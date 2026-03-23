@@ -1,0 +1,9 @@
+*.ds_store
+.env
+TODO.md
+
+.astro/
+.netlify/
+.playwright/
+dist/
+node_modules/
