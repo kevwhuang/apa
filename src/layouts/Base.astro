@@ -1,0 +1,86 @@
+---
+import '@fontsource/geist-sans';
+import { ClientRouter } from 'astro:transitions';
+
+interface Props {
+    description: string;
+    title: string;
+}
+
+const { description, title } = Astro.props;
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <title>{title}</title>
+        <meta content="Kevin Huang" name="author" />
+        <meta content={description} name="description" />
+        <meta content="#09090b" name="theme-color" />
+        <link href={canonicalUrl} rel="canonical" />
+        <link href="/favicon.png" rel="icon" type="image/png" />
+        <meta content={title} property="og:title" />
+        <meta content={description} property="og:description" />
+        <meta content={canonicalUrl} property="og:url" />
+        <meta content="website" property="og:type" />
+        <meta content={`${Astro.site}og.png`} property="og:image" />
+        <meta content="APA" property="og:site_name" />
+        <meta content="summary_large_image" name="twitter:card" />
+        <meta content={title} name="twitter:title" />
+        <meta content={description} name="twitter:description" />
+        <meta content={`${Astro.site}og.png`} name="twitter:image" />
+        <script
+            set:html={JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'WebSite',
+                'founder': {
+                    '@type': 'Person',
+                    'name': 'Kevin Huang',
+                },
+                'name': 'APA',
+                'url': Astro.site,
+            })}
+            type="application/ld+json"
+        />
+        <ClientRouter />
+    </head>
+    <body class="flex flex-col min-h-screen font-sans bg-zinc-950 text-white">
+        <main class="flex-1">
+            <slot />
+        </main>
+    </body>
+</html>
+
+<style is:global>
+    @import 'tailwindcss';
+
+    :root {
+        --color-lime: 196, 240, 77;
+        --font-sans: 'Geist', system-ui, sans-serif;
+        --rgb-white: 255, 255, 255;
+    }
+
+    :focus {
+        outline: none;
+    }
+
+    :focus-visible {
+        border-radius: 2px;
+        outline: 2px solid rgba(var(--color-lime), 0.8);
+        outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            scroll-behavior: auto !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+</style>
