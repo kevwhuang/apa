@@ -1,0 +1,66 @@
+---
+const assets = [
+    { label: 'APA wordmark, light', kind: 'svg', size: '14 KB' },
+    { label: 'APA wordmark, dark', kind: 'svg', size: '14 KB' },
+    { label: 'APA monogram', kind: 'svg', size: '6 KB' },
+    { label: 'Brand guidelines', kind: 'pdf', size: '2.4 MB' },
+    { label: 'Founder photos', kind: 'zip', size: '38 MB' },
+    { label: 'Producer Bash photo pack', kind: 'zip', size: '184 MB' },
+];
+const quotes = [
+    { src: 'Austin Chronicle', quote: 'The most important music room in Austin most people have never heard of.' },
+    { src: 'Texas Monthly', quote: 'A working studio that doubles as a city-wide producer co-op.' },
+    { src: 'KUTX', quote: 'They aren\'t a label, but they\'ve quietly built the strongest beat scene in the South.' },
+];
+---
+<section class="pt-20 pb-12 border-b-2 border-ink">
+    <div class="max-w-[1400px] mx-auto px-6">
+        <p class="label mb-4 text-coral reveal">PRESS &amp; MEDIA</p>
+        <h1 class="font-display font-extrabold tracking-[-0.04em] text-5xl md:text-7xl leading-[0.9] reveal" style="transition-delay: 80ms;">
+            Press kit.
+        </h1>
+        <p class="mt-6 max-w-2xl text-[18px] text-ink-soft">
+            Wordmarks, photography, founder bios, and recent coverage. Email
+            <a class="underline underline-offset-4 decoration-coral decoration-2 hover:text-coral transition-colors" href="mailto:press@austinproduceralliance.com">press@austinproduceralliance.com</a>
+            for interviews and embargoed materials.
+        </p>
+    </div>
+</section>
+
+<section class="py-16 border-b-2 border-ink">
+    <div class="max-w-[1400px] mx-auto px-6">
+        <h2 class="font-display text-3xl font-extrabold tracking-tight mb-8">Brand assets</h2>
+        <div class="border-2 border-ink">
+            <div class="grid grid-cols-4 border-b-2 border-ink font-mono text-[11px] font-bold uppercase tracking-wide text-ink-soft">
+                <div class="py-3 px-4">Asset</div>
+                <div class="py-3 px-4">Format</div>
+                <div class="py-3 px-4">Size</div>
+                <div class="py-3 px-4"></div>
+            </div>
+            {assets.map((a, i) => (
+                <div class={`grid grid-cols-4 ${i > 0 ? 'border-t border-ink' : ''}`}>
+                    <div class="py-4 px-4 font-display font-bold">{a.label}</div>
+                    <div class="py-4 px-4 font-mono text-[12px] uppercase">{a.kind}</div>
+                    <div class="py-4 px-4 font-mono text-[12px] text-ink-soft">{a.size}</div>
+                    <div class="py-4 px-4 text-right"><a href={`/assets/${a.label.toLowerCase().replace(/\s+/g, '-')}`} class="font-mono text-[12px] font-bold uppercase hover:text-coral transition-colors">Download &rarr;</a></div>
+                </div>
+            ))}
+        </div>
+    </div>
+</section>
+
+<section class="py-16">
+    <div class="max-w-[1400px] mx-auto px-6">
+        <h2 class="font-display text-3xl font-extrabold tracking-tight mb-8">Quoted</h2>
+        <div class="grid md:grid-cols-3 gap-5 reveal-stagger">
+            {quotes.map(q => (
+                <figure class="border-2 border-ink p-8 bg-bg card-hover" style="box-shadow: var(--shadow-card-sm);">
+                    <blockquote class="font-display text-2xl font-extrabold tracking-tight leading-snug">
+                        <span class="text-coral">"</span>{q.quote}<span class="text-coral">"</span>
+                    </blockquote>
+                    <figcaption class="label mt-6 text-ink-soft">&mdash; {q.src}</figcaption>
+                </figure>
+            ))}
+        </div>
+    </div>
+</section>

@@ -1,0 +1,29 @@
+---
+---
+<section class="py-24">
+    <div class="max-w-[800px] mx-auto px-6 text-center">
+        <p id="order-number" class="label mb-6 text-ink-soft">ORDER #APA-00000</p>
+        <div class="inline-flex items-center justify-center w-16 h-16 mb-8 bg-coral border-2 border-ink" style="box-shadow: var(--shadow-card-sm);">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#FFFAF8" stroke-width="2.5">
+                <polyline points="5,14 12,21 23,7" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+        <h1 class="font-display font-extrabold tracking-[-0.03em] text-5xl md:text-6xl leading-[0.95]">
+            Order received.
+        </h1>
+        <p class="mt-6 text-[18px] text-ink-soft">
+            We'll send a confirmation to your email. Orders ship in 14 business days from East Austin.
+        </p>
+        <div class="mt-12 flex gap-3 justify-center">
+            <a href="/merch" class="inline-flex items-center px-6 h-11 font-mono text-[12px] font-bold uppercase tracking-wide bg-ink text-bg border-2 border-ink hover:bg-coral hover:border-coral transition-colors">Keep shopping</a>
+            <a href="/" class="inline-flex items-center px-6 h-11 font-mono text-[12px] font-bold uppercase tracking-wide border-2 border-ink hover:bg-ink hover:text-bg transition-colors">Home</a>
+        </div>
+    </div>
+</section>
+
+<script>
+    const el = document.getElementById('order-number');
+    if (el) {
+        el.textContent = `ORDER #APA-${Math.floor(Math.random() * 90000 + 10000)}`;
+    }
+</script>

@@ -1,0 +1,106 @@
+---
+import Logo from '@components/Logo.astro';
+
+const year = new Date().getFullYear();
+const links = [
+    {
+        head: 'Visit',
+        items: [
+            { href: '/events', label: 'Events' },
+            { href: '/producers', label: 'Producers' },
+            { href: '/bash', label: 'The Bash' },
+            { href: '/about', label: 'About' },
+        ],
+    },
+    {
+        head: 'Shop',
+        items: [
+            { href: '/merch', label: 'All merch' },
+            { href: '/merch/cart', label: 'Cart' },
+            { href: '/merch/checkout', label: 'Checkout' },
+        ],
+    },
+    {
+        head: 'Connect',
+        items: [
+            { href: '/contact', label: 'Contact' },
+            { href: '/sponsor', label: 'Sponsor' },
+            { href: '/media', label: 'Press kit' },
+            { href: 'https://instagram.com/austinproduceralliance', label: 'Instagram', external: true },
+        ],
+    },
+];
+---
+<footer class="mt-32 border-t-2 border-ink bg-surface">
+    <div class="max-w-[1400px] mx-auto px-6 py-16 grid gap-12 md:grid-cols-[1.4fr_repeat(3,1fr)]">
+        <div>
+            <Logo size={32} />
+            <p class="mt-5 max-w-xs text-[14px] text-ink-soft leading-relaxed">
+                A community of music producers in Austin, Texas. Founded 2019. Above a print shop on 5th.
+            </p>
+            <div class="mt-8">
+                <p class="label mb-3 text-ink-soft">Synth keys</p>
+                <div id="synth-keys" class="inline-flex border-2 border-ink">
+                    {['C', 'D', 'E', 'F', 'G', 'A', 'B'].map((k, i) => (
+                        <button
+                            class="synth-key w-9 h-14 border-r-2 border-ink last:border-r-0 text-[10px] font-mono font-bold flex items-end justify-center pb-1.5 transition-colors bg-bg hover:bg-coral hover:text-coral-ink"
+                            data-freq={[261.6, 293.7, 329.6, 349.2, 392, 440, 493.9][i]}
+                            data-note={k}
+                            aria-label={`Play note ${k}`}
+                        >
+                            {k}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+
+        {links.map(c => (
+            <div>
+                <p class="label mb-4 text-ink-soft">{c.head}</p>
+                <ul class="space-y-2.5 text-[14px]">
+                    {c.items.map(i => (
+                        <li><a href={i.href} class="hover:text-coral transition-colors" {...('external' in i && i.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{i.label}</a></li>
+                    ))}
+                </ul>
+            </div>
+        ))}
+    </div>
+    <div class="border-t-2 border-ink">
+        <div class="max-w-[1400px] mx-auto px-6 py-5 flex flex-wrap gap-4 items-center justify-between text-[12px] text-ink-soft font-mono">
+            <p>&copy; {year} Austin Producer Alliance. Made in East Austin.</p>
+            <div class="flex gap-5 uppercase tracking-wide">
+                <a href="/privacy" class="hover:text-coral">Privacy</a>
+                <a href="/terms" class="hover:text-coral">Terms</a>
+                <a href="/media" class="hover:text-coral">Press</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const keys = document.querySelectorAll('.synth-key');
+    let ctx: AudioContext | null = null;
+    keys.forEach((k) => {
+        k.addEventListener('click', () => {
+            ctx ??= new AudioContext();
+            const freq = Number((k as HTMLElement).dataset.freq);
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.type = 'sawtooth';
+            o.frequency.value = freq;
+            g.gain.setValueAtTime(0.0001, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.15, ctx.currentTime + 0.01);
+            g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+            o.connect(g).connect(ctx.destination);
+            o.start();
+            o.stop(ctx.currentTime + 0.45);
+            (k as HTMLElement).style.background = 'var(--color-coral)';
+            (k as HTMLElement).style.color = 'var(--color-coral-ink)';
+            setTimeout(() => {
+                (k as HTMLElement).style.background = 'var(--color-bg)';
+                (k as HTMLElement).style.color = '';
+            }, 150);
+        });
+    });
+</script>

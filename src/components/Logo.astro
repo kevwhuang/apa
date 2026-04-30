@@ -1,0 +1,35 @@
+---
+interface Props {
+    size?: number;
+}
+const { size = 28 } = Astro.props;
+const h = size;
+const w = size * 4.4;
+---
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={w}
+    height={h}
+    viewBox={`0 0 ${w} ${h}`}
+    fill="none"
+    role="img"
+    aria-label="Austin Producer Alliance"
+>
+    <rect x="0" y="0" width={h * 1.8} height={h} fill="var(--color-coral)" />
+    <g
+        fill="#FFFAF8"
+        font-family="'Bricolage Grotesque Variable', Georgia, serif"
+        font-weight="800"
+        font-size={h * 0.65}
+    >
+        <text x={h * 0.9} y={h * 0.72} text-anchor="middle" letter-spacing="-1">APA</text>
+    </g>
+    <g
+        fill="currentColor"
+        font-family="'Space Mono', monospace"
+        font-size={h * 0.30}
+    >
+        <text x={h * 2.0} y={h * 0.48}>AUSTIN PRODUCER</text>
+        <text x={h * 2.0} y={h * 0.88}>ALLIANCE</text>
+    </g>
+</svg>

@@ -1,0 +1,77 @@
+---
+const bars = Array.from({ length: 32 }, () => 20 + Math.random() * 80);
+---
+<section class="relative pt-32 pb-28 overflow-hidden border-b-2 border-ink bg-bg">
+    <div class="absolute inset-0 halftone pointer-events-none"></div>
+    <div class="max-w-[1400px] mx-auto px-6 relative">
+        <div class="flex items-center gap-3 mb-14 label text-ink-soft reveal">
+            <span class="inline-block w-2.5 h-2.5 bg-coral animate-pulse"></span>
+            <span>AUSTIN TX / 30.27N 97.74W</span>
+            <span class="ml-auto hidden md:inline">EST 2019 / 142 PRODUCERS / 38 EVENTS YR</span>
+        </div>
+
+        <h1 class="font-display font-extrabold tracking-[-0.04em] text-[clamp(52px,10vw,140px)] leading-[0.88]">
+            <span class="block reveal">Austin's</span>
+            <span class="block text-coral reveal" style="transition-delay: 80ms;">producer</span>
+            <span class="block reveal" style="transition-delay: 160ms;">community.</span>
+        </h1>
+
+        <div class="mt-16 relative reveal" style="transition-delay: 300ms;">
+            <div class="relative border-2 border-ink bg-surface overflow-hidden crop-marks">
+                <div class="absolute inset-0 halftone-coral"></div>
+
+                <div class="flex items-end gap-[2px] h-20 px-3 py-2" id="waveform" aria-hidden="true">
+                    {bars.map((h, i) => (
+                        <div
+                            class="flex-1 bg-coral/70 origin-bottom"
+                            style={`height: ${h}%; animation: waveform ${0.8 + (i % 5) * 0.15}s ease-in-out ${i * 0.04}s infinite alternate;`}
+                        >
+                        </div>
+                    ))}
+                </div>
+
+                <div id="playhead" class="absolute top-0 bottom-0 w-0.5 bg-coral" style="left: 20%;">
+                    <div class="absolute -top-1.5 -left-[5px] w-3 h-3 bg-coral rotate-45"></div>
+                </div>
+            </div>
+            <div class="flex justify-between mt-2 font-mono text-[11px] text-ink-soft uppercase">
+                <span>00:00</span>
+                <span>Bar 01 / 4-4 / 92 BPM</span>
+                <span>04:00</span>
+            </div>
+
+            <div class="mt-12 grid md:grid-cols-2 gap-10 max-w-3xl">
+                <p class="text-[18px] leading-relaxed">
+                    A working community for music producers in Austin, Texas. Cookups, showcases,
+                    and the annual <a href="/bash" class="underline decoration-coral decoration-2 underline-offset-4 hover:text-coral transition-colors">Producer Bash</a> —
+                    where local artists and labels build the city's sound from the inside out.
+                </p>
+                <div class="flex flex-wrap gap-3 items-start">
+                    <a
+                        href="/events"
+                        class="inline-flex items-center gap-2 px-6 h-12 font-mono text-[12px] font-bold uppercase tracking-wide border-2 border-ink bg-ink text-bg hover:bg-coral hover:border-coral transition-colors"
+                    >
+                        Upcoming events
+                    </a>
+                    <a
+                        href="/about"
+                        class="inline-flex items-center gap-2 px-6 h-12 font-mono text-[12px] font-bold uppercase tracking-wide border-2 border-ink hover:bg-ink hover:text-bg transition-colors"
+                    >
+                        Our story
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const playhead = document.getElementById('playhead');
+    if (playhead && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        let t = 20;
+        setInterval(() => {
+            t = ((t - 20 + 0.35) % 65) + 20;
+            playhead.style.left = `${t}%`;
+        }, 80);
+    }
+</script>

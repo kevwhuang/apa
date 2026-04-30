@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+import { formatPrice } from '@lib/format';
+const products = (await getCollection('products')).slice(0, 4);
+const bgColors = ['#FF4D3A', '#2D2B85', '#1A1A1A', '#D4A843'];
+---
+<section class="py-24 border-b-2 border-ink bg-surface">
+    <div class="max-w-[1400px] mx-auto px-6">
+        <div class="flex items-end justify-between mb-12 gap-6 reveal">
+            <div>
+                <p class="label mb-3 text-coral">MERCH</p>
+                <h2 class="font-display text-5xl tracking-tight font-extrabold">Wear the alliance.</h2>
+            </div>
+            <a href="/merch" class="hidden md:inline-flex items-center gap-2 font-mono text-[12px] font-bold uppercase tracking-wide hover:text-coral transition-colors">
+                Shop all &rarr;
+            </a>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 reveal-stagger">
+            {products.map((p, i) => (
+                <a href={`/merch/${p.data.slug}`} class="block group">
+                    <div
+                        class="aspect-square border-2 border-ink relative overflow-hidden flex items-center justify-center card-hover"
+                        style={`background: ${bgColors[i % bgColors.length]}; box-shadow: var(--shadow-card-sm);`}
+                    >
+                        <div class="absolute inset-0 halftone"></div>
+                        <span class="font-display font-extrabold text-4xl text-white/90 mix-blend-overlay select-none uppercase tracking-tight">{p.data.title.split(' ')[0]}</span>
+                    </div>
+                    <div class="mt-3 flex items-baseline justify-between">
+                        <p class="font-display font-bold tracking-tight">{p.data.title}</p>
+                        <p class="font-mono text-[12px]">{formatPrice(p.data.priceCents)}</p>
+                    </div>
+                </a>
+            ))}
+        </div>
+    </div>
+</section>

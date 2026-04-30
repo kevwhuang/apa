@@ -1,0 +1,78 @@
+---
+import { getCollection } from 'astro:content';
+import { formatDate } from '@lib/format';
+
+const editions = (await getCollection('bash')).sort((a, b) => +b.data.date - +a.data.date);
+const current = editions[0];
+const past = editions.slice(1);
+---
+<section class="pt-20 pb-24 relative overflow-hidden border-b-2 border-ink ink-block">
+    <div class="absolute inset-0 halftone-coral pointer-events-none"></div>
+    <div class="max-w-[1400px] mx-auto px-6 relative">
+        <p class="label mb-6 text-coral reveal">THE PRODUCER BASH / EDITION {current?.data.edition ?? 'VII'}</p>
+        <h1 class="font-display font-extrabold tracking-[-0.05em] text-[clamp(60px,12vw,170px)] leading-[0.85] reveal" style="transition-delay: 80ms;">
+            Two days.<br />
+            <span class="text-coral">One room.</span><br />
+            Every member.
+        </h1>
+        {current && (
+            <p class="mt-10 max-w-2xl text-[18px] leading-relaxed text-inv-body">{current.data.recap}</p>
+        )}
+        <div class="mt-12 grid md:grid-cols-4 gap-px border-2 border-inv-rule bg-inv-rule reveal-stagger">
+            <div class="p-6 bg-ink">
+                <p class="label mb-2 text-inv-muted">Dates</p>
+                <p class="font-display font-extrabold text-2xl">{current ? formatDate(current.data.date) : 'TBA'}</p>
+            </div>
+            <div class="p-6 bg-ink">
+                <p class="label mb-2 text-inv-muted">Venue</p>
+                <p class="font-display font-extrabold text-2xl">The Mothership</p>
+                <p class="text-[12px] font-mono text-inv-muted mt-1">2400 E 6th St</p>
+            </div>
+            <div class="p-6 bg-ink">
+                <p class="label mb-2 text-inv-muted">Producers</p>
+                <p class="font-display font-extrabold text-2xl">96 on bill</p>
+            </div>
+            <div class="p-6 bg-ink">
+                <p class="label mb-2 text-inv-muted">Tickets</p>
+                <a href="#tickets" class="inline-block mt-1 px-5 h-10 leading-10 font-mono text-[12px] font-bold uppercase tracking-wide bg-coral text-coral-ink hover:bg-coral-dark transition-colors">Get yours</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 border-b-2 border-ink">
+    <div class="max-w-[1400px] mx-auto px-6">
+        <h2 class="font-display text-4xl font-extrabold tracking-tight mb-10">Press &amp; assets</h2>
+        <div class="border-2 border-ink">
+            <div class="grid grid-cols-4 border-b-2 border-ink font-mono text-[11px] font-bold uppercase tracking-wide text-ink-soft">
+                <div class="py-3 px-4">Asset</div>
+                <div class="py-3 px-4">Kind</div>
+                <div class="py-3 px-4">Size</div>
+                <div class="py-3 px-4"></div>
+            </div>
+            {(current?.data.assets ?? []).map((a, i) => (
+                <div class={`grid grid-cols-4 ${i > 0 ? 'border-t border-ink' : ''}`}>
+                    <div class="py-4 px-4 font-display font-bold">{a.label}</div>
+                    <div class="py-4 px-4 font-mono text-[12px] uppercase">{a.kind}</div>
+                    <div class="py-4 px-4 font-mono text-[12px] text-ink-soft">{a.size}</div>
+                    <div class="py-4 px-4 text-right"><a href={a.href} class="font-mono text-[12px] font-bold uppercase hover:text-coral transition-colors">Download &rarr;</a></div>
+                </div>
+            ))}
+        </div>
+    </div>
+</section>
+
+<section class="py-20">
+    <div class="max-w-[1400px] mx-auto px-6">
+        <h2 class="font-display text-4xl font-extrabold tracking-tight mb-10 text-ink-soft">Past editions</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 reveal-stagger">
+            {past.map(b => (
+                <article class="border-2 border-ink p-6 bg-bg card-hover" style="box-shadow: var(--shadow-card-sm);">
+                    <p class="label mb-2 text-coral">Edition {b.data.edition} / {formatDate(b.data.date)}</p>
+                    <h3 class="font-display text-2xl font-extrabold tracking-tight">{b.data.title}</h3>
+                    <p class="mt-3 text-[14px] text-ink-soft">{b.data.recap}</p>
+                </article>
+            ))}
+        </div>
+    </div>
+</section>

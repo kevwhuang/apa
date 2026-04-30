@@ -1,0 +1,70 @@
+---
+---
+<section class="pt-20 pb-12 border-b-2 border-ink">
+    <div class="max-w-[1100px] mx-auto px-6">
+        <p class="label mb-4 text-coral reveal">CONTACT</p>
+        <h1 class="font-display font-extrabold tracking-[-0.04em] text-5xl md:text-7xl leading-[0.9] reveal" style="transition-delay: 80ms;">
+            Send a signal.
+        </h1>
+    </div>
+</section>
+
+<section class="py-16">
+    <div class="max-w-[1100px] mx-auto px-6 grid md:grid-cols-[1.4fr_1fr] gap-12">
+        <form id="contact-form" class="space-y-5">
+            <div class="grid sm:grid-cols-2 gap-4">
+                <label class="block">
+                    <span class="label mb-2 block text-ink-soft">NAME</span>
+                    <input name="name" required autocomplete="name" class="w-full h-12 px-4 border-2 border-ink bg-transparent font-body" />
+                </label>
+                <label class="block">
+                    <span class="label mb-2 block text-ink-soft">EMAIL</span>
+                    <input name="email" type="email" required autocomplete="email" class="w-full h-12 px-4 border-2 border-ink bg-transparent font-mono text-[13px]" />
+                </label>
+            </div>
+            <label class="block">
+                <span class="label mb-2 block text-ink-soft">TOPIC</span>
+                <select name="topic" class="w-full h-12 px-4 border-2 border-ink bg-transparent">
+                    <option>Membership</option>
+                    <option>Sponsor inquiry</option>
+                    <option>Press</option>
+                    <option>Booking</option>
+                    <option>Something else</option>
+                </select>
+            </label>
+            <label class="block">
+                <span class="label mb-2 block text-ink-soft">MESSAGE</span>
+                <textarea name="message" rows="6" required class="w-full p-4 border-2 border-ink bg-transparent"></textarea>
+            </label>
+            <button class="h-12 px-6 font-mono text-[12px] font-bold uppercase tracking-wide bg-ink text-bg border-2 border-ink hover:bg-coral hover:border-coral transition-colors">
+                Send &rarr;
+            </button>
+            <p data-out role="status" aria-live="polite" class="hidden font-mono text-[12px] p-3 bg-coral text-coral-ink font-bold uppercase tracking-wide">
+                Sent. We'll respond within 48 hours.
+            </p>
+        </form>
+
+        <aside class="space-y-8">
+            <div>
+                <p class="label mb-2 text-ink-soft">EMAIL</p>
+                <p class="font-mono text-[14px]">hello@austinproduceralliance.com</p>
+            </div>
+            <div>
+                <p class="label mb-2 text-ink-soft">STUDIO</p>
+                <p>2107 E 5th St<br />Austin, TX 78702</p>
+            </div>
+            <div>
+                <p class="label mb-2 text-ink-soft">HOURS</p>
+                <p>Tues &mdash; Sun, 6 PM &mdash; late</p>
+            </div>
+        </aside>
+    </div>
+</section>
+
+<script>
+    document.getElementById('contact-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const out = (e.target as HTMLFormElement).querySelector('[data-out]') as HTMLElement;
+        if (out) out.classList.remove('hidden');
+    });
+</script>

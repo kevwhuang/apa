@@ -1,0 +1,58 @@
+---
+const tiers = [
+    { name: 'Friend', price: '$500', perks: ['Logo on website', 'Newsletter mention', 'Two Bash tickets'] },
+    { name: 'Studio', price: '$2,500', perks: ['Logo on all event flyers', 'On-stage mention at Bash', 'Six tickets', 'Booth at one cookup'] },
+    { name: 'Partner', price: '$10,000', perks: ['Stage naming at Bash', 'Year-long programming co-brand', 'Custom workshop series', 'Booth at every event'] },
+];
+---
+<section class="pt-20 pb-12 border-b-2 border-ink">
+    <div class="max-w-[1400px] mx-auto px-6">
+        <p class="label mb-4 text-coral reveal">SPONSOR APA</p>
+        <h1 class="font-display font-extrabold tracking-[-0.04em] text-5xl md:text-7xl leading-[0.9] max-w-4xl reveal" style="transition-delay: 80ms;">
+            Reach 142 working producers and the rooms they fill.
+        </h1>
+        <p class="mt-8 max-w-2xl text-[18px] text-ink-soft">
+            Our members release on Stones Throw, Ghostly, Sub Pop, RVNG, and dozens of independents.
+            Sponsorship dollars cover room rent, equipment, and the Producer Bash.
+        </p>
+    </div>
+</section>
+
+<section class="py-20 border-b-2 border-ink">
+    <div class="max-w-[1400px] mx-auto px-6">
+        <div class="grid md:grid-cols-3 gap-5 reveal-stagger">
+            {tiers.map((t, i) => (
+                <article
+                    class={`border-2 border-ink p-8 flex flex-col card-hover ${i === 1 ? 'ink-block border-ink' : 'bg-bg'}`}
+                    style={i === 1 ? 'box-shadow: 4px 4px 0 var(--color-coral);' : 'box-shadow: var(--shadow-card-sm);'}
+                >
+                    <p class={`label mb-4 ${i === 1 ? 'text-coral' : 'text-ink-soft'}`}>TIER {String(i + 1).padStart(2, '0')}</p>
+                    <h3 class="font-display text-3xl font-extrabold tracking-tight">{t.name}</h3>
+                    <p class="font-mono text-2xl mt-2 font-bold">{t.price}<span class={`text-sm font-normal ${i === 1 ? 'text-inv-muted' : 'text-ink-soft'}`}> / yr</span></p>
+                    <ul class="mt-8 space-y-2.5 text-[14px] flex-1">
+                        {t.perks.map(p => (
+                            <li class="flex gap-2"><span class="text-coral font-bold">+</span>{p}</li>
+                        ))}
+                    </ul>
+                    <a href="/contact" class={`mt-8 inline-flex items-center justify-center h-12 font-mono text-[12px] font-bold uppercase tracking-wide border-2 transition-colors ${i === 1 ? 'bg-coral border-coral text-coral-ink hover:bg-coral-dark' : 'bg-ink border-ink text-bg hover:bg-coral hover:border-coral'}`}>
+                        Start a conversation
+                    </a>
+                </article>
+            ))}
+        </div>
+    </div>
+</section>
+
+<section class="py-20">
+    <div class="max-w-[1100px] mx-auto px-6">
+        <h2 class="font-display text-4xl font-extrabold tracking-tight mb-8 reveal">By the numbers</h2>
+        <dl class="grid grid-cols-2 md:grid-cols-4 gap-px border-2 border-ink bg-ink crop-marks reveal-stagger">
+            {[['142', 'Producers'], ['38', 'Events / yr'], ['12k', 'Newsletter'], ['96', 'Bash bill']].map(([n, l]) => (
+                <div class="p-8 text-center bg-bg">
+                    <dd class="font-display text-5xl font-extrabold tracking-tight" data-count={n}>{n}</dd>
+                    <dt class="label mt-3 text-ink-soft">{l}</dt>
+                </div>
+            ))}
+        </dl>
+    </div>
+</section>

@@ -1,0 +1,26 @@
+---
+interface Props {
+    size?: number;
+}
+const { size = 32 } = Astro.props;
+---
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 32 32"
+    fill="none"
+    role="img"
+    aria-label="APA monogram"
+>
+    <rect width="32" height="32" fill="var(--color-coral)" />
+    <g
+        fill="#FFFAF8"
+        font-family="'Bricolage Grotesque Variable', Georgia, serif"
+        font-weight="800"
+        font-size="16"
+        letter-spacing="-1"
+    >
+        <text x="16" y="21" text-anchor="middle">APA</text>
+    </g>
+</svg>

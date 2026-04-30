@@ -1,0 +1,80 @@
+---
+import { getCollection } from 'astro:content';
+import { formatPrice } from '@lib/format';
+
+const products = await getCollection('products');
+const cats = ['all', 'apparel', 'accessory', 'print'] as const;
+const cardColors = ['#FF4D3A', '#2D2B85', '#1A1A1A', '#D4A843', '#6B68D9', '#CC3E2E'];
+---
+<section class="pt-20 pb-12 border-b-2 border-ink">
+    <div class="max-w-[1400px] mx-auto px-6">
+        <p class="label mb-4 text-coral reveal">SHOP / {products.length} ITEMS</p>
+        <h1 class="font-display font-extrabold tracking-[-0.04em] text-5xl md:text-7xl leading-[0.9] reveal" style="transition-delay: 80ms;">
+            Wear the alliance.
+        </h1>
+        <div id="cat-filter" class="mt-10 flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+            {cats.map((c, i) => (
+                <button class={`cat-btn px-3 h-8 font-mono text-[11px] font-bold uppercase tracking-wide border-2 border-ink ${i === 0 ? 'filter-on' : 'hover:bg-ink hover:text-bg'} transition-colors`} data-cat={c} aria-pressed={i === 0 ? 'true' : 'false'}>{c}</button>
+            ))}
+        </div>
+    </div>
+</section>
+
+<section class="py-16">
+    <div id="product-grid" class="max-w-[1400px] mx-auto px-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-10 reveal-stagger">
+        {products.map((p, i) => (
+            <a
+                href={`/merch/${p.data.slug}`}
+                class="product-card block group"
+                data-cat={p.data.category}
+            >
+                <div
+                    class="aspect-square border-2 border-ink relative overflow-hidden flex items-center justify-center card-hover"
+                    style={`background: ${cardColors[i % cardColors.length]}; box-shadow: var(--shadow-card-sm);`}
+                >
+                    <div class="absolute inset-0 halftone"></div>
+                    <span class="font-display font-extrabold text-4xl text-white/80 mix-blend-overlay select-none uppercase tracking-tight">{p.data.title.split(' ')[0]}</span>
+                </div>
+                <div class="mt-4">
+                    <p class="label text-ink-soft">{p.data.category}</p>
+                    <div class="mt-1 flex items-baseline justify-between gap-3">
+                        <h3 class="font-display font-bold tracking-tight">{p.data.title}</h3>
+                        <p class="font-mono text-[13px] font-bold">{formatPrice(p.data.priceCents)}</p>
+                    </div>
+                </div>
+            </a>
+        ))}
+    </div>
+</section>
+
+<script>
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.cat-btn');
+    const cards = document.querySelectorAll<HTMLElement>('.product-card');
+    let active = 'all';
+    const apply = () => {
+        cards.forEach((c) => {
+            c.style.display = active === 'all' || c.dataset.cat === active ? '' : 'none';
+        });
+        buttons.forEach((b) => {
+            const on = b.dataset.cat === active;
+            b.setAttribute('aria-pressed', String(on));
+            b.classList.toggle('filter-on', on);
+        });
+    };
+    const btnArr = Array.from(buttons);
+    buttons.forEach((b, i) => {
+        b.addEventListener('click', () => {
+            active = b.dataset.cat ?? 'all';
+            apply();
+        });
+        b.addEventListener('keydown', (e) => {
+            let next = -1;
+            if (e.key === 'ArrowRight') next = (i + 1) % btnArr.length;
+            if (e.key === 'ArrowLeft') next = (i - 1 + btnArr.length) % btnArr.length;
+            if (next >= 0) {
+                e.preventDefault();
+                btnArr[next].focus();
+            }
+        });
+    });
+</script>

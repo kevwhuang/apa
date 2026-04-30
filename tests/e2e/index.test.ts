@@ -6,6 +6,6 @@ test.describe('index page', () => {
     });
 
     test('loads with correct title', async ({ page }) => {
-        await expect(page).toHaveTitle('APA');
+        await expect(page).toHaveTitle('Austin Producer Alliance');
     });
 });

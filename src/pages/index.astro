@@ -1,9 +1,21 @@
 ---
 import Base from '@layouts/Base.astro';
+import HeroTimeline from '@sections/HeroTimeline.astro';
+import LandingEvents from '@sections/LandingEvents.astro';
+import LandingProducers from '@sections/LandingProducers.astro';
+import LandingBash from '@sections/LandingBash.astro';
+import LandingMerch from '@sections/LandingMerch.astro';
+import LandingAbout from '@sections/LandingAbout.astro';
+import LandingSponsors from '@sections/LandingSponsors.astro';
+import LandingNewsletter from '@sections/LandingNewsletter.astro';
 ---
-
-<Base
-    description="A community of music producers in Austin, Texas."
-    title="APA"
->
+<Base pad={false}>
+    <HeroTimeline />
+    <LandingEvents />
+    <LandingProducers />
+    <LandingBash />
+    <LandingAbout />
+    <LandingMerch />
+    <LandingSponsors />
+    <LandingNewsletter />
 </Base>

@@ -1,27 +1,38 @@
 ---
-import '@fontsource/geist-sans';
+import '@fontsource-variable/bricolage-grotesque/index.css';
+import '@fontsource/space-mono/400.css';
+import '@fontsource/space-mono/700.css';
 import { ClientRouter } from 'astro:transitions';
+import Footer from '@components/Footer.astro';
+import Navbar from '@components/Navbar.astro';
 
 interface Props {
-    description: string;
-    title: string;
+    title?: string;
+    description?: string;
+    pad?: boolean;
+    noindex?: boolean;
 }
 
-const { description, title } = Astro.props;
+const {
+    title = 'Austin Producer Alliance',
+    description = 'A community of music producers in Austin, Texas — events, releases, and the annual Producer Bash.',
+    pad = true,
+    noindex = false,
+} = Astro.props;
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 ---
-
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
     <head>
         <meta charset="utf-8" />
         <meta content="width=device-width, initial-scale=1" name="viewport" />
         <title>{title}</title>
         <meta content="Kevin Huang" name="author" />
         <meta content={description} name="description" />
-        <meta content="#09090b" name="theme-color" />
+        {noindex && <meta content="noindex, nofollow" name="robots" />}
+        <meta content="#0D0D1A" name="theme-color" />
         <link href={canonicalUrl} rel="canonical" />
-        <link href="/favicon.png" rel="icon" type="image/png" />
+        <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
         <meta content={title} property="og:title" />
         <meta content={description} property="og:description" />
         <meta content={canonicalUrl} property="og:url" />
@@ -35,52 +46,390 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
         <script
             set:html={JSON.stringify({
                 '@context': 'https://schema.org',
-                '@type': 'WebSite',
+                '@type': 'Organization',
+                'name': 'Austin Producer Alliance',
+                'alternateName': 'APA',
+                'url': Astro.site,
+                'foundingDate': '2019',
                 'founder': {
                     '@type': 'Person',
                     'name': 'Kevin Huang',
                 },
-                'name': 'APA',
-                'url': Astro.site,
+                'address': {
+                    '@type': 'PostalAddress',
+                    'streetAddress': '2107 E 5th St',
+                    'addressLocality': 'Austin',
+                    'addressRegion': 'TX',
+                    'postalCode': '78702',
+                },
+                'description': 'A community of music producers in Austin, Texas.',
             })}
             type="application/ld+json"
         />
         <ClientRouter />
+        <script is:inline>
+            (() => {
+                const saved = localStorage.getItem('apa.theme');
+                const system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                const t = saved === 'dark' || saved === 'light' ? saved : system;
+                document.documentElement.setAttribute('data-theme', t);
+            })();
+        </script>
     </head>
-    <body class="flex flex-col min-h-screen font-sans bg-zinc-950 text-white">
-        <main class="flex-1">
+    <body>
+        <svg class="fixed inset-0 w-full h-full pointer-events-none z-50" aria-hidden="true" style="opacity: 0.028;">
+            <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" /></filter>
+            <rect width="100%" height="100%" filter="url(#grain)" />
+        </svg>
+        <noscript><p style="padding:1rem;text-align:center;font-family:system-ui;">This site works best with JavaScript enabled.</p></noscript>
+        <a href="#main" class="sr-only focus:not-sr-only">Skip to content</a>
+        <Navbar />
+        <main id="main" class={pad ? 'pt-18' : ''}>
             <slot />
         </main>
+        <Footer />
     </body>
 </html>
 
 <style is:global>
     @import 'tailwindcss';
 
-    :root {
-        --color-lime: 196, 240, 77;
-        --font-sans: 'Geist', system-ui, sans-serif;
-        --rgb-white: 255, 255, 255;
+    @theme {
+        --font-display: 'Bricolage Grotesque Variable', 'Georgia', serif;
+        --font-body: 'Bricolage Grotesque Variable', 'Georgia', serif;
+        --font-mono: 'Space Mono', 'Courier New', monospace;
+
+        --color-bg: #FAF6F0;
+        --color-surface: #F2EDE5;
+        --color-ink: #1A1A1A;
+        --color-ink-soft: #6B6560;
+        --color-line: #DDD6CC;
+        --color-line-soft: #EAE4DC;
+
+        --color-coral: #FF4D3A;
+        --color-coral-dark: #CC3E2E;
+        --color-indigo: #2D2B85;
+        --color-coral-ink: #FFFAF8;
+
+        --color-inv-body: #B8B0A8;
+        --color-inv-muted: #787068;
+        --color-inv-rule: #3A3530;
+
+        --radius-tile: 0px;
+
+        --shadow-card: 3px 3px 0 #1A1A1A;
+        --shadow-card-sm: 2px 2px 0 #1A1A1A;
     }
 
-    :focus {
-        outline: none;
+    [data-theme='dark'] {
+        --color-bg: #0D0D1A;
+        --color-surface: #161625;
+        --color-ink: #F5F0E8;
+        --color-ink-soft: #9A9490;
+        --color-line: #2A2838;
+        --color-line-soft: #1E1C2E;
+        --color-coral: #FF6B5A;
+        --color-coral-dark: #FF4D3A;
+        --color-indigo: #6B68D9;
+        --shadow-card: 3px 3px 0 #FF6B5A;
+        --shadow-card-sm: 2px 2px 0 #FF6B5A;
+    }
+
+    * {
+        border-color: var(--color-line);
+    }
+
+    html {
+        background: var(--color-bg);
+        color: var(--color-ink);
+        font-family: var(--font-body);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        html { scroll-behavior: smooth; }
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+    }
+
+    ::selection {
+        background: var(--color-coral);
+        color: var(--color-coral-ink);
     }
 
     :focus-visible {
-        border-radius: 2px;
-        outline: 2px solid rgba(var(--color-lime), 0.8);
+        outline: 2px solid var(--color-coral);
         outline-offset: 2px;
     }
 
+    .font-display { font-family: var(--font-display); }
+    .font-mono { font-family: var(--font-mono); }
+
+    .label {
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 0.7rem;
+        line-height: 1;
+    }
+
+    .halftone {
+        background-image: radial-gradient(circle, var(--color-ink) 0.8px, transparent 0.8px);
+        background-size: 6px 6px;
+        opacity: 0.06;
+    }
+
+    .halftone-coral {
+        background-image: radial-gradient(circle, var(--color-coral) 1px, transparent 1px);
+        background-size: 8px 8px;
+        opacity: 0.12;
+    }
+
+    .ink-block {
+        background: var(--color-ink);
+        color: var(--color-bg);
+    }
+
+    .coral-block {
+        background: var(--color-coral);
+        color: var(--color-coral-ink);
+    }
+
+    .indigo-block {
+        background: var(--color-indigo);
+        color: #E8E6FF;
+    }
+
+    .filter-on {
+        background: var(--color-ink);
+        border-color: var(--color-ink);
+        color: var(--color-bg);
+    }
+
+    .stamp {
+        display: inline-block;
+        border: 2px solid currentColor;
+        padding: 0.15em 0.5em;
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.06em;
+        transform: rotate(-2deg);
+    }
+
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .focus\:not-sr-only:focus {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 100;
+        background: var(--color-coral);
+        color: var(--color-coral-ink);
+        padding: 0.5rem 0.75rem;
+        clip: auto;
+        width: auto;
+        height: auto;
+    }
+
+    /* --- Scroll reveal --- */
+    .reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* --- Staggered grid children --- */
+    .reveal-stagger > * {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal-stagger.is-visible > *:nth-child(1) { transition-delay: 0ms; }
+    .reveal-stagger.is-visible > *:nth-child(2) { transition-delay: 60ms; }
+    .reveal-stagger.is-visible > *:nth-child(3) { transition-delay: 120ms; }
+    .reveal-stagger.is-visible > *:nth-child(4) { transition-delay: 180ms; }
+    .reveal-stagger.is-visible > *:nth-child(5) { transition-delay: 240ms; }
+    .reveal-stagger.is-visible > *:nth-child(6) { transition-delay: 300ms; }
+    .reveal-stagger.is-visible > *:nth-child(7) { transition-delay: 360ms; }
+    .reveal-stagger.is-visible > *:nth-child(8) { transition-delay: 420ms; }
+
+    .reveal-stagger.is-visible > * {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* --- Card hover lift --- */
+    .card-hover {
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                    box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .card-hover:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 5px 5px 0 var(--color-ink);
+    }
+
+    [data-theme='dark'] .card-hover:hover {
+        box-shadow: 5px 5px 0 var(--color-coral);
+    }
+
+    /* --- Registration / crop marks --- */
+    .crop-marks {
+        position: relative;
+    }
+
+    .crop-marks::before,
+    .crop-marks::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-color: var(--color-line);
+        pointer-events: none;
+        opacity: 0.5;
+    }
+
+    .crop-marks::before {
+        top: -8px;
+        left: -8px;
+        border-top: 1px solid;
+        border-left: 1px solid;
+    }
+
+    .crop-marks::after {
+        bottom: -8px;
+        right: -8px;
+        border-bottom: 1px solid;
+        border-right: 1px solid;
+    }
+
+    /* --- Crosshair registration mark --- */
+    .reg-mark {
+        position: relative;
+    }
+
+    .reg-mark::before {
+        content: '+';
+        position: absolute;
+        top: -16px;
+        right: -16px;
+        font-family: var(--font-mono);
+        font-size: 14px;
+        line-height: 1;
+        color: var(--color-line);
+        pointer-events: none;
+    }
+
+    /* --- Waveform animation --- */
+    @keyframes waveform {
+        0%, 100% { transform: scaleY(0.3); }
+        50% { transform: scaleY(1); }
+    }
+
+    /* --- View transitions --- */
+    ::view-transition-old(root) {
+        animation: 200ms ease-out both fade-out;
+    }
+
+    ::view-transition-new(root) {
+        animation: 300ms ease-out 100ms both fade-in;
+    }
+
+    @keyframes fade-out {
+        to { opacity: 0; transform: translateY(-4px); }
+    }
+
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(4px); }
+    }
+
     @media (prefers-reduced-motion: reduce) {
-        *,
-        *::before,
-        *::after {
-            animation-duration: 0.01ms !important;
+        *, *::before, *::after {
+            animation-duration: 0.001ms !important;
             animation-iteration-count: 1 !important;
-            scroll-behavior: auto !important;
-            transition-duration: 0.01ms !important;
+            transition-duration: 0.001ms !important;
         }
+        .reveal { opacity: 1; transform: none; }
+        .reveal-stagger > * { opacity: 1; transform: none; }
+        ::view-transition-old(root),
+        ::view-transition-new(root) { animation: none; }
+    }
+
+    @media print {
+        header, footer, #nav-mobile { display: none !important; }
+        main { padding-top: 0 !important; }
+        a[href]::after { content: ' (' attr(href) ')'; font-size: 0.8em; }
     }
 </style>
+
+<script>
+    function initReveals() {
+        const els = document.querySelectorAll('.reveal, .reveal-stagger');
+        if (!els.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach((e) => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('is-visible');
+                    io.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+        els.forEach(el => io.observe(el));
+    }
+
+    function initCounters() {
+        const els = document.querySelectorAll('[data-count]');
+        if (!els.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach((e) => {
+                if (!e.isIntersecting) return;
+                const el = e.target as HTMLElement;
+                const raw = el.dataset.count ?? '0';
+                const suffix = raw.replace(/[\d.]/g, '');
+                const target = parseFloat(raw);
+                const dur = 1200;
+                const start = performance.now();
+                const tick = (now: number) => {
+                    const p = Math.min((now - start) / dur, 1);
+                    const ease = 1 - Math.pow(1 - p, 3);
+                    const v = Math.round(target * ease);
+                    el.textContent = v + suffix;
+                    if (p < 1) requestAnimationFrame(tick);
+                };
+                requestAnimationFrame(tick);
+                io.unobserve(el);
+            });
+        }, { threshold: 0.5 });
+        els.forEach(el => io.observe(el));
+    }
+
+    initReveals();
+    initCounters();
+
+    document.addEventListener('astro:page-load', () => {
+        initReveals();
+        initCounters();
+    });
+</script>
