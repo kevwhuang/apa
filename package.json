@@ -1,6 +1,6 @@
 {
     "name": "apa",
-    "version": "26.4.30",
+    "version": "26.5.1",
     "type": "module",
     "author": "Kevin Huang",
     "scripts": {
@@ -18,7 +18,7 @@
         "@fontsource/space-mono": "^5.2.9",
         "@supabase/supabase-js": "^2.105.1",
         "@tailwindcss/vite": "^4.2.4",
-        "astro": "^6.1.10",
+        "astro": "^6.2.1",
         "astro-robots-txt": "^1.0.0",
         "gsap": "^3.15.0",
         "react": "^19.2.5",

@@ -1,15 +1,15 @@
 ---
-import Base from '@layouts/Base.astro';
 import HeroTimeline from '@sections/HeroTimeline.astro';
-import LandingEvents from '@sections/LandingEvents.astro';
-import LandingProducers from '@sections/LandingProducers.astro';
-import LandingBash from '@sections/LandingBash.astro';
-import LandingMerch from '@sections/LandingMerch.astro';
 import LandingAbout from '@sections/LandingAbout.astro';
-import LandingSponsors from '@sections/LandingSponsors.astro';
+import LandingBash from '@sections/LandingBash.astro';
+import LandingEvents from '@sections/LandingEvents.astro';
+import LandingMerch from '@sections/LandingMerch.astro';
 import LandingNewsletter from '@sections/LandingNewsletter.astro';
+import LandingProducers from '@sections/LandingProducers.astro';
+import LandingSponsors from '@sections/LandingSponsors.astro';
+import Layout from '@/Layout.astro';
 ---
-<Base pad={false}>
+<Layout pad={false}>
     <HeroTimeline />
     <LandingEvents />
     <LandingProducers />
@@ -18,4 +18,4 @@ import LandingNewsletter from '@sections/LandingNewsletter.astro';
     <LandingMerch />
     <LandingSponsors />
     <LandingNewsletter />
-</Base>
+</Layout>
