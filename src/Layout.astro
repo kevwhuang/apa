@@ -3,6 +3,8 @@ import '@fontsource-variable/bricolage-grotesque/index.css';
 import '@fontsource/space-mono/400.css';
 import '@fontsource/space-mono/700.css';
 import { ClientRouter } from 'astro:transitions';
+
+import '@/styles.css';
 import Footer from '@components/Footer.astro';
 import Navbar from '@components/Navbar.astro';
 
@@ -44,6 +46,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
         <meta content={description} name="twitter:description" />
         <meta content={`${Astro.site}og.png`} name="twitter:image" />
         <script
+            is:inline
             set:html={JSON.stringify({
                 '@context': 'https://schema.org',
                 '@type': 'Organization',
