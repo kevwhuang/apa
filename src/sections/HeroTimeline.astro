@@ -1,7 +1,11 @@
 ---
 const bars = Array.from({ length: 32 }, () => 20 + Math.random() * 80);
 ---
-<section class="relative pt-32 pb-28 overflow-hidden border-b-2 border-ink bg-bg">
+
+<section
+    class="relative pt-32 pb-28 overflow-hidden border-b-2 border-ink bg-sand"
+    aria-label="Homepage hero"
+>
     <div class="absolute inset-0 halftone pointer-events-none"></div>
     <div class="max-w-[1400px] mx-auto px-6 relative">
         <div class="flex items-center gap-3 mb-14 label text-ink-soft reveal">
@@ -10,17 +14,17 @@ const bars = Array.from({ length: 32 }, () => 20 + Math.random() * 80);
             <span class="ml-auto hidden md:inline">EST 2019 / 142 PRODUCERS / 38 EVENTS YR</span>
         </div>
 
-        <h1 class="font-display font-extrabold tracking-[-0.04em] text-[clamp(52px,10vw,140px)] leading-[0.88]">
+        <h1 class="font-sans font-extrabold tracking-[-0.04em] text-[clamp(52px,10vw,140px)] leading-[0.88]">
             <span class="block reveal">Austin's</span>
-            <span class="block text-coral reveal" style="transition-delay: 80ms;">producer</span>
-            <span class="block reveal" style="transition-delay: 160ms;">community.</span>
+            <span class="block text-coral reveal" style="transition-delay: 0.08s;">producer</span>
+            <span class="block reveal" style="transition-delay: 0.16s;">community.</span>
         </h1>
 
-        <div class="mt-16 relative reveal" style="transition-delay: 300ms;">
+        <div class="mt-16 relative reveal" style="transition-delay: 0.3s;">
             <div class="relative border-2 border-ink bg-surface overflow-hidden crop-marks">
-                <div class="absolute inset-0 halftone-coral"></div>
+                <div class="absolute inset-0 halftone--coral"></div>
 
-                <div class="flex items-end gap-[2px] h-20 px-3 py-2" id="waveform" aria-hidden="true">
+                <div id="waveform" class="flex items-end gap-[2px] h-20 px-3 py-2" aria-hidden="true">
                     {bars.map((h, i) => (
                         <div
                             class="flex-1 bg-coral/70 origin-bottom"
@@ -43,19 +47,19 @@ const bars = Array.from({ length: 32 }, () => 20 + Math.random() * 80);
             <div class="mt-12 grid md:grid-cols-2 gap-10 max-w-3xl">
                 <p class="text-[18px] leading-relaxed">
                     A working community for music producers in Austin, Texas. Cookups, showcases,
-                    and the annual <a href="/bash" class="underline decoration-coral decoration-2 underline-offset-4 hover:text-coral transition-colors">Producer Bash</a> —
+                    and the annual <a class="underline decoration-coral decoration-2 underline-offset-4 hover:text-coral transition-colors" href="/bash">Producer Bash</a> —
                     where local artists and labels build the city's sound from the inside out.
                 </p>
                 <div class="flex flex-wrap gap-3 items-start">
                     <a
+                        class="inline-flex items-center gap-2 px-6 h-12 btn-text border-2 border-ink bg-ink text-sand hover:bg-coral hover:border-coral transition-colors"
                         href="/events"
-                        class="inline-flex items-center gap-2 px-6 h-12 font-mono text-[12px] font-bold uppercase tracking-wide border-2 border-ink bg-ink text-bg hover:bg-coral hover:border-coral transition-colors"
                     >
                         Upcoming events
                     </a>
                     <a
+                        class="inline-flex items-center gap-2 px-6 h-12 btn-text border-2 border-ink hover:bg-ink hover:text-sand transition-colors"
                         href="/about"
-                        class="inline-flex items-center gap-2 px-6 h-12 font-mono text-[12px] font-bold uppercase tracking-wide border-2 border-ink hover:bg-ink hover:text-bg transition-colors"
                     >
                         Our story
                     </a>
@@ -66,12 +70,19 @@ const bars = Array.from({ length: 32 }, () => 20 + Math.random() * 80);
 </section>
 
 <script>
+    const PLAYHEAD_END = 85;
+    const PLAYHEAD_INTERVAL = 80;
+    const PLAYHEAD_START = 20;
+    const PLAYHEAD_STEP = 0.35;
+
     const playhead = document.getElementById('playhead');
+
     if (playhead && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        let t = 20;
+        let progress = PLAYHEAD_START;
+
         setInterval(() => {
-            t = ((t - 20 + 0.35) % 65) + 20;
-            playhead.style.left = `${t}%`;
-        }, 80);
+            progress = ((progress - PLAYHEAD_START + PLAYHEAD_STEP) % (PLAYHEAD_END - PLAYHEAD_START)) + PLAYHEAD_START;
+            playhead.style.left = `${progress}%`;
+        }, PLAYHEAD_INTERVAL);
     }
 </script>

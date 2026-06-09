@@ -3,34 +3,38 @@ interface Props { kind: 'privacy' | 'terms' }
 const { kind } = Astro.props;
 const title = kind === 'privacy' ? 'Privacy policy' : 'Terms of service';
 ---
-<section class="pt-20 pb-16">
+
+<section
+    class="pt-20 pb-16"
+    aria-label={title}
+>
     <div class="max-w-[800px] mx-auto px-6">
         <p class="label mb-4 text-coral">LAST UPDATED / MARCH 2026</p>
-        <h1 class="font-display font-extrabold tracking-[-0.03em] text-5xl mb-10">{title}</h1>
+        <h1 class="font-sans font-extrabold tracking-[-0.03em] text-5xl mb-10">{title}</h1>
 
         <div class="space-y-6 text-[16px] leading-[1.7]">
             {kind === 'privacy'
                 ? (
                         <>
-                            <h2 class="font-display text-2xl font-extrabold mt-10">What we collect</h2>
+                            <h2 class="font-sans text-2xl font-extrabold mt-10">What we collect</h2>
                             <p>The Austin Producer Alliance collects only the information you explicitly provide — name, email, and shipping address — when you sign up for our newsletter, become a member, or place a merch order.</p>
-                            <h2 class="font-display text-2xl font-extrabold mt-10">How we use it</h2>
+                            <h2 class="font-sans text-2xl font-extrabold mt-10">How we use it</h2>
                             <p>We use your information to send you the dispatch newsletter, fulfill merch orders, and contact you about events you've RSVP'd to. We do not sell or share your data with third parties for marketing purposes.</p>
-                            <h2 class="font-display text-2xl font-extrabold mt-10">Cookies</h2>
+                            <h2 class="font-sans text-2xl font-extrabold mt-10">Cookies</h2>
                             <p>We use a single first-party cookie to remember your theme preference and cart contents. We do not run third-party analytics or ad trackers.</p>
-                            <h2 class="font-display text-2xl font-extrabold mt-10">Your rights</h2>
+                            <h2 class="font-sans text-2xl font-extrabold mt-10">Your rights</h2>
                             <p>Email <a class="underline underline-offset-4 decoration-coral decoration-2 hover:text-coral transition-colors" href="mailto:privacy@austinproduceralliance.com">privacy@austinproduceralliance.com</a> at any time to access, correct, or delete your information.</p>
                         </>
                     )
                 : (
                         <>
-                            <h2 class="font-display text-2xl font-extrabold mt-10">Membership</h2>
+                            <h2 class="font-sans text-2xl font-extrabold mt-10">Membership</h2>
                             <p>APA membership is open to producers based in or working in the greater Austin area. Sliding-scale annual dues fund room rent and equipment. Membership is non-transferable.</p>
-                            <h2 class="font-display text-2xl font-extrabold mt-10">Studio use</h2>
+                            <h2 class="font-sans text-2xl font-extrabold mt-10">Studio use</h2>
                             <p>Members agree to leave the studio as they found it, label and clean up their gear, and respect the recording schedule. Repeated violations may result in suspension.</p>
-                            <h2 class="font-display text-2xl font-extrabold mt-10">Merch &amp; orders</h2>
+                            <h2 class="font-sans text-2xl font-extrabold mt-10">Merch &amp; orders</h2>
                             <p>All merch is printed in small batches. Orders ship within 14 business days. Returns are accepted within 30 days for unworn items.</p>
-                            <h2 class="font-display text-2xl font-extrabold mt-10">Compilations</h2>
+                            <h2 class="font-sans text-2xl font-extrabold mt-10">Compilations</h2>
                             <p>Producers retain full ownership of all masters submitted to APA compilations. We license non-exclusive rights to distribute the compilation only.</p>
                         </>
                     )}

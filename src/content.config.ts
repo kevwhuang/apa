@@ -1,73 +1,79 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { z } from 'astro/zod';
+
+const CONTENT_PATH = 'src/content';
+const EVENT_TYPES = ['cookup', 'mixer', 'panel', 'showcase', 'workshop'] as const;
+const PRODUCT_CATEGORIES = ['accessory', 'apparel', 'print'] as const;
+const PRODUCT_KINDS = ['photo-pack', 'press-kit', 'sample-pack', 'stems', 'video'] as const;
+
+const bash = defineCollection({
+    loader: glob({ base: `./${CONTENT_PATH}/bash`, pattern: '**/*.md' }),
+    schema: z.object({
+        assets: z.array(z.object({
+            href: z.string(),
+            kind: z.enum(PRODUCT_KINDS),
+            label: z.string(),
+            size: z.string(),
+        })).default([]),
+        cover: z.string().optional(),
+        date: z.coerce.date(),
+        edition: z.string(),
+        recap: z.string(),
+        title: z.string(),
+    }),
+});
 
 const events = defineCollection({
-    loader: glob({ pattern: '**/*.md', base: './src/content/events' }),
+    loader: glob({ base: `./${CONTENT_PATH}/events`, pattern: '**/*.md' }),
     schema: z.object({
-        title: z.string(),
-        date: z.coerce.date(),
-        location: z.string(),
-        type: z.enum(['cookup', 'showcase', 'workshop', 'mixer', 'panel']),
-        status: z.enum(['upcoming', 'past']).default('upcoming'),
-        rsvp: z.string().url().optional(),
         cover: z.string().optional(),
+        date: z.coerce.date(),
         excerpt: z.string(),
+        location: z.string(),
+        rsvp: z.string().url().optional(),
+        status: z.enum(['past', 'upcoming']).default('upcoming'),
+        title: z.string(),
+        type: z.enum(EVENT_TYPES),
     }),
 });
 
 const producers = defineCollection({
-    loader: glob({ pattern: '**/*.md', base: './src/content/producers' }),
+    loader: glob({ base: `./${CONTENT_PATH}/producers`, pattern: '**/*.md' }),
     schema: z.object({
-        name: z.string(),
-        handle: z.string(),
-        genres: z.array(z.string()),
-        location: z.string().default('Austin, TX'),
+        avatar: z.string().optional(),
         bio: z.string(),
+        genres: z.array(z.string()),
+        handle: z.string(),
         links: z.object({
+            bandcamp: z.string().url().optional(),
             instagram: z.string().url().optional(),
+            site: z.string().url().optional(),
             soundcloud: z.string().url().optional(),
             spotify: z.string().url().optional(),
-            bandcamp: z.string().url().optional(),
-            site: z.string().url().optional(),
         }).default({}),
-        avatar: z.string().optional(),
+        location: z.string().default('Austin, TX'),
+        name: z.string(),
     }),
 });
 
 const products = defineCollection({
-    loader: glob({ pattern: '**/*.md', base: './src/content/products' }),
+    loader: glob({ base: `./${CONTENT_PATH}/products`, pattern: '**/*.md' }),
     schema: z.object({
-        title: z.string(),
-        slug: z.string(),
-        category: z.enum(['apparel', 'accessory', 'print']),
-        priceCents: z.number().int().positive(),
-        sizes: z.array(z.string()).default([]),
+        category: z.enum(PRODUCT_CATEGORIES),
         colors: z.array(z.object({
-            name: z.string(),
             hex: z.string(),
+            name: z.string(),
         })).default([]),
-        images: z.array(z.string()).min(1),
         description: z.string(),
         details: z.array(z.string()).default([]),
+        images: z.array(z.string()).min(1),
         inStock: z.boolean().default(true),
-    }),
-});
-
-const bash = defineCollection({
-    loader: glob({ pattern: '**/*.md', base: './src/content/bash' }),
-    schema: z.object({
+        priceCents: z.number().int().positive(),
+        sizes: z.array(z.string()).default([]),
+        slug: z.string(),
         title: z.string(),
-        edition: z.string(),
-        date: z.coerce.date(),
-        recap: z.string(),
-        assets: z.array(z.object({
-            label: z.string(),
-            kind: z.enum(['stems', 'photo-pack', 'press-kit', 'video', 'sample-pack']),
-            size: z.string(),
-            href: z.string(),
-        })).default([]),
-        cover: z.string().optional(),
     }),
 });
 
-export const collections = { events, producers, products, bash };
+export const collections = { bash, events, producers, products };

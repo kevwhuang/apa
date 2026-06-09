@@ -1,17 +1,7 @@
-export type CartItem = {
-    productSlug: string;
-    title: string;
-    priceCents: number;
-    image: string;
-    size?: string;
-    color?: string;
-    quantity: number;
-};
-
-const KEY = 'apa.cart';
 const EVT = 'apa:cart-changed';
+const KEY = 'apa.cart';
 
-export function read(): CartItem[] {
+function read(): CartItem[] {
     if (typeof localStorage === 'undefined') return [];
     try {
         return JSON.parse(localStorage.getItem(KEY) ?? '[]');
@@ -20,7 +10,7 @@ export function read(): CartItem[] {
     }
 }
 
-export function write(items: CartItem[]): void {
+function write(items: CartItem[]): void {
     localStorage.setItem(KEY, JSON.stringify(items));
     window.dispatchEvent(new CustomEvent(EVT, { detail: items }));
 }
@@ -32,6 +22,24 @@ export function add(item: CartItem): void {
     if (idx >= 0) items[idx].quantity += item.quantity;
     else items.push(item);
     write(items);
+}
+
+export function clear(): void {
+    write([]);
+}
+
+export function count(items = read()): number {
+    return items.reduce((s, i) => s + i.quantity, 0);
+}
+
+export function getItems(): CartItem[] {
+    return read();
+}
+
+export function onChange(cb: (items: CartItem[]) => void): () => void {
+    const handler = (e: Event) => cb((e as CustomEvent<CartItem[]>).detail ?? read());
+    window.addEventListener(EVT, handler);
+    return () => window.removeEventListener(EVT, handler);
 }
 
 export function remove(index: number): void {
@@ -47,22 +55,6 @@ export function setQuantity(index: number, q: number): void {
     write(items);
 }
 
-export function clear(): void {
-    write([]);
-}
-
 export function subtotalCents(items = read()): number {
     return items.reduce((s, i) => s + i.priceCents * i.quantity, 0);
 }
-
-export function count(items = read()): number {
-    return items.reduce((s, i) => s + i.quantity, 0);
-}
-
-export function onChange(cb: (items: CartItem[]) => void): () => void {
-    const handler = (e: Event) => cb((e as CustomEvent<CartItem[]>).detail ?? read());
-    window.addEventListener(EVT, handler);
-    return () => window.removeEventListener(EVT, handler);
-}
-
-export const CART_EVENT = EVT;

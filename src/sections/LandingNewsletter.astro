@@ -1,12 +1,17 @@
 ---
+
 ---
-<section class="py-24">
+
+<section
+    class="py-24"
+    aria-label="Newsletter signup"
+>
     <div class="max-w-[1400px] mx-auto px-6">
         <div class="border-2 border-ink p-12 md:p-16 grid md:grid-cols-[1.2fr_1fr] gap-10 items-end bg-surface relative overflow-hidden crop-marks reveal">
             <div class="absolute inset-0 halftone pointer-events-none"></div>
             <div class="relative">
                 <p class="label mb-4 text-coral">SIGNAL</p>
-                <h2 class="font-display font-extrabold tracking-[-0.03em] text-4xl md:text-5xl leading-[1.05]">
+                <h2 class="font-sans font-extrabold tracking-[-0.03em] text-4xl md:text-5xl leading-[1.05]">
                     Get the dispatch.
                 </h2>
                 <p class="mt-4 max-w-md text-ink-soft">
@@ -15,15 +20,15 @@
             </div>
             <form id="newsletter-form" class="flex gap-2 relative">
                 <input
-                    type="email"
+                    class="flex-1 h-12 px-4 border-2 border-ink bg-sand font-mono text-[13px] placeholder:text-ink-soft/60"
+                    aria-label="Email address"
+                    autocomplete="email"
                     name="email"
                     placeholder="you@studio.fm"
                     required
-                    autocomplete="email"
-                    aria-label="Email address"
-                    class="flex-1 h-12 px-4 border-2 border-ink bg-bg font-mono text-[13px] placeholder:text-ink-soft/60"
+                    type="email"
                 />
-                <button class="h-12 px-6 font-mono text-[12px] font-bold uppercase tracking-wide bg-coral text-coral-ink border-2 border-coral hover:bg-coral-dark transition-colors">
+                <button class="h-12 px-6 btn-text bg-coral text-coral-ink border-2 border-coral hover:bg-coral-dark transition-colors">
                     Subscribe
                 </button>
             </form>
@@ -35,9 +40,11 @@
     document.getElementById('newsletter-form')?.addEventListener('submit', (e) => {
         e.preventDefault();
         const form = e.target as HTMLFormElement;
-        const btn = form.querySelector('button')!;
+        const btn = form.querySelector('button');
+        if (!btn) return;
         btn.textContent = 'Subscribed!';
         btn.setAttribute('disabled', '');
-        form.querySelector('input')!.setAttribute('disabled', '');
+        const input = form.querySelector('input');
+        if (input) input.setAttribute('disabled', '');
     });
 </script>

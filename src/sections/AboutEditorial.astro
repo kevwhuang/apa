@@ -1,37 +1,49 @@
 ---
+import { PALETTE } from '@lib/utils';
+
 const bios = [
-    { name: 'Yara Soto', role: 'Co-founder / Director', city: 'East Side', years: '2019 &mdash;' },
-    { name: 'Devon Park', role: 'Co-founder / Programs', city: 'South Lamar', years: '2019 &mdash;' },
-    { name: 'Inez Rao', role: 'Producer Bash lead', city: 'North Loop', years: '2021 &mdash;' },
-    { name: 'Marcus Hale', role: 'Merch & ops', city: 'Hyde Park', years: '2022 &mdash;' },
-    { name: 'Tana Wolfe', role: 'Membership', city: 'Govalle', years: '2023 &mdash;' },
-    { name: 'June Castillo', role: 'Press & partnerships', city: 'Bouldin', years: '2024 &mdash;' },
+    { city: 'East Side', name: 'Yara Soto', role: 'Co-founder / Director', years: '2019 &mdash;' },
+    { city: 'South Lamar', name: 'Devon Park', role: 'Co-founder / Programs', years: '2019 &mdash;' },
+    { city: 'North Loop', name: 'Inez Rao', role: 'Producer Bash lead', years: '2021 &mdash;' },
+    { city: 'Hyde Park', name: 'Marcus Hale', role: 'Merch & ops', years: '2022 &mdash;' },
+    { city: 'Govalle', name: 'Tana Wolfe', role: 'Membership', years: '2023 &mdash;' },
+    { city: 'Bouldin', name: 'June Castillo', role: 'Press & partnerships', years: '2024 &mdash;' },
 ];
-const teamColors = ['#FF4D3A', '#2D2B85', '#D4A843', '#1A1A1A', '#6B68D9', '#CC3E2E'];
+const teamColors = PALETTE.slice(0, 6);
 ---
-<section class="pt-20 pb-16 border-b-2 border-ink">
+
+<section
+    class="pt-20 pb-16 border-b-2 border-ink"
+    aria-label="About introduction"
+>
     <div class="max-w-[1100px] mx-auto px-6">
         <p class="label mb-6 text-coral reveal">ABOUT / EST 2019</p>
-        <h1 class="font-display font-extrabold tracking-[-0.04em] text-5xl md:text-7xl leading-[0.95] reveal" style="transition-delay: 80ms;">
+        <h1 class="font-sans font-extrabold tracking-[-0.04em] text-5xl md:text-7xl leading-[0.95] reveal" style="transition-delay: 0.08s;">
             Six producers met every Tuesday at a coffee shop on Cesar Chavez. Five years later there are 142 of us.
         </h1>
     </div>
 </section>
 
-<section class="py-20">
+<section
+    class="py-20"
+    aria-label="About details"
+>
     <div class="max-w-[1100px] mx-auto px-6 grid md:grid-cols-[1fr_2fr] gap-12">
         <aside class="md:sticky md:top-28 self-start">
             <p class="label mb-3 text-ink-soft">SECTIONS</p>
             <ul class="space-y-2.5 text-[14px]">
-                <li><a href="#beginning" class="hover:text-coral transition-colors">The beginning</a></li>
-                <li><a href="#how" class="hover:text-coral transition-colors">How it works</a></li>
-                <li><a href="#values" class="hover:text-coral transition-colors">What we believe</a></li>
-                <li><a href="#team" class="hover:text-coral transition-colors">The team</a></li>
+                <li><a class="hover:text-coral transition-colors" href="#beginning">The beginning</a></li>
+                <li><a class="hover:text-coral transition-colors" href="#how">How it works</a></li>
+                <li><a class="hover:text-coral transition-colors" href="#values">What we believe</a></li>
+                <li><a class="hover:text-coral transition-colors" href="#team">The team</a></li>
             </ul>
         </aside>
         <div class="space-y-8 text-[18px] leading-[1.65]">
-            <section id="beginning">
-                <h2 class="font-display text-3xl font-extrabold tracking-tight mb-3">The beginning</h2>
+            <section
+                id="beginning"
+                aria-label="The beginning"
+            >
+                <h2 class="font-sans text-3xl font-extrabold tracking-tight mb-3">The beginning</h2>
                 <p>
                     Austin's music economy has always favored the performer. Songwriters get rooms, bands
                     get residencies, but producers — the engineers, beatmakers, and arrangers behind the
@@ -45,22 +57,28 @@ const teamColors = ['#FF4D3A', '#2D2B85', '#D4A843', '#1A1A1A', '#6B68D9', '#CC3
             </section>
 
             <figure class="border-y-2 border-ink py-10 my-10 reveal">
-                <blockquote class="font-display text-3xl md:text-4xl font-extrabold tracking-[-0.02em] leading-[1.1]">
+                <blockquote class="font-sans text-3xl md:text-4xl font-extrabold tracking-[-0.02em] leading-[1.1]">
                     <span class="text-coral">"</span>It's the only room in the city where you can show up with a half-finished beat at 9 p.m. on a Tuesday and leave with a finished record.<span class="text-coral">"</span>
                 </blockquote>
                 <figcaption class="mt-6 label text-ink-soft">YARA SOTO / CO-FOUNDER</figcaption>
             </figure>
 
-            <section id="how">
-                <h2 class="font-display text-3xl font-extrabold tracking-tight mb-3">How it works</h2>
+            <section
+                id="how"
+                aria-label="How it works"
+            >
+                <h2 class="font-sans text-3xl font-extrabold tracking-tight mb-3">How it works</h2>
                 <p>
                     Membership is open to anyone making music in Austin. We charge a sliding-scale annual due
                     ($0&mdash;$120) that covers room rent and equipment. Members get the keys.
                 </p>
             </section>
 
-            <section id="values">
-                <h2 class="font-display text-3xl font-extrabold tracking-tight mb-3">What we believe</h2>
+            <section
+                id="values"
+                aria-label="What we believe"
+            >
+                <h2 class="font-sans text-3xl font-extrabold tracking-tight mb-3">What we believe</h2>
                 <ul class="space-y-3 list-none pl-0">
                     <li class="flex gap-4"><span class="label pt-1 text-coral">01</span><span>Producers own their masters. We don't sign anyone.</span></li>
                     <li class="flex gap-4"><span class="label pt-1 text-coral">02</span><span>Every event is open to every member, regardless of genre.</span></li>
@@ -69,22 +87,25 @@ const teamColors = ['#FF4D3A', '#2D2B85', '#D4A843', '#1A1A1A', '#6B68D9', '#CC3
                 </ul>
             </section>
 
-            <section id="team">
-                <h2 class="font-display text-3xl font-extrabold tracking-tight mb-6">The team</h2>
-                <div class="grid sm:grid-cols-2 gap-5 reveal-stagger">
+            <section
+                id="team"
+                aria-label="The team"
+            >
+                <h2 class="font-sans text-3xl font-extrabold tracking-tight mb-6">The team</h2>
+                <div class="grid sm:grid-cols-2 gap-5 reveal--stagger">
                     {bios.map((b, i) => (
-                        <div class="border-2 border-ink bg-bg card-hover" style="box-shadow: var(--shadow-card-sm);">
+                        <div class="border-2 border-ink bg-sand card-hover" style="box-shadow: var(--shadow-card-sm);">
                             <div
                                 class="aspect-[4/3] relative overflow-hidden flex items-center justify-center"
                                 style={`background: ${teamColors[i]};`}
                             >
                                 <div class="absolute inset-0 halftone"></div>
-                                <span class="font-display font-extrabold text-[64px] text-white/80 mix-blend-overlay select-none">
+                                <span class="font-sans font-extrabold text-[64px] text-white/80 mix-blend-overlay select-none">
                                     {b.name.split(' ').map(w => w[0]).join('')}
                                 </span>
                             </div>
                             <div class="p-4">
-                                <h3 class="font-display font-extrabold tracking-tight">{b.name}</h3>
+                                <h3 class="font-sans font-extrabold tracking-tight">{b.name}</h3>
                                 <p class="text-[12px] font-mono text-ink-soft" set:html={`${b.role} / ${b.city} / ${b.years}`}></p>
                             </div>
                         </div>

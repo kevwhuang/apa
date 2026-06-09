@@ -3,33 +3,35 @@ interface Props {
     size?: number;
 }
 const { size = 28 } = Astro.props;
-const h = size;
-const w = size * 4.4;
+const height = size;
+const width = size * 4.4;
 ---
+
 <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={w}
-    height={h}
-    viewBox={`0 0 ${w} ${h}`}
-    fill="none"
-    role="img"
+    class="text-coral-ink"
     aria-label="Austin Producer Alliance"
+    fill="none"
+    height={height}
+    role="img"
+    viewBox={`0 0 ${width} ${height}`}
+    width={width}
+    xmlns="http://www.w3.org/2000/svg"
 >
-    <rect x="0" y="0" width={h * 1.8} height={h} fill="var(--color-coral)" />
+    <rect fill="var(--color-coral)" height={height} width={height * 1.8} x="0" y="0" />
     <g
-        fill="#FFFAF8"
+        fill="currentColor"
         font-family="'Bricolage Grotesque Variable', Georgia, serif"
+        font-size={height * 0.65}
         font-weight="800"
-        font-size={h * 0.65}
     >
-        <text x={h * 0.9} y={h * 0.72} text-anchor="middle" letter-spacing="-1">APA</text>
+        <text letter-spacing="-1" text-anchor="middle" x={height * 0.9} y={height * 0.72}>APA</text>
     </g>
     <g
         fill="currentColor"
         font-family="'Space Mono', monospace"
-        font-size={h * 0.30}
+        font-size={height * 0.30}
     >
-        <text x={h * 2.0} y={h * 0.48}>AUSTIN PRODUCER</text>
-        <text x={h * 2.0} y={h * 0.88}>ALLIANCE</text>
+        <text x={height * 2.0} y={height * 0.48}>AUSTIN PRODUCER</text>
+        <text x={height * 2.0} y={height * 0.88}>ALLIANCE</text>
     </g>
 </svg>

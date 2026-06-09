@@ -1,31 +1,39 @@
 ---
 import { getCollection } from 'astro:content';
+import { PALETTE } from '@lib/utils';
 
+const cardColors = PALETTE;
 const producers = await getCollection('producers');
 const allGenres = Array.from(new Set(producers.flatMap(p => p.data.genres))).sort();
-const cardColors = ['#FF4D3A', '#2D2B85', '#1A1A1A', '#D4A843', '#6B68D9', '#CC3E2E', '#3A3530', '#FF6B5A'];
 ---
-<section class="pt-20 pb-12 border-b-2 border-ink">
+
+<section
+    class="pt-20 pb-12 border-b-2 border-ink"
+    aria-label="Producer roster"
+>
     <div class="max-w-[1400px] mx-auto px-6">
         <p class="label mb-4 text-coral reveal">ROSTER / {producers.length} MEMBERS</p>
-        <h1 class="font-display font-extrabold tracking-[-0.04em] text-6xl md:text-8xl leading-[0.9] max-w-3xl reveal" style="transition-delay: 80ms;">
+        <h1 class="font-sans font-extrabold tracking-[-0.04em] text-6xl md:text-8xl leading-[0.9] max-w-3xl reveal" style="transition-delay: 0.08s;">
             The producers.
         </h1>
-        <div id="genre-filter" class="mt-10 flex flex-wrap gap-2" role="group" aria-label="Filter by genre">
-            <button class="genre-btn filter-on px-3 h-8 font-mono text-[11px] font-bold uppercase tracking-wide border-2 border-ink" data-genre="" aria-pressed="true">All</button>
+        <div id="genre-filter" class="mt-10 flex flex-wrap gap-2" aria-label="Filter by genre" role="group">
+            <button class="genre-btn filter-on px-3 h-8 font-mono text-[11px] font-bold uppercase tracking-wide border-2 border-ink" aria-pressed="true" data-genre="">All</button>
             {allGenres.map(g => (
-                <button class="genre-btn px-3 h-8 font-mono text-[11px] font-bold uppercase tracking-wide border-2 border-ink hover:bg-ink hover:text-bg transition-colors" data-genre={g} aria-pressed="false">{g}</button>
+                <button class="genre-btn px-3 h-8 font-mono text-[11px] font-bold uppercase tracking-wide border-2 border-ink hover:bg-ink hover:text-sand transition-colors" aria-pressed="false" data-genre={g}>{g}</button>
             ))}
         </div>
     </div>
 </section>
 
-<section class="py-16">
-    <div id="producer-grid" class="max-w-[1400px] mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 reveal-stagger">
+<section
+    class="py-16"
+    aria-label="Producer cards"
+>
+    <div id="producer-grid" class="max-w-[1400px] mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 reveal--stagger">
         {producers.map((p, i) => (
             <article
                 id={p.id}
-                class="producer-card border-2 border-ink p-0 bg-bg card-hover"
+                class="producer-card border-2 border-ink p-0 bg-sand card-hover"
                 data-genres={p.data.genres.join(',')}
                 style="box-shadow: var(--shadow-card-sm);"
             >
@@ -34,13 +42,13 @@ const cardColors = ['#FF4D3A', '#2D2B85', '#1A1A1A', '#D4A843', '#6B68D9', '#CC3
                     style={`background: ${cardColors[i % cardColors.length]};`}
                 >
                     <div class="absolute inset-0 halftone"></div>
-                    <span class="font-display font-extrabold text-[80px] leading-none text-white/80 mix-blend-overlay select-none">
+                    <span class="font-sans font-extrabold text-[80px] leading-none text-white/80 mix-blend-overlay select-none">
                         {p.data.name.split(' ').map(w => w[0]).join('')}
                     </span>
                 </div>
                 <div class="p-5">
                     <p class="label text-coral">{p.data.handle}</p>
-                    <h3 class="font-display font-extrabold text-xl tracking-tight mt-1">{p.data.name}</h3>
+                    <h2 class="font-sans font-extrabold text-xl tracking-tight mt-1">{p.data.name}</h2>
                     <p class="text-[13px] mt-2 text-ink-soft leading-relaxed">{p.data.bio}</p>
                     <div class="mt-4 flex flex-wrap gap-1.5">
                         {p.data.genres.map(g => (
@@ -48,10 +56,10 @@ const cardColors = ['#FF4D3A', '#2D2B85', '#1A1A1A', '#D4A843', '#6B68D9', '#CC3
                         ))}
                     </div>
                     <div class="flex gap-3 mt-4 font-mono text-[11px] font-bold uppercase text-ink-soft">
-                        {p.data.links.instagram && <a href={p.data.links.instagram} target="_blank" rel="noopener noreferrer" aria-label={`${p.data.name} on Instagram`} class="hover:text-coral transition-colors">IG</a>}
-                        {p.data.links.soundcloud && <a href={p.data.links.soundcloud} target="_blank" rel="noopener noreferrer" aria-label={`${p.data.name} on SoundCloud`} class="hover:text-coral transition-colors">SC</a>}
-                        {p.data.links.spotify && <a href={p.data.links.spotify} target="_blank" rel="noopener noreferrer" aria-label={`${p.data.name} on Spotify`} class="hover:text-coral transition-colors">SP</a>}
-                        {p.data.links.bandcamp && <a href={p.data.links.bandcamp} target="_blank" rel="noopener noreferrer" aria-label={`${p.data.name} on Bandcamp`} class="hover:text-coral transition-colors">BC</a>}
+                        {p.data.links.instagram && <a class="hover:text-coral transition-colors" aria-label={`${p.data.name} on Instagram`} href={p.data.links.instagram} rel="noopener noreferrer" target="_blank">IG</a>}
+                        {p.data.links.soundcloud && <a class="hover:text-coral transition-colors" aria-label={`${p.data.name} on SoundCloud`} href={p.data.links.soundcloud} rel="noopener noreferrer" target="_blank">SC</a>}
+                        {p.data.links.spotify && <a class="hover:text-coral transition-colors" aria-label={`${p.data.name} on Spotify`} href={p.data.links.spotify} rel="noopener noreferrer" target="_blank">SP</a>}
+                        {p.data.links.bandcamp && <a class="hover:text-coral transition-colors" aria-label={`${p.data.name} on Bandcamp`} href={p.data.links.bandcamp} rel="noopener noreferrer" target="_blank">BC</a>}
                     </div>
                 </div>
             </article>
@@ -60,35 +68,25 @@ const cardColors = ['#FF4D3A', '#2D2B85', '#1A1A1A', '#D4A843', '#6B68D9', '#CC3
 </section>
 
 <script>
+    import { applyFilter, rovingFocus } from '@/lib/utils';
+
     const buttons = document.querySelectorAll<HTMLButtonElement>('.genre-btn');
     const cards = document.querySelectorAll<HTMLElement>('.producer-card');
-    let active = '';
-    const apply = () => {
-        cards.forEach((c) => {
-            const list = (c.dataset.genres ?? '').split(',');
-            c.style.display = !active || list.includes(active) ? '' : 'none';
-        });
-        buttons.forEach((b) => {
-            const on = b.dataset.genre === active;
-            b.setAttribute('aria-pressed', String(on));
-            b.classList.toggle('filter-on', on);
-        });
-    };
-    const btnArr = Array.from(buttons);
-    buttons.forEach((b, i) => {
-        b.addEventListener('click', () => {
-            active = b.dataset.genre ?? '';
+
+    let activeGenre = '';
+
+    function apply() {
+        applyFilter(buttons, cards, activeGenre, 'genre', (card, genre) => !genre || (card.dataset.genres ?? '').split(',').includes(genre));
+    }
+
+    rovingFocus(buttons);
+
+    buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            activeGenre = btn.dataset.genre ?? '';
             apply();
         });
-        b.addEventListener('keydown', (e) => {
-            let next = -1;
-            if (e.key === 'ArrowRight') next = (i + 1) % btnArr.length;
-            if (e.key === 'ArrowLeft') next = (i - 1 + btnArr.length) % btnArr.length;
-            if (next >= 0) {
-                e.preventDefault();
-                btnArr[next].focus();
-            }
-        });
     });
+
     apply();
 </script>

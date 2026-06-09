@@ -1,7 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
-import Layout from '@/Layout.astro';
+
 import ProductDetail from '@sections/ProductDetail.astro';
+import Layout from '@/Layout.astro';
 
 export async function getStaticPaths() {
     const products = await getCollection('products');
@@ -13,6 +14,10 @@ export async function getStaticPaths() {
 
 const { product } = Astro.props;
 ---
-<Layout title={`${product.title} — APA`}>
+
+<Layout
+    description={product.description}
+    title={`${product.title} | APA`}
+>
     <ProductDetail product={product} />
 </Layout>

@@ -1,5 +1,5 @@
 ---
-import { formatPrice } from '@lib/format';
+import { formatPrice, PALETTE } from '@lib/utils';
 
 interface Props {
     product: {
@@ -15,16 +15,23 @@ interface Props {
         inStock: boolean;
     };
 }
+const imgColors = PALETTE.slice(0, 3);
 const { product } = Astro.props;
-const imgColors = ['#FF4D3A', '#2D2B85', '#D4A843'];
 ---
-<section class="pt-20 pb-12 border-b-2 border-ink">
+
+<section
+    class="pt-20 pb-12 border-b-2 border-ink"
+    aria-label="Product breadcrumb"
+>
     <div class="max-w-[1400px] mx-auto px-6 label text-ink-soft">
-        <a href="/merch" class="hover:text-coral transition-colors">&larr; All merch</a> / <span>{product.category}</span>
+        <a class="hover:text-coral transition-colors" href="/merch">&larr; All merch</a> / <span>{product.category}</span>
     </div>
 </section>
 
-<section class="py-16">
+<section
+    class="py-16"
+    aria-label="Product details"
+>
     <div class="max-w-[1400px] mx-auto px-6 grid md:grid-cols-2 gap-12">
         <div class="space-y-4">
             {product.images.map((_, i) => (
@@ -33,7 +40,7 @@ const imgColors = ['#FF4D3A', '#2D2B85', '#D4A843'];
                     style={`background: ${imgColors[i % imgColors.length]}; box-shadow: var(--shadow-card);`}
                 >
                     <div class="absolute inset-0 halftone"></div>
-                    <span class="font-display font-extrabold text-6xl text-white/80 mix-blend-overlay select-none uppercase">{product.title.split(' ')[0]}</span>
+                    <span class="font-sans font-extrabold text-6xl text-white/80 mix-blend-overlay select-none uppercase">{product.title.split(' ')[0]}</span>
                 </div>
             ))}
         </div>
@@ -41,7 +48,7 @@ const imgColors = ['#FF4D3A', '#2D2B85', '#D4A843'];
         <div class="md:sticky md:top-28 self-start space-y-8">
             <div>
                 <p class="label mb-2 text-coral">{product.category}</p>
-                <h1 class="font-display font-extrabold tracking-[-0.03em] text-4xl md:text-5xl leading-tight">{product.title}</h1>
+                <h1 class="font-sans font-extrabold tracking-[-0.03em] text-4xl md:text-5xl leading-tight">{product.title}</h1>
                 <p class="font-mono text-2xl mt-3 font-bold">{formatPrice(product.priceCents)}</p>
             </div>
 
@@ -51,15 +58,15 @@ const imgColors = ['#FF4D3A', '#2D2B85', '#D4A843'];
                 {product.colors.length > 0 && (
                     <div>
                         <p class="label mb-3 text-ink-soft">COLOR / <span data-color-out>{product.colors[0].name}</span></p>
-                        <div class="flex gap-2" role="group" aria-label="Color options">
+                        <div class="flex gap-2" aria-label="Color options" role="group">
                             {product.colors.map((c, i) => (
                                 <button
-                                    type="button"
-                                    data-color={c.name}
-                                    class="color-swatch w-10 h-10 border-2 transition-all"
-                                    style={`background: ${c.hex}; border-color: ${i === 0 ? 'var(--color-ink)' : 'var(--color-line)'};`}
+                                    class="color-swatch w-10 h-10 border-2 transition-colors"
                                     aria-label={c.name}
                                     aria-pressed={i === 0 ? 'true' : 'false'}
+                                    data-color={c.name}
+                                    style={`background: ${c.hex}; border-color: ${i === 0 ? 'var(--color-ink)' : 'var(--color-line)'};`}
+                                    type="button"
                                 >
                                 </button>
                             ))}
@@ -70,13 +77,13 @@ const imgColors = ['#FF4D3A', '#2D2B85', '#D4A843'];
                 {product.sizes.length > 0 && (
                     <div>
                         <p class="label mb-3 text-ink-soft">SIZE</p>
-                        <div class="flex flex-wrap gap-2" role="group" aria-label="Size options">
+                        <div class="flex flex-wrap gap-2" aria-label="Size options" role="group">
                             {product.sizes.map((s, i) => (
                                 <button
-                                    type="button"
-                                    data-size={s}
-                                    class={`size-btn min-w-[44px] h-11 px-3 border-2 border-ink font-mono text-[12px] font-bold uppercase transition-colors ${i === 0 ? 'filter-on' : 'hover:bg-ink hover:text-bg'}`}
+                                    class={`size-btn min-w-[44px] h-11 px-3 border-2 border-ink font-mono text-[12px] font-bold uppercase transition-colors ${i === 0 ? 'filter-on' : 'hover:bg-ink hover:text-sand'}`}
                                     aria-pressed={i === 0 ? 'true' : 'false'}
+                                    data-size={s}
+                                    type="button"
                                 >{s}
                                 </button>
                             ))}
@@ -87,19 +94,19 @@ const imgColors = ['#FF4D3A', '#2D2B85', '#D4A843'];
                 <div>
                     <p class="label mb-3 text-ink-soft">QUANTITY</p>
                     <div class="inline-flex items-center border-2 border-ink">
-                        <button type="button" data-qty="-1" class="w-11 h-11 text-lg font-bold hover:bg-surface transition-colors" aria-label="Decrease quantity">&minus;</button>
-                        <span data-qty-out class="w-12 text-center font-mono font-bold" aria-live="polite">1</span>
-                        <button type="button" data-qty="+1" class="w-11 h-11 text-lg font-bold hover:bg-surface transition-colors" aria-label="Increase quantity">+</button>
+                        <button class="w-11 h-11 text-lg font-bold hover:bg-surface transition-colors" aria-label="Decrease quantity" data-qty="-1" type="button">&minus;</button>
+                        <span class="w-12 text-center font-mono font-bold" aria-live="polite" data-qty-out>1</span>
+                        <button class="w-11 h-11 text-lg font-bold hover:bg-surface transition-colors" aria-label="Increase quantity" data-qty="+1" type="button">+</button>
                     </div>
                 </div>
 
                 <button
+                    class="w-full h-14 py-4 font-mono text-[13px] font-bold uppercase tracking-wide bg-ink text-sand border-2 border-ink hover:bg-coral hover:border-coral transition-colors"
                     type="submit"
-                    class="w-full h-14 py-4 font-mono text-[13px] font-bold uppercase tracking-wide bg-ink text-bg border-2 border-ink hover:bg-coral hover:border-coral transition-colors"
                 >
                     Add to cart
                 </button>
-                <p data-added class="hidden font-mono text-[12px] p-3 text-center bg-coral text-coral-ink font-bold uppercase" role="status" aria-live="polite"></p>
+                <p class="hidden font-mono text-[12px] p-3 text-center bg-coral text-coral-ink font-bold uppercase" aria-live="polite" data-added role="status"></p>
             </form>
 
             {product.details.length > 0 && (
@@ -116,46 +123,46 @@ const imgColors = ['#FF4D3A', '#2D2B85', '#D4A843'];
 
 <script define:vars={{ product }}>
     let color = product.colors[0]?.name;
-    let size = product.sizes[0];
     let qty = 1;
+    let size = product.sizes[0];
 
-    document.querySelectorAll('.color-swatch').forEach((b) => {
-        b.addEventListener('click', () => {
-            color = b.dataset.color;
-            document.querySelectorAll('.color-swatch').forEach((x) => {
-                x.style.borderColor = 'var(--color-line)';
-                x.setAttribute('aria-pressed', 'false');
+    document.querySelectorAll('.color-swatch').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            color = btn.dataset.color;
+            document.querySelectorAll('.color-swatch').forEach((swatch) => {
+                swatch.style.borderColor = 'var(--color-line)';
+                swatch.setAttribute('aria-pressed', 'false');
             });
-            b.style.borderColor = 'var(--color-ink)';
-            b.setAttribute('aria-pressed', 'true');
+            btn.style.borderColor = 'var(--color-ink)';
+            btn.setAttribute('aria-pressed', 'true');
             const out = document.querySelector('[data-color-out]');
             if (out) out.textContent = color;
         });
     });
 
-    document.querySelectorAll('.size-btn').forEach((b) => {
-        b.addEventListener('click', () => {
-            size = b.dataset.size;
-            document.querySelectorAll('.size-btn').forEach((x) => {
-                x.classList.remove('filter-on');
-                x.setAttribute('aria-pressed', 'false');
+    document.querySelectorAll('.size-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            size = btn.dataset.size;
+            document.querySelectorAll('.size-btn').forEach((sizeBtn) => {
+                sizeBtn.classList.remove('filter-on');
+                sizeBtn.setAttribute('aria-pressed', 'false');
             });
-            b.classList.add('filter-on');
-            b.setAttribute('aria-pressed', 'true');
+            btn.classList.add('filter-on');
+            btn.setAttribute('aria-pressed', 'true');
         });
     });
 
-    document.querySelectorAll('[data-qty]').forEach((b) => {
-        b.addEventListener('click', () => {
-            qty = Math.max(1, qty + Number(b.dataset.qty));
-            const o = document.querySelector('[data-qty-out]');
-            if (o) o.textContent = String(qty);
+    document.querySelectorAll('[data-qty]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            qty = Math.max(1, qty + Number(btn.dataset.qty));
+            const qtyOutput = document.querySelector('[data-qty-out]');
+            if (qtyOutput) qtyOutput.textContent = String(qty);
         });
     });
 
     document.getElementById('add-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const { add } = await import('/src/lib/cart.ts');
+        const { add } = await import('@/lib/store');
         add({
             productSlug: product.slug,
             title: product.title,
@@ -166,7 +173,7 @@ const imgColors = ['#FF4D3A', '#2D2B85', '#D4A843'];
         });
         const out = document.querySelector('[data-added]');
         if (out) {
-            out.textContent = `Added ${qty} × ${product.title} to cart`;
+            out.textContent = `Added ${qty} \u00d7 ${product.title} to cart`;
             out.classList.remove('hidden');
         }
     });

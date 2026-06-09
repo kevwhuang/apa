@@ -1,17 +1,22 @@
 ---
+
 ---
-<section class="min-h-[80vh] flex items-center">
+
+<section
+    class="min-h-[80vh] flex items-center"
+    aria-label="Page not found"
+>
     <div class="max-w-[1100px] mx-auto px-6 grid md:grid-cols-2 gap-12 items-center py-20">
         <div>
             <p class="label mb-6 text-coral">ERROR / SIGNAL LOST</p>
-            <h1 class="font-display font-extrabold tracking-[-0.05em] text-[clamp(96px,16vw,220px)] leading-[0.85]">404</h1>
+            <h1 class="font-sans font-extrabold tracking-[-0.05em] text-[clamp(96px,16vw,220px)] leading-[0.85]">404</h1>
             <p class="mt-6 max-w-md text-[18px] text-ink-soft">
                 That track isn't on the timeline. Try one of these instead.
             </p>
             <div class="mt-8 flex flex-wrap gap-3">
-                <a href="/" class="inline-flex items-center px-6 h-11 font-mono text-[12px] font-bold uppercase tracking-wide bg-ink text-bg border-2 border-ink hover:bg-coral hover:border-coral transition-colors">Home</a>
-                <a href="/events" class="inline-flex items-center px-6 h-11 font-mono text-[12px] font-bold uppercase tracking-wide border-2 border-ink hover:bg-ink hover:text-bg transition-colors">Events</a>
-                <a href="/producers" class="inline-flex items-center px-6 h-11 font-mono text-[12px] font-bold uppercase tracking-wide border-2 border-ink hover:bg-ink hover:text-bg transition-colors">Producers</a>
+                <a class="inline-flex items-center px-6 h-11 btn-text bg-ink text-sand border-2 border-ink hover:bg-coral hover:border-coral transition-colors" href="/">Home</a>
+                <a class="inline-flex items-center px-6 h-11 btn-text border-2 border-ink hover:bg-ink hover:text-sand transition-colors" href="/events">Events</a>
+                <a class="inline-flex items-center px-6 h-11 btn-text border-2 border-ink hover:bg-ink hover:text-sand transition-colors" href="/producers">Producers</a>
             </div>
         </div>
         <div
@@ -19,7 +24,7 @@
             style="box-shadow: var(--shadow-card);"
         >
             <div class="absolute inset-0 halftone"></div>
-            <span class="font-display font-extrabold text-[180px] text-white/80 mix-blend-overlay select-none">?</span>
+            <span class="font-sans font-extrabold text-[180px] text-white/80 mix-blend-overlay select-none">?</span>
         </div>
     </div>
 </section>

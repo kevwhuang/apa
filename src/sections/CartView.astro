@@ -1,13 +1,21 @@
 ---
+
 ---
-<section class="pt-20 pb-12 border-b-2 border-ink">
+
+<section
+    class="pt-20 pb-12 border-b-2 border-ink"
+    aria-label="Cart header"
+>
     <div class="max-w-[1100px] mx-auto px-6">
         <p class="label mb-4 text-coral">YOUR CART</p>
-        <h1 class="font-display font-extrabold tracking-[-0.03em] text-5xl">Cart</h1>
+        <h1 class="font-sans font-extrabold tracking-[-0.03em] text-5xl">Cart</h1>
     </div>
 </section>
 
-<section class="py-16">
+<section
+    class="py-16"
+    aria-label="Cart contents"
+>
     <div class="max-w-[1100px] mx-auto px-6 grid md:grid-cols-[1.5fr_1fr] gap-12">
         <div id="cart-items" class="space-y-4"></div>
         <aside id="cart-summary" class="border-2 border-ink p-6 self-start bg-surface">
@@ -15,9 +23,9 @@
             <dl class="space-y-2 font-mono text-[14px]">
                 <div class="flex justify-between"><dt>Subtotal</dt><dd data-subtotal>$0.00</dd></div>
                 <div class="flex justify-between"><dt>Shipping</dt><dd>&mdash;</dd></div>
-                <div class="flex justify-between border-t-2 border-ink pt-3 mt-3 font-display font-extrabold text-lg"><dt>Total</dt><dd data-total>$0.00</dd></div>
+                <div class="flex justify-between border-t-2 border-ink pt-3 mt-3 font-sans font-extrabold text-lg"><dt>Total</dt><dd data-total>$0.00</dd></div>
             </dl>
-            <a href="/merch/checkout" id="checkout-btn" class="mt-6 inline-flex items-center justify-center w-full h-12 font-mono text-[12px] font-bold uppercase tracking-wide bg-ink text-bg border-2 border-ink hover:bg-coral hover:border-coral transition-colors">
+            <a id="checkout-btn" class="mt-6 inline-flex items-center justify-center w-full h-12 btn-text bg-ink text-sand border-2 border-ink hover:bg-coral hover:border-coral transition-colors" href="/merch/checkout">
                 Checkout
             </a>
         </aside>
@@ -25,45 +33,45 @@
 </section>
 
 <script>
-    import { read, remove, setQuantity, subtotalCents, onChange } from '@/lib/cart';
-    import { formatPrice } from '@/lib/format';
+    import { getItems, onChange, remove, setQuantity, subtotalCents } from '@/lib/store';
+    import { formatPrice, PALETTE } from '@/lib/utils';
 
     function render() {
-        const items = read();
+        const items = getItems();
         const list = document.getElementById('cart-items');
         if (!list) return;
         if (items.length === 0) {
             list.innerHTML = `
                 <div class='border-2 border-ink p-12 text-center'>
                     <p class='label mb-3 text-ink-soft'>EMPTY</p>
-                    <p class='font-display text-2xl font-extrabold mb-6'>Nothing in the cart yet.</p>
-                    <a href='/merch' class='inline-flex items-center px-6 h-11 font-mono text-[12px] font-bold uppercase tracking-wide bg-ink text-bg border-2 border-ink hover:bg-coral hover:border-coral transition-colors'>Browse merch</a>
+                    <p class='font-sans text-2xl font-extrabold mb-6'>Nothing in the cart yet.</p>
+                    <a href='/merch' class='inline-flex items-center px-6 h-11 btn-text bg-ink text-sand border-2 border-ink hover:bg-coral hover:border-coral transition-colors'>Browse merch</a>
                 </div>
             `;
             const btn = document.getElementById('checkout-btn');
             if (btn) (btn as HTMLAnchorElement).style.opacity = '0.4';
             (btn as HTMLAnchorElement)?.setAttribute('aria-disabled', 'true');
         } else {
-            const cardColors = ['#FF4D3A', '#2D2B85', '#D4A843', '#1A1A1A'];
-            list.innerHTML = items.map((it, idx) => `
+            const cardColors = PALETTE.slice(0, 4);
+            list.innerHTML = items.map((item, idx) => `
                 <article class='border-2 border-ink p-5 flex gap-5' style='box-shadow: var(--shadow-card-sm);'>
                     <div class='w-28 h-28 shrink-0 relative overflow-hidden flex items-center justify-center' style='background: ${cardColors[idx % cardColors.length]};'>
                         <div class='absolute inset-0 halftone'></div>
-                        <span class='font-display font-extrabold text-xl text-white/80 mix-blend-overlay select-none uppercase'>${it.title.split(' ')[0]}</span>
+                        <span class='font-sans font-extrabold text-xl text-white/80 mix-blend-overlay select-none uppercase'>${item.title.split(' ')[0]}</span>
                     </div>
                     <div class='flex-1'>
-                        <h3 class='font-display font-extrabold'>${it.title}</h3>
+                        <h3 class='font-sans font-extrabold'>${item.title}</h3>
                         <p class='label mt-1 text-ink-soft'>
-                            ${[it.color, it.size].filter(Boolean).join(' / ')}
+                            ${[item.color, item.size].filter(Boolean).join(' / ')}
                         </p>
                         <div class='mt-4 flex items-center gap-4'>
                             <div class='inline-flex items-center border-2 border-ink'>
                                 <button data-dec='${idx}' class='w-9 h-9 font-bold' aria-label='Decrease quantity'>&minus;</button>
-                                <span class='w-9 text-center font-mono font-bold'>${it.quantity}</span>
+                                <span class='w-9 text-center font-mono font-bold'>${item.quantity}</span>
                                 <button data-inc='${idx}' class='w-9 h-9 font-bold' aria-label='Increase quantity'>+</button>
                             </div>
                             <button data-rm='${idx}' class='label text-ink-soft hover:text-coral transition-colors'>Remove</button>
-                            <span class='ml-auto font-mono font-bold'>${formatPrice(it.priceCents * it.quantity)}</span>
+                            <span class='ml-auto font-mono font-bold'>${formatPrice(item.priceCents * item.quantity)}</span>
                         </div>
                     </div>
                 </article>
@@ -71,22 +79,24 @@
         }
 
         const sub = subtotalCents();
-        document.querySelector('[data-subtotal]')!.textContent = formatPrice(sub);
-        document.querySelector('[data-total]')!.textContent = formatPrice(sub);
+        const subtotalEl = document.querySelector('[data-subtotal]');
+        const totalEl = document.querySelector('[data-total]');
+        if (subtotalEl) subtotalEl.textContent = formatPrice(sub);
+        if (totalEl) totalEl.textContent = formatPrice(sub);
 
-        list.querySelectorAll('[data-rm]').forEach((b) => {
-            b.addEventListener('click', () => remove(Number((b as HTMLElement).dataset.rm)));
+        list.querySelectorAll('[data-rm]').forEach((btn) => {
+            btn.addEventListener('click', () => remove(Number((btn as HTMLElement).dataset.rm)));
         });
-        list.querySelectorAll('[data-inc]').forEach((b) => {
-            b.addEventListener('click', () => {
-                const i = Number((b as HTMLElement).dataset.inc);
-                setQuantity(i, read()[i].quantity + 1);
+        list.querySelectorAll('[data-inc]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const idx = Number((btn as HTMLElement).dataset.inc);
+                setQuantity(idx, getItems()[idx].quantity + 1);
             });
         });
-        list.querySelectorAll('[data-dec]').forEach((b) => {
-            b.addEventListener('click', () => {
-                const i = Number((b as HTMLElement).dataset.dec);
-                setQuantity(i, Math.max(1, read()[i].quantity - 1));
+        list.querySelectorAll('[data-dec]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const idx = Number((btn as HTMLElement).dataset.dec);
+                setQuantity(idx, Math.max(1, getItems()[idx].quantity - 1));
             });
         });
     }

@@ -1,18 +1,22 @@
 ---
 const sponsors = ['Mantis Audio', 'Studio Ten', 'Heritage Print', 'KUTX 98.9', 'Wax Mtn Records', 'East Side Co-op', 'Lone Star Mics', 'Hi-Fi Tape'];
 ---
-<section class="py-20 border-b-2 border-ink">
+
+<section
+    class="py-20 border-b-2 border-ink"
+    aria-label="Sponsors"
+>
     <div class="max-w-[1400px] mx-auto px-6">
         <p class="label mb-8 text-center text-ink-soft reveal">BACKED BY</p>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 border-2 border-ink reveal-stagger">
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 border-2 border-ink reveal--stagger">
             {sponsors.map((s, i) => (
-                <div class={`aspect-[2/1] flex items-center justify-center font-display font-bold text-[13px] tracking-tight bg-bg ${i < sponsors.length - 1 ? 'border-r border-b md:border-b-0 lg:border-b-0' : ''}`}>
+                <div class={`aspect-[2/1] flex items-center justify-center font-sans font-bold text-[13px] tracking-tight bg-sand ${i < sponsors.length - 1 ? 'border-r border-b md:border-b-0 lg:border-b-0' : ''}`}>
                     {s}
                 </div>
             ))}
         </div>
         <p class="mt-8 text-center text-[13px] text-ink-soft font-mono reveal">
-            Become a sponsor &mdash; <a href="/sponsor" class="underline underline-offset-4 hover:text-coral transition-colors">view tiers &rarr;</a>
+            Become a sponsor &mdash; <a class="underline underline-offset-4 hover:text-coral transition-colors" href="/sponsor">view tiers &rarr;</a>
         </p>
     </div>
 </section>

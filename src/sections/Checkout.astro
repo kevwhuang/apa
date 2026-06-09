@@ -1,12 +1,17 @@
 ---
+
 ---
-<section class="pt-20 pb-12 border-b-2 border-ink">
+
+<section
+    class="pt-20 pb-12 border-b-2 border-ink"
+    aria-label="Checkout header"
+>
     <div class="max-w-[1100px] mx-auto px-6">
         <p class="label mb-4 text-coral">CHECKOUT</p>
-        <h1 class="font-display font-extrabold tracking-[-0.03em] text-5xl">Checkout</h1>
+        <h1 class="font-sans font-extrabold tracking-[-0.03em] text-5xl">Checkout</h1>
         <ol id="steps" class="mt-8 flex border-2 border-ink" aria-label="Checkout steps">
             {['01 Shipping', '02 Payment', '03 Review'].map((s, i) => (
-                <li class={`step flex-1 p-4 font-mono text-[11px] font-bold uppercase tracking-wide ${i === 0 ? 'ink-block' : 'bg-bg'} ${i > 0 ? 'border-l-2 border-ink' : ''}`} data-step={i} aria-current={i === 0 ? 'step' : undefined}>
+                <li class={`step flex-1 p-4 font-mono text-[11px] font-bold uppercase tracking-wide ${i === 0 ? 'ink-block' : 'bg-sand'} ${i > 0 ? 'border-l-2 border-ink' : ''}`} aria-current={i === 0 ? 'step' : undefined} data-step={i}>
                     {s}
                 </li>
             ))}
@@ -14,44 +19,47 @@
     </div>
 </section>
 
-<section class="py-16">
+<section
+    class="py-16"
+    aria-label="Checkout form"
+>
     <div class="max-w-[1100px] mx-auto px-6 grid md:grid-cols-[1.5fr_1fr] gap-12">
         <form id="checkout-form" class="space-y-6">
             <fieldset class="step-pane" data-pane="0">
-                <legend class="font-display text-2xl font-extrabold tracking-tight mb-6">Shipping</legend>
+                <legend class="font-sans text-2xl font-extrabold tracking-tight mb-6">Shipping</legend>
                 <div class="grid sm:grid-cols-2 gap-4">
-                    <input name="given-name" required placeholder="First name" autocomplete="given-name" aria-label="First name" class="h-11 px-4 border-2 border-ink bg-transparent" />
-                    <input name="family-name" required placeholder="Last name" autocomplete="family-name" aria-label="Last name" class="h-11 px-4 border-2 border-ink bg-transparent" />
+                    <input class="h-11 px-4 border-2 border-ink bg-transparent" aria-label="First name" autocomplete="given-name" name="given-name" placeholder="First name" required />
+                    <input class="h-11 px-4 border-2 border-ink bg-transparent" aria-label="Last name" autocomplete="family-name" name="family-name" placeholder="Last name" required />
                 </div>
-                <input name="email" required type="email" placeholder="Email" autocomplete="email" aria-label="Email" class="w-full h-11 px-4 border-2 border-ink bg-transparent font-mono text-[13px] mt-4" />
-                <input name="address" required placeholder="Street address" autocomplete="street-address" aria-label="Street address" class="w-full h-11 px-4 border-2 border-ink bg-transparent mt-4" />
+                <input class="w-full h-11 px-4 border-2 border-ink bg-transparent font-mono text-[13px] mt-4" aria-label="Email" autocomplete="email" name="email" placeholder="Email" required type="email" />
+                <input class="w-full h-11 px-4 border-2 border-ink bg-transparent mt-4" aria-label="Street address" autocomplete="street-address" name="address" placeholder="Street address" required />
                 <div class="grid sm:grid-cols-3 gap-4 mt-4">
-                    <input name="city" required placeholder="City" autocomplete="address-level2" aria-label="City" class="h-11 px-4 border-2 border-ink bg-transparent" />
-                    <input name="state" required placeholder="State" autocomplete="address-level1" aria-label="State" class="h-11 px-4 border-2 border-ink bg-transparent" />
-                    <input name="zip" required placeholder="ZIP" autocomplete="postal-code" aria-label="ZIP code" class="h-11 px-4 border-2 border-ink bg-transparent font-mono" />
+                    <input class="h-11 px-4 border-2 border-ink bg-transparent" aria-label="City" autocomplete="address-level2" name="city" placeholder="City" required />
+                    <input class="h-11 px-4 border-2 border-ink bg-transparent" aria-label="State" autocomplete="address-level1" name="state" placeholder="State" required />
+                    <input class="h-11 px-4 border-2 border-ink bg-transparent font-mono" aria-label="ZIP code" autocomplete="postal-code" name="zip" placeholder="ZIP" required />
                 </div>
             </fieldset>
 
             <fieldset class="step-pane hidden" data-pane="1">
-                <legend class="font-display text-2xl font-extrabold tracking-tight mb-6">Payment</legend>
-                <input name="cc-number" required placeholder="Card number" inputmode="numeric" autocomplete="cc-number" aria-label="Card number" class="w-full h-11 px-4 border-2 border-ink bg-transparent font-mono" />
+                <legend class="font-sans text-2xl font-extrabold tracking-tight mb-6">Payment</legend>
+                <input class="w-full h-11 px-4 border-2 border-ink bg-transparent font-mono" aria-label="Card number" autocomplete="cc-number" inputmode="numeric" name="cc-number" placeholder="Card number" required />
                 <div class="grid grid-cols-2 gap-4 mt-4">
-                    <input name="cc-exp" required placeholder="MM / YY" autocomplete="cc-exp" aria-label="Expiration date" class="h-11 px-4 border-2 border-ink bg-transparent font-mono" />
-                    <input name="cc-csc" required placeholder="CVC" inputmode="numeric" autocomplete="cc-csc" aria-label="Security code" class="h-11 px-4 border-2 border-ink bg-transparent font-mono" />
+                    <input class="h-11 px-4 border-2 border-ink bg-transparent font-mono" aria-label="Expiration date" autocomplete="cc-exp" name="cc-exp" placeholder="MM / YY" required />
+                    <input class="h-11 px-4 border-2 border-ink bg-transparent font-mono" aria-label="Security code" autocomplete="cc-csc" inputmode="numeric" name="cc-csc" placeholder="CVC" required />
                 </div>
-                <input name="cc-name" required placeholder="Name on card" autocomplete="cc-name" aria-label="Name on card" class="w-full h-11 px-4 border-2 border-ink bg-transparent mt-4" />
+                <input class="w-full h-11 px-4 border-2 border-ink bg-transparent mt-4" aria-label="Name on card" autocomplete="cc-name" name="cc-name" placeholder="Name on card" required />
                 <p class="label mt-4 text-coral">DEMO ONLY / NO REAL PAYMENT PROCESSED</p>
             </fieldset>
 
             <fieldset class="step-pane hidden" data-pane="2">
-                <legend class="font-display text-2xl font-extrabold tracking-tight mb-6">Review</legend>
+                <legend class="font-sans text-2xl font-extrabold tracking-tight mb-6">Review</legend>
                 <div id="review-items" class="border-2 border-ink"></div>
                 <p class="mt-6 text-[14px] text-ink-soft">By placing this order you agree to our <a class="underline decoration-coral decoration-2 underline-offset-4 hover:text-coral transition-colors" href="/terms">terms</a>.</p>
             </fieldset>
 
             <div class="flex justify-between gap-4">
-                <button type="button" id="prev" class="h-11 px-5 font-mono text-[12px] font-bold uppercase tracking-wide border-2 border-ink hover:bg-ink hover:text-bg transition-colors">Back</button>
-                <button type="button" id="next" class="h-11 px-5 font-mono text-[12px] font-bold uppercase tracking-wide bg-ink text-bg border-2 border-ink hover:bg-coral hover:border-coral transition-colors">Continue</button>
+                <button id="prev" class="h-11 px-5 btn-text border-2 border-ink hover:bg-ink hover:text-sand transition-colors" type="button">Back</button>
+                <button id="next" class="h-11 px-5 btn-text bg-ink text-sand border-2 border-ink hover:bg-coral hover:border-coral transition-colors" type="button">Continue</button>
             </div>
         </form>
 
@@ -62,49 +70,103 @@
                 <div class="flex justify-between"><dt>Subtotal</dt><dd data-subtotal>$0.00</dd></div>
                 <div class="flex justify-between"><dt>Shipping</dt><dd>$8.00</dd></div>
                 <div class="flex justify-between"><dt>Tax</dt><dd data-tax>$0.00</dd></div>
-                <div class="flex justify-between border-t-2 border-ink pt-2 mt-2 font-display font-extrabold text-lg"><dt>Total</dt><dd data-total>$0.00</dd></div>
+                <div class="flex justify-between border-t-2 border-ink pt-2 mt-2 font-sans font-extrabold text-lg"><dt>Total</dt><dd data-total>$0.00</dd></div>
             </dl>
         </aside>
     </div>
 </section>
 
 <script>
-    import { read, subtotalCents, clear } from '@/lib/cart';
-    import { formatPrice } from '@/lib/format';
+    import { clear, getItems, subtotalCents } from '@/lib/store';
+    import { formatPrice, PALETTE } from '@/lib/utils';
+
+    const LAST_STEP = 2;
+    const SHIPPING_CENTS = 800;
+    const TAX_RATE = 0.0825;
+
+    const next = document.getElementById('next') as HTMLButtonElement;
+    const panes = document.querySelectorAll<HTMLElement>('.step-pane');
+    const prev = document.getElementById('prev') as HTMLButtonElement;
+    const steps = document.querySelectorAll<HTMLElement>('.step');
 
     let step = 0;
-    const steps = document.querySelectorAll<HTMLElement>('.step');
-    const panes = document.querySelectorAll<HTMLElement>('.step-pane');
-    const next = document.getElementById('next') as HTMLButtonElement;
-    const prev = document.getElementById('prev') as HTMLButtonElement;
+
     function paint() {
         steps.forEach((s, i) => {
-            const done = i <= step;
-            if (done) {
+            if (i <= step) {
                 s.classList.add('ink-block');
-                s.classList.remove('bg-bg');
+                s.classList.remove('bg-sand');
             } else {
                 s.classList.remove('ink-block');
-                s.classList.add('bg-bg');
+                s.classList.add('bg-sand');
             }
+
             if (i === step) s.setAttribute('aria-current', 'step');
             else s.removeAttribute('aria-current');
         });
         panes.forEach((p, i) => p.classList.toggle('hidden', i !== step));
         prev.style.visibility = step === 0 ? 'hidden' : 'visible';
-        next.textContent = step === 2 ? 'Place order' : 'Continue';
+        next.textContent = step === LAST_STEP ? 'Place order' : 'Continue';
+    }
+
+    function renderReview() {
+        const container = document.getElementById('review-items');
+
+        if (!container) return;
+
+        const cardColors = PALETTE.slice(0, 4);
+
+        container.innerHTML = getItems().map((item, idx) => `
+            <div class='p-4 flex gap-4 items-center ${idx > 0 ? 'border-t-2 border-ink' : ''}'>
+                <div class='w-14 h-14 shrink-0 relative overflow-hidden flex items-center justify-center' style='background: ${cardColors[idx % cardColors.length]};'>
+                    <div class='absolute inset-0 halftone'></div>
+                </div>
+                <div class='flex-1'>
+                    <p class='font-sans font-bold'>${item.title}</p>
+                    <p class='label text-ink-soft'>${[item.color, item.size, `\u00d7 ${item.quantity}`].filter(Boolean).join(' / ')}</p>
+                </div>
+                <p class='font-mono font-bold'>${formatPrice(item.priceCents * item.quantity)}</p>
+            </div>
+        `).join('');
+    }
+
+    function renderSummary() {
+        const items = getItems();
+        const list = document.getElementById('summary-items');
+
+        if (list) {
+            list.innerHTML = items.map(item => `
+                <div class='flex justify-between gap-2'>
+                    <span>${item.quantity} &times; ${item.title}<br><span class='label text-ink-soft'>${[item.color, item.size].filter(Boolean).join(' / ')}</span></span>
+                    <span class='font-mono font-bold'>${formatPrice(item.priceCents * item.quantity)}</span>
+                </div>
+            `).join('');
+        }
+
+        const sub = subtotalCents();
+        const tax = Math.round(sub * TAX_RATE);
+        const total = sub + tax + SHIPPING_CENTS;
+        const subtotalEl = document.querySelector('[data-subtotal]');
+        const taxEl = document.querySelector('[data-tax]');
+        const totalEl = document.querySelector('[data-total]');
+
+        if (subtotalEl) subtotalEl.textContent = formatPrice(sub);
+        if (taxEl) taxEl.textContent = formatPrice(tax);
+        if (totalEl) totalEl.textContent = formatPrice(total);
     }
 
     next.addEventListener('click', () => {
         const pane = panes[step];
         const inputs = pane.querySelectorAll<HTMLInputElement>('input');
-        for (const i of inputs) {
-            if (!i.checkValidity()) {
-                i.reportValidity();
+
+        for (const input of inputs) {
+            if (!input.checkValidity()) {
+                input.reportValidity();
                 return;
             }
         }
-        if (step < 2) {
+
+        if (step < LAST_STEP) {
             step++;
             paint();
             renderReview();
@@ -113,48 +175,11 @@
             window.location.href = '/merch/order';
         }
     });
+
     prev.addEventListener('click', () => {
         step = Math.max(0, step - 1);
         paint();
     });
-
-    function renderSummary() {
-        const items = read();
-        const list = document.getElementById('summary-items');
-        if (list) {
-            list.innerHTML = items.map(i => `
-                <div class='flex justify-between gap-2'>
-                    <span>${i.quantity} &times; ${i.title}<br><span class='label text-ink-soft'>${[i.color, i.size].filter(Boolean).join(' / ')}</span></span>
-                    <span class='font-mono font-bold'>${formatPrice(i.priceCents * i.quantity)}</span>
-                </div>
-            `).join('');
-        }
-        const sub = subtotalCents();
-        const tax = Math.round(sub * 0.0825);
-        const total = sub + tax + 800;
-        document.querySelector('[data-subtotal]')!.textContent = formatPrice(sub);
-        document.querySelector('[data-tax]')!.textContent = formatPrice(tax);
-        document.querySelector('[data-total]')!.textContent = formatPrice(total);
-    }
-
-    function renderReview() {
-        const items = read();
-        const r = document.getElementById('review-items');
-        if (!r) return;
-        const cardColors = ['#FF4D3A', '#2D2B85', '#D4A843', '#1A1A1A'];
-        r.innerHTML = items.map((i, idx) => `
-            <div class='p-4 flex gap-4 items-center ${idx > 0 ? 'border-t-2 border-ink' : ''}'>
-                <div class='w-14 h-14 shrink-0 relative overflow-hidden flex items-center justify-center' style='background: ${cardColors[idx % cardColors.length]};'>
-                    <div class='absolute inset-0 halftone'></div>
-                </div>
-                <div class='flex-1'>
-                    <p class='font-display font-bold'>${i.title}</p>
-                    <p class='label text-ink-soft'>${[i.color, i.size, `× ${i.quantity}`].filter(Boolean).join(' / ')}</p>
-                </div>
-                <p class='font-mono font-bold'>${formatPrice(i.priceCents * i.quantity)}</p>
-            </div>
-        `).join('');
-    }
 
     paint();
     renderSummary();
