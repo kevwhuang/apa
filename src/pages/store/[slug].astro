@@ -1,0 +1,24 @@
+---
+import { getCollection } from 'astro:content';
+
+import Layout from '@/Layout.astro';
+import ProductDetail from '@sections/ProductDetail.astro';
+
+export async function getStaticPaths() {
+    const products = await getCollection('products');
+
+    return products.map(product => ({
+        params: { slug: product.id },
+        props: { product: product.data },
+    }));
+}
+
+const { product } = Astro.props;
+---
+
+<Layout
+    description={`${product.description} From the Austin Producer Alliance store.`}
+    title={`${product.title} \u2014 Austin Producer Alliance`}
+>
+    <ProductDetail product={product} />
+</Layout>

@@ -1,6 +1,6 @@
 ---
 title: March Cookup
-date: 2026-03-26T19:00:00-06:00
+date: 2026-03-26T19:00:00-05:00
 location: APA Studio
 type: cookup
 status: past

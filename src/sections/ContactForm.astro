@@ -1,16 +1,22 @@
 ---
+import PageHead from '@components/PageHead.astro';
+import { LINKS } from '@lib/utils';
 
+const TOPICS = ['Booking', 'Membership', 'Press', 'Sponsor inquiry', 'Something else'];
 ---
 
 <section
-    class="pt-20 pb-12 border-b-2 border-ink"
-    aria-label="Contact header"
+    class="pb-12 pt-20 border-b-2 border-ink"
+    aria-labelledby="contact-title"
 >
-    <div class="max-w-[1100px] mx-auto px-6">
-        <p class="label mb-4 text-coral reveal">CONTACT</p>
-        <h1 class="font-sans font-extrabold tracking-[-0.04em] text-5xl md:text-7xl leading-[0.9] reveal" style="transition-delay: 0.08s;">
+    <div class="shell shell--narrow">
+        <PageHead
+            class="font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            eyebrow="Contact"
+            headingId="contact-title"
+        >
             Send a signal.
-        </h1>
+        </PageHead>
     </div>
 </section>
 
@@ -18,61 +24,102 @@
     class="py-16"
     aria-label="Contact form"
 >
-    <div class="max-w-[1100px] mx-auto px-6 grid md:grid-cols-[1.4fr_1fr] gap-12">
-        <form id="contact-form" class="space-y-5">
-            <div class="grid sm:grid-cols-2 gap-4">
+    <div class="reveal--stagger shell shell--narrow grid gap-12 md:grid-cols-[1.4fr_1fr]">
+        <form class="contact-form space-y-5">
+            <div class="grid gap-4 md:grid-cols-2">
                 <label class="block">
-                    <span class="label mb-2 block text-ink-soft">NAME</span>
-                    <input class="w-full h-12 px-4 border-2 border-ink bg-transparent font-sans" autocomplete="name" name="name" required />
+                    <span class="label block mb-2 text-taupe">Name</span>
+                    <input class="h-12 w-full px-4 border-2 border-ink font-sans bg-transparent" autocomplete="name" name="name" required />
                 </label>
                 <label class="block">
-                    <span class="label mb-2 block text-ink-soft">EMAIL</span>
-                    <input class="w-full h-12 px-4 border-2 border-ink bg-transparent font-mono text-[13px]" autocomplete="email" name="email" required type="email" />
+                    <span class="label block mb-2 text-taupe">Email</span>
+                    <input class="h-12 w-full px-4 border-2 border-ink font-mono text-[13px] bg-transparent" autocomplete="email" name="email" required type="email" />
                 </label>
             </div>
             <label class="block">
-                <span class="label mb-2 block text-ink-soft">TOPIC</span>
-                <select class="w-full h-12 px-4 border-2 border-ink bg-transparent" name="topic">
-                    <option>Membership</option>
-                    <option>Sponsor inquiry</option>
-                    <option>Press</option>
-                    <option>Booking</option>
-                    <option>Something else</option>
+                <span class="label block mb-2 text-taupe">Topic</span>
+                <select
+                    class="h-12 w-full px-4 border-2 border-ink bg-transparent"
+                    name="topic"
+                >
+                    <option
+                        disabled
+                        selected
+                        value=""
+                    >
+                        Choose a topic&hellip;
+                    </option>
+                    {TOPICS.map(topic => (
+                        <option>{topic}</option>
+                    ))}
                 </select>
             </label>
             <label class="block">
-                <span class="label mb-2 block text-ink-soft">MESSAGE</span>
-                <textarea class="w-full p-4 border-2 border-ink bg-transparent" name="message" required rows="6"></textarea>
+                <span class="label block mb-2 text-taupe">Message</span>
+                <textarea class="w-full p-4 border-2 border-ink bg-transparent" name="message" required rows="6" />
             </label>
-            <button class="h-12 px-6 btn-text bg-ink text-sand border-2 border-ink hover:bg-coral hover:border-coral transition-colors">
+            <button
+                class="btn btn--primary h-12"
+                type="submit"
+            >
                 Send &rarr;
             </button>
-            <p class="hidden btn-text p-3 bg-coral text-coral-ink" aria-live="polite" data-out role="status">
-                Sent. We'll respond within 48 hours.
-            </p>
+            <p
+                class="action-text hidden p-3 bg-coral text-ink"
+                data-output
+                role="status"
+            />
         </form>
-
-        <aside class="space-y-8">
-            <div>
-                <p class="label mb-2 text-ink-soft">EMAIL</p>
-                <p class="font-mono text-[14px]">hello@austinproduceralliance.com</p>
-            </div>
-            <div>
-                <p class="label mb-2 text-ink-soft">STUDIO</p>
-                <p>2107 E 5th St<br />Austin, TX 78702</p>
-            </div>
-            <div>
-                <p class="label mb-2 text-ink-soft">HOURS</p>
-                <p>Tues &mdash; Sun, 6 PM &mdash; late</p>
-            </div>
+        <aside>
+            <dl class="space-y-8">
+                <div>
+                    <dt class="label mb-2 text-taupe">Email</dt>
+                    <dd>
+                        <a
+                            class="hover:text-coral-dark font-mono text-[14px] transition-colors"
+                            href={`mailto:${LINKS.email}`}
+                        >
+                            {LINKS.email}
+                        </a>
+                    </dd>
+                </div>
+                <div>
+                    <dt class="label mb-2 text-taupe">Studio</dt>
+                    <dd>
+                        <address class="not-italic">2107 E 5th St<br />Austin, TX 78702</address>
+                    </dd>
+                </div>
+            </dl>
         </aside>
     </div>
 </section>
 
 <script>
-    document.getElementById('contact-form')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const out = (e.target as HTMLFormElement).querySelector('[data-out]') as HTMLElement;
-        if (out) out.classList.remove('hidden');
-    });
+    let contactController: AbortController | undefined;
+
+    function handleContactSubmit(event: SubmitEvent, form: HTMLFormElement) {
+        event.preventDefault();
+
+        const output = form.querySelector<HTMLElement>('[data-output]');
+
+        if (!output) return;
+
+        output.classList.remove('hidden');
+        output.textContent = 'Demo form \u2014 nothing was sent. Email us at hello@austinproduceralliance.com.';
+    }
+
+    function initContactForm() {
+        contactController?.abort();
+        contactController = new AbortController();
+
+        const { signal } = contactController;
+
+        const form = document.querySelector<HTMLFormElement>('.contact-form');
+
+        if (!form) return;
+
+        form.addEventListener('submit', event => handleContactSubmit(event, form), { signal });
+    }
+
+    document.addEventListener('astro:page-load', initContactForm);
 </script>

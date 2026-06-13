@@ -1,22 +1,41 @@
 ---
-const tiers = [
+import PageHead from '@components/PageHead.astro';
+
+interface Tier {
+    featured?: boolean;
+    name: string;
+    perks: string[];
+    price: string;
+}
+
+const STATS = [
+    { label: 'Producers', value: '142' },
+    { label: 'Events / yr', value: '38' },
+    { label: 'Newsletter', value: '12k' },
+    { label: 'Bash bill', value: '96' },
+];
+
+const TIERS: Tier[] = [
     { name: 'Friend', perks: ['Logo on website', 'Newsletter mention', 'Two Bash tickets'], price: '$500' },
-    { name: 'Studio', perks: ['Logo on all event flyers', 'On-stage mention at Bash', 'Six tickets', 'Booth at one cookup'], price: '$2,500' },
+    { featured: true, name: 'Studio', perks: ['Logo on all event flyers', 'On-stage mention at Bash', 'Six tickets', 'Booth at one cookup'], price: '$2,500' },
     { name: 'Partner', perks: ['Stage naming at Bash', 'Year-long programming co-brand', 'Custom workshop series', 'Booth at every event'], price: '$10,000' },
 ];
 ---
 
 <section
-    class="pt-20 pb-12 border-b-2 border-ink"
-    aria-label="Sponsor overview"
+    class="pb-12 pt-20 border-b-2 border-ink"
+    aria-labelledby="sponsor-title"
 >
-    <div class="max-w-[1400px] mx-auto px-6">
-        <p class="label mb-4 text-coral reveal">SPONSOR APA</p>
-        <h1 class="font-sans font-extrabold tracking-[-0.04em] text-5xl md:text-7xl leading-[0.9] max-w-4xl reveal" style="transition-delay: 0.08s;">
+    <div class="shell">
+        <PageHead
+            class="max-w-4xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            eyebrow="Sponsor APA"
+            headingId="sponsor-title"
+        >
             Reach 142 working producers and the rooms they fill.
-        </h1>
-        <p class="mt-8 max-w-2xl text-[18px] text-ink-soft">
-            Our members release on Stones Throw, Ghostly, Sub Pop, RVNG, and dozens of independents.
+        </PageHead>
+        <p class="reveal max-w-2xl mt-8 text-[18px] text-taupe">
+            Our members release on respected independent labels across the country.
             Sponsorship dollars cover room rent, equipment, and the Producer Bash.
         </p>
     </div>
@@ -24,43 +43,76 @@ const tiers = [
 
 <section
     class="py-20 border-b-2 border-ink"
-    aria-label="Sponsorship tiers"
+    aria-labelledby="tiers-title"
 >
-    <div class="max-w-[1400px] mx-auto px-6">
-        <div class="grid md:grid-cols-3 gap-5 reveal--stagger">
-            {tiers.map((t, i) => (
-                <article
-                    class={`border-2 border-ink p-8 flex flex-col card-hover ${i === 1 ? 'ink-block border-ink' : 'bg-sand'}`}
-                    style={i === 1 ? 'box-shadow: 4px 4px 0 var(--color-coral);' : 'box-shadow: var(--shadow-card-sm);'}
-                >
-                    <p class={`label mb-4 ${i === 1 ? 'text-coral' : 'text-ink-soft'}`}>TIER {String(i + 1).padStart(2, '0')}</p>
-                    <h3 class="font-sans text-3xl font-extrabold tracking-tight">{t.name}</h3>
-                    <p class="font-mono text-2xl mt-2 font-bold">{t.price}<span class={`text-sm font-normal ${i === 1 ? 'text-inv-muted' : 'text-ink-soft'}`}> / yr</span></p>
-                    <ul class="mt-8 space-y-2.5 text-[14px] flex-1">
-                        {t.perks.map(p => (
-                            <li class="flex gap-2"><span class="text-coral font-bold">+</span>{p}</li>
-                        ))}
-                    </ul>
-                    <a class={`mt-8 inline-flex items-center justify-center h-12 btn-text border-2 transition-colors ${i === 1 ? 'bg-coral border-coral text-coral-ink hover:bg-coral-dark' : 'bg-ink border-ink text-sand hover:bg-coral hover:border-coral'}`} href="/contact">
-                        Start a conversation
-                    </a>
-                </article>
+    <div class="shell">
+        <h2
+            id="tiers-title"
+            class="sr-only"
+        >
+            Sponsorship tiers
+        </h2>
+        <ul class="reveal--stagger grid gap-5 list-none md:grid-cols-3">
+            {TIERS.map((tier, index) => (
+                <li>
+                    <article
+                        class:list={[
+                            'card-hover flex flex-col h-full p-8',
+                            tier.featured ? 'ink-block border-2 border-ink shadow-[4px_4px_0_var(--color-coral)]' : 'card',
+                        ]}
+                    >
+                        <p class:list={['label mb-4', tier.featured ? 'text-coral' : 'text-taupe']}>
+                            Tier {String(index + 1).padStart(2, '0')}
+                        </p>
+                        <h3 class="font-extrabold font-sans text-3xl tracking-tight">{tier.name}</h3>
+                        <p class="mt-2 font-bold font-mono text-2xl">{tier.price}<span class:list={['font-normal text-sm', tier.featured ? 'text-taupe-3' : 'text-taupe']}> / yr</span></p>
+                        <ul class="flex-1 mt-8 space-y-2.5 text-[14px]">
+                            {tier.perks.map(perk => (
+                                <li class="flex gap-2">
+                                    <span
+                                        class:list={['font-bold', tier.featured ? 'text-coral' : 'text-coral-dark']}
+                                        aria-hidden="true"
+                                    >
+                                        +
+                                    </span>
+                                    {perk}
+                                </li>
+                            ))}
+                        </ul>
+                        <a
+                            class:list={['btn', tier.featured ? 'btn--coral' : 'btn--primary', 'h-12 mt-8']}
+                            href="/contact"
+                        >
+                            Start a conversation
+                        </a>
+                    </article>
+                </li>
             ))}
-        </div>
+        </ul>
     </div>
 </section>
 
 <section
     class="py-20"
-    aria-label="Statistics"
+    aria-labelledby="numbers-title"
 >
-    <div class="max-w-[1100px] mx-auto px-6">
-        <h2 class="font-sans text-4xl font-extrabold tracking-tight mb-8 reveal">By the numbers</h2>
-        <dl class="grid grid-cols-2 md:grid-cols-4 gap-px border-2 border-ink bg-ink crop-marks reveal--stagger">
-            {[['142', 'Producers'], ['38', 'Events / yr'], ['12k', 'Newsletter'], ['96', 'Bash bill']].map(([n, l]) => (
-                <div class="p-8 text-center bg-sand">
-                    <dd class="font-sans text-5xl font-extrabold tracking-tight" data-count={n}>{n}</dd>
-                    <dt class="label mt-3 text-ink-soft">{l}</dt>
+    <div class="shell shell--narrow">
+        <h2
+            id="numbers-title"
+            class="reveal mb-8 font-extrabold font-sans text-4xl tracking-tight"
+        >
+            By the numbers
+        </h2>
+        <dl class="crop-marks reveal--stagger grid grid-cols-2 gap-px border-2 border-ink bg-ink md:grid-cols-4">
+            {STATS.map(stat => (
+                <div class="flex flex-col-reverse gap-3 p-8 text-center bg-sand">
+                    <dt class="label text-taupe">{stat.label}</dt>
+                    <dd
+                        class="font-extrabold font-sans text-5xl tracking-tight"
+                        data-count={stat.value}
+                    >
+                        {stat.value}
+                    </dd>
                 </div>
             ))}
         </dl>

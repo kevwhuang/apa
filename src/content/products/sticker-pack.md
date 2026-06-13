@@ -1,6 +1,5 @@
 ---
 title: Sticker Pack
-slug: sticker-pack
 category: accessory
 priceCents: 800
 sizes: []

@@ -1,159 +1,242 @@
 ---
+import IconCart from '@components/IconCart.astro';
+import IconMenu from '@components/IconMenu.astro';
 import Monogram from '@components/Monogram.astro';
+import { ROUTES } from '@lib/utils';
 
-const links = [
-    { href: '/events', label: 'Events' },
-    { href: '/producers', label: 'Producers' },
-    { href: '/bash', label: 'The Bash' },
-    { href: '/about', label: 'About' },
-    { href: '/merch', label: 'Merch' },
-    { href: '/sponsor', label: 'Sponsor' },
-    { href: '/contact', label: 'Contact' },
-];
-const path = Astro.url.pathname;
+const isStorePage = Astro.url.pathname.startsWith('/store');
 ---
 
-<header
-    id="nav"
-    class="sticky top-0 z-40 border-b-2 border-ink"
-    style="background: var(--color-sand);"
->
-    <div class="max-w-[1400px] mx-auto px-6 h-[4.5rem] flex items-center gap-8">
-        <a class="flex items-center gap-3 shrink-0" aria-label="APA home" href="/">
-            <Monogram size={30} />
-            <span class="hidden sm:inline font-sans font-extrabold tracking-tight text-[15px] uppercase">
+<header class="site-header sticky top-0 z-40 border-b-2 border-ink bg-sand">
+    <div class="shell flex items-center h-18 gap-8">
+        <a
+            class="flex items-center shrink-0 gap-3 select-none"
+            aria-label="Austin Producer Alliance &mdash; home"
+            href="/"
+        >
+            <Monogram decorative size={30} />
+            <span class="hidden font-extrabold font-sans text-[15px] tracking-tight uppercase md:inline">
                 Austin Producer Alliance
             </span>
         </a>
-
-        <nav class="hidden md:flex items-center gap-6 font-mono text-[12px] uppercase tracking-wide" aria-label="Primary">
-            {links.map(l => (
-                <a
-                    class:list={[
-                        'transition-colors hover:text-coral',
-                        path.startsWith(l.href) ? 'text-coral font-bold' : '',
-                    ]}
-                    href={l.href}
-                >
-                    {l.label}
-                </a>
-            ))}
+        <nav
+            id="site-nav"
+            class="site-nav absolute hidden inset-x-0 top-full border-t-2 border-ink bg-sand lg:block lg:border-t-0 lg:static"
+            aria-label="Primary"
+        >
+            <ul class="flex flex-col gap-4 px-6 py-5 font-mono list-none text-[14px] tracking-wide uppercase lg:flex-row lg:gap-6 lg:items-center lg:p-0 lg:text-[12px]">
+                {ROUTES.map(route => (
+                    <li>
+                        <a
+                            class="hover:text-coral-dark block py-1 transition-colors"
+                            href={route.href}
+                        >
+                            {route.label}
+                        </a>
+                    </li>
+                ))}
+            </ul>
         </nav>
-
-        <div class="ml-auto flex items-center gap-1">
-            {path.startsWith('/merch') && (
+        <div class="flex items-center gap-1 ml-auto">
+            {isStorePage && (
                 <a
-                    id="cart-badge"
-                    class="relative p-2 transition-colors hover:text-coral"
-                    aria-label="Cart"
-                    href="/merch/cart"
+                    class="cart-link hover:text-coral-dark relative p-2 transition-colors"
+                    href="/store/cart"
                 >
-                    <svg fill="none" height="18" stroke="currentColor" stroke-width="1.5" viewBox="0 0 18 18" width="18">
-                        <path d="M2 3 H4.5 L6 12 H15 L16.5 5 H5" stroke-linejoin="round" />
-                        <circle cx="7" cy="15" r="1.2" />
-                        <circle cx="13" cy="15" r="1.2" />
-                    </svg>
+                    <IconCart />
                     <span
-                        id="cart-count"
-                        class="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-1 text-[10px] font-mono leading-[16px] text-center hidden bg-coral text-coral-ink"
+                        class="cart-count -right-0.5 -top-0.5 absolute hidden h-4 min-w-4 px-1 font-mono leading-4 text-[10px] text-center bg-coral text-ink"
+                        aria-hidden="true"
                     >
                         0
+                    </span>
+                    <span
+                        class="cart-label sr-only"
+                        aria-live="polite"
+                    >
+                        Cart
                     </span>
                 </a>
             )}
             <button
-                id="nav-menu-btn"
-                class="md:hidden p-2 -mr-2"
+                class="nav-toggle hover:text-coral-dark relative -mr-2 p-2 transition-colors lg:hidden"
+                aria-controls="site-nav"
                 aria-expanded="false"
-                aria-label="Open menu"
+                aria-label="Toggle menu"
+                type="button"
             >
-                <svg fill="none" height="22" stroke="currentColor" stroke-width="2" viewBox="0 0 22 22" width="22">
-                    <line x1="3" x2="19" y1="6" y2="6" />
-                    <line x1="3" x2="19" y1="11" y2="11" />
-                    <line x1="3" x2="19" y1="16" y2="16" />
-                </svg>
+                <IconMenu />
             </button>
         </div>
     </div>
-
-    <div
-        id="nav-mobile"
-        class="md:hidden hidden border-t-2 border-ink bg-sand"
-        aria-label="Mobile navigation"
-        role="region"
-    >
-        <nav class="px-6 py-5 flex flex-col gap-4 font-mono text-[14px] uppercase tracking-wide">
-            {links.map(l => (
-                <a class="py-1 hover:text-coral" href={l.href}>{l.label}</a>
-            ))}
-        </nav>
-    </div>
 </header>
 
+<style>
+    .cart-link::after {
+        content: '';
+        inset: -7px;
+        position: absolute;
+    }
+
+    .nav-toggle::after {
+        content: '';
+        inset: -5px;
+        position: absolute;
+    }
+
+    .site-header {
+        transition: transform var(--duration-slow) ease;
+    }
+
+    .site-header.is-hidden {
+        transform: translateY(-100%);
+    }
+
+    .site-nav a[aria-current] {
+        color: var(--color-coral-dark);
+        font-weight: 700;
+    }
+</style>
+
 <script>
-    import { count, getItems, onChange } from '@/lib/store';
+    import { count, getItems, onChange } from '@lib/store';
 
     const SCROLL_DELTA = 6;
     const SCROLL_TOP_THRESHOLD = 80;
 
-    const btn = document.getElementById('nav-menu-btn');
-    const drawer = document.getElementById('nav-mobile');
-    const nav = document.getElementById('nav');
+    let cartUnsubscribe: (() => void) | undefined;
+    let lastScrollY = 0;
+    let navController: AbortController | undefined;
+    let scrollTicking = false;
 
-    let lastY = window.scrollY;
-    let ticking = false;
+    function closeMenu(menu: HTMLElement, toggle: HTMLElement) {
+        menu.classList.add('hidden');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.focus();
+    }
 
-    function setMenu(open: boolean) {
-        drawer?.classList.toggle('hidden', !open);
-        btn?.setAttribute('aria-expanded', String(open));
+    function handleMenuClick(event: Event, menu: HTMLElement, toggle: HTMLElement) {
+        if (menu.classList.contains('hidden')) return;
+
+        if (event.target instanceof Element && event.target.closest('a')) closeMenu(menu, toggle);
+    }
+
+    function handleMenuKeydown(event: KeyboardEvent, menu: HTMLElement, toggle: HTMLElement) {
+        if (menu.classList.contains('hidden')) return;
+
+        if (event.key === 'Escape') {
+            closeMenu(menu, toggle);
+        } else if (event.key === 'Tab') {
+            trapFocus(event, menu);
+        }
+    }
+
+    function handleScroll(header: HTMLElement) {
+        if (scrollTicking) return;
+
+        scrollTicking = true;
+        requestAnimationFrame(() => updateHeaderVisibility(header));
+    }
+
+    function handleToggleClick(menu: HTMLElement, toggle: HTMLElement) {
+        if (menu.classList.contains('hidden')) {
+            openMenu(menu, toggle);
+        } else {
+            closeMenu(menu, toggle);
+        }
+    }
+
+    function initNavbar() {
+        cartUnsubscribe?.();
+        cartUnsubscribe = onChange(updateCart);
+        navController?.abort();
+        navController = new AbortController();
+
+        const { signal } = navController;
+
+        const header = document.querySelector<HTMLElement>('.site-header');
+        const menu = document.querySelector<HTMLElement>('.site-nav');
+        const toggle = document.querySelector<HTMLElement>('.nav-toggle');
+
+        if (!header || !menu || !toggle) return;
+
+        header.classList.remove('is-hidden');
+        lastScrollY = window.scrollY;
+        scrollTicking = false;
+        updateActiveLink(menu);
+        updateCart();
+
+        document.addEventListener('keydown', event => handleMenuKeydown(event, menu, toggle), { signal });
+        menu.addEventListener('click', event => handleMenuClick(event, menu, toggle), { signal });
+        toggle.addEventListener('click', () => handleToggleClick(menu, toggle), { signal });
+        window.addEventListener('scroll', () => handleScroll(header), { passive: true, signal });
+    }
+
+    function openMenu(menu: HTMLElement, toggle: HTMLElement) {
+        menu.classList.remove('hidden');
+        toggle.setAttribute('aria-expanded', 'true');
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => menu.querySelector<HTMLElement>('a')?.focus());
+        });
+    }
+
+    function trapFocus(event: KeyboardEvent, menu: HTMLElement) {
+        const focusables = menu.querySelectorAll<HTMLElement>('a');
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    }
+
+    function updateActiveLink(menu: HTMLElement) {
+        const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
+
+        menu.querySelectorAll<HTMLElement>('a').forEach((link) => {
+            const href = link.getAttribute('href')?.replace(/\/$/, '') || '/';
+
+            if (href === currentPath) {
+                link.setAttribute('aria-current', 'page');
+            } else if (currentPath.startsWith(`${href}/`)) {
+                link.setAttribute('aria-current', 'true');
+            } else {
+                link.removeAttribute('aria-current');
+            }
+        });
     }
 
     function updateCart() {
-        const el = document.getElementById('cart-count');
+        const badge = document.querySelector<HTMLElement>('.cart-count');
+        const label = document.querySelector<HTMLElement>('.cart-label');
 
-        if (!el) return;
+        if (!badge || !label) return;
 
-        const c = count(getItems());
-        el.textContent = String(c);
-        el.classList.toggle('hidden', c === 0);
+        const total = count(getItems());
+
+        badge.textContent = String(total);
+        badge.classList.toggle('hidden', total === 0);
+        label.textContent = `Cart, ${total} ${total === 1 ? 'item' : 'items'}`;
     }
 
-    window.addEventListener('scroll', () => {
-        if (ticking) return;
+    function updateHeaderVisibility(header: HTMLElement) {
+        const currentScrollY = window.scrollY;
 
-        ticking = true;
-
-        requestAnimationFrame(() => {
-            const y = window.scrollY;
-
-            if (y < SCROLL_TOP_THRESHOLD) {
-                nav?.style.setProperty('transform', 'translateY(0)');
-            } else if (y > lastY + SCROLL_DELTA) {
-                nav?.style.setProperty('transform', 'translateY(-100%)');
-            } else if (y < lastY - SCROLL_DELTA) {
-                nav?.style.setProperty('transform', 'translateY(0)');
-            }
-
-            lastY = y;
-            ticking = false;
-        });
-    }, { passive: true });
-
-    btn?.addEventListener('click', () => {
-        setMenu(drawer?.classList.contains('hidden') ?? false);
-    });
-
-    drawer?.querySelectorAll('a').forEach((link) => {
-        link.addEventListener('click', () => setMenu(false));
-    });
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !drawer?.classList.contains('hidden')) {
-            setMenu(false);
-            btn?.focus();
+        if (currentScrollY < SCROLL_TOP_THRESHOLD) {
+            header.classList.remove('is-hidden');
+        } else if (currentScrollY > lastScrollY + SCROLL_DELTA) {
+            header.classList.add('is-hidden');
+        } else if (currentScrollY < lastScrollY - SCROLL_DELTA) {
+            header.classList.remove('is-hidden');
         }
-    });
 
-    updateCart();
-    onChange(updateCart);
+        lastScrollY = currentScrollY;
+        scrollTicking = false;
+    }
+
+    document.addEventListener('astro:page-load', initNavbar);
 </script>

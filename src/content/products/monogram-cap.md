@@ -1,6 +1,5 @@
 ---
 title: Monogram Cap
-slug: monogram-cap
 category: apparel
 priceCents: 4000
 sizes: []

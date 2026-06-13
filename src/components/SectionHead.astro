@@ -1,0 +1,31 @@
+---
+interface Props {
+    class?: string;
+    eyebrow: string;
+    eyebrowClass?: string;
+    headingId: string;
+    tone?: 'dark' | 'light';
+}
+
+const { class: headingClass, eyebrow, eyebrowClass = 'mb-3', headingId, tone = 'light' } = Astro.props;
+---
+
+<div
+    class:list={[
+        'reveal mb-12',
+        Astro.slots.has('cta') && 'flex items-end justify-between gap-6',
+    ]}
+>
+    <div>
+        <p class:list={['label', eyebrowClass, tone === 'dark' ? 'text-coral' : 'text-coral-dark']}>
+            {eyebrow}
+        </p>
+        <h2
+            id={headingId}
+            class={headingClass}
+        >
+            <slot />
+        </h2>
+    </div>
+    <slot name="cta" />
+</div>

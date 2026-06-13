@@ -1,50 +1,93 @@
 ---
-
+import SectionHead from '@components/SectionHead.astro';
 ---
 
 <section
     class="py-24"
-    aria-label="Newsletter signup"
+    aria-labelledby="newsletter-title"
 >
-    <div class="max-w-[1400px] mx-auto px-6">
-        <div class="border-2 border-ink p-12 md:p-16 grid md:grid-cols-[1.2fr_1fr] gap-10 items-end bg-surface relative overflow-hidden crop-marks reveal">
-            <div class="absolute inset-0 halftone pointer-events-none"></div>
+    <div class="shell">
+        <div class="crop-marks reveal grid items-end overflow-hidden relative gap-10 p-12 border-2 border-ink bg-cream md:grid-cols-[1.2fr_1fr] md:p-16">
+            <div
+                class="halftone absolute inset-0 pointer-events-none"
+                aria-hidden="true"
+            />
             <div class="relative">
-                <p class="label mb-4 text-coral">SIGNAL</p>
-                <h2 class="font-sans font-extrabold tracking-[-0.03em] text-4xl md:text-5xl leading-[1.05]">
+                <SectionHead
+                    class="font-extrabold font-sans leading-[1.05] text-4xl tracking-[-0.03em] md:text-5xl"
+                    eyebrow="Signal"
+                    eyebrowClass="mb-4"
+                    headingId="newsletter-title"
+                >
                     Get the dispatch.
-                </h2>
-                <p class="mt-4 max-w-md text-ink-soft">
+                </SectionHead>
+                <p class="max-w-md text-taupe">
                     One email a month. Upcoming cookups, free sample packs from members, drop dates.
                 </p>
             </div>
-            <form id="newsletter-form" class="flex gap-2 relative">
-                <input
-                    class="flex-1 h-12 px-4 border-2 border-ink bg-sand font-mono text-[13px] placeholder:text-ink-soft/60"
-                    aria-label="Email address"
-                    autocomplete="email"
-                    name="email"
-                    placeholder="you@studio.fm"
-                    required
-                    type="email"
-                />
-                <button class="h-12 px-6 btn-text bg-coral text-coral-ink border-2 border-coral hover:bg-coral-dark transition-colors">
-                    Subscribe
-                </button>
+            <form class="newsletter-form flex flex-col relative gap-3">
+                <div class="flex items-end gap-2">
+                    <label class="block flex-1">
+                        <span class="label block mb-2 text-taupe">
+                            Email
+                        </span>
+                        <input
+                            class="disabled:cursor-not-allowed disabled:opacity-55 placeholder:text-taupe h-12 w-full px-4 border-2 border-ink font-mono text-[13px] bg-sand"
+                            autocomplete="email"
+                            name="email"
+                            placeholder="you@studio.fm"
+                            required
+                            type="email"
+                        />
+                    </label>
+                    <button
+                        class="btn btn--coral h-12"
+                        type="submit"
+                    >
+                        Subscribe
+                    </button>
+                </div>
+                <p
+                    class="action-text hidden p-3 bg-coral text-ink"
+                    data-output
+                    role="status"
+                >
+                    Demo only &mdash; no address was stored.
+                </p>
             </form>
         </div>
     </div>
 </section>
 
 <script>
-    document.getElementById('newsletter-form')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const form = e.target as HTMLFormElement;
-        const btn = form.querySelector('button');
-        if (!btn) return;
-        btn.textContent = 'Subscribed!';
-        btn.setAttribute('disabled', '');
-        const input = form.querySelector('input');
-        if (input) input.setAttribute('disabled', '');
-    });
+    let newsletterController: AbortController | undefined;
+
+    function handleNewsletterSubmit(event: SubmitEvent, form: HTMLFormElement) {
+        event.preventDefault();
+
+        const button = form.querySelector<HTMLButtonElement>('button');
+        const input = form.querySelector<HTMLInputElement>('input');
+        const output = form.querySelector<HTMLElement>('[data-output]');
+
+        if (!button || !input || !output) return;
+
+        button.disabled = true;
+        input.disabled = true;
+        output.classList.remove('hidden');
+    }
+
+    function initNewsletter() {
+        newsletterController?.abort();
+        newsletterController = new AbortController();
+
+        const { signal } = newsletterController;
+
+        const form = document.querySelector<HTMLFormElement>('.newsletter-form');
+
+        if (!form) return;
+
+        form.addEventListener('submit', event => handleNewsletterSubmit(event, form), { signal });
+    }
+
+    document.addEventListener('astro:page-load', initNewsletter);
 </script>

@@ -1,6 +1,5 @@
 ---
 title: Bash VII Hoodie
-slug: bash-hoodie
 category: apparel
 priceCents: 7800
 sizes: [S, M, L, XL, XXL]

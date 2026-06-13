@@ -1,22 +1,36 @@
 ---
-const sponsors = ['Mantis Audio', 'Studio Ten', 'Heritage Print', 'KUTX 98.9', 'Wax Mtn Records', 'East Side Co-op', 'Lone Star Mics', 'Hi-Fi Tape'];
+const SPONSORS = ['East Side Co-op', 'Heritage Print', 'Hi-Fi Tape', 'Lone Star Mics', 'Mantis Audio', 'Station Austin', 'Studio Ten', 'Wax Mtn Records'];
 ---
 
 <section
     class="py-20 border-b-2 border-ink"
-    aria-label="Sponsors"
+    aria-labelledby="sponsors-title"
 >
-    <div class="max-w-[1400px] mx-auto px-6">
-        <p class="label mb-8 text-center text-ink-soft reveal">BACKED BY</p>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 border-2 border-ink reveal--stagger">
-            {sponsors.map((s, i) => (
-                <div class={`aspect-[2/1] flex items-center justify-center font-sans font-bold text-[13px] tracking-tight bg-sand ${i < sponsors.length - 1 ? 'border-r border-b md:border-b-0 lg:border-b-0' : ''}`}>
-                    {s}
-                </div>
+    <div class="shell">
+        <h2
+            id="sponsors-title"
+            class="sr-only"
+        >
+            Sponsors
+        </h2>
+        <p class="label reveal mb-8 text-center text-taupe">
+            Backed by
+        </p>
+        <ul class="reveal--stagger grid grid-cols-2 gap-px mb-8 border-2 border-ink list-none bg-ink lg:grid-cols-8 md:grid-cols-4">
+            {SPONSORS.map(sponsor => (
+                <li class="flex items-center justify-center aspect-[2/1] font-bold font-sans text-[13px] tracking-tight bg-sand">
+                    {sponsor}
+                </li>
             ))}
-        </div>
-        <p class="mt-8 text-center text-[13px] text-ink-soft font-mono reveal">
-            Become a sponsor &mdash; <a class="underline underline-offset-4 hover:text-coral transition-colors" href="/sponsor">view tiers &rarr;</a>
+        </ul>
+        <p class="reveal font-mono text-[13px] text-center text-taupe">
+            Become a sponsor &mdash;
+            <a
+                class="hover:text-coral-dark underline underline-offset-4 transition-colors"
+                href="/sponsor"
+            >
+                view tiers &rarr;
+            </a>
         </p>
     </div>
 </section>

@@ -1,49 +1,82 @@
 ---
-
+import SectionHead from '@components/SectionHead.astro';
 ---
 
 <section
-    class="py-24 border-b-2 border-ink relative overflow-hidden ink-block"
-    aria-label="The Producer Bash"
+    class="ink-block overflow-hidden relative py-24 border-b-2 border-ink"
+    aria-labelledby="bash-title"
 >
-    <div class="absolute inset-0 halftone--coral pointer-events-none"></div>
-    <div class="max-w-[1400px] mx-auto px-6 relative grid md:grid-cols-[1.4fr_1fr] gap-16 items-end">
+    <div class="halftone--coral absolute inset-0 pointer-events-none" aria-hidden="true" />
+    <div class="shell grid items-end relative gap-16 md:grid-cols-[1.4fr_1fr]">
         <div>
-            <p class="label mb-5 text-coral reveal">THE BASH / ANNUAL</p>
-            <h2 class="font-sans font-extrabold tracking-[-0.04em] text-[clamp(44px,8vw,108px)] leading-[0.9] reveal" style="transition-delay: 0.08s;">
+            <SectionHead
+                class="font-extrabold font-sans leading-[0.9] text-[clamp(44px,8.44vw,108px)] tracking-[-0.04em]"
+                eyebrow="The Bash / annual"
+                eyebrowClass="mb-5"
+                headingId="bash-title"
+                tone="dark"
+            >
                 The Producer<br />Bash 2026.
-            </h2>
-            <p class="mt-8 text-[18px] leading-relaxed max-w-xl text-inv-body reveal" style="transition-delay: 0.16s;">
+            </SectionHead>
+            <p class="bash__intro reveal max-w-xl mt-8 leading-relaxed text-[18px] text-taupe-3">
                 Two days, four stages, one warehouse. Every member of the alliance ships a track to
                 the compilation, and the room mixes it live.
             </p>
-            <div class="mt-10 flex flex-wrap gap-3 reveal" style="transition-delay: 0.24s;">
-                <a class="inline-flex items-center gap-2 px-6 h-12 btn-text bg-coral text-coral-ink border-2 border-coral hover:bg-coral-dark transition-colors" href="/bash">
+            <div class="bash__actions reveal flex flex-wrap gap-3 mt-10">
+                <a
+                    class="btn btn--coral h-12"
+                    href="/bash"
+                >
                     Bash details
                 </a>
-                <a class="inline-flex items-center gap-2 px-6 h-12 btn-text border-2 border-inv-rule text-inv-body hover:border-coral hover:text-coral transition-colors" href="/sponsor">
+                <a
+                    class="bash__cta btn h-12"
+                    href="/sponsor"
+                >
                     Sponsor it
                 </a>
             </div>
         </div>
-
-        <dl class="grid grid-cols-2 gap-px bg-inv-rule border-2 border-inv-rule reveal--stagger">
+        <dl class="reveal--stagger grid grid-cols-2 gap-px border-2 border-ink-2 bg-ink-2">
             <div class="p-5 bg-ink">
-                <dt class="label mb-2 text-inv-muted">Edition</dt>
-                <dd class="font-sans text-3xl font-extrabold">VII</dd>
+                <dt class="label mb-2 text-taupe-3">Edition</dt>
+                <dd class="font-extrabold font-sans text-3xl">VII</dd>
             </div>
             <div class="p-5 bg-ink">
-                <dt class="label mb-2 text-inv-muted">Dates</dt>
-                <dd class="font-sans text-3xl font-extrabold">03.27<span class="text-inv-muted">&mdash;</span>28</dd>
+                <dt class="label mb-2 text-taupe-3">Dates</dt>
+                <dd class="font-extrabold font-sans text-3xl">
+                    <time datetime="2026-03-27">03.27</time><span class="text-taupe-2">&ndash;</span><time datetime="2026-03-28">28</time>
+                </dd>
             </div>
             <div class="p-5 bg-ink">
-                <dt class="label mb-2 text-inv-muted">Stages</dt>
-                <dd class="font-sans text-3xl font-extrabold">4</dd>
+                <dt class="label mb-2 text-taupe-3">Stages</dt>
+                <dd class="font-extrabold font-sans text-3xl">4</dd>
             </div>
             <div class="p-5 bg-ink">
-                <dt class="label mb-2 text-inv-muted">Producers</dt>
-                <dd class="font-sans text-3xl font-extrabold">96</dd>
+                <dt class="label mb-2 text-taupe-3">Producers</dt>
+                <dd class="font-extrabold font-sans text-3xl">96</dd>
             </div>
         </dl>
     </div>
 </section>
+
+<style>
+    .bash__actions {
+        transition-delay: 0.24s;
+    }
+
+    .bash__intro {
+        transition-delay: 0.16s;
+    }
+
+    .btn.bash__cta {
+        border-color: var(--color-taupe-3);
+        color: var(--color-taupe-3);
+    }
+
+    .btn.bash__cta:hover {
+        background: transparent;
+        border-color: var(--color-coral);
+        color: var(--color-coral);
+    }
+</style>

@@ -1,26 +1,40 @@
-const EVT = 'apa:cart-changed';
-const KEY = 'apa.cart';
+const CHANGE_EVENT = 'apa:cart-changed';
+const STORAGE_KEY = 'apa.cart';
 
 function read(): CartItem[] {
-    if (typeof localStorage === 'undefined') return [];
     try {
-        return JSON.parse(localStorage.getItem(KEY) ?? '[]');
+        const items: CartItem[] = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
+
+        return items.map(item => ({
+            ...item,
+            priceCents: Number(item.priceCents) || 0,
+            quantity: Math.max(1, Math.trunc(Number(item.quantity)) || 1),
+        }));
     } catch {
         return [];
     }
 }
 
-function write(items: CartItem[]): void {
-    localStorage.setItem(KEY, JSON.stringify(items));
-    window.dispatchEvent(new CustomEvent(EVT, { detail: items }));
+function variantKey(item: CartItem) {
+    return `${item.productSlug}|${item.size ?? ''}|${item.color ?? ''}`;
+}
+
+function write(items: CartItem[]) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    window.dispatchEvent(new Event(CHANGE_EVENT));
 }
 
 export function add(item: CartItem): void {
     const items = read();
-    const key = `${item.productSlug}|${item.size ?? ''}|${item.color ?? ''}`;
-    const idx = items.findIndex(i => `${i.productSlug}|${i.size ?? ''}|${i.color ?? ''}` === key);
-    if (idx >= 0) items[idx].quantity += item.quantity;
-    else items.push(item);
+
+    const index = items.findIndex(existing => variantKey(existing) === variantKey(item));
+
+    if (index >= 0) {
+        items[index].quantity += item.quantity;
+    } else {
+        items.push(item);
+    }
+
     write(items);
 }
 
@@ -29,32 +43,37 @@ export function clear(): void {
 }
 
 export function count(items = read()): number {
-    return items.reduce((s, i) => s + i.quantity, 0);
+    return items.reduce((total, item) => total + item.quantity, 0);
 }
 
 export function getItems(): CartItem[] {
     return read();
 }
 
-export function onChange(cb: (items: CartItem[]) => void): () => void {
-    const handler = (e: Event) => cb((e as CustomEvent<CartItem[]>).detail ?? read());
-    window.addEventListener(EVT, handler);
-    return () => window.removeEventListener(EVT, handler);
+export function onChange(callback: (items: CartItem[]) => void): () => void {
+    const handler = () => callback(read());
+
+    window.addEventListener(CHANGE_EVENT, handler);
+
+    return () => window.removeEventListener(CHANGE_EVENT, handler);
 }
 
 export function remove(index: number): void {
     const items = read();
+
     items.splice(index, 1);
     write(items);
 }
 
-export function setQuantity(index: number, q: number): void {
+export function setQuantity(index: number, quantity: number): void {
     const items = read();
+
     if (!items[index]) return;
-    items[index].quantity = Math.max(1, q);
+
+    items[index].quantity = Math.max(1, quantity);
     write(items);
 }
 
 export function subtotalCents(items = read()): number {
-    return items.reduce((s, i) => s + i.priceCents * i.quantity, 0);
+    return items.reduce((total, item) => total + item.priceCents * item.quantity, 0);
 }

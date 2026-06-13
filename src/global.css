@@ -3,33 +3,41 @@
 @theme {
     --color-black-20: #00000033;
     --color-black-70: #000000b3;
+    --color-bone: #ddd6cc;
     --color-coral: #ff4d3a;
-    --color-coral-dark: #cc3e2e;
-    --color-coral-ink: #fffaf8;
+    --color-coral-dark: #c03a2b;
+    --color-cream: #f2ede5;
     --color-ink: #1a1a1a;
-    --color-ink-soft: #6b6560;
-    --color-inv-body: #b8b0a8;
-    --color-inv-muted: #787068;
-    --color-inv-rule: #3a3530;
-    --color-line: #ddd6cc;
+    --color-ink-2: #3a3530;
     --color-sand: #faf6f0;
-    --color-surface: #f2ede5;
+    --color-snow: #fffaf8;
+    --color-taupe: #6b6560;
+    --color-taupe-2: #787068;
+    --color-taupe-3: #b8b0a8;
+    --color-white: #ffffff;
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     --font-mono: 'Space Mono', 'Courier New', monospace;
-    --font-sans: 'Bricolage Grotesque Variable', 'Georgia', serif;
+    --font-sans: 'Bricolage Grotesque Variable', system-ui, sans-serif;
     --shadow-card: 3px 3px 0 #1a1a1a;
     --shadow-card-sm: 2px 2px 0 #1a1a1a;
 }
 
-* {
-    border-color: var(--color-line);
+:root {
+    --duration-base: 0.25s;
+    --duration-fast: 0.2s;
+    --duration-slow: 0.3s;
+    --duration-slower: 0.5s;
+    --duration-slowest: 0.7s;
+    --shell-max: 1280px;
+    --shell-pad: 24px;
 }
 
 :focus {
     outline: none;
 }
 
-:focus-visible:not(input) {
-    outline: 2px solid var(--color-coral);
+:focus-visible {
+    outline: 2px solid var(--color-coral-dark);
     outline-offset: 2px;
 }
 
@@ -37,12 +45,25 @@
     user-select: none;
 }
 
-::view-transition-old(root) {
-    animation: 0.2s ease-out both fade-out;
+::selection {
+    background: var(--color-coral);
+    color: var(--color-ink);
 }
 
 ::view-transition-new(root) {
-    animation: 0.3s ease-out 0.1s both fade-in;
+    animation: var(--duration-slow) ease-out 0.1s both root__fade-in;
+}
+
+::view-transition-old(root) {
+    animation: var(--duration-fast) ease-out both root__fade-out;
+}
+
+button:not(:disabled) {
+    cursor: pointer;
+}
+
+[id] {
+    scroll-margin-top: 88px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -55,20 +76,20 @@
         transition-duration: 0.01s !important;
     }
 
-    ::view-transition-old(root),
-    ::view-transition-new(root) {
+    ::view-transition-new(root),
+    ::view-transition-old(root) {
         animation: none;
     }
 }
 
-@keyframes fade-in {
+@keyframes root__fade-in {
     from {
         opacity: 0;
         transform: translateY(4px);
     }
 }
 
-@keyframes fade-out {
+@keyframes root__fade-out {
     to {
         opacity: 0;
         transform: translateY(-4px);

@@ -1,4 +1,4 @@
-.btn-text {
+.action-text {
     font-family: var(--font-mono);
     font-size: 12px;
     font-weight: 700;
@@ -6,14 +6,129 @@
     text-transform: uppercase;
 }
 
+.btn {
+    align-items: center;
+    border: 2px solid var(--color-ink);
+    cursor: pointer;
+    display: inline-flex;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    gap: 8px;
+    justify-content: center;
+    letter-spacing: 0.025em;
+    padding: 0 24px;
+    text-transform: uppercase;
+    transition: background var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease, transform var(--duration-fast) ease;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.btn:disabled:hover {
+    background: transparent;
+    color: var(--color-ink);
+}
+
+.btn:hover {
+    background: var(--color-ink);
+    color: var(--color-sand);
+}
+
+.btn--coral {
+    background: var(--color-coral);
+    border-color: var(--color-coral);
+    color: var(--color-ink);
+}
+
+.btn--coral:disabled:hover {
+    background: var(--color-coral);
+    border-color: var(--color-coral);
+    color: var(--color-ink);
+}
+
+.btn--coral:hover {
+    background: var(--color-coral-dark);
+    border-color: var(--color-coral-dark);
+    color: var(--color-snow);
+}
+
+.btn--primary {
+    background: var(--color-ink);
+    color: var(--color-sand);
+}
+
+.btn--primary:disabled:hover {
+    background: var(--color-ink);
+    color: var(--color-sand);
+}
+
+.btn--primary:hover {
+    background: var(--color-coral-dark);
+    border-color: var(--color-coral-dark);
+    color: var(--color-snow);
+}
+
+.card {
+    background: var(--color-sand);
+    border: 2px solid var(--color-ink);
+    box-shadow: var(--shadow-card-sm);
+}
+
 .card-hover {
-    transition: box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-                transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: box-shadow var(--duration-base) var(--ease-out-expo), transform var(--duration-base) var(--ease-out-expo);
 }
 
 .card-hover:hover {
     box-shadow: 5px 5px 0 var(--color-ink);
     transform: translate(-2px, -2px);
+}
+
+.chip {
+    border: 2px solid var(--color-ink);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    height: 32px;
+    letter-spacing: 0.025em;
+    padding: 0 12px;
+    text-transform: uppercase;
+    transition: background var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+
+.crop-marks {
+    position: relative;
+}
+
+.crop-marks::after,
+.crop-marks::before {
+    border-color: var(--color-bone);
+    content: '';
+    height: 20px;
+    opacity: 0.5;
+    pointer-events: none;
+    position: absolute;
+    width: 20px;
+}
+
+.crop-marks::after {
+    border-bottom: 1px solid;
+    border-right: 1px solid;
+    bottom: -8px;
+    right: -8px;
+}
+
+.crop-marks::before {
+    border-left: 1px solid;
+    border-top: 1px solid;
+    left: -8px;
+    top: -8px;
 }
 
 .grain {
@@ -24,41 +139,6 @@
     pointer-events: none;
     position: fixed;
     z-index: 50;
-}
-
-.crop-marks {
-    position: relative;
-}
-
-.crop-marks::before,
-.crop-marks::after {
-    border-color: var(--color-line);
-    content: '';
-    height: 20px;
-    opacity: 0.5;
-    pointer-events: none;
-    position: absolute;
-    width: 20px;
-}
-
-.crop-marks::before {
-    border-left: 1px solid;
-    border-top: 1px solid;
-    left: -8px;
-    top: -8px;
-}
-
-.crop-marks::after {
-    border-bottom: 1px solid;
-    border-right: 1px solid;
-    bottom: -8px;
-    right: -8px;
-}
-
-.filter-on {
-    background: var(--color-ink);
-    border-color: var(--color-ink);
-    color: var(--color-sand);
 }
 
 .halftone {
@@ -78,9 +158,15 @@
     color: var(--color-sand);
 }
 
+.is-active {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    color: var(--color-sand);
+}
+
 .label {
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: 11px;
     letter-spacing: 0.06em;
     line-height: 1;
     text-transform: uppercase;
@@ -89,8 +175,7 @@
 .reveal {
     opacity: 0;
     transform: translateY(24px);
-    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-                transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity var(--duration-slowest) var(--ease-out-expo), transform var(--duration-slowest) var(--ease-out-expo);
 }
 
 .reveal.is-visible {
@@ -101,65 +186,34 @@
 .reveal--stagger > * {
     opacity: 0;
     transform: translateY(20px);
-    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-                transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity var(--duration-slower) var(--ease-out-expo), transform var(--duration-slower) var(--ease-out-expo);
 }
 
 .reveal--stagger.is-visible > * {
     opacity: 1;
     transform: translateY(0);
+    transition-delay: calc(var(--reveal-index, 0) * 0.06s);
 }
 
-.reveal--stagger.is-visible > *:nth-child(1) {
-    transition-delay: 0s;
+.shell {
+    margin: 0 auto;
+    max-width: var(--shell-max);
+    padding-inline: var(--shell-pad);
+    width: 100%;
 }
 
-.reveal--stagger.is-visible > *:nth-child(2) {
-    transition-delay: 0.06s;
+.shell--narrow {
+    max-width: 1100px;
 }
 
-.reveal--stagger.is-visible > *:nth-child(3) {
-    transition-delay: 0.12s;
-}
-
-.reveal--stagger.is-visible > *:nth-child(4) {
-    transition-delay: 0.18s;
-}
-
-.reveal--stagger.is-visible > *:nth-child(5) {
-    transition-delay: 0.24s;
-}
-
-.reveal--stagger.is-visible > *:nth-child(6) {
-    transition-delay: 0.3s;
-}
-
-.reveal--stagger.is-visible > *:nth-child(7) {
-    transition-delay: 0.36s;
-}
-
-.reveal--stagger.is-visible > *:nth-child(8) {
-    transition-delay: 0.42s;
+.shell--prose {
+    max-width: 800px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .reveal {
-        opacity: 1;
-        transform: none;
-    }
-
+    .reveal,
     .reveal--stagger > * {
         opacity: 1;
         transform: none;
-    }
-}
-
-@keyframes waveform {
-    0%, 100% {
-        transform: scaleY(0.3);
-    }
-
-    50% {
-        transform: scaleY(1);
     }
 }

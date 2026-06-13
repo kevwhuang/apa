@@ -1,14 +1,16 @@
 ---
 interface Props {
+    class?: string;
     size?: number;
 }
-const { size = 28 } = Astro.props;
+
+const { class: logoClass = 'text-ink', size = 28 } = Astro.props;
 const height = size;
-const width = size * 4.4;
+const width = size * 4.8;
 ---
 
 <svg
-    class="text-coral-ink"
+    class:list={[logoClass, 'select-none']}
     aria-label="Austin Producer Alliance"
     fill="none"
     height={height}
@@ -24,14 +26,31 @@ const width = size * 4.4;
         font-size={height * 0.65}
         font-weight="800"
     >
-        <text letter-spacing="-1" text-anchor="middle" x={height * 0.9} y={height * 0.72}>APA</text>
+        <text
+            letter-spacing="-1"
+            text-anchor="middle"
+            x={height * 0.9}
+            y={height * 0.72}
+        >
+            APA
+        </text>
     </g>
     <g
         fill="currentColor"
         font-family="'Space Mono', monospace"
         font-size={height * 0.30}
     >
-        <text x={height * 2.0} y={height * 0.48}>AUSTIN PRODUCER</text>
-        <text x={height * 2.0} y={height * 0.88}>ALLIANCE</text>
+        <text
+            x={height * 2.0}
+            y={height * 0.48}
+        >
+            AUSTIN PRODUCER
+        </text>
+        <text
+            x={height * 2.0}
+            y={height * 0.88}
+        >
+            ALLIANCE
+        </text>
     </g>
 </svg>

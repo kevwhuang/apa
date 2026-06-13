@@ -1,26 +1,47 @@
 ---
+import PageHead from '@components/PageHead.astro';
+import PlaceholderTile from '@components/PlaceholderTile.astro';
 import { PALETTE } from '@lib/utils';
 
-const bios = [
-    { city: 'East Side', name: 'Yara Soto', role: 'Co-founder / Director', years: '2019 &mdash;' },
-    { city: 'South Lamar', name: 'Devon Park', role: 'Co-founder / Programs', years: '2019 &mdash;' },
-    { city: 'North Loop', name: 'Inez Rao', role: 'Producer Bash lead', years: '2021 &mdash;' },
-    { city: 'Hyde Park', name: 'Marcus Hale', role: 'Merch & ops', years: '2022 &mdash;' },
-    { city: 'Govalle', name: 'Tana Wolfe', role: 'Membership', years: '2023 &mdash;' },
-    { city: 'Bouldin', name: 'June Castillo', role: 'Press & partnerships', years: '2024 &mdash;' },
+const BIOS = [
+    { city: 'East Side', name: 'Yara Soto', role: 'Co-founder / Director', years: '2019 \u2014' },
+    { city: 'South Lamar', name: 'Devon Park', role: 'Co-founder / Programs', years: '2019 \u2014' },
+    { city: 'North Loop', name: 'Inez Rao', role: 'Producer Bash lead', years: '2021 \u2014' },
+    { city: 'Hyde Park', name: 'Marcus Hale', role: 'Store & ops', years: '2022 \u2014' },
+    { city: 'Govalle', name: 'Tana Wolfe', role: 'Membership', years: '2023 \u2014' },
+    { city: 'Bouldin', name: 'June Castillo', role: 'Press & partnerships', years: '2024 \u2014' },
 ];
+
+const SECTIONS = [
+    { href: '#beginning', label: 'The beginning' },
+    { href: '#how', label: 'How it works' },
+    { href: '#values', label: 'What we believe' },
+    { href: '#team', label: 'The team' },
+];
+
+const VALUES = [
+    'Producers own their masters. We don\'t sign anyone.',
+    'Every event is open to every member, regardless of genre.',
+    'Store profit splits back across the room.',
+    'Sliding-scale dues. Always.',
+];
+
 const teamColors = PALETTE.slice(0, 6);
 ---
 
 <section
-    class="pt-20 pb-16 border-b-2 border-ink"
-    aria-label="About introduction"
+    class="pb-16 pt-20 border-b-2 border-ink"
+    aria-labelledby="about-title"
 >
-    <div class="max-w-[1100px] mx-auto px-6">
-        <p class="label mb-6 text-coral reveal">ABOUT / EST 2019</p>
-        <h1 class="font-sans font-extrabold tracking-[-0.04em] text-5xl md:text-7xl leading-[0.95] reveal" style="transition-delay: 0.08s;">
-            Six producers met every Tuesday at a coffee shop on Cesar Chavez. Five years later there are 142 of us.
-        </h1>
+    <div class="shell shell--narrow">
+        <PageHead
+            class="font-extrabold font-sans leading-[0.95] text-5xl tracking-[-0.04em] md:text-7xl"
+            eyebrow="About / Est 2019"
+            eyebrowClass="mb-6"
+            headingId="about-title"
+        >
+            Six producers met every Tuesday at a coffee shop on Cesar Chavez. Today there are 142 of us.
+        </PageHead>
     </div>
 </section>
 
@@ -28,89 +49,114 @@ const teamColors = PALETTE.slice(0, 6);
     class="py-20"
     aria-label="About details"
 >
-    <div class="max-w-[1100px] mx-auto px-6 grid md:grid-cols-[1fr_2fr] gap-12">
-        <aside class="md:sticky md:top-28 self-start">
-            <p class="label mb-3 text-ink-soft">SECTIONS</p>
-            <ul class="space-y-2.5 text-[14px]">
-                <li><a class="hover:text-coral transition-colors" href="#beginning">The beginning</a></li>
-                <li><a class="hover:text-coral transition-colors" href="#how">How it works</a></li>
-                <li><a class="hover:text-coral transition-colors" href="#values">What we believe</a></li>
-                <li><a class="hover:text-coral transition-colors" href="#team">The team</a></li>
-            </ul>
+    <div class="shell shell--narrow grid gap-12 md:grid-cols-[1fr_2fr]">
+        <aside class="self-start md:sticky md:top-28">
+            <p class="label mb-3 text-taupe">Sections</p>
+            <nav aria-label="Sections">
+                <ul class="space-y-2.5 list-none text-[14px]">
+                    {SECTIONS.map(section => (
+                        <li>
+                            <a
+                                class="hover:text-coral-dark transition-colors"
+                                href={section.href}
+                            >
+                                {section.label}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </nav>
         </aside>
-        <div class="space-y-8 text-[18px] leading-[1.65]">
+        <div class="space-y-8 leading-[1.65] text-[18px]">
             <section
                 id="beginning"
-                aria-label="The beginning"
+                aria-labelledby="beginning-title"
             >
-                <h2 class="font-sans text-3xl font-extrabold tracking-tight mb-3">The beginning</h2>
-                <p>
+                <h2
+                    id="beginning-title"
+                    class="reveal mb-3 font-extrabold font-sans text-3xl tracking-tight"
+                >
+                    The beginning
+                </h2>
+                <p class="mb-4">
                     Austin's music economy has always favored the performer. Songwriters get rooms, bands
-                    get residencies, but producers — the engineers, beatmakers, and arrangers behind the
-                    record — were everywhere and nowhere at once.
+                    get residencies, but producers &mdash; the engineers, beatmakers, and arrangers behind the
+                    record &mdash; were everywhere and nowhere at once.
                 </p>
-                <p class="mt-4">
-                    APA started as a Tuesday-night beat-making circle in 2019. Six producers, one coffee shop,
+                <p>
+                    APA started as a Tuesday-night beat-making circle in <time datetime="2019">2019</time>. Six producers, one coffee shop,
                     one rule: bring an unfinished track. Within a year it was sixty people in a basement, and
-                    by 2022 we had moved into a permanent room above a print shop in East Austin.
+                    by <time datetime="2022">2022</time> we had moved into a permanent room above a print shop in Austin.
                 </p>
             </section>
-
-            <figure class="border-y-2 border-ink py-10 my-10 reveal">
-                <blockquote class="font-sans text-3xl md:text-4xl font-extrabold tracking-[-0.02em] leading-[1.1]">
-                    <span class="text-coral">"</span>It's the only room in the city where you can show up with a half-finished beat at 9 p.m. on a Tuesday and leave with a finished record.<span class="text-coral">"</span>
+            <figure class="reveal my-10 py-10 border-y-2 border-ink">
+                <blockquote class="mb-6 font-extrabold font-sans leading-[1.1] text-3xl tracking-[-0.02em] md:text-4xl">
+                    <span class="text-coral">&ldquo;</span>It's the only room in the city where you can show up with a half-finished beat at 9 p.m. on a Tuesday and leave with a finished record.<span class="text-coral">&rdquo;</span>
                 </blockquote>
-                <figcaption class="mt-6 label text-ink-soft">YARA SOTO / CO-FOUNDER</figcaption>
+                <figcaption class="label text-taupe">Yara Soto / co-founder</figcaption>
             </figure>
-
             <section
                 id="how"
-                aria-label="How it works"
+                aria-labelledby="how-title"
             >
-                <h2 class="font-sans text-3xl font-extrabold tracking-tight mb-3">How it works</h2>
+                <h2
+                    id="how-title"
+                    class="reveal mb-3 font-extrabold font-sans text-3xl tracking-tight"
+                >
+                    How it works
+                </h2>
                 <p>
-                    Membership is open to anyone making music in Austin. We charge a sliding-scale annual due
-                    ($0&mdash;$120) that covers room rent and equipment. Members get the keys.
+                    Membership is open to anyone making music in Austin. We charge sliding-scale annual dues
+                    ($0&ndash;$120) that cover room rent and equipment. Members get the keys.
                 </p>
             </section>
-
             <section
                 id="values"
-                aria-label="What we believe"
+                aria-labelledby="values-title"
             >
-                <h2 class="font-sans text-3xl font-extrabold tracking-tight mb-3">What we believe</h2>
-                <ul class="space-y-3 list-none pl-0">
-                    <li class="flex gap-4"><span class="label pt-1 text-coral">01</span><span>Producers own their masters. We don't sign anyone.</span></li>
-                    <li class="flex gap-4"><span class="label pt-1 text-coral">02</span><span>Every event is open to every member, regardless of genre.</span></li>
-                    <li class="flex gap-4"><span class="label pt-1 text-coral">03</span><span>Merch profit splits back across the room.</span></li>
-                    <li class="flex gap-4"><span class="label pt-1 text-coral">04</span><span>Sliding-scale dues. Always.</span></li>
+                <h2
+                    id="values-title"
+                    class="reveal mb-3 font-extrabold font-sans text-3xl tracking-tight"
+                >
+                    What we believe
+                </h2>
+                <ul class="reveal--stagger space-y-3 list-none">
+                    {VALUES.map((value, index) => (
+                        <li class="flex gap-4">
+                            <span class="label pt-1 text-coral-dark">{String(index + 1).padStart(2, '0')}</span>
+                            <span>{value}</span>
+                        </li>
+                    ))}
                 </ul>
             </section>
-
             <section
                 id="team"
-                aria-label="The team"
+                aria-labelledby="team-title"
             >
-                <h2 class="font-sans text-3xl font-extrabold tracking-tight mb-6">The team</h2>
-                <div class="grid sm:grid-cols-2 gap-5 reveal--stagger">
-                    {bios.map((b, i) => (
-                        <div class="border-2 border-ink bg-sand card-hover" style="box-shadow: var(--shadow-card-sm);">
-                            <div
-                                class="aspect-[4/3] relative overflow-hidden flex items-center justify-center"
-                                style={`background: ${teamColors[i]};`}
-                            >
-                                <div class="absolute inset-0 halftone"></div>
-                                <span class="font-sans font-extrabold text-[64px] text-white/80 mix-blend-overlay select-none">
-                                    {b.name.split(' ').map(w => w[0]).join('')}
-                                </span>
-                            </div>
+                <h2
+                    id="team-title"
+                    class="reveal mb-6 font-extrabold font-sans text-3xl tracking-tight"
+                >
+                    The team
+                </h2>
+                <ul class="reveal--stagger grid gap-5 list-none md:grid-cols-2">
+                    {BIOS.map((bio, index) => (
+                        <li class="card card-hover">
+                            <PlaceholderTile
+                                class="aspect-[4/3]"
+                                color={teamColors[index]}
+                                label={bio.name.split(' ').map(word => word[0]).join('')}
+                                labelClass="text-[64px] text-white/80"
+                            />
                             <div class="p-4">
-                                <h3 class="font-sans font-extrabold tracking-tight">{b.name}</h3>
-                                <p class="text-[12px] font-mono text-ink-soft" set:html={`${b.role} / ${b.city} / ${b.years}`}></p>
+                                <h3 class="font-extrabold font-sans tracking-tight">{bio.name}</h3>
+                                <p class="font-mono text-[12px] text-taupe">
+                                    {`${bio.role} / ${bio.city} / ${bio.years}`}
+                                </p>
                             </div>
-                        </div>
+                        </li>
                     ))}
-                </div>
+                </ul>
             </section>
         </div>
     </div>

@@ -1,6 +1,5 @@
 ---
 title: Tick Tee
-slug: tick-tee
 category: apparel
 priceCents: 3500
 sizes: [S, M, L, XL, XXL]

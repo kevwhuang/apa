@@ -1,6 +1,5 @@
 ---
 title: Tote Bag
-slug: tote-bag
 category: accessory
 priceCents: 2200
 sizes: []

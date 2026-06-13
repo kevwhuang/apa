@@ -33,7 +33,7 @@ const { description, title } = Astro.props;
         <meta content={description} property="og:description" />
         <meta content={`${Astro.site}og.png`} property="og:image" />
         <meta content={canonicalUrl} property="og:url" />
-        <meta content="APA" property="og:site_name" />
+        <meta content="Austin Producer Alliance" property="og:site_name" />
         <meta content="website" property="og:type" />
         <meta content="summary_large_image" name="twitter:card" />
         <meta content={title} name="twitter:title" />
@@ -55,10 +55,10 @@ const { description, title } = Astro.props;
         />
         <ClientRouter />
     </head>
-    <body class="flex flex-col min-h-screen font-sans antialiased bg-sand text-ink">
+    <body class="flex flex-col min-h-screen antialiased font-sans bg-sand text-ink">
         <div class="grain" aria-hidden="true" />
         <Navbar />
-        <main class="flex flex-1 flex-col">
+        <main class="flex flex-1 flex-col mb-32">
             <slot />
         </main>
         <Footer />

@@ -1,88 +1,175 @@
 ---
 import { getCollection } from 'astro:content';
+
+import PageHead from '@components/PageHead.astro';
 import { formatDate } from '@lib/utils';
 
 const editions = (await getCollection('bash')).sort((a, b) => +b.data.date - +a.data.date);
+
 const current = editions[0];
 const past = editions.slice(1);
+
+const assets = current?.data.assets ?? [];
 ---
 
 <section
-    class="pt-20 pb-24 relative overflow-hidden border-b-2 border-ink ink-block"
-    aria-label="Producer Bash hero"
+    class="ink-block overflow-hidden relative pb-24 pt-20 border-b-2 border-ink"
+    aria-labelledby="bash-title"
 >
-    <div class="absolute inset-0 halftone--coral pointer-events-none"></div>
-    <div class="max-w-[1400px] mx-auto px-6 relative">
-        <p class="label mb-6 text-coral reveal">THE PRODUCER BASH / EDITION {current?.data.edition ?? 'VII'}</p>
-        <h1 class="font-sans font-extrabold tracking-[-0.05em] text-[clamp(60px,12vw,170px)] leading-[0.85] reveal" style="transition-delay: 0.08s;">
+    <div class="halftone--coral absolute inset-0 pointer-events-none" aria-hidden="true" />
+    <div class="shell relative">
+        <PageHead
+            class="font-extrabold font-sans leading-[0.85] text-[clamp(60px,13.28vw,170px)] tracking-[-0.05em]"
+            eyebrow={`The Producer Bash / Edition ${current?.data.edition ?? 'VII'}`}
+            eyebrowClass="mb-6"
+            headingId="bash-title"
+            tone="dark"
+        >
             Two days.<br />
             <span class="text-coral">One room.</span><br />
             Every member.
-        </h1>
+        </PageHead>
         {current && (
-            <p class="mt-10 max-w-2xl text-[18px] leading-relaxed text-inv-body">{current.data.recap}</p>
+            <p class="reveal max-w-2xl mt-10 leading-relaxed text-[18px] text-taupe-3">
+                {current.data.recap}
+            </p>
         )}
-        <div class="mt-12 grid md:grid-cols-4 gap-px border-2 border-inv-rule bg-inv-rule reveal--stagger">
+        <dl class="reveal--stagger grid gap-px mt-12 border-2 border-ink-2 bg-ink-2 md:grid-cols-4">
             <div class="p-6 bg-ink">
-                <p class="label mb-2 text-inv-muted">Dates</p>
-                <p class="font-sans font-extrabold text-2xl">{current ? formatDate(current.data.date) : 'TBA'}</p>
+                <dt class="label mb-2 text-taupe-3">
+                    Date
+                </dt>
+                <dd class="font-extrabold font-sans text-2xl">
+                    {current ? <time datetime={current.data.date.toISOString().slice(0, 10)}>{formatDate(current.data.date)}</time> : 'TBA'}
+                </dd>
             </div>
             <div class="p-6 bg-ink">
-                <p class="label mb-2 text-inv-muted">Venue</p>
-                <p class="font-sans font-extrabold text-2xl">The Mothership</p>
-                <p class="text-[12px] font-mono text-inv-muted mt-1">2400 E 6th St</p>
+                <dt class="label mb-2 text-taupe-3">
+                    Venue
+                </dt>
+                <dd class="font-extrabold font-sans text-2xl">
+                    The Mothership
+                    <address class="mt-1 font-mono font-normal not-italic text-[12px] text-taupe-3">
+                        2400 E 6th St
+                    </address>
+                </dd>
             </div>
             <div class="p-6 bg-ink">
-                <p class="label mb-2 text-inv-muted">Producers</p>
-                <p class="font-sans font-extrabold text-2xl">96 on bill</p>
+                <dt class="label mb-2 text-taupe-3">
+                    Producers
+                </dt>
+                <dd class="font-extrabold font-sans text-2xl">
+                    96 on bill
+                </dd>
             </div>
             <div class="p-6 bg-ink">
-                <p class="label mb-2 text-inv-muted">Tickets</p>
-                <a class="inline-block mt-1 px-5 h-10 leading-10 btn-text bg-coral text-coral-ink hover:bg-coral-dark transition-colors" href="#tickets">Get yours</a>
+                <dt class="label mb-2 text-taupe-3">
+                    Next edition
+                </dt>
+                <dd class="font-extrabold font-sans text-2xl">
+                    TBA
+                </dd>
             </div>
-        </div>
+        </dl>
     </div>
 </section>
 
-<section
-    class="py-20 border-b-2 border-ink"
-    aria-label="Press and assets"
->
-    <div class="max-w-[1400px] mx-auto px-6">
-        <h2 class="font-sans text-4xl font-extrabold tracking-tight mb-10">Press &amp; assets</h2>
-        <div class="border-2 border-ink">
-            <div class="grid grid-cols-4 border-b-2 border-ink font-mono text-[11px] font-bold uppercase tracking-wide text-ink-soft">
-                <div class="py-3 px-4">Asset</div>
-                <div class="py-3 px-4">Kind</div>
-                <div class="py-3 px-4">Size</div>
-                <div class="py-3 px-4"></div>
-            </div>
-            {(current?.data.assets ?? []).map((a, i) => (
-                <div class={`grid grid-cols-4 ${i > 0 ? 'border-t border-ink' : ''}`}>
-                    <div class="py-4 px-4 font-sans font-bold">{a.label}</div>
-                    <div class="py-4 px-4 font-mono text-[12px] uppercase">{a.kind}</div>
-                    <div class="py-4 px-4 font-mono text-[12px] text-ink-soft">{a.size}</div>
-                    <div class="py-4 px-4 text-right"><a class="font-mono text-[12px] font-bold uppercase hover:text-coral transition-colors" href={a.href}>Download &rarr;</a></div>
-                </div>
-            ))}
+{assets.length > 0 && (
+    <section
+        class="py-20 border-b-2 border-ink"
+        aria-labelledby="press-title"
+    >
+        <div class="shell">
+            <h2
+                id="press-title"
+                class="reveal mb-10 font-extrabold font-sans text-4xl tracking-tight"
+            >
+                Press &amp; assets
+            </h2>
+            <table class="reveal w-full border-2 border-ink">
+                <thead>
+                    <tr class="border-b-2 border-ink font-bold font-mono text-[11px] tracking-wide uppercase text-taupe">
+                        <th
+                            class="px-4 py-3 text-left"
+                            scope="col"
+                        >
+                            Asset
+                        </th>
+                        <th
+                            class="px-4 py-3 text-left"
+                            scope="col"
+                        >
+                            Kind
+                        </th>
+                        <th
+                            class="px-4 py-3 text-left"
+                            scope="col"
+                        >
+                            Size
+                        </th>
+                        <th
+                            class="px-4 py-3"
+                            scope="col"
+                        >
+                            <span class="sr-only">Download</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-ink">
+                    {assets.map(asset => (
+                        <tr>
+                            <td class="px-4 py-4 font-bold font-sans">
+                                {asset.label}
+                            </td>
+                            <td class="px-4 py-4 font-mono text-[12px] uppercase">
+                                {asset.kind}
+                            </td>
+                            <td class="px-4 py-4 font-mono text-[12px] text-taupe">
+                                {asset.size}
+                            </td>
+                            <td class="px-4 py-4 text-right">
+                                <a
+                                    class="action-text hover:text-coral-dark transition-colors"
+                                    href={asset.href}
+                                >
+                                    Download &rarr;
+                                </a>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
-    </div>
-</section>
+    </section>
+)}
 
 <section
     class="py-20"
-    aria-label="Past editions"
+    aria-labelledby="editions-title"
 >
-    <div class="max-w-[1400px] mx-auto px-6">
-        <h2 class="font-sans text-4xl font-extrabold tracking-tight mb-10 text-ink-soft">Past editions</h2>
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 reveal--stagger">
-            {past.map(b => (
-                <article class="border-2 border-ink p-6 bg-sand card-hover" style="box-shadow: var(--shadow-card-sm);">
-                    <p class="label mb-2 text-coral">Edition {b.data.edition} / {formatDate(b.data.date)}</p>
-                    <h3 class="font-sans text-2xl font-extrabold tracking-tight">{b.data.title}</h3>
-                    <p class="mt-3 text-[14px] text-ink-soft">{b.data.recap}</p>
-                </article>
+    <div class="shell">
+        <h2
+            id="editions-title"
+            class="reveal mb-10 font-extrabold font-sans text-4xl tracking-tight text-taupe"
+        >
+            Past editions
+        </h2>
+        <ul class="reveal--stagger grid gap-5 list-none lg:grid-cols-3 md:grid-cols-2">
+            {past.map(edition => (
+                <li>
+                    <article class="card card-hover p-6">
+                        <p class="label mb-2 text-coral-dark">
+                            Edition {edition.data.edition} / <time datetime={edition.data.date.toISOString().slice(0, 10)}>{formatDate(edition.data.date)}</time>
+                        </p>
+                        <h3 class="font-extrabold font-sans text-2xl tracking-tight">
+                            {edition.data.title}
+                        </h3>
+                        <p class="mt-3 text-[14px] text-taupe">
+                            {edition.data.recap}
+                        </p>
+                    </article>
+                </li>
             ))}
-        </div>
+        </ul>
     </div>
 </section>

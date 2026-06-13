@@ -1,22 +1,18 @@
 ---
 import Logo from '@components/Logo.astro';
+import { LINKS, ROUTES } from '@lib/utils';
 
-const links = [
+const COLUMNS = [
     {
-        head: 'Visit',
-        items: [
-            { href: '/events', label: 'Events' },
-            { href: '/producers', label: 'Producers' },
-            { href: '/bash', label: 'The Bash' },
-            { href: '/about', label: 'About' },
-        ],
+        head: 'Explore',
+        items: ROUTES,
     },
     {
-        head: 'Shop',
+        head: 'Store',
         items: [
-            { href: '/merch', label: 'All merch' },
-            { href: '/merch/cart', label: 'Cart' },
-            { href: '/merch/checkout', label: 'Checkout' },
+            { href: '/store', label: 'All products' },
+            { href: '/store/cart', label: 'Cart' },
+            { href: '/store/checkout', label: 'Checkout' },
         ],
     },
     {
@@ -25,96 +21,153 @@ const links = [
             { href: '/contact', label: 'Contact' },
             { href: '/sponsor', label: 'Sponsor' },
             { href: '/media', label: 'Press kit' },
-            { external: true, href: 'https://instagram.com/austinproduceralliance', label: 'Instagram' },
+            { href: LINKS.instagram, label: 'Instagram' },
         ],
     },
 ];
+
+const SYNTH_KEYS = [
+    { frequency: 261.6, note: 'C' },
+    { frequency: 293.7, note: 'D' },
+    { frequency: 329.6, note: 'E' },
+    { frequency: 349.2, note: 'F' },
+    { frequency: 392, note: 'G' },
+    { frequency: 440, note: 'A' },
+    { frequency: 493.9, note: 'B' },
+];
+
 const year = new Date().getFullYear();
 ---
 
-<footer class="mt-32 border-t-2 border-ink bg-surface">
-    <div class="max-w-[1400px] mx-auto px-6 py-16 grid gap-12 md:grid-cols-[1.4fr_repeat(3,1fr)]">
+<footer
+    class="border-t-2 border-ink bg-cream"
+    aria-label="Site footer"
+>
+    <div class="shell grid gap-12 py-16 md:grid-cols-[1.4fr_repeat(3,1fr)]">
         <div>
-            <Logo size={32} />
-            <p class="mt-5 max-w-xs text-[14px] text-ink-soft leading-relaxed">
-                A community of music producers in Austin, Texas. Founded 2019. Above a print shop on 5th.
+            <Logo class="mb-5 text-ink" size={32} />
+            <p class="max-w-xs mb-8 leading-relaxed text-[14px] text-taupe">
+                A community of music producers in Austin, Texas. Founded <time datetime="2019">2019</time>. Above a print shop on 5th.
             </p>
-            <div class="mt-8">
-                <p class="label mb-3 text-ink-soft">Synth keys</p>
-                <div id="synth-keys" class="inline-flex border-2 border-ink">
-                    {['C', 'D', 'E', 'F', 'G', 'A', 'B'].map((k, i) => (
+            <h2 class="label mb-3 text-taupe">Synth keys</h2>
+            <ul class="inline-flex border-2 border-ink list-none">
+                {SYNTH_KEYS.map(key => (
+                    <li class="border-r-2 border-ink last:border-r-0">
                         <button
-                            class="synth-key w-9 h-14 border-r-2 border-ink last:border-r-0 text-[10px] font-mono font-bold flex items-end justify-center pb-1.5 transition-colors bg-sand hover:bg-coral hover:text-coral-ink"
-                            aria-label={`Play note ${k}`}
-                            data-freq={[261.6, 293.7, 329.6, 349.2, 392, 440, 493.9][i]}
-                            data-note={k}
+                            class="synth-key hover:bg-coral hover:text-ink flex items-end justify-center relative h-14 w-9 pb-1.5 font-bold font-mono text-[10px] bg-sand select-none transition-colors"
+                            aria-label={`Play note ${key.note}`}
+                            data-frequency={key.frequency}
+                            type="button"
                         >
-                            {k}
+                            {key.note}
                         </button>
-                    ))}
-                </div>
-            </div>
+                    </li>
+                ))}
+            </ul>
         </div>
-
-        {links.map(c => (
+        {COLUMNS.map(column => (
             <div>
-                <p class="label mb-4 text-ink-soft">{c.head}</p>
-                <ul class="space-y-2.5 text-[14px]">
-                    {c.items.map(i => (
-                        <li><a class="hover:text-coral transition-colors" href={i.href} {...('external' in i && i.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{i.label}</a></li>
+                <h2 class="label mb-4 text-taupe">{column.head}</h2>
+                <ul class="space-y-2.5 list-none text-[14px]">
+                    {column.items.map(item => (
+                        <li>
+                            <a
+                                class="hover:text-coral-dark transition-colors"
+                                href={item.href}
+                                rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                                target={item.href.startsWith('http') ? '_blank' : undefined}
+                            >
+                                {item.label}
+                            </a>
+                        </li>
                     ))}
                 </ul>
             </div>
         ))}
     </div>
     <div class="border-t-2 border-ink">
-        <div class="max-w-[1400px] mx-auto px-6 py-5 flex flex-wrap gap-4 items-center justify-between text-[12px] text-ink-soft font-mono">
-            <p>&copy; {year} Austin Producer Alliance. Made in East Austin.</p>
-            <div class="flex gap-5 uppercase tracking-wide">
-                <a class="hover:text-coral" href="/privacy">Privacy</a>
-                <a class="hover:text-coral" href="/terms">Terms</a>
-                <a class="hover:text-coral" href="/media">Press</a>
-            </div>
+        <div class="shell flex flex-wrap items-center justify-between gap-4 py-5 font-mono text-[12px] text-taupe">
+            <p>&copy; {year} Austin Producer Alliance. Made in Austin.</p>
+            <nav
+                class="flex gap-5 tracking-wide uppercase"
+                aria-label="Legal"
+            >
+                <a
+                    class="hover:text-coral-dark transition-colors"
+                    href="/privacy"
+                >
+                    Privacy
+                </a>
+                <a
+                    class="hover:text-coral-dark transition-colors"
+                    href="/terms"
+                >
+                    Terms
+                </a>
+            </nav>
         </div>
     </div>
 </footer>
 
+<style>
+    .synth-key.is-pressed {
+        background: var(--color-coral);
+        color: var(--color-ink);
+    }
+
+    .synth-key::after {
+        content: '';
+        inset: -6px;
+        position: absolute;
+    }
+</style>
+
 <script>
     const ATTACK_TIME = 0.01;
     const FLASH_DURATION = 150;
+    const MIN_GAIN = 0.0001;
     const NOTE_DURATION = 0.45;
     const PEAK_GAIN = 0.15;
     const RELEASE_TIME = 0.4;
 
-    const keys = document.querySelectorAll('.synth-key');
+    const flashTimers = new WeakMap<HTMLElement, number>();
 
-    let ctx: AudioContext | null = null;
+    let audioContext: AudioContext | undefined;
+    let footerController: AbortController | undefined;
 
-    keys.forEach((key) => {
-        key.addEventListener('click', () => {
-            ctx ??= new AudioContext();
+    function handleKeyClick(key: HTMLElement) {
+        audioContext ??= new AudioContext();
 
-            const el = key as HTMLElement;
-            const freq = Number(el.dataset.freq);
-            const gainNode = ctx.createGain();
-            const oscillator = ctx.createOscillator();
+        const frequency = Number(key.dataset.frequency);
+        const gainNode = audioContext.createGain();
+        const oscillator = audioContext.createOscillator();
 
-            oscillator.type = 'sawtooth';
-            oscillator.frequency.value = freq;
-            gainNode.gain.setValueAtTime(0.0001, ctx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(PEAK_GAIN, ctx.currentTime + ATTACK_TIME);
-            gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + RELEASE_TIME);
-            oscillator.connect(gainNode).connect(ctx.destination);
-            oscillator.start();
-            oscillator.stop(ctx.currentTime + NOTE_DURATION);
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.value = frequency;
+        gainNode.gain.setValueAtTime(MIN_GAIN, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(PEAK_GAIN, audioContext.currentTime + ATTACK_TIME);
+        gainNode.gain.exponentialRampToValueAtTime(MIN_GAIN, audioContext.currentTime + RELEASE_TIME);
+        oscillator.connect(gainNode).connect(audioContext.destination);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + NOTE_DURATION);
 
-            el.style.background = 'var(--color-coral)';
-            el.style.color = 'var(--color-coral-ink)';
+        clearTimeout(flashTimers.get(key));
+        key.classList.add('is-pressed');
+        flashTimers.set(key, window.setTimeout(() => key.classList.remove('is-pressed'), FLASH_DURATION));
+    }
 
-            setTimeout(() => {
-                el.style.background = 'var(--color-sand)';
-                el.style.color = '';
-            }, FLASH_DURATION);
+    function initFooter() {
+        footerController?.abort();
+        footerController = new AbortController();
+
+        const { signal } = footerController;
+
+        const keys = document.querySelectorAll<HTMLElement>('.synth-key');
+
+        keys.forEach((key) => {
+            key.addEventListener('click', () => handleKeyClick(key), { signal });
         });
-    });
+    }
+
+    document.addEventListener('astro:page-load', initFooter);
 </script>

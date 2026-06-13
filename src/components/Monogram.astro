@@ -1,16 +1,19 @@
 ---
 interface Props {
+    decorative?: boolean;
     size?: number;
 }
-const { size = 32 } = Astro.props;
+
+const { decorative = false, size = 32 } = Astro.props;
 ---
 
 <svg
-    class="text-coral-ink"
-    aria-label="APA monogram"
+    class="text-snow select-none"
+    aria-hidden={decorative ? 'true' : undefined}
+    aria-label={decorative ? undefined : 'Austin Producer Alliance'}
     fill="none"
     height={size}
-    role="img"
+    role={decorative ? undefined : 'img'}
     viewBox="0 0 32 32"
     width={size}
     xmlns="http://www.w3.org/2000/svg"
@@ -23,6 +26,12 @@ const { size = 32 } = Astro.props;
         font-weight="800"
         letter-spacing="-1"
     >
-        <text text-anchor="middle" x="16" y="21">APA</text>
+        <text
+            text-anchor="middle"
+            x="16"
+            y="21"
+        >
+            APA
+        </text>
     </g>
 </svg>

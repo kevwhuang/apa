@@ -1,12 +1,36 @@
+const HTML_ESCAPES: Record<string, string> = {
+    '"': '&quot;',
+    '&': '&amp;',
+    '\'': '&#39;',
+    '<': '&lt;',
+    '>': '&gt;',
+};
+
+export const LINKS = {
+    email: 'hello@austinproduceralliance.com',
+    instagram: 'https://instagram.com/austin_producer_alliance',
+    pressEmail: 'press@austinproduceralliance.com',
+} as const;
+
 export const PALETTE = [
-    '#FF4D3A',
-    '#2D2B85',
-    '#1A1A1A',
-    '#D4A843',
-    '#6B68D9',
-    '#CC3E2E',
-    '#3A3530',
-    '#FF6B5A',
+    '#ff4d3a',
+    '#2d2b85',
+    '#1a1a1a',
+    '#d4a843',
+    '#6b68d9',
+    '#cc3e2e',
+    '#3a3530',
+    '#ff6b5a',
+] as const;
+
+export const ROUTES = [
+    { href: '/events', label: 'Events' },
+    { href: '/producers', label: 'Producers' },
+    { href: '/bash', label: 'The Bash' },
+    { href: '/about', label: 'About' },
+    { href: '/store', label: 'Store' },
+    { href: '/sponsor', label: 'Sponsor' },
+    { href: '/contact', label: 'Contact' },
 ] as const;
 
 export function applyFilter(
@@ -16,51 +40,64 @@ export function applyFilter(
     dataKey: string,
     matches: (card: HTMLElement, active: string) => boolean,
 ): void {
-    cards.forEach((c) => {
-        c.style.display = matches(c, active) ? '' : 'none';
+    buttons.forEach((button) => {
+        const on = (button.dataset[dataKey] ?? '') === active;
+
+        button.classList.toggle('is-active', on);
+        button.setAttribute('aria-pressed', String(on));
     });
-    buttons.forEach((b) => {
-        const on = (b.dataset[dataKey] ?? '') === active;
-        b.setAttribute('aria-pressed', String(on));
-        b.classList.toggle('filter-on', on);
+
+    cards.forEach((card) => {
+        card.classList.toggle('hidden', !matches(card, active));
     });
 }
 
-export function formatDate(d: Date): string {
-    return d.toLocaleDateString('en-US', {
-        weekday: 'short',
-        month: 'short',
+export function escapeHtml(value: string): string {
+    return value.replace(/["&'<>]/g, character => HTML_ESCAPES[character]);
+}
+
+export function formatDate(date: Date): string {
+    return date.toLocaleDateString('en-US', {
         day: 'numeric',
+        month: 'short',
+        timeZone: 'America/Chicago',
+        weekday: 'short',
         year: 'numeric',
     });
-}
-
-export function formatDateShort(d: Date): string {
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 export function formatPrice(cents: number): string {
     return `$${(cents / 100).toFixed(2)}`;
 }
 
-export function formatTime(d: Date): string {
-    return d.toLocaleTimeString('en-US', {
+export function formatTime(date: Date): string {
+    return date.toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
+        timeZone: 'America/Chicago',
     });
 }
 
-export function rovingFocus(buttons: NodeListOf<HTMLButtonElement>): void {
-    const arr = Array.from(buttons);
-    arr.forEach((b, i) => {
-        b.addEventListener('keydown', (e) => {
-            let next = -1;
-            if (e.key === 'ArrowRight') next = (i + 1) % arr.length;
-            if (e.key === 'ArrowLeft') next = (i - 1 + arr.length) % arr.length;
-            if (next >= 0) {
-                e.preventDefault();
-                arr[next].focus();
-            }
-        });
+export function formatVariant(item: CartItem): string {
+    return [item.color, item.size].filter(Boolean).join(' / ');
+}
+
+function handleRovingKeydown(event: KeyboardEvent, buttons: HTMLButtonElement[], index: number) {
+    let next = -1;
+
+    if (event.key === 'ArrowRight') next = (index + 1) % buttons.length;
+    if (event.key === 'ArrowLeft') next = (index - 1 + buttons.length) % buttons.length;
+
+    if (next < 0) return;
+
+    event.preventDefault();
+    buttons[next].focus();
+}
+
+export function rovingFocus(buttons: NodeListOf<HTMLButtonElement>, signal?: AbortSignal): void {
+    const all = Array.from(buttons);
+
+    all.forEach((button, index) => {
+        button.addEventListener('keydown', event => handleRovingKeydown(event, all, index), { signal });
     });
 }

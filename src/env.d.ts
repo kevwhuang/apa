@@ -2,6 +2,8 @@
 
 declare module 'eslint-plugin-jsx-a11y';
 
+type Timer = ReturnType<typeof setInterval>;
+
 interface CartItem {
     color?: string;
     image: string;

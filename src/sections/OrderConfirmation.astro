@@ -1,27 +1,46 @@
 ---
-
+import IconCheck from '@components/IconCheck.astro';
 ---
 
 <section
     class="py-24"
-    aria-label="Order confirmation"
+    aria-labelledby="order-title"
 >
-    <div class="max-w-[800px] mx-auto px-6 text-center">
-        <p id="order-number" class="label mb-6 text-ink-soft">ORDER #APA-00000</p>
-        <div class="inline-flex items-center justify-center w-16 h-16 mb-8 bg-coral border-2 border-ink" style="box-shadow: var(--shadow-card-sm);">
-            <svg class="text-coral-ink" fill="none" height="28" stroke="currentColor" stroke-width="2.5" viewBox="0 0 28 28" width="28">
-                <polyline points="5,14 12,21 23,7" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
+    <div class="reveal shell shell--prose text-center">
+        <p
+            class="label mb-6 text-taupe"
+            data-order-number
+        >
+            Order #APA-00000
+        </p>
+        <div
+            class="inline-flex items-center justify-center h-16 w-16 mb-8 border-2 border-ink bg-coral shadow-card-sm"
+            aria-hidden="true"
+        >
+            <IconCheck />
         </div>
-        <h1 class="font-sans font-extrabold tracking-[-0.03em] text-5xl md:text-6xl leading-[0.95]">
+        <h1
+            id="order-title"
+            class="mb-6 font-extrabold font-sans leading-[0.95] text-5xl tracking-[-0.04em] md:text-6xl"
+        >
             Order received.
         </h1>
-        <p class="mt-6 text-[18px] text-ink-soft">
-            We'll send a confirmation to your email. Orders ship in 14 business days from East Austin.
+        <p class="mb-12 text-[18px] text-taupe">
+            This is a demo store &mdash; no real order was placed and nothing will ship.
         </p>
-        <div class="mt-12 flex gap-3 justify-center">
-            <a class="inline-flex items-center px-6 h-11 btn-text bg-ink text-sand border-2 border-ink hover:bg-coral hover:border-coral transition-colors" href="/merch">Keep shopping</a>
-            <a class="inline-flex items-center px-6 h-11 btn-text border-2 border-ink hover:bg-ink hover:text-sand transition-colors" href="/">Home</a>
+        <div class="flex justify-center gap-3">
+            <a
+                class="btn btn--primary h-11"
+                href="/store"
+            >
+                Back to the store
+            </a>
+            <a
+                class="btn h-11"
+                href="/"
+            >
+                Home
+            </a>
         </div>
     </div>
 </section>
@@ -30,9 +49,13 @@
     const ORDER_ID_MAX = 90_000;
     const ORDER_ID_OFFSET = 10_000;
 
-    const el = document.getElementById('order-number');
+    function initOrderConfirmation() {
+        const element = document.querySelector<HTMLElement>('[data-order-number]');
 
-    if (el) {
-        el.textContent = `ORDER #APA-${Math.floor(Math.random() * ORDER_ID_MAX + ORDER_ID_OFFSET)}`;
+        if (!element) return;
+
+        element.textContent = `Order #APA-${Math.floor(Math.random() * ORDER_ID_MAX + ORDER_ID_OFFSET)}`;
     }
+
+    document.addEventListener('astro:page-load', initOrderConfirmation);
 </script>

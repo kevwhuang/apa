@@ -8,6 +8,6 @@ describe('NotFound', () => {
         const container = await AstroContainer.create();
         const html = await container.renderToString(NotFound);
 
-        expect(html).toMatch(/<h1[^>]*>[\s]*404[\s]*<\/h1>/);
+        expect(html).toMatch(/<h1[^>]*>\s*404\s*<\/h1>/);
     });
 });

@@ -1,5 +1,8 @@
 ---
-const assets = [
+import PageHead from '@components/PageHead.astro';
+import { LINKS } from '@lib/utils';
+
+const ASSETS = [
     { kind: 'svg', label: 'APA wordmark, light', size: '14 KB' },
     { kind: 'svg', label: 'APA wordmark, dark', size: '14 KB' },
     { kind: 'svg', label: 'APA monogram', size: '6 KB' },
@@ -7,25 +10,34 @@ const assets = [
     { kind: 'zip', label: 'Founder photos', size: '38 MB' },
     { kind: 'zip', label: 'Producer Bash photo pack', size: '184 MB' },
 ];
-const quotes = [
-    { quote: 'The most important music room in Austin most people have never heard of.', src: 'Austin Chronicle' },
-    { quote: 'A working studio that doubles as a city-wide producer co-op.', src: 'Texas Monthly' },
-    { quote: 'They aren\'t a label, but they\'ve quietly built the strongest beat scene in the South.', src: 'KUTX' },
+
+const QUOTES = [
+    { quote: 'The most important music room in Austin most people have never heard of.', source: 'The Eastside Ledger' },
+    { quote: 'A working studio that doubles as a city-wide producer co-op.', source: 'Lone Star Frequency' },
+    { quote: 'They aren\'t a label, but they\'ve quietly built the strongest beat scene in the South.', source: 'Station Austin' },
 ];
 ---
 
 <section
-    class="pt-20 pb-12 border-b-2 border-ink"
-    aria-label="Press and media"
+    class="pb-12 pt-20 border-b-2 border-ink"
+    aria-labelledby="media-title"
 >
-    <div class="max-w-[1400px] mx-auto px-6">
-        <p class="label mb-4 text-coral reveal">PRESS &amp; MEDIA</p>
-        <h1 class="font-sans font-extrabold tracking-[-0.04em] text-5xl md:text-7xl leading-[0.9] reveal" style="transition-delay: 0.08s;">
+    <div class="shell">
+        <PageHead
+            class="font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            eyebrow="Press &amp; media"
+            headingId="media-title"
+        >
             Press kit.
-        </h1>
-        <p class="mt-6 max-w-2xl text-[18px] text-ink-soft">
+        </PageHead>
+        <p class="reveal max-w-2xl mt-6 text-[18px] text-taupe">
             Wordmarks, photography, founder bios, and recent coverage. Email
-            <a class="underline underline-offset-4 decoration-coral decoration-2 hover:text-coral transition-colors" href="mailto:press@austinproduceralliance.com">press@austinproduceralliance.com</a>
+            <a
+                class="hover:text-coral-dark decoration-2 decoration-coral underline underline-offset-4 wrap-anywhere transition-colors"
+                href={`mailto:${LINKS.pressEmail}`}
+            >
+                {LINKS.pressEmail}
+            </a>
             for interviews and embargoed materials.
         </p>
     </div>
@@ -33,44 +45,80 @@ const quotes = [
 
 <section
     class="py-16 border-b-2 border-ink"
-    aria-label="Brand assets"
+    aria-labelledby="assets-title"
 >
-    <div class="max-w-[1400px] mx-auto px-6">
-        <h2 class="font-sans text-3xl font-extrabold tracking-tight mb-8">Brand assets</h2>
-        <div class="border-2 border-ink">
-            <div class="grid grid-cols-4 border-b-2 border-ink font-mono text-[11px] font-bold uppercase tracking-wide text-ink-soft">
-                <div class="py-3 px-4">Asset</div>
-                <div class="py-3 px-4">Format</div>
-                <div class="py-3 px-4">Size</div>
-                <div class="py-3 px-4"></div>
-            </div>
-            {assets.map((a, i) => (
-                <div class={`grid grid-cols-4 ${i > 0 ? 'border-t border-ink' : ''}`}>
-                    <div class="py-4 px-4 font-sans font-bold">{a.label}</div>
-                    <div class="py-4 px-4 font-mono text-[12px] uppercase">{a.kind}</div>
-                    <div class="py-4 px-4 font-mono text-[12px] text-ink-soft">{a.size}</div>
-                    <div class="py-4 px-4 text-right"><a class="font-mono text-[12px] font-bold uppercase hover:text-coral transition-colors" href={`/assets/${a.label.toLowerCase().replace(/\s+/g, '-')}`}>Download &rarr;</a></div>
-                </div>
-            ))}
-        </div>
+    <div class="shell">
+        <h2
+            id="assets-title"
+            class="reveal mb-8 font-extrabold font-sans text-3xl tracking-tight"
+        >
+            Brand assets
+        </h2>
+        <table class="reveal table-fixed w-full border-2 border-ink">
+            <thead>
+                <tr class="border-b-2 border-ink font-bold font-mono text-[11px] tracking-wide uppercase text-taupe">
+                    <th
+                        class="px-4 py-3 text-left"
+                        scope="col"
+                    >
+                        Asset
+                    </th>
+                    <th
+                        class="px-4 py-3 text-left"
+                        scope="col"
+                    >
+                        Format
+                    </th>
+                    <th
+                        class="px-4 py-3 text-left"
+                        scope="col"
+                    >
+                        Size
+                    </th>
+                    <th
+                        class="px-4 py-3 text-right"
+                        scope="col"
+                    >
+                        Download
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-ink">
+                {ASSETS.map(asset => (
+                    <tr>
+                        <td class="px-4 py-4 font-bold font-sans">{asset.label}</td>
+                        <td class="px-4 py-4 font-mono text-[12px] uppercase">{asset.kind}</td>
+                        <td class="px-4 py-4 font-mono text-[12px] text-taupe">{asset.size}</td>
+                        <td class="px-4 py-4 font-mono text-[12px] text-right text-taupe">pending</td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
     </div>
 </section>
 
 <section
     class="py-16"
-    aria-label="Press quotes"
+    aria-labelledby="quotes-title"
 >
-    <div class="max-w-[1400px] mx-auto px-6">
-        <h2 class="font-sans text-3xl font-extrabold tracking-tight mb-8">Quoted</h2>
-        <div class="grid md:grid-cols-3 gap-5 reveal--stagger">
-            {quotes.map(q => (
-                <figure class="border-2 border-ink p-8 bg-sand card-hover" style="box-shadow: var(--shadow-card-sm);">
-                    <blockquote class="font-sans text-2xl font-extrabold tracking-tight leading-snug">
-                        <span class="text-coral">"</span>{q.quote}<span class="text-coral">"</span>
-                    </blockquote>
-                    <figcaption class="label mt-6 text-ink-soft">&mdash; {q.src}</figcaption>
-                </figure>
+    <div class="shell">
+        <h2
+            id="quotes-title"
+            class="reveal mb-8 font-extrabold font-sans text-3xl tracking-tight"
+        >
+            Quoted
+        </h2>
+        <ul class="reveal--stagger grid gap-5 list-none md:grid-cols-3">
+            {QUOTES.map(({ quote, source }) => (
+                <li>
+                    <figure class="card card-hover h-full p-8">
+                        <blockquote class="font-extrabold font-sans leading-snug text-2xl tracking-tight">
+                            <span class="text-coral">&ldquo;</span>{quote}<span class="text-coral">&rdquo;</span>
+                        </blockquote>
+                        <figcaption class="label mt-6 text-taupe">&mdash; {source}</figcaption>
+                    </figure>
+                </li>
             ))}
-        </div>
+        </ul>
     </div>
 </section>

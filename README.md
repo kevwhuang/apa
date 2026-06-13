@@ -2,7 +2,7 @@
 
 ## Overview
 
-Austin Producer Alliance (APA) is a collective of music producers in Austin, Texas, open to anyone in the creative industry who wants to create and collaborate alongside them. This document is the Alliance's operating reference.
+Austin Producer Alliance (APA) is a collective of music producers in Austin, Texas, open to anyone in the creative industry who wants to collaborate alongside them. This document is the Alliance's operating reference.
 
 ## Platforms
 
@@ -18,8 +18,8 @@ Austin Producer Alliance (APA) is a collective of music producers in Austin, Tex
 | Event | Cadence | Description |
 | :--- | :---: | :--- |
 | **Assembly** | Monthly | The Alliance's centerpiece at Station Austin, an evening devoted to craft and community, with time for tracks to be heard. |
+| **Hangout** | Monthly | A pop-up social for connecting beyond the music, landing midway between assemblies. |
 | **Producer&nbsp;Bash** | Bimonthly | An afternoon of producing against the clock at Austin Community College, sparked by a prompt and capped by a final showdown. |
-| **Hangout** | Biweekly | A pop-up social for connecting beyond the music. |
 
 ### Planned
 

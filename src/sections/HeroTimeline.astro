@@ -3,62 +3,65 @@ const bars = Array.from({ length: 32 }, () => 20 + Math.random() * 80);
 ---
 
 <section
-    class="relative pt-32 pb-28 overflow-hidden border-b-2 border-ink bg-sand"
-    aria-label="Homepage hero"
+    class="hero overflow-hidden relative pb-28 pt-32 border-b-2 border-ink bg-sand"
+    aria-labelledby="hero-title"
 >
-    <div class="absolute inset-0 halftone pointer-events-none"></div>
-    <div class="max-w-[1400px] mx-auto px-6 relative">
-        <div class="flex items-center gap-3 mb-14 label text-ink-soft reveal">
-            <span class="inline-block w-2.5 h-2.5 bg-coral animate-pulse"></span>
-            <span>AUSTIN TX / 30.27N 97.74W</span>
-            <span class="ml-auto hidden md:inline">EST 2019 / 142 PRODUCERS / 38 EVENTS YR</span>
+    <div class="halftone absolute inset-0 pointer-events-none" aria-hidden="true" />
+    <div class="shell relative">
+        <div class="label reveal flex items-center gap-3 mb-14 text-taupe">
+            <span class="inline-block h-2.5 w-2.5 bg-coral animate-pulse" aria-hidden="true" />
+            <span>Austin TX / 30.27N 97.74W</span>
+            <span class="hidden ml-auto md:inline">Est <time datetime="2019">2019</time> / 142 producers / 38 events / yr</span>
         </div>
-
-        <h1 class="font-sans font-extrabold tracking-[-0.04em] text-[clamp(52px,10vw,140px)] leading-[0.88]">
-            <span class="block reveal">Austin's</span>
-            <span class="block text-coral reveal" style="transition-delay: 0.08s;">producer</span>
-            <span class="block reveal" style="transition-delay: 0.16s;">community.</span>
+        <h1
+            id="hero-title"
+            class="font-extrabold font-sans leading-[0.88] text-[clamp(52px,10.94vw,140px)] tracking-[-0.04em]"
+        >
+            <span class="reveal block">Austin's</span>
+            <span class="reveal block text-coral">producer</span>
+            <span class="reveal block">community.</span>
         </h1>
-
-        <div class="mt-16 relative reveal" style="transition-delay: 0.3s;">
-            <div class="relative border-2 border-ink bg-surface overflow-hidden crop-marks">
-                <div class="absolute inset-0 halftone--coral"></div>
-
-                <div id="waveform" class="flex items-end gap-[2px] h-20 px-3 py-2" aria-hidden="true">
-                    {bars.map((h, i) => (
+        <div class="hero__timeline reveal relative mt-16">
+            <div class="crop-marks overflow-hidden relative border-2 border-ink bg-cream">
+                <div class="halftone--coral absolute inset-0" aria-hidden="true" />
+                <div
+                    class="flex items-end h-20 gap-[2px] px-3 py-2"
+                    aria-hidden="true"
+                >
+                    {bars.map((height, index) => (
                         <div
                             class="flex-1 bg-coral/70 origin-bottom"
-                            style={`height: ${h}%; animation: waveform ${0.8 + (i % 5) * 0.15}s ease-in-out ${i * 0.04}s infinite alternate;`}
-                        >
-                        </div>
+                            style={`height: ${height}%; animation: hero__waveform ${0.8 + (index % 5) * 0.15}s ease-in-out ${index * 0.04}s infinite alternate;`}
+                        />
                     ))}
                 </div>
-
-                <div id="playhead" class="absolute top-0 bottom-0 w-0.5 bg-coral" style="left: 20%;">
-                    <div class="absolute -top-1.5 -left-[5px] w-3 h-3 bg-coral rotate-45"></div>
+                <div
+                    class="playhead absolute bottom-0 top-0 w-0.5 bg-coral"
+                    aria-hidden="true"
+                >
+                    <div class="-left-[5px] -top-1.5 absolute h-3 w-3 bg-coral rotate-45" />
                 </div>
             </div>
-            <div class="flex justify-between mt-2 font-mono text-[11px] text-ink-soft uppercase">
+            <div class="flex justify-between mt-2 font-mono text-[11px] uppercase text-taupe">
                 <span>00:00</span>
                 <span>Bar 01 / 4-4 / 92 BPM</span>
                 <span>04:00</span>
             </div>
-
-            <div class="mt-12 grid md:grid-cols-2 gap-10 max-w-3xl">
-                <p class="text-[18px] leading-relaxed">
+            <div class="grid max-w-3xl gap-10 mt-12 md:grid-cols-2">
+                <p class="leading-relaxed text-[18px]">
                     A working community for music producers in Austin, Texas. Cookups, showcases,
-                    and the annual <a class="underline decoration-coral decoration-2 underline-offset-4 hover:text-coral transition-colors" href="/bash">Producer Bash</a> —
+                    and the annual <a class="hover:text-coral-dark decoration-2 decoration-coral underline underline-offset-4 transition-colors" href="/bash">Producer Bash</a> &mdash;
                     where local artists and labels build the city's sound from the inside out.
                 </p>
-                <div class="flex flex-wrap gap-3 items-start">
+                <div class="flex flex-wrap items-start gap-3">
                     <a
-                        class="inline-flex items-center gap-2 px-6 h-12 btn-text border-2 border-ink bg-ink text-sand hover:bg-coral hover:border-coral transition-colors"
+                        class="btn btn--primary h-12"
                         href="/events"
                     >
-                        Upcoming events
+                        All events
                     </a>
                     <a
-                        class="inline-flex items-center gap-2 px-6 h-12 btn-text border-2 border-ink hover:bg-ink hover:text-sand transition-colors"
+                        class="btn h-12"
                         href="/about"
                     >
                         Our story
@@ -69,20 +72,59 @@ const bars = Array.from({ length: 32 }, () => 20 + Math.random() * 80);
     </div>
 </section>
 
+<style is:global>
+    .hero h1 span:nth-child(2) {
+        transition-delay: 0.08s;
+    }
+
+    .hero h1 span:nth-child(3) {
+        transition-delay: 0.16s;
+    }
+
+    .hero__timeline {
+        transition-delay: 0.3s;
+    }
+
+    .playhead {
+        left: 20%;
+    }
+
+    @keyframes hero__waveform {
+        0%,
+        100% {
+            transform: scaleY(0.3);
+        }
+
+        50% {
+            transform: scaleY(1);
+        }
+    }
+</style>
+
 <script>
     const PLAYHEAD_END = 85;
     const PLAYHEAD_INTERVAL = 80;
     const PLAYHEAD_START = 20;
     const PLAYHEAD_STEP = 0.35;
 
-    const playhead = document.getElementById('playhead');
+    let playheadInterval: Timer | undefined;
+    let progress = PLAYHEAD_START;
 
-    if (playhead && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        let progress = PLAYHEAD_START;
+    function initHeroTimeline() {
+        if (playheadInterval) clearInterval(playheadInterval);
 
-        setInterval(() => {
-            progress = ((progress - PLAYHEAD_START + PLAYHEAD_STEP) % (PLAYHEAD_END - PLAYHEAD_START)) + PLAYHEAD_START;
-            playhead.style.left = `${progress}%`;
-        }, PLAYHEAD_INTERVAL);
+        const playhead = document.querySelector<HTMLElement>('.playhead');
+
+        if (!playhead || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        progress = PLAYHEAD_START;
+        playheadInterval = setInterval(() => updatePlayhead(playhead), PLAYHEAD_INTERVAL);
     }
+
+    function updatePlayhead(playhead: HTMLElement) {
+        progress = ((progress - PLAYHEAD_START + PLAYHEAD_STEP) % (PLAYHEAD_END - PLAYHEAD_START)) + PLAYHEAD_START;
+        playhead.style.left = `${progress}%`;
+    }
+
+    document.addEventListener('astro:page-load', initHeroTimeline);
 </script>

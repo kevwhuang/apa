@@ -1,7 +1,7 @@
 ---
 title: Bash VII · The Mothership
 edition: VII
-date: 2026-03-27
+date: 2026-03-27T12:00:00-05:00
 recap: Two days, four stages, ninety-six producers on the bill. The compilation drops the same week.
 assets:
   - { label: Bash VII press release, kind: press-kit, size: 1.2 MB, href: '#' }
