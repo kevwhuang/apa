@@ -1,6 +1,7 @@
 ---
 import '@fontsource-variable/bricolage-grotesque/index.css';
-import '@fontsource/space-mono/index.css';
+import '@fontsource/space-mono/400.css';
+import '@fontsource/space-mono/700.css';
 import { ClientRouter } from 'astro:transitions';
 
 import '@/global.css';
@@ -10,11 +11,13 @@ import Navbar from '@sections/Navbar.astro';
 
 interface Props {
     description: string;
+    noindex?: boolean;
     title: string;
 }
 
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
-const { description, title } = Astro.props;
+const { description, noindex, title } = Astro.props;
+const ogImageUrl = `${Astro.site}og.png`;
 ---
 
 <!doctype html>
@@ -26,19 +29,20 @@ const { description, title } = Astro.props;
         <meta content={description} name="description" />
         <meta content="Kevin Huang" name="author" />
         <meta content="#faf6f0" name="theme-color" />
+        <meta content={noindex ? 'noindex, nofollow' : 'index, follow'} name="robots" />
         <link href={canonicalUrl} rel="canonical" />
         <link href="/apple-touch-icon.png" rel="apple-touch-icon" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
         <meta content={title} property="og:title" />
         <meta content={description} property="og:description" />
-        <meta content={`${Astro.site}og.png`} property="og:image" />
+        <meta content={ogImageUrl} property="og:image" />
         <meta content={canonicalUrl} property="og:url" />
         <meta content="Austin Producer Alliance" property="og:site_name" />
         <meta content="website" property="og:type" />
         <meta content="summary_large_image" name="twitter:card" />
         <meta content={title} name="twitter:title" />
         <meta content={description} name="twitter:description" />
-        <meta content={`${Astro.site}og.png`} name="twitter:image" />
+        <meta content={ogImageUrl} name="twitter:image" />
         <script
             is:inline
             set:html={JSON.stringify({
@@ -48,6 +52,7 @@ const { description, title } = Astro.props;
                     '@type': 'Person',
                     'name': 'Kevin Huang',
                 },
+                'inLanguage': 'en',
                 'name': 'Austin Producer Alliance',
                 'url': Astro.site,
             })}

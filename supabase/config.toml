@@ -1,0 +1,4 @@
+project_id = "apa"
+
+[analytics]
+enabled = false

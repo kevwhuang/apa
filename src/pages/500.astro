@@ -1,0 +1,14 @@
+---
+import ErrorServer from '@sections/ErrorServer.astro';
+import Layout from '@/Layout.astro';
+
+export const prerender = false;
+---
+
+<Layout
+    description="Something went wrong on our end. Try again in a moment, or head back to the Austin Producer Alliance home page."
+    noindex
+    title={'Server Error \u2014 Austin Producer Alliance'}
+>
+    <ErrorServer />
+</Layout>

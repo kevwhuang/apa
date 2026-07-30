@@ -5,6 +5,7 @@
     --color-black-70: #000000b3;
     --color-bone: #ddd6cc;
     --color-coral: #ff4d3a;
+    --color-coral-20: #ff4d3a33;
     --color-coral-dark: #c03a2b;
     --color-cream: #f2ede5;
     --color-ink: #1a1a1a;
@@ -32,11 +33,37 @@
     --shell-pad: 24px;
 }
 
+a,
+button,
+label,
+select {
+    cursor: pointer;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+html[data-astro-transition] {
+    scroll-behavior: auto;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--color-coral-dark);
+    outline-offset: 2px;
+}
+
+:disabled {
+    cursor: not-allowed;
+}
+
 :focus {
     outline: none;
 }
 
-:focus-visible {
+:focus-visible:not(input, select, textarea) {
     outline: 2px solid var(--color-coral-dark);
     outline-offset: 2px;
 }
@@ -46,8 +73,7 @@
 }
 
 ::selection {
-    background: var(--color-coral);
-    color: var(--color-ink);
+    background: var(--color-coral-20);
 }
 
 ::view-transition-new(root) {
@@ -58,21 +84,19 @@
     animation: var(--duration-fast) ease-out both root__fade-out;
 }
 
-button:not(:disabled) {
-    cursor: pointer;
-}
-
 [id] {
     scroll-margin-top: 88px;
 }
 
 @media (prefers-reduced-motion: reduce) {
     *,
-    *::before,
-    *::after {
+    *::after,
+    *::before {
+        animation-delay: 0s !important;
         animation-duration: 0.01s !important;
         animation-iteration-count: 1 !important;
         scroll-behavior: auto !important;
+        transition-delay: 0s !important;
         transition-duration: 0.01s !important;
     }
 
