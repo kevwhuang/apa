@@ -1,11 +1,12 @@
 ---
 import Layout from '@/Layout.astro';
-import LegalDoc from '@sections/LegalDoc.astro';
+import LegalDoc from '@sections/legal/Doc.astro';
+import { brandTitle } from '@lib/brand';
 ---
 
 <Layout
-    description="Terms of service for the Austin Producer Alliance covering membership, studio use, compilation rights, and the demonstration store."
-    title="Terms of Service &mdash; Austin Producer Alliance"
+    description="Terms of service for the Austin Producer Alliance: membership and conduct, events and photography, Bash submissions, the demonstration store, and Prods."
+    title={brandTitle('Terms of Service')}
 >
     <LegalDoc kind="terms" />
 </Layout>

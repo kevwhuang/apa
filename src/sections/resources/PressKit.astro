@@ -1,0 +1,291 @@
+---
+import { getCollection } from 'astro:content';
+
+import BrandLockup from '@components/brand/Lockup.astro';
+import BrandMark from '@components/brand/Mark.astro';
+import SectionHead from '@components/shared/SectionHead.astro';
+import { ASSET_KIND_LABELS, LINKS } from '@lib/constants';
+import { BRAND, BRAND_DOWNLOADS, BRAND_SIZES } from '@lib/brand';
+import { formatDateOnly, toIsoDate } from '@lib/utils';
+
+const PRESS_KINDS = ['brochure', 'media-kit', 'photo-pack', 'press-kit'] as const;
+
+const downloads = await getCollection('downloads');
+
+const press = downloads
+    .filter(asset => PRESS_KINDS.some(kind => kind === asset.data.kind))
+    .toSorted((a, b) => Number(b.data.available) - Number(a.data.available) || a.data.title.localeCompare(b.data.title));
+---
+
+<section
+    class="stage stage--tight border-b-2 border-ink"
+    aria-labelledby="brand-assets-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-3xl tracking-tight"
+            eyebrow="Press kit / Brand"
+            headingId="brand-assets-title"
+        >
+            Brand assets
+        </SectionHead>
+        <p
+            class="max-w-2xl mb-8 text-[15px] text-ink-muted"
+            data-motion="rise"
+        >
+            The wordmark and lockup, in the formats a publication is likely to ask for.
+        </p>
+        <div
+            class="press-kit__marks slab slab--card slab--roomy"
+            data-motion="unfold"
+        >
+            <BrandLockup
+                class="press-kit__lockup"
+                label={`${BRAND.name} lockup`}
+            />
+            <BrandMark
+                class="press-kit__mark"
+                height={BRAND_SIZES.markPreview}
+                label={`${BRAND.name} wordmark`}
+            />
+        </div>
+        <div
+            class="press-kit__scroller mt-8"
+            data-motion="unfold"
+        >
+            <table class="press-kit__table border-2 border-ink">
+                <thead>
+                    <tr class="border-b-2 border-ink font-bold font-mono text-[11px] tracking-wide uppercase text-ink-muted">
+                        <th
+                            class="px-4 py-3 text-left"
+                            scope="col"
+                        >
+                            Asset
+                        </th>
+                        <th
+                            class="px-4 py-3 text-left"
+                            scope="col"
+                        >
+                            Format
+                        </th>
+                        <th
+                            class="px-4 py-3 text-right"
+                            scope="col"
+                        >
+                            Download
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-ink">
+                    {BRAND_DOWNLOADS.map(download => (
+                        <tr>
+                            <td class="px-4 py-4 font-bold font-sans">{download.label}</td>
+                            <td class="px-4 py-4 font-mono text-[12px] uppercase">{download.format}</td>
+                            <td class="px-4 py-4 text-right">
+                                <a
+                                    class="action-text press-kit__download"
+                                    download={download.filename}
+                                    href={download.asset.src}
+                                >
+                                    Download
+                                </a>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section
+    class="stage stage--tight border-b-2 border-ink"
+    aria-labelledby="press-material-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-3xl tracking-tight"
+            eyebrow={`Press kit / ${press.length} entries`}
+            headingId="press-material-title"
+        >
+            Press material
+        </SectionHead>
+        <div
+            class="press-kit__scroller"
+            data-motion="unfold"
+        >
+            <table class="press-kit__table border-2 border-ink">
+                <caption class="sr-only">Press material, its format, and whether it is published</caption>
+                <thead>
+                    <tr class="border-b-2 border-ink font-bold font-mono text-[11px] tracking-wide uppercase text-ink-muted">
+                        <th
+                            class="px-4 py-3 text-left"
+                            scope="col"
+                        >
+                            Asset
+                        </th>
+                        <th
+                            class="px-4 py-3 text-left"
+                            scope="col"
+                        >
+                            Kind
+                        </th>
+                        <th
+                            class="px-4 py-3 text-left"
+                            scope="col"
+                        >
+                            Format
+                        </th>
+                        <th
+                            class="px-4 py-3 text-left"
+                            scope="col"
+                        >
+                            Size
+                        </th>
+                        <th
+                            class="px-4 py-3 text-left"
+                            scope="col"
+                        >
+                            Updated
+                        </th>
+                        <th
+                            class="px-4 py-3 text-right"
+                            scope="col"
+                        >
+                            Status
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-ink">
+                    {press.map(asset => (
+                        <tr>
+                            <th
+                                class="px-4 py-4 font-bold font-sans text-left"
+                                scope="row"
+                            >
+                                {asset.data.title}
+                            </th>
+                            <td class="px-4 py-4 font-mono text-[12px] text-ink-muted">
+                                {ASSET_KIND_LABELS[asset.data.kind]}
+                            </td>
+                            <td class="px-4 py-4 font-mono text-[12px] uppercase">{asset.data.format}</td>
+                            <td
+                                class="px-4 py-4 font-mono text-[12px] text-ink-muted"
+                                data-placeholder
+                            >
+                                {asset.data.size}
+                            </td>
+                            <td class="px-4 py-4 font-mono text-[12px] text-ink-muted">
+                                <time datetime={toIsoDate(asset.data.date)}>{formatDateOnly(asset.data.date)}</time>
+                            </td>
+                            <td class="px-4 py-4 text-right">
+                                {asset.data.available && asset.data.href
+                                    ? (
+                                            <a
+                                                class="action-text press-kit__download"
+                                                href={asset.data.href}
+                                            >
+                                                Open
+                                            </a>
+                                        )
+                                    : (
+                                            <span class="font-mono text-[12px] text-ink-subtle">In preparation</span>
+                                        )}
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+        <p class="mt-8 text-[15px] text-ink-muted">
+            Each entry also has a card in the&#32;
+            <a
+                class="press-kit__link hover:text-accent-deep underline underline-offset-4 transition-colors"
+                href="#library-title"
+            >
+                asset library
+            </a>&#32;
+            above, alongside event packs, stems, and working documents.
+        </p>
+    </div>
+</section>
+
+<section
+    class="stage stage--tight"
+    aria-labelledby="resources-ask-title"
+>
+    <div class="slab slab--roomy slab--sunk mark grid grid-cols-1 items-end gap-10 md:grid-cols-[1.2fr_1fr]">
+        <div>
+            <SectionHead
+                class="font-extrabold font-sans leading-[1.05] text-3xl tracking-[-0.035em] md:text-5xl"
+                eyebrow="Requests"
+                eyebrowClass="mb-4"
+                headingId="resources-ask-title"
+            >
+                Ask us.
+            </SectionHead>
+            <p class="max-w-md text-ink-muted">
+                Plenty of what is listed here is still being prepared &mdash; ask and we will
+                send what exists. For interviews and embargoed material, write to the press desk.
+            </p>
+        </div>
+        <div class="flex flex-wrap gap-3 md:justify-end">
+            <a
+                class="btn btn--primary"
+                href="/contact"
+            >
+                Request an asset
+            </a>
+            <a
+                class="btn"
+                href={`mailto:${LINKS.pressEmail}`}
+            >
+                Email the press desk
+            </a>
+        </div>
+    </div>
+</section>
+
+<style>
+    .press-kit__download {
+        align-items: center;
+        display: inline-flex;
+        min-height: 50px;
+        transition: color var(--duration-fast) ease;
+    }
+
+    .press-kit__download:hover {
+        color: var(--color-accent-deep);
+    }
+
+    .press-kit__link {
+        display: inline-block;
+        min-height: 50px;
+        padding-block: var(--space-xs);
+    }
+
+    .press-kit__lockup {
+        color: var(--color-ink);
+    }
+
+    .press-kit__mark {
+        color: var(--color-accent);
+    }
+
+    .press-kit__marks {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2xl);
+    }
+
+    .press-kit__scroller {
+        overflow-x: auto;
+    }
+
+    .press-kit__table {
+        display: table;
+        overflow-x: visible;
+        width: 100%;
+    }
+</style>

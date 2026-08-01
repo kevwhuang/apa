@@ -1,0 +1,865 @@
+---
+import { getCollection } from 'astro:content';
+
+import PageHead from '@components/shared/PageHead.astro';
+import { CHECKOUT_STEPS, DEMO_CARDS, FIELD_LIMITS, US_STATES } from '@lib/constants';
+import { toCatalog } from '@lib/utils';
+
+type FieldInputMode = 'numeric';
+
+type FieldKind = 'select' | 'text';
+
+type FieldType = 'email' | 'text';
+
+interface CheckoutField {
+    autocomplete: string;
+    column: string;
+    inputmode?: FieldInputMode;
+    kind?: FieldKind;
+    label: string;
+    maxlength?: number;
+    name: string;
+    pattern?: string;
+    placeholder?: string;
+    type?: FieldType;
+}
+
+const PAYMENT_FIELDS: CheckoutField[] = [
+    { autocomplete: 'off', column: 'md:col-span-6', inputmode: 'numeric', label: 'Card number', maxlength: FIELD_LIMITS.card, name: 'cc-number', pattern: '[0-9 ]{13,19}', placeholder: DEMO_CARDS.approved },
+    { autocomplete: 'off', column: 'md:col-span-3', inputmode: 'numeric', label: 'Expiration date', maxlength: FIELD_LIMITS.expiry, name: 'cc-exp', pattern: '(0[1-9]|1[0-2]) ?/ ?[0-9]{2}', placeholder: 'MM / YY' },
+    { autocomplete: 'off', column: 'md:col-span-3', inputmode: 'numeric', label: 'Security code', maxlength: FIELD_LIMITS.csc, name: 'cc-csc', pattern: '[0-9]{3,4}' },
+    { autocomplete: 'off', column: 'md:col-span-6', label: 'Name on card', maxlength: FIELD_LIMITS.name, name: 'cc-name' },
+];
+
+const SHIPPING_FIELDS: CheckoutField[] = [
+    { autocomplete: 'given-name', column: 'md:col-span-3', label: 'First name', maxlength: FIELD_LIMITS.name, name: 'given-name' },
+    { autocomplete: 'family-name', column: 'md:col-span-3', label: 'Last name', maxlength: FIELD_LIMITS.name, name: 'family-name' },
+    { autocomplete: 'email', column: 'md:col-span-6', label: 'Email', maxlength: FIELD_LIMITS.email, name: 'email', type: 'email' },
+    { autocomplete: 'street-address', column: 'md:col-span-6', label: 'Street address', maxlength: FIELD_LIMITS.address, name: 'address' },
+    { autocomplete: 'address-level2', column: 'md:col-span-2', label: 'City', maxlength: FIELD_LIMITS.name, name: 'city' },
+    { autocomplete: 'address-level1', column: 'md:col-span-2', kind: 'select', label: 'State', name: 'state' },
+    { autocomplete: 'postal-code', column: 'md:col-span-2', inputmode: 'numeric', label: 'ZIP code', name: 'zip', pattern: '[0-9]{5}(-[0-9]{4})?' },
+];
+
+const catalog = toCatalog(await getCollection('products'));
+---
+
+<section
+    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    aria-labelledby="checkout-title"
+>
+    <div>
+        <PageHead
+            class="font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            eyebrow="Checkout"
+            headingId="checkout-title"
+        >
+            Checkout
+        </PageHead>
+        <ol
+            class="flex mt-8 border-2 border-ink"
+            aria-label="Checkout steps"
+            data-motion="rule"
+        >
+            {CHECKOUT_STEPS.map((step, index) => (
+                <li
+                    class:list={[
+                        'step flex-1 p-4 font-bold font-mono text-2xs tracking-wide uppercase',
+                        index === 0 ? 'slab--well' : 'bg-surface',
+                        index > 0 && 'border-l-2 border-ink',
+                    ]}
+                    aria-current={index === 0 ? 'step' : undefined}
+                >
+                    {step}
+                </li>
+            ))}
+        </ol>
+        <p class="action-text mt-6 text-ink-subtle">
+            This is a demonstration checkout &mdash; nothing is charged and nothing ships.
+        </p>
+    </div>
+</section>
+
+<section
+    class="stage stage--narrow stage--tight"
+    aria-label="Checkout form"
+    data-catalog={JSON.stringify(catalog)}
+>
+    <div
+        class="slab slab--card slab--roomy max-w-xl w-full mx-auto text-center"
+        data-checkout-empty
+        hidden
+    >
+        <p class="label mb-3 text-ink-muted">Empty</p>
+        <p class="mb-6 font-extrabold font-sans text-2xl">There is nothing to check out.</p>
+        <a
+            class="btn btn--primary"
+            href="/store"
+        >
+            Browse the store
+        </a>
+    </div>
+    <div
+        class="grid grid-cols-1 gap-12 md:grid-cols-[1.5fr_1fr]"
+        data-checkout-body
+    >
+        <form
+            class="checkout-form flex flex-col gap-6"
+            data-checkout-form
+        >
+            <div
+                class="checkout__alert slab slab--card flex flex-col gap-3"
+                data-form-error
+                hidden
+                role="alert"
+                tabindex="-1"
+            >
+                <p
+                    class="action-text text-accent-deep"
+                    data-form-error-message
+                />
+                <ul
+                    class="checkout__alert-list list-none"
+                    data-form-error-list
+                />
+            </div>
+            <fieldset
+                class="step-pane"
+                data-step="0"
+            >
+                <legend class="mb-6 font-extrabold font-sans text-2xl tracking-tight">
+                    Shipping
+                </legend>
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-6">
+                    {SHIPPING_FIELDS.map(field => (
+                        <div class:list={['flex flex-col gap-2', field.column]}>
+                            <label class="flex flex-col gap-2">
+                                <span class="label text-ink-muted">{field.label}</span>
+                                {field.kind === 'select'
+                                    ? (
+                                            <select
+                                                id={`checkout-${field.name}`}
+                                                class="h-[50px] w-full px-4 border-2 border-ink bg-transparent"
+                                                aria-describedby={`checkout-${field.name}-error`}
+                                                aria-invalid="false"
+                                                autocomplete={field.autocomplete}
+                                                name={field.name}
+                                                required
+                                            >
+                                                <option value="">Choose&hellip;</option>
+                                                {US_STATES.map(state => (
+                                                    <option value={state.code}>{state.name}</option>
+                                                ))}
+                                            </select>
+                                        )
+                                    : (
+                                            <input
+                                                id={`checkout-${field.name}`}
+                                                class="h-[50px] w-full px-4 border-2 border-ink bg-transparent"
+                                                aria-describedby={`checkout-${field.name}-error`}
+                                                aria-invalid="false"
+                                                autocomplete={field.autocomplete}
+                                                inputmode={field.inputmode}
+                                                maxlength={field.maxlength}
+                                                name={field.name}
+                                                pattern={field.pattern}
+                                                placeholder={field.placeholder}
+                                                required
+                                                type={field.type ?? 'text'}
+                                            />
+                                        )}
+                            </label>
+                            <p
+                                id={`checkout-${field.name}-error`}
+                                class="action-text text-accent-deep"
+                                data-field-error
+                                hidden
+                            />
+                        </div>
+                    ))}
+                </div>
+            </fieldset>
+            <fieldset
+                class="step-pane hidden"
+                data-step="1"
+                disabled
+            >
+                <legend class="mb-6 font-extrabold font-sans text-2xl tracking-tight">
+                    Payment
+                </legend>
+                <div class="grid grid-cols-1 gap-4 mb-4 md:grid-cols-6">
+                    {PAYMENT_FIELDS.map(field => (
+                        <div class:list={['flex flex-col gap-2', field.column]}>
+                            <label class="flex flex-col gap-2">
+                                <span class="label text-ink-muted">{field.label}</span>
+                                <input
+                                    id={`checkout-${field.name}`}
+                                    class="h-[50px] w-full px-4 border-2 border-ink font-mono text-[13px] bg-transparent"
+                                    aria-describedby={`checkout-${field.name}-error`}
+                                    aria-invalid="false"
+                                    autocomplete={field.autocomplete}
+                                    inputmode={field.inputmode}
+                                    maxlength={field.maxlength}
+                                    name={field.name}
+                                    pattern={field.pattern}
+                                    placeholder={field.placeholder}
+                                    required
+                                    type="text"
+                                />
+                            </label>
+                            <p
+                                id={`checkout-${field.name}-error`}
+                                class="action-text text-accent-deep"
+                                data-field-error
+                                hidden
+                            />
+                        </div>
+                    ))}
+                </div>
+                <p class="action-text mb-3 text-accent-deep">
+                    Demo only &mdash; the two numbers below are the only cards this store accepts.
+                </p>
+                <dl class="checkout__cards">
+                    <div class="checkout__card-row">
+                        <dt class="font-mono text-[13px]">{DEMO_CARDS.approved}</dt>
+                        <dd class="text-[14px] text-ink-muted">Approved</dd>
+                    </div>
+                    <div class="checkout__card-row">
+                        <dt class="font-mono text-[13px]">{DEMO_CARDS.declined}</dt>
+                        <dd class="text-[14px] text-ink-muted">Declined</dd>
+                    </div>
+                </dl>
+            </fieldset>
+            <fieldset
+                class="step-pane hidden"
+                data-step="2"
+                disabled
+            >
+                <legend class="mb-6 font-extrabold font-sans text-2xl tracking-tight">
+                    Review
+                </legend>
+                <aside
+                    class="checkout__notice slab slab--card flex flex-col gap-4 mb-6"
+                    aria-label="Cart changes"
+                    data-checkout-notice
+                    hidden
+                    role="status"
+                >
+                    <p class="label text-accent-deep">Your cart changed</p>
+                    <ul
+                        class="checkout__issues list-none"
+                        data-checkout-issues
+                    />
+                </aside>
+                <ul
+                    class="review-list scroll-slot mb-6 border-2 border-ink list-none"
+                    data-review-list
+                />
+                <div class="flex flex-col gap-2">
+                    <label class="checkout__check">
+                        <input
+                            id="checkout-terms"
+                            class="checkout__box"
+                            aria-describedby="checkout-terms-error"
+                            aria-invalid="false"
+                            name="terms"
+                            required
+                            type="checkbox"
+                        />
+                        I accept the terms and conditions
+                    </label>
+                    <p
+                        id="checkout-terms-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </div>
+                <label
+                    class="checkout__check"
+                    data-prods-field
+                    hidden
+                >
+                    <input
+                        id="checkout-prods"
+                        class="checkout__box"
+                        name="prods"
+                        type="checkbox"
+                    />
+                    <span data-prods-label>Apply your Prods</span>
+                </label>
+                <p class="mt-4 text-[14px] text-ink-muted">
+                    Read the&#32;
+                    <a
+                        class="checkout__link hover:text-accent-deep decoration-2 decoration-accent underline underline-offset-4 transition-colors"
+                        href="/terms"
+                    >
+                        terms
+                    </a>&#32;
+                    before you accept them.
+                </p>
+            </fieldset>
+            <div class="flex flex-wrap justify-between gap-4">
+                <button
+                    class="btn checkout-back invisible"
+                    type="button"
+                >
+                    Back
+                </button>
+                <button
+                    class="btn btn--primary checkout-next"
+                    type="submit"
+                >
+                    Continue
+                </button>
+            </div>
+            <p
+                class="action-text text-ink-subtle"
+                aria-live="polite"
+                data-checkout-status
+            />
+        </form>
+        <aside
+            class="slab slab--sunk self-start"
+            aria-label="Order summary"
+        >
+            <h2 class="label mb-4 text-ink-muted">Summary</h2>
+            <ul
+                class="checkout__summary scroll-slot mb-4 list-none text-[14px]"
+                data-summary-list
+            />
+            <dl class="pt-4 space-y-1.5 border-t-2 border-ink font-mono text-[14px]">
+                <div class="flex justify-between gap-3">
+                    <dt>Subtotal</dt>
+                    <dd data-subtotal>$0.00</dd>
+                </div>
+                <div
+                    class="flex justify-between gap-3"
+                    data-discount-row
+                    hidden
+                >
+                    <dt>Prods credit</dt>
+                    <dd data-discount>$0.00</dd>
+                </div>
+                <div class="flex justify-between gap-3">
+                    <dt>Shipping</dt>
+                    <dd data-shipping>&mdash;</dd>
+                </div>
+                <div class="flex justify-between gap-3">
+                    <dt>Tax</dt>
+                    <dd data-tax>$0.00</dd>
+                </div>
+                <div class="flex justify-between gap-3 mt-2 pt-2 border-t-2 border-ink font-extrabold font-sans text-lg">
+                    <dt>Total</dt>
+                    <dd
+                        aria-live="polite"
+                        data-total
+                    >
+                        $0.00
+                    </dd>
+                </div>
+            </dl>
+        </aside>
+    </div>
+    <template data-error-anchor>
+        <li>
+            <a
+                class="checkout__anchor hover:text-accent-deep flex items-center min-h-[50px] text-[14px] underline"
+                data-anchor
+                href="#checkout-email"
+            >
+                Fix this field
+            </a>
+        </li>
+    </template>
+    <template data-issue-row>
+        <li class="flex gap-2 text-[14px] text-ink-muted">
+            <span
+                class="font-bold text-accent-deep"
+                aria-hidden="true"
+            >
+                &middot;
+            </span>
+            <span data-issue-text />
+        </li>
+    </template>
+    <template data-review-row>
+        <li class="first:border-t-0 flex items-center gap-4 p-4 border-t-2 border-ink">
+            <div
+                class="flex items-center justify-center overflow-hidden relative shrink-0 h-14 w-14"
+                aria-hidden="true"
+                data-review-tile
+            >
+                <div class="halftone absolute inset-0" />
+            </div>
+            <div class="flex-1 min-w-0">
+                <p
+                    class="font-bold font-sans"
+                    data-review-title
+                />
+                <p
+                    class="label text-ink-muted"
+                    data-review-variant
+                />
+            </div>
+            <p
+                class="font-bold font-mono"
+                data-review-price
+            />
+        </li>
+    </template>
+    <template data-summary-row>
+        <li class="flex justify-between gap-2 mb-3">
+            <span data-summary-title />
+            <span
+                class="font-bold font-mono"
+                data-summary-price
+            />
+        </li>
+    </template>
+</section>
+
+<style>
+    .checkout__alert {
+        border-left: 2px solid var(--color-accent-deep);
+    }
+
+    .checkout__alert-list,
+    .checkout__issues {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3xs);
+    }
+
+    .checkout__box {
+        appearance: none;
+        background-color: transparent;
+        border: 2px solid var(--color-ink);
+        flex-shrink: 0;
+        height: 24px;
+        margin: 0;
+        position: relative;
+        width: 24px;
+    }
+
+    .checkout__box::after {
+        content: '';
+        inset: -13px;
+        position: absolute;
+    }
+
+    .checkout__box:checked {
+        background-color: var(--color-accent-deep);
+        border-color: var(--color-accent-deep);
+        box-shadow: inset 0 0 0 4px var(--color-surface-raised);
+    }
+
+    .checkout__card-row {
+        display: flex;
+        gap: var(--space-xs);
+        justify-content: space-between;
+    }
+
+    .checkout__cards {
+        border-top: 1px solid var(--color-ink-20);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3xs);
+        padding-top: var(--space-xs);
+    }
+
+    .checkout__check {
+        align-items: center;
+        align-self: flex-start;
+        display: flex;
+        font-size: var(--text-smd);
+        gap: var(--space-xs);
+        min-height: 50px;
+        padding: var(--space-2xs) var(--space-sm) var(--space-2xs) 0;
+    }
+
+    .checkout__link {
+        display: inline-block;
+        padding-block: var(--space-sm);
+    }
+
+    .checkout__notice {
+        border-left: 2px solid var(--color-accent-deep);
+    }
+
+    .checkout__summary,
+    .review-list {
+        --scroll-slot-max: 40vh;
+    }
+
+    .step--done {
+        background: var(--color-surface-sunken);
+        color: var(--color-ink-muted);
+    }
+
+    .step--done::before {
+        content: '\2713\00a0';
+    }
+
+    .step-pane {
+        min-width: 0;
+    }
+
+    @media (forced-colors: active) {
+        .checkout__box {
+            background-color: Canvas;
+            border-color: CanvasText;
+            forced-color-adjust: none;
+        }
+
+        .checkout__box:checked {
+            background-color: SelectedItem;
+            border-color: CanvasText;
+            box-shadow: inset 0 0 0 4px Canvas;
+        }
+    }
+</style>
+
+<script>
+    import { navigate } from 'astro:transitions/client';
+
+    import { CENTS_PER_DOLLAR, CHECKOUT_STEPS, EMAIL_PATTERN, FIELD_LIMITS, PALETTE } from '@lib/constants';
+    import { clearFieldErrors, renderErrorSummary, renderIssueList, setFieldErrors, validateFields } from '@lib/forms';
+    import { formatPrice, formatVariant, parseCatalog, registerPageScript, setPending, setText } from '@lib/utils';
+    import { getItems, reconcile, totals } from '@lib/store';
+    import { getSession } from '@lib/session';
+    import { isDemoCardNumber, placeOrder } from '@lib/checkout';
+
+    interface CheckoutControls {
+        backButton: HTMLButtonElement;
+        form: HTMLFormElement;
+        nextButton: HTMLButtonElement;
+        panes: NodeListOf<HTMLFieldSetElement>;
+        steps: NodeListOf<HTMLElement>;
+    }
+
+    const ADDRESS_MIN = 5;
+    const CARD_FIELDS = ['cc-csc', 'cc-exp', 'cc-name', 'cc-number'];
+    const CENTURY = 2_000;
+    const CITY_MIN = 2;
+    const CSC_PATTERN = /^\d{3,4}$/;
+    const EXPIRY_PATTERN = /^(0[1-9]|1[0-2]) ?\/ ?(\d{2})$/;
+    const LAST_STEP = 2;
+    const MAX_EXPIRY_YEARS = 20;
+    const ZIP_PATTERN = /^\d{5}(-\d{4})?$/;
+
+    const STEP_RULES: Record<string, FieldRule>[] = [
+        {
+            'address': { max: FIELD_LIMITS.address, message: 'Enter your street address.', min: ADDRESS_MIN, required: true },
+            'city': { max: FIELD_LIMITS.name, message: 'Enter your city.', min: CITY_MIN, required: true },
+            'email': { max: FIELD_LIMITS.email, message: 'Enter a valid email address.', pattern: EMAIL_PATTERN, required: true },
+            'family-name': { max: FIELD_LIMITS.name, message: 'Enter your last name.', required: true },
+            'given-name': { max: FIELD_LIMITS.name, message: 'Enter your first name.', required: true },
+            'state': { message: 'Choose your state.', required: true },
+            'zip': { message: 'Enter a five-digit ZIP code.', pattern: ZIP_PATTERN, required: true },
+        },
+        {
+            'cc-csc': { message: 'Enter the three or four digit security code.', pattern: CSC_PATTERN, required: true },
+            'cc-exp': { message: 'Use MM / YY, this month or later.', required: true, validate: isFutureExpiry },
+            'cc-name': { max: FIELD_LIMITS.name, message: 'Enter the name on the card.', required: true },
+            'cc-number': { message: 'Use one of the demo card numbers below.', required: true, validate: isDemoCardNumber },
+        },
+        {
+            terms: { message: 'Accept the terms to place the order.', required: true },
+        },
+    ];
+
+    const cardColors = PALETTE.slice(0, 4);
+
+    let blocked = false;
+    let catalog: CatalogEntry[] = [];
+    let orderItems: CartItem[] = [];
+    let step = 0;
+
+    function clearCardFields(form: HTMLFormElement) {
+        CARD_FIELDS.forEach((name) => {
+            const field = form.elements.namedItem(name);
+
+            if (field instanceof HTMLInputElement) field.value = '';
+        });
+    }
+
+    function getProdsApplied(form: HTMLFormElement) {
+        const checkbox = form.elements.namedItem('prods');
+
+        if (!(checkbox instanceof HTMLInputElement) || !checkbox.checked) return 0;
+
+        return getSession()?.prods ?? 0;
+    }
+
+    function handleBackClick(controls: CheckoutControls) {
+        step = Math.max(0, step - 1);
+        updateSteps(controls, true);
+    }
+
+    function handleCardInput(input: HTMLInputElement) {
+        input.value = input.value.replace(/[^\d ]/g, '');
+    }
+
+    async function handleFormSubmit(event: SubmitEvent, controls: CheckoutControls) {
+        event.preventDefault();
+
+        if (blocked) {
+            await navigate('/store/cart');
+
+            return;
+        }
+
+        const errors = validateFields(controls.form, STEP_RULES[step]);
+
+        clearFieldErrors(controls.form);
+        renderErrorSummary(controls.form, errors, 'checkout');
+
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(controls.form, errors);
+
+            return;
+        }
+
+        if (step < LAST_STEP) {
+            step += 1;
+            updateSteps(controls, true);
+
+            return;
+        }
+
+        await submitOrder(controls);
+    }
+
+    function handleProdsToggle(form: HTMLFormElement) {
+        renderSummary(form);
+    }
+
+    function initCheckoutFlow(signal: AbortSignal) {
+        const backButton = document.querySelector<HTMLButtonElement>('.checkout-back');
+        const body = document.querySelector<HTMLElement>('[data-checkout-body]');
+        const empty = document.querySelector<HTMLElement>('[data-checkout-empty]');
+        const form = document.querySelector<HTMLFormElement>('[data-checkout-form]');
+        const nextButton = document.querySelector<HTMLButtonElement>('.checkout-next');
+        const source = document.querySelector<HTMLElement>('[data-catalog]');
+
+        if (!backButton || !body || !form || !nextButton) return;
+
+        const controls: CheckoutControls = {
+            backButton,
+            form,
+            nextButton,
+            panes: document.querySelectorAll<HTMLFieldSetElement>('.step-pane'),
+            steps: document.querySelectorAll<HTMLElement>('.step'),
+        };
+
+        blocked = false;
+        catalog = parseCatalog(source?.dataset.catalog);
+        form.noValidate = true;
+        step = 0;
+
+        if (getItems().length === 0) {
+            body.setAttribute('hidden', '');
+            empty?.removeAttribute('hidden');
+
+            return;
+        }
+
+        updateSteps(controls, false);
+        renderSummary(form);
+
+        backButton.addEventListener('click', () => handleBackClick(controls), { signal });
+        form.addEventListener('submit', event => handleFormSubmit(event, controls), { signal });
+        signal.addEventListener('abort', () => clearCardFields(form), { once: true });
+
+        form.querySelectorAll<HTMLInputElement>('[name="cc-number"], [name="cc-csc"]').forEach((input) => {
+            input.addEventListener('input', () => handleCardInput(input), { signal });
+        });
+
+        form.querySelector<HTMLInputElement>('[name="prods"]')?.addEventListener('change', () => handleProdsToggle(form), { signal });
+    }
+
+    function isFutureExpiry(value: string) {
+        const match = EXPIRY_PATTERN.exec(value);
+
+        if (!match) return false;
+
+        const now = new Date();
+        const expiry = new Date(CENTURY + Number(match[2]), Number(match[1]), 1);
+        const limit = new Date(now.getFullYear() + MAX_EXPIRY_YEARS, now.getMonth(), 1);
+
+        return expiry > now && expiry <= limit;
+    }
+
+    function readValue(form: HTMLFormElement, name: string) {
+        const field = form.elements.namedItem(name);
+
+        return field instanceof HTMLInputElement || field instanceof HTMLSelectElement ? field.value : '';
+    }
+
+    function renderIssues(issues: CartIssue[]) {
+        renderIssueList(
+            issues,
+            document.querySelector<HTMLElement>('[data-checkout-notice]'),
+            document.querySelector<HTMLElement>('[data-checkout-issues]'),
+            document.querySelector<HTMLTemplateElement>('[data-issue-row]'),
+        );
+    }
+
+    function renderProds(form: HTMLFormElement) {
+        const field = form.querySelector<HTMLElement>('[data-prods-field]');
+        const prods = getSession()?.prods ?? 0;
+
+        if (!field) return;
+
+        field.toggleAttribute('hidden', prods === 0);
+
+        if (prods === 0) return;
+
+        setText(field.querySelector('[data-prods-label]'), `Apply ${prods} ${prods === 1 ? 'Prod' : 'Prods'} (${formatPrice(prods * CENTS_PER_DOLLAR)} credit)`);
+    }
+
+    function renderReview(form: HTMLFormElement) {
+        const list = document.querySelector<HTMLElement>('[data-review-list]');
+        const template = document.querySelector<HTMLTemplateElement>('[data-review-row]');
+
+        orderItems = getItems();
+
+        renderProds(form);
+        renderSummary(form);
+
+        if (!list || !template) return;
+
+        list.replaceChildren();
+
+        orderItems.forEach((item, index) => {
+            const fragment = template.content.cloneNode(true) as DocumentFragment;
+            const tile = fragment.querySelector<HTMLElement>('[data-review-tile]');
+            const variant = formatVariant(item);
+
+            if (tile) tile.style.background = cardColors[index % cardColors.length];
+
+            setText(fragment.querySelector('[data-review-price]'), formatPrice(item.priceCents * item.quantity));
+            setText(fragment.querySelector('[data-review-title]'), item.title);
+            setText(fragment.querySelector('[data-review-variant]'), [variant, `\u00d7 ${item.quantity}`].filter(Boolean).join(' / '));
+            list.append(fragment);
+        });
+    }
+
+    function renderSummary(form: HTMLFormElement) {
+        const items = getItems();
+        const list = document.querySelector<HTMLElement>('[data-summary-list]');
+        const row = document.querySelector<HTMLElement>('[data-discount-row]');
+        const summary = totals(items, getProdsApplied(form));
+        const template = document.querySelector<HTMLTemplateElement>('[data-summary-row]');
+
+        if (list && template) {
+            list.replaceChildren();
+
+            items.forEach((item) => {
+                const fragment = template.content.cloneNode(true) as DocumentFragment;
+                const variant = formatVariant(item);
+
+                setText(fragment.querySelector('[data-summary-price]'), formatPrice(item.priceCents * item.quantity));
+                setText(fragment.querySelector('[data-summary-title]'), [`${item.quantity} \u00d7 ${item.title}`, variant].filter(Boolean).join(' \u2014 '));
+                list.append(fragment);
+            });
+        }
+
+        row?.toggleAttribute('hidden', summary.discountCents === 0);
+
+        setText(document.querySelector('[data-discount]'), `\u2212${formatPrice(summary.discountCents)}`);
+        setText(document.querySelector('[data-shipping]'), summary.subtotalCents === 0 ? '\u2014' : formatPrice(summary.shippingCents));
+        setText(document.querySelector('[data-subtotal]'), formatPrice(summary.subtotalCents));
+        setText(document.querySelector('[data-tax]'), formatPrice(summary.taxCents));
+        setText(document.querySelector('[data-total]'), formatPrice(summary.totalCents));
+    }
+
+    function showAlert(form: HTMLFormElement, message: string) {
+        const list = form.querySelector<HTMLElement>('[data-form-error-list]');
+        const summary = form.querySelector<HTMLElement>('[data-form-error]');
+
+        if (!list || !summary) return;
+
+        list.replaceChildren();
+        summary.removeAttribute('hidden');
+        setText(summary.querySelector('[data-form-error-message]'), message);
+        summary.focus();
+    }
+
+    async function submitOrder(controls: CheckoutControls) {
+        const issues = reconcile(catalog);
+
+        if (issues.length > 0) {
+            blocked = true;
+            renderIssues(issues);
+            renderSummary(controls.form);
+            controls.nextButton.textContent = 'Back to cart';
+
+            return;
+        }
+
+        const status = document.querySelector<HTMLElement>('[data-checkout-status]');
+
+        setPending(controls.nextButton, true);
+        setText(status, 'Placing your order\u2026');
+
+        const result = await placeOrder({
+            cardNumber: readValue(controls.form, 'cc-number'),
+            email: readValue(controls.form, 'email'),
+            items: orderItems,
+            prodsApplied: getProdsApplied(controls.form),
+        });
+
+        setPending(controls.nextButton, false);
+        setText(status, '');
+
+        if (!result.ok) {
+            if (result.code !== 'card-declined') {
+                blocked = true;
+                controls.nextButton.textContent = 'Back to cart';
+                showAlert(controls.form, result.message);
+
+                return;
+            }
+
+            step = 1;
+            updateSteps(controls, true);
+            setFieldErrors(controls.form, { 'cc-number': result.message });
+            renderErrorSummary(controls.form, { 'cc-number': result.message }, 'checkout');
+
+            return;
+        }
+
+        clearCardFields(controls.form);
+        await navigate('/store/order');
+    }
+
+    function updateSteps(controls: CheckoutControls, moveFocus: boolean) {
+        controls.steps.forEach((item, index) => {
+            item.classList.toggle('slab--well', index === step);
+            item.classList.toggle('step--done', index < step);
+            item.classList.toggle('bg-surface', index > step);
+
+            if (index === step) item.setAttribute('aria-current', 'step');
+            else item.removeAttribute('aria-current');
+        });
+
+        controls.panes.forEach((pane, index) => {
+            pane.classList.toggle('hidden', index !== step);
+            pane.disabled = index !== step;
+        });
+
+        controls.backButton.classList.toggle('invisible', step === 0);
+        controls.nextButton.textContent = step === LAST_STEP ? 'Place order' : 'Continue';
+
+        if (step === LAST_STEP) renderReview(controls.form);
+
+        if (!moveFocus) return;
+
+        setText(document.querySelector('[data-checkout-status]'), `Step ${step + 1} of ${CHECKOUT_STEPS.length}, ${CHECKOUT_STEPS[step]}`);
+        controls.panes[step]?.querySelector<HTMLElement>('input, select')?.focus();
+    }
+
+    registerPageScript(initCheckoutFlow);
+</script>

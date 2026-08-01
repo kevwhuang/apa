@@ -1,0 +1,20 @@
+---
+import AssemblyArchive from '@sections/assembly/Archive.astro';
+import AssemblyCalendar from '@sections/assembly/Calendar.astro';
+import AssemblyFeedback from '@sections/assembly/Feedback.astro';
+import AssemblyHero from '@sections/assembly/Hero.astro';
+import AssemblyWorkshop from '@sections/assembly/Workshop.astro';
+import Layout from '@/Layout.astro';
+import { brandTitle } from '@lib/brand';
+---
+
+<Layout
+    description={'The Assembly is the Austin Producer Alliance\'s monthly working session \u2014 a workshop, track feedback played out loud, and an open floor, every month.'}
+    title={brandTitle('Assembly')}
+>
+    <AssemblyHero />
+    <AssemblyWorkshop />
+    <AssemblyFeedback />
+    <AssemblyCalendar />
+    <AssemblyArchive />
+</Layout>

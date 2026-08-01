@@ -8,11 +8,11 @@ colors:
   - { name: Ink, hex: '#181818' }
   - { name: Lime, hex: '#c4f04d' }
 images: [tick-tee-1, tick-tee-2, tick-tee-3]
-description: Heavyweight cotton tee with the APA timeline-tick wordmark. Printed in Austin in batches of 50.
+description: Heavyweight cotton tee carrying the APA timeline-tick wordmark, printed front and back.
 details:
-  - 8 oz heavyweight cotton
+  - Heavyweight cotton
   - Boxy unisex fit
-  - Screen-printed by Heritage Print Co
+  - Printed wordmark
   - Pre-shrunk
-inStock: true
+stock: 64
 ---

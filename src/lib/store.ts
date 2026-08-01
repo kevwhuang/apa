@@ -1,79 +1,150 @@
-const CHANGE_EVENT = 'apa:cart-changed';
-const STORAGE_KEY = 'apa.cart';
+import { BASIS_POINTS_DIVISOR, CENTS_PER_DOLLAR, COMMERCE, STORAGE } from '@lib/constants';
+import { createStore } from '@lib/state';
 
-function read(): CartItem[] {
-    try {
-        const items: CartItem[] = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
+const cart = createStore<CartItem[]>({
+    fallback: [],
+    key: STORAGE.cart.key,
+    normalize: normalizeItems,
+    scope: STORAGE.cart.scope,
+    topic: STORAGE.cart.topic,
+});
 
-        return items.map(item => ({
-            ...item,
-            priceCents: Number(item.priceCents) || 0,
-            quantity: Math.max(1, Math.trunc(Number(item.quantity)) || 1),
-        }));
-    } catch {
-        return [];
-    }
+export function add(item: CartItem, maxQuantity: number = COMMERCE.maxQuantityPerItem): void {
+    cart.update((items) => {
+        const next = [...items];
+        const index = next.findIndex(existing => variantKey(existing) === variantKey(item));
+
+        if (index < 0) {
+            next.push({ ...item, quantity: clampQuantity(item.quantity, maxQuantity) });
+
+            return next;
+        }
+
+        next[index] = { ...next[index], quantity: clampQuantity(next[index].quantity + item.quantity, maxQuantity) };
+
+        return next;
+    });
 }
 
-function variantKey(item: CartItem) {
-    return `${item.productSlug}|${item.size ?? ''}|${item.color ?? ''}`;
-}
+function clampQuantity(quantity: number, maxQuantity: number): number {
+    const ceiling = Math.max(1, Math.trunc(maxQuantity) || 1);
 
-function write(items: CartItem[]) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    window.dispatchEvent(new Event(CHANGE_EVENT));
-}
-
-export function add(item: CartItem): void {
-    const items = read();
-
-    const index = items.findIndex(existing => variantKey(existing) === variantKey(item));
-
-    if (index >= 0) {
-        items[index].quantity += item.quantity;
-    } else {
-        items.push(item);
-    }
-
-    write(items);
+    return Math.min(ceiling, Math.max(1, Math.trunc(quantity) || 1));
 }
 
 export function clear(): void {
-    write([]);
+    cart.set([]);
 }
 
-export function count(items = read()): number {
+export function count(items = getItems()): number {
     return items.reduce((total, item) => total + item.quantity, 0);
 }
 
 export function getItems(): CartItem[] {
-    return read();
+    return cart.get();
+}
+
+function isCartItem(item: unknown): item is CartItem {
+    return typeof item === 'object' && item !== null && 'productSlug' in item && typeof item.productSlug === 'string';
+}
+
+function normalizeItems(items: CartItem[]): CartItem[] {
+    if (!Array.isArray(items)) return [];
+
+    return items.filter(isCartItem).map(item => ({
+        ...item,
+        priceCents: Number(item.priceCents) || 0,
+        quantity: Math.max(1, Math.trunc(Number(item.quantity)) || 1),
+    }));
 }
 
 export function onChange(callback: (items: CartItem[]) => void): () => void {
-    const handler = () => callback(read());
+    return cart.onChange(callback);
+}
 
-    window.addEventListener(CHANGE_EVENT, handler);
+export function reconcile(catalog: CatalogEntry[], items = getItems()): CartIssue[] {
+    const entries = new Map(catalog.map(entry => [entry.slug, entry]));
+    const issues: CartIssue[] = [];
+    const next: CartItem[] = [];
 
-    return () => window.removeEventListener(CHANGE_EVENT, handler);
+    items.forEach((item) => {
+        const entry = entries.get(item.productSlug);
+
+        if (!entry) {
+            issues.push({ kind: 'removed', title: item.title });
+
+            return;
+        }
+
+        if (entry.stock === 0) {
+            issues.push({ kind: 'out-of-stock', title: entry.title });
+
+            return;
+        }
+
+        const ceiling = Math.min(entry.stock, COMMERCE.maxQuantityPerItem);
+        const reconciled = { ...item };
+
+        if (item.quantity > ceiling) {
+            issues.push({ from: item.quantity, kind: 'quantity-reduced', title: entry.title, to: ceiling });
+            reconciled.quantity = ceiling;
+        }
+
+        if (item.priceCents !== entry.priceCents) {
+            issues.push({ from: item.priceCents, kind: 'price-changed', title: entry.title, to: entry.priceCents });
+            reconciled.priceCents = entry.priceCents;
+        }
+
+        next.push(reconciled);
+    });
+
+    if (issues.length > 0) cart.set(next);
+
+    return issues;
 }
 
 export function remove(index: number): void {
-    const items = read();
+    cart.update((items) => {
+        const next = [...items];
 
-    items.splice(index, 1);
-    write(items);
+        next.splice(index, 1);
+
+        return next;
+    });
 }
 
-export function setQuantity(index: number, quantity: number): void {
-    const items = read();
+export function setQuantity(index: number, quantity: number, maxQuantity: number = COMMERCE.maxQuantityPerItem): void {
+    const items = getItems();
 
     if (!items[index]) return;
 
-    items[index].quantity = Math.max(1, quantity);
-    write(items);
+    const next = [...items];
+
+    next[index] = { ...next[index], quantity: clampQuantity(quantity, maxQuantity) };
+
+    cart.set(next);
 }
 
-export function subtotalCents(items = read()): number {
+export function subtotalCents(items = getItems()): number {
     return items.reduce((total, item) => total + item.priceCents * item.quantity, 0);
+}
+
+export function totals(items = getItems(), prodsApplied = 0): CartTotals {
+    const subtotal = subtotalCents(items);
+    const credit = Math.max(0, Math.trunc(prodsApplied) || 0) * CENTS_PER_DOLLAR;
+    const discountCents = Math.min(credit, subtotal);
+    const taxCents = Math.round((subtotal - discountCents) * COMMERCE.taxBasisPoints / BASIS_POINTS_DIVISOR);
+    const shippingCents = subtotal === 0 || subtotal >= COMMERCE.freeShippingThresholdCents ? 0 : COMMERCE.shippingFlatCents;
+
+    return {
+        discountCents,
+        shippingCents,
+        subtotalCents: subtotal,
+        taxCents,
+        totalCents: subtotal - discountCents + taxCents + shippingCents,
+    };
+}
+
+function variantKey(item: CartItem): string {
+    return `${item.productSlug}|${item.size ?? ''}|${item.color ?? ''}`;
 }

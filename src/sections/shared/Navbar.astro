@@ -1,0 +1,709 @@
+---
+import AccountControl from '@components/shared/AccountControl.astro';
+import BrandMark from '@components/brand/Mark.astro';
+import IconCart from '@components/icons/Cart.astro';
+import IconChevron from '@components/icons/Chevron.astro';
+import IconMenu from '@components/icons/Menu.astro';
+import { BRAND, BRAND_SIZES } from '@lib/brand';
+import { NAV_GROUPS } from '@lib/constants';
+
+interface Props {
+    hasHero?: boolean;
+}
+
+const { hasHero = false } = Astro.props;
+---
+
+<header
+    class:list={['site-header', hasHero && 'site-header--overlay']}
+    data-has-hero={hasHero ? 'true' : undefined}
+    style={`--mark-compact: ${BRAND_SIZES.markNavCompact}px`}
+>
+    <div class="stage stage--flush h-full">
+        <div class="site-header__bar">
+            <a
+                class="site-header__brand"
+                aria-label={`${BRAND.name} \u2014 home`}
+                href="/"
+            >
+                <BrandMark class="site-header__mark" />
+                <span class="site-header__name">{BRAND.name}</span>
+            </a>
+            <nav
+                id="site-nav"
+                class="site-nav"
+                aria-label="Primary"
+            >
+                <ul class="site-nav__list list-none">
+                    {NAV_GROUPS.map(group => (
+                        <li class="site-nav__group">
+                            {'items' in group && (
+                                <Fragment>
+                                    <button
+                                        id={`nav-${group.id}`}
+                                        class="site-nav__trigger"
+                                        aria-controls={`nav-${group.id}-menu`}
+                                        aria-expanded="false"
+                                        data-nav-trigger
+                                        type="button"
+                                    >
+                                        <span>{group.label}</span>
+                                        <IconChevron />
+                                    </button>
+                                    <ul
+                                        id={`nav-${group.id}-menu`}
+                                        class="site-nav__menu list-none"
+                                        aria-labelledby={`nav-${group.id}`}
+                                        data-nav-menu
+                                        hidden
+                                    >
+                                        {group.items.map(item => (
+                                            <li>
+                                                <a
+                                                    class="site-nav__item"
+                                                    href={item.href}
+                                                >
+                                                    {item.label}
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </Fragment>
+                            )}
+                            {'href' in group && (
+                                <a
+                                    class="site-nav__link"
+                                    href={group.href}
+                                >
+                                    {group.label}
+                                </a>
+                            )}
+                        </li>
+                    ))}
+                </ul>
+            </nav>
+            <div class="site-header__controls">
+                <AccountControl />
+                <a
+                    class="cart-link"
+                    href="/store/cart"
+                >
+                    <IconCart />
+                    <span
+                        class="cart-count"
+                        aria-hidden="true"
+                        hidden
+                    >
+                        0
+                    </span>
+                    <span
+                        class="cart-label sr-only"
+                        aria-live="polite"
+                    >
+                        Cart
+                    </span>
+                </a>
+                <button
+                    class="nav-toggle"
+                    aria-controls="site-nav"
+                    aria-expanded="false"
+                    aria-label="Toggle menu"
+                    type="button"
+                >
+                    <IconMenu />
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<style>
+    .cart-count {
+        background: var(--color-accent);
+        color: var(--color-ink);
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        line-height: 1;
+        min-width: 18px;
+        padding: 3px 4px;
+        position: absolute;
+        right: 3px;
+        top: 7px;
+    }
+
+    .cart-link {
+        align-items: center;
+        display: inline-flex;
+        height: var(--control-size);
+        justify-content: center;
+        position: relative;
+        transition: color var(--duration-fast) var(--motion-ease-ui);
+        width: var(--control-size);
+    }
+
+    .cart-link:hover {
+        color: var(--color-accent-deep);
+    }
+
+    .nav-toggle {
+        align-items: center;
+        display: none;
+        height: var(--control-size);
+        justify-content: center;
+        transition: color var(--duration-fast) var(--motion-ease-ui);
+        width: var(--control-size);
+    }
+
+    .nav-toggle:hover {
+        color: var(--color-accent-deep);
+    }
+
+    .site-header {
+        background: var(--color-surface);
+        border-bottom: 2px solid var(--color-ink);
+        height: var(--header-height);
+        position: sticky;
+        top: 0;
+        transition:
+            background var(--duration-slow) var(--motion-ease-ui),
+            border-color var(--duration-slow) var(--motion-ease-ui),
+            box-shadow var(--duration-slow) var(--motion-ease-ui),
+            transform var(--duration-slow) var(--motion-ease-ui);
+        z-index: var(--z-header);
+    }
+
+    .site-header--overlay {
+        background: transparent;
+        border-bottom-color: transparent;
+        margin-bottom: calc(-1 * var(--header-height));
+    }
+
+    .site-header--overlay.is-solid {
+        background: var(--color-surface);
+        border-bottom-color: var(--color-ink);
+        box-shadow: var(--lift) var(--lift) 0 0 var(--color-ink-20);
+    }
+
+    .site-header.is-hidden {
+        transform: translateY(-100%);
+    }
+
+    .site-header__bar {
+        align-items: center;
+        display: flex;
+        gap: var(--space-md);
+        height: 100%;
+    }
+
+    .site-header__brand {
+        align-items: center;
+        display: inline-flex;
+        flex-shrink: 0;
+        gap: var(--space-2xs);
+        height: var(--control-size);
+        user-select: none;
+    }
+
+    .site-header__controls {
+        align-items: center;
+        display: flex;
+        gap: var(--space-3xs);
+        margin-left: auto;
+    }
+
+    .site-header__name {
+        font-size: var(--text-2xs);
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        text-transform: uppercase;
+    }
+
+    .site-nav__group {
+        position: relative;
+    }
+
+    .site-nav__item {
+        --nav-item-hover-bg: var(--color-ink);
+        --nav-item-hover-ink: var(--color-surface);
+        align-items: center;
+        display: flex;
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        letter-spacing: 0.04em;
+        min-height: var(--control-size);
+        padding-inline: var(--space-sm);
+        text-transform: uppercase;
+        transition:
+            background var(--duration-fast) var(--motion-ease-ui),
+            color var(--duration-fast) var(--motion-ease-ui);
+        white-space: nowrap;
+        width: 100%;
+    }
+
+    .site-nav__item:hover,
+    .site-nav__item:focus-visible {
+        background: var(--nav-item-hover-bg);
+        color: var(--nav-item-hover-ink);
+    }
+
+    .site-nav__item[aria-current] {
+        box-shadow: inset 4px 0 0 0 var(--color-accent);
+        color: var(--color-accent-deep);
+        font-weight: 700;
+    }
+
+    .site-nav__item[aria-current]:hover,
+    .site-nav__item[aria-current]:focus-visible {
+        color: var(--color-accent);
+    }
+
+    .site-nav__link {
+        align-items: center;
+        display: flex;
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        letter-spacing: 0.04em;
+        min-height: var(--control-size);
+        padding-inline: var(--space-xs);
+        text-transform: uppercase;
+        transition: color var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .site-nav__link:hover {
+        color: var(--color-accent-deep);
+    }
+
+    .site-nav__link[aria-current] {
+        color: var(--color-accent-deep);
+        font-weight: 700;
+    }
+
+    .site-nav__list {
+        display: flex;
+    }
+
+    .site-nav__menu {
+        background: var(--color-surface-raised);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--lift) var(--lift) 0 0 var(--color-ink);
+        display: flex;
+        flex-direction: column;
+        inset: calc(100% + 6px) auto auto 0;
+        min-width: 240px;
+        padding-bottom: var(--space-3xs);
+        position: absolute;
+        z-index: var(--z-header);
+    }
+
+    .site-nav__menu::before {
+        background: var(--color-accent);
+        content: '';
+        height: 4px;
+        margin-bottom: var(--space-3xs);
+    }
+
+    .site-nav__menu li + li {
+        border-top: 1px solid var(--color-ink-20);
+    }
+
+    .site-nav__trigger {
+        align-items: center;
+        display: flex;
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        gap: var(--space-3xs);
+        letter-spacing: 0.04em;
+        min-height: var(--control-size);
+        padding-inline: var(--space-xs);
+        text-transform: uppercase;
+        transition: color var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .site-nav__trigger :global(svg) {
+        transition: rotate var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .site-nav__trigger:hover {
+        color: var(--color-accent-deep);
+    }
+
+    .site-nav__trigger[aria-expanded='true'] {
+        color: var(--color-accent-deep);
+    }
+
+    .site-nav__trigger[aria-expanded='true'] :global(svg) {
+        rotate: 180deg;
+    }
+
+    @media (max-width: 1024px) {
+        .nav-toggle {
+            display: inline-flex;
+        }
+
+        .site-nav {
+            background: var(--color-surface);
+            border-bottom: 2px solid var(--color-ink);
+            display: none;
+            inset: 100% 0 auto;
+            position: absolute;
+        }
+
+        .site-nav.is-open {
+            display: block;
+        }
+
+        .site-nav__item {
+            --nav-item-hover-bg: none;
+            --nav-item-hover-ink: var(--color-accent-deep);
+        }
+
+        .site-nav__list {
+            flex-direction: column;
+            padding: var(--space-2xs) 0;
+            padding-inline-end: var(--launcher-rail);
+            padding-inline-start: calc(var(--shell-pad) - var(--space-xs));
+        }
+
+        .site-nav__menu {
+            background: none;
+            border: 0;
+            box-shadow: none;
+            inset: auto;
+            min-width: 0;
+            padding-bottom: 0;
+            padding-left: var(--space-md);
+            position: static;
+        }
+
+        .site-nav__menu::before {
+            display: none;
+        }
+
+        .site-nav__menu li + li {
+            border-top: 0;
+        }
+
+        .site-nav__trigger {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .site-header__name {
+            display: none;
+        }
+
+        :global(.site-header__mark) {
+            height: var(--mark-compact);
+        }
+    }
+</style>
+
+<script>
+    import { count, getItems, onChange } from '@lib/store';
+    import { registerPageScript } from '@lib/utils';
+
+    const HOVER_CLICK_GRACE = 500;
+    const HOVER_CLOSE_DELAY = 200;
+    const HOVER_QUERY = '(hover: hover) and (min-width: 1024.01px)';
+    const SCROLL_DELTA = 6;
+    const SCROLL_SOLID_THRESHOLD = 24;
+    const SCROLL_TOP_THRESHOLD = 80;
+
+    let cartUnsubscribe: (() => void) | undefined;
+    let hoverCloseTimer: number | undefined;
+    let lastScrollY = 0;
+    let pointerActive = false;
+    let scrollTicking = false;
+
+    function canHover() {
+        return window.matchMedia(HOVER_QUERY).matches;
+    }
+
+    function clearHoverTimer() {
+        clearTimeout(hoverCloseTimer);
+        hoverCloseTimer = undefined;
+    }
+
+    function closeAll(except?: HTMLElement) {
+        document.querySelectorAll<HTMLElement>('[data-nav-trigger]').forEach((trigger) => {
+            if (trigger === except) return;
+            if (findMenu(trigger)?.contains(document.activeElement)) return;
+
+            setExpanded(trigger, false);
+        });
+    }
+
+    function closeMenu(menu: HTMLElement, toggle: HTMLElement) {
+        closeAll();
+        menu.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    function findMenu(trigger: HTMLElement) {
+        const id = trigger.getAttribute('aria-controls');
+
+        return id ? document.getElementById(id) : null;
+    }
+
+    function focusItem(menu: HTMLElement, index: number) {
+        const items = listItems(menu);
+
+        if (!items.length) return;
+
+        items[(index + items.length) % items.length].focus();
+    }
+
+    function handleDocumentClick(event: MouseEvent, menu: HTMLElement, toggle: HTMLElement) {
+        if (!(event.target instanceof Element)) return;
+        if (event.target.closest('[data-nav-trigger], [data-nav-menu]')) return;
+
+        closeAll();
+
+        if (!menu.classList.contains('is-open')) return;
+        if (event.target.closest('.site-nav, .nav-toggle')) return;
+
+        closeMenu(menu, toggle);
+    }
+
+    function handleDocumentKeydown(event: KeyboardEvent, menu: HTMLElement, toggle: HTMLElement) {
+        if (event.key !== 'Escape') return;
+
+        const expanded = document.querySelector<HTMLElement>('[data-nav-trigger][aria-expanded="true"]');
+
+        if (expanded) {
+            setExpanded(expanded, false);
+            expanded.focus();
+
+            return;
+        }
+
+        if (menu.classList.contains('is-open')) {
+            closeMenu(menu, toggle);
+            toggle.focus();
+        }
+    }
+
+    function handleFocusOut(event: FocusEvent) {
+        const group = event.target instanceof Element ? event.target.closest('.site-nav__group, .account__in') : null;
+        const next = event.relatedTarget instanceof Element ? event.relatedTarget : null;
+
+        if (!group || pointerActive) return;
+        if (next && group.contains(next)) return;
+
+        const trigger = group.querySelector<HTMLElement>('[data-nav-trigger]');
+
+        if (trigger) setExpanded(trigger, false);
+    }
+
+    function handleHoverLeave(trigger: HTMLElement) {
+        if (!canHover()) return;
+        if (trigger.getAttribute('aria-expanded') !== 'true') return;
+
+        scheduleHoverClose(trigger);
+    }
+
+    function handleHoverOpen(trigger: HTMLElement) {
+        if (!canHover()) return;
+
+        clearHoverTimer();
+
+        if (trigger.getAttribute('aria-expanded') === 'true') return;
+
+        closeAll(trigger);
+        setExpanded(trigger, true);
+        trigger.dataset.hoverOpened = String(Date.now());
+    }
+
+    function handleMenuClick(event: Event, menu: HTMLElement, toggle: HTMLElement) {
+        if (event.target instanceof Element && event.target.closest('a')) closeMenu(menu, toggle);
+    }
+
+    function handleMenuKeydown(event: KeyboardEvent, menu: HTMLElement) {
+        const index = listItems(menu).indexOf(document.activeElement as HTMLElement);
+
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            focusItem(menu, index + (event.key === 'ArrowDown' ? 1 : -1));
+        } else if (event.key === 'Home' || event.key === 'End') {
+            event.preventDefault();
+            focusItem(menu, event.key === 'Home' ? 0 : -1);
+        }
+    }
+
+    function handlePointerDown() {
+        pointerActive = true;
+    }
+
+    function handlePointerSettle() {
+        pointerActive = false;
+    }
+
+    function handleScroll(header: HTMLElement) {
+        if (scrollTicking) return;
+
+        scrollTicking = true;
+        requestAnimationFrame(() => updateHeader(header));
+    }
+
+    function handleTriggerClick(trigger: HTMLElement) {
+        const expanded = trigger.getAttribute('aria-expanded') === 'true';
+        const hoverOpenedAt = Number(trigger.dataset.hoverOpened ?? '0');
+
+        clearHoverTimer();
+        delete trigger.dataset.hoverOpened;
+        closeAll(trigger);
+
+        if (expanded && hoverOpenedAt && Date.now() - hoverOpenedAt < HOVER_CLICK_GRACE) return;
+
+        setExpanded(trigger, !expanded);
+    }
+
+    function handleTriggerKeydown(event: KeyboardEvent, trigger: HTMLElement) {
+        const menu = findMenu(trigger);
+
+        if (!menu) return;
+        if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+
+        event.preventDefault();
+        closeAll(trigger);
+        setExpanded(trigger, true);
+        focusItem(menu, event.key === 'ArrowDown' ? 0 : -1);
+    }
+
+    function initNavbar(signal: AbortSignal) {
+        cartUnsubscribe?.();
+        cartUnsubscribe = onChange(updateCart);
+        signal.addEventListener('abort', () => cartUnsubscribe?.(), { once: true });
+        signal.addEventListener('abort', clearHoverTimer, { once: true });
+
+        const header = document.querySelector<HTMLElement>('.site-header');
+        const menu = document.querySelector<HTMLElement>('.site-nav');
+        const toggle = document.querySelector<HTMLElement>('.nav-toggle');
+
+        if (!header || !menu || !toggle) return;
+
+        header.classList.remove('is-hidden');
+        lastScrollY = window.scrollY;
+        scrollTicking = false;
+        updateActiveLink();
+        updateCart();
+        updateHeader(header);
+
+        document.addEventListener('click', event => handleDocumentClick(event, menu, toggle), { signal });
+        document.addEventListener('click', handlePointerSettle, { signal });
+        document.addEventListener('focusout', handleFocusOut, { signal });
+        document.addEventListener('keydown', event => handleDocumentKeydown(event, menu, toggle), { signal });
+        document.addEventListener('keydown', handlePointerSettle, { capture: true, signal });
+        document.addEventListener('pointercancel', handlePointerSettle, { signal });
+        document.addEventListener('pointerdown', handlePointerDown, { capture: true, signal });
+        header.addEventListener('focusin', () => header.classList.remove('is-hidden'), { signal });
+        menu.addEventListener('click', event => handleMenuClick(event, menu, toggle), { signal });
+        toggle.addEventListener('click', () => toggleMenu(menu, toggle), { signal });
+        window.addEventListener('scroll', () => handleScroll(header), { passive: true, signal });
+
+        document.querySelectorAll<HTMLElement>('[data-nav-trigger]').forEach((trigger) => {
+            const panel = findMenu(trigger);
+            const zone = trigger.parentElement;
+
+            if (!panel) return;
+
+            panel.addEventListener('keydown', event => handleMenuKeydown(event, panel), { signal });
+            trigger.addEventListener('click', () => handleTriggerClick(trigger), { signal });
+            trigger.addEventListener('keydown', event => handleTriggerKeydown(event, trigger), { signal });
+            zone?.addEventListener('pointerenter', () => handleHoverOpen(trigger), { signal });
+            zone?.addEventListener('pointerleave', () => handleHoverLeave(trigger), { signal });
+        });
+    }
+
+    function listItems(menu: HTMLElement) {
+        return Array.from(menu.querySelectorAll<HTMLElement>('li:not([hidden]) a, li:not([hidden]) button'));
+    }
+
+    function scheduleHoverClose(trigger: HTMLElement) {
+        clearHoverTimer();
+        hoverCloseTimer = window.setTimeout(() => {
+            const menu = findMenu(trigger);
+
+            if (menu?.contains(document.activeElement)) return;
+
+            setExpanded(trigger, false);
+        }, HOVER_CLOSE_DELAY);
+    }
+
+    function setExpanded(trigger: HTMLElement, expanded: boolean) {
+        const menu = findMenu(trigger);
+
+        if (!menu) return;
+
+        if (!expanded) delete trigger.dataset.hoverOpened;
+
+        trigger.setAttribute('aria-expanded', String(expanded));
+        menu.hidden = !expanded;
+    }
+
+    function toggleMenu(menu: HTMLElement, toggle: HTMLElement) {
+        if (menu.classList.contains('is-open')) {
+            closeMenu(menu, toggle);
+
+            return;
+        }
+
+        menu.classList.add('is-open');
+        toggle.setAttribute('aria-expanded', 'true');
+        menu.querySelector<HTMLElement>('a, button')?.focus();
+    }
+
+    function updateActiveLink() {
+        const currentHash = window.location.hash;
+        const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
+
+        document.querySelectorAll<HTMLAnchorElement>('.site-nav a').forEach((link) => {
+            const target = link.getAttribute('href') ?? '';
+            const [path] = target.split('#');
+            const hash = target.slice(path.length);
+            const href = path.replace(/\/$/, '') || '/';
+
+            if (href === currentPath && (hash === '' || hash === currentHash)) {
+                link.setAttribute('aria-current', 'page');
+            } else if (href !== '/' && currentPath.startsWith(`${href}/`)) {
+                link.setAttribute('aria-current', 'true');
+            } else {
+                link.removeAttribute('aria-current');
+            }
+        });
+    }
+
+    function updateCart() {
+        const badge = document.querySelector<HTMLElement>('.cart-count');
+        const label = document.querySelector<HTMLElement>('.cart-label');
+
+        if (!badge || !label) return;
+
+        const total = count(getItems());
+
+        badge.textContent = String(total);
+        badge.hidden = total === 0;
+        label.textContent = `Cart, ${total} ${total === 1 ? 'item' : 'items'}`;
+    }
+
+    function updateHeader(header: HTMLElement) {
+        const currentScrollY = window.scrollY;
+
+        header.classList.toggle('is-solid', currentScrollY > SCROLL_SOLID_THRESHOLD);
+
+        if (currentScrollY < SCROLL_TOP_THRESHOLD) {
+            header.classList.remove('is-hidden');
+        } else if (currentScrollY > lastScrollY + SCROLL_DELTA && !header.contains(document.activeElement)) {
+            header.classList.add('is-hidden');
+            closeAll();
+        } else if (currentScrollY < lastScrollY - SCROLL_DELTA) {
+            header.classList.remove('is-hidden');
+        }
+
+        lastScrollY = currentScrollY;
+        scrollTicking = false;
+    }
+
+    registerPageScript(initNavbar);
+</script>

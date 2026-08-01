@@ -1,7 +1,7 @@
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { describe, expect, test } from 'vitest';
 
-import ErrorServer from '../../src/sections/ErrorServer.astro';
+import ErrorServer from '../../src/sections/errors/Server.astro';
 
 describe('ErrorServer', () => {
     test('renders 500 heading', async () => {

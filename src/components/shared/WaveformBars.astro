@@ -1,0 +1,33 @@
+---
+interface Props {
+    bars: number[];
+    class?: string;
+    gap?: number;
+    width?: number;
+}
+
+const BAR_GAP = 1;
+const BAR_WIDTH = 3;
+const TRACK_HEIGHT = 100;
+
+const { bars, class: waveformClass, gap = BAR_GAP, width = BAR_WIDTH } = Astro.props;
+
+const trackWidth = bars.length * (width + gap) - gap;
+---
+
+<svg
+    class={waveformClass}
+    aria-hidden="true"
+    preserveAspectRatio="none"
+    viewBox={`0 0 ${trackWidth} ${TRACK_HEIGHT}`}
+>
+    {bars.map((height, index) => (
+        <rect
+            fill="currentColor"
+            height={height}
+            width={width}
+            x={index * (width + gap)}
+            y={TRACK_HEIGHT - height}
+        />
+    ))}
+</svg>

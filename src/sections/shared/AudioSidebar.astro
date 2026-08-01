@@ -1,0 +1,442 @@
+---
+import IconClose from '@components/icons/Close.astro';
+import IconPause from '@components/icons/Pause.astro';
+import IconPlay from '@components/icons/Play.astro';
+import IconVolume from '@components/icons/Volume.astro';
+import IconWaveform from '@components/icons/Waveform.astro';
+---
+
+<aside
+    class="dock"
+    aria-label="Track player"
+    transition:persist
+>
+    <button
+        class="dock__launcher"
+        aria-controls="dock-panel"
+        aria-expanded="false"
+        data-dock-launcher
+        type="button"
+    >
+        <IconWaveform />
+        <span class="sr-only">Open the track player</span>
+    </button>
+    <div
+        id="dock-panel"
+        class="dock__panel"
+        hidden
+    >
+        <div class="dock__head">
+            <p class="label dock__eyebrow">Now playing</p>
+            <button
+                class="dock__close"
+                data-dock-close
+                type="button"
+            >
+                <IconClose />
+                <span class="sr-only">Close the track player</span>
+            </button>
+        </div>
+        <p
+            class="dock__title"
+            data-dock-title
+        >
+            Nothing playing
+        </p>
+        <p
+            class="dock__artist"
+            data-dock-artist
+        >
+            Play a track to load it here
+        </p>
+        <div class="dock__transport">
+            <button
+                class="dock__control dock__control--play"
+                data-dock-toggle
+                disabled
+                type="button"
+            >
+                <span class="dock__icon dock__icon--play">
+                    <IconPlay />
+                </span>
+                <span
+                    class="dock__icon dock__icon--pause"
+                    hidden
+                >
+                    <IconPause />
+                </span>
+                <span
+                    class="sr-only"
+                    data-dock-toggle-label
+                >
+                    Play
+                </span>
+            </button>
+            <button
+                class="dock__control"
+                aria-pressed="false"
+                data-dock-mute
+                type="button"
+            >
+                <span class="dock__icon dock__icon--sound">
+                    <IconVolume />
+                </span>
+                <span
+                    class="dock__icon dock__icon--muted"
+                    hidden
+                >
+                    <IconVolume muted />
+                </span>
+                <span class="sr-only">Mute</span>
+            </button>
+        </div>
+        <input
+            class="dock__seek"
+            aria-label="Seek within the track"
+            data-dock-seek
+            disabled
+            max="0"
+            min="0"
+            step="1"
+            type="range"
+            value="0"
+        />
+        <p class="dock__clock">
+            <span data-dock-position>0:00</span>
+            <span data-dock-duration>0:00</span>
+        </p>
+        <a
+            class="action-text dock__link"
+            href="/producers"
+        >
+            Find a track on the roster &rarr;
+        </a>
+        <p class="dock__note">
+            Every track here is synthesised in your browser. No audio file is fetched, streamed, or
+            stored &mdash; the transport is real, the recording is not.
+        </p>
+    </div>
+    <p
+        class="sr-only"
+        aria-live="polite"
+        data-dock-status
+    />
+</aside>
+
+<style>
+    .dock {
+        display: none;
+    }
+
+    .dock.is-ready {
+        display: block;
+    }
+
+    .dock__artist {
+        color: var(--color-ink-inverse-muted);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        padding: 0 var(--space-md) var(--space-md);
+    }
+
+    .dock__clock {
+        color: var(--color-ink-inverse-muted);
+        display: flex;
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        justify-content: space-between;
+        padding: var(--space-3xs) var(--space-md) var(--space-md);
+    }
+
+    .dock__close {
+        align-items: center;
+        display: inline-flex;
+        height: 50px;
+        justify-content: center;
+        transition: color var(--duration-fast) var(--motion-ease-ui);
+        width: 50px;
+    }
+
+    .dock__close:hover {
+        color: var(--color-accent-light);
+    }
+
+    .dock__control {
+        align-items: center;
+        border: 2px solid var(--color-ink-inverse);
+        display: inline-flex;
+        height: 50px;
+        justify-content: center;
+        transition: background var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui);
+        width: 50px;
+    }
+
+    .dock__control:hover {
+        background: var(--color-ink-inverse);
+        color: var(--color-ink);
+    }
+
+    .dock__control--play {
+        background: var(--color-accent);
+        border-color: var(--color-accent);
+        color: var(--color-ink);
+    }
+
+    .dock__control--play:hover {
+        background: var(--color-accent-light);
+        border-color: var(--color-accent-light);
+        color: var(--color-ink);
+    }
+
+    .dock__control--play:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+    }
+
+    .dock__control--play:disabled:hover {
+        background: var(--color-accent);
+        border-color: var(--color-accent);
+    }
+
+    .dock__eyebrow {
+        color: var(--color-accent-light);
+        padding: var(--space-md) var(--space-md) var(--space-2xs);
+    }
+
+    .dock__head {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+        padding-right: var(--space-2xs);
+    }
+
+    .dock__launcher {
+        align-items: center;
+        background: var(--color-surface-inverse);
+        border: 2px solid var(--color-ink);
+        border-right: 0;
+        color: var(--color-ink-inverse);
+        display: inline-flex;
+        height: var(--launcher-size);
+        inset: auto 0 calc(var(--space-md) + var(--launcher-size) + var(--space-2xs)) auto;
+        justify-content: center;
+        position: fixed;
+        transition: background var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui);
+        width: var(--launcher-size);
+        z-index: var(--z-drawer);
+    }
+
+    .dock__launcher:hover {
+        background: var(--color-accent);
+        color: var(--color-ink);
+    }
+
+    .dock__link {
+        align-items: center;
+        border-top: 1px solid var(--color-ink-inverse-10);
+        color: var(--color-ink-inverse);
+        display: flex;
+        min-height: 50px;
+        padding: 0 var(--space-md);
+        transition: color var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .dock__link:hover {
+        color: var(--color-accent-light);
+    }
+
+    .dock__note {
+        border-top: 1px solid var(--color-ink-inverse-10);
+        color: var(--color-ink-inverse-muted);
+        font-size: var(--text-sm);
+        padding: var(--space-sm) var(--space-md);
+    }
+
+    .dock__panel {
+        background: var(--color-surface-inverse);
+        border-left: 2px solid var(--color-ink);
+        color: var(--color-ink-inverse);
+        inset: var(--header-height) var(--launcher-rail) 0 auto;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        position: fixed;
+        width: min(340px, calc(100vw - var(--launcher-rail)));
+        z-index: var(--z-drawer);
+    }
+
+    .dock__seek {
+        accent-color: var(--color-accent);
+        display: block;
+        height: 50px;
+        margin-block-end: 0;
+        margin-inline: var(--space-md);
+        width: calc(100% - 2 * var(--space-md));
+    }
+
+    .dock__seek:disabled {
+        opacity: 0.55;
+    }
+
+    .dock__title {
+        font-size: var(--text-lg);
+        font-weight: 800;
+        padding: 0 var(--space-md);
+    }
+
+    .dock__transport {
+        display: flex;
+        gap: var(--space-2xs);
+        padding: 0 var(--space-md) var(--space-sm);
+    }
+</style>
+
+<script>
+    import { TRACK_PLAY_TOPIC } from '@lib/constants';
+    import {
+        announceTrackState,
+        closePlayer,
+        getPlayerState,
+        getPosition,
+        getTrack,
+        isMuted,
+        onPlayerChange,
+        openPlayer,
+        playTrack,
+        seekTo,
+        setMuted,
+        togglePlayback,
+    } from '@lib/audio';
+    import { formatDuration, registerPageScript } from '@lib/utils';
+
+    let frame = 0;
+    let unsubscribe: (() => void) | undefined;
+
+    function handleKeydown(event: KeyboardEvent) {
+        if (event.key !== 'Escape' || !getPlayerState().open) return;
+
+        event.preventDefault();
+        closePlayer();
+        document.querySelector<HTMLElement>('[data-dock-launcher]')?.focus();
+    }
+
+    function handleLaunch() {
+        if (getPlayerState().open) {
+            closePlayer();
+
+            return;
+        }
+
+        openPlayer();
+        document.querySelector<HTMLElement>('[data-dock-close]')?.focus();
+    }
+
+    function handleSeek(input: HTMLInputElement) {
+        seekTo(Number(input.value));
+    }
+
+    function handleTrackPlay(event: Event) {
+        const detail = (event as CustomEvent<{ track: PlayerTrack }>).detail;
+
+        if (!detail?.track) return;
+
+        playTrack(detail.track);
+        setText('[data-dock-status]', `Playing ${detail.track.title} by ${detail.track.artist}`);
+    }
+
+    function initDock(signal: AbortSignal) {
+        const dock = document.querySelector<HTMLElement>('.dock');
+        const launcher = document.querySelector<HTMLElement>('[data-dock-launcher]');
+        const seek = document.querySelector<HTMLInputElement>('[data-dock-seek]');
+
+        if (!dock || !launcher || !seek) return;
+
+        dock.classList.add('is-ready');
+        announceTrackState();
+        unsubscribe?.();
+        unsubscribe = onPlayerChange(render);
+        signal.addEventListener('abort', teardown, { once: true });
+
+        document.querySelector<HTMLElement>('[data-dock-close]')?.addEventListener('click', () => {
+            closePlayer();
+            launcher.focus();
+        }, { signal });
+        document.querySelector<HTMLElement>('[data-dock-mute]')?.addEventListener('click', toggleMute, { signal });
+        document.querySelector<HTMLElement>('[data-dock-toggle]')?.addEventListener('click', togglePlayback, { signal });
+        dock.addEventListener('keydown', handleKeydown, { signal });
+        launcher.addEventListener('click', handleLaunch, { signal });
+        seek.addEventListener('input', () => handleSeek(seek), { signal });
+        window.addEventListener(TRACK_PLAY_TOPIC, handleTrackPlay, { signal });
+        render();
+    }
+
+    function render() {
+        const state = getPlayerState();
+        const track = getTrack();
+        const panel = document.querySelector<HTMLElement>('#dock-panel');
+        const launcher = document.querySelector<HTMLElement>('[data-dock-launcher]');
+        const seek = document.querySelector<HTMLInputElement>('[data-dock-seek]');
+        const toggle = document.querySelector<HTMLElement>('[data-dock-toggle]');
+
+        if (!launcher || !panel || !seek || !toggle) return;
+
+        panel.hidden = !state.open;
+        launcher.setAttribute('aria-expanded', String(state.open));
+        seek.toggleAttribute('disabled', !track);
+        toggle.toggleAttribute('disabled', !track);
+        setText('[data-dock-toggle-label]', state.playing ? 'Pause' : 'Play');
+        setHidden('.dock__icon--pause', !state.playing);
+        setHidden('.dock__icon--play', state.playing);
+
+        if (track) {
+            seek.max = String(track.durationSeconds);
+            setText('[data-dock-title]', track.title);
+            setText('[data-dock-artist]', track.artist);
+            setText('[data-dock-duration]', formatDuration(track.durationSeconds));
+        }
+
+        cancelAnimationFrame(frame);
+
+        if (state.open) tickProgress();
+    }
+
+    function setHidden(selector: string, hidden: boolean) {
+        const element = document.querySelector<HTMLElement>(selector);
+
+        if (element) element.hidden = hidden;
+    }
+
+    function setText(selector: string, text: string) {
+        const element = document.querySelector<HTMLElement>(selector);
+
+        if (element) element.textContent = text;
+    }
+
+    function teardown() {
+        cancelAnimationFrame(frame);
+        unsubscribe?.();
+        unsubscribe = undefined;
+    }
+
+    function tickProgress() {
+        const position = getPosition();
+        const seek = document.querySelector<HTMLInputElement>('[data-dock-seek]');
+
+        if (seek && document.activeElement !== seek) seek.value = String(Math.floor(position));
+
+        setText('[data-dock-position]', formatDuration(position));
+
+        if (getPlayerState().playing) frame = requestAnimationFrame(tickProgress);
+    }
+
+    function toggleMute() {
+        const next = !isMuted();
+        const button = document.querySelector<HTMLElement>('[data-dock-mute]');
+
+        setMuted(next);
+        button?.setAttribute('aria-pressed', String(next));
+        setHidden('.dock__icon--muted', !next);
+        setHidden('.dock__icon--sound', next);
+    }
+
+    registerPageScript(initDock);
+</script>

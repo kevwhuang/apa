@@ -5,6 +5,8 @@ import sitemap from '@astrojs/sitemap';
 import tailwind from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 
+const PRIVATE_ROUTES = new Set(['/admin', '/check-in', '/onboarding', '/sign-in', '/store/cart', '/store/checkout', '/store/order']);
+
 export default defineConfig({
     adapter: netlify(),
     devToolbar: {
@@ -13,7 +15,7 @@ export default defineConfig({
     integrations: [
         react(),
         robots(),
-        sitemap({ lastmod: new Date() }),
+        sitemap({ filter: page => !PRIVATE_ROUTES.has(new URL(page).pathname.replace(/\/$/, '')) }),
     ],
     site: 'https://austinproduceralliance.com',
     vite: {

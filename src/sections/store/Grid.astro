@@ -1,0 +1,173 @@
+---
+import { getCollection } from 'astro:content';
+
+import PageHead from '@components/shared/PageHead.astro';
+import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
+import { PALETTE } from '@lib/constants';
+import { formatPrice, getStockLabel } from '@lib/utils';
+
+const CATEGORIES = ['all', 'accessory', 'apparel', 'music'] as const;
+
+const cardColors = PALETTE.slice(0, 6);
+const products = await getCollection('products');
+---
+
+<section
+    class="stage stage--tight border-b-2 border-ink"
+    aria-labelledby="store-title"
+>
+    <div>
+        <PageHead
+            class="font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            eyebrow={`Store / ${products.length} items`}
+            headingId="store-title"
+        >
+            Wear the alliance.
+        </PageHead>
+        <p
+            class="max-w-2xl mt-6 text-lmd text-ink-muted"
+            data-motion="rise"
+        >
+            Every order goes back into the calendar &mdash; room hire, gear for the Bash, and
+            keeping Assembly free to attend. Runs are small and printed in Austin; collect at
+            the next Assembly or have it shipped.
+        </p>
+        <div
+            class="flex flex-wrap gap-2 mt-10"
+            aria-label="Filter by category"
+            role="group"
+        >
+            {CATEGORIES.map((category, index) => (
+                <button
+                    class:list={[
+                        'chip category-btn store__chip active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse',
+                        { 'is-active': index === 0 },
+                    ]}
+                    aria-pressed={index === 0 ? 'true' : 'false'}
+                    data-category={category}
+                    type="button"
+                >
+                    {category}
+                </button>
+            ))}
+        </div>
+    </div>
+</section>
+
+<section
+    class="stage stage--tight"
+    aria-labelledby="products-title"
+>
+    <h2
+        id="products-title"
+        class="sr-only"
+    >
+        Products
+    </h2>
+    <ul
+        class="rank rank--4 store__grid list-none"
+        data-motion-stagger="rise"
+    >
+        {products.map((product, index) => (
+            <li
+                class="product-card"
+                data-category={product.data.category}
+            >
+                <a href={`/store/${product.id}`}>
+                    <PlaceholderTile
+                        class="slab slab--bare slab--card slab--hover aspect-square"
+                        color={cardColors[index % cardColors.length]}
+                        label={product.data.title.split(' ')[0]}
+                        labelClass="text-lg tracking-tight uppercase text-surface-raised/80 md:text-2xl"
+                    >
+                        {getStockLabel(product.data.stock) && (
+                            <p
+                                class:list={[
+                                    'label store__flag absolute px-2 py-1',
+                                    product.data.stock === 0 ? 'bg-ink text-ink-inverse' : 'bg-accent text-ink',
+                                ]}
+                                data-placeholder
+                            >
+                                {getStockLabel(product.data.stock)}
+                            </p>
+                        )}
+                    </PlaceholderTile>
+                    <p class="label mt-4 text-ink-muted">
+                        {product.data.category}
+                    </p>
+                    <div class="flex flex-nowrap items-baseline justify-between gap-x-3 mt-1">
+                        <h3 class="min-w-0 font-bold font-sans tracking-tight">
+                            {product.data.title}
+                        </h3>
+                        <p
+                            class="shrink-0 font-bold font-mono text-[13px] whitespace-nowrap"
+                            data-placeholder
+                        >
+                            {formatPrice(product.data.priceCents)}
+                        </p>
+                    </div>
+                </a>
+            </li>
+        ))}
+    </ul>
+</section>
+
+<style>
+    .product-card:not(.hidden),
+    .product-card > a {
+        display: grid;
+        grid-row: span 3;
+        grid-template-rows: subgrid;
+    }
+
+    .store__chip {
+        height: 50px;
+    }
+
+    .store__flag {
+        left: 0;
+        top: 0;
+    }
+
+    .store__grid {
+        grid-auto-rows: auto;
+    }
+
+    @media (max-width: 1024px) {
+        .store__grid {
+            --rank-cols: repeat(2, minmax(0, 1fr));
+        }
+    }
+</style>
+
+<script>
+    import { applyFilter, registerPageScript, rovingFocus } from '@lib/utils';
+
+    let activeCategory = 'all';
+
+    function handleCategoryClick(button: HTMLButtonElement, buttons: NodeListOf<HTMLButtonElement>, cards: NodeListOf<HTMLElement>) {
+        activeCategory = button.dataset.category ?? 'all';
+        updateCategoryFilter(buttons, cards);
+    }
+
+    function initStoreGrid(signal: AbortSignal) {
+        const buttons = document.querySelectorAll<HTMLButtonElement>('.category-btn');
+        const cards = document.querySelectorAll<HTMLElement>('.product-card');
+
+        if (!buttons.length || !cards.length) return;
+
+        activeCategory = 'all';
+        updateCategoryFilter(buttons, cards);
+        rovingFocus(buttons, signal);
+
+        buttons.forEach((button) => {
+            button.addEventListener('click', () => handleCategoryClick(button, buttons, cards), { signal });
+        });
+    }
+
+    function updateCategoryFilter(buttons: NodeListOf<HTMLButtonElement>, cards: NodeListOf<HTMLElement>) {
+        applyFilter(buttons, cards, activeCategory, 'category', (card, active) => active === 'all' || card.dataset.category === active);
+    }
+
+    registerPageScript(initStoreGrid);
+</script>

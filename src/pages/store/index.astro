@@ -1,11 +1,12 @@
 ---
 import Layout from '@/Layout.astro';
-import StoreGrid from '@sections/StoreGrid.astro';
+import StoreGrid from '@sections/store/Grid.astro';
+import { brandTitle } from '@lib/brand';
 ---
 
 <Layout
-    description="Official APA merchandise &mdash; apparel, accessories, sticker packs, and the annual compilation LP, printed in small batches in Austin."
-    title="Store &mdash; Austin Producer Alliance"
+    description={'Official APA merchandise \u2014 apparel, accessories, sticker packs, and music from the roster.'}
+    title={brandTitle('Store')}
 >
     <StoreGrid />
 </Layout>

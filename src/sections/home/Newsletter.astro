@@ -1,0 +1,83 @@
+---
+import SectionHead from '@components/shared/SectionHead.astro';
+---
+
+<section
+    class="stage"
+    aria-labelledby="newsletter-title"
+>
+    <div class="slab slab--roomy slab--sunk mark grid grid-cols-1 items-end gap-10 md:grid-cols-[1.2fr_1fr]">
+        <div>
+            <SectionHead
+                class="font-extrabold font-sans leading-[1.05] text-3xl tracking-[-0.035em] md:text-5xl"
+                eyebrow="Signal"
+                headingId="newsletter-title"
+            >
+                Get the dispatch.
+            </SectionHead>
+            <p class="max-w-md text-ink-muted">
+                One email a season. What's on the calendar, what the roster has been working on,
+                and where to find us next.
+            </p>
+        </div>
+        <form class="newsletter-form flex flex-col gap-3">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:gap-2">
+                <label class="block flex-1">
+                    <span class="label block mb-2 text-ink-muted">
+                        Email
+                    </span>
+                    <input
+                        class="disabled:cursor-not-allowed disabled:opacity-55 placeholder:text-ink-muted min-h-[50px] w-full px-4 border-2 border-ink font-mono text-sm bg-surface"
+                        autocomplete="email"
+                        name="email"
+                        placeholder="you@studio.fm"
+                        required
+                        type="email"
+                    />
+                </label>
+                <button
+                    class="btn btn--accent w-full lg:w-auto"
+                    type="submit"
+                >
+                    Subscribe
+                </button>
+            </div>
+            <p
+                class="action-text hidden p-3 bg-accent text-ink"
+                data-output
+                role="status"
+            />
+        </form>
+    </div>
+</section>
+
+<script>
+    import { registerPageScript } from '@lib/utils';
+
+    function handleNewsletterSubmit(event: SubmitEvent, form: HTMLFormElement) {
+        event.preventDefault();
+
+        const button = form.querySelector<HTMLButtonElement>('button');
+        const input = form.querySelector<HTMLInputElement>('input');
+        const output = form.querySelector<HTMLElement>('[data-output]');
+
+        if (!button || !input || !output) return;
+
+        button.disabled = true;
+        input.disabled = true;
+        output.textContent = 'This is where the dispatch would start. Nothing was sent \u2014 this demo stores nothing.';
+        output.classList.remove('hidden');
+        output.tabIndex = -1;
+        output.focus();
+    }
+
+    function initNewsletter(signal: AbortSignal) {
+        const form = document.querySelector<HTMLFormElement>('.newsletter-form');
+
+        if (!form) return;
+
+        form.addEventListener('submit', event => handleNewsletterSubmit(event, form), { signal });
+    }
+
+    registerPageScript(initNewsletter);
+</script>

@@ -1,11 +1,12 @@
 ---
 import Layout from '@/Layout.astro';
-import ProducersGrid from '@sections/ProducersGrid.astro';
+import ProducersGrid from '@sections/producers/Grid.astro';
+import { brandTitle } from '@lib/brand';
 ---
 
 <Layout
-    description="Browse the featured producers of the Austin Producer Alliance roster &mdash; house, techno, ambient, footwork, hip-hop, and more, filterable by genre."
-    title="Producers &mdash; Austin Producer Alliance"
+    description={'Browse the featured producers of the Austin Producer Alliance roster \u2014 house, techno, ambient, footwork, hip-hop, and more, filterable by genre.'}
+    title={brandTitle('Producers')}
 >
     <ProducersGrid />
 </Layout>

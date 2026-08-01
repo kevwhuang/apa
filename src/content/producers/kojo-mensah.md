@@ -2,5 +2,12 @@
 name: Kojo Mensah
 handle: kojo
 genres: [afrobeats, hip-hop]
-bio: Ghanaian-American producer making club-ready cuts at the intersection of Afrobeats and Atlanta trap.
+location: Austin, TX
+joined: 2023-06-20
+availability: open
+featured: false
+roles: [Producer, Engineer]
+bio: Writes for the club and mixes for the car. Drums first, everything else in service of them.
+tracks:
+  - { title: Untitled Sketch 03, durationSeconds: 178 }
 ---

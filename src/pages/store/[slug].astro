@@ -2,7 +2,14 @@
 import { getCollection } from 'astro:content';
 
 import Layout from '@/Layout.astro';
-import ProductDetail from '@sections/ProductDetail.astro';
+import ProductDetail from '@sections/store/ProductDetail.astro';
+import { brandTitle } from '@lib/brand';
+
+const DESCRIPTION_MAX = 155;
+
+const DESCRIPTION_SUFFIX = ' From the Austin Producer Alliance store.';
+
+const { product } = Astro.props;
 
 export async function getStaticPaths() {
     const products = await getCollection('products');
@@ -13,12 +20,28 @@ export async function getStaticPaths() {
     }));
 }
 
-const { product } = Astro.props;
+function toDescription(text: string) {
+    const limit = DESCRIPTION_MAX - DESCRIPTION_SUFFIX.length;
+
+    if (text.length <= limit) return `${text}${DESCRIPTION_SUFFIX}`;
+
+    let kept = '';
+
+    for (const sentence of text.match(/[^.!?]+[.!?]+/g) ?? []) {
+        const next = `${kept}${sentence}`.trim();
+
+        if (next.length > limit) break;
+
+        kept = next;
+    }
+
+    return `${kept.length > 0 ? kept : text.slice(0, limit).trimEnd()}${DESCRIPTION_SUFFIX}`;
+}
 ---
 
 <Layout
-    description={`${product.description} From the Austin Producer Alliance store.`}
-    title={`${product.title} \u2014 Austin Producer Alliance`}
+    description={toDescription(product.description)}
+    title={brandTitle(product.title)}
 >
     <ProductDetail product={product} />
 </Layout>

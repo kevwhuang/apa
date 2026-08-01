@@ -1,0 +1,32 @@
+---
+import { getCollection } from 'astro:content';
+
+import ProgramFlyer from '@components/program/Flyer.astro';
+
+const STRIP_LIMIT = 1;
+
+const events = await getCollection('events');
+
+const hangouts = events
+    .filter(event => event.data.type === 'hangout' && event.data.status === 'upcoming')
+    .sort((a, b) => +a.data.date - +b.data.date)
+    .slice(0, STRIP_LIMIT)
+    .map(event => ({
+        date: event.data.date,
+        end: event.data.end,
+        excerpt: event.data.excerpt,
+        id: event.id,
+        location: event.data.location,
+        status: event.data.status,
+        title: event.data.title,
+        type: event.data.type,
+    }));
+---
+
+<ProgramFlyer
+    class="border-b-2 border-ink"
+    ctaHref="/events"
+    ctaLabel="All events"
+    events={hangouts}
+    headingId="landing-hangout-title"
+/>

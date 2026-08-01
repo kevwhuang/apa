@@ -1,25 +1,24 @@
 ---
-import HeroTimeline from '@sections/HeroTimeline.astro';
-import LandingAbout from '@sections/LandingAbout.astro';
-import LandingBash from '@sections/LandingBash.astro';
-import LandingEvents from '@sections/LandingEvents.astro';
-import LandingNewsletter from '@sections/LandingNewsletter.astro';
-import LandingProducers from '@sections/LandingProducers.astro';
-import LandingSponsors from '@sections/LandingSponsors.astro';
-import LandingStore from '@sections/LandingStore.astro';
+import HeroTimeline from '@sections/home/HeroTimeline.astro';
+import LandingAssembly from '@sections/home/Assembly.astro';
+import LandingBash from '@sections/home/Bash.astro';
+import LandingHangouts from '@sections/home/Hangouts.astro';
+import LandingNewsletter from '@sections/home/Newsletter.astro';
+import LandingProducers from '@sections/home/Producers.astro';
+import LandingSponsors from '@sections/home/Sponsors.astro';
 import Layout from '@/Layout.astro';
 ---
 
 <Layout
-    description="A working community of 142 music producers in Austin, Texas &mdash; monthly cookups, public showcases, and the annual Producer Bash."
+    description={'A collective of music producers in Austin, Texas \u2014 a roster spanning every genre, monthly Assemblies and Hangouts, and the bimonthly Producer Bash.'}
+    hasHero
     title="Austin Producer Alliance"
 >
     <HeroTimeline />
-    <LandingEvents />
     <LandingProducers />
+    <LandingAssembly />
     <LandingBash />
-    <LandingAbout />
-    <LandingStore />
+    <LandingHangouts />
     <LandingSponsors />
     <LandingNewsletter />
 </Layout>

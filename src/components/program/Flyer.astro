@@ -1,0 +1,157 @@
+---
+import SectionHead from '@components/shared/SectionHead.astro';
+import { LINKS } from '@lib/constants';
+import { formatDate, formatTime, formatTimeRange, getProgram, mergeCalendar } from '@lib/utils';
+
+type ProgramEvent = ReturnType<typeof mergeCalendar>['upcoming'][number] & { end?: Date };
+
+interface Props {
+    class?: string;
+    ctaHref?: string;
+    ctaLabel?: string;
+    detailed?: boolean;
+    events: ProgramEvent[];
+    headingId: string;
+}
+
+const { class: stageClass, ctaHref, ctaLabel, detailed = false, events, headingId } = Astro.props;
+
+const program = getProgram('hangout');
+---
+
+<section
+    class:list={['stage stage--hangout stage--overhang', stageClass]}
+    aria-labelledby={headingId}
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-5xl tracking-tight"
+            eyebrow={`${program.shortName} / ${program.cadence}`}
+            headingId={headingId}
+        >
+            {program.name}
+            {ctaHref && ctaLabel && (
+                <a
+                    class="action-text hover:text-accent-deep hidden items-center min-h-[50px] transition-colors md:inline-flex"
+                    href={ctaHref}
+                    slot="cta"
+                >
+                    {ctaLabel} &rarr;
+                </a>
+            )}
+        </SectionHead>
+        <p class="max-w-2xl leading-relaxed text-base text-ink-muted">
+            {program.summary}
+        </p>
+        {detailed && (
+            <p>
+                <a
+                    class="action-text hover:text-accent-deep inline-flex items-center min-h-[50px] underline underline-offset-4 transition-colors"
+                    href={LINKS.meetup}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                >
+                    RSVP for {program.shortName} on Meetup &rarr;
+                </a>
+            </p>
+        )}
+        {ctaHref && ctaLabel && (
+            <div class="md:hidden">
+                <a
+                    class="btn mt-10"
+                    href={ctaHref}
+                >
+                    {ctaLabel}
+                </a>
+            </div>
+        )}
+    </div>
+    <ul
+        class="program-flyer__list rake list-none"
+        data-motion-stagger="rise"
+    >
+        {events.map(event => (
+            <li class="rake__item tilt">
+                <article
+                    id={event.id}
+                    class="program-flyer__card slab slab--card rank items-start"
+                >
+                    <div>
+                        <p class="label mb-3 text-accent-deep">{program.shortName}</p>
+                        <h3 class="font-extrabold font-sans text-3xl tracking-tight">
+                            {detailed
+                                ? event.title
+                                : (
+                                        <a
+                                            class="hover:text-accent-deep inline-flex items-center min-h-[50px] transition-colors"
+                                            href={`/events#${event.id}`}
+                                        >
+                                            {event.title}
+                                        </a>
+                                    )}
+                        </h3>
+                        {detailed && (
+                            <p class="mt-3 leading-relaxed text-[15px] text-ink-muted">{event.excerpt}</p>
+                        )}
+                    </div>
+                    <div>
+                        <p class="label mb-3 text-ink-muted">When</p>
+                        <p
+                            class="font-extrabold font-sans text-xl"
+                            data-placeholder
+                        >
+                            <time datetime={event.date.toISOString()}>{formatDate(event.date)}</time>
+                        </p>
+                        <p
+                            class="mt-1 font-mono text-xs uppercase text-ink-muted"
+                            data-placeholder
+                        >
+                            {event.end
+                                ? formatTimeRange(event.date, event.end)
+                                : <time datetime={event.date.toISOString()}>{formatTime(event.date)}</time>}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="label mb-3 text-ink-muted">Where</p>
+                        <address class="font-mono not-italic text-xs uppercase">{event.location}</address>
+                    </div>
+                </article>
+            </li>
+        ))}
+    </ul>
+</section>
+
+<style>
+    .program-flyer__card.rank {
+        --rank-cols: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.9fr);
+    }
+
+    .program-flyer__card.slab {
+        padding: var(--space-lg);
+    }
+
+    .program-flyer__card > div:not(:first-child) {
+        align-self: end;
+    }
+
+    .program-flyer__list.rake {
+        --rake-amp: 0.55;
+        gap: var(--space-2xl);
+    }
+
+    @media (max-width: 1024px) {
+        .program-flyer__card.rank {
+            --rank-cols: repeat(2, minmax(0, 1fr));
+        }
+
+        .program-flyer__card.rank > :first-child {
+            grid-column: 1 / -1;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .program-flyer__card.rank {
+            --rank-cols: minmax(0, 1fr);
+        }
+    }
+</style>

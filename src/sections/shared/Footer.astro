@@ -1,0 +1,239 @@
+---
+import BrandLockup from '@components/brand/Lockup.astro';
+import IconDiscord from '@components/icons/Discord.astro';
+import IconInstagram from '@components/icons/Instagram.astro';
+import IconMeetup from '@components/icons/Meetup.astro';
+import { BRAND } from '@lib/brand';
+import { LINKS, NAV_GROUPS, SITE_UPDATED } from '@lib/constants';
+import { formatDateOnly } from '@lib/utils';
+
+const SOCIALS = [
+    { Icon: IconInstagram, href: LINKS.instagram, label: 'Instagram' },
+    { Icon: IconDiscord, href: LINKS.discord, label: 'Discord' },
+    { Icon: IconMeetup, href: LINKS.meetup, label: 'Meetup' },
+];
+
+const columns = [
+    ...NAV_GROUPS.flatMap(group => ('items' in group ? [{ head: group.label, items: [...group.items] }] : [])),
+    {
+        head: 'Browse',
+        items: NAV_GROUPS.flatMap(group => ('href' in group ? [{ href: group.href, label: group.label }] : [])),
+    },
+];
+
+const updated = new Date(SITE_UPDATED);
+const year = new Date().getFullYear();
+---
+
+<footer
+    class="border-t-2 border-ink bg-surface-sunken"
+    aria-label="Site footer"
+>
+    <div class="stage stage--tight">
+        <div
+            class="footer__grid"
+            style={`--footer-cols: ${columns.length}`}
+        >
+            <div>
+                <BrandLockup
+                    class="footer__lockup"
+                    label={BRAND.name}
+                />
+                <p class="footer__lede">
+                    A collective of music producers in Austin, Texas, open to anyone in the creative
+                    industry who wants to collaborate alongside them.
+                </p>
+                <p class="footer__updated">
+                    Last updated <time datetime={SITE_UPDATED}>{formatDateOnly(updated)}</time>
+                </p>
+            </div>
+            {columns.map(column => (
+                <div>
+                    <h2 class="label footer__head">{column.head}</h2>
+                    <ul class="footer__links list-none">
+                        {column.items.map(item => (
+                            <li>
+                                <a
+                                    class="footer__link"
+                                    href={item.href}
+                                >
+                                    {item.label}
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            ))}
+        </div>
+    </div>
+    <div class="stage stage--flush border-t-2 border-ink">
+        <div class="footer__bar">
+            <p>&copy; {year} {BRAND.name}.</p>
+            <ul class="footer__socials list-none">
+                {SOCIALS.map(({ Icon, href, label }) => (
+                    <li>
+                        <a
+                            class="footer__social"
+                            href={href}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                        >
+                            <Icon />
+                            <span class="sr-only">{label} (opens in a new tab)</span>
+                        </a>
+                    </li>
+                ))}
+            </ul>
+            <nav
+                class="footer__legal"
+                aria-label="Legal and operations"
+            >
+                <a
+                    class="footer__meta"
+                    href="/privacy"
+                >
+                    Privacy
+                </a>
+                <a
+                    class="footer__meta"
+                    href="/terms"
+                >
+                    Terms
+                </a>
+                <a
+                    class="footer__meta footer__meta--quiet"
+                    href="/admin"
+                >
+                    Admin
+                </a>
+                <a
+                    class="footer__meta footer__meta--quiet"
+                    href={LINKS.aephonics}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                >
+                    Made by Aephonics<span class="sr-only"> (opens in a new tab)</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+</footer>
+
+<style>
+    .footer__bar {
+        align-items: center;
+        color: var(--color-ink-muted);
+        display: flex;
+        flex-wrap: wrap;
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        gap: var(--space-sm);
+        justify-content: space-between;
+        padding-block: var(--space-2xs);
+    }
+
+    .footer__grid {
+        display: grid;
+        gap: var(--space-2xl);
+        grid-template-columns: minmax(0, 1.4fr) repeat(var(--footer-cols), minmax(0, 1fr));
+    }
+
+    .footer__head {
+        color: var(--color-ink-muted);
+        margin-bottom: var(--space-2xs);
+    }
+
+    .footer__lede {
+        color: var(--color-ink-muted);
+        font-size: var(--text-sm);
+        line-height: 1.7;
+        margin-bottom: var(--space-md);
+        max-width: 34ch;
+    }
+
+    .footer__legal {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-xs);
+    }
+
+    .footer__link {
+        font-size: var(--text-sm);
+        transition: color var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .footer__link:hover {
+        color: var(--color-accent-deep);
+    }
+
+    .footer__links li {
+        padding-block: var(--space-3xs);
+    }
+
+    :global(.footer__lockup) {
+        color: var(--color-ink);
+        display: block;
+        margin-bottom: var(--space-md);
+    }
+
+    .footer__meta {
+        align-items: center;
+        display: inline-flex;
+        letter-spacing: 0.04em;
+        min-height: 50px;
+        padding-inline: var(--space-2xs);
+        text-transform: uppercase;
+        transition: color var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .footer__meta:hover {
+        color: var(--color-accent-deep);
+    }
+
+    .footer__meta--quiet {
+        color: var(--color-ink-subtle);
+    }
+
+    .footer__social {
+        align-items: center;
+        display: inline-flex;
+        height: 50px;
+        justify-content: center;
+        transition: color var(--duration-fast) var(--motion-ease-ui);
+        width: 50px;
+    }
+
+    .footer__social:hover {
+        color: var(--color-accent-deep);
+    }
+
+    .footer__socials {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3xs);
+    }
+
+    .footer__updated {
+        color: var(--color-ink-subtle);
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    @media (max-width: 1024px) {
+        .footer__grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .footer__grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .footer__grid > :first-child {
+            grid-column: 1 / -1;
+        }
+    }
+</style>

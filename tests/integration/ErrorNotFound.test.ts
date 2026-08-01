@@ -1,7 +1,7 @@
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { describe, expect, test } from 'vitest';
 
-import ErrorNotFound from '../../src/sections/ErrorNotFound.astro';
+import ErrorNotFound from '../../src/sections/errors/NotFound.astro';
 
 describe('ErrorNotFound', () => {
     test('renders 404 heading', async () => {

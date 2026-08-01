@@ -1,0 +1,206 @@
+---
+import IconCheck from '@components/icons/Check.astro';
+import PageHead from '@components/shared/PageHead.astro';
+---
+
+<section
+    class="stage stage--narrow"
+    aria-labelledby="order-title"
+>
+    <div class="text-center">
+        <div
+            class="slab slab--accent slab--bare inline-flex items-center justify-center h-16 w-16 mb-8"
+            aria-hidden="true"
+            data-order-mark
+            hidden
+        >
+            <IconCheck />
+        </div>
+        <PageHead
+            class="font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            eyebrow="Store / Order"
+            headingId="order-title"
+        >
+            <span data-order-heading>No recent order</span>
+        </PageHead>
+        <p
+            class="label mt-6 text-ink-muted"
+            data-order-number
+            data-placeholder
+            hidden
+        />
+    </div>
+    <div
+        class="flex flex-col items-center gap-8 text-center"
+        data-motion="rise"
+        data-order-empty
+    >
+        <p class="max-w-xl text-lmd text-ink-muted">
+            Nothing has been placed from this tab. A confirmation only lives for the length of a browsing
+            session, so a fresh tab &mdash; or a reload after closing this one &mdash; starts here.
+        </p>
+        <div class="flex flex-wrap justify-center gap-3">
+            <a
+                class="btn btn--primary"
+                href="/store"
+            >
+                Browse the store
+            </a>
+            <a
+                class="btn"
+                href="/store/cart"
+            >
+                Go to the cart
+            </a>
+        </div>
+    </div>
+    <div
+        class="flex flex-col gap-8"
+        data-motion="rise"
+        data-order-detail
+        hidden
+    >
+        <p class="text-center text-lmd text-ink-muted">
+            A receipt would have gone to&#32;
+            <span
+                class="font-mono wrap-break-word text-smd"
+                data-order-email
+            />&#32;
+            &mdash; nothing was sent.
+        </p>
+        <ul
+            class="order__list scroll-slot border-2 border-ink list-none"
+            data-order-list
+        />
+        <dl class="slab slab--sunk space-y-1.5 font-mono text-[14px]">
+            <div class="flex justify-between gap-3">
+                <dt>Subtotal</dt>
+                <dd data-order-subtotal>$0.00</dd>
+            </div>
+            <div
+                class="flex justify-between gap-3"
+                data-order-discount-row
+                hidden
+            >
+                <dt>Prods credit</dt>
+                <dd data-order-discount>$0.00</dd>
+            </div>
+            <div class="flex justify-between gap-3">
+                <dt>Shipping</dt>
+                <dd data-order-shipping>&mdash;</dd>
+            </div>
+            <div class="flex justify-between gap-3">
+                <dt>Tax</dt>
+                <dd data-order-tax>$0.00</dd>
+            </div>
+            <div class="flex justify-between gap-3 mt-2 pt-2 border-t-2 border-ink font-extrabold font-sans text-lg">
+                <dt>Total</dt>
+                <dd data-order-total>$0.00</dd>
+            </div>
+        </dl>
+        <div class="flex flex-wrap justify-center gap-3">
+            <a
+                class="btn btn--primary"
+                href="/store"
+            >
+                Back to the store
+            </a>
+            <a
+                class="btn"
+                href="/"
+            >
+                Home
+            </a>
+        </div>
+    </div>
+    <template data-order-row>
+        <li class="first:border-t-0 flex items-center gap-4 p-4 border-t-2 border-ink">
+            <div class="flex-1 min-w-0">
+                <p
+                    class="font-bold font-sans"
+                    data-row-title
+                />
+                <p
+                    class="label text-ink-muted"
+                    data-row-variant
+                />
+            </div>
+            <p
+                class="font-bold font-mono"
+                data-row-price
+            />
+        </li>
+    </template>
+</section>
+
+<style>
+    .order__list {
+        --scroll-slot-max: 40vh;
+    }
+</style>
+
+<script>
+    import { formatPrice, formatVariant, registerPageScript, setText } from '@lib/utils';
+    import { getLastOrder } from '@lib/checkout';
+
+    function initOrderConfirmation() {
+        const detail = document.querySelector<HTMLElement>('[data-order-detail]');
+        const empty = document.querySelector<HTMLElement>('[data-order-empty]');
+        const order = getLastOrder();
+
+        if (!detail || !empty || !order) return;
+
+        empty.setAttribute('hidden', '');
+        detail.removeAttribute('hidden');
+        document.querySelector<HTMLElement>('[data-order-mark]')?.removeAttribute('hidden');
+
+        renderHeading(order);
+        renderItems(order);
+        renderTotals(order.totals);
+    }
+
+    function renderHeading(order: Order) {
+        const number = document.querySelector<HTMLElement>('[data-order-number]');
+
+        setText(document.querySelector('[data-order-email]'), order.email);
+        setText(document.querySelector('[data-order-heading]'), 'Order received.');
+
+        if (!number) return;
+
+        number.textContent = `Order ${order.id}`;
+        number.removeAttribute('hidden');
+    }
+
+    function renderItems(order: Order) {
+        const list = document.querySelector<HTMLElement>('[data-order-list]');
+        const template = document.querySelector<HTMLTemplateElement>('[data-order-row]');
+
+        if (!list || !template) return;
+
+        list.replaceChildren();
+
+        order.items.forEach((item) => {
+            const fragment = template.content.cloneNode(true) as DocumentFragment;
+            const variant = formatVariant(item);
+
+            setText(fragment.querySelector('[data-row-price]'), formatPrice(item.priceCents * item.quantity));
+            setText(fragment.querySelector('[data-row-title]'), item.title);
+            setText(fragment.querySelector('[data-row-variant]'), [variant, `\u00d7 ${item.quantity}`].filter(Boolean).join(' / '));
+            list.append(fragment);
+        });
+    }
+
+    function renderTotals(totals: CartTotals) {
+        const row = document.querySelector<HTMLElement>('[data-order-discount-row]');
+
+        row?.toggleAttribute('hidden', totals.discountCents === 0);
+
+        setText(document.querySelector('[data-order-discount]'), `\u2212${formatPrice(totals.discountCents)}`);
+        setText(document.querySelector('[data-order-shipping]'), totals.shippingCents === 0 ? 'Free' : formatPrice(totals.shippingCents));
+        setText(document.querySelector('[data-order-subtotal]'), formatPrice(totals.subtotalCents));
+        setText(document.querySelector('[data-order-tax]'), formatPrice(totals.taxCents));
+        setText(document.querySelector('[data-order-total]'), formatPrice(totals.totalCents));
+    }
+
+    registerPageScript(initOrderConfirmation);
+</script>

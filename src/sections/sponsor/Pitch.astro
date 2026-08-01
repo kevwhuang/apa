@@ -1,0 +1,281 @@
+---
+import { Image } from 'astro:assets';
+
+import PageHead from '@components/shared/PageHead.astro';
+import SectionHead from '@components/shared/SectionHead.astro';
+import { EVENT_PROGRAMS, SPONSORS, SPONSOR_LOGO_WIDTH } from '@lib/constants';
+import { getProgram } from '@lib/utils';
+
+interface Tier {
+    featured?: boolean;
+    name: string;
+    perks: string[];
+    price: string;
+}
+
+const FOUNDING_YEAR = '2022';
+
+const PRODUCERS_WELCOMED = '1,000+';
+
+const DONATION_AMOUNTS = ['$10', '$25', '$50', '$100'];
+
+const DONATION_USES = [
+    'Venue deposits and room fees',
+    'Cables, adapters, and spare gear',
+    'Showcase staging and production',
+];
+
+const assembly = getProgram('assembly');
+const bash = getProgram('bash');
+const programs = Object.values(EVENT_PROGRAMS);
+
+const STATS = [
+    { label: 'Founded', value: FOUNDING_YEAR },
+    { label: 'Welcomed', value: PRODUCERS_WELCOMED },
+    { label: 'Programs running', value: String(programs.filter(program => program.state === 'active').length) },
+    { label: 'Programs planned', value: String(programs.filter(program => program.state === 'planned').length) },
+];
+
+const TIERS: Tier[] = [
+    { name: 'Friend', perks: ['Name on the site', 'Newsletter thank-you', `A guest pass to the next ${bash.name}`], price: '$100' },
+    { featured: true, name: 'Studio', perks: ['Logo on the site and event flyers', `Mention from the front of the room at the ${bash.name}`, 'Guest passes across the year', `${assembly.name} table`], price: '$500' },
+    { name: 'Partner', perks: ['Everything in Studio', `Named partner on one ${bash.name}`, 'Co-branded workshop each year', 'Presence at every event'], price: '$1,500' },
+];
+---
+
+<section
+    class="stage stage--tight border-b-2 border-ink"
+    aria-labelledby="sponsor-title"
+>
+    <div>
+        <PageHead
+            class="max-w-4xl mb-8 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            eyebrow="Sponsor APA"
+            headingId="sponsor-title"
+        >
+            Reach the producers building Austin's sound.
+        </PageHead>
+        <p
+            class="max-w-2xl text-lmd text-ink-muted"
+            data-motion="rise"
+        >
+            Sponsorship keeps the rooms booked, the gear working, and the calendar full.
+            It reaches producers of every genre and experience level, in person, every month.
+        </p>
+    </div>
+</section>
+
+<section
+    class="stage stage--tight border-b-2 border-ink"
+    aria-labelledby="tiers-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-4xl tracking-tight"
+            eyebrow="Tiers"
+            headingId="tiers-title"
+        >
+            Pick a level
+        </SectionHead>
+        <ul
+            class="tiers grid grid-cols-1 gap-5 list-none lg:grid-cols-3"
+            data-motion-stagger="unfold"
+        >
+            {TIERS.map((tier, index) => (
+                <li>
+                    <article
+                        class:list={[
+                            'slab slab--hover tier',
+                            tier.featured ? 'slab--well tier--featured' : 'slab--card',
+                        ]}
+                    >
+                        <p class:list={['label mb-4', tier.featured ? 'text-accent' : 'text-ink-muted']}>
+                            Tier {String(index + 1).padStart(2, '0')}
+                        </p>
+                        <h3 class="mb-2 font-extrabold font-sans text-3xl tracking-tight">{tier.name}</h3>
+                        <p
+                            class="mb-8 font-bold font-mono text-2xl"
+                            data-placeholder
+                        >
+                            {tier.price}<span class:list={['font-normal text-sm', tier.featured ? 'text-ink-inverse-muted' : 'text-ink-muted']}> / yr</span>
+                        </p>
+                        <ul class="mb-8 space-y-2.5 text-sm">
+                            {tier.perks.map(perk => (
+                                <li class="flex gap-2">
+                                    <span
+                                        class:list={['font-bold', tier.featured ? 'text-accent' : 'text-accent-deep']}
+                                        aria-hidden="true"
+                                    >
+                                        +
+                                    </span>
+                                    {perk}
+                                </li>
+                            ))}
+                        </ul>
+                        <a
+                            class:list={['btn', tier.featured ? 'btn--accent' : 'btn--primary']}
+                            href="/contact?topic=Sponsor%20inquiry#contact-topic"
+                        >
+                            Start a conversation
+                        </a>
+                    </article>
+                </li>
+            ))}
+        </ul>
+    </div>
+</section>
+
+<section
+    class="stage stage--tight border-b-2 border-ink"
+    aria-labelledby="donate-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-4xl tracking-tight"
+            eyebrow="Donations"
+            headingId="donate-title"
+        >
+            Chip in once
+        </SectionHead>
+        <div class="grid grid-cols-1 gap-10 md:grid-cols-[1.4fr_1fr]">
+            <div data-motion="rise">
+                <p class="max-w-2xl mb-8 text-base text-ink-muted">
+                    Sponsorship is a year-long relationship &mdash; a donation is one good afternoon.
+                    Give any amount, once, and it lands directly on the line items that keep the
+                    calendar running:
+                </p>
+                <ul class="mb-8 space-y-2.5 text-sm">
+                    {DONATION_USES.map(use => (
+                        <li class="flex gap-2">
+                            <span
+                                class="font-bold text-accent-deep"
+                                aria-hidden="true"
+                            >
+                                +
+                            </span>
+                            {use}
+                        </li>
+                    ))}
+                </ul>
+                <p class="text-sm text-ink-muted">
+                    The Alliance is volunteer-run and not yet a 501(c)(3), so donations aren't
+                    tax-deductible &mdash; every dollar still shows up in the room.
+                </p>
+            </div>
+            <div
+                class="slab slab--card slab--roomy"
+                data-motion="unfold"
+            >
+                <p class="label mb-4 text-ink-muted">Suggested amounts</p>
+                <ul class="flex flex-wrap gap-2.5 mb-8 list-none">
+                    {DONATION_AMOUNTS.map(amount => (
+                        <li class="chip">{amount}</li>
+                    ))}
+                </ul>
+                <a
+                    class="btn btn--accent w-full mb-4"
+                    data-placeholder
+                    href="/contact#contact-topic"
+                >
+                    Arrange a donation
+                </a>
+                <p class="text-sm text-ink-muted">
+                    Online giving isn't live yet &mdash; the contact form is the way in for now.
+                    Tell us the amount you have in mind and we'll take it from there.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section
+    class="stage stage--tight border-b-2 border-ink"
+    aria-labelledby="backers-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-4xl tracking-tight"
+            eyebrow="Current partners"
+            headingId="backers-title"
+        >
+            Backed by
+        </SectionHead>
+        <ul
+            class="grid grid-cols-1 gap-px border-2 border-ink list-none bg-ink md:grid-cols-2"
+            data-motion-stagger="stamp"
+        >
+            {SPONSORS.map(sponsor => (
+                <li class="flex flex-col items-center justify-center gap-5 p-6 bg-surface md:p-10">
+                    <div class="flex items-center justify-center h-20 w-full md:h-28">
+                        <Image
+                            class="object-contain max-h-full max-w-full"
+                            alt={`${sponsor.name} logo`}
+                            densities={[1, 2]}
+                            src={sponsor.logo}
+                            width={SPONSOR_LOGO_WIDTH}
+                        />
+                    </div>
+                    <p class="label text-center text-ink-muted">{sponsor.name}</p>
+                </li>
+            ))}
+        </ul>
+    </div>
+</section>
+
+<section
+    class="stage stage--tight"
+    aria-labelledby="numbers-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-4xl tracking-tight"
+            eyebrow="Impact"
+            headingId="numbers-title"
+        >
+            By the numbers
+        </SectionHead>
+        <dl
+            class="mark grid grid-cols-2 gap-px border-2 border-ink bg-ink md:grid-cols-4"
+            data-motion-stagger="unfold"
+        >
+            {STATS.map(stat => (
+                <div class="flex flex-col-reverse gap-3 p-4 text-center bg-surface md:p-8">
+                    <dt class="label text-ink-muted">{stat.label}</dt>
+                    <dd
+                        class="font-extrabold font-sans text-3xl tracking-tight md:text-4xl"
+                        data-motion-count={stat.value}
+                    >
+                        {stat.value}
+                    </dd>
+                </div>
+            ))}
+        </dl>
+    </div>
+</section>
+
+<style>
+    .tier {
+        align-content: start;
+        display: grid;
+        grid-row: span 5;
+        grid-template-rows: subgrid;
+        padding: var(--space-lg);
+    }
+
+    .tier--featured {
+        --slab-level: var(--z-card);
+        --slab-line: var(--color-ink);
+        --slab-rule: 2px;
+    }
+
+    .tiers {
+        grid-auto-rows: auto;
+    }
+
+    .tiers > li {
+        align-content: start;
+        display: grid;
+        grid-row: span 5;
+        grid-template-rows: subgrid;
+    }
+</style>

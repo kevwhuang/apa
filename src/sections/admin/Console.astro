@@ -1,0 +1,394 @@
+---
+import PageHead from '@components/shared/PageHead.astro';
+import SectionHead from '@components/shared/SectionHead.astro';
+
+const ACTIONS = [
+    {
+        blurb: 'Removes every track queued for live feedback at the next Assembly, along with the notes attached to each one.',
+        confirm: 'Clear all 12 feedback entries? This cannot be undone.',
+        count: '12 entries',
+        id: 'feedback-entries',
+        label: 'Clear track feedback',
+        name: 'Assembly track feedback',
+        result: 'Cleared 12 entries.',
+    },
+    {
+        blurb: 'Removes every track submitted for the current Producer Bash prompt, along with its uploaded stems.',
+        confirm: 'Clear all 24 intake entries and their uploads? This cannot be undone.',
+        count: '24 entries',
+        id: 'bash-entries',
+        label: 'Clear Producer Bash intake',
+        name: 'Producer Bash intake',
+        result: 'Cleared 24 entries.',
+    },
+];
+
+const SWITCHES = [
+    {
+        blurb: 'Controls whether check-in and the site accept new member signups.',
+        checked: true,
+        id: 'signups',
+        name: 'Signups',
+        off: 'Closed',
+        on: 'Open',
+    },
+    {
+        blurb: 'Controls whether the submission form accepts new tracks for the current prompt.',
+        checked: true,
+        id: 'bash-intake',
+        name: 'Producer Bash intake',
+        off: 'Closed',
+        on: 'Open',
+    },
+    {
+        blurb: 'Controls whether members can queue a track for live feedback at the next Assembly.',
+        checked: true,
+        id: 'assembly-feedback',
+        name: 'Assembly track feedback intake',
+        off: 'Closed',
+        on: 'Open',
+    },
+];
+---
+
+<section
+    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    aria-labelledby="admin-title"
+>
+    <div>
+        <PageHead
+            class="max-w-3xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            eyebrow="Internal / Admin"
+            headingId="admin-title"
+        >
+            Operations.
+        </PageHead>
+        <p class="max-w-2xl mt-6 text-[18px] text-ink-muted">
+            Open and close Alliance programs, run cleanup actions, and manage member Prods.
+            Access is not yet restricted &mdash; this console is linked from the site footer and
+            open to anyone who opens it.
+        </p>
+    </div>
+</section>
+
+<section
+    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    aria-labelledby="admin-switches-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-3xl tracking-tight"
+            eyebrow={`Console / ${SWITCHES.length} switches`}
+            headingId="admin-switches-title"
+        >
+            Switches
+        </SectionHead>
+        <ul
+            class="flex flex-col gap-6 list-none"
+            data-motion-stagger="rise"
+        >
+            {SWITCHES.map(control => (
+                <li>
+                    <div class="admin__row slab slab--card flex flex-wrap items-center gap-x-6 gap-y-4">
+                        <div class="admin__body flex-1">
+                            <h3
+                                id={`${control.id}-name`}
+                                class="font-extrabold font-sans text-lg tracking-tight"
+                            >
+                                {control.name}
+                            </h3>
+                            <p class="max-w-xl mt-1 text-[14px] text-ink-muted">
+                                {control.blurb}
+                            </p>
+                            <p
+                                class="admin__feedback action-text mt-3 text-ink-subtle"
+                                aria-live="polite"
+                                data-admin-feedback={control.id}
+                            />
+                        </div>
+                        <p class="admin__state label">
+                            <span class="admin__state-on">{control.on}</span>
+                            <span class="admin__state-off">{control.off}</span>
+                        </p>
+                        <input
+                            id={control.id}
+                            class="admin__switch"
+                            aria-labelledby={`${control.id}-name`}
+                            checked={control.checked}
+                            data-admin-toggle={control.id}
+                            role="switch"
+                            type="checkbox"
+                        />
+                    </div>
+                </li>
+            ))}
+        </ul>
+    </div>
+</section>
+
+<section
+    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    aria-labelledby="admin-actions-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-3xl tracking-tight"
+            eyebrow={`Console / ${ACTIONS.length} actions`}
+            headingId="admin-actions-title"
+        >
+            Actions
+        </SectionHead>
+        <ul
+            class="admin__actions grid gap-6 list-none md:grid-cols-2"
+            data-motion-stagger="rise"
+        >
+            {ACTIONS.map(action => (
+                <li class="admin__action">
+                    <article class="admin__card slab slab--card">
+                        <p class="label text-accent-deep">{action.count}</p>
+                        <h3 class="font-extrabold font-sans text-lg tracking-tight">
+                            {action.name}
+                        </h3>
+                        <p class="text-[14px] text-ink-muted">
+                            {action.blurb}
+                        </p>
+                        <button
+                            class="btn"
+                            data-admin-action={action.id}
+                            type="button"
+                        >
+                            {action.label}
+                        </button>
+                        <div class="admin__tail">
+                            <div
+                                class="admin__confirm slab slab--sunk"
+                                data-admin-confirm={action.id}
+                                hidden
+                            >
+                                <p class="mb-3 text-[14px]">{action.confirm}</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button
+                                        class="btn btn--accent"
+                                        data-admin-commit={action.id}
+                                        type="button"
+                                    >
+                                        Yes, {action.label.toLowerCase()}
+                                    </button>
+                                    <button
+                                        class="btn"
+                                        data-admin-cancel={action.id}
+                                        type="button"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                            <p
+                                class="admin__feedback action-text text-ink-subtle"
+                                aria-live="polite"
+                                data-admin-feedback={action.id}
+                                data-admin-result={action.result}
+                            />
+                        </div>
+                    </article>
+                </li>
+            ))}
+        </ul>
+    </div>
+</section>
+
+<style>
+    .admin__action,
+    .admin__card {
+        align-content: start;
+        display: grid;
+        grid-row: span 5;
+        grid-template-rows: subgrid;
+        row-gap: var(--space-xs);
+    }
+
+    .admin__actions {
+        grid-auto-rows: auto;
+    }
+
+    .admin__body {
+        min-width: 200px;
+    }
+
+    .admin__confirm {
+        border-left: 2px solid var(--color-accent-deep);
+    }
+
+    .admin__row:has(.admin__switch:checked) .admin__state-off {
+        display: none;
+    }
+
+    .admin__row:not(:has(.admin__switch:checked)) .admin__state-on {
+        display: none;
+    }
+
+    .admin__state {
+        min-width: 72px;
+        text-align: right;
+    }
+
+    .admin__switch {
+        appearance: none;
+        background-color: var(--color-surface-sunken);
+        background-image: linear-gradient(var(--color-ink), var(--color-ink));
+        background-position: 5px center;
+        background-repeat: no-repeat;
+        background-size: 30px 30px;
+        border: 2px solid var(--color-ink);
+        flex-shrink: 0;
+        height: 50px;
+        transition: background-color var(--duration-fast) ease, background-position var(--duration-fast) ease;
+        width: 80px;
+    }
+
+    .admin__switch:active {
+        background-color: var(--color-surface);
+    }
+
+    .admin__switch:checked {
+        background-color: var(--color-accent);
+        background-position: calc(100% - 5px) center;
+    }
+
+    .admin__switch:hover {
+        border-color: var(--color-accent-deep);
+    }
+
+    .admin__switch[aria-busy='true'] {
+        opacity: 0.6;
+    }
+
+    .admin__tail {
+        align-content: start;
+        display: grid;
+        gap: var(--space-xs);
+    }
+
+    @media (max-width: 768px) {
+        .admin__state {
+            text-align: left;
+        }
+    }
+
+    @media (forced-colors: active) {
+        .admin__switch {
+            background-color: Canvas;
+            background-image: linear-gradient(CanvasText, CanvasText);
+            border-color: CanvasText;
+            forced-color-adjust: none;
+        }
+
+        .admin__switch:checked {
+            background-color: SelectedItem;
+            background-image: linear-gradient(SelectedItemText, SelectedItemText);
+        }
+    }
+</style>
+
+<script>
+    import { MOCK_LATENCY_MS } from '@lib/constants';
+    import { delay, formatTime, registerPageScript, setText } from '@lib/utils';
+
+    const pending = new Set<string>();
+
+    function closeConfirm(id: string, focusTrigger: boolean) {
+        const panel = document.querySelector<HTMLElement>(`[data-admin-confirm="${id}"]`);
+        const trigger = document.querySelector<HTMLButtonElement>(`[data-admin-action="${id}"]`);
+
+        panel?.setAttribute('hidden', '');
+
+        if (focusTrigger) trigger?.focus();
+    }
+
+    function getFeedback(id: string) {
+        return document.querySelector<HTMLElement>(`[data-admin-feedback="${id}"]`);
+    }
+
+    function guardAdmin(): boolean {
+        return true;
+    }
+
+    async function handleActionClick(button: HTMLButtonElement) {
+        const id = button.dataset.adminAction ?? '';
+        const panel = document.querySelector<HTMLElement>(`[data-admin-confirm="${id}"]`);
+
+        if (panel) {
+            panel.removeAttribute('hidden');
+            panel.querySelector<HTMLButtonElement>('[data-admin-commit]')?.focus();
+
+            return;
+        }
+
+        await runAction(id, button);
+    }
+
+    async function handleToggleChange(input: HTMLInputElement) {
+        const id = input.dataset.adminToggle ?? '';
+
+        if (pending.has(id)) return;
+
+        pending.add(id);
+        input.setAttribute('aria-busy', 'true');
+        setText(getFeedback(id), 'Saving\u2026');
+
+        await delay(MOCK_LATENCY_MS);
+
+        input.removeAttribute('aria-busy');
+        pending.delete(id);
+        setText(getFeedback(id), `Saved at ${formatTime(new Date())}.`);
+    }
+
+    function initAdminConsole(signal: AbortSignal) {
+        const toggles = document.querySelectorAll<HTMLInputElement>('[data-admin-toggle]');
+
+        if (toggles.length === 0) return;
+
+        if (!guardAdmin()) {
+            window.location.replace('/404');
+
+            return;
+        }
+
+        pending.clear();
+
+        toggles.forEach((input) => {
+            input.addEventListener('change', () => handleToggleChange(input), { signal });
+        });
+
+        document.querySelectorAll<HTMLButtonElement>('[data-admin-action]').forEach((button) => {
+            button.addEventListener('click', () => handleActionClick(button), { signal });
+        });
+
+        document.querySelectorAll<HTMLButtonElement>('[data-admin-cancel]').forEach((button) => {
+            button.addEventListener('click', () => closeConfirm(button.dataset.adminCancel ?? '', true), { signal });
+        });
+
+        document.querySelectorAll<HTMLButtonElement>('[data-admin-commit]').forEach((button) => {
+            button.addEventListener('click', () => runAction(button.dataset.adminCommit ?? '', button), { signal });
+        });
+    }
+
+    async function runAction(id: string, control: HTMLButtonElement | null) {
+        if (pending.has(id)) return;
+
+        const feedback = getFeedback(id);
+
+        pending.add(id);
+        control?.setAttribute('aria-busy', 'true');
+        setText(feedback, 'Working\u2026');
+
+        await delay(MOCK_LATENCY_MS);
+
+        control?.removeAttribute('aria-busy');
+        pending.delete(id);
+        closeConfirm(id, true);
+        setText(feedback, feedback?.dataset.adminResult ?? 'Done.');
+    }
+
+    registerPageScript(initAdminConsole);
+</script>

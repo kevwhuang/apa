@@ -1,0 +1,375 @@
+---
+import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
+import { COMMERCE, PALETTE } from '@lib/constants';
+import { formatPrice, getStockLabel } from '@lib/utils';
+
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+    product: CollectionEntry<'products'>['data'];
+}
+
+const imageColors = PALETTE.slice(0, 3);
+const { product } = Astro.props;
+const { slug = '' } = Astro.params;
+
+const ceiling = Math.min(product.stock, COMMERCE.maxQuantityPerItem);
+const inStock = product.stock > 0;
+const lowStock = inStock && product.stock <= COMMERCE.lowStockThreshold;
+---
+
+<nav
+    class="stage stage--tight product__crumbs border-b-2 border-ink"
+    aria-label="Breadcrumb"
+>
+    <div
+        class="label text-ink-muted"
+        data-motion="stamp"
+    >
+        <a
+            class="product__crumb hover:text-accent-deep transition-colors"
+            href="/store"
+        >
+            &larr; All products
+        </a>&#32;
+        / {product.category}
+    </div>
+</nav>
+
+<section
+    class="stage stage--tight"
+    aria-labelledby="product-title"
+>
+    <div class="grid grid-cols-1 gap-12 md:grid-cols-2">
+        <ul
+            class="grid grid-cols-2 gap-8 list-none"
+            data-motion-stagger="unfold"
+        >
+            {product.images.map((_, index) => (
+                <li class:list={[index === 0 && 'col-span-2']}>
+                    <PlaceholderTile
+                        class="slab slab--bare slab--lift aspect-square"
+                        color={imageColors[index % imageColors.length]}
+                        label={product.title.split(' ')[0]}
+                        labelClass="text-[length:14cqi] uppercase text-surface-raised/80"
+                    />
+                </li>
+            ))}
+        </ul>
+        <div class="self-start space-y-8 md:sticky md:top-28">
+            <div>
+                <p class="label mb-2 text-accent-deep">{product.category}</p>
+                <h1
+                    id="product-title"
+                    class="mb-3 font-extrabold font-sans leading-tight text-4xl tracking-[-0.03em] md:text-5xl"
+                >
+                    {product.title}
+                </h1>
+                <p
+                    class="mb-4 font-bold font-mono text-2xl"
+                    data-placeholder
+                >
+                    {formatPrice(product.priceCents)}
+                </p>
+                <p
+                    class:list={[
+                        'label inline-block px-2 py-1.5',
+                        inStock && !lowStock && 'text-ink-muted',
+                        lowStock && 'bg-accent text-ink',
+                        !inStock && 'product__sold text-accent-deep',
+                    ]}
+                    data-placeholder
+                >
+                    {getStockLabel(product.stock, 'In stock')}
+                </p>
+            </div>
+            <p class="leading-relaxed text-[16px] text-ink-muted">{product.description}</p>
+            <form
+                class="add-form space-y-6"
+                data-image={product.images[0]}
+                data-max={ceiling}
+                data-price-cents={product.priceCents}
+                data-slug={slug}
+                data-title={product.title}
+            >
+                {product.colors.length > 0 && (
+                    <div>
+                        <p class="label mb-3 text-ink-muted">
+                            Color / <span data-color-output>{product.colors[0].name}</span>
+                        </p>
+                        <div
+                            class="flex gap-4"
+                            aria-label="Color options"
+                            role="group"
+                        >
+                            {product.colors.map((color, index) => (
+                                <button
+                                    class="active:border-ink aria-pressed:border-ink aria-pressed:outline-2 aria-pressed:outline-ink aria-pressed:outline-offset-[3px] hover:border-ink h-10 w-10 border-2 border-ink-muted transition-colors"
+                                    aria-label={color.name}
+                                    aria-pressed={index === 0 ? 'true' : 'false'}
+                                    data-color={color.name}
+                                    style={`background: ${color.hex};`}
+                                    type="button"
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
+                {product.sizes.length > 0 && (
+                    <div>
+                        <p class="label mb-3 text-ink-muted">Size</p>
+                        <div
+                            class="flex flex-wrap gap-2"
+                            aria-label="Size options"
+                            role="group"
+                        >
+                            {product.sizes.map((size, index) => (
+                                <button
+                                    class:list={[
+                                        'active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse h-[50px] min-w-[50px] px-3 border-2 border-ink font-bold font-mono text-xs uppercase transition-colors',
+                                        index === 0 && 'is-active',
+                                    ]}
+                                    aria-pressed={index === 0 ? 'true' : 'false'}
+                                    data-size={size}
+                                    type="button"
+                                >
+                                    {size}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+                <div>
+                    <p class="label mb-3 text-ink-muted">Quantity</p>
+                    <div class="inline-flex items-center border-2 border-ink">
+                        <button
+                            class="active:bg-ink active:text-ink-inverse aria-disabled:cursor-not-allowed aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-[50px] w-[50px] font-bold text-lg transition"
+                            aria-disabled="true"
+                            aria-label="Decrease quantity"
+                            data-quantity="-1"
+                            type="button"
+                        >
+                            &minus;
+                        </button>
+                        <span
+                            class="w-12 font-bold font-mono text-center"
+                            aria-live="polite"
+                            data-quantity-output
+                        >
+                            1
+                        </span>
+                        <button
+                            class="active:bg-ink active:text-ink-inverse aria-disabled:cursor-not-allowed aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-[50px] w-[50px] font-bold text-lg transition"
+                            aria-disabled={!inStock || ceiling <= 1}
+                            aria-label="Increase quantity"
+                            data-quantity="+1"
+                            type="button"
+                        >
+                            +
+                        </button>
+                    </div>
+                    <p
+                        class="action-text mt-3 text-ink-subtle"
+                        aria-live="polite"
+                        data-quantity-hint
+                    />
+                </div>
+                <button
+                    class="btn btn--primary w-full"
+                    disabled={!inStock}
+                    type="submit"
+                >
+                    {inStock ? 'Add to cart' : 'Sold out'}
+                </button>
+                <p
+                    class="action-text hidden p-3 text-center bg-accent text-ink"
+                    data-added
+                    role="status"
+                />
+            </form>
+            {product.details.length > 0 && (
+                <details class="product__details pt-4 border-t-2 border-ink">
+                    <summary class="label product__summary hover:text-accent-deep flex items-center min-h-[50px] cursor-pointer select-none transition-colors">
+                        Details
+                        <span
+                            class="action-text product__sign ml-auto"
+                            aria-hidden="true"
+                        >
+                            +
+                        </span>
+                    </summary>
+                    <ul class="mt-3 space-y-1 text-[14px] text-ink-muted">
+                        {product.details.map(detail => (
+                            <li class="flex gap-2">
+                                <span
+                                    class="font-bold text-accent-deep"
+                                    aria-hidden="true"
+                                >
+                                    &middot;
+                                </span>
+                                {detail}
+                            </li>
+                        ))}
+                    </ul>
+                </details>
+            )}
+        </div>
+    </div>
+</section>
+
+<style>
+    .product__crumb {
+        align-items: center;
+        display: inline-flex;
+        min-height: 50px;
+    }
+
+    .product__crumbs {
+        --stage-pad: var(--space-lg);
+    }
+
+    .product__details[open] .product__sign {
+        rotate: 45deg;
+    }
+
+    .product__sold {
+        background-image: repeating-linear-gradient(135deg, var(--color-ink-10) 0 4px, transparent 4px 8px);
+    }
+
+    .product__summary {
+        list-style: none;
+    }
+
+    .product__summary::marker {
+        content: none;
+    }
+
+    [data-color] {
+        position: relative;
+    }
+
+    [data-color]::after {
+        content: '';
+        inset: -8px;
+        position: absolute;
+    }
+</style>
+
+<script>
+    import { COMMERCE } from '@lib/constants';
+    import { add, getItems } from '@lib/store';
+    import { registerPageScript } from '@lib/utils';
+
+    let maxQuantity = 1;
+    let quantity = 1;
+
+    function countInCart(slug: string, color: string | undefined, size: string | undefined) {
+        const line = getItems().find(item => item.productSlug === slug
+            && (item.color ?? '') === (color ?? '')
+            && (item.size ?? '') === (size ?? ''));
+
+        return line?.quantity ?? 0;
+    }
+
+    function handleAddSubmit(event: SubmitEvent, form: HTMLFormElement, notice: HTMLElement | null) {
+        event.preventDefault();
+
+        const color = form.querySelector<HTMLButtonElement>('[data-color][aria-pressed="true"]')?.dataset.color;
+        const size = form.querySelector<HTMLButtonElement>('[data-size][aria-pressed="true"]')?.dataset.size;
+        const slug = form.dataset.slug ?? '';
+        const title = form.dataset.title ?? '';
+
+        if (countInCart(slug, color, size) >= maxQuantity) {
+            setNotice(notice, `Already at the maximum \u2014 ${maxQuantity} \u00d7 ${title} is all we can hold for you.`);
+
+            return;
+        }
+
+        add({
+            color,
+            image: form.dataset.image ?? '',
+            priceCents: Number(form.dataset.priceCents),
+            productSlug: slug,
+            quantity,
+            size,
+            title,
+        }, maxQuantity);
+
+        setNotice(notice, `${countInCart(slug, color, size)} \u00d7 ${title} in your cart.`);
+    }
+
+    function handleColorClick(button: HTMLButtonElement, swatches: NodeListOf<HTMLButtonElement>, output: HTMLElement | null) {
+        swatches.forEach((swatch) => {
+            swatch.setAttribute('aria-pressed', String(swatch === button));
+        });
+
+        if (output) output.textContent = button.dataset.color ?? '';
+    }
+
+    function handleQuantityClick(step: number, decrease: HTMLButtonElement, increase: HTMLButtonElement, output: HTMLElement, hint: HTMLElement | null) {
+        const button = step < 0 ? decrease : increase;
+
+        if (button.getAttribute('aria-disabled') === 'true') return;
+
+        quantity = Math.min(maxQuantity, Math.max(1, quantity + step));
+        updateQuantity(decrease, increase, output, hint);
+    }
+
+    function handleSizeClick(button: HTMLButtonElement, sizeButtons: NodeListOf<HTMLButtonElement>) {
+        sizeButtons.forEach((sizeButton) => {
+            sizeButton.classList.toggle('is-active', sizeButton === button);
+            sizeButton.setAttribute('aria-pressed', String(sizeButton === button));
+        });
+    }
+
+    function initProductDetail(signal: AbortSignal) {
+        const form = document.querySelector<HTMLFormElement>('.add-form');
+
+        if (!form) return;
+
+        const colorOutput = form.querySelector<HTMLElement>('[data-color-output]');
+        const decrease = form.querySelector<HTMLButtonElement>('[data-quantity="-1"]');
+        const hint = form.querySelector<HTMLElement>('[data-quantity-hint]');
+        const increase = form.querySelector<HTMLButtonElement>('[data-quantity="+1"]');
+        const notice = form.querySelector<HTMLElement>('[data-added]');
+        const quantityOutput = form.querySelector<HTMLElement>('[data-quantity-output]');
+        const sizeButtons = form.querySelectorAll<HTMLButtonElement>('[data-size]');
+        const swatches = form.querySelectorAll<HTMLButtonElement>('[data-color]');
+
+        maxQuantity = Math.max(1, Math.min(Number(form.dataset.max) || 1, COMMERCE.maxQuantityPerItem));
+        quantity = 1;
+
+        if (decrease && increase && quantityOutput) {
+            updateQuantity(decrease, increase, quantityOutput, hint);
+            decrease.addEventListener('click', () => handleQuantityClick(-1, decrease, increase, quantityOutput, hint), { signal });
+            increase.addEventListener('click', () => handleQuantityClick(1, decrease, increase, quantityOutput, hint), { signal });
+        }
+
+        form.addEventListener('submit', event => handleAddSubmit(event, form, notice), { signal });
+
+        sizeButtons.forEach((button) => {
+            button.addEventListener('click', () => handleSizeClick(button, sizeButtons), { signal });
+        });
+
+        swatches.forEach((button) => {
+            button.addEventListener('click', () => handleColorClick(button, swatches, colorOutput), { signal });
+        });
+    }
+
+    function setNotice(notice: HTMLElement | null, message: string) {
+        if (!notice) return;
+
+        notice.textContent = message;
+        notice.classList.remove('hidden');
+    }
+
+    function updateQuantity(decrease: HTMLButtonElement, increase: HTMLButtonElement, output: HTMLElement, hint: HTMLElement | null) {
+        decrease.setAttribute('aria-disabled', String(quantity <= 1));
+        increase.setAttribute('aria-disabled', String(quantity >= maxQuantity));
+        output.textContent = String(quantity);
+
+        if (hint) hint.textContent = quantity >= maxQuantity ? 'That\u2019s all we have.' : '';
+    }
+
+    registerPageScript(initProductDetail);
+</script>

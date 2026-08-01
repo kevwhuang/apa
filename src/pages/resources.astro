@@ -1,0 +1,14 @@
+---
+import Layout from '@/Layout.astro';
+import ResourcesLibrary from '@sections/resources/Library.astro';
+import ResourcesPressKit from '@sections/resources/PressKit.astro';
+import { brandTitle } from '@lib/brand';
+---
+
+<Layout
+    description={'Downloads and press material from the Austin Producer Alliance \u2014 brand assets, event packs, working documents, and a press contact for interviews.'}
+    title={brandTitle('Resources')}
+>
+    <ResourcesLibrary />
+    <ResourcesPressKit />
+</Layout>

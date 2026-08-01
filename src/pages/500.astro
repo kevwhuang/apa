@@ -1,6 +1,7 @@
 ---
-import ErrorServer from '@sections/ErrorServer.astro';
+import ErrorServer from '@sections/errors/Server.astro';
 import Layout from '@/Layout.astro';
+import { brandTitle } from '@lib/brand';
 
 export const prerender = false;
 ---
@@ -8,7 +9,7 @@ export const prerender = false;
 <Layout
     description="Something went wrong on our end. Try again in a moment, or head back to the Austin Producer Alliance home page."
     noindex
-    title={'Server Error \u2014 Austin Producer Alliance'}
+    title={brandTitle('Server Error')}
 >
     <ErrorServer />
 </Layout>

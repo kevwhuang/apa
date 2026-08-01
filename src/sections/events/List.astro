@@ -1,0 +1,395 @@
+---
+import { getCollection } from 'astro:content';
+
+import PageHead from '@components/shared/PageHead.astro';
+import ProgramFlyer from '@components/program/Flyer.astro';
+import ProgramSheet from '@components/program/Sheet.astro';
+import SectionHead from '@components/shared/SectionHead.astro';
+import { EVENT_PROGRAMS, LINKS } from '@lib/constants';
+import { formatDate, formatTimeRange, getProgram, mergeCalendar } from '@lib/utils';
+
+type CalendarItem = ReturnType<typeof mergeCalendar>['upcoming'][number];
+
+const programs = Object.values(EVENT_PROGRAMS);
+
+const planned = programs.filter(program => program.state === 'planned');
+
+const bashEditions = await getCollection('bash');
+const events = await getCollection('events');
+
+const bashProgram = getProgram('bash');
+
+const endById = new Map<string, Date>(
+    [...events, ...bashEditions].map(entry => [entry.id, entry.data.end] as const),
+);
+
+const { past, upcoming } = mergeCalendar(events, bashEditions);
+
+const withEnd = (list: CalendarItem[]) => list.map(event => ({ ...event, end: endById.get(event.id) ?? event.date }));
+
+const pastEvents = withEnd(past);
+const upcomingEvents = withEnd(upcoming);
+
+const assemblies = upcomingEvents.filter(event => event.type === 'assembly');
+const hangouts = upcomingEvents.filter(event => event.type === 'hangout');
+
+const upcomingBashes = bashEditions
+    .filter(edition => edition.data.status === 'upcoming')
+    .sort((a, b) => +a.data.date - +b.data.date);
+
+const pageIndex = [
+    { href: '#assembly-title', label: 'Assembly' },
+    { href: '#hangout-title', label: 'Hangout' },
+    { href: '#bash-title', label: 'Producer Bash' },
+    { href: '#planned-title', label: 'Planned' },
+    { href: '#past-title', label: 'Archive' },
+];
+
+function stampDay(date: Date) {
+    return date.toLocaleDateString('en-US', { day: '2-digit', timeZone: 'America/Chicago' });
+}
+
+function stampMonth(date: Date) {
+    return date.toLocaleDateString('en-US', { month: 'short', timeZone: 'America/Chicago', year: 'numeric' });
+}
+---
+
+<section
+    class="stage stage--tight border-b-2 border-ink"
+    aria-labelledby="programs-title"
+>
+    <div>
+        <PageHead
+            class="max-w-4xl font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
+            eyebrow="Events"
+            headingId="programs-title"
+        >
+            What we run.
+        </PageHead>
+        <p
+            class="max-w-2xl mt-6 text-lmd text-ink-muted"
+            data-motion="rise"
+        >
+            Three programs run on a fixed cadence, each with its own shape and its own room.
+            Below is the working calendar: every upcoming date with its hours, the programs
+            still on paper, and the archive of every date already run.
+        </p>
+        <nav
+            class="flex flex-wrap gap-3 mt-10"
+            aria-label="On this page"
+            data-motion="rise"
+        >
+            {pageIndex.map(item => (
+                <a
+                    class="chip hover:bg-ink hover:text-ink-inverse"
+                    href={item.href}
+                >
+                    {item.label}
+                </a>
+            ))}
+        </nav>
+    </div>
+</section>
+
+<ProgramSheet
+    class="border-b-2 border-ink"
+    ctaHref="/assembly"
+    ctaLabel="About the Assembly"
+    detailed
+    events={assemblies}
+    headingId="assembly-title"
+/>
+
+<ProgramFlyer
+    class="border-b-2 border-ink"
+    detailed
+    events={hangouts}
+    headingId="hangout-title"
+/>
+
+<section
+    class="stage stage--bash stage--overhang border-b-2 border-ink"
+    aria-labelledby="bash-title"
+>
+    <div class="bash-well fold slab slab--well stage__item--runoff">
+        <div
+            class="halftone--accent absolute inset-0 pointer-events-none"
+            aria-hidden="true"
+        />
+        <div class="relative">
+            <SectionHead
+                class="font-extrabold font-sans text-5xl tracking-tight"
+                eyebrow={`${bashProgram.shortName} / ${bashProgram.cadence}`}
+                headingId="bash-title"
+                tone="dark"
+            >
+                {bashProgram.name}.
+            </SectionHead>
+            <p
+                class="max-w-xl leading-relaxed text-md text-ink-inverse-muted"
+                data-motion="rise"
+            >
+                {bashProgram.summary}
+            </p>
+            <div
+                class="flex flex-wrap items-center gap-6 mt-8"
+                data-motion="rise"
+            >
+                <a
+                    class="btn btn--accent"
+                    href="/bash"
+                >
+                    Everything about the {bashProgram.name} &rarr;
+                </a>
+                <a
+                    class="action-text hover:text-accent inline-flex items-center min-h-[50px] underline underline-offset-8 text-ink-inverse transition-colors"
+                    href={LINKS.meetup}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                >
+                    RSVP on Meetup &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+    {upcomingBashes.length > 0
+        ? (
+                <ul
+                    class="slab slab--cut slab--lift list-none"
+                    data-motion-stagger="rise"
+                >
+                    {upcomingBashes.map(edition => (
+                        <li
+                            id={edition.id}
+                            class="rank last:border-b-0 items-baseline py-4 border-b-2 border-ink"
+                        >
+                            <p
+                                class="font-extrabold font-sans text-xl"
+                                data-placeholder
+                            >
+                                <time datetime={edition.data.date.toISOString()}>{formatDate(edition.data.date)}</time>
+                                <span class="block mt-1 font-mono text-xs uppercase text-ink-muted">
+                                    {formatTimeRange(edition.data.date, edition.data.end)}
+                                </span>
+                            </p>
+                            <div>
+                                <h3 class="font-extrabold font-sans text-2xl tracking-tight">{edition.data.title}</h3>
+                                <address class="mt-2 font-mono not-italic text-xs uppercase text-ink-muted">
+                                    {edition.data.location}
+                                </address>
+                                <p class="max-w-2xl mt-3 leading-relaxed text-ink-muted">{edition.data.recap}</p>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            )
+        : (
+                <p
+                    class="slab slab--cut slab--lift leading-relaxed text-ink-muted"
+                    data-motion="rise"
+                >
+                    No edition on the calendar right now &mdash; the next date goes up here and on Meetup as soon as the room is booked.
+                </p>
+            )}
+</section>
+
+<section
+    class="stage border-b-2 border-ink"
+    aria-labelledby="planned-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-4xl tracking-tight"
+            eyebrow="Planned"
+            headingId="planned-title"
+        >
+            Written down, not yet dated.
+        </SectionHead>
+        <ul
+            class="grid grid-cols-1 gap-6 list-none lg:grid-cols-3 md:grid-cols-2"
+            data-motion-stagger="rise"
+        >
+            {planned.map(program => (
+                <li class="p-5 border-2 border-dashed border-ink-subtle">
+                    <p class="label mb-3 text-ink-muted">{program.cadence}</p>
+                    <h3 class="mb-2 font-bold font-sans text-lg tracking-tight">{program.name}</h3>
+                    <p class="text-sm text-ink-muted">{program.summary}</p>
+                </li>
+            ))}
+        </ul>
+    </div>
+</section>
+
+<section
+    class="slab--sunk stage"
+    aria-labelledby="past-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-4xl tracking-tight"
+            eyebrow={`Archive / ${pastEvents.length} on file`}
+            headingId="past-title"
+        >
+            Already run, still on file.
+        </SectionHead>
+        <ul
+            class="archive-grid list-none"
+            data-motion-stagger="rise"
+        >
+            {pastEvents.map(event => (
+                <li class="tilt">
+                    <article
+                        id={event.id}
+                        class="archive-card slab slab--bare slab--card"
+                        data-program={event.type}
+                    >
+                        <p
+                            class="archive-card__stamp"
+                            data-placeholder
+                        >
+                            <time datetime={event.date.toISOString()}>
+                                <span class="archive-card__day">{stampDay(event.date)}</span>
+                                <span class="archive-card__month">{stampMonth(event.date)}</span>
+                            </time>
+                        </p>
+                        <div class="archive-card__body">
+                            <p
+                                class="label mb-2 text-ink-muted"
+                                data-placeholder
+                            >
+                                {getProgram(event.type).shortName} / {formatTimeRange(event.date, event.end)}
+                            </p>
+                            <h3 class="font-extrabold font-sans text-lg tracking-tight">{event.title}</h3>
+                            <address class="mt-2 font-mono not-italic text-xs uppercase text-ink-muted">
+                                {event.location}
+                            </address>
+                            <p class="mt-3 leading-relaxed text-sm text-ink-muted">{event.excerpt}</p>
+                        </div>
+                    </article>
+                </li>
+            ))}
+        </ul>
+    </div>
+</section>
+
+<style>
+    .archive-card {
+        display: grid;
+        grid-row: span 4;
+        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-rows: subgrid;
+    }
+
+    .archive-card:target {
+        outline: 2px solid var(--color-accent-deep);
+        outline-offset: 3px;
+    }
+
+    .archive-card[data-program='assembly'] .archive-card__stamp {
+        background: var(--color-ink);
+        color: var(--color-ink-inverse);
+    }
+
+    .archive-card[data-program='bash'] .archive-card__stamp {
+        background: var(--color-accent);
+    }
+
+    .archive-card[data-program='hangout'] .archive-card__stamp {
+        background: var(--color-surface-sunken);
+    }
+
+    .archive-card__body {
+        align-content: start;
+        display: grid;
+        grid-row: span 4;
+        grid-template-rows: subgrid;
+        padding: var(--space-sm) var(--space-md) var(--space-md);
+    }
+
+    .archive-card__day {
+        font-family: var(--font-sans);
+        font-size: var(--text-3xl);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1;
+    }
+
+    .archive-card__month {
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .archive-card__stamp {
+        align-items: center;
+        border-right: 2px solid var(--color-ink);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2xs);
+        grid-row: span 4;
+        justify-content: center;
+        min-width: 92px;
+        padding: var(--space-sm) var(--space-xs);
+        text-align: center;
+    }
+
+    .archive-card__stamp time {
+        display: contents;
+    }
+
+    .archive-grid {
+        --drift-step: 2;
+        column-gap: var(--space-md);
+        display: grid;
+        grid-auto-rows: auto;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-bottom: calc(-1 * var(--space-md));
+        row-gap: 0;
+    }
+
+    .archive-grid > li {
+        display: grid;
+        grid-row: span 4;
+        grid-template-rows: subgrid;
+        padding-bottom: var(--space-md);
+    }
+
+    .bash-well {
+        padding-block: var(--space-2xl);
+        padding-inline: max(var(--shell-pad), calc(100% - var(--shell-inner))) 0;
+    }
+
+    @media (max-width: 1024px) {
+        .archive-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .archive-card {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .archive-card,
+        .archive-grid > li {
+            grid-row: span 5;
+        }
+
+        .archive-card__stamp {
+            border-bottom: 2px solid var(--color-ink);
+            border-right: 0;
+            flex-direction: row;
+            gap: var(--space-xs);
+            grid-row: span 1;
+            justify-content: flex-start;
+            min-width: 0;
+            padding: var(--space-2xs) var(--space-sm);
+        }
+
+        .archive-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+</style>

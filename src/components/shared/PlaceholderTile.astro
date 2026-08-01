@@ -1,0 +1,35 @@
+---
+interface Props {
+    'class'?: string;
+    'color': string;
+    'data-motion'?: string;
+    'label': string;
+    'labelClass'?: string;
+}
+
+const { class: tileClass, color, 'data-motion': motion, label, labelClass } = Astro.props;
+---
+
+<div
+    class:list={['tile flex items-center justify-center overflow-hidden relative', tileClass]}
+    data-motion={motion}
+    style={`background: ${color};`}
+>
+    <div
+        class="halftone absolute inset-0"
+        aria-hidden="true"
+    />
+    <span
+        class:list={['font-extrabold font-sans select-none', labelClass]}
+        aria-hidden="true"
+    >
+        {label}
+    </span>
+    <slot />
+</div>
+
+<style>
+    .tile {
+        container-type: inline-size;
+    }
+</style>

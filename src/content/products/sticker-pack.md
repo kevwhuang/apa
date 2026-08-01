@@ -5,9 +5,9 @@ priceCents: 800
 sizes: []
 colors: []
 images: [stickers-1]
-description: Pack of six die-cut vinyl stickers. Wordmarks, monogram, ticks, and one secret cookup-only design.
+description: A mixed pack of die-cut vinyl stickers. Wordmarks, monogram, ticks, and a design that turns up nowhere else.
 details:
-  - 6 stickers, weatherproof vinyl
-  - Designs vary
-inStock: true
+  - Weatherproof vinyl
+  - Assorted designs
+stock: 120
 ---

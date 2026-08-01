@@ -1,6 +1,8 @@
-# Prods — Virtual Currency Proposal
-
-Austin Producer Alliance · Third Draft · June 13, 2026
+---
+title: Prods
+description: A virtual currency that rewards members for showing up, contributing, and helping the community grow.
+updated: 2026-06-13
+---
 
 ## Overview
 
@@ -18,8 +20,8 @@ Behind the scenes, we track everything through our platform and backend, keeping
 
 | Item        | Price |
 | ----------- | ----- |
-| Stickers    | $2    |
-| Shirts      | $30   |
+| Stickers    | $8    |
+| Shirts      | $35   |
 
 ## How to Earn
 

@@ -1,0 +1,15 @@
+---
+import AdminConsole from '@sections/admin/Console.astro';
+import AdminProds from '@sections/admin/Prods.astro';
+import Layout from '@/Layout.astro';
+import { brandTitle } from '@lib/brand';
+---
+
+<Layout
+    description={'Internal operations console for the Austin Producer Alliance \u2014 program switches, cleanup actions, and the Prods ledger.'}
+    noindex
+    title={brandTitle('Operations')}
+>
+    <AdminConsole />
+    <AdminProds />
+</Layout>

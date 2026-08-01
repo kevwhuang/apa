@@ -1,0 +1,12 @@
+---
+import Layout from '@/Layout.astro';
+import SandboxBento from '@sections/sandbox/Bento.astro';
+import { brandTitle } from '@lib/brand';
+---
+
+<Layout
+    description={'A live rack of Web Audio processors from the Austin Producer Alliance \u2014 drop a file on any module, press play, and A/B the effect with bypass.'}
+    title={brandTitle('Sandbox')}
+>
+    <SandboxBento />
+</Layout>

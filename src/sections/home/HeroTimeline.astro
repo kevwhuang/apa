@@ -1,0 +1,133 @@
+---
+import WaveformBars from '@components/shared/WaveformBars.astro';
+import { STEP_COUNT, stepEnergy } from '@lib/motion/pattern';
+import { getProgram } from '@lib/utils';
+
+const BAR_MAX = 92;
+const BAR_MIN = 18;
+
+const assembly = getProgram('assembly');
+const bash = getProgram('bash');
+const hangout = getProgram('hangout');
+
+const barPeak = Math.max(...Array.from({ length: STEP_COUNT }, (_, step) => stepEnergy(step)));
+const bars = Array.from({ length: STEP_COUNT }, (_, step) => BAR_MIN + (BAR_MAX - BAR_MIN) * (stepEnergy(step) / barPeak));
+---
+
+<section
+    class="hero stage stage--hero stage--wide overflow-hidden relative border-b-2 border-ink bg-surface"
+    aria-labelledby="hero-title"
+>
+    <div class="halftone stage__item--full absolute inset-0 pointer-events-none" aria-hidden="true" />
+    <div class="hero__field stage__item--full absolute inset-0 pointer-events-none" aria-hidden="true" />
+    <div class="relative">
+        <div
+            class="label hero__meta flex flex-wrap items-center justify-center gap-3 mb-6 text-ink-muted"
+            data-motion="stamp"
+        >
+            <span class="inline-block h-2.5 w-2.5 bg-accent animate-pulse" aria-hidden="true" />
+            <span>Austin TX</span>
+            <span class="hidden md:inline">/ Est <time datetime="2022-05">2022</time> / More than 1,000 welcomed</span>
+        </div>
+        <h1
+            id="hero-title"
+            class="hero__title mb-10 font-extrabold font-sans leading-[0.86] text-[clamp(40px,min(10vw,13.5svh),148px)] tracking-[-0.045em]"
+            data-motion-stagger="strike"
+        >
+            <span class="block">Austin's</span>
+            <span class="block text-accent">producer</span>
+            <span class="block">community.</span>
+        </h1>
+        <div
+            class="hero__timeline relative"
+            data-motion="unfold"
+        >
+            <div class="slab slab--bare slab--card mark overflow-hidden relative mb-8">
+                <div class="halftone--accent absolute inset-0" aria-hidden="true" />
+                <WaveformBars
+                    class="block h-16 w-full px-3 py-2 text-accent/70"
+                    bars={bars}
+                />
+                <div class="hero__playhead" aria-hidden="true" />
+            </div>
+            <div class="hero__foot grid grid-cols-1 max-w-3xl gap-8 md:grid-cols-2">
+                <p class="leading-relaxed text-md">
+                    A working community for music producers in Austin, Texas. At {assembly.name}, {hangout.name},
+                    and the {bash.cadence} {bash.name}, producers of every genre and experience
+                    level find their people.
+                </p>
+                <div class="hero__actions flex flex-wrap items-start gap-3">
+                    <a
+                        class="btn btn--primary"
+                        href="/events"
+                    >
+                        All events
+                    </a>
+                    <a
+                        class="btn"
+                        href="/about"
+                    >
+                        Our story
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style is:global>
+    .hero {
+        align-content: center;
+        min-height: 100svh;
+        padding-block: calc(var(--header-height) + var(--space-lg)) var(--space-2xl);
+        text-align: center;
+    }
+
+    .hero__actions {
+        justify-content: center;
+    }
+
+    .hero__canvas {
+        height: 100%;
+        inset: 0;
+        mask-image: linear-gradient(to right, currentColor 0%, transparent 22%, transparent 62%, currentColor 88%);
+        pointer-events: none;
+        position: absolute;
+        transition: opacity var(--duration-cinematic) var(--motion-ease-entrance);
+        width: 100%;
+    }
+
+    .hero__foot {
+        margin-inline: auto;
+    }
+
+    .hero__playhead {
+        --playhead-width: 2px;
+        inset: 0 auto 0 0;
+        pointer-events: none;
+        position: absolute;
+        width: calc(100% - var(--playhead-width));
+    }
+
+    .hero__playhead::after,
+    .hero__playhead::before {
+        background: var(--color-accent);
+        content: '';
+        position: absolute;
+    }
+
+    .hero__playhead::after {
+        height: 12px;
+        left: -5px;
+        rotate: 45deg;
+        top: -6px;
+        width: 12px;
+    }
+
+    .hero__playhead::before {
+        bottom: 0;
+        left: 0;
+        top: 0;
+        width: var(--playhead-width);
+    }
+</style>

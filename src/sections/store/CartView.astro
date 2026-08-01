@@ -1,0 +1,421 @@
+---
+import { getCollection } from 'astro:content';
+
+import PageHead from '@components/shared/PageHead.astro';
+import { toCatalog } from '@lib/utils';
+
+const catalog = toCatalog(await getCollection('products'));
+---
+
+<section
+    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    aria-labelledby="cart-title"
+>
+    <div>
+        <PageHead
+            class="font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            eyebrow="Your cart"
+            headingId="cart-title"
+        >
+            Cart
+        </PageHead>
+    </div>
+</section>
+
+<section
+    class="stage stage--narrow stage--tight"
+    aria-label="Cart contents"
+    data-catalog={JSON.stringify(catalog)}
+>
+    <div class="cart__grid grid grid-cols-1 gap-12 md:grid-cols-[1.5fr_1fr]">
+        <div class="cart__main flex flex-col gap-6">
+            <aside
+                class="cart__notice slab slab--card flex flex-col gap-4"
+                aria-label="Cart changes"
+                data-cart-notice
+                hidden
+                role="status"
+            >
+                <p class="label text-accent-deep">Your cart changed</p>
+                <ul
+                    class="cart__issues list-none"
+                    data-cart-issues
+                />
+                <button
+                    class="btn self-start"
+                    data-cart-dismiss
+                    type="button"
+                >
+                    Got it
+                </button>
+            </aside>
+            <div
+                class="slab slab--card slab--roomy max-w-xl w-full mx-auto text-center"
+                data-cart-empty
+                tabindex="-1"
+            >
+                <p class="label mb-3 text-ink-muted">Empty</p>
+                <p class="mb-6 font-extrabold font-sans text-2xl">Nothing in the cart yet.</p>
+                <a
+                    class="btn btn--primary"
+                    href="/store"
+                >
+                    Browse the store
+                </a>
+            </div>
+            <ul
+                class="cart-items flex flex-col gap-4 list-none"
+                data-cart-list
+            />
+            <p
+                class="sr-only"
+                aria-live="polite"
+                data-cart-status
+            />
+        </div>
+        <aside
+            class="slab slab--sunk self-start"
+            aria-label="Order summary"
+            data-cart-summary
+        >
+            <h2 class="label mb-4 text-ink-muted">Summary</h2>
+            <dl class="space-y-2 font-mono text-[14px]">
+                <div class="flex justify-between gap-3">
+                    <dt>Subtotal</dt>
+                    <dd data-subtotal>$0.00</dd>
+                </div>
+                <div class="flex justify-between gap-3">
+                    <dt>Shipping</dt>
+                    <dd data-shipping>&mdash;</dd>
+                </div>
+                <div class="flex justify-between gap-3">
+                    <dt>Estimated tax</dt>
+                    <dd data-tax>$0.00</dd>
+                </div>
+                <div class="flex justify-between gap-3 mt-3 pt-3 border-t-2 border-ink font-extrabold font-sans text-lg">
+                    <dt>Total</dt>
+                    <dd
+                        aria-live="polite"
+                        data-total
+                    >
+                        $0.00
+                    </dd>
+                </div>
+            </dl>
+            <p
+                class="action-text mt-4 text-ink-subtle"
+                data-cart-shipping-hint
+                hidden
+            />
+            <a
+                class="btn btn--primary cart-checkout w-full mt-6"
+                aria-disabled="true"
+                href="/store/checkout"
+            >
+                Checkout
+            </a>
+        </aside>
+    </div>
+    <template data-cart-row>
+        <li class="slab slab--card flex gap-5">
+            <div
+                class="flex items-center justify-center overflow-hidden relative shrink-0 h-28 w-28"
+                aria-hidden="true"
+                data-row-tile
+            >
+                <div class="halftone absolute inset-0" />
+                <span
+                    class="font-extrabold font-sans text-xl uppercase text-surface-raised/80 select-none"
+                    data-row-initial
+                />
+            </div>
+            <div class="flex flex-1 flex-col min-w-0 gap-2">
+                <p
+                    class="font-extrabold font-sans"
+                    data-row-title
+                />
+                <p
+                    class="label text-ink-muted"
+                    data-row-variant
+                />
+                <p
+                    class="label self-start px-2 py-1 bg-accent text-ink"
+                    data-row-stock
+                    hidden
+                />
+                <div class="flex flex-wrap items-center gap-4 mt-2">
+                    <div class="inline-flex items-center border-2 border-ink">
+                        <button
+                            class="active:bg-ink active:text-ink-inverse aria-disabled:cursor-not-allowed aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-[50px] w-[50px] font-bold transition"
+                            data-row-decrease
+                            type="button"
+                        >
+                            &minus;
+                        </button>
+                        <span
+                            class="w-12 font-bold font-mono text-center"
+                            data-row-quantity
+                        />
+                        <button
+                            class="active:bg-ink active:text-ink-inverse aria-disabled:cursor-not-allowed aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-[50px] w-[50px] font-bold transition"
+                            data-row-increase
+                            type="button"
+                        >
+                            +
+                        </button>
+                    </div>
+                    <button
+                        class="action-text active:text-accent-deep flex items-center min-h-[50px] px-1 text-ink-muted transition-colors"
+                        data-row-remove
+                        type="button"
+                    >
+                        Remove
+                    </button>
+                    <span
+                        class="ml-auto font-bold font-mono"
+                        data-row-price
+                    />
+                </div>
+            </div>
+        </li>
+    </template>
+    <template data-cart-issue>
+        <li class="flex gap-2 text-[14px] text-ink-muted">
+            <span
+                class="font-bold text-accent-deep"
+                aria-hidden="true"
+            >
+                &middot;
+            </span>
+            <span data-issue-text />
+        </li>
+    </template>
+</section>
+
+<style>
+    .cart__grid:has([data-cart-summary][hidden]) > .cart__main {
+        grid-column: 1 / -1;
+    }
+
+    .cart__issues {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3xs);
+    }
+
+    .cart__notice {
+        border-left: 2px solid var(--color-accent-deep);
+    }
+
+    .cart-checkout {
+        transition: background var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease, transform var(--duration-fast) ease;
+    }
+
+    .cart-checkout[aria-disabled='true'] {
+        background: transparent;
+        border-color: var(--color-ink-20);
+        color: var(--color-ink-subtle);
+        cursor: not-allowed;
+        opacity: 1;
+    }
+
+    .cart-checkout[aria-disabled='true']:active {
+        transform: none;
+    }
+
+    .cart-checkout[aria-disabled='true']:hover {
+        background: transparent;
+        border-color: var(--color-ink-20);
+        color: var(--color-ink-subtle);
+    }
+
+    .cart-items:empty {
+        display: none;
+    }
+</style>
+
+<script>
+    import { COMMERCE, PALETTE } from '@lib/constants';
+    import { formatPrice, formatVariant, getStockLabel, parseCatalog, registerPageScript, setText } from '@lib/utils';
+    import { getItems, onChange, reconcile, remove, setQuantity, totals } from '@lib/store';
+    import { renderIssueList } from '@lib/forms';
+
+    interface FocusMark {
+        control: string;
+        count: number;
+        index: number;
+    }
+
+    const ROW_CONTROLS = ['[data-row-decrease]', '[data-row-increase]', '[data-row-remove]'];
+
+    const cardColors = PALETTE.slice(0, 4);
+
+    let catalog: CatalogEntry[] = [];
+
+    function announce(message: string) {
+        setText(document.querySelector('[data-cart-status]'), message);
+    }
+
+    function captureFocus(list: HTMLElement) {
+        const active = document.activeElement;
+
+        if (!(active instanceof HTMLElement) || !list.contains(active)) return null;
+
+        const control = ROW_CONTROLS.find(selector => active.matches(selector));
+        const row = active.closest('li');
+
+        if (!control || !row) return null;
+
+        return { control, count: list.children.length, index: Array.from(list.children).indexOf(row) };
+    }
+
+    function ceilingFor(slug: string) {
+        const entry = catalog.find(item => item.slug === slug);
+
+        return Math.max(1, Math.min(entry?.stock ?? COMMERCE.maxQuantityPerItem, COMMERCE.maxQuantityPerItem));
+    }
+
+    function handleCheckoutClick(event: Event, checkout: HTMLElement) {
+        if (checkout.getAttribute('aria-disabled') === 'true') event.preventDefault();
+    }
+
+    function handleQuantityClick(button: HTMLButtonElement, index: number, item: CartItem, ceiling: number, step: number) {
+        if (button.getAttribute('aria-disabled') === 'true') return;
+
+        setQuantity(index, item.quantity + step, ceiling);
+
+        const line = getItems()[index];
+
+        if (line) announce(`${line.quantity} \u00d7 ${line.title}, ${formatPrice(line.priceCents * line.quantity)}`);
+    }
+
+    function handleRemoveClick(index: number, item: CartItem) {
+        remove(index);
+        announce(`Removed ${item.title} from your cart.`);
+    }
+
+    function initCartView(signal: AbortSignal) {
+        const checkout = document.querySelector<HTMLElement>('.cart-checkout');
+        const dismiss = document.querySelector<HTMLButtonElement>('[data-cart-dismiss]');
+        const issueList = document.querySelector<HTMLElement>('[data-cart-issues]');
+        const issueTemplate = document.querySelector<HTMLTemplateElement>('[data-cart-issue]');
+        const list = document.querySelector<HTMLElement>('[data-cart-list]');
+        const notice = document.querySelector<HTMLElement>('[data-cart-notice]');
+        const source = document.querySelector<HTMLElement>('[data-catalog]');
+
+        if (!checkout || !list) return;
+
+        catalog = parseCatalog(source?.dataset.catalog);
+
+        renderIssueList(reconcile(catalog), notice, issueList, issueTemplate);
+        renderCart(checkout, list, signal);
+
+        const unsubscribe = onChange(() => renderCart(checkout, list, signal));
+
+        signal.addEventListener('abort', unsubscribe, { once: true });
+        checkout.addEventListener('click', event => handleCheckoutClick(event, checkout), { signal });
+        dismiss?.addEventListener('click', () => notice?.setAttribute('hidden', ''), { signal });
+    }
+
+    function renderCart(checkout: HTMLElement, list: HTMLElement, signal: AbortSignal) {
+        const empty = document.querySelector<HTMLElement>('[data-cart-empty]');
+        const items = getItems();
+        const mark = captureFocus(list);
+        const summary = document.querySelector<HTMLElement>('[data-cart-summary]');
+        const template = document.querySelector<HTMLTemplateElement>('[data-cart-row]');
+
+        checkout.setAttribute('aria-disabled', String(items.length === 0));
+        empty?.toggleAttribute('hidden', items.length > 0);
+        summary?.toggleAttribute('hidden', items.length === 0);
+        list.replaceChildren();
+
+        if (template) items.forEach((item, index) => list.append(renderRow(template, item, index, signal)));
+
+        renderSummary(items);
+        restoreFocus(list, mark);
+    }
+
+    function renderRow(template: HTMLTemplateElement, item: CartItem, index: number, signal: AbortSignal) {
+        const ceiling = ceilingFor(item.productSlug);
+        const entry = catalog.find(candidate => candidate.slug === item.productSlug);
+        const fragment = template.content.cloneNode(true) as DocumentFragment;
+        const stockLabel = entry ? getStockLabel(entry.stock) : '';
+        const variant = formatVariant(item);
+
+        const decrease = fragment.querySelector<HTMLButtonElement>('[data-row-decrease]');
+        const increase = fragment.querySelector<HTMLButtonElement>('[data-row-increase]');
+        const removeButton = fragment.querySelector<HTMLButtonElement>('[data-row-remove]');
+        const stock = fragment.querySelector<HTMLElement>('[data-row-stock]');
+        const tile = fragment.querySelector<HTMLElement>('[data-row-tile]');
+
+        setText(fragment.querySelector('[data-row-initial]'), item.title.split(' ')[0]);
+        setText(fragment.querySelector('[data-row-price]'), formatPrice(item.priceCents * item.quantity));
+        setText(fragment.querySelector('[data-row-quantity]'), String(item.quantity));
+        setText(fragment.querySelector('[data-row-title]'), item.title);
+        setText(fragment.querySelector('[data-row-variant]'), variant.length > 0 ? variant : 'One option');
+
+        if (tile) tile.style.background = cardColors[index % cardColors.length];
+
+        if (stock && stockLabel.length > 0) {
+            stock.textContent = stockLabel;
+            stock.removeAttribute('hidden');
+        }
+
+        if (decrease) {
+            decrease.setAttribute('aria-disabled', String(item.quantity <= 1));
+            decrease.setAttribute('aria-label', `Decrease quantity of ${item.title}`);
+            decrease.addEventListener('click', () => handleQuantityClick(decrease, index, item, ceiling, -1), { signal });
+        }
+
+        if (increase) {
+            increase.setAttribute('aria-disabled', String(item.quantity >= ceiling));
+            increase.setAttribute('aria-label', `Increase quantity of ${item.title}`);
+            increase.addEventListener('click', () => handleQuantityClick(increase, index, item, ceiling, 1), { signal });
+        }
+
+        if (removeButton) {
+            removeButton.setAttribute('aria-label', `Remove ${item.title} from your cart`);
+            removeButton.addEventListener('click', () => handleRemoveClick(index, item), { signal });
+        }
+
+        return fragment;
+    }
+
+    function renderSummary(items: CartItem[]) {
+        const hint = document.querySelector<HTMLElement>('[data-cart-shipping-hint]');
+        const summary = totals(items);
+        const remaining = COMMERCE.freeShippingThresholdCents - summary.subtotalCents;
+
+        setText(document.querySelector('[data-shipping]'), summary.subtotalCents === 0 ? '\u2014' : formatPrice(summary.shippingCents));
+        setText(document.querySelector('[data-subtotal]'), formatPrice(summary.subtotalCents));
+        setText(document.querySelector('[data-tax]'), formatPrice(summary.taxCents));
+        setText(document.querySelector('[data-total]'), formatPrice(summary.totalCents));
+
+        if (!hint) return;
+
+        hint.textContent = remaining > 0 ? `${formatPrice(remaining)} more for free shipping.` : 'Shipping is on us.';
+        hint.toggleAttribute('hidden', summary.subtotalCents === 0);
+    }
+
+    function restoreFocus(list: HTMLElement, mark: FocusMark | null) {
+        if (!mark) return;
+
+        const rows = Array.from(list.children);
+
+        if (rows.length === 0) {
+            document.querySelector<HTMLElement>('[data-cart-empty]')?.focus();
+
+            return;
+        }
+
+        if (rows.length === mark.count) {
+            rows[mark.index]?.querySelector<HTMLElement>(mark.control)?.focus();
+
+            return;
+        }
+
+        (rows[mark.index] ?? rows[rows.length - 1]).querySelector<HTMLElement>('[data-row-remove]')?.focus();
+    }
+
+    registerPageScript(initCartView);
+</script>

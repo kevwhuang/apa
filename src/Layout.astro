@@ -1,23 +1,89 @@
 ---
-import '@fontsource-variable/bricolage-grotesque/index.css';
-import '@fontsource/space-mono/400.css';
-import '@fontsource/space-mono/700.css';
 import { ClientRouter } from 'astro:transitions';
 
 import '@/global.css';
 import '@/styles.css';
-import Footer from '@sections/Footer.astro';
-import Navbar from '@sections/Navbar.astro';
+import AudioSidebar from '@sections/shared/AudioSidebar.astro';
+import ChatWindow from '@sections/shared/ChatWindow.astro';
+import Footer from '@sections/shared/Footer.astro';
+import Navbar from '@sections/shared/Navbar.astro';
+import { BRAND, BRAND_ICONS, BRAND_OG } from '@lib/brand';
+import { LINKS, STORAGE } from '@lib/constants';
 
 interface Props {
     description: string;
+    hasHero?: boolean;
     noindex?: boolean;
     title: string;
 }
 
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
-const { description, noindex, title } = Astro.props;
-const ogImageUrl = `${Astro.site}og.png`;
+const { description, hasHero, noindex, title } = Astro.props;
+const logoUrl = new URL(BRAND_ICONS.logo, Astro.site).href;
+const ogImageUrl = new URL(BRAND_ICONS.og, Astro.site).href;
+const bootstrap = `(function () {
+    let state = 'out';
+
+    try {
+        const raw = localStorage.getItem('${STORAGE.session.key}');
+        const session = raw ? JSON.parse(raw) : null;
+
+        if (session && session.expiresAt > Date.now()) state = 'in';
+    } catch {
+        state = 'out';
+    }
+
+    document.documentElement.dataset.session = state;
+})();
+
+(function () {
+    if (window.__apaMotion) return;
+
+    const ARMED_CLASS = 'is-motion-armed';
+    const REDUCE = '(prefers-reduced-motion: reduce)';
+    const WATCHDOG_MS = 2_500;
+    const root = document.documentElement;
+    const state = { arm: arm, armedClass: ARMED_CLASS, disarm: disarm, expired: false, live: live };
+
+    let watchdog;
+
+    function arm() {
+        if (state.expired) return;
+        if (window.matchMedia(REDUCE).matches) return disarm();
+
+        root.classList.add(ARMED_CLASS);
+        clearTimeout(watchdog);
+        watchdog = setTimeout(expire, WATCHDOG_MS);
+    }
+
+    function disarm() {
+        clearTimeout(watchdog);
+        root.classList.remove(ARMED_CLASS);
+    }
+
+    function expire() {
+        state.expired = true;
+        disarm();
+    }
+
+    function live() {
+        clearTimeout(watchdog);
+
+        return !state.expired;
+    }
+
+    function preArm(event) {
+        if (state.expired || window.matchMedia(REDUCE).matches) return;
+
+        event.newDocument.documentElement.classList.add(ARMED_CLASS);
+    }
+
+    window.__apaMotion = state;
+    arm();
+    document.addEventListener('astro:after-swap', arm);
+    document.addEventListener('astro:before-swap', preArm);
+    window.addEventListener('beforeprint', disarm);
+})();`;
 ---
 
 <!doctype html>
@@ -27,17 +93,20 @@ const ogImageUrl = `${Astro.site}og.png`;
         <meta content="width=device-width, initial-scale=1" name="viewport" />
         <title>{title}</title>
         <meta content={description} name="description" />
-        <meta content="Kevin Huang" name="author" />
-        <meta content="#faf6f0" name="theme-color" />
+        <meta content={BRAND.author} name="author" />
+        <meta content={BRAND.themeColor} name="theme-color" />
         <meta content={noindex ? 'noindex, nofollow' : 'index, follow'} name="robots" />
         <link href={canonicalUrl} rel="canonical" />
-        <link href="/apple-touch-icon.png" rel="apple-touch-icon" />
-        <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
+        <link href={BRAND_ICONS.appleTouch} rel="apple-touch-icon" />
+        <link href={BRAND_ICONS.png} rel="icon" type="image/png" />
         <meta content={title} property="og:title" />
         <meta content={description} property="og:description" />
         <meta content={ogImageUrl} property="og:image" />
+        <meta content={BRAND.name} property="og:image:alt" />
+        <meta content={String(BRAND_OG.height)} property="og:image:height" />
+        <meta content={String(BRAND_OG.width)} property="og:image:width" />
         <meta content={canonicalUrl} property="og:url" />
-        <meta content="Austin Producer Alliance" property="og:site_name" />
+        <meta content={BRAND.name} property="og:site_name" />
         <meta content="website" property="og:type" />
         <meta content="summary_large_image" name="twitter:card" />
         <meta content={title} name="twitter:title" />
@@ -47,31 +116,49 @@ const ogImageUrl = `${Astro.site}og.png`;
             is:inline
             set:html={JSON.stringify({
                 '@context': 'https://schema.org',
-                '@type': 'WebSite',
-                'author': {
-                    '@type': 'Person',
-                    'name': 'Kevin Huang',
-                },
+                '@type': 'Organization',
                 'inLanguage': 'en',
-                'name': 'Austin Producer Alliance',
+                'logo': logoUrl,
+                'name': BRAND.name,
+                'sameAs': [LINKS.instagram, LINKS.discord, LINKS.meetup],
                 'url': Astro.site,
             })}
             type="application/ld+json"
         />
+        <script
+            is:inline
+            set:html={bootstrap}
+        />
         <ClientRouter />
     </head>
-    <body class="flex flex-col min-h-screen antialiased font-sans bg-sand text-ink">
+    <body class="antialiased font-sans bg-surface text-ink">
+        <a
+            class="skip-link"
+            href="#main"
+        >
+            Skip to content
+        </a>
         <div class="grain" aria-hidden="true" />
-        <Navbar />
-        <main class="flex flex-1 flex-col mb-32">
-            <slot />
-        </main>
-        <Footer />
+        <div class="page flex flex-col min-h-screen">
+            <Navbar hasHero={hasHero} />
+            <main
+                id="main"
+                class="flex flex-1 flex-col"
+                tabindex="-1"
+            >
+                <slot />
+            </main>
+            <Footer />
+        </div>
+        <AudioSidebar />
+        <ChatWindow />
     </body>
 </html>
 
 <script>
     import { initMotion } from '@lib/motion';
+    import { syncSessionAttribute } from '@lib/session';
 
-    document.addEventListener('astro:page-load', initMotion);
+    document.addEventListener('astro:after-swap', syncSessionAttribute);
+    initMotion();
 </script>

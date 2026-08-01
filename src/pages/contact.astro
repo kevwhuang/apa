@@ -1,11 +1,12 @@
 ---
-import ContactForm from '@sections/ContactForm.astro';
+import ContactForm from '@sections/contact/Form.astro';
 import Layout from '@/Layout.astro';
+import { brandTitle } from '@lib/brand';
 ---
 
 <Layout
-    description="Contact the Austin Producer Alliance about membership, sponsorship, press, or booking &mdash; or visit the studio at 2107 E 5th St in Austin."
-    title="Contact &mdash; Austin Producer Alliance"
+    description={'Contact the Austin Producer Alliance about membership, sponsorship, press, or booking \u2014 by email, or through any of the platforms where the community meets.'}
+    title={brandTitle('Contact')}
 >
     <ContactForm />
 </Layout>

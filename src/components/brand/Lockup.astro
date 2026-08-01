@@ -1,0 +1,21 @@
+---
+import { BRAND_LOGOS, BRAND_SIZES } from '@lib/brand';
+
+interface Props {
+    class?: string;
+    height?: number;
+    label?: string;
+}
+
+const { class: lockupClass, height = BRAND_SIZES.lockupFooter, label } = Astro.props;
+const Lockup = BRAND_LOGOS.lockup;
+---
+
+<Lockup
+    class={lockupClass}
+    aria-hidden={label ? undefined : 'true'}
+    aria-label={label}
+    fill="currentColor"
+    height={height}
+    role={label ? 'img' : undefined}
+/>

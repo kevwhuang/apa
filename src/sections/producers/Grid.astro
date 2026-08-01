@@ -1,0 +1,329 @@
+---
+import { getCollection } from 'astro:content';
+
+import PageHead from '@components/shared/PageHead.astro';
+import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
+import ProducerStatus from '@components/producer/Status.astro';
+import ProducerTracks from '@components/producer/Tracks.astro';
+import SectionHead from '@components/shared/SectionHead.astro';
+import { JOIN_ROUTE, LINKS, PALETTE } from '@lib/constants';
+import { formatMonthOnly, getInitials, toIsoDate } from '@lib/utils';
+
+const producers = await getCollection('producers');
+
+const allGenres = Array.from(new Set(producers.flatMap(producer => producer.data.genres))).sort((a, b) => a.localeCompare(b));
+const roster = [...producers].sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || a.data.name.localeCompare(b.data.name));
+---
+
+<section
+    class="stage stage--tight border-b-2 border-ink"
+    aria-labelledby="roster-title"
+>
+    <div>
+        <PageHead
+            class="max-w-3xl font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
+            eyebrow="Producers / Roster"
+            headingId="roster-title"
+        >
+            The producers.
+        </PageHead>
+        <p
+            class="max-w-2xl mt-6 text-lmd text-ink-muted"
+            data-motion="rise"
+        >
+            Every card carries what a producer works in, what they answer to, and how reachable
+            they are right now &mdash; plus one track. Press it to play.
+        </p>
+        <div
+            class="flex flex-wrap gap-2 mt-10"
+            aria-label="Filter by genre"
+            role="group"
+        >
+            <button
+                class="chip genre-btn is-active active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
+                aria-pressed="true"
+                data-genre=""
+                type="button"
+            >
+                All
+            </button>
+            {allGenres.map(genre => (
+                <button
+                    class="chip genre-btn active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
+                    aria-pressed="false"
+                    data-genre={genre}
+                    type="button"
+                >
+                    {genre}
+                </button>
+            ))}
+        </div>
+        <p
+            class="label mt-6 text-ink-subtle"
+            aria-live="polite"
+            data-producers-status
+        >
+            Showing all {roster.length} producers.
+        </p>
+        <div class="flex flex-wrap gap-x-4 gap-y-2 items-center mt-6">
+            <p class="label text-ink-muted">Availability key &mdash;</p>
+            <ProducerStatus availability="open" />
+            <ProducerStatus availability="selective" />
+            <ProducerStatus availability="booked" />
+        </div>
+    </div>
+    <aside
+        class="roster__disclosure slab slab--sunk"
+        aria-label="About this roster"
+    >
+        <p class="label mb-3 text-accent-deep">Illustrative roster</p>
+        <p class="max-w-3xl text-smd text-ink-muted">
+            The producers below are invented stand-ins showing what a finished roster looks like
+            &mdash; nobody here is contactable or bookable, and every track is synthesized in your
+            browser rather than recorded. Real member profiles take their place once the roster
+            opens; the two ways in are at the bottom of this page.
+        </p>
+    </aside>
+</section>
+
+<section
+    class="stage stage--tight border-b-2 border-ink"
+    aria-label="Roster"
+>
+    <ul
+        class="roster__grid list-none"
+        data-motion-stagger="rise"
+    >
+        {roster.map((producer, index) => (
+            <li
+                id={producer.id}
+                class="producer-card"
+                data-genres={producer.data.genres.join(',')}
+            >
+                <article class="producer-card__frame slab slab--bare slab--card">
+                    <PlaceholderTile
+                        class="aspect-[5/3] border-b-2 border-ink"
+                        color={PALETTE[index % PALETTE.length]}
+                        label={getInitials(producer.data.name)}
+                        labelClass="leading-none text-[80px] text-surface-raised/80 [text-shadow:2px_2px_0_var(--color-ink-20)]"
+                    >
+                        {producer.data.featured && (
+                            <p class="label absolute left-0 top-0 px-2 py-1.5 bg-accent text-ink">Featured</p>
+                        )}
+                    </PlaceholderTile>
+                    <div class="producer-card__body p-5">
+                        <p
+                            class="label mb-1 text-accent-deep"
+                            data-placeholder
+                        >
+                            {producer.data.handle}
+                        </p>
+                        <h2
+                            class="mb-2 font-extrabold font-sans text-xl tracking-tight"
+                            data-placeholder
+                        >
+                            {producer.data.name}
+                        </h2>
+                        <p
+                            class="mb-3 font-mono text-2xs uppercase text-ink-muted"
+                            data-placeholder
+                        >
+                            {producer.data.roles.join(' \u00b7 ')} &mdash; {producer.data.location}
+                        </p>
+                        <ProducerStatus
+                            class="justify-self-start mb-4"
+                            availability={producer.data.availability}
+                        />
+                        <p
+                            class="producer-card__bio scroll-slot mb-4 leading-relaxed text-[13px] text-ink-muted"
+                            data-placeholder
+                        >
+                            {producer.data.bio}
+                        </p>
+                        <ul class="flex flex-wrap gap-1.5 mb-5 list-none">
+                            {producer.data.genres.map(genre => (
+                                <li class="inline-flex items-center h-6 px-2 border-2 border-ink font-bold font-mono text-[10px] tracking-wide uppercase">{genre}</li>
+                            ))}
+                        </ul>
+                        <ProducerTracks
+                            class="mb-4"
+                            producerId={producer.id}
+                            track={producer.data.tracks[0]}
+                        />
+                        <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pt-4 border-t-2 border-ink">
+                            <p
+                                class="font-mono text-2xs uppercase text-ink-muted"
+                                data-placeholder
+                            >
+                                Since <time datetime={toIsoDate(producer.data.joined)}>{formatMonthOnly(producer.data.joined)}</time>
+                            </p>
+                            {producer.data.links.length > 0 && (
+                                <ul
+                                    class="flex flex-wrap gap-3 list-none"
+                                    data-placeholder
+                                >
+                                    {producer.data.links.map(link => (
+                                        <li>
+                                            <a
+                                                class="action-text hover:text-accent-deep inline-flex items-center min-h-[50px] underline underline-offset-4 transition-colors"
+                                                href={link.href}
+                                                rel="noopener noreferrer"
+                                                target="_blank"
+                                            >
+                                                {link.label}
+                                                <span class="sr-only"> (opens in a new tab)</span>
+                                            </a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    </div>
+                </article>
+            </li>
+        ))}
+    </ul>
+</section>
+
+<section
+    class="stage stage--tight"
+    aria-labelledby="roster-join-title"
+>
+    <div class="mark slab slab--roomy slab--sunk grid grid-cols-1 items-end gap-10 md:grid-cols-[1.2fr_1fr]">
+        <div>
+            <SectionHead
+                class="font-extrabold font-sans leading-[1.05] text-3xl tracking-[-0.035em] md:text-5xl"
+                eyebrow="Producers / Join"
+                headingId="roster-join-title"
+            >
+                Want on this list?
+            </SectionHead>
+            <p class="max-w-md text-ink-muted">
+                Two ways in. Pick Membership on the contact form and tell us what you make, or open
+                the Discord and say hello in the room where the day-to-day happens.
+            </p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <a
+                class="btn btn--primary"
+                href={JOIN_ROUTE}
+            >
+                Ask about membership
+            </a>
+            <a
+                class="btn"
+                href={LINKS.discord}
+                rel="noopener noreferrer"
+                target="_blank"
+            >
+                Open the Discord
+                <span class="sr-only"> (opens in a new tab)</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<style>
+    .producer-card:not(.hidden) {
+        align-content: start;
+        display: grid;
+        grid-row: span 10;
+        grid-template-rows: subgrid;
+    }
+
+    .producer-card::after {
+        content: '';
+        display: block;
+        grid-row: 10;
+        height: var(--space-lg);
+    }
+
+    .producer-card__bio {
+        --scroll-slot-max: calc(4 * 1.625 * 13px);
+    }
+
+    .producer-card__body {
+        align-content: start;
+        display: grid;
+        grid-row: 2 / span 8;
+        grid-template-rows: subgrid;
+    }
+
+    .producer-card__frame {
+        align-content: start;
+        display: grid;
+        grid-row: 1 / span 9;
+        grid-template-rows: subgrid;
+    }
+
+    .roster__disclosure {
+        border-left: 2px solid var(--color-accent-deep);
+    }
+
+    .roster__grid {
+        column-gap: var(--space-lg);
+        display: grid;
+        grid-auto-rows: auto;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        row-gap: 0;
+    }
+
+    .roster__grid > * {
+        min-width: 0;
+    }
+
+    @media (max-width: 1024px) {
+        .roster__grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .roster__grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+</style>
+
+<script>
+    import { applyFilter, registerPageScript, rovingFocus } from '@lib/utils';
+    import { initTracks } from '@lib/tracks';
+
+    let activeGenre = '';
+
+    function handleGenreClick(button: HTMLButtonElement, buttons: NodeListOf<HTMLButtonElement>, cards: NodeListOf<HTMLElement>) {
+        activeGenre = button.dataset.genre ?? '';
+        updateGenreFilter(buttons, cards);
+    }
+
+    function initProducersGrid(signal: AbortSignal) {
+        const buttons = document.querySelectorAll<HTMLButtonElement>('.genre-btn');
+        const cards = document.querySelectorAll<HTMLElement>('.producer-card');
+
+        if (!buttons.length || !cards.length) return;
+
+        activeGenre = '';
+        updateGenreFilter(buttons, cards);
+        rovingFocus(buttons, signal);
+
+        buttons.forEach((button) => {
+            button.addEventListener('click', () => handleGenreClick(button, buttons, cards), { signal });
+        });
+    }
+
+    function updateGenreFilter(buttons: NodeListOf<HTMLButtonElement>, cards: NodeListOf<HTMLElement>) {
+        applyFilter(buttons, cards, activeGenre, 'genre', (card, genre) => !genre || (card.dataset.genres ?? '').split(',').includes(genre));
+
+        const status = document.querySelector<HTMLElement>('[data-producers-status]');
+        const shown = Array.from(cards).filter(card => !card.classList.contains('hidden')).length;
+
+        if (!status) return;
+
+        status.textContent = activeGenre
+            ? `Showing ${shown} of ${cards.length} producers.`
+            : `Showing all ${cards.length} producers.`;
+    }
+
+    initTracks();
+    registerPageScript(initProducersGrid);
+</script>

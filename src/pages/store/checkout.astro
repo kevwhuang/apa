@@ -1,11 +1,13 @@
 ---
-import CheckoutFlow from '@sections/CheckoutFlow.astro';
+import CheckoutFlow from '@sections/store/CheckoutFlow.astro';
 import Layout from '@/Layout.astro';
+import { brandTitle } from '@lib/brand';
 ---
 
 <Layout
-    description="Demo checkout for the Austin Producer Alliance store &mdash; shipping, payment, and order review in three steps. No real payment is processed."
-    title="Checkout &mdash; Austin Producer Alliance"
+    description={'Demo checkout for the Austin Producer Alliance store \u2014 shipping, payment, and order review in three steps. No real payment is processed.'}
+    noindex
+    title={brandTitle('Checkout')}
 >
     <CheckoutFlow />
 </Layout>

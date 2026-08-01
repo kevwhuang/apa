@@ -1,0 +1,91 @@
+---
+import PageHead from '@components/shared/PageHead.astro';
+import { getProgram } from '@lib/utils';
+
+const AGENDA = [
+    { name: 'Doors', note: 'Load in, patch in, say hello.', time: '6:00 PM' },
+    { name: 'Workshop', note: 'One topic, taken apart properly.', time: '6:30 PM' },
+    { name: 'Track feedback', note: 'The queue plays out loud.', time: '7:30 PM' },
+    { name: 'Open floor', note: 'Collabs form on the way out the door.', time: '8:30 PM' },
+] as const;
+
+const program = getProgram('assembly');
+---
+
+<section
+    class="stage stage--assembly stage--tight border-b-2 border-ink"
+    aria-labelledby="assembly-title"
+>
+    <div>
+        <PageHead
+            class="max-w-4xl font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
+            eyebrow={`${program.shortName} / ${program.cadence}`}
+            headingId="assembly-title"
+        >
+            The working<br />
+            <span class="text-accent-deep">session.</span>
+        </PageHead>
+        <div class="grid grid-cols-1 gap-12 mt-10 md:grid-cols-[1.2fr_1fr]">
+            <div class="flex flex-col gap-5">
+                <p
+                    class="max-w-2xl leading-relaxed text-lmd text-ink-muted"
+                    data-motion="rise"
+                >
+                    The Assembly is the Alliance&rsquo;s monthly centerpiece &mdash; one evening a
+                    month at Station Austin, given over to craft and conversation.
+                </p>
+                <p
+                    class="max-w-2xl leading-relaxed text-smd text-ink-muted"
+                    data-motion="rise"
+                >
+                    A workshop opens the night. Then the room turns to track feedback: work in
+                    progress on the big speakers, played out loud and talked through together.
+                    No clock, no showdown &mdash; just the work, taken seriously.
+                </p>
+            </div>
+            <aside
+                class="slab slab--card self-start"
+                aria-label="How an assembly runs"
+                data-motion="unfold"
+            >
+                <p class="label mb-4 text-accent-deep">Running order / Every edition</p>
+                <ol class="list-none">
+                    {AGENDA.map(item => (
+                        <li class="agenda__row">
+                            <span
+                                class="label pt-1 text-ink-subtle"
+                                data-placeholder
+                            >
+                                {item.time}
+                            </span>
+                            <div>
+                                <p class="font-bold font-sans">{item.name}</p>
+                                <p class="mt-1 text-sm text-ink-muted">{item.note}</p>
+                            </div>
+                        </li>
+                    ))}
+                </ol>
+            </aside>
+        </div>
+    </div>
+</section>
+
+<style>
+    .agenda__row {
+        align-items: baseline;
+        border-top: 1px solid var(--color-ink-20);
+        display: grid;
+        gap: var(--space-xs);
+        grid-template-columns: 72px minmax(0, 1fr);
+        padding-block: var(--space-sm);
+    }
+
+    .agenda__row:first-child {
+        border-top: 0;
+        padding-top: 0;
+    }
+
+    .agenda__row:last-child {
+        padding-bottom: 0;
+    }
+</style>

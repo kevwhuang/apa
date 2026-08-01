@@ -1,0 +1,596 @@
+---
+import SectionHead from '@components/shared/SectionHead.astro';
+import { formatDateOnly } from '@lib/utils';
+
+const MEMBERS = [
+    {
+        email: 'devon.park@fastmail.com',
+        id: 'devon-park',
+        joined: '2023-11-04',
+        ledger: [
+            { amount: 1, date: '2023-11-04', reason: 'Welcome Prod' },
+            { amount: 20, date: '2026-03-14', reason: 'Led a workshop \u2014 synthesis basics' },
+            { amount: 1, date: '2026-05-09', reason: 'Attended the May Assembly' },
+            { amount: -35, date: '2026-06-20', reason: 'Redeemed \u2014 Tick tee' },
+        ],
+        username: 'devonpark',
+    },
+    {
+        email: 'inez.rao@hey.com',
+        id: 'inez-rao',
+        joined: '2024-01-19',
+        ledger: [
+            { amount: 1, date: '2024-01-19', reason: 'Welcome Prod' },
+            { amount: 10, date: '2026-04-11', reason: 'Won the Bash \u2014 spring edition' },
+            { amount: 1, date: '2026-06-13', reason: 'Attended the June Hangout' },
+        ],
+        username: 'inezrao',
+    },
+    {
+        email: 'june.castillo@gmail.com',
+        id: 'june-castillo',
+        joined: '2024-02-08',
+        ledger: [
+            { amount: 1, date: '2024-02-08', reason: 'Welcome Prod' },
+            { amount: 1, date: '2026-02-21', reason: 'Submitted a track for feedback' },
+            { amount: 3, date: '2026-05-09', reason: 'Gave a lightning talk' },
+        ],
+        username: 'junecastillo',
+    },
+    {
+        email: 'kojo.mensah@outlook.com',
+        id: 'kojo-mensah',
+        joined: '2024-03-27',
+        ledger: [
+            { amount: 1, date: '2024-03-27', reason: 'Welcome Prod' },
+            { amount: 2, date: '2026-05-23', reason: 'Got a sample accepted' },
+            { amount: 1, date: '2026-07-12', reason: 'Attended the July Bash' },
+        ],
+        username: 'kojomensah',
+    },
+    {
+        email: 'marcus.hale@gmail.com',
+        id: 'marcus-hale',
+        joined: '2023-09-12',
+        ledger: [
+            { amount: 1, date: '2023-09-12', reason: 'Welcome Prod' },
+            { amount: 10, date: '2026-01-17', reason: 'Organized a weekly meet' },
+            { amount: -8, date: '2026-06-20', reason: 'Redeemed \u2014 Sticker pack' },
+        ],
+        username: 'marcushale',
+    },
+    {
+        email: 'otis.reed@gmail.com',
+        id: 'otis-reed',
+        joined: '2025-04-09',
+        ledger: [
+            { amount: 1, date: '2025-04-09', reason: 'Welcome Prod' },
+        ],
+        username: 'otisreed',
+    },
+    {
+        email: 'priya.nand@hey.com',
+        id: 'priya-nand',
+        joined: '2025-06-21',
+        ledger: [
+            { amount: 1, date: '2025-06-21', reason: 'Welcome Prod' },
+            { amount: 1, date: '2026-07-12', reason: 'Submitted a track for feedback' },
+        ],
+        username: 'priyanand',
+    },
+    {
+        email: 'sasha.lin@proton.me',
+        id: 'sasha-lin',
+        joined: '2024-06-02',
+        ledger: [
+            { amount: 1, date: '2024-06-02', reason: 'Welcome Prod' },
+            { amount: 1, date: '2026-03-14', reason: 'Brought a friend' },
+            { amount: 2, date: '2026-07-12', reason: 'Finished a Bash track' },
+        ],
+        username: 'sashalin',
+    },
+    {
+        email: 'tana.wolfe@gmail.com',
+        id: 'tana-wolfe',
+        joined: '2024-08-15',
+        ledger: [
+            { amount: 1, date: '2024-08-15', reason: 'Welcome Prod' },
+            { amount: 1, date: '2026-04-11', reason: 'Attended the April Assembly' },
+        ],
+        username: 'tanawolfe',
+    },
+    {
+        email: 'yara.soto@icloud.com',
+        id: 'yara-soto',
+        joined: '2025-01-23',
+        ledger: [
+            { amount: 1, date: '2025-01-23', reason: 'Welcome Prod' },
+            { amount: 1, date: '2026-05-23', reason: 'Tagged our social media' },
+            { amount: 5, date: '2026-06-13', reason: 'Facilitated conversation' },
+        ],
+        username: 'yarasoto',
+    },
+];
+
+const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [member.id, member.ledger])));
+---
+
+<section
+    class="stage stage--narrow stage--tight"
+    aria-labelledby="admin-prods-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-3xl tracking-tight"
+            eyebrow={`Console / ${MEMBERS.length} members`}
+            headingId="admin-prods-title"
+        >
+            Prods management
+        </SectionHead>
+        <div class="grid items-start gap-8 lg:grid-cols-2">
+            <div>
+                <label class="block">
+                    <span class="label block mb-2 text-ink-muted">Find a member</span>
+                    <input
+                        class="h-12 w-full px-4 border-2 border-ink font-mono text-[13px] bg-transparent"
+                        autocomplete="off"
+                        data-prods-search
+                        placeholder="Username or email"
+                        type="search"
+                    />
+                </label>
+                <p
+                    class="label mt-3 text-ink-subtle"
+                    aria-live="polite"
+                    data-prods-count
+                >
+                    {MEMBERS.length} members
+                </p>
+                <ul
+                    class="prods__members scroll-slot mt-4 border-2 border-ink divide-y divide-ink list-none"
+                    data-prods-seed={LEDGER_SEED}
+                >
+                    {MEMBERS.map(member => (
+                        <li>
+                            <button
+                                class="prods__member"
+                                aria-pressed="false"
+                                data-member-email={member.email}
+                                data-member-id={member.id}
+                                data-member-joined={formatDateOnly(new Date(member.joined))}
+                                data-member-username={member.username}
+                                type="button"
+                            >
+                                <span class="font-bold font-sans text-[15px] tracking-tight">@{member.username}</span>
+                                <span class="prods__member-meta font-mono text-[12px] text-ink-muted">{member.email}</span>
+                                <span class="prods__member-meta font-mono text-[11px] text-ink-subtle">Joined {formatDateOnly(new Date(member.joined))}</span>
+                            </button>
+                        </li>
+                    ))}
+                    <li
+                        class="hidden"
+                        data-prods-none
+                    >
+                        <p class="px-4 py-4 font-mono text-[13px] text-ink-muted">No members match that search.</p>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <div
+                    class="slab slab--sunk"
+                    data-prods-empty
+                >
+                    <p class="font-mono text-[13px] text-ink-muted">
+                        Select a member to see their balance, standing, and ledger history.
+                    </p>
+                </div>
+                <div
+                    data-prods-detail
+                    hidden
+                >
+                    <h3 class="font-extrabold font-sans text-lg tracking-tight">
+                        <span data-prods-member>Selected member</span>
+                    </h3>
+                    <dl class="grid gap-px mt-4 border-2 border-ink bg-ink sm:grid-cols-3">
+                        <div class="p-5 bg-surface-raised">
+                            <dt class="label mb-2 text-ink-muted">Prod balance</dt>
+                            <dd
+                                class="font-extrabold font-sans text-3xl tracking-tight"
+                                data-prods-balance
+                            />
+                        </div>
+                        <div class="p-5 bg-surface-raised">
+                            <dt class="label mb-2 text-ink-muted">Standing</dt>
+                            <dd
+                                class="action-text"
+                                data-prods-standing
+                            />
+                        </div>
+                        <div class="p-5 bg-surface-raised">
+                            <dt class="label mb-2 text-ink-muted">Member since</dt>
+                            <dd
+                                class="font-mono text-[13px]"
+                                data-prods-joined
+                            />
+                        </div>
+                    </dl>
+                    <p class="label mt-8 text-ink-muted">Ledger history</p>
+                    <div class="prods__scroller mt-3">
+                        <table class="prods__table border-2 border-ink">
+                            <caption class="sr-only">Dated ledger entries with reason, change, and running balance</caption>
+                            <thead>
+                                <tr class="border-b-2 border-ink font-bold font-mono text-[11px] tracking-wide uppercase text-ink-muted">
+                                    <th
+                                        class="px-4 py-3 text-left"
+                                        scope="col"
+                                    >
+                                        Date
+                                    </th>
+                                    <th
+                                        class="px-4 py-3 text-left"
+                                        scope="col"
+                                    >
+                                        Reason
+                                    </th>
+                                    <th
+                                        class="px-4 py-3 text-right"
+                                        scope="col"
+                                    >
+                                        Change
+                                    </th>
+                                    <th
+                                        class="px-4 py-3 text-right"
+                                        scope="col"
+                                    >
+                                        Balance
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody
+                                class="divide-y divide-ink"
+                                data-prods-ledger
+                            />
+                        </table>
+                    </div>
+                    <template data-prods-row>
+                        <tr>
+                            <td
+                                class="px-4 py-4 font-mono text-[12px] text-ink-muted"
+                                data-cell="date"
+                            />
+                            <td
+                                class="px-4 py-4 text-[14px]"
+                                data-cell="reason"
+                            />
+                            <td
+                                class="px-4 py-4 font-mono text-[12px] text-right"
+                                data-cell="change"
+                            />
+                            <td
+                                class="px-4 py-4 font-mono text-[12px] text-right"
+                                data-cell="balance"
+                            />
+                        </tr>
+                    </template>
+                    <form class="prods-form slab slab--card mt-8">
+                        <p class="label mb-4 text-ink-muted">Adjust balance</p>
+                        <div class="grid gap-4 sm:grid-cols-[160px_1fr]">
+                            <div>
+                                <label class="block">
+                                    <span class="label block mb-2 text-ink-muted">Amount</span>
+                                    <input
+                                        class="h-12 w-full px-4 border-2 border-ink font-mono text-[13px] bg-transparent"
+                                        aria-describedby="prods-amount-error"
+                                        aria-invalid="false"
+                                        autocomplete="off"
+                                        inputmode="numeric"
+                                        min="1"
+                                        name="amount"
+                                        step="1"
+                                        type="number"
+                                    />
+                                </label>
+                                <p
+                                    id="prods-amount-error"
+                                    class="action-text mt-2 text-accent-deep"
+                                    data-field-error
+                                    hidden
+                                />
+                            </div>
+                            <div>
+                                <label class="block">
+                                    <span class="label block mb-2 text-ink-muted">Reason</span>
+                                    <input
+                                        class="h-12 w-full px-4 border-2 border-ink font-sans bg-transparent"
+                                        aria-describedby="prods-reason-error"
+                                        aria-invalid="false"
+                                        autocomplete="off"
+                                        maxlength="80"
+                                        name="reason"
+                                        type="text"
+                                    />
+                                </label>
+                                <p
+                                    id="prods-reason-error"
+                                    class="action-text mt-2 text-accent-deep"
+                                    data-field-error
+                                    hidden
+                                />
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3 mt-6">
+                            <button
+                                class="btn btn--primary"
+                                name="direction"
+                                type="submit"
+                                value="add"
+                            >
+                                Add Prods
+                            </button>
+                            <button
+                                class="btn"
+                                name="direction"
+                                type="submit"
+                                value="remove"
+                            >
+                                Remove Prods
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <p
+                    class="action-text mt-4 text-ink-subtle"
+                    aria-live="polite"
+                    data-prods-feedback
+                />
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .prods__member {
+        display: grid;
+        gap: 2px;
+        min-height: 50px;
+        padding: var(--space-2xs) var(--space-sm);
+        text-align: left;
+        transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
+        width: 100%;
+    }
+
+    .prods__member:hover {
+        background-color: var(--color-surface-sunken);
+    }
+
+    .prods__member[aria-pressed='true'] {
+        background-color: var(--color-surface-inverse);
+        color: var(--color-ink-inverse);
+    }
+
+    .prods__member[aria-pressed='true'] .prods__member-meta {
+        color: var(--color-ink-inverse-muted);
+    }
+
+    .prods__members {
+        --scroll-slot-max: 416px;
+    }
+
+    .prods__scroller {
+        overflow-x: auto;
+    }
+
+    .prods__table {
+        display: table;
+        overflow-x: visible;
+        width: 100%;
+    }
+</style>
+
+<script>
+    import { MOCK_LATENCY_MS, STORAGE } from '@lib/constants';
+    import { clearFieldErrors, focusFirstError, setFieldErrors, validateFields } from '@lib/forms';
+    import { createStore } from '@lib/state';
+    import { delay, formatDateOnly, registerPageScript, setPending, setText } from '@lib/utils';
+
+    interface LedgerEntry {
+        amount: number;
+        date: string;
+        reason: string;
+    }
+
+    type LedgerMap = Record<string, LedgerEntry[]>;
+
+    const RULES: Record<string, FieldRule> = {
+        amount: { message: 'Enter a whole number of Prods, 1 or more.', pattern: /^[1-9]\d*$/, required: true },
+        reason: { max: 80, message: 'Give the ledger a reason for this change.', required: true },
+    };
+
+    const adjustments = createStore<LedgerMap>({
+        fallback: {},
+        key: STORAGE.adminProds.key,
+        scope: STORAGE.adminProds.scope,
+        topic: STORAGE.adminProds.topic,
+    });
+
+    let pending = false;
+    let seed: LedgerMap = {};
+    let selectedId = '';
+
+    function formatChange(amount: number) {
+        return amount > 0 ? `+${amount}` : String(amount);
+    }
+
+    function getLedger(id: string) {
+        return [...(seed[id] ?? []), ...(adjustments.get()[id] ?? [])];
+    }
+
+    function getStanding(balance: number) {
+        if (balance < 0) return 'In review';
+        if (balance === 0) return 'Settled';
+
+        return 'Good standing';
+    }
+
+    async function handleAdjustSubmit(event: SubmitEvent, form: HTMLFormElement) {
+        event.preventDefault();
+
+        if (!selectedId || pending) return;
+
+        const errors = validateFields(form, RULES);
+
+        clearFieldErrors(form);
+
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(form, errors);
+            focusFirstError(form, errors);
+
+            return;
+        }
+
+        const buttons = Array.from(form.querySelectorAll<HTMLButtonElement>('button[type="submit"]'));
+        const feedback = document.querySelector<HTMLElement>('[data-prods-feedback]');
+        const memberId = selectedId;
+        const username = selectedUsername();
+        const values = new FormData(form);
+
+        const amount = Number(String(values.get('amount') ?? '').trim());
+        const reason = String(values.get('reason') ?? '').trim();
+        const submitter = event.submitter instanceof HTMLButtonElement ? event.submitter : buttons.at(0);
+
+        const remove = submitter?.value === 'remove';
+
+        pending = true;
+        buttons.forEach(control => setPending(control, true));
+        setText(feedback, 'Recording\u2026');
+
+        await delay(MOCK_LATENCY_MS);
+
+        const entry: LedgerEntry = {
+            amount: remove ? -amount : amount,
+            date: new Date().toISOString(),
+            reason,
+        };
+
+        adjustments.update(value => ({ ...value, [memberId]: [...(value[memberId] ?? []), entry] }));
+        pending = false;
+        buttons.forEach(control => setPending(control, false));
+        submitter?.focus();
+        form.reset();
+
+        if (selectedId === memberId) renderDetail();
+
+        setText(feedback, `${remove ? 'Removed' : 'Added'} ${amount} ${amount === 1 ? 'Prod' : 'Prods'} ${remove ? 'from' : 'to'} @${username}.`);
+    }
+
+    function handleSearch(input: HTMLInputElement) {
+        const query = input.value.trim().toLowerCase();
+        const buttons = document.querySelectorAll<HTMLButtonElement>('[data-member-id]');
+        const count = document.querySelector<HTMLElement>('[data-prods-count]');
+        const none = document.querySelector<HTMLElement>('[data-prods-none]');
+
+        let shown = 0;
+
+        buttons.forEach((button) => {
+            const haystack = `${button.dataset.memberUsername} ${button.dataset.memberEmail}`.toLowerCase();
+            const match = query.length === 0 || haystack.includes(query);
+
+            button.closest('li')?.classList.toggle('hidden', !match);
+
+            if (match) shown += 1;
+        });
+
+        none?.classList.toggle('hidden', shown > 0);
+        setText(count, query.length === 0 ? `${buttons.length} members` : `${shown} of ${buttons.length} members match`);
+    }
+
+    function handleSelect(button: HTMLButtonElement, form: HTMLFormElement) {
+        selectedId = button.dataset.memberId ?? '';
+
+        document.querySelectorAll<HTMLButtonElement>('[data-member-id]').forEach((candidate) => {
+            candidate.setAttribute('aria-pressed', String(candidate === button));
+        });
+
+        form.reset();
+        clearFieldErrors(form);
+        document.querySelector<HTMLElement>('[data-prods-empty]')?.setAttribute('hidden', '');
+        document.querySelector<HTMLElement>('[data-prods-detail]')?.removeAttribute('hidden');
+        renderDetail();
+        setText(document.querySelector<HTMLElement>('[data-prods-feedback]'), `Showing the ledger for @${button.dataset.memberUsername}.`);
+    }
+
+    function initAdminProds(signal: AbortSignal) {
+        const form = document.querySelector<HTMLFormElement>('.prods-form');
+        const search = document.querySelector<HTMLInputElement>('[data-prods-search]');
+
+        if (!form || !search) return;
+
+        pending = false;
+        seed = readSeed();
+        selectedId = '';
+
+        form.noValidate = true;
+        form.addEventListener('submit', event => handleAdjustSubmit(event, form), { signal });
+        search.addEventListener('input', () => handleSearch(search), { signal });
+
+        document.querySelectorAll<HTMLButtonElement>('[data-member-id]').forEach((button) => {
+            button.addEventListener('click', () => handleSelect(button, form), { signal });
+        });
+    }
+
+    function readSeed() {
+        const raw = document.querySelector<HTMLElement>('[data-prods-seed]')?.dataset.prodsSeed;
+
+        try {
+            return JSON.parse(raw ?? '{}') as LedgerMap;
+        } catch {
+            return {};
+        }
+    }
+
+    function renderDetail() {
+        const balance = document.querySelector<HTMLElement>('[data-prods-balance]');
+        const body = document.querySelector<HTMLElement>('[data-prods-ledger]');
+        const button = document.querySelector<HTMLButtonElement>(`[data-member-id="${selectedId}"]`);
+        const joined = document.querySelector<HTMLElement>('[data-prods-joined]');
+        const member = document.querySelector<HTMLElement>('[data-prods-member]');
+        const standing = document.querySelector<HTMLElement>('[data-prods-standing]');
+        const template = document.querySelector<HTMLTemplateElement>('[data-prods-row]');
+
+        if (!balance || !body || !button || !template) return;
+
+        let total = 0;
+
+        const rows = getLedger(selectedId).map((entry) => {
+            total += entry.amount;
+
+            return { ...entry, total };
+        });
+
+        body.replaceChildren();
+
+        rows.toReversed().forEach((row) => {
+            const fragment = template.content.cloneNode(true) as DocumentFragment;
+            const change = fragment.querySelector<HTMLElement>('[data-cell="change"]');
+
+            setText(fragment.querySelector<HTMLElement>('[data-cell="date"]'), formatDateOnly(new Date(row.date)));
+            setText(fragment.querySelector<HTMLElement>('[data-cell="reason"]'), row.reason);
+            setText(change, formatChange(row.amount));
+            change?.classList.toggle('text-accent-deep', row.amount < 0);
+            setText(fragment.querySelector<HTMLElement>('[data-cell="balance"]'), String(row.total));
+            body.append(fragment);
+        });
+
+        setText(balance, String(total));
+        setText(joined, button.dataset.memberJoined ?? '');
+        setText(member, `@${button.dataset.memberUsername}`);
+        setText(standing, getStanding(total));
+        standing?.classList.toggle('text-accent-deep', total < 0);
+    }
+
+    function selectedUsername() {
+        return document.querySelector<HTMLButtonElement>(`[data-member-id="${selectedId}"]`)?.dataset.memberUsername ?? '';
+    }
+
+    registerPageScript(initAdminProds);
+</script>

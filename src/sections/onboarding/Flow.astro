@@ -1,0 +1,816 @@
+---
+import { getCollection } from 'astro:content';
+
+import PageHead from '@components/shared/PageHead.astro';
+import { PASSWORD_MIN_LENGTH, QUESTIONNAIRE } from '@lib/constants';
+
+const DISPLAY_NAME_MAX_LENGTH = 50;
+
+const REJECTIONS = [
+    {
+        action: 'Check in',
+        body: 'Onboarding opens from the welcome email composed when you check in at an event. Open the link in that message, or check in again to get a fresh one.',
+        heading: 'This page opens from your welcome email.',
+        href: '/check-in',
+        reason: 'missing',
+    },
+    {
+        action: 'Check in again',
+        body: 'The address in that link could not be read. Links get mangled by copying and pasting more often than you would think.',
+        heading: 'That link does not look right.',
+        href: '/check-in',
+        reason: 'malformed',
+    },
+    {
+        action: 'Check in again',
+        body: 'Onboarding links last 24 hours. Check in again and the Alliance will compose a new one.',
+        heading: 'This link expired.',
+        href: '/check-in',
+        reason: 'expired',
+    },
+    {
+        action: 'Open your account',
+        body: 'This account has already been through onboarding, so there is nothing left to fill in.',
+        heading: 'You are already set up.',
+        href: '/sign-in',
+        reason: 'completed',
+    },
+];
+
+const STEPS = ['Account', 'Profile', 'Questionnaire'];
+
+const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
+
+const producers = await getCollection('producers');
+
+const genres = Array.from(new Set(producers.flatMap(producer => producer.data.genres))).sort((a, b) => a.localeCompare(b));
+const roles = Array.from(new Set(producers.flatMap(producer => producer.data.roles))).sort((a, b) => a.localeCompare(b));
+---
+
+<section
+    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    aria-labelledby="onboarding-title"
+>
+    <div>
+        <PageHead
+            class="max-w-3xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            eyebrow="Account / Onboarding"
+            headingId="onboarding-title"
+        >
+            Finish your profile.
+        </PageHead>
+        <p class="max-w-2xl mt-6 text-[18px] text-ink-muted">
+            Three short steps: pick a name and a password, say what you make, and answer four
+            questions. Nothing is sent anywhere and nothing outlives this browser.
+        </p>
+    </div>
+</section>
+
+<section
+    class="stage stage--narrow stage--tight"
+    aria-label="Onboarding"
+>
+    {REJECTIONS.map(rejection => (
+        <div
+            class="onboarding__reject slab slab--card flex flex-col items-start gap-4"
+            data-onboarding-reject={rejection.reason}
+            hidden={rejection.reason !== 'missing'}
+        >
+            <p class="label text-accent-deep">Link {rejection.reason}</p>
+            <h2 class="font-extrabold font-sans text-3xl tracking-tight">
+                {rejection.heading}
+            </h2>
+            <p class="max-w-2xl text-[16px] text-ink-muted">
+                {rejection.body}
+            </p>
+            <a
+                class="btn btn--primary"
+                href={rejection.href}
+            >
+                {rejection.action} &rarr;
+            </a>
+        </div>
+    ))}
+    <div
+        class="onboarding__flow flex flex-col gap-8"
+        data-onboarding-flow
+        hidden
+    >
+        <ol
+            class="onboarding__steps flex flex-wrap border-2 border-ink list-none"
+            aria-label="Onboarding steps"
+        >
+            {STEPS.map((step, index) => (
+                <li
+                    class:list={[
+                        'onboarding__step flex-1 p-4 font-bold font-mono text-[11px] tracking-wide uppercase',
+                        index > 0 && 'border-l-2 border-ink',
+                    ]}
+                    aria-current={index === 0 ? 'step' : undefined}
+                    data-onboarding-step={index}
+                >
+                    {index + 1}. {step}
+                </li>
+            ))}
+        </ol>
+        <p
+            class="sr-only"
+            aria-live="polite"
+            data-onboarding-announce
+        />
+        <form
+            class="onboarding__form slab slab--card flex flex-col gap-6"
+            data-onboarding-form
+        >
+            <p
+                class="action-text px-3 py-3 bg-accent text-ink"
+                data-form-error
+                hidden
+                role="alert"
+                tabindex="-1"
+            />
+            <fieldset
+                class="onboarding__pane flex flex-col gap-5"
+                data-onboarding-pane="0"
+            >
+                <legend class="font-extrabold font-sans text-2xl tracking-tight">
+                    Account
+                </legend>
+                <p class="text-[15px] text-ink-muted">
+                    Setting up&#32;
+                    <span
+                        class="font-mono wrap-break-word text-[14px]"
+                        data-onboarding-email
+                    />.
+                </p>
+                <div class="flex flex-col gap-2">
+                    <label class="block">
+                        <span class="label block mb-2 text-ink-muted">Username</span>
+                        <input
+                            id="onboarding-username"
+                            class="h-12 w-full px-4 border-2 border-ink font-mono text-[13px] bg-transparent"
+                            aria-describedby="onboarding-username-error"
+                            aria-invalid="false"
+                            autocomplete="username"
+                            name="username"
+                            pattern={USERNAME_PATTERN}
+                            required
+                            type="text"
+                        />
+                    </label>
+                    <p
+                        id="onboarding-username-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                    <p class="text-[13px] text-ink-subtle">
+                        Three to twenty letters, numbers, or underscores.
+                    </p>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="block">
+                        <span class="label block mb-2 text-ink-muted">Password</span>
+                        <input
+                            id="onboarding-password"
+                            class="h-12 w-full px-4 border-2 border-ink font-sans bg-transparent"
+                            aria-describedby="onboarding-password-error"
+                            aria-invalid="false"
+                            autocomplete="new-password"
+                            minlength={PASSWORD_MIN_LENGTH}
+                            name="password"
+                            required
+                            type="password"
+                        />
+                    </label>
+                    <div
+                        class="strength flex gap-1"
+                        aria-hidden="true"
+                    >
+                        <span class="strength__bar" />
+                        <span class="strength__bar" />
+                        <span class="strength__bar" />
+                        <span class="strength__bar" />
+                    </div>
+                    <p
+                        class="action-text text-ink-subtle"
+                        aria-live="polite"
+                        data-strength-label
+                    >
+                        Strength: nothing typed
+                    </p>
+                    <p
+                        id="onboarding-password-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                    <p class="text-[13px] text-ink-subtle">
+                        At least {PASSWORD_MIN_LENGTH} characters with a letter and a digit. It is
+                        never written down &mdash; if you step back to this page you will type it
+                        again.
+                    </p>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="block">
+                        <span class="label block mb-2 text-ink-muted">Confirm password</span>
+                        <input
+                            id="onboarding-confirm"
+                            class="h-12 w-full px-4 border-2 border-ink font-sans bg-transparent"
+                            aria-describedby="onboarding-confirm-error"
+                            aria-invalid="false"
+                            autocomplete="new-password"
+                            name="confirm"
+                            required
+                            type="password"
+                        />
+                    </label>
+                    <p
+                        id="onboarding-confirm-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </div>
+            </fieldset>
+            <fieldset
+                class="onboarding__pane flex flex-col gap-5"
+                data-onboarding-pane="1"
+                hidden
+            >
+                <legend class="font-extrabold font-sans text-2xl tracking-tight">
+                    Profile
+                </legend>
+                <div class="flex flex-col gap-2">
+                    <label class="block">
+                        <span class="label block mb-2 text-ink-muted">Display name</span>
+                        <input
+                            id="onboarding-display-name"
+                            class="h-12 w-full px-4 border-2 border-ink font-sans bg-transparent"
+                            aria-describedby="onboarding-display-name-error"
+                            aria-invalid="false"
+                            autocomplete="nickname"
+                            maxlength={DISPLAY_NAME_MAX_LENGTH}
+                            name="displayName"
+                            required
+                            type="text"
+                        />
+                    </label>
+                    <p
+                        id="onboarding-display-name-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="block">
+                        <span class="label block mb-2 text-ink-muted">Location</span>
+                        <input
+                            id="onboarding-location"
+                            class="h-12 w-full px-4 border-2 border-ink font-sans bg-transparent"
+                            aria-describedby="onboarding-location-error"
+                            aria-invalid="false"
+                            autocomplete="address-level2"
+                            name="location"
+                            type="text"
+                            value="Austin, TX"
+                        />
+                    </label>
+                    <p
+                        id="onboarding-location-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </div>
+                <fieldset class="onboarding__group flex flex-col gap-3">
+                    <legend class="label mb-1 text-ink-muted">What do you make?</legend>
+                    <div class="flex flex-wrap gap-2">
+                        {genres.map(genre => (
+                            <label class="onboarding__chip">
+                                <input
+                                    class="onboarding__box"
+                                    aria-describedby="onboarding-genres-error"
+                                    aria-invalid="false"
+                                    name="genres"
+                                    type="checkbox"
+                                    value={genre}
+                                />
+                                {genre}
+                            </label>
+                        ))}
+                    </div>
+                    <p
+                        id="onboarding-genres-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </fieldset>
+                <fieldset class="onboarding__group flex flex-col gap-3">
+                    <legend class="label mb-1 text-ink-muted">
+                        What do you do? <span class="onboarding__optional">optional</span>
+                    </legend>
+                    <div class="flex flex-wrap gap-2">
+                        {roles.map(role => (
+                            <label class="onboarding__chip">
+                                <input
+                                    class="onboarding__box"
+                                    aria-describedby="onboarding-roles-error"
+                                    aria-invalid="false"
+                                    name="roles"
+                                    type="checkbox"
+                                    value={role}
+                                />
+                                {role}
+                            </label>
+                        ))}
+                    </div>
+                    <p
+                        id="onboarding-roles-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </fieldset>
+            </fieldset>
+            <fieldset
+                class="onboarding__pane flex flex-col gap-6"
+                data-onboarding-pane="2"
+                hidden
+            >
+                <legend class="font-extrabold font-sans text-2xl tracking-tight">
+                    Questionnaire
+                </legend>
+                {QUESTIONNAIRE.map(question => (question.kind === 'select'
+                    ? (
+                            <div class="flex flex-col gap-2">
+                                <label class="block">
+                                    <span class="label block mb-2 text-ink-muted">{question.label}</span>
+                                    <select
+                                        id={`onboarding-${question.id}`}
+                                        class="h-12 w-full px-4 border-2 border-ink bg-transparent"
+                                        aria-describedby={`onboarding-${question.id}-error`}
+                                        aria-invalid="false"
+                                        name={question.id}
+                                        required
+                                    >
+                                        <option
+                                            disabled
+                                            selected
+                                            value=""
+                                        >
+                                            Choose one&hellip;
+                                        </option>
+                                        {question.options.map(option => (
+                                            <option value={option.value}>{option.label}</option>
+                                        ))}
+                                    </select>
+                                </label>
+                                <p
+                                    id={`onboarding-${question.id}-error`}
+                                    class="action-text text-accent-deep"
+                                    data-field-error
+                                    hidden
+                                />
+                            </div>
+                        )
+                    : (
+                            <fieldset class="onboarding__group flex flex-col gap-3">
+                                <legend class="label mb-1 text-ink-muted">{question.label}</legend>
+                                <div class="flex flex-wrap gap-2">
+                                    {question.options.map(option => (
+                                        <label class="onboarding__chip">
+                                            <input
+                                                class="onboarding__box"
+                                                aria-describedby={`onboarding-${question.id}-error`}
+                                                aria-invalid="false"
+                                                name={question.id}
+                                                type={question.kind}
+                                                value={option.value}
+                                            />
+                                            {option.label}
+                                        </label>
+                                    ))}
+                                </div>
+                                <p
+                                    id={`onboarding-${question.id}-error`}
+                                    class="action-text text-accent-deep"
+                                    data-field-error
+                                    hidden
+                                />
+                            </fieldset>
+                        )))}
+            </fieldset>
+            <div class="flex flex-wrap items-center gap-4">
+                <button
+                    class="btn"
+                    data-onboarding-back
+                    hidden
+                    type="button"
+                >
+                    &larr; Back
+                </button>
+                <button
+                    class="btn btn--primary"
+                    data-onboarding-next
+                    type="submit"
+                >
+                    Continue &rarr;
+                </button>
+                <p
+                    class="action-text text-ink-subtle"
+                    aria-live="polite"
+                    data-onboarding-status
+                />
+            </div>
+        </form>
+    </div>
+    <div
+        class="onboarding__done slab slab--well flex flex-col items-start gap-5"
+        data-onboarding-done
+        hidden
+    >
+        <p class="label text-accent-light">Done</p>
+        <h2
+            class="font-extrabold font-sans text-4xl tracking-tight"
+            data-onboarding-heading
+            tabindex="-1"
+        >
+            You are in.
+        </h2>
+        <p class="max-w-2xl text-[16px] text-ink-inverse-muted">
+            Your profile is set up as&#32;
+            <span
+                class="font-mono wrap-break-word text-[14px]"
+                data-onboarding-handle
+            />&#32;
+            and your welcome Prod is on your account. Prods spend like cash in the store, and they
+            add up every time you show up.
+        </p>
+        <p class="max-w-2xl text-[15px] text-ink-inverse-muted">
+            Nothing you typed left this browser, and the draft that carried you between steps has
+            been deleted.
+        </p>
+        <div class="flex flex-wrap gap-3">
+            <a
+                class="btn btn--accent"
+                href="/store"
+            >
+                Spend your Prod &rarr;
+            </a>
+            <a
+                class="btn"
+                href="/producers"
+            >
+                Meet the roster
+            </a>
+        </div>
+    </div>
+</section>
+
+<style>
+    .onboarding__box {
+        appearance: none;
+        background-color: transparent;
+        border: 2px solid currentcolor;
+        flex-shrink: 0;
+        height: 24px;
+        margin: 0;
+        width: 24px;
+    }
+
+    .onboarding__box:checked {
+        background-color: var(--color-accent-deep);
+        border-color: var(--color-accent-deep);
+        box-shadow: inset 0 0 0 4px var(--color-surface-raised);
+    }
+
+    .onboarding__done .btn:not(.btn--accent):hover {
+        background-color: var(--color-ink-inverse);
+        border-color: var(--color-ink-inverse);
+        color: var(--color-ink);
+    }
+
+    .onboarding__chip {
+        align-items: center;
+        border: 2px solid var(--color-ink);
+        display: flex;
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        gap: var(--space-2xs);
+        letter-spacing: 0.025em;
+        min-height: 50px;
+        padding: var(--space-2xs) var(--space-sm);
+        text-transform: uppercase;
+    }
+
+    .onboarding__chip:active {
+        background-color: var(--color-surface-sunken);
+    }
+
+    .onboarding__chip:has(.onboarding__box:checked) {
+        background-color: var(--color-surface-sunken);
+    }
+
+    .onboarding__chip:hover {
+        background-color: var(--color-surface-sunken);
+    }
+
+    .onboarding__group {
+        border: 0;
+        padding: 0;
+    }
+
+    .onboarding__optional {
+        color: var(--color-ink-subtle);
+        text-transform: none;
+    }
+
+    .onboarding__pane {
+        border: 0;
+        padding: 0;
+    }
+
+    .onboarding__step {
+        min-width: 140px;
+    }
+
+    .onboarding__step[aria-current='step'] {
+        background-color: var(--color-ink);
+        color: var(--color-ink-inverse);
+    }
+
+    .strength__bar {
+        background-color: var(--color-ink-20);
+        flex: 1;
+        height: 6px;
+    }
+
+    .strength__bar[data-strength-on] {
+        background-color: var(--color-accent-deep);
+    }
+
+    @media (forced-colors: active) {
+        .onboarding__box {
+            background-color: Canvas;
+            border-color: CanvasText;
+            forced-color-adjust: none;
+        }
+
+        .onboarding__box:checked {
+            background-color: SelectedItem;
+            border-color: CanvasText;
+            box-shadow: inset 0 0 0 4px Canvas;
+        }
+    }
+</style>
+
+<script>
+    import { ONBOARDING_TOKEN_PARAM, PASSWORD_MIN_LENGTH, QUESTIONNAIRE } from '@lib/constants';
+    import { clearFieldErrors, focusFirstError, setFieldErrors, validateFields } from '@lib/forms';
+    import { clearOnboardingDraft, getOnboardingDraft, isReservedUsername, saveOnboardingDraft, scorePassword, verifyOnboardingToken } from '@lib/onboarding';
+    import { registerPageScript, setMessage, setPending, setText } from '@lib/utils';
+    import { startSession, updateSession } from '@lib/session';
+
+    const ACCOUNT_RULES: Record<string, FieldRule> = {
+        confirm: { message: 'Both passwords must match.', required: true, validate: (value, values) => value === values.get('password') },
+        password: { message: `Use at least ${PASSWORD_MIN_LENGTH} characters, including a letter and a digit.`, min: PASSWORD_MIN_LENGTH, required: true, validate: hasLetterAndDigit },
+        username: { message: 'Use 3 to 20 letters, numbers, or underscores.', pattern: /^[a-z0-9_]{3,20}$/i, required: true },
+    };
+
+    const LAST_STEP = 2;
+
+    const PROFILE_RULES: Record<string, FieldRule> = {
+        displayName: { message: 'Enter the name the roster should show.', required: true },
+        genres: { message: 'Choose at least one.', required: true },
+    };
+
+    const QUESTION_RULES: Record<string, FieldRule> = Object.fromEntries(
+        QUESTIONNAIRE.map(question => [question.id, { message: 'Pick an answer to continue.', required: true }]),
+    );
+
+    const STEP_NAMES = ['Account', 'Profile', 'Questionnaire'];
+
+    const STEP_RULES = [ACCOUNT_RULES, PROFILE_RULES, QUESTION_RULES];
+
+    const STRENGTH_LABELS = ['nothing typed', 'very weak', 'weak', 'fair', 'strong', 'very strong'];
+
+    let accountEmail = '';
+    let step = 0;
+
+    function collect(form: HTMLFormElement) {
+        const values = new FormData(form);
+
+        return {
+            answers: Object.fromEntries(QUESTIONNAIRE.map(question => [question.id, values.getAll(question.id).map(String)])),
+            displayName: String(values.get('displayName') ?? ''),
+            email: accountEmail,
+            genres: values.getAll('genres').map(String),
+            location: String(values.get('location') ?? ''),
+            username: String(values.get('username') ?? ''),
+        };
+    }
+
+    async function complete(form: HTMLFormElement) {
+        const button = form.querySelector<HTMLButtonElement>('[data-onboarding-next]');
+        const status = form.querySelector<HTMLElement>('[data-onboarding-status]');
+        const summary = form.querySelector<HTMLElement>('[data-form-error]');
+        const values = new FormData(form);
+
+        const displayName = String(values.get('displayName') ?? '');
+        const username = String(values.get('username') ?? '').toLowerCase();
+
+        setPending(button, true);
+        setText(status, 'Saving your profile\u2026');
+
+        const result = await startSession({ displayName, email: accountEmail, username });
+
+        if (!result.ok) {
+            setPending(button, false);
+            setText(status, '');
+            setMessage(summary, result.message);
+            (summary ?? button)?.focus();
+
+            return;
+        }
+
+        await updateSession({ onboarded: true });
+
+        setPending(button, false);
+        setText(status, '');
+        clearOnboardingDraft();
+
+        const done = document.querySelector<HTMLElement>('[data-onboarding-done]');
+        const flow = document.querySelector<HTMLElement>('[data-onboarding-flow]');
+
+        setText(document.querySelector<HTMLElement>('[data-onboarding-handle]'), `@${username}`);
+        flow?.setAttribute('hidden', '');
+        done?.removeAttribute('hidden');
+        document.querySelector<HTMLElement>('[data-onboarding-heading]')?.focus();
+    }
+
+    function handleBack(form: HTMLFormElement) {
+        if (step === 0) return;
+
+        step -= 1;
+        saveOnboardingDraft({ ...collect(form), step: step + 1 });
+        showStep(form, true);
+    }
+
+    function handlePasswordInput(input: HTMLInputElement) {
+        const bars = document.querySelectorAll<HTMLElement>('.strength__bar');
+        const score = scorePassword(input.value);
+
+        bars.forEach((bar, index) => {
+            bar.toggleAttribute('data-strength-on', index < score);
+        });
+
+        setText(document.querySelector<HTMLElement>('[data-strength-label]'), `Strength: ${STRENGTH_LABELS[score]}`);
+    }
+
+    async function handleSubmit(event: SubmitEvent, form: HTMLFormElement) {
+        event.preventDefault();
+
+        const summary = form.querySelector<HTMLElement>('[data-form-error]');
+        const errors = validate(form);
+
+        clearFieldErrors(form);
+        setMessage(summary, '');
+
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(form, errors);
+            focusFirstError(form, errors);
+            setMessage(summary, `Step ${step + 1} is not complete yet. Fix the fields below.`);
+
+            return;
+        }
+
+        if (step === LAST_STEP) {
+            await complete(form);
+
+            return;
+        }
+
+        step += 1;
+        saveOnboardingDraft({ ...collect(form), passwordSet: true, step: step + 1 });
+        showStep(form, true);
+    }
+
+    function hasLetterAndDigit(value: string) {
+        return /[a-z]/i.test(value) && /\d/.test(value);
+    }
+
+    function initOnboardingFlow(signal: AbortSignal) {
+        const flow = document.querySelector<HTMLElement>('[data-onboarding-flow]');
+        const form = document.querySelector<HTMLFormElement>('[data-onboarding-form]');
+        const gate = verifyOnboardingToken(new URLSearchParams(window.location.search).get(ONBOARDING_TOKEN_PARAM));
+
+        if (!flow || !form) return;
+
+        if (gate.state === 'rejected') {
+            showRejection(gate.reason);
+
+            return;
+        }
+
+        accountEmail = gate.email;
+        step = 0;
+        form.noValidate = true;
+
+        showRejection(null);
+        setText(document.querySelector<HTMLElement>('[data-onboarding-email]'), accountEmail);
+        restore(form);
+        flow.removeAttribute('hidden');
+        showStep(form, false);
+
+        form.addEventListener('submit', event => handleSubmit(event, form), { signal });
+        form.querySelector<HTMLInputElement>('#onboarding-password')?.addEventListener('input', event => handlePasswordInput(event.currentTarget as HTMLInputElement), { signal });
+        form.querySelector<HTMLButtonElement>('[data-onboarding-back]')?.addEventListener('click', () => handleBack(form), { signal });
+    }
+
+    function restore(form: HTMLFormElement) {
+        const draft = getOnboardingDraft();
+
+        if (draft.email !== accountEmail) return;
+
+        setValue(form, 'displayName', draft.displayName);
+        setValue(form, 'location', draft.location);
+        setValue(form, 'username', draft.username);
+        setChecked(form, 'genres', draft.genres);
+
+        QUESTIONNAIRE.forEach((question) => {
+            const answers = draft.answers[question.id] ?? [];
+
+            if (question.kind === 'select') setValue(form, question.id, answers.at(0) ?? '');
+            else setChecked(form, question.id, answers);
+        });
+
+        step = Math.min(LAST_STEP, Math.max(0, draft.step - 1));
+    }
+
+    function setChecked(form: HTMLFormElement, name: string, values: string[]) {
+        form.querySelectorAll<HTMLInputElement>(`[name="${name}"]`).forEach((input) => {
+            input.checked = values.includes(input.value);
+        });
+    }
+
+    function setValue(form: HTMLFormElement, name: string, value: string) {
+        const control = form.querySelector<HTMLInputElement | HTMLSelectElement>(`[name="${name}"]`);
+
+        if (control && value) control.value = value;
+    }
+
+    function showRejection(reason: OnboardingRejection | null) {
+        document.querySelectorAll<HTMLElement>('[data-onboarding-reject]').forEach((panel) => {
+            panel.toggleAttribute('hidden', panel.dataset.onboardingReject !== reason);
+        });
+    }
+
+    function showStep(form: HTMLFormElement, moveFocus: boolean) {
+        const back = form.querySelector<HTMLButtonElement>('[data-onboarding-back]');
+        const next = form.querySelector<HTMLButtonElement>('[data-onboarding-next]');
+
+        form.querySelectorAll<HTMLElement>('[data-onboarding-pane]').forEach((pane, index) => {
+            pane.toggleAttribute('hidden', index !== step);
+        });
+
+        document.querySelectorAll<HTMLElement>('[data-onboarding-step]').forEach((marker, index) => {
+            if (index === step) marker.setAttribute('aria-current', 'step');
+            else marker.removeAttribute('aria-current');
+        });
+
+        back?.toggleAttribute('hidden', step === 0);
+
+        if (next) next.textContent = step === LAST_STEP ? 'Finish \u2192' : 'Continue \u2192';
+
+        setText(document.querySelector<HTMLElement>('[data-onboarding-announce]'), `Step ${step + 1} of ${STEP_NAMES.length}, ${STEP_NAMES[step]}`);
+
+        if (moveFocus) form.querySelector<HTMLElement>(`[data-onboarding-pane="${step}"] input, [data-onboarding-pane="${step}"] select`)?.focus();
+    }
+
+    function validate(form: HTMLFormElement) {
+        const errors = validateFields(form, STEP_RULES[step]);
+
+        if (step !== 0) return errors;
+
+        const values = new FormData(form);
+        const password = String(values.get('password') ?? '');
+        const username = String(values.get('username') ?? '');
+
+        if (!errors.username && isReservedUsername(username)) errors.username = 'That username is taken. Pick another.';
+        if (!errors.password && wouldEcho(password, username)) errors.password = 'Your password cannot repeat your username or your email.';
+
+        return errors;
+    }
+
+    function wouldEcho(password: string, username: string) {
+        const local = accountEmail.split('@').at(0) ?? '';
+        const candidate = password.toLowerCase();
+
+        return candidate === username.toLowerCase() || candidate === local.toLowerCase();
+    }
+
+    registerPageScript(initOnboardingFlow);
+</script>

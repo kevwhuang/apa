@@ -1,0 +1,89 @@
+---
+import BrandMark from '@components/brand/Mark.astro';
+import PageHead from '@components/shared/PageHead.astro';
+
+interface Props {
+    code: string;
+    eyebrow: string;
+    headingId: string;
+    lede: string;
+}
+
+const MARK_HEIGHT = 72;
+
+const ROUTES = [
+    { href: '/', label: 'Home', primary: true },
+    { href: '/events', label: 'Events', primary: false },
+    { href: '/producers', label: 'Producers', primary: false },
+    { href: '/store', label: 'Store', primary: false },
+];
+
+const { code, eyebrow, headingId, lede } = Astro.props;
+---
+
+<section
+    class="stage stage--narrow"
+    aria-labelledby={headingId}
+>
+    <div class="mark rank rank--2 items-center">
+        <div class="flex flex-col gap-6">
+            <PageHead
+                class="font-extrabold font-sans leading-[0.82] text-mega tracking-[-0.05em]"
+                eyebrow={eyebrow}
+                eyebrowClass="mb-5"
+                eyebrowMotion="rule"
+                headingId={headingId}
+            >
+                {code}
+            </PageHead>
+            <hr
+                class="border-0 border-t-2 border-ink"
+                data-motion="rule"
+            />
+            <p class="max-w-md leading-relaxed text-md text-ink-muted">
+                {lede}
+            </p>
+            <nav aria-label="Suggested pages">
+                <ul class="flex flex-wrap gap-3 list-none">
+                    {ROUTES.map(route => (
+                        <li>
+                            <a
+                                class:list={['btn', route.primary && 'btn--primary']}
+                                href={route.href}
+                            >
+                                {route.label}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </nav>
+        </div>
+        <div class="error__plate slab slab--bare slab--lift tilt flex items-center justify-center overflow-hidden relative">
+            <div
+                class="halftone absolute inset-0"
+                aria-hidden="true"
+            />
+            <BrandMark
+                class="relative text-ink-inverse"
+                height={MARK_HEIGHT}
+            />
+        </div>
+    </div>
+</section>
+
+<style>
+    .error__plate {
+        --slab-fill: var(--color-accent);
+        aspect-ratio: 1;
+    }
+
+    .mark {
+        --mark-offset: calc(var(--z-lift) * var(--lift) + var(--space-2xs));
+    }
+
+    @media (max-width: 768px) {
+        .error__plate {
+            aspect-ratio: 2;
+        }
+    }
+</style>

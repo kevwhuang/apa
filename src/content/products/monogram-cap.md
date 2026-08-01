@@ -12,5 +12,5 @@ details:
   - Brushed cotton twill
   - Adjustable buckle strap
   - One size
-inStock: true
+stock: 0
 ---

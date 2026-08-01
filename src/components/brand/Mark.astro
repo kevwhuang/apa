@@ -1,0 +1,21 @@
+---
+import { BRAND_LOGOS, BRAND_SIZES } from '@lib/brand';
+
+interface Props {
+    class?: string;
+    height?: number;
+    label?: string;
+}
+
+const { class: markClass, height = BRAND_SIZES.markNav, label } = Astro.props;
+const Mark = BRAND_LOGOS.mark;
+---
+
+<Mark
+    class={markClass}
+    aria-hidden={label ? undefined : 'true'}
+    aria-label={label}
+    fill="currentColor"
+    height={height}
+    role={label ? 'img' : undefined}
+/>

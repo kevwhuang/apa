@@ -1,0 +1,642 @@
+---
+import PageHead from '@components/shared/PageHead.astro';
+import SectionHead from '@components/shared/SectionHead.astro';
+import { CONTACT_LIMITS, LINKS, PLATFORMS } from '@lib/constants';
+
+const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
+
+const TOPICS = ['Booking', 'Membership', 'Press', 'Sponsor inquiry', 'Something else'];
+---
+
+<section
+    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    aria-labelledby="contact-title"
+>
+    <div>
+        <PageHead
+            class="mb-6 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            eyebrow="Contact"
+            headingId="contact-title"
+        >
+            Send a signal.
+        </PageHead>
+        <p
+            class="max-w-2xl text-lmd text-ink-muted"
+            data-motion="rise"
+        >
+            Membership, sponsorship, press, booking &mdash; whatever you're here for, this is the front door.
+        </p>
+    </div>
+</section>
+
+<section
+    class="stage stage--narrow stage--tight"
+    aria-label="Contact form"
+>
+    <div class="grid grid-cols-1 gap-12 lg:gap-16 md:grid-cols-[1.4fr_1fr]">
+        <div
+            class="contact__panel mark"
+            data-motion="rise"
+        >
+            <div
+                class="contact__backdrop halftone"
+                aria-hidden="true"
+            />
+            <form
+                class="contact-form slab slab--card flex flex-col gap-6"
+                data-contact-form
+            >
+                <header class="contact__masthead">
+                    <p class="label text-accent-deep">Correspondence</p>
+                    <p class="label text-ink-subtle">APA / Form 01</p>
+                </header>
+                <div
+                    class="contact__alert slab slab--card flex flex-col gap-3"
+                    data-form-error
+                    hidden
+                    role="alert"
+                    tabindex="-1"
+                >
+                    <p
+                        class="action-text text-accent-deep"
+                        data-form-error-message
+                    />
+                    <ul
+                        class="contact__alert-list list-none"
+                        data-form-error-list
+                    />
+                </div>
+                <div class="grid grid-cols-1 gap-6 md:gap-5 md:grid-cols-2">
+                    <div class="flex flex-col gap-2">
+                        <label class="flex flex-col gap-2">
+                            <span class="contact-field__head label text-ink"><span class="contact-field__index">01</span>Name</span>
+                            <input
+                                id="contact-name"
+                                class="contact-field__control font-sans"
+                                aria-describedby="contact-name-error"
+                                aria-invalid="false"
+                                autocomplete="name"
+                                maxlength={CONTACT_LIMITS.name}
+                                name="name"
+                                required
+                            />
+                        </label>
+                        <p
+                            id="contact-name-error"
+                            class="action-text text-accent-deep"
+                            data-field-error
+                            hidden
+                        />
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="flex flex-col gap-2">
+                            <span class="contact-field__head label text-ink"><span class="contact-field__index">02</span>Email</span>
+                            <input
+                                id="contact-email"
+                                class="contact-field__control font-mono text-sm"
+                                aria-describedby="contact-email-error"
+                                aria-invalid="false"
+                                autocomplete="email"
+                                maxlength={CONTACT_LIMITS.email}
+                                name="email"
+                                required
+                                type="email"
+                            />
+                        </label>
+                        <p
+                            id="contact-email-error"
+                            class="action-text text-accent-deep"
+                            data-field-error
+                            hidden
+                        />
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="flex flex-col gap-2">
+                        <span class="contact-field__head label text-ink"><span class="contact-field__index">03</span>Topic</span>
+                        <span class="contact-field__select">
+                            <select
+                                id="contact-topic"
+                                class="contact-field__control contact-field__control--select font-sans"
+                                aria-describedby="contact-topic-error"
+                                aria-invalid="false"
+                                name="topic"
+                                required
+                            >
+                                <option value="">Choose a topic&hellip;</option>
+                                {TOPICS.map(topic => (
+                                    <option value={topic}>{topic}</option>
+                                ))}
+                            </select>
+                        </span>
+                    </label>
+                    <p
+                        id="contact-topic-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </div>
+                <div class="flex flex-col gap-2 mb-2">
+                    <label class="flex flex-col gap-2">
+                        <span class="contact-field__head label text-ink"><span class="contact-field__index">04</span>Message<span class="contact-field__hint text-ink-subtle">{MESSAGE_MAX} characters max</span></span>
+                        <textarea
+                            id="contact-message"
+                            class="contact-field__control contact-field__control--area font-sans"
+                            aria-describedby="contact-message-error"
+                            aria-invalid="false"
+                            maxlength={CONTACT_LIMITS.message}
+                            name="message"
+                            required
+                            rows="6"
+                        />
+                    </label>
+                    <p
+                        id="contact-message-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </div>
+                <div class="contact-form__foot">
+                    <button
+                        class="btn btn--primary contact-form__submit"
+                        type="submit"
+                    >
+                        Send the signal &rarr;
+                    </button>
+                    <p class="text-sm text-ink-muted">
+                        Nothing is sent automatically &mdash; the form writes the email, and you send it from your own inbox.
+                    </p>
+                </div>
+            </form>
+            <div
+                class="contact__done slab slab--card flex flex-col gap-5"
+                data-contact-done
+                hidden
+            >
+                <header class="contact__masthead">
+                    <p class="label text-accent-deep">Receipt</p>
+                    <p class="contact__stamp action-text">Not sent</p>
+                </header>
+                <h2
+                    class="font-extrabold font-sans text-3xl tracking-tight"
+                    data-contact-heading
+                    tabindex="-1"
+                >
+                    Nothing was sent.
+                </h2>
+                <p class="text-smd text-ink-muted">
+                    This is the message the form composed. It stayed in this browser.
+                </p>
+                <dl class="contact__receipt">
+                    <div class="contact__receipt-row">
+                        <dt class="label text-ink-subtle">From</dt>
+                        <dd
+                            class="font-mono wrap-break-word text-sm"
+                            data-contact-from
+                        />
+                    </div>
+                    <div class="contact__receipt-row">
+                        <dt class="label text-ink-subtle">To</dt>
+                        <dd
+                            class="font-mono wrap-break-word text-sm"
+                            data-contact-to
+                        />
+                    </div>
+                    <div class="contact__receipt-row">
+                        <dt class="label text-ink-subtle">Subject</dt>
+                        <dd
+                            class="font-mono wrap-break-word text-sm"
+                            data-contact-subject
+                        />
+                    </div>
+                    <div class="contact__receipt-row contact__receipt-row--message">
+                        <dt class="label text-ink-subtle">Message</dt>
+                        <dd
+                            class="slab slab--sunk p-4 whitespace-pre-line wrap-break-word text-smd"
+                            data-contact-message
+                        />
+                    </div>
+                </dl>
+                <div class="contact__done-actions flex flex-wrap gap-3">
+                    <a
+                        class="btn btn--accent"
+                        data-contact-send
+                        href={`mailto:${LINKS.email}`}
+                    >
+                        Send it yourself
+                    </a>
+                    <button
+                        class="btn"
+                        data-contact-again
+                        type="button"
+                    >
+                        Write another
+                    </button>
+                </div>
+            </div>
+        </div>
+        <aside aria-labelledby="direct-lines-title">
+            <div class="md:sticky md:top-28">
+                <SectionHead
+                    class="font-extrabold font-sans text-2xl tracking-tight"
+                    eyebrow="Direct lines"
+                    eyebrowClass="mb-2"
+                    headingId="direct-lines-title"
+                >
+                    Skip the form entirely.
+                </SectionHead>
+                <ul
+                    class="contact__lines list-none"
+                    data-motion-stagger="rise"
+                >
+                    <li>
+                        <a
+                            class="contact-line contact-line--accent slab slab--card slab--hover"
+                            href={`mailto:${LINKS.email}`}
+                        >
+                            <span class="contact-line__body">
+                                <span class="contact-line__label">Email</span>
+                                <span class="contact-line__blurb font-mono">{LINKS.email}</span>
+                            </span>
+                            <span
+                                class="contact-line__arrow"
+                                aria-hidden="true"
+                            >
+                                &rarr;
+                            </span>
+                        </a>
+                    </li>
+                    {PLATFORMS.map(platform => (
+                        <li>
+                            <a
+                                class="contact-line slab slab--card slab--hover"
+                                href={platform.href}
+                                rel="noopener noreferrer"
+                                target="_blank"
+                            >
+                                <span class="contact-line__body">
+                                    <span class="contact-line__label">{platform.label}</span>
+                                    <span class="contact-line__blurb">{platform.blurb}</span>
+                                </span>
+                                <span
+                                    class="contact-line__arrow"
+                                    aria-hidden="true"
+                                >
+                                    &rarr;
+                                </span>
+                                <span class="sr-only"> (opens in a new tab)</span>
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </aside>
+    </div>
+    <template data-error-anchor>
+        <li>
+            <a
+                class="contact__anchor hover:text-accent-deep flex items-center min-h-[50px] text-sm underline"
+                data-anchor
+                href="#contact-name"
+            >
+                Fix this field
+            </a>
+        </li>
+    </template>
+</section>
+
+<style>
+    .contact-form,
+    .contact__done {
+        padding: var(--space-lg);
+    }
+
+    .contact-form__foot {
+        border-top: 2px solid var(--color-ink);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xs);
+        padding-top: var(--space-md);
+    }
+
+    .contact-form__submit {
+        min-height: 58px;
+        width: 100%;
+    }
+
+    .contact__alert {
+        --slab-shadow: var(--color-accent-deep);
+        border-left: 4px solid var(--color-accent-deep);
+    }
+
+    .contact__alert-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3xs);
+    }
+
+    .contact__backdrop {
+        height: min(220px, 45%);
+        inset: calc(-0.5 * var(--drift-unit)) auto auto calc(-0.5 * var(--drift-unit));
+        position: absolute;
+        width: min(520px, 75%);
+        z-index: var(--z-ground);
+    }
+
+    .contact__done-actions {
+        background-image: repeating-linear-gradient(90deg, var(--color-ink-20) 0 8px, transparent 8px 16px);
+        background-position: top left;
+        background-repeat: no-repeat;
+        background-size: 100% 1px;
+        padding-top: var(--space-md);
+    }
+
+    .contact__lines {
+        display: grid;
+        gap: var(--space-sm);
+        grid-auto-rows: 1fr;
+    }
+
+    .contact__lines > li {
+        display: grid;
+    }
+
+    .contact__masthead {
+        align-items: center;
+        border-bottom: 2px solid var(--color-ink);
+        display: flex;
+        justify-content: space-between;
+        padding-bottom: var(--space-xs);
+    }
+
+    .contact__panel {
+        position: relative;
+    }
+
+    .contact__receipt {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .contact__receipt-row {
+        align-items: baseline;
+        border-bottom: 1px solid var(--color-ink-20);
+        display: grid;
+        gap: var(--space-sm);
+        grid-template-columns: 72px minmax(0, 1fr);
+        padding-block: var(--space-2xs);
+    }
+
+    .contact__receipt-row--message {
+        border-bottom: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2xs);
+        padding-top: var(--space-sm);
+    }
+
+    .contact__stamp {
+        border: 2px solid var(--color-accent-deep);
+        color: var(--color-accent-deep);
+        padding: var(--space-3xs) var(--space-2xs);
+        rotate: calc(var(--tilt-unit) * -3);
+    }
+
+    .contact-field__control {
+        background-color: var(--color-surface);
+        border: 2px solid var(--color-ink);
+        color: var(--color-ink);
+        min-height: 54px;
+        padding: 0 var(--space-sm);
+        transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease;
+        width: 100%;
+    }
+
+    .contact-field__control:focus-visible,
+    .contact-field__control:hover {
+        background-color: var(--color-surface-raised);
+    }
+
+    .contact-field__control[aria-invalid='true'] {
+        border-color: var(--color-accent-deep);
+        box-shadow: 3px 3px 0 0 var(--color-accent-20);
+    }
+
+    .contact-field__control--area {
+        min-height: 190px;
+        padding: var(--space-sm);
+        resize: vertical;
+    }
+
+    .contact-field__control--select {
+        appearance: none;
+        padding-right: calc(2 * var(--space-sm) + 12px);
+    }
+
+    .contact-field__head {
+        align-items: baseline;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .contact-field__hint {
+        flex: 1;
+        padding-left: var(--space-sm);
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .contact-field__index {
+        color: var(--color-accent-deep);
+        padding-right: var(--space-2xs);
+    }
+
+    .contact-field__select {
+        position: relative;
+    }
+
+    .contact-field__select::after {
+        background-color: var(--color-ink);
+        content: '';
+        height: 8px;
+        mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' fill='none' stroke='currentColor' stroke-width='2'/></svg>");
+        mask-repeat: no-repeat;
+        mask-size: 12px 8px;
+        pointer-events: none;
+        position: absolute;
+        right: var(--space-sm);
+        top: calc(50% - 4px);
+        width: 12px;
+    }
+
+    .contact-line {
+        align-items: center;
+        display: flex;
+        gap: var(--space-sm);
+        justify-content: space-between;
+        min-height: 96px;
+        padding: var(--space-sm) var(--space-md);
+        transition:
+            background-color var(--duration-fast) ease,
+            box-shadow var(--duration-base) var(--motion-ease-entrance),
+            color var(--duration-fast) ease,
+            translate var(--duration-base) var(--motion-ease-entrance);
+    }
+
+    .contact-line:hover {
+        --slab-fill: var(--color-ink);
+        color: var(--color-ink-inverse);
+    }
+
+    .contact-line:hover .contact-line__arrow {
+        color: var(--color-accent);
+        translate: 4px 0;
+    }
+
+    .contact-line:hover .contact-line__blurb {
+        color: var(--color-ink-inverse-muted);
+    }
+
+    .contact-line__arrow {
+        color: var(--color-accent-deep);
+        flex-shrink: 0;
+        font-family: var(--font-mono);
+        font-size: var(--text-xl);
+        transition: color var(--duration-fast) ease, translate var(--duration-fast) ease;
+    }
+
+    .contact-line__blurb {
+        color: var(--color-ink-muted);
+        font-size: var(--text-sm);
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+        transition: color var(--duration-fast) ease;
+    }
+
+    .contact-line__body {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3xs);
+        min-width: 0;
+    }
+
+    .contact-line__label {
+        font-family: var(--font-mono);
+        font-size: var(--text-md);
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+
+    .contact-line--accent .contact-line__arrow,
+    .contact-line--accent .contact-line__blurb {
+        color: var(--color-ink);
+    }
+
+    .contact-line--accent.slab {
+        --slab-fill: var(--color-accent);
+    }
+
+    .contact-line--accent.slab:hover {
+        --slab-fill: var(--color-accent-deep);
+        color: var(--color-ink-inverse);
+    }
+
+    .contact-line--accent.slab:hover .contact-line__arrow,
+    .contact-line--accent.slab:hover .contact-line__blurb {
+        color: var(--color-ink-inverse);
+    }
+</style>
+
+<script>
+    import { CONTACT_LIMITS, EMAIL_PATTERN } from '@lib/constants';
+    import { clearFieldErrors, renderErrorSummary, setFieldErrors, validateFields } from '@lib/forms';
+    import { composeContactEmail } from '@lib/email';
+    import { registerPageScript, setText } from '@lib/utils';
+
+    const RULES: Record<string, FieldRule> = {
+        email: { max: CONTACT_LIMITS.email, message: 'Enter a valid email address.', pattern: EMAIL_PATTERN, required: true },
+        message: { max: CONTACT_LIMITS.message, message: 'Write at least a sentence.', min: CONTACT_LIMITS.messageMin, required: true },
+        name: { max: CONTACT_LIMITS.name, message: 'Enter your name.', required: true },
+        topic: { message: 'Choose a topic.', required: true },
+    };
+
+    function applyTopicFromQuery(form: HTMLFormElement) {
+        const requested = new URLSearchParams(window.location.search).get('topic')?.trim();
+        const select = form.querySelector<HTMLSelectElement>('#contact-topic');
+
+        if (!requested || !select) return;
+
+        const match = Array.from(select.options).find(option => option.value !== '' && option.value.toLowerCase() === requested.toLowerCase());
+
+        if (!match) return;
+
+        select.value = match.value;
+        select.focus();
+    }
+
+    function handleContactAgain(form: HTMLFormElement, done: HTMLElement) {
+        done.setAttribute('hidden', '');
+        form.removeAttribute('hidden');
+        form.reset();
+        form.querySelector<HTMLInputElement>('#contact-name')?.focus();
+    }
+
+    function handleContactSubmit(event: SubmitEvent, form: HTMLFormElement, done: HTMLElement) {
+        event.preventDefault();
+
+        const errors = validateFields(form, RULES);
+
+        clearFieldErrors(form);
+        renderErrorSummary(form, errors, 'contact');
+
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(form, errors);
+
+            return;
+        }
+
+        renderReceipt(form, done);
+    }
+
+    function initContactForm(signal: AbortSignal) {
+        const again = document.querySelector<HTMLButtonElement>('[data-contact-again]');
+        const done = document.querySelector<HTMLElement>('[data-contact-done]');
+        const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+
+        if (!done || !form) return;
+
+        form.noValidate = true;
+        form.addEventListener('submit', event => handleContactSubmit(event, form, done), { signal });
+        again?.addEventListener('click', () => handleContactAgain(form, done), { signal });
+        applyTopicFromQuery(form);
+    }
+
+    function renderReceipt(form: HTMLFormElement, done: HTMLElement) {
+        const values = new FormData(form);
+
+        const composed = composeContactEmail({
+            email: String(values.get('email') ?? ''),
+            message: String(values.get('message') ?? ''),
+            name: String(values.get('name') ?? ''),
+            topic: String(values.get('topic') ?? ''),
+        });
+
+        const send = document.querySelector<HTMLAnchorElement>('[data-contact-send]');
+
+        form.setAttribute('hidden', '');
+        done.removeAttribute('hidden');
+
+        if (send) send.href = composed.actionHref;
+
+        setText(document.querySelector('[data-contact-from]'), composed.from);
+        setText(document.querySelector('[data-contact-message]'), composed.body.join('\n\n'));
+        setText(document.querySelector('[data-contact-subject]'), composed.subject);
+        setText(document.querySelector('[data-contact-to]'), composed.to);
+        document.querySelector<HTMLElement>('[data-contact-heading]')?.focus();
+    }
+
+    registerPageScript(initContactForm);
+</script>

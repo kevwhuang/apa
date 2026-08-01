@@ -1,0 +1,493 @@
+---
+import IconUpload from '@components/icons/Upload.astro';
+import SectionHead from '@components/shared/SectionHead.astro';
+import { UPLOAD } from '@lib/constants';
+import { formatBytes, getProgram } from '@lib/utils';
+
+const program = getProgram('bash');
+
+const extensions = UPLOAD.extensions.map(extension => extension.toUpperCase()).join(', ');
+---
+
+<section
+    class="stage stage--tight border-b-2 border-ink"
+    aria-labelledby="submissions-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-4xl tracking-tight"
+            eyebrow={`${program.shortName} / Submissions`}
+            headingId="submissions-title"
+        >
+            Submit your track
+        </SectionHead>
+        <div class="grid grid-cols-1 gap-12 md:grid-cols-[1fr_1.4fr]">
+            <div class="flex flex-col gap-4">
+                <p class="text-base text-ink-muted">
+                    Bounce what you made on the clock and drop it here. Nothing leaves this browser
+                    &mdash; the file is read from disk to draw its waveform and then discarded.
+                </p>
+                <p
+                    class="text-smd text-ink-muted"
+                    data-placeholder
+                >
+                    Five minutes of stereo WAV runs close to the {formatBytes(UPLOAD.maxFileBytes)} ceiling,
+                    so bounce to FLAC if yours is bigger.
+                </p>
+            </div>
+            <div class="flex flex-col gap-5">
+                <label
+                    class="dropzone slab slab--card flex flex-col items-center justify-center gap-3 text-center"
+                    data-dropzone
+                    for="submissions-input"
+                >
+                    <IconUpload />
+                    <span class="font-extrabold font-sans text-2xl tracking-tight">
+                        Drop your track here
+                    </span>
+                    <span class="label text-ink-muted">or choose a file</span>
+                    <input
+                        id="submissions-input"
+                        class="dropzone__input sr-only"
+                        accept={UPLOAD.acceptAttribute}
+                        aria-describedby="submissions-help"
+                        data-dropzone-input
+                        multiple
+                        name="submissions"
+                        type="file"
+                    />
+                </label>
+                <p
+                    id="submissions-help"
+                    class="text-sm text-ink-muted"
+                    data-placeholder
+                >
+                    {extensions}. Up to {formatBytes(UPLOAD.maxFileBytes)} each, {UPLOAD.maxFiles} files,{' '}
+                    {formatBytes(UPLOAD.maxTotalBytes)} in total.
+                </p>
+                <ul
+                    class="upload__list list-none"
+                    aria-label="Selected files"
+                    data-dropzone-list
+                />
+                <p
+                    class="sr-only"
+                    aria-live="polite"
+                    data-dropzone-status
+                />
+            </div>
+        </div>
+        <div class="mt-16">
+            <div class="flex flex-wrap items-baseline justify-between gap-3">
+                <h3
+                    class="font-extrabold font-sans text-2xl tracking-tight"
+                    data-motion="rise"
+                >
+                    The submission board
+                </h3>
+                <p
+                    class="label text-ink-subtle"
+                    data-board-refresh
+                    hidden
+                />
+            </div>
+            <p
+                class="max-w-2xl mt-3 text-smd text-ink-muted"
+                data-motion="rise"
+            >
+                Every track turned in across past editions, oldest first &mdash; the running
+                record of afternoons spent on the clock.
+            </p>
+            <p
+                class="max-w-2xl mt-2 text-sm text-ink-subtle"
+                data-motion="rise"
+            >
+                The names and titles on the board are invented stand-ins &mdash; real submissions
+                take their place once the next edition runs.
+            </p>
+            <div
+                class="board__scroller mt-6"
+                data-motion="rise"
+            >
+                <table
+                    class="board__table border-2 border-ink"
+                    data-placeholder
+                >
+                    <caption class="sr-only">Tracks submitted at past Producer Bash editions</caption>
+                    <thead>
+                        <tr class="border-b-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
+                            <th
+                                class="px-4 py-3 text-left"
+                                scope="col"
+                            >
+                                #
+                            </th>
+                            <th
+                                class="px-4 py-3 text-left"
+                                scope="col"
+                            >
+                                Producer
+                            </th>
+                            <th
+                                class="px-4 py-3 text-left"
+                                scope="col"
+                            >
+                                Track
+                            </th>
+                            <th
+                                class="px-4 py-3 text-left"
+                                scope="col"
+                            >
+                                Edition
+                            </th>
+                            <th
+                                class="px-4 py-3 text-left"
+                                scope="col"
+                            >
+                                Submitted
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody
+                        class="divide-y divide-ink"
+                        data-board-body
+                    >
+                        <tr>
+                            <td
+                                class="px-4 py-4 font-mono text-xs uppercase text-ink-muted"
+                                colspan="5"
+                            >
+                                Pulling up the board&hellip;
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <nav
+                class="flex flex-wrap gap-2 mt-5"
+                aria-label="Submission board pages"
+                data-board-pager
+            />
+            <p
+                class="label mt-4 text-ink-subtle"
+                aria-live="polite"
+                data-board-status
+            />
+        </div>
+    </div>
+    <template data-dropzone-row>
+        <li class="slab slab--card flex flex-col gap-3">
+            <div class="flex flex-wrap items-baseline justify-between gap-3">
+                <p
+                    class="font-bold font-sans wrap-break-word"
+                    data-row-name
+                />
+                <p
+                    class="label text-ink-muted"
+                    data-row-meta
+                />
+            </div>
+            <canvas
+                class="upload__wave"
+                aria-hidden="true"
+                data-row-canvas
+                height="72"
+                hidden
+                width="640"
+            />
+            <p
+                class="action-text text-accent-deep"
+                data-row-error
+                hidden
+            />
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <progress
+                    class="upload__progress"
+                    data-row-progress
+                    max="100"
+                    value="0"
+                />
+                <p
+                    class="label text-ink-subtle"
+                    data-row-percent
+                />
+                <button
+                    class="action-text hover:text-accent-deep flex items-center min-h-[50px] px-1 text-ink-muted transition-colors"
+                    data-row-cancel
+                    type="button"
+                >
+                    Remove
+                </button>
+            </div>
+        </li>
+    </template>
+    <template data-board-row>
+        <tr>
+            <td
+                class="px-4 py-3 font-mono text-xs text-ink-subtle"
+                data-cell-index
+            />
+            <td
+                class="px-4 py-3 font-bold font-sans whitespace-nowrap"
+                data-cell-producer
+            />
+            <td
+                class="px-4 py-3"
+                data-cell-title
+            />
+            <td
+                class="px-4 py-3 font-mono text-2xs uppercase text-ink-muted whitespace-nowrap"
+                data-cell-edition
+            />
+            <td
+                class="px-4 py-3 font-mono text-2xs uppercase text-ink-muted whitespace-nowrap"
+                data-cell-submitted
+            />
+        </tr>
+    </template>
+    <template data-board-page>
+        <button
+            class="chip active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse min-w-[50px]"
+            type="button"
+        />
+    </template>
+</section>
+
+<style>
+    .board__scroller {
+        overflow-x: auto;
+    }
+
+    .board__table {
+        display: table;
+        overflow-x: visible;
+        width: 100%;
+    }
+
+    .dropzone {
+        --slab-fill: var(--color-surface-sunken);
+        background-image: repeating-linear-gradient(135deg, var(--color-ink-10) 0 6px, transparent 6px 12px);
+        border-style: dashed;
+        min-height: 220px;
+        padding: var(--space-2xl);
+        position: relative;
+        transition: background var(--duration-fast) ease, border-color var(--duration-fast) ease;
+    }
+
+    .dropzone:has(.dropzone__input:focus-visible) {
+        border-color: var(--color-accent-deep);
+        outline: 2px solid var(--color-accent-deep);
+        outline-offset: 2px;
+    }
+
+    .dropzone:hover {
+        border-color: var(--color-accent-deep);
+    }
+
+    .dropzone.is-dragging {
+        --slab-fill: var(--color-surface-raised);
+        border-color: var(--color-accent-deep);
+        border-style: solid;
+    }
+
+    .dropzone__input {
+        clip-path: inset(50%);
+        height: 100%;
+        inset: 0;
+        margin: 0;
+        width: 100%;
+    }
+
+    .upload__list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+
+    .upload__list:empty {
+        display: none;
+    }
+
+    .upload__progress {
+        accent-color: var(--color-accent-deep);
+        flex: 1 1 140px;
+        height: 12px;
+        min-width: 0;
+    }
+
+    .upload__wave {
+        color: var(--color-accent-deep);
+        display: block;
+        height: 72px;
+        max-width: 100%;
+        width: 100%;
+    }
+</style>
+
+<script>
+    import { BASH_SUBMISSIONS } from '@lib/bash-submissions';
+    import { MOCK_LATENCY_MS, STORAGE } from '@lib/constants';
+    import { createDropzone } from '@lib/dropzone';
+    import { createStore } from '@lib/state';
+    import { delay, formatTime, registerPageScript, rovingFocus, setMessage, setText } from '@lib/utils';
+
+    interface BoardElements {
+        body: HTMLElement;
+        chipTemplate: HTMLTemplateElement;
+        pager: HTMLElement;
+        refresh: HTMLElement;
+        rowTemplate: HTMLTemplateElement;
+        status: HTMLElement;
+    }
+
+    const PAGE_SIZE = 10;
+
+    const boardStore = createStore<BashSubmission[]>({
+        fallback: [],
+        key: STORAGE.bashBoard.key,
+        normalize: value => (Array.isArray(value) ? value.toSorted(bySubmittedAt) : []),
+        scope: STORAGE.bashBoard.scope,
+        topic: STORAGE.bashBoard.topic,
+    });
+
+    function bySubmittedAt(a: BashSubmission, b: BashSubmission) {
+        return +new Date(a.submittedAt) - +new Date(b.submittedAt);
+    }
+
+    function formatStamp(iso: string) {
+        const date = new Date(iso);
+        const day = date.toLocaleDateString('en-US', {
+            day: 'numeric',
+            month: 'short',
+            timeZone: 'America/Chicago',
+            year: 'numeric',
+        });
+
+        return `${day} \u00b7 ${formatTime(date)}`;
+    }
+
+    function initBashSubmissions(signal: AbortSignal) {
+        createDropzone({ signal });
+    }
+
+    function initSubmissionBoard(signal: AbortSignal) {
+        const body = document.querySelector<HTMLElement>('[data-board-body]');
+        const chipTemplate = document.querySelector<HTMLTemplateElement>('[data-board-page]');
+        const pager = document.querySelector<HTMLElement>('[data-board-pager]');
+        const refresh = document.querySelector<HTMLElement>('[data-board-refresh]');
+        const rowTemplate = document.querySelector<HTMLTemplateElement>('[data-board-row]');
+        const status = document.querySelector<HTMLElement>('[data-board-status]');
+
+        if (!body || !chipTemplate || !pager || !refresh || !rowTemplate || !status) return;
+
+        startBoard({ body, chipTemplate, pager, refresh, rowTemplate, status }, signal);
+    }
+
+    function startBoard(elements: BoardElements, signal: AbortSignal) {
+        const { body, chipTemplate, pager, refresh, rowTemplate, status } = elements;
+
+        let page = 1;
+        let rows = boardStore.get();
+
+        function buildPager() {
+            pager.replaceChildren();
+
+            for (let index = 1; index <= pageCount(); index += 1) {
+                const fragment = chipTemplate.content.cloneNode(true) as DocumentFragment;
+                const chip = fragment.querySelector('button');
+
+                if (!chip) continue;
+
+                chip.addEventListener('click', () => setPage(index), { signal });
+                chip.setAttribute('aria-label', `Page ${index}`);
+                chip.textContent = String(index);
+                pager.append(fragment);
+            }
+
+            rovingFocus(pager.querySelectorAll('button'), signal);
+        }
+
+        function pageCount() {
+            return Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+        }
+
+        function render() {
+            if (pager.querySelectorAll('button').length !== pageCount()) buildPager();
+
+            renderRows();
+            updatePager();
+            updateStatus();
+        }
+
+        function renderRows() {
+            const start = (page - 1) * PAGE_SIZE;
+
+            body.replaceChildren();
+
+            rows.slice(start, start + PAGE_SIZE).forEach((entry, index) => {
+                const fragment = rowTemplate.content.cloneNode(true) as DocumentFragment;
+                const row = fragment.querySelector('tr');
+
+                if (!row) return;
+
+                const stamp = document.createElement('time');
+
+                stamp.dateTime = entry.submittedAt;
+                stamp.textContent = formatStamp(entry.submittedAt);
+
+                setText(row.querySelector('[data-cell-index]'), String(start + index + 1).padStart(2, '0'));
+                setText(row.querySelector('[data-cell-producer]'), entry.producer);
+                setText(row.querySelector('[data-cell-title]'), entry.title);
+                setText(row.querySelector('[data-cell-edition]'), entry.edition);
+                row.querySelector('[data-cell-submitted]')?.append(stamp);
+                body.append(fragment);
+            });
+        }
+
+        async function revalidate() {
+            await delay(MOCK_LATENCY_MS);
+
+            if (signal.aborted) return;
+
+            rows = boardStore.set([...BASH_SUBMISSIONS]);
+            page = Math.min(page, pageCount());
+            render();
+            setMessage(refresh, '');
+        }
+
+        function setPage(next: number) {
+            if (next === page) return;
+
+            page = next;
+            renderRows();
+            updatePager();
+            updateStatus();
+        }
+
+        function updatePager() {
+            pager.querySelectorAll('button').forEach((chip, index) => {
+                const on = index + 1 === page;
+
+                chip.classList.toggle('is-active', on);
+
+                if (on) chip.setAttribute('aria-current', 'page');
+                else chip.removeAttribute('aria-current');
+            });
+        }
+
+        function updateStatus() {
+            const first = (page - 1) * PAGE_SIZE + 1;
+            const last = Math.min(rows.length, page * PAGE_SIZE);
+
+            setText(status, `Showing ${first}\u2013${last} of ${rows.length} \u00b7 Page ${page} of ${pageCount()}`);
+        }
+
+        if (rows.length > 0) render();
+
+        setMessage(refresh, rows.length > 0 ? 'Refreshing\u2026' : 'Loading\u2026');
+        void revalidate();
+    }
+
+    registerPageScript(initBashSubmissions);
+    registerPageScript(initSubmissionBoard);
+</script>

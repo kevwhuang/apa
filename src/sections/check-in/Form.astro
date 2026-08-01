@@ -1,0 +1,440 @@
+---
+import { getCollection } from 'astro:content';
+
+import PageHead from '@components/shared/PageHead.astro';
+import { EMAIL_MAX_LENGTH } from '@lib/constants';
+import { formatDate, formatTime, mergeCalendar } from '@lib/utils';
+
+const bashEditions = await getCollection('bash');
+const events = await getCollection('events');
+
+const { upcoming } = mergeCalendar(events, bashEditions);
+const nextEvent = upcoming.at(0);
+---
+
+<section
+    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    aria-labelledby="checkin-title"
+>
+    <div>
+        <PageHead
+            class="max-w-3xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            eyebrow="Events / Check-in"
+            headingId="checkin-title"
+        >
+            You made it.
+        </PageHead>
+        <p class="max-w-2xl mt-6 text-[18px] text-ink-muted">
+            This is where the welcome code at the door sends you. Leave an address and the Alliance
+            opens an account for you with your first Prod already on it. Nothing is emailed &mdash;
+            the message is composed here and shown to you instead.
+        </p>
+    </div>
+    <aside
+        class="checkin__scanned slab slab--well flex flex-col gap-3"
+        aria-label="What you scanned"
+    >
+        <p class="label text-ink-inverse-muted">You scanned</p>
+        <p class="checkin__url font-mono wrap-break-word text-[15px]">
+            austinproduceralliance.com/check-in
+        </p>
+        {nextEvent && (
+            <p class="text-[15px] text-ink-inverse-muted">
+                Next on the calendar:&#32;
+                <span data-placeholder>
+                    {nextEvent.title} &middot;&#32;
+                    <time datetime={nextEvent.date.toISOString()}>
+                        {formatDate(nextEvent.date)}, {formatTime(nextEvent.date)}
+                    </time>&#32;
+                    &middot; {nextEvent.location}
+                </span>
+            </p>
+        )}
+    </aside>
+</section>
+
+<section
+    class="stage stage--narrow stage--tight"
+    aria-label="Check in"
+>
+    <form
+        class="checkin__form slab slab--card flex flex-col gap-5"
+        data-checkin-form
+    >
+        <h2 class="font-extrabold font-sans text-2xl tracking-tight">
+            Check in
+        </h2>
+        <p
+            class="checkin__alert action-text px-3 py-3 bg-accent text-ink"
+            data-form-error
+            hidden
+            role="alert"
+        />
+        <div class="flex flex-col gap-2">
+            <label class="block">
+                <span class="label block mb-2 text-ink-muted">Email</span>
+                <input
+                    id="checkin-email"
+                    class="h-12 w-full px-4 border-2 border-ink font-mono text-[13px] bg-transparent"
+                    aria-describedby="checkin-email-error"
+                    aria-invalid="false"
+                    autocomplete="email"
+                    maxlength={EMAIL_MAX_LENGTH}
+                    name="email"
+                    required
+                    type="email"
+                />
+            </label>
+            <p
+                id="checkin-email-error"
+                class="action-text text-accent-deep"
+                data-field-error
+                hidden
+            />
+        </div>
+        <div class="flex flex-col gap-2">
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <label class="checkin__check">
+                    <input
+                        id="checkin-terms"
+                        class="checkin__box"
+                        aria-describedby="checkin-terms-error"
+                        aria-invalid="false"
+                        name="terms"
+                        required
+                        type="checkbox"
+                    />
+                    I accept the terms
+                </label>
+                <a
+                    class="checkin__link hover:text-accent-deep underline text-[14px] transition-colors"
+                    href="/terms"
+                >
+                    Read them first
+                </a>
+            </div>
+            <p
+                id="checkin-terms-error"
+                class="action-text text-accent-deep"
+                data-field-error
+                hidden
+            />
+        </div>
+        <label class="checkin__check">
+            <input
+                id="checkin-newsletter"
+                class="checkin__box"
+                checked
+                name="newsletter"
+                type="checkbox"
+            />
+            Add me to the seasonal newsletter
+        </label>
+        <div class="flex flex-wrap items-center gap-4">
+            <button
+                class="btn btn--primary"
+                type="submit"
+            >
+                Check in &rarr;
+            </button>
+            <p
+                class="action-text text-ink-subtle"
+                aria-live="polite"
+                data-checkin-status
+            />
+        </div>
+    </form>
+    <div
+        class="checkin__done flex flex-col gap-6"
+        data-checkin-done
+        hidden
+    >
+        <div class="slab slab--card flex flex-col gap-4">
+            <h2
+                class="font-extrabold font-sans text-3xl tracking-tight"
+                data-checkin-heading
+                tabindex="-1"
+            >
+                You are checked in.
+            </h2>
+            <p class="text-[16px] text-ink-muted">
+                An account is open for&#32;
+                <span
+                    class="font-mono wrap-break-word text-[14px]"
+                    data-checkin-email
+                />&#32;
+                with&#32;
+                <span
+                    class="font-mono text-[14px]"
+                    data-checkin-prods
+                />&#32;
+                on it.&#32;
+                <span data-checkin-newsletter />
+            </p>
+            <p class="action-text px-3 py-3 bg-accent text-ink">
+                This is what we would email you. Nothing was sent &mdash; read it below.
+            </p>
+            <button
+                class="btn self-start"
+                data-checkin-again
+                type="button"
+            >
+                Check in another address
+            </button>
+        </div>
+        <article
+            class="mail slab slab--lift flex flex-col gap-4"
+            aria-label="Welcome email preview"
+            data-checkin-mail
+            data-event={nextEvent?.title}
+        >
+            <dl class="mail__head">
+                <div class="mail__row">
+                    <dt class="label text-ink-subtle">From</dt>
+                    <dd
+                        class="font-mono wrap-break-word text-[13px]"
+                        data-mail-from
+                    />
+                </div>
+                <div class="mail__row">
+                    <dt class="label text-ink-subtle">To</dt>
+                    <dd
+                        class="font-mono wrap-break-word text-[13px]"
+                        data-mail-to
+                    />
+                </div>
+                <div class="mail__row">
+                    <dt class="label text-ink-subtle">Reply to</dt>
+                    <dd
+                        class="font-mono wrap-break-word text-[13px]"
+                        data-mail-reply
+                    />
+                </div>
+                <div class="mail__row">
+                    <dt class="label text-ink-subtle">Subject</dt>
+                    <dd
+                        class="font-bold font-sans text-[16px]"
+                        data-mail-subject
+                    />
+                </div>
+            </dl>
+            <p
+                class="mail__preheader text-[13px] text-ink-subtle"
+                data-mail-preheader
+            />
+            <div
+                class="mail__body flex flex-col gap-4 text-[15px]"
+                data-mail-body
+            />
+            <a
+                class="btn btn--accent self-start"
+                data-mail-action
+                href="/onboarding"
+            >
+                Finish your profile
+            </a>
+        </article>
+        <template data-mail-template>
+            <p class="mail__paragraph leading-relaxed" />
+        </template>
+    </div>
+</section>
+
+<style>
+    .checkin__box {
+        appearance: none;
+        background-color: transparent;
+        border: 2px solid var(--color-ink);
+        flex-shrink: 0;
+        height: 24px;
+        margin: 0;
+        width: 24px;
+    }
+
+    .checkin__box:checked {
+        background-color: var(--color-accent-deep);
+        border-color: var(--color-accent-deep);
+        box-shadow: inset 0 0 0 4px var(--color-surface-raised);
+    }
+
+    .checkin__check {
+        align-items: center;
+        align-self: flex-start;
+        display: flex;
+        font-size: var(--text-smd);
+        gap: var(--space-xs);
+        min-height: 50px;
+        padding: var(--space-2xs) var(--space-sm);
+    }
+
+    .checkin__check:hover {
+        background-color: var(--color-surface-sunken);
+    }
+
+    .checkin__link {
+        align-items: center;
+        display: inline-flex;
+        min-height: 50px;
+        padding-inline: var(--space-3xs);
+    }
+
+    .checkin__url {
+        color: var(--color-pulse);
+    }
+
+    .mail__head {
+        border-bottom: 1px solid var(--color-ink-20);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3xs);
+        padding-bottom: var(--space-xs);
+    }
+
+    .mail__row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-xs);
+    }
+
+    .mail__row dt {
+        min-width: 72px;
+    }
+
+    @media (forced-colors: active) {
+        .checkin__box {
+            background-color: Canvas;
+            border-color: CanvasText;
+            forced-color-adjust: none;
+        }
+
+        .checkin__box:checked {
+            background-color: SelectedItem;
+            border-color: CanvasText;
+            box-shadow: inset 0 0 0 4px Canvas;
+        }
+    }
+</style>
+
+<script>
+    import { clearFieldErrors, focusFirstError, setFieldErrors, validateFields } from '@lib/forms';
+    import { composeOnboardingEmail } from '@lib/email';
+    import { createOnboardingToken } from '@lib/onboarding';
+    import { registerPageScript, setMessage, setPending, setText } from '@lib/utils';
+    import { startSession } from '@lib/session';
+
+    const RULES: Record<string, FieldRule> = {
+        email: { message: 'Enter your email address.', required: true },
+        terms: { message: 'Accept the terms to check in.', required: true },
+    };
+
+    function handleCheckInAgain(form: HTMLFormElement, done: HTMLElement) {
+        done.setAttribute('hidden', '');
+        form.removeAttribute('hidden');
+        form.querySelector<HTMLInputElement>('#checkin-email')?.focus();
+    }
+
+    async function handleCheckInSubmit(event: SubmitEvent, form: HTMLFormElement) {
+        event.preventDefault();
+
+        const summary = form.querySelector<HTMLElement>('[data-form-error]');
+        const values = new FormData(form);
+        const errors = validateFields(form, RULES);
+
+        clearFieldErrors(form);
+        setMessage(summary, '');
+
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(form, errors);
+            focusFirstError(form, errors);
+            setMessage(summary, 'You are not checked in yet. Fix the fields below.');
+
+            return;
+        }
+
+        const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        const status = form.querySelector<HTMLElement>('[data-checkin-status]');
+
+        setPending(button, true);
+        setText(status, 'Checking you in\u2026');
+
+        const result = await startSession({ email: String(values.get('email') ?? '') });
+
+        setPending(button, false);
+        setText(status, '');
+
+        if (!result.ok) {
+            setFieldErrors(form, { email: result.message });
+            focusFirstError(form, { email: result.message });
+            setMessage(summary, result.message);
+
+            return;
+        }
+
+        renderCheckIn(form, result.session, values.get('newsletter') !== null);
+    }
+
+    function initCheckInForm(signal: AbortSignal) {
+        const again = document.querySelector<HTMLButtonElement>('[data-checkin-again]');
+        const done = document.querySelector<HTMLElement>('[data-checkin-done]');
+        const form = document.querySelector<HTMLFormElement>('[data-checkin-form]');
+
+        if (!done || !form) return;
+
+        form.noValidate = true;
+        form.addEventListener('submit', event => handleCheckInSubmit(event, form), { signal });
+        again?.addEventListener('click', () => handleCheckInAgain(form, done), { signal });
+    }
+
+    function renderBody(container: HTMLElement, template: HTMLTemplateElement, paragraphs: string[]) {
+        container.replaceChildren();
+
+        paragraphs.forEach((text) => {
+            const fragment = template.content.cloneNode(true) as DocumentFragment;
+            const paragraph = fragment.querySelector('p');
+
+            if (paragraph) paragraph.textContent = text;
+
+            container.append(fragment);
+        });
+    }
+
+    function renderCheckIn(form: HTMLFormElement, session: Session, newsletter: boolean) {
+        const body = document.querySelector<HTMLElement>('[data-mail-body]');
+        const done = document.querySelector<HTMLElement>('[data-checkin-done]');
+        const mail = document.querySelector<HTMLElement>('[data-checkin-mail]');
+        const template = document.querySelector<HTMLTemplateElement>('[data-mail-template]');
+
+        if (!body || !done || !mail || !template) return;
+
+        const message = composeOnboardingEmail({
+            email: session.email,
+            eventName: mail.dataset.event,
+            prods: session.prods,
+            token: createOnboardingToken(session.email),
+        });
+
+        const action = document.querySelector<HTMLAnchorElement>('[data-mail-action]');
+
+        form.setAttribute('hidden', '');
+        done.removeAttribute('hidden');
+
+        setText(document.querySelector<HTMLElement>('[data-checkin-email]'), session.email);
+        setText(document.querySelector<HTMLElement>('[data-checkin-prods]'), session.prods === 1 ? '1 Prod' : `${session.prods} Prods`);
+        setText(document.querySelector<HTMLElement>('[data-checkin-newsletter]'), newsletter ? 'You are on the seasonal newsletter too.' : 'You are not on the newsletter.');
+        setText(document.querySelector<HTMLElement>('[data-mail-from]'), message.from);
+        setText(document.querySelector<HTMLElement>('[data-mail-preheader]'), message.preheader);
+        setText(document.querySelector<HTMLElement>('[data-mail-reply]'), message.replyTo);
+        setText(document.querySelector<HTMLElement>('[data-mail-subject]'), message.subject);
+        setText(document.querySelector<HTMLElement>('[data-mail-to]'), message.to);
+        renderBody(body, template, message.body);
+
+        if (action) {
+            action.href = message.actionHref;
+            action.textContent = message.actionLabel;
+        }
+
+        document.querySelector<HTMLElement>('[data-checkin-heading]')?.focus();
+    }
+
+    registerPageScript(initCheckInForm);
+</script>

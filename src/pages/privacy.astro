@@ -1,11 +1,12 @@
 ---
 import Layout from '@/Layout.astro';
-import LegalDoc from '@sections/LegalDoc.astro';
+import LegalDoc from '@sections/legal/Doc.astro';
+import { brandTitle } from '@lib/brand';
 ---
 
 <Layout
-    description="How the Austin Producer Alliance site handles data: no cookies, no trackers, demonstration forms that store nothing, and a cart that never leaves your browser."
-    title="Privacy Policy &mdash; Austin Producer Alliance"
+    description="How the Austin Producer Alliance site handles data: nothing collected server-side, no cookies, no analytics, and a plain inventory of browser storage."
+    title={brandTitle('Privacy Policy')}
 >
     <LegalDoc kind="privacy" />
 </Layout>

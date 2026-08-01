@@ -1,11 +1,20 @@
 ---
-import BashFeature from '@sections/BashFeature.astro';
+import BashArchive from '@sections/bash/Archive.astro';
+import BashDownloads from '@sections/bash/Downloads.astro';
+import BashFeature from '@sections/bash/Feature.astro';
+import BashSubmissions from '@sections/bash/Submissions.astro';
+import BashUpcoming from '@sections/bash/Upcoming.astro';
 import Layout from '@/Layout.astro';
+import { brandTitle } from '@lib/brand';
 ---
 
 <Layout
-    description="The Producer Bash is Austin Producer Alliance's annual two-day flagship event &mdash; recaps and stats from editions V, VI, and VII, with the next edition TBA."
-    title="The Bash &mdash; Austin Producer Alliance"
+    description={'The Producer Bash is the Austin Producer Alliance\'s bimonthly production sprint \u2014 one prompt, one afternoon on the clock, and a final showdown to close it out.'}
+    title={brandTitle('Producer Bash')}
 >
     <BashFeature />
+    <BashDownloads />
+    <BashSubmissions />
+    <BashUpcoming />
+    <BashArchive />
 </Layout>

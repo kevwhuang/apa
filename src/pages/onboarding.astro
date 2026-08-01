@@ -1,0 +1,13 @@
+---
+import Layout from '@/Layout.astro';
+import OnboardingFlow from '@sections/onboarding/Flow.astro';
+import { brandTitle } from '@lib/brand';
+---
+
+<Layout
+    description={'Finish your Austin Producer Alliance profile \u2014 this page opens from the link in your welcome email.'}
+    noindex
+    title={brandTitle('Finish your profile')}
+>
+    <OnboardingFlow />
+</Layout>

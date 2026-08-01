@@ -1,0 +1,239 @@
+---
+import IconChevron from '@components/icons/Chevron.astro';
+import IconUser from '@components/icons/User.astro';
+---
+
+<div class="account">
+    <a
+        class="account__out"
+        href="/sign-in"
+    >
+        Sign in
+    </a>
+    <div class="account__in">
+        <button
+            id="account-trigger"
+            class="account__toggle"
+            aria-controls="account-menu"
+            aria-expanded="false"
+            data-nav-trigger
+            type="button"
+        >
+            <IconUser />
+            <span
+                class="sr-only"
+                data-account-name
+            >
+                Account
+            </span>
+            <IconChevron />
+        </button>
+        <ul
+            id="account-menu"
+            class="account__menu list-none"
+            aria-labelledby="account-trigger"
+            data-nav-menu
+            hidden
+        >
+            <li
+                data-account-onboarding
+                hidden
+            >
+                <a
+                    class="account__item"
+                    data-account-onboarding-link
+                    href="/onboarding"
+                >
+                    Finish your profile
+                </a>
+            </li>
+            <li>
+                <span
+                    class="account__balance"
+                    data-account-prods
+                >
+                    Prods
+                </span>
+            </li>
+            <li>
+                <button
+                    class="account__item"
+                    data-account-signout
+                    type="button"
+                >
+                    Sign out
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<style>
+    .account {
+        position: relative;
+    }
+
+    .account__balance {
+        color: var(--color-ink-muted);
+        display: block;
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        padding: var(--space-2xs) var(--space-sm);
+        text-transform: uppercase;
+    }
+
+    .account__in {
+        display: none;
+    }
+
+    .account__item {
+        align-items: center;
+        display: flex;
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        letter-spacing: 0.04em;
+        min-height: 50px;
+        padding-inline: var(--space-sm);
+        text-transform: uppercase;
+        transition:
+            background var(--duration-fast) var(--motion-ease-ui),
+            color var(--duration-fast) var(--motion-ease-ui);
+        white-space: nowrap;
+        width: 100%;
+    }
+
+    .account__item:hover,
+    .account__item:focus-visible {
+        background: var(--color-ink);
+        color: var(--color-surface);
+    }
+
+    .account__menu {
+        background: var(--color-surface-raised);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--lift) var(--lift) 0 0 var(--color-ink);
+        display: flex;
+        flex-direction: column;
+        inset: calc(100% + 6px) 0 auto auto;
+        min-width: 220px;
+        padding-bottom: var(--space-3xs);
+        position: absolute;
+        z-index: var(--z-header);
+    }
+
+    .account__menu::before {
+        background: var(--color-accent);
+        content: '';
+        height: 4px;
+        margin-bottom: var(--space-3xs);
+    }
+
+    .account__menu li + li {
+        border-top: 1px solid var(--color-ink-20);
+    }
+
+    .account__menu li[hidden] + li {
+        border-top: 0;
+    }
+
+    .account__out {
+        align-items: center;
+        display: inline-flex;
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        letter-spacing: 0.04em;
+        min-height: 50px;
+        padding-inline: var(--space-xs);
+        text-transform: uppercase;
+        transition: color var(--duration-fast) var(--motion-ease-ui);
+        white-space: nowrap;
+    }
+
+    .account__out:hover {
+        color: var(--color-accent-deep);
+    }
+
+    .account__toggle {
+        align-items: center;
+        display: flex;
+        gap: 2px;
+        height: 50px;
+        justify-content: center;
+        transition: color var(--duration-fast) var(--motion-ease-ui);
+        width: 50px;
+    }
+
+    .account__toggle :global(svg:last-of-type) {
+        transition: rotate var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .account__toggle:hover {
+        color: var(--color-accent-deep);
+    }
+
+    .account__toggle[aria-expanded='true'] {
+        color: var(--color-accent-deep);
+    }
+
+    .account__toggle[aria-expanded='true'] :global(svg:last-of-type) {
+        rotate: 180deg;
+    }
+
+    :global([data-session='in']) .account__in {
+        display: block;
+    }
+
+    :global([data-session='in']) .account__out {
+        display: none;
+    }
+</style>
+
+<script>
+    import { navigate } from 'astro:transitions/client';
+
+    import { endSession, getSession, onSessionChange } from '@lib/session';
+    import { getOnboardingHref } from '@lib/onboarding';
+    import { registerPageScript, setPending } from '@lib/utils';
+
+    let unsubscribe: (() => void) | undefined;
+
+    async function handleSignOut(button: HTMLButtonElement) {
+        setPending(button, true);
+
+        await endSession();
+        await navigate('/');
+    }
+
+    function initAccount(signal: AbortSignal) {
+        unsubscribe?.();
+        unsubscribe = onSessionChange(render);
+        signal.addEventListener('abort', () => unsubscribe?.(), { once: true });
+        render();
+
+        const signOut = document.querySelector<HTMLButtonElement>('[data-account-signout]');
+
+        signOut?.addEventListener('click', () => void handleSignOut(signOut), { signal });
+    }
+
+    function render() {
+        const balance = document.querySelector<HTMLElement>('[data-account-prods]');
+        const link = document.querySelector<HTMLAnchorElement>('[data-account-onboarding-link]');
+        const name = document.querySelector<HTMLElement>('[data-account-name]');
+        const onboarding = document.querySelector<HTMLElement>('[data-account-onboarding]');
+        const session = getSession();
+
+        document.documentElement.dataset.session = session ? 'in' : 'out';
+
+        if (!balance || !link || !name || !onboarding) return;
+
+        const label = session?.displayName || session?.username || session?.email || 'Account';
+
+        balance.textContent = `${session?.prods ?? 0} Prods`;
+        name.textContent = `Account, signed in as ${label}`;
+        onboarding.hidden = !session || session.onboarded;
+
+        if (session) link.href = getOnboardingHref(session.email);
+    }
+
+    registerPageScript(initAccount);
+</script>

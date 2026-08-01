@@ -1,0 +1,472 @@
+---
+import IconUpload from '@components/icons/Upload.astro';
+import SectionHead from '@components/shared/SectionHead.astro';
+import { UPLOAD } from '@lib/constants';
+import { formatBytes } from '@lib/utils';
+
+const extensions = UPLOAD.extensions.map(extension => extension.toUpperCase()).join(', ');
+---
+
+<section
+    class="stage stage--assembly stage--tight border-b-2 border-ink"
+    aria-labelledby="feedback-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-4xl tracking-tight"
+            eyebrow="Track feedback / Every assembly"
+            headingId="feedback-title"
+        >
+            Put a track on the list
+        </SectionHead>
+        <div class="grid grid-cols-1 gap-12 md:grid-cols-[1fr_1.4fr]">
+            <div class="flex flex-col gap-4">
+                <p class="text-base text-ink-muted">
+                    Every assembly holds space for work in progress. Put a track on the list and
+                    it gets played out loud at the next one, then talked through in the room while
+                    it is still ringing.
+                </p>
+                <p class="text-smd text-ink-muted">
+                    A streaming or download link works, and so does a bounce straight out of your
+                    session. Unfinished is fine &mdash; rough mixes get the most useful
+                    conversation.
+                </p>
+                <p class="text-sm text-ink-subtle">
+                    The list lives in this browser, so bring the same link or bounce with you on
+                    the night.
+                </p>
+            </div>
+            <div class="flex flex-col gap-5">
+                <div
+                    class="flex flex-wrap gap-4"
+                    aria-label="How to hand over your track"
+                    role="group"
+                >
+                    <button
+                        class="chip feedback__mode is-active active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
+                        aria-controls="feedback-panel-link"
+                        aria-pressed="true"
+                        data-mode="link"
+                        type="button"
+                    >
+                        Paste a link
+                    </button>
+                    <button
+                        class="chip feedback__mode active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
+                        aria-controls="feedback-panel-file"
+                        aria-pressed="false"
+                        data-mode="file"
+                        type="button"
+                    >
+                        Drop a file
+                    </button>
+                </div>
+                <form
+                    id="feedback-panel-link"
+                    class="flex flex-col gap-3"
+                    data-feedback-panel="link"
+                >
+                    <label class="flex flex-col gap-2">
+                        <span class="label text-ink-muted">Track link</span>
+                        <input
+                            id="feedback-link"
+                            class="h-[50px] w-full px-4 border-2 border-ink bg-transparent font-mono text-sm"
+                            aria-describedby="feedback-link-help feedback-link-error"
+                            aria-invalid="false"
+                            autocomplete="off"
+                            name="link"
+                            placeholder="https://soundcloud.com/you/rough-mix"
+                            spellcheck="false"
+                            type="url"
+                        />
+                    </label>
+                    <p
+                        id="feedback-link-help"
+                        class="text-sm text-ink-muted"
+                    >
+                        SoundCloud, Bandcamp, Dropbox, Drive &mdash; anywhere the room can press
+                        play.
+                    </p>
+                    <p
+                        id="feedback-link-error"
+                        class="action-text text-accent-deep"
+                        data-link-error
+                        hidden
+                    />
+                    <button
+                        class="btn btn--primary self-start"
+                        type="submit"
+                    >
+                        Queue the link
+                    </button>
+                </form>
+                <div
+                    id="feedback-panel-file"
+                    data-feedback-panel="file"
+                    hidden
+                >
+                    <label
+                        class="dropzone slab slab--card flex flex-col items-center justify-center gap-3 text-center"
+                        data-dropzone
+                        for="feedback-input"
+                    >
+                        <IconUpload />
+                        <span class="font-extrabold font-sans text-2xl tracking-tight">
+                            Drop your bounce here
+                        </span>
+                        <span class="label text-ink-muted">or choose a file</span>
+                        <input
+                            id="feedback-input"
+                            class="dropzone__input sr-only"
+                            accept={UPLOAD.acceptAttribute}
+                            aria-describedby="feedback-file-help"
+                            data-dropzone-input
+                            multiple
+                            name="feedback"
+                            type="file"
+                        />
+                    </label>
+                    <p
+                        id="feedback-file-help"
+                        class="mt-3 text-sm text-ink-muted"
+                        data-placeholder
+                    >
+                        {extensions}. Up to {formatBytes(UPLOAD.maxFileBytes)} each; the list
+                        holds {UPLOAD.maxFiles} tracks, links included.
+                    </p>
+                </div>
+                <ol
+                    class="feedback__list list-none"
+                    aria-label="Queued for the next assembly"
+                    data-feedback-list
+                />
+                <p
+                    class="sr-only"
+                    aria-live="polite"
+                    data-feedback-status
+                />
+            </div>
+        </div>
+    </div>
+    <template data-feedback-row-link>
+        <li class="slab slab--card flex flex-col gap-2">
+            <div class="flex flex-wrap items-baseline justify-between gap-3">
+                <p class="label px-2 py-1 bg-ink text-ink-inverse">Link</p>
+                <p
+                    class="label text-ink-muted"
+                    data-row-host
+                />
+            </div>
+            <a
+                class="feedback__href hover:text-accent-deep font-mono text-sm underline underline-offset-4 transition-colors"
+                data-row-href
+                href="/assembly"
+                rel="noopener noreferrer"
+                target="_blank"
+            >
+                <span data-row-label>Queued link</span>
+                <span class="sr-only"> (opens in a new tab)</span>
+            </a>
+            <div class="flex justify-end">
+                <button
+                    class="action-text hover:text-accent-deep flex items-center min-h-[50px] px-1 text-ink-muted transition-colors"
+                    data-row-remove
+                    type="button"
+                >
+                    Remove
+                </button>
+            </div>
+        </li>
+    </template>
+    <template data-feedback-row-file>
+        <li class="slab slab--card flex flex-col gap-3">
+            <div class="flex flex-wrap items-baseline justify-between gap-3">
+                <div class="flex flex-wrap items-baseline gap-3">
+                    <p class="label px-2 py-1 bg-ink text-ink-inverse">File</p>
+                    <p
+                        class="font-bold font-sans wrap-break-word"
+                        data-row-name
+                    />
+                </div>
+                <p
+                    class="label text-ink-muted"
+                    data-row-meta
+                />
+            </div>
+            <canvas
+                class="feedback__wave"
+                aria-hidden="true"
+                data-row-canvas
+                height="72"
+                hidden
+                width="640"
+            />
+            <p
+                class="action-text text-accent-deep"
+                data-row-error
+                hidden
+            />
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <progress
+                    class="feedback__progress"
+                    data-row-progress
+                    max="100"
+                    value="0"
+                />
+                <p
+                    class="label text-ink-subtle"
+                    data-row-percent
+                />
+                <button
+                    class="action-text hover:text-accent-deep flex items-center min-h-[50px] px-1 text-ink-muted transition-colors"
+                    data-row-cancel
+                    type="button"
+                >
+                    Remove
+                </button>
+            </div>
+        </li>
+    </template>
+</section>
+
+<style>
+    .dropzone {
+        --slab-fill: var(--color-surface-sunken);
+        background-image: repeating-linear-gradient(135deg, var(--color-ink-10) 0 6px, transparent 6px 12px);
+        border-style: dashed;
+        min-height: 220px;
+        padding: var(--space-2xl);
+        position: relative;
+        transition: background var(--duration-fast) ease, border-color var(--duration-fast) ease;
+    }
+
+    .dropzone:has(.dropzone__input:focus-visible) {
+        border-color: var(--color-accent-deep);
+        outline: 2px solid var(--color-accent-deep);
+        outline-offset: 2px;
+    }
+
+    .dropzone:hover {
+        border-color: var(--color-accent-deep);
+    }
+
+    .dropzone.is-dragging {
+        --slab-fill: var(--color-surface-raised);
+        border-color: var(--color-accent-deep);
+        border-style: solid;
+    }
+
+    .dropzone__input {
+        clip-path: inset(50%);
+        height: 100%;
+        inset: 0;
+        margin: 0;
+        width: 100%;
+    }
+
+    .feedback__href {
+        align-items: center;
+        display: flex;
+        min-height: 50px;
+        overflow-wrap: anywhere;
+    }
+
+    .feedback__list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+
+    .feedback__list:empty {
+        display: none;
+    }
+
+    .feedback__mode {
+        height: 50px;
+    }
+
+    .feedback__progress {
+        accent-color: var(--color-accent-deep);
+        flex: 1 1 140px;
+        height: 12px;
+        min-width: 0;
+    }
+
+    .feedback__wave {
+        color: var(--color-accent-deep);
+        display: block;
+        height: 72px;
+        max-width: 100%;
+        width: 100%;
+    }
+</style>
+
+<script>
+    import { UPLOAD } from '@lib/constants';
+    import { createDropzone, nextFocusTarget } from '@lib/dropzone';
+    import { parseTrackLink } from '@lib/assembly-feedback';
+    import { registerPageScript, rovingFocus, setMessage, setText } from '@lib/utils';
+
+    import type { TrackLink } from '@lib/assembly-feedback';
+
+    type FeedbackMode = 'file' | 'link';
+
+    interface QueuedLink {
+        link: TrackLink;
+        row: HTMLElement;
+    }
+
+    let linkQueue: QueuedLink[] = [];
+    let queuedFiles = 0;
+
+    function announce(message: string) {
+        setText(document.querySelector('[data-feedback-status]'), message);
+    }
+
+    function capacity() {
+        return UPLOAD.maxFiles - queuedFiles - linkQueue.length;
+    }
+
+    function clearLinkError(input: HTMLInputElement) {
+        input.setAttribute('aria-invalid', 'false');
+        setMessage(document.querySelector<HTMLElement>('[data-link-error]'), '');
+    }
+
+    function describeIntake(accepted: number, skipped: number) {
+        const noun = accepted === 1 ? 'file' : 'files';
+
+        return skipped > 0
+            ? `${accepted} ${noun} queued \u2014 ${skipped} skipped, the list holds ${UPLOAD.maxFiles}.`
+            : `${accepted} ${noun} queued for the next assembly.`;
+    }
+
+    function handleLinkRemove(link: TrackLink, row: HTMLElement) {
+        const target = nextFocusTarget(row, '#feedback-link');
+
+        linkQueue = linkQueue.filter(item => item.link.id !== link.id);
+        row.remove();
+        target?.focus();
+        announce(`${link.host} link removed.`);
+    }
+
+    function handleLinkSubmit(event: SubmitEvent, form: HTMLFormElement, input: HTMLInputElement, list: HTMLElement, signal: AbortSignal) {
+        event.preventDefault();
+
+        if (capacity() <= 0) {
+            setLinkError(input, `The list is full \u2014 ${UPLOAD.maxFiles} tracks per assembly.`);
+
+            return;
+        }
+
+        const parsed = parseTrackLink(input.value);
+
+        if (!parsed.ok) {
+            setLinkError(input, parsed.message);
+
+            return;
+        }
+
+        if (linkQueue.some(item => item.link.href === parsed.link.href)) {
+            setLinkError(input, 'That link is already on the list.');
+
+            return;
+        }
+
+        const row = renderLinkRow(parsed.link, list, signal);
+
+        if (!row) return;
+
+        linkQueue.push({ link: parsed.link, row });
+        clearLinkError(input);
+        form.reset();
+        input.focus();
+        announce(`${parsed.link.host} link queued for the next assembly.`);
+    }
+
+    function initAssemblyFeedback(signal: AbortSignal) {
+        const form = document.querySelector<HTMLFormElement>('[data-feedback-panel="link"]');
+        const linkInput = document.querySelector<HTMLInputElement>('#feedback-link');
+        const list = document.querySelector<HTMLElement>('[data-feedback-list]');
+        const modes = document.querySelectorAll<HTMLButtonElement>('.feedback__mode');
+
+        if (!form || !linkInput || !list) return;
+
+        linkQueue = [];
+        queuedFiles = 0;
+        setMode('link');
+
+        createDropzone({
+            capacity,
+            messages: {
+                added: describeIntake,
+                full: () => `The list is full \u2014 ${UPLOAD.maxFiles} tracks per assembly.`,
+            },
+            onQueueChange: (entries) => {
+                queuedFiles = entries.length;
+            },
+            selectors: {
+                list: '[data-feedback-list]',
+                row: '[data-feedback-row-file]',
+                status: '[data-feedback-status]',
+            },
+            signal,
+        });
+
+        form.noValidate = true;
+        form.addEventListener('submit', event => handleLinkSubmit(event, form, linkInput, list, signal), { signal });
+        linkInput.addEventListener('input', () => clearLinkError(linkInput), { signal });
+        rovingFocus(modes, signal);
+
+        modes.forEach((button) => {
+            button.addEventListener('click', () => setMode(button.dataset.mode === 'file' ? 'file' : 'link'), { signal });
+        });
+    }
+
+    function renderLinkRow(link: TrackLink, list: HTMLElement, signal: AbortSignal) {
+        const template = document.querySelector<HTMLTemplateElement>('[data-feedback-row-link]');
+
+        if (!template) return null;
+
+        const fragment = template.content.cloneNode(true) as DocumentFragment;
+        const row = fragment.querySelector<HTMLElement>('li');
+
+        if (!row) return null;
+
+        const anchor = row.querySelector<HTMLAnchorElement>('[data-row-href]');
+        const remove = row.querySelector<HTMLButtonElement>('[data-row-remove]');
+
+        setText(row.querySelector('[data-row-host]'), link.host);
+
+        if (anchor) {
+            anchor.href = link.href;
+            setText(anchor.querySelector('[data-row-label]'), link.href);
+        }
+
+        remove?.setAttribute('aria-label', `Remove the ${link.host} link`);
+        remove?.addEventListener('click', () => handleLinkRemove(link, row), { signal });
+        list.append(fragment);
+
+        return row;
+    }
+
+    function setLinkError(input: HTMLInputElement, message: string) {
+        input.setAttribute('aria-invalid', 'true');
+        setMessage(document.querySelector<HTMLElement>('[data-link-error]'), message);
+        announce(message);
+    }
+
+    function setMode(next: FeedbackMode) {
+        document.querySelectorAll<HTMLButtonElement>('.feedback__mode').forEach((button) => {
+            const on = button.dataset.mode === next;
+
+            button.classList.toggle('is-active', on);
+            button.setAttribute('aria-pressed', String(on));
+        });
+
+        document.querySelectorAll<HTMLElement>('[data-feedback-panel]').forEach((panel) => {
+            panel.toggleAttribute('hidden', panel.dataset.feedbackPanel !== next);
+        });
+    }
+
+    registerPageScript(initAssemblyFeedback);
+</script>

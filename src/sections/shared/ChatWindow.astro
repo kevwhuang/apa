@@ -1,0 +1,530 @@
+---
+import { getCollection } from 'astro:content';
+
+import IconChat from '@components/icons/Chat.astro';
+import IconClose from '@components/icons/Close.astro';
+import { CHAT_OPENERS } from '@lib/chat';
+
+const producers = await getCollection('producers');
+
+const threads = producers.slice(0, CHAT_OPENERS.length).map((producer, index) => ({
+    handle: producer.data.handle,
+    id: producer.id,
+    name: producer.data.name,
+    opener: CHAT_OPENERS[index],
+}));
+---
+
+<aside
+    class="chat"
+    aria-label="Member chat"
+    transition:persist
+>
+    <button
+        class="chat__launcher"
+        aria-controls="chat-window"
+        aria-expanded="false"
+        data-chat-launcher
+        type="button"
+    >
+        <IconChat />
+        <span class="sr-only">Open member chat</span>
+    </button>
+    <dialog
+        id="chat-window"
+        class="chat__window"
+        aria-labelledby="chat-title"
+        data-chat-window
+    >
+        <div class="chat__head">
+            <h2
+                id="chat-title"
+                class="label chat__eyebrow"
+            >
+                Messages
+            </h2>
+            <button
+                class="chat__close"
+                data-chat-close
+                type="button"
+            >
+                <IconClose />
+                <span class="sr-only">Close member chat</span>
+            </button>
+        </div>
+        <div class="chat__stack">
+            <div
+                class="chat__body"
+                data-chat-body
+            >
+                <ul class="chat__threads list-none">
+                    {threads.map(thread => (
+                        <li>
+                            <button
+                                class="chat__thread"
+                                aria-pressed="false"
+                                data-chat-opener={thread.opener}
+                                data-chat-thread={thread.id}
+                                type="button"
+                            >
+                                {thread.name}
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+                <ol
+                    class="chat__log list-none"
+                    aria-live="polite"
+                    data-chat-log
+                />
+                <form
+                    class="chat__form"
+                    data-chat-form
+                >
+                    <input
+                        id="chat-message"
+                        class="chat__field"
+                        aria-label="Message"
+                        autocomplete="off"
+                        data-chat-field
+                        name="message"
+                        placeholder="Write a message"
+                        type="text"
+                    />
+                    <button
+                        class="btn btn--accent chat__send"
+                        type="submit"
+                    >
+                        Send
+                    </button>
+                </form>
+                <p class="chat__note">Messages live in this browser only.</p>
+            </div>
+            <div
+                class="chat__guard"
+                data-chat-guard
+            >
+                <div class="chat__guard-card">
+                    <p class="label chat__guard-eyebrow">Members only</p>
+                    <p class="chat__lede">Member messaging is for signed-in producers.</p>
+                    <a
+                        class="btn btn--accent chat__signin"
+                        data-chat-signin
+                        href="/sign-in"
+                    >
+                        Sign in
+                    </a>
+                </div>
+            </div>
+        </div>
+    </dialog>
+</aside>
+
+<style>
+    .chat {
+        display: none;
+    }
+
+    .chat.is-ready {
+        display: block;
+    }
+
+    .chat__body {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-height: 0;
+        transition: opacity var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .chat__body--locked {
+        filter: grayscale(1);
+        opacity: 0.4;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    .chat__bubble {
+        border: 1px solid var(--color-ink-20);
+        font-size: var(--text-sm);
+        padding: var(--space-2xs) var(--space-xs);
+    }
+
+    .chat__bubble--you {
+        background: var(--color-accent);
+        border-color: var(--color-accent);
+        color: var(--color-ink);
+        margin-inline-start: var(--space-2xl);
+    }
+
+    .chat__close {
+        align-items: center;
+        display: inline-flex;
+        height: 50px;
+        justify-content: center;
+        transition: color var(--duration-fast) var(--motion-ease-ui);
+        width: 50px;
+    }
+
+    .chat__close:hover {
+        color: var(--color-accent-deep);
+    }
+
+    .chat__eyebrow {
+        color: var(--color-accent-deep);
+        padding-left: var(--space-sm);
+    }
+
+    .chat__field {
+        border: 2px solid var(--color-ink);
+        flex: 1;
+        font-size: var(--text-sm);
+        min-height: 50px;
+        min-width: 0;
+        padding-inline: var(--space-2xs);
+    }
+
+    .chat__form {
+        border-top: 1px solid var(--color-ink-20);
+        display: flex;
+        flex-shrink: 0;
+        gap: var(--space-2xs);
+        padding: var(--space-sm);
+    }
+
+    .chat__guard {
+        align-items: center;
+        display: flex;
+        inset: 0;
+        justify-content: center;
+        padding: var(--space-sm);
+        position: absolute;
+    }
+
+    .chat__guard-card {
+        background: var(--color-surface-raised);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--lift) var(--lift) 0 0 var(--color-ink);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+        padding: var(--space-sm);
+        width: min(260px, 100%);
+    }
+
+    .chat__guard-eyebrow {
+        color: var(--color-accent-deep);
+    }
+
+    .chat__head {
+        align-items: center;
+        border-bottom: 1px solid var(--color-ink-20);
+        display: flex;
+        flex-shrink: 0;
+        justify-content: space-between;
+    }
+
+    .chat__launcher {
+        align-items: center;
+        background: var(--color-surface-inverse);
+        border: 2px solid var(--color-ink);
+        border-right: 0;
+        color: var(--color-ink-inverse);
+        display: inline-flex;
+        height: var(--launcher-size);
+        inset: auto 0 var(--space-md) auto;
+        justify-content: center;
+        position: fixed;
+        transition: background var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui);
+        width: var(--launcher-size);
+        z-index: var(--z-drawer);
+    }
+
+    .chat__launcher:hover {
+        background: var(--color-accent);
+        color: var(--color-ink);
+    }
+
+    .chat__lede {
+        font-size: var(--text-sm);
+    }
+
+    .chat__log {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: var(--space-2xs);
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: var(--space-sm);
+    }
+
+    .chat__note {
+        border-top: 1px solid var(--color-ink-20);
+        color: var(--color-ink-muted);
+        flex-shrink: 0;
+        font-size: var(--text-2xs);
+        padding: var(--space-2xs) var(--space-sm) var(--space-sm);
+    }
+
+    .chat__send {
+        height: 50px;
+    }
+
+    .chat__signin {
+        height: 50px;
+    }
+
+    .chat__stack {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-height: 0;
+        position: relative;
+    }
+
+    .chat__thread {
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        min-height: 50px;
+        padding-inline: var(--space-2xs);
+        text-transform: uppercase;
+        transition: color var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .chat__thread:hover {
+        color: var(--color-accent-deep);
+    }
+
+    .chat__thread[aria-pressed='true'] {
+        color: var(--color-accent-deep);
+        font-weight: 700;
+    }
+
+    .chat__threads {
+        border-bottom: 1px solid var(--color-ink-20);
+        display: flex;
+        flex-shrink: 0;
+        flex-wrap: wrap;
+        gap: var(--space-2xs);
+        padding-inline: var(--space-sm);
+    }
+
+    .chat__window {
+        background: var(--color-surface-raised);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--lift) var(--lift) 0 0 var(--color-ink);
+        color: var(--color-ink);
+        height: min(70vh, 560px);
+        inset: auto var(--launcher-rail) var(--space-md) auto;
+        overflow: hidden;
+        padding: 0;
+        position: fixed;
+        width: min(340px, calc(100vw - var(--launcher-rail) - 2 * var(--space-md)));
+        z-index: var(--z-drawer);
+    }
+
+    .chat__window[open] {
+        display: flex;
+        flex-direction: column;
+    }
+</style>
+
+<script>
+    import { CHAT_PREVIEW, closeChat, getChatState, getMessages, onChatChange, openChat, selectThread, sendChatMessage } from '@lib/chat';
+    import { getSession, onSessionChange } from '@lib/session';
+    import { registerPageScript } from '@lib/utils';
+
+    const LIVE_RESET_DELAY = 200;
+
+    let renderedKey: string | undefined;
+    let unsubscribeChat: (() => void) | undefined;
+    let unsubscribeSession: (() => void) | undefined;
+
+    function activeThread() {
+        const id = getChatState().threadId;
+        const buttons = document.querySelectorAll<HTMLButtonElement>('[data-chat-thread]');
+
+        return Array.from(buttons).find(button => button.dataset.chatThread === id) ?? buttons[0] ?? null;
+    }
+
+    function closeWindow() {
+        const dialog = document.querySelector<HTMLDialogElement>('[data-chat-window]');
+
+        if (dialog?.open) {
+            dialog.close();
+
+            return;
+        }
+
+        handleClose(dialog);
+    }
+
+    function handleClose(dialog: HTMLDialogElement | null) {
+        const active = document.activeElement;
+        const launcher = document.querySelector<HTMLElement>('[data-chat-launcher]');
+        const held = active === null || active === document.body || (dialog?.contains(active) ?? false);
+
+        closeChat();
+        launcher?.setAttribute('aria-expanded', 'false');
+
+        if (held) launcher?.focus();
+    }
+
+    function handleKeydown(event: KeyboardEvent) {
+        if (event.key !== 'Escape') return;
+
+        const dialog = document.querySelector<HTMLDialogElement>('[data-chat-window]');
+
+        if (!dialog?.open) return;
+
+        event.preventDefault();
+        closeWindow();
+    }
+
+    function handleLaunch() {
+        if (getChatState().open) {
+            closeWindow();
+
+            return;
+        }
+
+        openChat();
+        openWindow(true);
+    }
+
+    async function handleSubmit(event: SubmitEvent) {
+        event.preventDefault();
+
+        if (getSession() === null) return;
+
+        const field = document.querySelector<HTMLInputElement>('[data-chat-field]');
+        const thread = activeThread();
+
+        if (!field || !thread?.dataset.chatThread) return;
+
+        const body = field.value;
+
+        field.value = '';
+        await sendChatMessage(thread.dataset.chatThread, body);
+    }
+
+    function handleThreadClick(button: HTMLButtonElement) {
+        if (button.dataset.chatThread) selectThread(button.dataset.chatThread);
+    }
+
+    function initChat(signal: AbortSignal) {
+        const aside = document.querySelector<HTMLElement>('.chat');
+        const dialog = document.querySelector<HTMLDialogElement>('[data-chat-window]');
+        const form = document.querySelector<HTMLFormElement>('[data-chat-form]');
+        const launcher = document.querySelector<HTMLElement>('[data-chat-launcher]');
+
+        if (!aside || !dialog || !form || !launcher) return;
+
+        if ('closedBy' in dialog) dialog.setAttribute('closedby', 'closerequest');
+
+        aside.classList.add('is-ready');
+        unsubscribeChat?.();
+        unsubscribeSession?.();
+        unsubscribeChat = onChatChange(render);
+        unsubscribeSession = onSessionChange(render);
+        signal.addEventListener('abort', teardown, { once: true });
+
+        aside.addEventListener('keydown', handleKeydown, { signal });
+        dialog.addEventListener('close', () => handleClose(dialog), { signal });
+        document.querySelector<HTMLElement>('[data-chat-close]')?.addEventListener('click', closeWindow, { signal });
+        form.addEventListener('submit', event => void handleSubmit(event), { signal });
+        launcher.addEventListener('click', handleLaunch, { signal });
+
+        document.querySelectorAll<HTMLButtonElement>('[data-chat-thread]').forEach((button) => {
+            button.addEventListener('click', () => handleThreadClick(button), { signal });
+        });
+
+        if (getChatState().open) openWindow(false);
+
+        render();
+    }
+
+    function openWindow(moveFocus: boolean) {
+        const dialog = document.querySelector<HTMLDialogElement>('[data-chat-window]');
+        const field = document.querySelector<HTMLInputElement>('[data-chat-field]');
+        const previous = document.activeElement;
+
+        if (!dialog || dialog.open) return;
+
+        dialog.show();
+        document.querySelector<HTMLElement>('[data-chat-launcher]')?.setAttribute('aria-expanded', 'true');
+
+        if (moveFocus) {
+            const target = getSession() !== null
+                ? field
+                : dialog.querySelector<HTMLElement>('[data-chat-signin]');
+
+            (target ?? dialog.querySelector<HTMLElement>('[data-chat-close]'))?.focus();
+
+            return;
+        }
+
+        if (previous instanceof HTMLElement && previous !== document.body) {
+            previous.focus();
+        } else if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+    }
+
+    function render() {
+        const body = document.querySelector<HTMLElement>('[data-chat-body]');
+        const guard = document.querySelector<HTMLElement>('[data-chat-guard]');
+        const log = document.querySelector<HTMLElement>('[data-chat-log]');
+        const signedIn = getSession() !== null;
+        const thread = activeThread();
+
+        if (!body || !guard || !log) return;
+
+        body.classList.toggle('chat__body--locked', !signedIn);
+        body.toggleAttribute('inert', !signedIn);
+        guard.hidden = signedIn;
+
+        document.querySelectorAll<HTMLButtonElement>('[data-chat-thread]').forEach((button) => {
+            button.setAttribute('aria-pressed', String(button === thread));
+        });
+
+        if (!thread?.dataset.chatThread) return;
+
+        const key = `${thread.dataset.chatThread}:${String(signedIn)}`;
+        const messages = signedIn ? getMessages(thread.dataset.chatThread) : CHAT_PREVIEW;
+
+        renderLog(log, key, thread.dataset.chatOpener ?? '', messages);
+    }
+
+    function renderLog(log: HTMLElement, key: string, opener: string, messages: ChatMessage[]) {
+        const entries = [{ author: 'member' as const, body: opener, sentAt: 0 }, ...messages];
+        const stale = renderedKey !== key || !log.children.length || log.children.length > entries.length;
+
+        if (stale) {
+            log.setAttribute('aria-live', 'off');
+            log.replaceChildren();
+            renderedKey = key;
+            window.setTimeout(() => log.setAttribute('aria-live', 'polite'), LIVE_RESET_DELAY);
+        }
+
+        entries.slice(log.children.length).forEach((message) => {
+            const item = document.createElement('li');
+
+            item.className = message.author === 'you' ? 'chat__bubble chat__bubble--you' : 'chat__bubble';
+            item.textContent = message.body;
+            log.append(item);
+        });
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function teardown() {
+        unsubscribeChat?.();
+        unsubscribeSession?.();
+        unsubscribeChat = undefined;
+        unsubscribeSession = undefined;
+    }
+
+    registerPageScript(initChat);
+</script>

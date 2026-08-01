@@ -1,0 +1,228 @@
+---
+import { LINKS, SESSION_TTL_DAYS, SITE_UPDATED, STORAGE } from '@lib/constants';
+import { formatDateOnly } from '@lib/utils';
+
+interface Props {
+    kind: 'privacy' | 'terms';
+}
+
+const SECTIONS: Record<'privacy' | 'terms', { body: string[]; heading: string }[]> = {
+    privacy: [
+        {
+            body: [
+                'Nothing, on our side. This site has no backend and no database \u2014 the interactive features you will find here (the contact form, the store checkout, the sign-in, the member chat, the Producer Bash uploader, the assembly track-feedback uploader, the Sandbox) are working demonstrations that run entirely in your browser. Submitting them does not send, transmit, or store your name, email, message, files, or payment details anywhere. The <a href="/terms">terms of service</a> describe how those demonstrations behave; this page covers what they keep, which is very little and never leaves your device.',
+                'When a form offers to send a message, it composes an ordinary email in your own mail app through a mailto link and shows you exactly what it wrote \u2014 nothing is transmitted unless you press send there, and at that point you are simply emailing us, which the Email section below covers. Files you hand to the Bash submission form, to the assembly track-feedback uploader, or to the Sandbox are read locally to draw the waveforms, meters, and progress readouts you see, then go nowhere.',
+            ],
+            heading: 'What we collect',
+        },
+        {
+            body: [
+                'A few features remember things between pages or visits. They do it with your browser\'s built-in storage, on your device, and none of it is ever transmitted to us or to anyone else. The demo audio player keeps its state in page memory only \u2014 it does not survive a reload.',
+                `Longer-lived storage (localStorage) holds three keys: <code>${STORAGE.adminProds.key}</code>, the operations-console Prods ledger, which never expires on its own; <code>${STORAGE.cart.key}</code>, the contents of your demonstration store cart; and <code>${STORAGE.session.key}</code>, the demo sign-in session, which expires by itself after ${SESSION_TTL_DAYS} days.`,
+                `Per-tab storage (sessionStorage) empties as soon as the tab closes. It holds <code>${STORAGE.bashBoard.key}</code>, the cached Producer Bash submission board; <code>${STORAGE.chat.key}</code>, the demo member chat threads; <code>${STORAGE.onboardingDraft.key}</code>, an in-progress draft of the onboarding questionnaire; and <code>${STORAGE.order.key}</code>, the receipt from your most recent demonstration checkout. Clearing site data in your browser settings wipes every one of these \u2014 there is nothing to ask us to delete, because we hold nothing.`,
+            ],
+            heading: 'Data stored in your browser',
+        },
+        {
+            body: [
+                'None. This site sets no cookies \u2014 not for preferences, not for sessions, not for advertising. There is no cookie banner because there is nothing to consent to.',
+            ],
+            heading: 'Cookies',
+        },
+        {
+            body: [
+                'We run no analytics, no tracking pixels, and no ad networks. Fonts, images, and scripts are served from our own hosting, so pages make no third-party requests, and no script on this site reports your visit to anyone.',
+            ],
+            heading: 'Analytics & tracking',
+        },
+        {
+            body: [
+                'The site is served by Netlify. Like any host, Netlify keeps standard server access logs \u2014 IP address, requested page, timestamp, browser \u2014 as part of operating and securing its network. Those logs live with Netlify, not with us; we do not collect them, enrich them, or use them to identify visitors.',
+                'Netlify\'s own handling of that data is described in its <a href="https://www.netlify.com/privacy/" rel="noopener noreferrer" target="_blank">privacy policy</a>.',
+            ],
+            heading: 'Hosting & server logs',
+        },
+        {
+            body: [
+                `If you write to us at <a href="mailto:${LINKS.email}">${LINKS.email}</a>, we receive your address and whatever you chose to say. We use them to reply and for nothing else \u2014 no lists, no sharing, no automated processing. Ask us to delete a thread and we will.`,
+            ],
+            heading: 'Email',
+        },
+        {
+            body: [
+                `The Alliance organizes on platforms we do not run: RSVPs on <a href="${LINKS.meetup}" rel="noopener noreferrer" target="_blank">Meetup</a>, day-to-day conversation on <a href="${LINKS.discord}" rel="noopener noreferrer" target="_blank">Discord</a>, and recaps on <a href="${LINKS.instagram}" rel="noopener noreferrer" target="_blank">Instagram</a>. Following any of those links takes you off this site and onto that service's own terms and privacy practices \u2014 what they collect there is between you and them.`,
+            ],
+            heading: 'Links to other services',
+        },
+        {
+            body: [
+                'This site is not directed at children under 13, and because nothing is collected here, no personal information about anyone \u2014 child or adult \u2014 is gathered or held. If you believe a child has emailed us personal information, write to us and we will delete it.',
+            ],
+            heading: 'Children',
+        },
+        {
+            body: [
+                'If the site ever gains real infrastructure \u2014 a live store, member accounts, an actual mailing list \u2014 this policy will be rewritten to say precisely what changed, before it ships. The date at the top marks the current version; meaningful revisions will be called out on this page rather than slipped in quietly.',
+            ],
+            heading: 'Changes to this policy',
+        },
+    ],
+    terms: [
+        {
+            body: [
+                'Membership is open to anyone making music in or around Austin, and to anyone in the creative industry who wants to work alongside them. There are no dues and no auditions \u2014 show up, introduce yourself, make things. Membership is personal and non-transferable.',
+                'One standing rule travels with it: treat the room the way you want the scene to be. Harassment, discrimination, and gatekeeping have no home here, in person or in the Discord. Organizers may warn, remove, or ban anyone who makes the community worse for everyone else, and their call is final.',
+            ],
+            heading: 'Membership & conduct',
+        },
+        {
+            body: [
+                `Events happen in rooms our venue partners lend us. Attending means following the house rules of whichever space we are in, respecting the schedule and the people running it, and leaving the room as we found it. RSVPs run through <a href="${LINKS.meetup}" rel="noopener noreferrer" target="_blank">Meetup</a> and some rooms cap attendance \u2014 an RSVP is a plan, not a contract, but tell us if yours changes. Repeated disregard for house rules can end in removal from an event or from future ones.`,
+                'We document what we do. Most events are photographed and some are filmed for recaps on our channels, and by attending you consent to appearing in that coverage. If you would rather not, tell an organizer at check-in and we will keep you out of frame; if a published photo of you needs to come down, email us and it will.',
+            ],
+            heading: 'Events & photography',
+        },
+        {
+            body: [
+                'The <a href="/bash">Producer Bash</a> runs on submitted work \u2014 samples contributed to the pack and tracks built from it. You keep your work: submitting transfers no ownership of anything, and every right in your samples and tracks stays with you.',
+                'What you grant the Alliance is only what the event needs \u2014 permission to play submissions at the Bash, to feature them in recaps, and to include them, with credit, in the community compilation when a round produces one. Submit only material you have the rights to share; if a submission turns out to contain uncleared third-party work, we will pull it from anything we have published, and the clearance stays your responsibility.',
+            ],
+            heading: 'Producer Bash submissions',
+        },
+        {
+            body: [
+                'Assemblies set aside time for tracks to be heard, and feedback sessions are the heart of them. Feedback is opinion, offered producer to producer to make the work better \u2014 it is not professional, legal, or A&R advice, and what you do with it is your call.',
+                'Playing a work-in-progress for the room is not publication and gives nobody in it any rights. What gets shared in session stays with its maker, and recording someone else\'s unreleased work without asking is the fastest way to test the conduct section above.',
+            ],
+            heading: 'Track feedback',
+        },
+        {
+            body: [
+                'The store is currently a demonstration. Checkout accepts the test card numbers it suggests and nothing else, no payment is collected or processed, and no order placed today obligates anyone to anything. Your cart and order confirmation exist only in your browser \u2014 the <a href="/privacy#data-stored-in-your-browser">privacy policy</a> lists exactly where.',
+                'When real ordering arrives it will work the way the Alliance does: order online, then collect in person at an <a href="/assembly">assembly</a>. These terms will be updated before any real money moves.',
+            ],
+            heading: 'Store & orders',
+        },
+        {
+            body: [
+                'Prods are the Alliance\'s participation currency: members earn them for showing up and contributing \u2014 attending meets, submitting tracks, giving talks, bringing friends \u2014 and each Prod is worth $1.00 of credit toward items in our inventory, redeemed in person.',
+                'Prods are a community reward, not money. They have no cash value and cannot be bought, sold, or transferred, and the program \u2014 earn rates, inventory, and all \u2014 may change or wind down as the Alliance evolves. The current rules are set out in the Prods document in our <a href="/resources">resources library</a>, which is still being prepared.',
+            ],
+            heading: 'Prods',
+        },
+        {
+            body: [
+                'Use the site as a visitor, not a target. Do not probe or disrupt it, harvest it for spam lists, impersonate the Alliance or its members, or present its demonstration surfaces \u2014 checkout, sign-in, chat \u2014 to anyone as the real thing. That is the whole list.',
+            ],
+            heading: 'Acceptable use',
+        },
+        {
+            body: [
+                'The Alliance name, the tick mark, and the writing and design of this site belong to the Austin Producer Alliance. Press and partners are welcome to the brand assets in our <a href="/resources">resources library</a>; ask before reusing anything else.',
+                'Producer work that appears here \u2014 tracks, titles, names \u2014 belongs to the producers who made it and is shown with their permission. Nothing on this site grants you a license to any of it.',
+            ],
+            heading: 'Intellectual property',
+        },
+        {
+            body: [
+                'This site and everything the Alliance runs are provided as-is by a volunteer community organization, without warranties of any kind. We do our best, and that is the whole promise.',
+                'To the fullest extent the law allows, the Alliance and its organizers are not liable for indirect or consequential damages arising from the site, its demonstrations, or attendance at events. Nothing here limits liability that cannot lawfully be limited.',
+            ],
+            heading: 'Disclaimer & liability',
+        },
+        {
+            body: [
+                'These terms will grow as the Alliance does \u2014 a live store, the Prods rollout, and new programs will each land here before they launch. The date at the top marks the current version, and continuing to use the site or attend events after a change means the new terms apply.',
+            ],
+            heading: 'Changes to these terms',
+        },
+    ],
+};
+
+function slugify(heading: string) {
+    return heading
+        .toLowerCase()
+        .replace(/&/g, 'and')
+        .replace(/[^a-z\d]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
+const { kind } = Astro.props;
+
+const crossLink = kind === 'privacy'
+    ? { href: '/terms', label: 'terms of service' }
+    : { href: '/privacy', label: 'privacy policy' };
+
+const title = kind === 'privacy' ? 'Privacy policy' : 'Terms of service';
+
+const updated = new Date(SITE_UPDATED);
+---
+
+<section
+    class="stage stage--prose stage--tight"
+    aria-labelledby={`${kind}-title`}
+>
+    <div class="wrap-break-word">
+        <p
+            class="label mb-4 text-accent-deep"
+            data-motion="stamp"
+        >
+            Last updated / <time datetime={SITE_UPDATED}>{formatDateOnly(updated)}</time>
+        </p>
+        <h1
+            id={`${kind}-title`}
+            class="mb-10 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em]"
+            data-motion="strike"
+        >
+            {title}
+        </h1>
+        <div
+            class="legal__body space-y-6 leading-[1.7] text-[16px]"
+            data-motion="rise"
+        >
+            {SECTIONS[kind].map(section => (
+                <>
+                    <h2
+                        id={slugify(section.heading)}
+                        class="first:pt-0 pt-4 font-extrabold font-sans text-2xl tracking-tight"
+                    >
+                        {section.heading}
+                    </h2>
+                    {section.body.map(paragraph => <p set:html={paragraph} />)}
+                </>
+            ))}
+            <h2
+                id="contact"
+                class="first:pt-0 pt-4 font-extrabold font-sans text-2xl tracking-tight"
+            >
+                Contact
+            </h2>
+            <p>
+                Email <a href={`mailto:${LINKS.email}`}>{LINKS.email}</a> with any questions about this document. It pairs with our <a href={crossLink.href}>{crossLink.label}</a>, and together the two are the whole of the paperwork.
+            </p>
+        </div>
+    </div>
+</section>
+
+<style>
+    .legal__body :global(a) {
+        text-decoration-color: var(--color-accent);
+        text-decoration-line: underline;
+        text-decoration-thickness: 2px;
+        text-underline-offset: 4px;
+        transition: color var(--duration-fast) ease;
+    }
+
+    .legal__body :global(a:hover) {
+        color: var(--color-accent-deep);
+    }
+
+    .legal__body :global(code) {
+        background-color: var(--color-surface-sunken);
+        border: 1px solid var(--color-ink-20);
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        padding: 1px 6px;
+        white-space: nowrap;
+    }
+</style>

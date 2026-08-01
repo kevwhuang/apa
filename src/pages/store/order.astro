@@ -1,11 +1,13 @@
 ---
 import Layout from '@/Layout.astro';
-import OrderConfirmation from '@sections/OrderConfirmation.astro';
+import OrderConfirmation from '@sections/store/OrderConfirmation.astro';
+import { brandTitle } from '@lib/brand';
 ---
 
 <Layout
-    description="Demo order confirmation for the Austin Producer Alliance store &mdash; no real order was placed, nothing was charged, and nothing will ship."
-    title="Order Received &mdash; Austin Producer Alliance"
+    description={'Demo order confirmation for the Austin Producer Alliance store \u2014 no real order was placed, nothing was charged, and nothing will ship.'}
+    noindex
+    title={brandTitle('Order Received')}
 >
     <OrderConfirmation />
 </Layout>

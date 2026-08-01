@@ -6,9 +6,9 @@ sizes: []
 colors:
   - { name: Natural, hex: '#d8cdb0' }
 images: [tote-1]
-description: Heavy canvas tote, oversized handles, ink wordmark on one side, ticks on the other. Holds two records and a laptop.
+description: Heavy canvas tote with the ink wordmark on one side and the ticks on the other. Sized for records and a laptop.
 details:
-  - 14 oz natural canvas
-  - 24" handles
-inStock: true
+  - Heavy natural canvas
+  - Oversized handles
+stock: 25
 ---

@@ -1,12 +1,13 @@
 ---
-import ErrorNotFound from '@sections/ErrorNotFound.astro';
+import ErrorNotFound from '@sections/errors/NotFound.astro';
 import Layout from '@/Layout.astro';
+import { brandTitle } from '@lib/brand';
 ---
 
 <Layout
     description="That page isn't on the timeline. Head back to the Austin Producer Alliance home page, browse the events archive, or meet the producer roster."
     noindex
-    title={'Page Not Found \u2014 Austin Producer Alliance'}
+    title={brandTitle('Page Not Found')}
 >
     <ErrorNotFound />
 </Layout>

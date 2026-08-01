@@ -1,0 +1,31 @@
+---
+import PageHead from '@components/shared/PageHead.astro';
+import { getProgram } from '@lib/utils';
+
+const program = getProgram('bash');
+---
+
+<section
+    class="slab--well stage stage--tight border-b-2 border-ink"
+    aria-labelledby="bash-title"
+>
+    <div class="halftone--accent stage__item--full absolute inset-0 pointer-events-none" aria-hidden="true" />
+    <div class="relative">
+        <PageHead
+            class="font-extrabold font-sans leading-[0.85] text-mega tracking-[-0.05em]"
+            eyebrow={`${program.shortName} / ${program.cadence}`}
+            headingId="bash-title"
+            tone="dark"
+        >
+            One prompt.<br />
+            <span class="text-accent">One afternoon.</span><br />
+            One showdown.
+        </PageHead>
+        <p
+            class="max-w-2xl mt-10 leading-relaxed text-lmd text-ink-inverse-muted"
+            data-motion="rise"
+        >
+            {program.summary}
+        </p>
+    </div>
+</section>

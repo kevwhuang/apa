@@ -1,0 +1,28 @@
+---
+interface Props {
+    class?: string;
+    eyebrow: string;
+    eyebrowClass?: string;
+    eyebrowMotion?: 'rule' | 'stamp' | 'strike';
+    headingId: string;
+    tone?: 'dark' | 'light';
+}
+
+const { class: headingClass, eyebrow, eyebrowClass = 'mb-4', eyebrowMotion = 'stamp', headingId, tone = 'light' } = Astro.props;
+---
+
+<div class="page-head">
+    <p
+        class:list={['label', eyebrowClass, tone === 'dark' ? 'text-accent' : 'text-accent-deep']}
+        data-motion={eyebrowMotion}
+    >
+        {eyebrow}
+    </p>
+    <h1
+        id={headingId}
+        class:list={[headingClass]}
+        data-motion="strike"
+    >
+        <slot />
+    </h1>
+</div>

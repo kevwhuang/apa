@@ -1,0 +1,107 @@
+---
+import { getCollection } from 'astro:content';
+
+import SectionHead from '@components/shared/SectionHead.astro';
+import { formatDate, formatTimeRange, getProgram } from '@lib/utils';
+
+const program = getProgram('bash');
+
+const editions = await getCollection('bash');
+
+const [next] = editions
+    .filter(edition => edition.data.status === 'upcoming')
+    .sort((a, b) => +a.data.date - +b.data.date);
+---
+
+<section
+    class="stage stage--bash stage--overhang border-b-2 border-ink"
+    aria-labelledby="bash-title"
+>
+    <div class="bash-well fold slab slab--well stage__item--runoff">
+        <div
+            class="halftone--accent absolute inset-0 pointer-events-none"
+            aria-hidden="true"
+        />
+        <div class="relative">
+            <SectionHead
+                class="font-extrabold font-sans leading-[0.9] text-display tracking-[-0.04em]"
+                eyebrow={`${program.shortName} / ${program.cadence}`}
+                eyebrowClass="mb-5"
+                headingId="bash-title"
+                tone="dark"
+            >
+                {program.name}.
+            </SectionHead>
+            <p
+                class="max-w-xl mt-8 leading-relaxed text-md text-ink-inverse-muted"
+                data-motion="rise"
+            >
+                {program.summary}
+            </p>
+            <div
+                class="flex flex-wrap items-center gap-6 mt-10"
+                data-motion="rise"
+            >
+                <a
+                    class="btn btn--accent"
+                    href="/bash"
+                >
+                    {program.shortName} details
+                </a>
+                <a
+                    class="action-text hover:text-accent inline-flex items-center min-h-[50px] text-ink-inverse underline underline-offset-8 transition-colors"
+                    href="/sponsor"
+                >
+                    Sponsor it &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+    <dl
+        class="slab slab--cut slab--lift grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2"
+        data-motion-stagger="rise"
+    >
+        <div>
+            <dt class="label mb-2 text-ink-muted">Cadence</dt>
+            <dd class="font-extrabold font-sans text-3xl capitalize">{program.cadence}</dd>
+        </div>
+        <div>
+            <dt class="label mb-2 text-ink-muted">Next</dt>
+            <dd data-placeholder>
+                {next
+                    ? (
+                            <>
+                                <span class="block font-extrabold font-sans text-xl">
+                                    <time datetime={next.data.date.toISOString()}>{formatDate(next.data.date)}</time>
+                                </span>
+                                <span class="block mt-1 font-mono text-xs uppercase text-ink-muted">
+                                    {formatTimeRange(next.data.date, next.data.end)}
+                                </span>
+                            </>
+                        )
+                    : <span class="font-extrabold font-sans text-xl">To be announced</span>}
+            </dd>
+        </div>
+        <div>
+            <dt class="label mb-2 text-ink-muted">Where</dt>
+            <dd>
+                <address class="font-bold font-sans not-italic text-lg">
+                    {next ? next.data.location : 'To be announced'}
+                </address>
+            </dd>
+        </div>
+        <div>
+            <dt class="label mb-2 text-ink-muted">Prompt</dt>
+            <dd class="font-bold font-sans text-lg">
+                {next ? next.data.prompt : 'To be announced'}
+            </dd>
+        </div>
+    </dl>
+</section>
+
+<style>
+    .bash-well {
+        padding-block: var(--space-2xl);
+        padding-inline: max(var(--shell-pad), calc(100% - var(--shell-inner))) 0;
+    }
+</style>

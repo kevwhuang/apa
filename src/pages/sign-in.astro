@@ -1,0 +1,13 @@
+---
+import Layout from '@/Layout.astro';
+import SignInForm from '@sections/sign-in/Form.astro';
+import { brandTitle } from '@lib/brand';
+---
+
+<Layout
+    description={'Sign in or create an Austin Producer Alliance account \u2014 a browser-only demonstration of the account surface, with no server and no stored password.'}
+    noindex
+    title={brandTitle('Sign in')}
+>
+    <SignInForm />
+</Layout>

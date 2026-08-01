@@ -1,0 +1,111 @@
+---
+import { getCollection } from 'astro:content';
+
+import IconPause from '@components/icons/Pause.astro';
+import IconPlay from '@components/icons/Play.astro';
+import { formatDuration } from '@lib/utils';
+
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+    class?: string;
+    producerId: string;
+    track: CollectionEntry<'producers'>['data']['tracks'][number];
+}
+
+const WAVE_BAR_COUNT = 14;
+
+const WAVE_HASH_MODULUS = 997;
+
+const WAVE_HASH_MULTIPLIER = 31;
+
+const WAVE_MAX_SPAN = 72;
+
+const WAVE_MIN_HEIGHT = 24;
+
+const WAVE_PHASE_STEP = 1.7;
+
+const { class: rowClass, producerId, track } = Astro.props;
+
+const producers = await getCollection('producers');
+const artist = producers.find(entry => entry.id === producerId)?.data.name ?? '';
+
+const seed = [...`${producerId}:${track.title}`].reduce((total, character) => (total * WAVE_HASH_MULTIPLIER + character.charCodeAt(0)) % WAVE_HASH_MODULUS, 0);
+const waveHeights = Array.from({ length: WAVE_BAR_COUNT }, (_, index) => Math.round(WAVE_MIN_HEIGHT + Math.abs(Math.sin(seed + index * WAVE_PHASE_STEP)) * WAVE_MAX_SPAN));
+---
+
+<button
+    class:list={[
+        'producer-track group aria-pressed:bg-accent hover:bg-ink-10 flex items-center gap-3 min-h-[50px] w-full px-3 py-2 border-2 border-ink text-left transition-colors',
+        rowClass,
+    ]}
+    aria-pressed="false"
+    data-track-artist={artist}
+    data-track-duration={track.durationSeconds}
+    data-track-id={producerId}
+    data-track-title={track.title}
+    type="button"
+>
+    <span class="group-aria-pressed:hidden inline-flex shrink-0 text-accent-deep">
+        <IconPlay />
+    </span>
+    <span class="group-aria-pressed:inline-flex hidden shrink-0">
+        <IconPause />
+    </span>
+    <span
+        class="sr-only"
+        data-track-label
+    >
+        Play
+    </span>
+    <span
+        class="flex-1 min-w-0 truncate font-bold font-mono text-[13px]"
+        data-placeholder
+    >
+        {track.title}
+    </span>
+    <span
+        class="producer-track__wave"
+        aria-hidden="true"
+    >
+        {waveHeights.map(height => (
+            <span
+                class="producer-track__bar"
+                style={`height: ${height}%;`}
+            />
+        ))}
+    </span>
+    <span
+        class="group-aria-pressed:text-ink shrink-0 font-mono text-[12px] tabular-nums text-ink-muted"
+        data-placeholder
+    >
+        {formatDuration(track.durationSeconds)}
+    </span>
+</button>
+
+<style>
+    .producer-track[aria-pressed='true'] .producer-track__bar {
+        opacity: 0.75;
+    }
+
+    .producer-track__bar {
+        background: currentColor;
+        min-height: 2px;
+        opacity: 0.3;
+        width: 2px;
+    }
+
+    .producer-track__wave {
+        align-items: center;
+        display: flex;
+        flex: 0 0 auto;
+        gap: 2px;
+        height: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .producer-track__wave {
+            display: none;
+        }
+    }
+</style>
