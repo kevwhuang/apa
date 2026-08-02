@@ -48,6 +48,14 @@ import IconUser from '@components/icons/User.astro';
                 </a>
             </li>
             <li>
+                <a
+                    class="account__item"
+                    href="/settings"
+                >
+                    Settings
+                </a>
+            </li>
+            <li>
                 <span
                     class="account__balance"
                     data-account-prods
@@ -77,7 +85,7 @@ import IconUser from '@components/icons/User.astro';
         color: var(--color-ink-muted);
         display: block;
         font-family: var(--font-mono);
-        font-size: var(--text-2xs);
+        font-size: var(--text-sm);
         padding: var(--space-2xs) var(--space-sm);
         text-transform: uppercase;
     }
@@ -88,65 +96,79 @@ import IconUser from '@components/icons/User.astro';
 
     .account__item {
         align-items: center;
+        border-radius: 4px;
         display: flex;
         font-family: var(--font-mono);
-        font-size: var(--text-2xs);
+        font-size: var(--text-sm);
         letter-spacing: 0.04em;
         min-height: 50px;
         padding-inline: var(--space-sm);
         text-transform: uppercase;
         transition:
             background var(--duration-fast) var(--motion-ease-ui),
-            color var(--duration-fast) var(--motion-ease-ui);
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
         white-space: nowrap;
         width: 100%;
     }
 
+    .account__item:active {
+        transform: translateY(1px);
+    }
+
     .account__item:hover,
     .account__item:focus-visible {
-        background: var(--color-ink);
-        color: var(--color-surface);
+        background: var(--color-surface-sunken);
+        color: var(--color-accent-deep);
     }
 
     .account__menu {
         background: var(--color-surface-raised);
-        border: 2px solid var(--color-ink);
-        box-shadow: var(--lift) var(--lift) 0 0 var(--color-ink);
+        border: 1px solid var(--color-ink-10);
+        border-radius: 6px;
+        box-shadow: 0 12px 32px 0 var(--color-ink-20);
         display: flex;
         flex-direction: column;
+        gap: 2px;
         inset: calc(100% + 6px) 0 auto auto;
         min-width: 220px;
-        padding-bottom: var(--space-3xs);
+        opacity: 1;
+        padding: var(--space-2xs);
         position: absolute;
+        transition: opacity var(--duration-fast) var(--motion-ease-ui), translate var(--duration-fast) var(--motion-ease-ui);
+        translate: 0 0;
         z-index: var(--z-header);
     }
 
     .account__menu::before {
         background: var(--color-accent);
         content: '';
-        height: 4px;
+        height: 2px;
         margin-bottom: var(--space-3xs);
     }
 
-    .account__menu li + li {
-        border-top: 1px solid var(--color-ink-20);
-    }
-
-    .account__menu li[hidden] + li {
-        border-top: 0;
+    @starting-style {
+        .account__menu {
+            opacity: 0;
+            translate: 0 -4px;
+        }
     }
 
     .account__out {
         align-items: center;
         display: inline-flex;
         font-family: var(--font-mono);
-        font-size: var(--text-2xs);
+        font-size: var(--text-sm);
         letter-spacing: 0.04em;
         min-height: 50px;
-        padding-inline: var(--space-xs);
+        padding-inline: var(--nav-pad);
         text-transform: uppercase;
-        transition: color var(--duration-fast) var(--motion-ease-ui);
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
         white-space: nowrap;
+    }
+
+    .account__out:active {
+        transform: translateY(1px);
     }
 
     .account__out:hover {
@@ -159,12 +181,16 @@ import IconUser from '@components/icons/User.astro';
         gap: 2px;
         height: 50px;
         justify-content: center;
-        transition: color var(--duration-fast) var(--motion-ease-ui);
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
         width: 50px;
     }
 
     .account__toggle :global(svg:last-of-type) {
         transition: rotate var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .account__toggle:active {
+        transform: translateY(1px);
     }
 
     .account__toggle:hover {
@@ -185,6 +211,17 @@ import IconUser from '@components/icons/User.astro';
 
     :global([data-session='in']) .account__out {
         display: none;
+    }
+
+    @media (max-width: 768px) {
+        .account {
+            position: static;
+        }
+
+        .account__menu {
+            inset: calc(100% + 6px) var(--shell-pad) auto auto;
+            min-width: 0;
+        }
     }
 </style>
 

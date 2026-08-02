@@ -27,7 +27,7 @@ const upcoming = editions.filter(edition => edition.data.status === 'upcoming').
             ? (
                     <ul
                         class="rake list-none"
-                        data-motion-stagger="rise"
+                        data-motion-stagger="tilt"
                     >
                         {upcoming.map(edition => (
                             <li class="rake__item rake__item--flush">
@@ -37,7 +37,7 @@ const upcoming = editions.filter(edition => edition.data.status === 'upcoming').
                                 >
                                     <div class="col-span-12 md:col-span-3">
                                         <p
-                                            class="font-extrabold font-sans text-[28px]"
+                                            class="font-extrabold font-sans text-2xl"
                                             data-placeholder
                                         >
                                             <time datetime={edition.data.date.toISOString()}>{formatDate(edition.data.date)}</time>
@@ -64,7 +64,7 @@ const upcoming = editions.filter(edition => edition.data.status === 'upcoming').
                                         </p>
                                         <p class="mt-4">
                                             <a
-                                                class="bash__rsvp action-text hover:text-accent-deep underline underline-offset-4 transition-colors"
+                                                class="action-text bash__rsvp hover:text-accent-deep underline underline-offset-4 transition-colors"
                                                 href={LINKS.meetup}
                                                 rel="noopener noreferrer"
                                                 target="_blank"
@@ -91,7 +91,7 @@ const upcoming = editions.filter(edition => edition.data.status === 'upcoming').
             data-motion="rise"
         >
             <a
-                class="bash__rsvp action-text hover:text-accent-deep underline underline-offset-4 transition-colors"
+                class="action-text bash__rsvp hover:text-accent-deep underline underline-offset-4 transition-colors"
                 href="/events"
             >
                 See the full calendar &rarr;

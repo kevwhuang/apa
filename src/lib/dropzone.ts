@@ -1,5 +1,4 @@
-import { UPLOAD } from '@lib/constants';
-import { acceptFiles, releaseAudioContext, uploadSubmission } from '@lib/uploads';
+import { QUEUE_FULL_MESSAGE, acceptFiles, releaseAudioContext, uploadSubmission } from '@lib/uploads';
 import { formatBytes, formatDuration, setText } from '@lib/utils';
 
 export interface Dropzone {
@@ -50,7 +49,7 @@ interface QueuedUpload {
 const DEFAULT_MESSAGES: DropzoneMessages = {
     added: accepted => `${accepted} ${accepted === 1 ? 'file' : 'files'} added.`,
     failed: (name, reason) => `${name} failed: ${reason}`,
-    full: () => `You can queue ${UPLOAD.maxFiles} files at a time.`,
+    full: () => QUEUE_FULL_MESSAGE,
     ready: name => `${name} ready.`,
     rejected: (name, reason) => `${name} rejected: ${reason}`,
     removed: name => `${name} removed.`,

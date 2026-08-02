@@ -1,5 +1,5 @@
 ---
-title: Producer Bash · July
+title: Bash · July
 edition: July
 date: 2026-07-25T13:30:00-05:00
 end: 2026-07-25T18:00:00-05:00

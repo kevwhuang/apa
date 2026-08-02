@@ -74,9 +74,6 @@ const catalog = toCatalog(await getCollection('products'));
                 </li>
             ))}
         </ol>
-        <p class="action-text mt-6 text-ink-subtle">
-            This is a demonstration checkout &mdash; nothing is charged and nothing ships.
-        </p>
     </div>
 </section>
 
@@ -100,7 +97,7 @@ const catalog = toCatalog(await getCollection('products'));
         </a>
     </div>
     <div
-        class="grid grid-cols-1 gap-12 md:grid-cols-[1.5fr_1fr]"
+        class="grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]"
         data-checkout-body
     >
         <form
@@ -139,7 +136,7 @@ const catalog = toCatalog(await getCollection('products'));
                                     ? (
                                             <select
                                                 id={`checkout-${field.name}`}
-                                                class="h-[50px] w-full px-4 border-2 border-ink bg-transparent"
+                                                class="checkout-field__control h-[50px] w-full px-4 border-2 border-ink bg-transparent"
                                                 aria-describedby={`checkout-${field.name}-error`}
                                                 aria-invalid="false"
                                                 autocomplete={field.autocomplete}
@@ -155,7 +152,7 @@ const catalog = toCatalog(await getCollection('products'));
                                     : (
                                             <input
                                                 id={`checkout-${field.name}`}
-                                                class="h-[50px] w-full px-4 border-2 border-ink bg-transparent"
+                                                class="checkout-field__control h-[50px] w-full px-4 border-2 border-ink bg-transparent"
                                                 aria-describedby={`checkout-${field.name}-error`}
                                                 aria-invalid="false"
                                                 autocomplete={field.autocomplete}
@@ -194,7 +191,7 @@ const catalog = toCatalog(await getCollection('products'));
                                 <span class="label text-ink-muted">{field.label}</span>
                                 <input
                                     id={`checkout-${field.name}`}
-                                    class="h-[50px] w-full px-4 border-2 border-ink font-mono text-[13px] bg-transparent"
+                                    class="checkout-field__control h-[50px] w-full px-4 border-2 border-ink font-mono text-sm bg-transparent"
                                     aria-describedby={`checkout-${field.name}-error`}
                                     aria-invalid="false"
                                     autocomplete={field.autocomplete}
@@ -216,17 +213,15 @@ const catalog = toCatalog(await getCollection('products'));
                         </div>
                     ))}
                 </div>
-                <p class="action-text mb-3 text-accent-deep">
-                    Demo only &mdash; the two numbers below are the only cards this store accepts.
-                </p>
+                <p class="label mb-3 text-ink-muted">Card numbers</p>
                 <dl class="checkout__cards">
                     <div class="checkout__card-row">
-                        <dt class="font-mono text-[13px]">{DEMO_CARDS.approved}</dt>
-                        <dd class="text-[14px] text-ink-muted">Approved</dd>
+                        <dt class="font-mono text-sm">{DEMO_CARDS.approved}</dt>
+                        <dd class="text-sm text-ink-muted">Approved</dd>
                     </div>
                     <div class="checkout__card-row">
-                        <dt class="font-mono text-[13px]">{DEMO_CARDS.declined}</dt>
-                        <dd class="text-[14px] text-ink-muted">Declined</dd>
+                        <dt class="font-mono text-sm">{DEMO_CARDS.declined}</dt>
+                        <dd class="text-sm text-ink-muted">Declined</dd>
                     </div>
                 </dl>
             </fieldset>
@@ -288,7 +283,7 @@ const catalog = toCatalog(await getCollection('products'));
                     />
                     <span data-prods-label>Apply your Prods</span>
                 </label>
-                <p class="mt-4 text-[14px] text-ink-muted">
+                <p class="mt-4 text-sm text-ink-muted">
                     Read the&#32;
                     <a
                         class="checkout__link hover:text-accent-deep decoration-2 decoration-accent underline underline-offset-4 transition-colors"
@@ -325,10 +320,10 @@ const catalog = toCatalog(await getCollection('products'));
         >
             <h2 class="label mb-4 text-ink-muted">Summary</h2>
             <ul
-                class="checkout__summary scroll-slot mb-4 list-none text-[14px]"
+                class="checkout__summary scroll-slot mb-4 list-none text-sm"
                 data-summary-list
             />
-            <dl class="pt-4 space-y-1.5 border-t-2 border-ink font-mono text-[14px]">
+            <dl class="pt-4 space-y-1.5 border-t-2 border-ink font-mono text-sm">
                 <div class="flex justify-between gap-3">
                     <dt>Subtotal</dt>
                     <dd data-subtotal>$0.00</dd>
@@ -364,7 +359,7 @@ const catalog = toCatalog(await getCollection('products'));
     <template data-error-anchor>
         <li>
             <a
-                class="checkout__anchor hover:text-accent-deep flex items-center min-h-[50px] text-[14px] underline"
+                class="checkout__anchor hover:text-accent-deep flex items-center min-h-[50px] text-sm underline"
                 data-anchor
                 href="#checkout-email"
             >
@@ -373,7 +368,7 @@ const catalog = toCatalog(await getCollection('products'));
         </li>
     </template>
     <template data-issue-row>
-        <li class="flex gap-2 text-[14px] text-ink-muted">
+        <li class="flex gap-2 text-sm text-ink-muted">
             <span
                 class="font-bold text-accent-deep"
                 aria-hidden="true"
@@ -420,6 +415,23 @@ const catalog = toCatalog(await getCollection('products'));
 </section>
 
 <style>
+    .checkout-field__control {
+        transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            box-shadow var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .checkout-field__control:focus-visible,
+    .checkout-field__control:hover {
+        background-color: var(--color-surface-raised);
+    }
+
+    .checkout-field__control[aria-invalid='true'] {
+        border-color: var(--color-accent-deep);
+        box-shadow: 3px 3px 0 0 var(--color-accent-20);
+    }
+
     .checkout__alert {
         border-left: 2px solid var(--color-accent-deep);
     }
@@ -431,6 +443,14 @@ const catalog = toCatalog(await getCollection('products'));
         gap: var(--space-3xs);
     }
 
+    .checkout__anchor {
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .checkout__anchor:active {
+        transform: translateY(1px);
+    }
+
     .checkout__box {
         appearance: none;
         background-color: transparent;
@@ -439,6 +459,10 @@ const catalog = toCatalog(await getCollection('products'));
         height: 24px;
         margin: 0;
         position: relative;
+        transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            box-shadow var(--duration-fast) var(--motion-ease-ui);
         width: 24px;
     }
 
@@ -452,6 +476,13 @@ const catalog = toCatalog(await getCollection('products'));
         background-color: var(--color-accent-deep);
         border-color: var(--color-accent-deep);
         box-shadow: inset 0 0 0 4px var(--color-surface-raised);
+    }
+
+    .checkout__box:checked:focus-visible {
+        box-shadow:
+            inset 0 0 0 4px var(--color-surface-raised),
+            0 0 0 2px var(--color-surface),
+            0 0 0 4px var(--color-accent-deep);
     }
 
     .checkout__card-row {
@@ -476,11 +507,22 @@ const catalog = toCatalog(await getCollection('products'));
         gap: var(--space-xs);
         min-height: 50px;
         padding: var(--space-2xs) var(--space-sm) var(--space-2xs) 0;
+        transition: background-color var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .checkout__check:active,
+    .checkout__check:hover {
+        background-color: var(--color-surface-sunken);
     }
 
     .checkout__link {
         display: inline-block;
         padding-block: var(--space-sm);
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .checkout__link:active {
+        transform: translateY(1px);
     }
 
     .checkout__notice {
@@ -523,7 +565,7 @@ const catalog = toCatalog(await getCollection('products'));
 <script>
     import { navigate } from 'astro:transitions/client';
 
-    import { CENTS_PER_DOLLAR, CHECKOUT_STEPS, EMAIL_PATTERN, FIELD_LIMITS, PALETTE } from '@lib/constants';
+    import { CARD_COLORS, CENTS_PER_DOLLAR, CHECKOUT_STEPS, EMAIL_PATTERN, FIELD_LIMITS } from '@lib/constants';
     import { clearFieldErrors, renderErrorSummary, renderIssueList, setFieldErrors, validateFields } from '@lib/forms';
     import { formatPrice, formatVariant, parseCatalog, registerPageScript, setPending, setText } from '@lib/utils';
     import { getItems, reconcile, totals } from '@lib/store';
@@ -539,13 +581,21 @@ const catalog = toCatalog(await getCollection('products'));
     }
 
     const ADDRESS_MIN = 5;
+
     const CARD_FIELDS = ['cc-csc', 'cc-exp', 'cc-name', 'cc-number'];
+
     const CENTURY = 2_000;
+
     const CITY_MIN = 2;
+
     const CSC_PATTERN = /^\d{3,4}$/;
+
     const EXPIRY_PATTERN = /^(0[1-9]|1[0-2]) ?\/ ?(\d{2})$/;
+
     const LAST_STEP = 2;
+
     const MAX_EXPIRY_YEARS = 20;
+
     const ZIP_PATTERN = /^\d{5}(-\d{4})?$/;
 
     const STEP_RULES: Record<string, FieldRule>[] = [
@@ -562,14 +612,12 @@ const catalog = toCatalog(await getCollection('products'));
             'cc-csc': { message: 'Enter the three or four digit security code.', pattern: CSC_PATTERN, required: true },
             'cc-exp': { message: 'Use MM / YY, this month or later.', required: true, validate: isFutureExpiry },
             'cc-name': { max: FIELD_LIMITS.name, message: 'Enter the name on the card.', required: true },
-            'cc-number': { message: 'Use one of the demo card numbers below.', required: true, validate: isDemoCardNumber },
+            'cc-number': { message: 'Use one of the card numbers below.', required: true, validate: isDemoCardNumber },
         },
         {
             terms: { message: 'Accept the terms to place the order.', required: true },
         },
     ];
-
-    const cardColors = PALETTE.slice(0, 4);
 
     let blocked = false;
     let catalog: CatalogEntry[] = [];
@@ -593,6 +641,13 @@ const catalog = toCatalog(await getCollection('products'));
     }
 
     function handleBackClick(controls: CheckoutControls) {
+        if (blocked) {
+            blocked = false;
+            orderItems = getItems();
+            renderIssues([]);
+            renderSummary(controls.form);
+        }
+
         step = Math.max(0, step - 1);
         updateSteps(controls, true);
     }
@@ -737,7 +792,7 @@ const catalog = toCatalog(await getCollection('products'));
             const tile = fragment.querySelector<HTMLElement>('[data-review-tile]');
             const variant = formatVariant(item);
 
-            if (tile) tile.style.background = cardColors[index % cardColors.length];
+            if (tile) tile.style.background = CARD_COLORS[index % CARD_COLORS.length];
 
             setText(fragment.querySelector('[data-review-price]'), formatPrice(item.priceCents * item.quantity));
             setText(fragment.querySelector('[data-review-title]'), item.title);

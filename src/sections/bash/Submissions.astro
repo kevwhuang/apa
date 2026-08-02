@@ -1,12 +1,10 @@
 ---
 import IconUpload from '@components/icons/Upload.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { UPLOAD } from '@lib/constants';
+import { UPLOAD, UPLOAD_EXTENSIONS_LABEL } from '@lib/constants';
 import { formatBytes, getProgram } from '@lib/utils';
 
 const program = getProgram('bash');
-
-const extensions = UPLOAD.extensions.map(extension => extension.toUpperCase()).join(', ');
 ---
 
 <section
@@ -21,7 +19,7 @@ const extensions = UPLOAD.extensions.map(extension => extension.toUpperCase()).j
         >
             Submit your track
         </SectionHead>
-        <div class="grid grid-cols-1 gap-12 md:grid-cols-[1fr_1.4fr]">
+        <div class="grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
             <div class="flex flex-col gap-4">
                 <p class="text-base text-ink-muted">
                     Bounce what you made on the clock and drop it here. Nothing leaves this browser
@@ -35,7 +33,10 @@ const extensions = UPLOAD.extensions.map(extension => extension.toUpperCase()).j
                     so bounce to FLAC if yours is bigger.
                 </p>
             </div>
-            <div class="flex flex-col gap-5">
+            <div
+                class="flex flex-col gap-5"
+                data-motion="unfold"
+            >
                 <label
                     class="dropzone slab slab--card flex flex-col items-center justify-center gap-3 text-center"
                     data-dropzone
@@ -62,7 +63,7 @@ const extensions = UPLOAD.extensions.map(extension => extension.toUpperCase()).j
                     class="text-sm text-ink-muted"
                     data-placeholder
                 >
-                    {extensions}. Up to {formatBytes(UPLOAD.maxFileBytes)} each, {UPLOAD.maxFiles} files,{' '}
+                    {UPLOAD_EXTENSIONS_LABEL}. Up to {formatBytes(UPLOAD.maxFileBytes)} each, {UPLOAD.maxFiles} files,{' '}
                     {formatBytes(UPLOAD.maxTotalBytes)} in total.
                 </p>
                 <ul
@@ -86,10 +87,13 @@ const extensions = UPLOAD.extensions.map(extension => extension.toUpperCase()).j
                     The submission board
                 </h3>
                 <p
-                    class="label text-ink-subtle"
+                    class="label flex items-center gap-2 text-ink-subtle"
                     data-board-refresh
                     hidden
-                />
+                >
+                    <span class="spinner" aria-hidden="true" />
+                    <span data-board-refresh-text />
+                </p>
             </div>
             <p
                 class="max-w-2xl mt-3 text-smd text-ink-muted"
@@ -97,13 +101,6 @@ const extensions = UPLOAD.extensions.map(extension => extension.toUpperCase()).j
             >
                 Every track turned in across past editions, oldest first &mdash; the running
                 record of afternoons spent on the clock.
-            </p>
-            <p
-                class="max-w-2xl mt-2 text-sm text-ink-subtle"
-                data-motion="rise"
-            >
-                The names and titles on the board are invented stand-ins &mdash; real submissions
-                take their place once the next edition runs.
             </p>
             <div
                 class="board__scroller mt-6"
@@ -113,7 +110,7 @@ const extensions = UPLOAD.extensions.map(extension => extension.toUpperCase()).j
                     class="board__table border-2 border-ink"
                     data-placeholder
                 >
-                    <caption class="sr-only">Tracks submitted at past Producer Bash editions</caption>
+                    <caption class="sr-only">Tracks submitted at past Bash editions</caption>
                     <thead>
                         <tr class="border-b-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
                             <th
@@ -157,7 +154,10 @@ const extensions = UPLOAD.extensions.map(extension => extension.toUpperCase()).j
                                 class="px-4 py-4 font-mono text-xs uppercase text-ink-muted"
                                 colspan="5"
                             >
-                                Pulling up the board&hellip;
+                                <span class="flex items-center gap-2">
+                                    <span class="spinner" aria-hidden="true" />
+                                    Pulling up the board&hellip;
+                                </span>
                             </td>
                         </tr>
                     </tbody>
@@ -236,11 +236,11 @@ const extensions = UPLOAD.extensions.map(extension => extension.toUpperCase()).j
                 data-cell-title
             />
             <td
-                class="px-4 py-3 font-mono text-2xs uppercase text-ink-muted whitespace-nowrap"
+                class="px-4 py-3 font-mono text-2xs uppercase whitespace-nowrap text-ink-muted"
                 data-cell-edition
             />
             <td
-                class="px-4 py-3 font-mono text-2xs uppercase text-ink-muted whitespace-nowrap"
+                class="px-4 py-3 font-mono text-2xs uppercase whitespace-nowrap text-ink-muted"
                 data-cell-submitted
             />
         </tr>
@@ -271,13 +271,17 @@ const extensions = UPLOAD.extensions.map(extension => extension.toUpperCase()).j
         min-height: 220px;
         padding: var(--space-2xl);
         position: relative;
-        transition: background var(--duration-fast) ease, border-color var(--duration-fast) ease;
+        transition: background var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .dropzone:active {
+        --slab-fill: var(--color-surface-raised);
+        border-color: var(--color-accent-deep);
     }
 
     .dropzone:has(.dropzone__input:focus-visible) {
         border-color: var(--color-accent-deep);
-        outline: 2px solid var(--color-accent-deep);
-        outline-offset: 2px;
+        border-style: solid;
     }
 
     .dropzone:hover {
@@ -329,13 +333,14 @@ const extensions = UPLOAD.extensions.map(extension => extension.toUpperCase()).j
     import { MOCK_LATENCY_MS, STORAGE } from '@lib/constants';
     import { createDropzone } from '@lib/dropzone';
     import { createStore } from '@lib/state';
-    import { delay, formatTime, registerPageScript, rovingFocus, setMessage, setText } from '@lib/utils';
+    import { delay, formatTime, registerPageScript, rovingFocus, setHidden, setText } from '@lib/utils';
 
     interface BoardElements {
         body: HTMLElement;
         chipTemplate: HTMLTemplateElement;
         pager: HTMLElement;
         refresh: HTMLElement;
+        refreshText: HTMLElement;
         rowTemplate: HTMLTemplateElement;
         status: HTMLElement;
     }
@@ -375,16 +380,17 @@ const extensions = UPLOAD.extensions.map(extension => extension.toUpperCase()).j
         const chipTemplate = document.querySelector<HTMLTemplateElement>('[data-board-page]');
         const pager = document.querySelector<HTMLElement>('[data-board-pager]');
         const refresh = document.querySelector<HTMLElement>('[data-board-refresh]');
+        const refreshText = document.querySelector<HTMLElement>('[data-board-refresh-text]');
         const rowTemplate = document.querySelector<HTMLTemplateElement>('[data-board-row]');
         const status = document.querySelector<HTMLElement>('[data-board-status]');
 
-        if (!body || !chipTemplate || !pager || !refresh || !rowTemplate || !status) return;
+        if (!body || !chipTemplate || !pager || !refresh || !refreshText || !rowTemplate || !status) return;
 
-        startBoard({ body, chipTemplate, pager, refresh, rowTemplate, status }, signal);
+        startBoard({ body, chipTemplate, pager, refresh, refreshText, rowTemplate, status }, signal);
     }
 
     function startBoard(elements: BoardElements, signal: AbortSignal) {
-        const { body, chipTemplate, pager, refresh, rowTemplate, status } = elements;
+        const { body, chipTemplate, pager, refresh, refreshText, rowTemplate, status } = elements;
 
         let page = 1;
         let rows = boardStore.get();
@@ -452,7 +458,7 @@ const extensions = UPLOAD.extensions.map(extension => extension.toUpperCase()).j
             rows = boardStore.set([...BASH_SUBMISSIONS]);
             page = Math.min(page, pageCount());
             render();
-            setMessage(refresh, '');
+            setRefresh('');
         }
 
         function setPage(next: number) {
@@ -462,6 +468,11 @@ const extensions = UPLOAD.extensions.map(extension => extension.toUpperCase()).j
             renderRows();
             updatePager();
             updateStatus();
+        }
+
+        function setRefresh(message: string) {
+            setHidden(refresh, message.length === 0);
+            setText(refreshText, message);
         }
 
         function updatePager() {
@@ -484,7 +495,7 @@ const extensions = UPLOAD.extensions.map(extension => extension.toUpperCase()).j
 
         if (rows.length > 0) render();
 
-        setMessage(refresh, rows.length > 0 ? 'Refreshing\u2026' : 'Loading\u2026');
+        setRefresh(rows.length > 0 ? 'Refreshing\u2026' : 'Loading\u2026');
         void revalidate();
     }
 

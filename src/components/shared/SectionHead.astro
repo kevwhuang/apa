@@ -4,10 +4,11 @@ interface Props {
     eyebrow: string;
     eyebrowClass?: string;
     headingId: string;
+    motion?: 'blur' | 'rise';
     tone?: 'dark' | 'light';
 }
 
-const { class: headingClass, eyebrow, eyebrowClass = 'mb-3', headingId, tone = 'light' } = Astro.props;
+const { class: headingClass, eyebrow, eyebrowClass = 'mb-3', headingId, motion = 'rise', tone = 'light' } = Astro.props;
 ---
 
 <div
@@ -15,7 +16,7 @@ const { class: headingClass, eyebrow, eyebrowClass = 'mb-3', headingId, tone = '
         'mb-12',
         Astro.slots.has('cta') && 'flex items-end justify-between gap-6',
     ]}
-    data-motion="rise"
+    data-motion={motion}
 >
     <div>
         <p class:list={['label', eyebrowClass, tone === 'dark' ? 'text-accent' : 'text-accent-deep']}>

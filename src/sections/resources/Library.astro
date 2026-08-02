@@ -1,12 +1,18 @@
 ---
 import { getCollection } from 'astro:content';
 
+import IconClose from '@components/icons/Close.astro';
+import IconSearch from '@components/icons/Search.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { ASSET_KIND_LABELS } from '@lib/constants';
+import { ASSET_KIND_LABELS, KIND_COLORS } from '@lib/constants';
 import { formatDateOnly, mergeAssets, toIsoDate } from '@lib/utils';
 
-const assets = mergeAssets(await getCollection('downloads'), await getCollection('docs'));
+const assets = mergeAssets(await getCollection('downloads'), await getCollection('docs'))
+    .map(asset => ({
+        ...asset,
+        search: [asset.data.title, asset.data.description, ASSET_KIND_LABELS[asset.data.kind], asset.data.format].join(' ').toLowerCase(),
+    }));
 
 const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
     .map(kind => ({ count: assets.filter(asset => asset.data.kind === kind).length, kind, label: ASSET_KIND_LABELS[kind] }))
@@ -26,8 +32,8 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             Resources.
         </PageHead>
         <p
-            class="max-w-2xl mt-6 text-[18px] text-ink-muted"
-            data-motion="rise"
+            class="max-w-2xl mt-6 text-lmd text-ink-muted"
+            data-motion="blur"
         >
             Everything the Alliance hands out in one place &mdash; press material, brand assets,
             event packs, and the working documents behind how the community runs.
@@ -47,13 +53,45 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
         >
             Asset library
         </SectionHead>
+        <label
+            class="block"
+            data-motion="rise"
+        >
+            <span class="sr-only">Search the library</span>
+            <span class="relative block max-w-[360px] w-full">
+                <span
+                    class="absolute bottom-0 left-4 top-0 flex items-center text-ink-muted pointer-events-none"
+                    aria-hidden="true"
+                >
+                    <IconSearch />
+                </span>
+                <input
+                    class="resources__search focus-visible:bg-surface-raised hover:bg-surface-raised placeholder:text-ink-muted h-[50px] w-full pl-11 pr-[50px] border-2 border-ink font-mono text-sm bg-surface transition-colors"
+                    autocomplete="off"
+                    data-resources-search
+                    placeholder="Search assets&hellip;"
+                    spellcheck="false"
+                    type="search"
+                />
+                <button
+                    class="active:translate-y-px hover:text-accent-deep absolute right-0 top-0 inline-flex items-center justify-center h-[50px] w-[50px] text-ink-muted transition-colors"
+                    aria-label="Clear search"
+                    data-resources-clear
+                    hidden
+                    type="button"
+                >
+                    <IconClose />
+                </button>
+            </span>
+        </label>
         <div
-            class="flex flex-wrap gap-2 mt-10"
+            class="flex flex-wrap gap-2 mt-4"
             aria-label="Filter by asset kind"
+            data-motion="rise"
             role="group"
         >
             <button
-                class="chip resources__chip is-active active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
+                class="chip is-active resources__chip active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
                 aria-pressed="true"
                 data-kind=""
                 type="button"
@@ -65,8 +103,13 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                     class="chip resources__chip active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
                     aria-pressed="false"
                     data-kind={entry.kind}
+                    style={`--kind-color: ${KIND_COLORS[entry.kind]}`}
                     type="button"
                 >
+                    <span
+                        class="resources__swatch resources__swatch--chip"
+                        aria-hidden="true"
+                    />
                     {entry.label} {entry.count}
                 </button>
             ))}
@@ -78,16 +121,26 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
         >
             Showing all {assets.length} assets.
         </p>
-        <ul class="resources__grid mt-10 list-none">
+        <ul
+            class="resources__grid mt-10 list-none"
+            data-motion-from="center"
+            data-motion-stagger="flip"
+        >
             {assets.map(asset => (
                 <li
                     id={asset.id}
                     class="resource-card"
                     data-kind={asset.data.kind}
+                    data-search={asset.search}
+                    style={`--kind-color: ${KIND_COLORS[asset.data.kind]}`}
                 >
                     <article class="resources__card slab slab--card slab--hover">
                         <header class="flex flex-wrap items-start justify-between gap-2">
-                            <p class="label px-2 py-1 bg-ink text-ink-inverse">
+                            <p class="label resources__tag">
+                                <span
+                                    class="resources__swatch"
+                                    aria-hidden="true"
+                                />
                                 {ASSET_KIND_LABELS[asset.data.kind]}
                             </p>
                             {asset.data.available && (
@@ -100,19 +153,19 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                             <h3 class="font-extrabold font-sans text-xl tracking-tight">
                                 {asset.data.title}
                             </h3>
-                            <p class="leading-relaxed text-[14px] text-ink-muted">
+                            <p class="leading-relaxed text-sm text-ink-muted">
                                 {asset.data.description}
                             </p>
                         </div>
                         <dl class="resources__meta">
                             <div class="resources__meta-row">
                                 <dt class="label text-ink-subtle">Format</dt>
-                                <dd class="font-mono text-[12px]">{asset.data.format}</dd>
+                                <dd class="font-mono text-xs">{asset.data.format}</dd>
                             </div>
                             <div class="resources__meta-row">
                                 <dt class="label text-ink-subtle">Size</dt>
                                 <dd
-                                    class="font-mono text-[12px]"
+                                    class="font-mono text-xs"
                                     data-placeholder
                                 >
                                     {asset.data.size}
@@ -120,7 +173,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                             </div>
                             <div class="resources__meta-row">
                                 <dt class="label text-ink-subtle">Updated</dt>
-                                <dd class="font-mono text-[12px]">
+                                <dd class="font-mono text-xs">
                                     <time datetime={toIsoDate(asset.data.date)}>{formatDateOnly(asset.data.date)}</time>
                                 </dd>
                             </div>
@@ -135,7 +188,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                                     </a>
                                 )
                             : (
-                                    <p class="resources__blocked action-text flex items-center min-h-[50px] px-4 text-ink-subtle">
+                                    <p class="action-text resources__blocked flex items-center min-h-[50px] px-4 text-ink-subtle">
                                         Not published yet
                                     </p>
                                 )}
@@ -143,6 +196,23 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                 </li>
             ))}
         </ul>
+        <div
+            class="slab slab--sunk flex flex-col items-start gap-4 mt-10"
+            data-resources-empty
+            hidden
+        >
+            <p class="font-extrabold font-sans text-xl tracking-tight">No matches.</p>
+            <p class="text-sm text-ink-muted">
+                Nothing in the library answers to &ldquo;<span class="font-mono" data-search-echo />&rdquo;.
+            </p>
+            <button
+                class="btn"
+                data-resources-clear
+                type="button"
+            >
+                Clear search
+            </button>
+        </div>
     </div>
 </section>
 
@@ -154,6 +224,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
 
     .resources__card {
         --slab-fill: var(--color-surface-raised);
+        border-top: 4px solid var(--kind-color);
     }
 
     .resources__card,
@@ -161,8 +232,13 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
         align-content: start;
         display: grid;
         grid-row: span 4;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
         row-gap: var(--space-sm);
+    }
+
+    .resources__chip {
+        gap: var(--space-3xs);
     }
 
     .resources__grid {
@@ -190,6 +266,30 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
         justify-content: space-between;
     }
 
+    .resources__search::-webkit-search-cancel-button {
+        appearance: none;
+    }
+
+    .resources__swatch {
+        background-color: var(--kind-color);
+        block-size: 8px;
+        flex: none;
+        inline-size: 8px;
+    }
+
+    .resources__swatch--chip {
+        outline: 1px solid var(--color-surface);
+    }
+
+    .resources__tag {
+        align-items: center;
+        border: 2px solid var(--kind-color);
+        color: var(--color-ink);
+        display: inline-flex;
+        gap: var(--space-3xs);
+        padding: 2px var(--space-2xs);
+    }
+
     @media (max-width: 1024px) {
         .resources__grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -204,13 +304,12 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
 </style>
 
 <script>
-    import { applyFilter, registerPageScript, rovingFocus } from '@lib/utils';
+    import { initFilterGroup, initSearchField, registerPageScript } from '@lib/utils';
 
-    let activeKind = '';
+    function describeAssets(shown: number, total: number, kind: string, query: string) {
+        if (query) return `Showing ${shown} of ${total} assets for \u201c${query}\u201d.`;
 
-    function handleKindClick(button: HTMLButtonElement, buttons: NodeListOf<HTMLButtonElement>, cards: NodeListOf<HTMLElement>) {
-        activeKind = button.dataset.kind ?? '';
-        updateKindFilter(buttons, cards);
+        return kind ? `Showing ${shown} of ${total} assets.` : `Showing all ${total} assets.`;
     }
 
     function initResourcesLibrary(signal: AbortSignal) {
@@ -219,26 +318,26 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
 
         if (!buttons.length || !cards.length) return;
 
-        activeKind = '';
-        updateKindFilter(buttons, cards);
-        rovingFocus(buttons, signal);
+        const searchElement = document.querySelector<HTMLInputElement>('[data-resources-search]');
 
-        buttons.forEach((button) => {
-            button.addEventListener('click', () => handleKindClick(button, buttons, cards), { signal });
+        initFilterGroup({
+            buttons,
+            cards,
+            dataKey: 'kind',
+            emptyElement: document.querySelector<HTMLElement>('[data-resources-empty]'),
+            initial: '',
+            matches: (card, kind) => !kind || card.dataset.kind === kind,
+            searchElement,
+            signal,
+            status: describeAssets,
+            statusElement: document.querySelector<HTMLElement>('[data-resources-status]'),
         });
-    }
 
-    function updateKindFilter(buttons: NodeListOf<HTMLButtonElement>, cards: NodeListOf<HTMLElement>) {
-        applyFilter(buttons, cards, activeKind, 'kind', (card, kind) => !kind || card.dataset.kind === kind);
-
-        const status = document.querySelector<HTMLElement>('[data-resources-status]');
-        const shown = Array.from(cards).filter(card => !card.classList.contains('hidden')).length;
-
-        if (!status) return;
-
-        status.textContent = activeKind
-            ? `Showing ${shown} of ${cards.length} assets.`
-            : `Showing all ${cards.length} assets.`;
+        initSearchField({
+            clearElements: document.querySelectorAll<HTMLButtonElement>('[data-resources-clear]'),
+            searchElement,
+            signal,
+        });
     }
 
     registerPageScript(initResourcesLibrary);

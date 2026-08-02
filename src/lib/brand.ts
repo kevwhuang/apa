@@ -55,8 +55,8 @@ export const BRAND_OG = {
 
 export const BRAND_SIZES = {
     lockupFooter: 64,
-    markNav: 26,
-    markNavCompact: 22,
+    markNav: 32,
+    markNavCompact: 26,
     markPreview: 40,
 } as const;
 

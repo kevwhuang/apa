@@ -1,5 +1,5 @@
 ---
-title: Producer Bash Recap Film
+title: Bash Recap Film
 kind: video
 format: MP4
 size: 410 MB

@@ -37,7 +37,11 @@ const REJECTIONS = [
     },
 ];
 
-const STEPS = ['Account', 'Profile', 'Questionnaire'];
+const STEPS = [
+    { blurb: 'A handle and a password.', name: 'Account' },
+    { blurb: 'What the roster shows.', name: 'Profile' },
+    { blurb: 'Four quick questions.', name: 'Questionnaire' },
+];
 
 const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
 
@@ -59,7 +63,10 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         >
             Finish your profile.
         </PageHead>
-        <p class="max-w-2xl mt-6 text-[18px] text-ink-muted">
+        <p
+            class="max-w-2xl mt-6 text-lmd text-ink-muted"
+            data-motion="blur"
+        >
             Three short steps: pick a name and a password, say what you make, and answer four
             questions. Nothing is sent anywhere and nothing outlives this browser.
         </p>
@@ -80,7 +87,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
             <h2 class="font-extrabold font-sans text-3xl tracking-tight">
                 {rejection.heading}
             </h2>
-            <p class="max-w-2xl text-[16px] text-ink-muted">
+            <p class="max-w-2xl text-md text-ink-muted">
                 {rejection.body}
             </p>
             <a
@@ -92,34 +99,50 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         </div>
     ))}
     <div
-        class="onboarding__flow flex flex-col gap-8"
+        class="onboarding__flow"
         data-onboarding-flow
         hidden
     >
-        <ol
-            class="onboarding__steps flex flex-wrap border-2 border-ink list-none"
-            aria-label="Onboarding steps"
-        >
-            {STEPS.map((step, index) => (
-                <li
-                    class:list={[
-                        'onboarding__step flex-1 p-4 font-bold font-mono text-[11px] tracking-wide uppercase',
-                        index > 0 && 'border-l-2 border-ink',
-                    ]}
-                    aria-current={index === 0 ? 'step' : undefined}
-                    data-onboarding-step={index}
-                >
-                    {index + 1}. {step}
-                </li>
-            ))}
-        </ol>
-        <p
-            class="sr-only"
-            aria-live="polite"
-            data-onboarding-announce
-        />
+        <div class="onboarding__aside">
+            <p
+                id="onboarding-progress-label"
+                class="label mb-4 text-ink-muted"
+            >
+                Progress
+            </p>
+            <ol
+                class="onboarding-rail list-none"
+                aria-labelledby="onboarding-progress-label"
+                data-motion="rise"
+            >
+                {STEPS.map((step, index) => (
+                    <li
+                        class="onboarding-rail__step"
+                        aria-current={index === 0 ? 'step' : undefined}
+                        data-onboarding-step={index}
+                    >
+                        <span
+                            class="onboarding-rail__node"
+                            aria-hidden="true"
+                        >
+                            <span class="onboarding-rail__index">0{index + 1}</span>
+                            <span class="onboarding-rail__check">&check;</span>
+                        </span>
+                        <span class="onboarding-rail__body">
+                            <span class="label onboarding-rail__name">{step.name}</span>
+                            <span class="onboarding-rail__blurb">{step.blurb}</span>
+                        </span>
+                    </li>
+                ))}
+            </ol>
+            <p
+                class="sr-only"
+                aria-live="polite"
+                data-onboarding-announce
+            />
+        </div>
         <form
-            class="onboarding__form slab slab--card flex flex-col gap-6"
+            class="onboarding-form slab slab--card flex flex-col gap-6"
             data-onboarding-form
         >
             <p
@@ -136,19 +159,22 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
                 <legend class="font-extrabold font-sans text-2xl tracking-tight">
                     Account
                 </legend>
-                <p class="text-[15px] text-ink-muted">
-                    Setting up&#32;
+                <p class="text-smd text-ink-muted">
+                    Your handle and a password for this browser-only demo.
+                </p>
+                <p class="slab slab--sunk flex flex-wrap items-center gap-x-3 gap-y-1 p-3">
+                    <span class="label text-ink-subtle">Setting up</span>
                     <span
-                        class="font-mono wrap-break-word text-[14px]"
+                        class="font-mono text-sm wrap-break-word"
                         data-onboarding-email
-                    />.
+                    />
                 </p>
                 <div class="flex flex-col gap-2">
                     <label class="block">
                         <span class="label block mb-2 text-ink-muted">Username</span>
                         <input
                             id="onboarding-username"
-                            class="h-12 w-full px-4 border-2 border-ink font-mono text-[13px] bg-transparent"
+                            class="onboarding-field__control font-mono text-sm"
                             aria-describedby="onboarding-username-error"
                             aria-invalid="false"
                             autocomplete="username"
@@ -164,7 +190,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
                         data-field-error
                         hidden
                     />
-                    <p class="text-[13px] text-ink-subtle">
+                    <p class="text-sm text-ink-subtle">
                         Three to twenty letters, numbers, or underscores.
                     </p>
                 </div>
@@ -173,7 +199,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
                         <span class="label block mb-2 text-ink-muted">Password</span>
                         <input
                             id="onboarding-password"
-                            class="h-12 w-full px-4 border-2 border-ink font-sans bg-transparent"
+                            class="onboarding-field__control font-sans"
                             aria-describedby="onboarding-password-error"
                             aria-invalid="false"
                             autocomplete="new-password"
@@ -205,7 +231,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
                         data-field-error
                         hidden
                     />
-                    <p class="text-[13px] text-ink-subtle">
+                    <p class="text-sm text-ink-subtle">
                         At least {PASSWORD_MIN_LENGTH} characters with a letter and a digit. It is
                         never written down &mdash; if you step back to this page you will type it
                         again.
@@ -216,7 +242,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
                         <span class="label block mb-2 text-ink-muted">Confirm password</span>
                         <input
                             id="onboarding-confirm"
-                            class="h-12 w-full px-4 border-2 border-ink font-sans bg-transparent"
+                            class="onboarding-field__control font-sans"
                             aria-describedby="onboarding-confirm-error"
                             aria-invalid="false"
                             autocomplete="new-password"
@@ -241,12 +267,15 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
                 <legend class="font-extrabold font-sans text-2xl tracking-tight">
                     Profile
                 </legend>
+                <p class="text-smd text-ink-muted">
+                    What the roster shows about you.
+                </p>
                 <div class="flex flex-col gap-2">
                     <label class="block">
                         <span class="label block mb-2 text-ink-muted">Display name</span>
                         <input
                             id="onboarding-display-name"
-                            class="h-12 w-full px-4 border-2 border-ink font-sans bg-transparent"
+                            class="onboarding-field__control font-sans"
                             aria-describedby="onboarding-display-name-error"
                             aria-invalid="false"
                             autocomplete="nickname"
@@ -268,7 +297,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
                         <span class="label block mb-2 text-ink-muted">Location</span>
                         <input
                             id="onboarding-location"
-                            class="h-12 w-full px-4 border-2 border-ink font-sans bg-transparent"
+                            class="onboarding-field__control font-sans"
                             aria-describedby="onboarding-location-error"
                             aria-invalid="false"
                             autocomplete="address-level2"
@@ -285,7 +314,9 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
                     />
                 </div>
                 <fieldset class="onboarding__group flex flex-col gap-3">
-                    <legend class="label mb-1 text-ink-muted">What do you make?</legend>
+                    <legend class="label onboarding__legend mb-1 text-ink-muted">
+                        What do you make? <span class="onboarding__hint">{genres.length} tags &middot; pick at least one</span>
+                    </legend>
                     <div class="flex flex-wrap gap-2">
                         {genres.map(genre => (
                             <label class="onboarding__chip">
@@ -309,8 +340,8 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
                     />
                 </fieldset>
                 <fieldset class="onboarding__group flex flex-col gap-3">
-                    <legend class="label mb-1 text-ink-muted">
-                        What do you do? <span class="onboarding__optional">optional</span>
+                    <legend class="label onboarding__legend mb-1 text-ink-muted">
+                        What do you do? <span class="onboarding__hint">{roles.length} tags &middot; optional</span>
                     </legend>
                     <div class="flex flex-wrap gap-2">
                         {roles.map(role => (
@@ -343,30 +374,35 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
                 <legend class="font-extrabold font-sans text-2xl tracking-tight">
                     Questionnaire
                 </legend>
+                <p class="text-smd text-ink-muted">
+                    Four quick questions to place you in the room.
+                </p>
                 {QUESTIONNAIRE.map(question => (question.kind === 'select'
                     ? (
                             <div class="flex flex-col gap-2">
                                 <label class="block">
                                     <span class="label block mb-2 text-ink-muted">{question.label}</span>
-                                    <select
-                                        id={`onboarding-${question.id}`}
-                                        class="h-12 w-full px-4 border-2 border-ink bg-transparent"
-                                        aria-describedby={`onboarding-${question.id}-error`}
-                                        aria-invalid="false"
-                                        name={question.id}
-                                        required
-                                    >
-                                        <option
-                                            disabled
-                                            selected
-                                            value=""
+                                    <span class="onboarding-field__select">
+                                        <select
+                                            id={`onboarding-${question.id}`}
+                                            class="onboarding-field__control onboarding-field__control--select font-sans"
+                                            aria-describedby={`onboarding-${question.id}-error`}
+                                            aria-invalid="false"
+                                            name={question.id}
+                                            required
                                         >
-                                            Choose one&hellip;
-                                        </option>
-                                        {question.options.map(option => (
-                                            <option value={option.value}>{option.label}</option>
-                                        ))}
-                                    </select>
+                                            <option
+                                                disabled
+                                                selected
+                                                value=""
+                                            >
+                                                Choose one&hellip;
+                                            </option>
+                                            {question.options.map(option => (
+                                                <option value={option.value}>{option.label}</option>
+                                            ))}
+                                        </select>
+                                    </span>
                                 </label>
                                 <p
                                     id={`onboarding-${question.id}-error`}
@@ -378,7 +414,9 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
                         )
                     : (
                             <fieldset class="onboarding__group flex flex-col gap-3">
-                                <legend class="label mb-1 text-ink-muted">{question.label}</legend>
+                                <legend class="label onboarding__legend mb-1 text-ink-muted">
+                                    {question.label} <span class="onboarding__hint">{question.options.length} options &middot; {question.kind === 'radio' ? 'pick one' : 'pick at least one'}</span>
+                                </legend>
                                 <div class="flex flex-wrap gap-2">
                                     {question.options.map(option => (
                                         <label class="onboarding__chip">
@@ -403,7 +441,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
                             </fieldset>
                         )))}
             </fieldset>
-            <div class="flex flex-wrap items-center gap-4">
+            <div class="onboarding-form__foot">
                 <button
                     class="btn"
                     data-onboarding-back
@@ -440,16 +478,30 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         >
             You are in.
         </h2>
-        <p class="max-w-2xl text-[16px] text-ink-inverse-muted">
-            Your profile is set up as&#32;
-            <span
-                class="font-mono wrap-break-word text-[14px]"
-                data-onboarding-handle
-            />&#32;
-            and your welcome Prod is on your account. Prods spend like cash in the store, and they
-            add up every time you show up.
+        <p
+            class="onboarding__handle font-mono text-3xl wrap-break-word"
+            data-onboarding-handle
+        />
+        <ul class="onboarding__stats list-none">
+            <li class="onboarding__stat">
+                <span class="label text-ink-inverse-muted">Prods balance</span>
+                <span
+                    class="font-bold font-mono text-md"
+                    data-onboarding-prods
+                >
+                    1 Prod
+                </span>
+            </li>
+            <li class="onboarding__stat">
+                <span class="label text-ink-inverse-muted">Profile</span>
+                <span class="font-bold font-mono text-md">Complete</span>
+            </li>
+        </ul>
+        <p class="max-w-2xl text-md text-ink-inverse-muted">
+            Your welcome Prod is on your account. Prods spend like cash in the store, and they add
+            up every time you show up.
         </p>
-        <p class="max-w-2xl text-[15px] text-ink-inverse-muted">
+        <p class="max-w-2xl text-smd text-ink-inverse-muted">
             Nothing you typed left this browser, and the draft that carried you between steps has
             been deleted.
         </p>
@@ -471,6 +523,169 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
 </section>
 
 <style>
+    .onboarding-field__control {
+        background-color: var(--color-surface);
+        border: 2px solid var(--color-ink);
+        color: var(--color-ink);
+        min-height: var(--control-size);
+        padding: 0 var(--space-sm);
+        transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            box-shadow var(--duration-fast) var(--motion-ease-ui);
+        width: 100%;
+    }
+
+    .onboarding-field__control:focus-visible {
+        background-color: var(--color-surface-raised);
+        border-color: var(--color-accent-deep);
+    }
+
+    .onboarding-field__control:hover {
+        background-color: var(--color-surface-raised);
+    }
+
+    .onboarding-field__control[aria-invalid='true'] {
+        border-color: var(--color-accent-deep);
+        box-shadow: 3px 3px 0 0 var(--color-accent-20);
+    }
+
+    .onboarding-field__control--select {
+        appearance: none;
+        padding-right: calc(2 * var(--space-sm) + 12px);
+    }
+
+    .onboarding-field__select {
+        display: block;
+        position: relative;
+    }
+
+    .onboarding-field__select::after {
+        background-color: var(--color-ink);
+        content: '';
+        height: 8px;
+        mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' fill='none' stroke='currentColor' stroke-width='2'/></svg>");
+        mask-repeat: no-repeat;
+        mask-size: 12px 8px;
+        pointer-events: none;
+        position: absolute;
+        right: var(--space-sm);
+        top: calc(50% - 4px);
+        width: 12px;
+    }
+
+    .onboarding-form {
+        padding: var(--space-lg);
+    }
+
+    .onboarding-form__foot {
+        align-items: center;
+        border-top: 2px solid var(--color-ink);
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-sm);
+        padding-top: var(--space-md);
+    }
+
+    .onboarding-rail {
+        --rail-node: 34px;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .onboarding-rail__blurb {
+        color: var(--color-ink-subtle);
+        font-size: var(--text-sm);
+        line-height: 1.4;
+    }
+
+    .onboarding-rail__body {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3xs);
+        min-width: 0;
+    }
+
+    .onboarding-rail__check {
+        display: none;
+    }
+
+    .onboarding-rail__name {
+        color: var(--color-ink-muted);
+        line-height: 1.3;
+    }
+
+    .onboarding-rail__node {
+        align-items: center;
+        background-color: var(--color-surface-raised);
+        border: 2px solid var(--color-ink);
+        color: var(--color-ink-muted);
+        display: flex;
+        flex-shrink: 0;
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        font-weight: 700;
+        height: var(--rail-node);
+        justify-content: center;
+        line-height: 1;
+        transition: background-color var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui);
+        width: var(--rail-node);
+    }
+
+    .onboarding-rail__step {
+        align-items: center;
+        column-gap: var(--space-sm);
+        display: grid;
+        grid-template-columns: var(--rail-node) minmax(0, 1fr);
+        position: relative;
+    }
+
+    .onboarding-rail__step:has(~ [aria-current='step']) .onboarding-rail__check {
+        display: block;
+    }
+
+    .onboarding-rail__step:has(~ [aria-current='step']) .onboarding-rail__index {
+        display: none;
+    }
+
+    .onboarding-rail__step:has(~ [aria-current='step']) .onboarding-rail__node {
+        background-color: var(--color-ink);
+        border-color: var(--color-ink);
+        color: var(--color-ink-inverse);
+    }
+
+    .onboarding-rail__step:not(:last-child)::after {
+        background-color: var(--color-ink-20);
+        bottom: calc(-1 * var(--space-md));
+        content: '';
+        left: calc(var(--rail-node) / 2 - 1px);
+        position: absolute;
+        top: var(--rail-node);
+        width: 2px;
+    }
+
+    .onboarding-rail__step:not(:last-child):has(~ [aria-current='step'])::after {
+        background-color: var(--color-ink);
+    }
+
+    .onboarding-rail__step[aria-current='step'] .onboarding-rail__blurb,
+    .onboarding-rail__step[aria-current='step'] .onboarding-rail__name {
+        color: var(--color-ink);
+    }
+
+    .onboarding-rail__step[aria-current='step'] .onboarding-rail__node {
+        background-color: var(--color-accent-deep);
+        border-color: var(--color-accent-deep);
+        color: var(--color-ink-inverse);
+    }
+
+    .onboarding__aside {
+        align-self: start;
+        position: sticky;
+        top: calc(var(--header-height) + var(--space-md));
+    }
+
     .onboarding__box {
         appearance: none;
         background-color: transparent;
@@ -478,6 +693,10 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         flex-shrink: 0;
         height: 24px;
         margin: 0;
+        transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            box-shadow var(--duration-fast) var(--motion-ease-ui);
         width: 24px;
     }
 
@@ -487,10 +706,11 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         box-shadow: inset 0 0 0 4px var(--color-surface-raised);
     }
 
-    .onboarding__done .btn:not(.btn--accent):hover {
-        background-color: var(--color-ink-inverse);
-        border-color: var(--color-ink-inverse);
-        color: var(--color-ink);
+    .onboarding__box:checked:focus-visible {
+        box-shadow:
+            inset 0 0 0 4px var(--color-surface-raised),
+            0 0 0 2px var(--color-surface),
+            0 0 0 4px var(--color-accent-deep);
     }
 
     .onboarding__chip {
@@ -504,6 +724,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         min-height: 50px;
         padding: var(--space-2xs) var(--space-sm);
         text-transform: uppercase;
+        transition: background-color var(--duration-fast) var(--motion-ease-ui);
     }
 
     .onboarding__chip:active {
@@ -518,14 +739,36 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         background-color: var(--color-surface-sunken);
     }
 
+    .onboarding__done .btn:not(.btn--accent):hover {
+        background-color: var(--color-ink-inverse);
+        border-color: var(--color-ink-inverse);
+        color: var(--color-ink);
+    }
+
+    .onboarding__flow {
+        align-items: start;
+        column-gap: var(--space-2xl);
+        display: grid;
+        grid-template-columns: minmax(190px, 0.28fr) minmax(0, 1fr);
+        row-gap: var(--space-lg);
+    }
+
     .onboarding__group {
         border: 0;
         padding: 0;
     }
 
-    .onboarding__optional {
+    .onboarding__handle {
+        color: var(--color-pulse);
+    }
+
+    .onboarding__hint {
         color: var(--color-ink-subtle);
         text-transform: none;
+    }
+
+    .onboarding__legend {
+        line-height: 1.5;
     }
 
     .onboarding__pane {
@@ -533,13 +776,20 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         padding: 0;
     }
 
-    .onboarding__step {
-        min-width: 140px;
+    .onboarding__stat {
+        border: 2px solid var(--color-ink-inverse);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3xs);
+        justify-content: center;
+        min-height: 50px;
+        padding: var(--space-2xs) var(--space-sm);
     }
 
-    .onboarding__step[aria-current='step'] {
-        background-color: var(--color-ink);
-        color: var(--color-ink-inverse);
+    .onboarding__stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-xs);
     }
 
     .strength__bar {
@@ -552,7 +802,53 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         background-color: var(--color-accent-deep);
     }
 
+    @media (max-width: 768px) {
+        .onboarding-rail {
+            --rail-node: 28px;
+            border: 2px solid var(--color-ink);
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 0;
+        }
+
+        .onboarding-rail__blurb {
+            display: none;
+        }
+
+        .onboarding-rail__step {
+            flex: 1 1 150px;
+            padding: var(--space-xs);
+        }
+
+        .onboarding-rail__step + .onboarding-rail__step {
+            border-left: 2px solid var(--color-ink);
+        }
+
+        .onboarding-rail__step:not(:last-child)::after {
+            content: none;
+        }
+
+        .onboarding__aside {
+            position: static;
+        }
+
+        .onboarding__flow {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
     @media (forced-colors: active) {
+        .onboarding-rail__node {
+            border-color: CanvasText;
+            forced-color-adjust: none;
+        }
+
+        .onboarding-rail__step:has(~ [aria-current='step']) .onboarding-rail__node,
+        .onboarding-rail__step[aria-current='step'] .onboarding-rail__node {
+            background-color: SelectedItem;
+            color: SelectedItemText;
+        }
+
         .onboarding__box {
             background-color: Canvas;
             border-color: CanvasText;
@@ -568,15 +864,16 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
 </style>
 
 <script>
-    import { ONBOARDING_TOKEN_PARAM, PASSWORD_MIN_LENGTH, QUESTIONNAIRE } from '@lib/constants';
-    import { clearFieldErrors, focusFirstError, setFieldErrors, validateFields } from '@lib/forms';
+    import { ONBOARDING_TOKEN_PARAM, QUESTIONNAIRE } from '@lib/constants';
+    import { clearFieldErrors, confirmRule, focusFirstError, passwordRule, setFieldErrors, validateFields } from '@lib/forms';
     import { clearOnboardingDraft, getOnboardingDraft, isReservedUsername, saveOnboardingDraft, scorePassword, verifyOnboardingToken } from '@lib/onboarding';
     import { registerPageScript, setMessage, setPending, setText } from '@lib/utils';
     import { startSession, updateSession } from '@lib/session';
+    import { toast } from '@lib/toasts';
 
     const ACCOUNT_RULES: Record<string, FieldRule> = {
-        confirm: { message: 'Both passwords must match.', required: true, validate: (value, values) => value === values.get('password') },
-        password: { message: `Use at least ${PASSWORD_MIN_LENGTH} characters, including a letter and a digit.`, min: PASSWORD_MIN_LENGTH, required: true, validate: hasLetterAndDigit },
+        confirm: confirmRule(),
+        password: passwordRule(),
         username: { message: 'Use 3 to 20 letters, numbers, or underscores.', pattern: /^[a-z0-9_]{3,20}$/i, required: true },
     };
 
@@ -646,9 +943,11 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         const flow = document.querySelector<HTMLElement>('[data-onboarding-flow]');
 
         setText(document.querySelector<HTMLElement>('[data-onboarding-handle]'), `@${username}`);
+        setText(document.querySelector<HTMLElement>('[data-onboarding-prods]'), result.session.prods === 1 ? '1 Prod' : `${result.session.prods} Prods`);
         flow?.setAttribute('hidden', '');
         done?.removeAttribute('hidden');
         document.querySelector<HTMLElement>('[data-onboarding-heading]')?.focus();
+        toast('Profile complete. Your welcome Prod is on your account.', 'success');
     }
 
     function handleBack(form: HTMLFormElement) {
@@ -696,10 +995,6 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         step += 1;
         saveOnboardingDraft({ ...collect(form), passwordSet: true, step: step + 1 });
         showStep(form, true);
-    }
-
-    function hasLetterAndDigit(value: string) {
-        return /[a-z]/i.test(value) && /\d/.test(value);
     }
 
     function initOnboardingFlow(signal: AbortSignal) {
@@ -806,8 +1101,8 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
     }
 
     function wouldEcho(password: string, username: string) {
-        const local = accountEmail.split('@').at(0) ?? '';
         const candidate = password.toLowerCase();
+        const local = accountEmail.split('@').at(0) ?? '';
 
         return candidate === username.toLowerCase() || candidate === local.toLowerCase();
     }

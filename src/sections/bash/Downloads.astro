@@ -24,7 +24,7 @@ const assets = downloads.filter(asset => asset.data.title.includes(program.name)
         >
             Take the room home
         </SectionHead>
-        <div class="grid grid-cols-1 gap-12 md:grid-cols-[1.3fr_1fr]">
+        <div class="grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
             <ul
                 class="bash-assets__list list-none"
                 data-motion-stagger="rise"
@@ -33,7 +33,7 @@ const assets = downloads.filter(asset => asset.data.title.includes(program.name)
                     <li class="bash-assets__row">
                         <div class="flex flex-col gap-1">
                             <a
-                                class="bash-assets__link hover:text-accent-deep font-bold font-sans underline decoration-2 decoration-accent underline-offset-4 transition-colors"
+                                class="bash-assets__link hover:text-accent-deep decoration-2 decoration-accent font-bold font-sans underline underline-offset-4"
                                 href={`/resources#${asset.id}`}
                             >
                                 {asset.data.title}
@@ -50,8 +50,9 @@ const assets = downloads.filter(asset => asset.data.title.includes(program.name)
                 ))}
             </ul>
             <aside
-                class="slab slab--sunk flex flex-col gap-4 self-start"
+                class="slab slab--sunk flex flex-col self-start gap-4"
                 aria-label="About the resource library"
+                data-motion="unfold"
             >
                 <p class="text-smd text-ink-muted">
                     Every asset the Alliance publishes &mdash; press material, event packs, and the working
@@ -73,6 +74,11 @@ const assets = downloads.filter(asset => asset.data.title.includes(program.name)
     .bash-assets__link {
         display: inline-block;
         padding-block: var(--space-sm);
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .bash-assets__link:active {
+        transform: translateY(1px);
     }
 
     .bash-assets__list {

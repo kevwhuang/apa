@@ -1,0 +1,106 @@
+---
+import PageHead from '@components/shared/PageHead.astro';
+import { LINKS } from '@lib/constants';
+import { getProgram } from '@lib/utils';
+
+const HOUSE_RULES: { detail: string; href?: string; term: string }[] = [
+    { detail: 'Monthly, midweek, halfway between assemblies', term: 'Cadence' },
+    { detail: 'A borrowed room, announced to members ahead of the date', term: 'Venue' },
+    { detail: 'On Meetup', href: LINKS.meetup, term: 'RSVP' },
+];
+
+const program = getProgram('hangout');
+---
+
+<section
+    class="stage stage--hangout stage--tight border-b-2 border-ink"
+    aria-labelledby="hangout-title"
+>
+    <div>
+        <PageHead
+            class="max-w-4xl font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
+            eyebrow={`${program.shortName} / ${program.cadence}`}
+            headingId="hangout-title"
+        >
+            No laptops.<br />
+            <span class="text-accent-deep">No agenda.</span>
+        </PageHead>
+        <div class="grid grid-cols-1 gap-12 mt-6 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+            <div class="flex flex-col gap-5">
+                <p
+                    class="max-w-2xl leading-relaxed text-lmd text-ink-muted"
+                    data-motion="blur"
+                >
+                    {program.summary}
+                </p>
+                <p
+                    class="max-w-2xl leading-relaxed text-smd text-ink-muted"
+                    data-motion="rise"
+                >
+                    It runs two hours on a midweek evening, in a room booked for the occasion and
+                    passed to members ahead of the date. Nothing to prepare, nothing to present
+                    &mdash; the only thing on the schedule is whoever turns up.
+                </p>
+            </div>
+            <aside
+                class="slab slab--card tilt self-start"
+                aria-label="How a hangout runs"
+                data-motion="rise"
+            >
+                <p class="label mb-4 text-accent-deep">House rules / Every month</p>
+                <dl>
+                    {HOUSE_RULES.map(rule => (
+                        <div class="house-rules__row">
+                            <dt class="label pt-1 text-ink-subtle">{rule.term}</dt>
+                            <dd class="text-smd">
+                                {rule.href
+                                    ? (
+                                            <a
+                                                class="house-rules__link hover:text-accent-deep decoration-2 decoration-accent font-bold underline underline-offset-4"
+                                                href={rule.href}
+                                                rel="noopener noreferrer"
+                                                target="_blank"
+                                            >
+                                                {rule.detail}
+                                                <span class="sr-only"> (opens in a new tab)</span>
+                                            </a>
+                                        )
+                                    : rule.detail}
+                            </dd>
+                        </div>
+                    ))}
+                </dl>
+            </aside>
+        </div>
+    </div>
+</section>
+
+<style>
+    .house-rules__link {
+        display: inline-block;
+        padding-block: var(--space-xs);
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .house-rules__link:active {
+        transform: translateY(1px);
+    }
+
+    .house-rules__row {
+        align-items: baseline;
+        border-top: 1px solid var(--color-ink-20);
+        display: grid;
+        gap: var(--space-xs);
+        grid-template-columns: 76px minmax(0, 1fr);
+        padding-block: var(--space-sm);
+    }
+
+    .house-rules__row:first-child {
+        border-top: 0;
+        padding-top: 0;
+    }
+
+    .house-rules__row:last-child {
+        padding-bottom: 0;
+    }
+</style>

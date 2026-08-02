@@ -2,30 +2,32 @@ import { BYTES_PER_KILOBYTE, BYTES_PER_MEGABYTE, CENTS_PER_DOLLAR, COMMERCE, EVE
 
 import type { CollectionEntry } from 'astro:content';
 
+export type ProgramEvent = CalendarEvent & { end?: Date };
+
+export interface FilterGroupOptions {
+    buttons: NodeListOf<HTMLButtonElement>;
+    cards: NodeListOf<HTMLElement>;
+    dataKey: string;
+    emptyElement?: HTMLElement | null;
+    initial: string;
+    matches: (card: HTMLElement, active: string) => boolean;
+    searchElement?: HTMLInputElement | null;
+    signal: AbortSignal;
+    status?: (shown: number, total: number, active: string, query: string) => string;
+    statusElement?: HTMLElement | null;
+}
+
+export interface SearchFieldOptions {
+    clearElements: NodeListOf<HTMLButtonElement>;
+    searchElement: HTMLInputElement | null;
+    signal: AbortSignal;
+}
+
 const ISO_DATE_LENGTH = 10;
 
 const MAX_INITIALS = 2;
 
 const SECONDS_PER_MINUTE = 60;
-
-export function applyFilter(
-    buttons: NodeListOf<HTMLButtonElement>,
-    cards: NodeListOf<HTMLElement>,
-    active: string,
-    dataKey: string,
-    matches: (card: HTMLElement, active: string) => boolean,
-): void {
-    buttons.forEach((button) => {
-        const on = (button.dataset[dataKey] ?? '') === active;
-
-        button.classList.toggle('is-active', on);
-        button.setAttribute('aria-pressed', String(on));
-    });
-
-    cards.forEach((card) => {
-        card.classList.toggle('hidden', !matches(card, active));
-    });
-}
 
 export function delay(milliseconds: number): Promise<void> {
     return new Promise((resolve) => {
@@ -66,6 +68,15 @@ export function formatDateOnly(date: Date): string {
         month: 'short',
         timeZone: 'UTC',
         weekday: 'short',
+        year: 'numeric',
+    });
+}
+
+export function formatDateStamp(date: Date): string {
+    return date.toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'short',
+        timeZone: 'America/Chicago',
         year: 'numeric',
     });
 }
@@ -134,6 +145,83 @@ function handleRovingKeydown(event: KeyboardEvent, buttons: HTMLButtonElement[],
     buttons[next].focus();
 }
 
+export function initFilterGroup(options: FilterGroupOptions): void {
+    const { buttons, cards, dataKey, emptyElement, initial, matches, searchElement, signal, status, statusElement } = options;
+
+    let active = initial;
+
+    function apply() {
+        const query = (searchElement?.value ?? '').trim();
+        const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+
+        let shown = 0;
+
+        buttons.forEach((button) => {
+            const on = (button.dataset[dataKey] ?? '') === active;
+
+            button.classList.toggle('is-active', on);
+            button.setAttribute('aria-pressed', String(on));
+        });
+
+        cards.forEach((card) => {
+            const haystack = card.dataset.search ?? '';
+            const on = matches(card, active) && tokens.every(token => haystack.includes(token));
+
+            if (on) shown += 1;
+
+            card.classList.toggle('hidden', !on);
+        });
+
+        if (emptyElement) {
+            setText(emptyElement.querySelector('[data-search-echo]'), query);
+            setHidden(emptyElement, shown > 0);
+        }
+
+        if (statusElement && status) statusElement.textContent = status(shown, cards.length, active, query);
+    }
+
+    function handleClick(button: HTMLButtonElement) {
+        active = button.dataset[dataKey] ?? initial;
+        apply();
+    }
+
+    apply();
+    rovingFocus(buttons, signal);
+
+    buttons.forEach((button) => {
+        button.addEventListener('click', () => handleClick(button), { signal });
+    });
+
+    searchElement?.addEventListener('input', apply, { signal });
+}
+
+export function initSearchField(options: SearchFieldOptions): void {
+    const { clearElements, searchElement, signal } = options;
+
+    if (!searchElement) return;
+
+    function handleClear(input: HTMLInputElement) {
+        input.value = '';
+        input.dispatchEvent(new Event('input'));
+        input.focus();
+    }
+
+    function sync(input: HTMLInputElement) {
+        const empty = input.value.length === 0;
+
+        clearElements.forEach((button) => {
+            button.hidden = empty;
+        });
+    }
+
+    sync(searchElement);
+    searchElement.addEventListener('input', () => sync(searchElement), { signal });
+
+    clearElements.forEach((button) => {
+        button.addEventListener('click', () => handleClear(searchElement), { signal });
+    });
+}
+
 export function mergeAssets(downloads: CollectionEntry<'downloads'>[], docs: CollectionEntry<'docs'>[]): CollectionEntry<'downloads'>[] {
     return downloads
         .map(entry => toAsset(entry, docs))
@@ -184,6 +272,12 @@ export function rovingFocus(buttons: NodeListOf<HTMLButtonElement>, signal?: Abo
     });
 }
 
+export function setHidden(element: HTMLElement | null, hidden: boolean): void {
+    if (!element) return;
+
+    element.hidden = hidden;
+}
+
 export function setMessage(element: HTMLElement | null, message: string): void {
     if (!element) return;
 
@@ -232,9 +326,10 @@ function toCalendarBashEvent(entry: CollectionEntry<'bash'>) {
     };
 }
 
-function toCalendarEvent(entry: CollectionEntry<'events'>) {
+export function toCalendarEvent(entry: CollectionEntry<'events'>) {
     return {
         date: entry.data.date,
+        end: entry.data.end,
         excerpt: entry.data.excerpt,
         id: entry.id,
         location: entry.data.location,
@@ -259,7 +354,6 @@ export function toIsoDate(date: Date): string {
 
 export function toProducerRecord(producer: CollectionEntry<'producers'>): ProducerRecord {
     return {
-        availability: producer.data.availability,
         avatar: producer.data.avatar ?? null,
         bio: producer.data.bio,
         featured: producer.data.featured,

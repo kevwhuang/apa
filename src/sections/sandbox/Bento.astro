@@ -3,6 +3,7 @@ import IconPause from '@components/icons/Pause.astro';
 import IconPlay from '@components/icons/Play.astro';
 import IconUpload from '@components/icons/Upload.astro';
 import PageHead from '@components/shared/PageHead.astro';
+import SectionHead from '@components/shared/SectionHead.astro';
 import {
     CHORUS_DEPTH_DEFAULT,
     CHORUS_RATE_DEFAULT,
@@ -12,11 +13,17 @@ import {
     DELAY_TIME_DEFAULT,
     FILTER_RESONANCE_DEFAULT,
     GATE_THRESHOLD_DEFAULT,
+    HIGHPASS_RESONANCE_DEFAULT,
     LIMITER_THRESHOLD_DEFAULT,
+    PAN_POSITION_DEFAULT,
     REVERB_DECAY_DEFAULT,
     REVERB_WET_DEFAULT,
     SATURATOR_DRIVE_DEFAULT,
+    TREMOLO_DEPTH_DEFAULT,
+    TREMOLO_RATE_DEFAULT,
+    TRIM_GAIN_DEFAULT,
 } from '@lib/audio/sandbox/blocks';
+import { MODULE_NAMES } from '@lib/audio/sandbox/rack';
 import { SANDBOX_EXTENSION_LIST } from '@lib/audio/sandbox/loader';
 import { UPLOAD } from '@lib/constants';
 import { formatBytes } from '@lib/utils';
@@ -24,15 +31,12 @@ import { formatBytes } from '@lib/utils';
 interface Module {
     blurb: string;
     id: string;
-    kind: string;
-    name: string;
+    kind: keyof typeof MODULE_NAMES;
     readout?: string;
     role: string;
-    slab: string;
     sliders: ModuleSlider[];
-    span: number;
-    stages?: ModuleStage[];
     viz?: 'canvas' | 'readout';
+    well?: boolean;
 }
 
 interface ModuleSlider {
@@ -45,169 +49,156 @@ interface ModuleSlider {
     value: number;
 }
 
-interface ModuleStage {
-    id: string;
-    label: string;
-}
-
 const MODULES: Module[] = [
     {
-        blurb: 'Drop a file, press play, and pull the decay slider \u2014 the impulse response regenerates live. Bypass A/Bs the room against the dry signal.',
-        id: 'chamber',
-        kind: 'reverb',
-        name: 'Chamber',
-        role: 'Reverb',
-        slab: 'slab--card slab--well',
+        blurb: 'Sets the level running into everything downstream. Pull it back before you drive the saturator, or lean on it to push the compressor harder.',
+        id: 'tare',
+        kind: 'trim',
+        role: 'Input trim',
         sliders: [
-            { display: '2.4 s', label: 'Decay', max: 6, min: 0.2, param: 'decay', step: 0.1, value: REVERB_DECAY_DEFAULT },
-            { display: '40%', label: 'Wet', max: 1, min: 0, param: 'wet', step: 0.01, value: REVERB_WET_DEFAULT },
+            { display: '+0.0 dB', label: 'Gain', max: 12, min: -24, param: 'gain', step: 0.5, value: TRIM_GAIN_DEFAULT },
         ],
-        span: 2,
     },
     {
-        blurb: 'Low and high shelves around a fixed mid band. Boost or cut while the loop plays; bypass hears the flat file.',
-        id: 'ledger',
-        kind: 'eq',
-        name: 'Ledger',
-        role: 'Equalizer',
-        slab: 'slab--card',
+        blurb: 'Cuts everything under the corner, where rumble and mud collect. The scale is logarithmic, and a high Q rings the corner itself.',
+        id: 'ridge',
+        kind: 'highpass',
+        role: 'High-pass filter',
         sliders: [
-            { display: '+4.0 dB', label: 'Low', max: 12, min: -12, param: 'low', step: 0.5, value: 4 },
-            { display: '+3.0 dB', label: 'High', max: 12, min: -12, param: 'high', step: 0.5, value: 3 },
+            { display: '126 Hz', label: 'Cutoff', max: 1, min: 0, param: 'cutoff', step: 0.001, value: 0.4 },
+            { display: 'Q 1.0', label: 'Reso', max: 12, min: 0.5, param: 'resonance', step: 0.1, value: HIGHPASS_RESONANCE_DEFAULT },
         ],
-        span: 2,
     },
     {
-        blurb: 'A passthrough level meter \u2014 the audio is untouched either way. Bypass freezes the bars so you can read a peak.',
-        id: 'needle',
-        kind: 'meter',
-        name: 'Needle',
-        role: 'Metering',
-        slab: 'slab--card',
-        sliders: [],
-        span: 2,
-        viz: 'canvas',
-    },
-    {
-        blurb: 'Pull the threshold down until the gain-reduction readout moves, then set the ratio. Bypass hears the uncompressed file.',
-        id: 'clamp',
-        kind: 'compressor',
-        name: 'Clamp',
-        readout: 'GR 0.0 dB',
-        role: 'Compressor',
-        slab: 'slab--card',
-        sliders: [
-            { display: '-28 dB', label: 'Thresh', max: 0, min: -60, param: 'threshold', step: 1, value: COMPRESSOR_THRESHOLD_DEFAULT },
-            { display: '4.0:1', label: 'Ratio', max: 20, min: 1, param: 'ratio', step: 0.5, value: COMPRESSOR_RATIO_DEFAULT },
-        ],
-        span: 2,
-        viz: 'readout',
-    },
-    {
-        blurb: 'Time and feedback into a real feedback loop, capped before self-oscillation. Toggle bypass mid-repeat to hear the tails cut around.',
-        id: 'offset',
-        kind: 'delay',
-        name: 'Offset',
-        role: 'Delay',
-        slab: 'slab--card slab--cut',
-        sliders: [
-            { display: '0.35 s', label: 'Time', max: 1, min: 0.05, param: 'time', step: 0.01, value: DELAY_TIME_DEFAULT },
-            { display: '45%', label: 'Feedback', max: 0.85, min: 0, param: 'feedback', step: 0.01, value: DELAY_FEEDBACK_DEFAULT },
-        ],
-        span: 2,
-    },
-    {
-        blurb: 'A resonant low-pass. Sweep the cutoff \u2014 the scale is logarithmic, like your ears \u2014 and raise Q to ring the corner.',
+        blurb: 'The other end of the same idea \u2014 a resonant low-pass. Sweep the cutoff against a running loop and raise Q until the corner sings.',
         id: 'sieve',
         kind: 'filter',
-        name: 'Sieve',
-        role: 'Filter',
-        slab: 'slab--card',
+        role: 'Low-pass filter',
         sliders: [
             { display: '1.15 kHz', label: 'Cutoff', max: 1, min: 0, param: 'cutoff', step: 0.001, value: 0.55 },
             { display: 'Q 4.0', label: 'Reso', max: 18, min: 0.5, param: 'resonance', step: 0.1, value: FILTER_RESONANCE_DEFAULT },
         ],
-        span: 2,
     },
     {
-        blurb: 'A tanh drive curve, oversampled 4x, with makeup gain tied to drive. Push it, then bypass to check you are not just louder.',
-        id: 'grit',
-        kind: 'saturator',
-        name: 'Grit',
-        role: 'Saturator',
-        slab: 'slab--card',
+        blurb: 'Low and high shelves around a fixed mid band. Boost or cut either end and the tilt lands on the chain immediately.',
+        id: 'ledger',
+        kind: 'eq',
+        role: 'Equalizer',
         sliders: [
-            { display: '3.0', label: 'Drive', max: 10, min: 1, param: 'drive', step: 0.1, value: SATURATOR_DRIVE_DEFAULT },
+            { display: '+4.0 dB', label: 'Low', max: 12, min: -12, param: 'low', step: 0.5, value: 4 },
+            { display: '+3.0 dB', label: 'High', max: 12, min: -12, param: 'high', step: 0.5, value: 3 },
         ],
-        span: 2,
-    },
-    {
-        blurb: 'Feed it something monophonic and read the pitch \u2014 Hz, nearest note, cents off. Bypass pauses detection; audio passes untouched.',
-        id: 'pitchfork',
-        kind: 'tuner',
-        name: 'Pitchfork',
-        readout: '\u2014',
-        role: 'Tuner',
-        slab: 'slab--card',
-        sliders: [],
-        span: 2,
-        viz: 'readout',
-    },
-    {
-        blurb: 'Two modulated delay lines against the dry path. Rate moves the LFO, depth widens the sweep.',
-        id: 'swell',
-        kind: 'chorus',
-        name: 'Swell',
-        role: 'Chorus',
-        slab: 'slab--card',
-        sliders: [
-            { display: '1.20 Hz', label: 'Rate', max: 5, min: 0.1, param: 'rate', step: 0.05, value: CHORUS_RATE_DEFAULT },
-            { display: '50%', label: 'Depth', max: 1, min: 0, param: 'depth', step: 0.01, value: CHORUS_DEPTH_DEFAULT },
-        ],
-        span: 2,
-    },
-    {
-        blurb: 'A 20:1 brickwall with a 1 ms attack. Drag the ceiling down and watch the gain-reduction readout catch the peaks.',
-        id: 'ceiling',
-        kind: 'limiter',
-        name: 'Ceiling',
-        readout: 'Ceiling -12.0 dB \u00b7 GR 0.0 dB',
-        role: 'Limiter',
-        slab: 'slab--card slab--well',
-        sliders: [
-            { display: '-12.0 dB', label: 'Ceiling', max: 0, min: -30, param: 'threshold', step: 0.5, value: LIMITER_THRESHOLD_DEFAULT },
-        ],
-        span: 2,
-        viz: 'readout',
     },
     {
         blurb: 'An RMS watcher opens and closes a gain stage with fast ramps. Set the threshold above the noise floor and below the hits.',
         id: 'latch',
         kind: 'gate',
-        name: 'Latch',
         readout: 'Gate closed',
         role: 'Noise gate',
-        slab: 'slab--card',
         sliders: [
             { display: '-45 dB', label: 'Thresh', max: -10, min: -70, param: 'threshold', step: 1, value: GATE_THRESHOLD_DEFAULT },
         ],
-        span: 2,
         viz: 'readout',
     },
     {
-        blurb: 'Saturator into filter into delay \u2014 preset stages proving the engine chains. Toggle a stage chip, or bypass the whole rack.',
-        id: 'bus',
-        kind: 'rack',
-        name: 'Bus',
-        role: 'Host rack',
-        slab: 'slab--card',
-        sliders: [],
-        span: 2,
-        stages: [
-            { id: 'saturator', label: 'Saturator' },
-            { id: 'filter', label: 'Filter' },
-            { id: 'delay', label: 'Delay' },
+        blurb: 'Pull the threshold down until the gain-reduction readout moves, then set how hard it leans once the signal crosses the line.',
+        id: 'clamp',
+        kind: 'compressor',
+        readout: 'GR 0.0 dB',
+        role: 'Compressor',
+        sliders: [
+            { display: '-28 dB', label: 'Thresh', max: 0, min: -60, param: 'threshold', step: 1, value: COMPRESSOR_THRESHOLD_DEFAULT },
+            { display: '4.0:1', label: 'Ratio', max: 20, min: 1, param: 'ratio', step: 0.5, value: COMPRESSOR_RATIO_DEFAULT },
         ],
+        viz: 'readout',
+    },
+    {
+        blurb: 'A tanh drive curve, oversampled 4x, with makeup gain tied to drive so the level stays honest. It sits ahead of the time effects, so the repeats inherit the dirt.',
+        id: 'grit',
+        kind: 'saturator',
+        role: 'Saturator',
+        sliders: [
+            { display: '3.0', label: 'Drive', max: 10, min: 1, param: 'drive', step: 0.1, value: SATURATOR_DRIVE_DEFAULT },
+        ],
+        well: true,
+    },
+    {
+        blurb: 'Two modulated delay lines run against the dry path. Rate moves the LFO, depth widens the sweep either side of it.',
+        id: 'swell',
+        kind: 'chorus',
+        role: 'Chorus',
+        sliders: [
+            { display: '1.20 Hz', label: 'Rate', max: 5, min: 0.1, param: 'rate', step: 0.05, value: CHORUS_RATE_DEFAULT },
+            { display: '50%', label: 'Depth', max: 1, min: 0, param: 'depth', step: 0.01, value: CHORUS_DEPTH_DEFAULT },
+        ],
+    },
+    {
+        blurb: 'One LFO on one gain stage \u2014 amplitude modulation, nothing more. Rate is the speed of the pulse, depth is how far each dip falls.',
+        id: 'flutter',
+        kind: 'tremolo',
+        role: 'Tremolo',
+        sliders: [
+            { display: '4.5 Hz', label: 'Rate', max: 12, min: 0.1, param: 'rate', step: 0.1, value: TREMOLO_RATE_DEFAULT },
+            { display: '60%', label: 'Depth', max: 1, min: 0, param: 'depth', step: 0.01, value: TREMOLO_DEPTH_DEFAULT },
+        ],
+    },
+    {
+        blurb: 'An equal-power panner across the stereo field. Center is dead ahead, and either edge leaves you with a single speaker.',
+        id: 'bearing',
+        kind: 'pan',
+        role: 'Stereo panner',
+        sliders: [
+            { display: 'Center', label: 'Position', max: 1, min: -1, param: 'position', step: 0.01, value: PAN_POSITION_DEFAULT },
+        ],
+    },
+    {
+        blurb: 'Time and feedback into a real feedback loop, capped just short of self-oscillation. Long times with high feedback stack up fast.',
+        id: 'offset',
+        kind: 'delay',
+        role: 'Delay',
+        sliders: [
+            { display: '0.35 s', label: 'Time', max: 1, min: 0.05, param: 'time', step: 0.01, value: DELAY_TIME_DEFAULT },
+            { display: '45%', label: 'Feedback', max: 0.85, min: 0, param: 'feedback', step: 0.01, value: DELAY_FEEDBACK_DEFAULT },
+        ],
+    },
+    {
+        blurb: 'Convolution against a noise impulse that regenerates whenever the decay changes. Wet sets how much of the room reaches the output.',
+        id: 'chamber',
+        kind: 'reverb',
+        role: 'Reverb',
+        sliders: [
+            { display: '2.4 s', label: 'Decay', max: 6, min: 0.2, param: 'decay', step: 0.1, value: REVERB_DECAY_DEFAULT },
+            { display: '40%', label: 'Wet', max: 1, min: 0, param: 'wet', step: 0.01, value: REVERB_WET_DEFAULT },
+        ],
+        well: true,
+    },
+    {
+        blurb: 'A 20:1 brickwall with a 1 ms attack, sitting last before the analysis stages. Drag the ceiling down and the readout catches every peak.',
+        id: 'ceiling',
+        kind: 'limiter',
+        readout: 'Ceiling -12.0 dB \u00b7 GR 0.0 dB',
+        role: 'Limiter',
+        sliders: [
+            { display: '-12.0 dB', label: 'Ceiling', max: 0, min: -30, param: 'threshold', step: 0.5, value: LIMITER_THRESHOLD_DEFAULT },
+        ],
+        viz: 'readout',
+    },
+    {
+        blurb: 'A passthrough level meter reading whatever reaches it. The bars run while the rack plays and rest the moment it stops.',
+        id: 'needle',
+        kind: 'meter',
+        role: 'Metering',
+        sliders: [],
+        viz: 'canvas',
+    },
+    {
+        blurb: 'Autocorrelation on the signal at this point in the chain: hertz, nearest note, cents off. Feed it something monophonic \u2014 chords read as nonsense.',
+        id: 'pitchfork',
+        kind: 'tuner',
+        readout: '\u2014',
+        role: 'Tuner',
+        sliders: [],
+        viz: 'readout',
     },
 ];
 
@@ -220,104 +211,204 @@ const PAD_LENGTH = 2;
 >
     <div>
         <PageHead
-            class="max-w-4xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="max-w-4xl font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
             eyebrow="Resources / Sandbox"
             headingId="sandbox-title"
         >
-            The rack is live.
+            One rack, live.
         </PageHead>
-        <p class="max-w-2xl mt-6 text-lmd text-ink-muted">
-            Twelve Web Audio processors running in your browser &mdash; no install, no license
-            server. Drop an audio file on any module, press play to loop it through the effect,
-            and toggle bypass to hear exactly what the stage is doing.
+        <p
+            class="max-w-2xl mt-6 text-lmd text-ink-muted"
+            data-motion="blur"
+        >
+            Fifteen Web Audio processors wired as a single chain in your browser &mdash; no
+            install, no license server. Load one file at the top, switch modules in and out of the
+            signal path, and hear the rack change under you.
         </p>
     </div>
     <aside
         class="mark slab slab--accent flex flex-wrap items-center gap-4"
         aria-label="How the rack works"
+        data-motion="unfold"
     >
-        <p class="sandbox__flag action-text px-3 py-2">Live processing</p>
+        <p class="action-text sandbox__flag px-3 py-2">Live processing</p>
         <p class="max-w-2xl text-smd">
-            Files stay in this browser &mdash; nothing uploads. Each module takes&#32;
-            {SANDBOX_EXTENSION_LIST} up to {formatBytes(UPLOAD.maxDecodeBytes)}, and one module
-            plays at a time.
+            Files stay in this browser &mdash; nothing uploads. The rack takes&#32;
+            {SANDBOX_EXTENSION_LIST} up to {formatBytes(UPLOAD.maxDecodeBytes)}, and it plays
+            through the site player.
         </p>
     </aside>
 </section>
 
 <section
-    class="stage stage--tight"
-    aria-label="Modules"
+    class="stage stage--tight border-b-2 border-ink"
+    aria-labelledby="rack-title"
 >
-    <ul class="rank sandbox__grid list-none">
-        {MODULES.map((module, index) => (
-            <li class:list={['sandbox__tile', `sandbox__tile--${module.span}`]}>
-                <article
-                    id={module.id}
-                    class:list={[
-                        'module sandbox__card slab',
-                        module.slab,
-                        module.slab.includes('slab--well') && 'module--well',
-                    ]}
-                    data-module={module.kind}
+    <div
+        class="mark rack slab slab--well"
+        data-motion="unfold"
+        data-rack-master
+    >
+        <div class="rack__head">
+            <p class="label rack__eyebrow">Master / One source</p>
+            <h2
+                id="rack-title"
+                class="font-extrabold font-sans text-2xl tracking-tight"
+            >
+                Load a file. Build the chain.
+            </h2>
+        </div>
+        <label
+            class="rack__drop"
+            data-rack-drop
+            for="rack-file"
+        >
+            <IconUpload />
+            <span class="action-text">Drop audio or browse</span>
+            <span class="rack__hint font-mono text-xs">
+                {SANDBOX_EXTENSION_LIST} up to {formatBytes(UPLOAD.maxDecodeBytes)}
+            </span>
+            <input
+                id="rack-file"
+                class="sr-only"
+                accept={UPLOAD.acceptAttribute}
+                aria-label="Load an audio file into the rack"
+                data-rack-input
+                type="file"
+            />
+        </label>
+        <div class="rack__deck">
+            <button
+                class="rack__play"
+                aria-pressed="false"
+                data-rack-toggle
+                disabled
+                type="button"
+            >
+                <span data-rack-icon-play><IconPlay /></span>
+                <span
+                    data-rack-icon-pause
+                    hidden
                 >
-                    <p class="label module__role flex flex-wrap items-baseline gap-2">
-                        <span class="module__index">{String(index + 1).padStart(PAD_LENGTH, '0')}</span>
-                        <span>{module.role}</span>
-                    </p>
-                    <h2 class="module__name font-extrabold font-sans text-xl tracking-tight">
-                        {module.name}
-                    </h2>
-                    <p class="module__blurb leading-relaxed text-[13px]">
-                        {module.blurb}
-                    </p>
-                    <label
-                        class="module__drop"
-                        data-module-drop
-                        for={`${module.id}-file`}
-                    >
-                        <IconUpload />
-                        <span class="action-text">Drop audio or browse</span>
-                        <input
-                            id={`${module.id}-file`}
-                            class="sr-only"
-                            accept={UPLOAD.acceptAttribute}
-                            aria-label={`Drop audio or browse \u2014 ${module.name}`}
-                            data-module-input
-                            type="file"
-                        />
-                    </label>
-                    <p
-                        class="module__meta font-mono text-xs"
-                        aria-live="polite"
-                        data-module-meta
+                    <IconPause />
+                </span>
+                <span
+                    class="sr-only"
+                    data-rack-toggle-label
+                >
+                    Play the rack
+                </span>
+            </button>
+            <div class="rack__status">
+                <p
+                    class="rack__meta font-mono text-smd"
+                    aria-live="polite"
+                    data-rack-meta
+                >
+                    <span
+                        class="spinner"
+                        aria-hidden="true"
+                        data-rack-spinner
+                        hidden
+                    />
+                    <span
+                        class="rack__meta-text"
+                        data-rack-meta-text
                     >
                         No file loaded
-                    </p>
-                    <p
-                        class="module__error font-mono text-xs"
-                        aria-live="polite"
-                        data-module-error
-                    />
-                    <div class="module__body">
-                        {module.viz === 'canvas' && (
-                            <canvas
-                                class="module__canvas"
-                                aria-label={`${module.name} level meter`}
-                                data-module-canvas
-                                height="80"
-                                role="img"
-                                width="320"
-                            />
-                        )}
-                        {module.viz === 'readout' && (
-                            <p
-                                class="module__readout font-mono"
-                                data-module-readout
+                    </span>
+                </p>
+                <p
+                    class="rack__error font-mono text-xs"
+                    aria-live="polite"
+                    data-rack-error
+                />
+            </div>
+        </div>
+        <div class="rack__signal">
+            <p class="label rack__signal-label">Signal path</p>
+            <ol
+                class="rack__path list-none"
+                data-rack-path
+            >
+                <li class="rack__node">In</li>
+                <li
+                    class="rack__node rack__node--idle"
+                    data-rack-idle
+                >
+                    Straight through
+                </li>
+                <li class="rack__node">Out</li>
+            </ol>
+        </div>
+        <div class="rack__notes">
+            <p class="rack__note text-smd">
+                Files stay in this browser &mdash; nothing uploads, and nothing is kept.
+            </p>
+            <p class="label rack__dock">
+                Transport and active plugins also live in the site player.
+            </p>
+        </div>
+        <template data-rack-chip>
+            <li
+                class="rack__node rack__node--plug"
+                data-rack-plug
+            />
+        </template>
+    </div>
+</section>
+
+<section
+    class="stage stage--tight"
+    aria-labelledby="modules-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-3xl tracking-tight"
+            eyebrow={`Rack / ${MODULES.length} modules`}
+            headingId="modules-title"
+        >
+            The modules, in signal order
+        </SectionHead>
+        <ul
+            class="rank sandbox__grid list-none"
+            data-motion-from="center"
+            data-motion-stagger="flip"
+        >
+            {MODULES.map((module, index) => (
+                <li class="sandbox__tile">
+                    <article
+                        id={module.id}
+                        class:list={[
+                            'module sandbox__card slab slab--card',
+                            module.well && 'module--well slab--well',
+                        ]}
+                        data-module={module.kind}
+                    >
+                        <p class="label module__role">
+                            <span class="module__index">{String(index + 1).padStart(PAD_LENGTH, '0')}</span>
+                            <span>{module.role}</span>
+                        </p>
+                        <div class="module__head">
+                            <h3
+                                class="module__name font-extrabold font-sans text-xl tracking-tight"
+                                data-module-name
                             >
-                                {module.readout}
-                            </p>
-                        )}
+                                {MODULE_NAMES[module.kind]}
+                            </h3>
+                            <button
+                                class="chip module__active"
+                                aria-pressed="false"
+                                data-module-active
+                                type="button"
+                            >
+                                <span aria-hidden="true">Active</span>
+                                <span class="sr-only">{MODULE_NAMES[module.kind]} active</span>
+                            </button>
+                        </div>
+                        <p class="module__blurb leading-relaxed text-sm">
+                            {module.blurb}
+                        </p>
                         {module.sliders.length > 0 && (
                             <div class="module__params">
                                 {module.sliders.map(slider => (
@@ -343,66 +434,33 @@ const PAD_LENGTH = 2;
                                 ))}
                             </div>
                         )}
-                        {module.stages && (
-                            <div
-                                class="module__stages"
-                                aria-label="Rack stages"
-                                role="group"
-                            >
-                                {module.stages.map(stage => (
-                                    <button
-                                        class="chip module__stage is-active"
-                                        aria-pressed="true"
-                                        data-module-stage={stage.id}
-                                        type="button"
-                                    >
-                                        {stage.label}
-                                    </button>
-                                ))}
+                        {module.viz === 'canvas' && (
+                            <div class="module__viz">
+                                <canvas
+                                    class="module__canvas"
+                                    aria-label={`${MODULE_NAMES[module.kind]} level meter`}
+                                    data-module-canvas
+                                    height="80"
+                                    role="img"
+                                    width="320"
+                                />
                             </div>
                         )}
-                    </div>
-                    <div class="module__transport">
-                        <button
-                            class="module__play"
-                            aria-pressed="false"
-                            data-module-play
-                            disabled
-                            type="button"
-                        >
-                            <span data-module-icon-play><IconPlay /></span>
-                            <span
-                                data-module-icon-stop
-                                hidden
-                            >
-                                <IconPause />
-                            </span>
-                            <span class="sr-only">Play {module.name} loop</span>
-                        </button>
-                        <button
-                            class="chip module__bypass"
-                            aria-pressed="false"
-                            data-module-bypass
-                            disabled
-                            type="button"
-                        >
-                            <span aria-hidden="true">Bypass</span>
-                            <span class="sr-only">Bypass {module.name}</span>
-                        </button>
-                    </div>
-                </article>
-            </li>
-        ))}
-    </ul>
-    <p class="max-w-2xl text-smd text-ink-muted">
-        Want another processor in the rack? The Alliance takes requests in the&#32;
-        <a
-            class="sandbox__link hover:text-accent-deep underline transition-colors"
-            href="/contact"
-        >
-            usual places
-        </a>.
-    </p>
+                        {module.viz === 'readout' && (
+                            <div class="module__viz">
+                                <p
+                                    class="module__readout font-mono"
+                                    data-module-readout
+                                >
+                                    {module.readout}
+                                </p>
+                            </div>
+                        )}
+                    </article>
+                </li>
+            ))}
+        </ul>
+    </div>
 </section>
 
 <style>
@@ -435,12 +493,41 @@ const PAD_LENGTH = 2;
         --slab-rule: 2px;
     }
 
-    .module.is-decoding .module__meta {
-        color: var(--module-accent);
+    .module.is-active::before {
+        background-color: var(--color-accent);
+        content: '';
+        inset: 0 auto 0 0;
+        position: absolute;
+        width: var(--lift);
     }
 
-    .module.is-playing .module__transport {
-        border-top-color: var(--module-accent);
+    .module__active {
+        border-color: var(--module-line);
+        color: inherit;
+        flex: 0 0 auto;
+        transition: background var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .module__active:active {
+        transform: translateY(1px);
+    }
+
+    .module__active:hover {
+        background-color: var(--module-line);
+        border-color: var(--module-line);
+        color: var(--module-contrast);
+    }
+
+    .module__active[aria-pressed='true'] {
+        background-color: var(--color-accent);
+        border-color: var(--color-accent);
+        color: var(--color-ink);
+    }
+
+    .module__active[aria-pressed='true']:hover {
+        background-color: var(--color-accent-deep);
+        border-color: var(--color-accent-deep);
+        color: var(--color-ink-inverse);
     }
 
     .module__blurb {
@@ -448,116 +535,37 @@ const PAD_LENGTH = 2;
         grid-row: 3;
     }
 
-    .module__body {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-xs);
-        grid-row: 7;
-    }
-
-    .module__bypass {
-        border-color: var(--module-line);
-        color: inherit;
-        transition: background var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease, transform var(--duration-fast) ease;
-    }
-
-    .module__bypass:active:not(:disabled) {
-        transform: translateY(1px);
-    }
-
-    .module__bypass:disabled {
-        cursor: not-allowed;
-        opacity: 0.45;
-    }
-
-    .module__bypass:hover:not(:disabled) {
-        background: var(--module-line);
-        border-color: var(--module-line);
-        color: var(--module-contrast);
-    }
-
-    .module__bypass.is-active {
-        background: var(--module-line);
-        border-color: var(--module-line);
-        color: var(--module-contrast);
-    }
-
     .module__canvas {
         background-color: var(--module-fill);
         border: 2px solid var(--module-line);
         display: block;
-        flex: 1 1 auto;
         min-height: 80px;
         width: 100%;
     }
 
-    .module__drop {
+    .module__head {
         align-items: center;
-        background-color: var(--module-fill);
-        background-image: repeating-linear-gradient(135deg, var(--color-ink-10) 0 6px, transparent 6px 12px);
-        border: 2px dashed var(--module-line);
-        cursor: pointer;
         display: flex;
-        flex-direction: column;
-        gap: var(--space-3xs);
-        grid-row: 4;
-        justify-content: center;
-        min-height: 96px;
-        padding: var(--space-xs);
-        text-align: center;
-        transition: background var(--duration-fast) ease, border-color var(--duration-fast) ease, transform var(--duration-fast) ease;
-    }
-
-    .module__drop:active {
-        transform: translateY(1px);
-    }
-
-    .module__drop:has(input:focus-visible) {
-        border-color: var(--module-accent);
-        outline: 2px solid var(--module-accent);
-        outline-offset: 2px;
-    }
-
-    .module__drop:hover {
-        border-color: var(--module-accent);
-    }
-
-    .module__drop.is-dragging {
-        border-color: var(--module-accent);
-        border-style: solid;
-    }
-
-    .module__error {
-        color: var(--module-error);
-        grid-row: 6;
-    }
-
-    .module__error:empty {
-        display: none;
+        flex-wrap: wrap;
+        gap: var(--space-2xs);
+        grid-row: 2;
+        justify-content: space-between;
     }
 
     .module__index {
         color: var(--module-accent);
     }
 
-    .module__meta {
-        color: var(--module-mute);
-        grid-row: 5;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
     .module__name {
-        grid-row: 2;
+        min-width: 0;
     }
 
     .module__param {
         align-items: center;
         display: grid;
         gap: var(--space-2xs);
-        grid-template-columns: 64px minmax(0, 1fr) 72px;
-        min-height: 50px;
+        grid-template-columns: 64px minmax(0, 1fr) 76px;
+        min-height: var(--control-size);
     }
 
     .module__param-label {
@@ -567,42 +575,13 @@ const PAD_LENGTH = 2;
     .module__params {
         display: flex;
         flex-direction: column;
-    }
-
-    .module__play {
-        align-items: center;
-        border: 2px solid var(--module-line);
-        display: inline-flex;
-        height: 50px;
-        justify-content: center;
-        transition: background var(--duration-fast) ease, color var(--duration-fast) ease, transform var(--duration-fast) ease;
-        width: 50px;
-    }
-
-    .module__play:active:not(:disabled) {
-        transform: translateY(1px);
-    }
-
-    .module__play:disabled {
-        cursor: not-allowed;
-        opacity: 0.45;
-    }
-
-    .module__play:hover:not(:disabled) {
-        background: var(--module-line);
-        color: var(--module-contrast);
-    }
-
-    .module__play[aria-pressed='true'] {
-        background: var(--color-accent);
-        border-color: var(--module-line);
-        color: var(--color-ink);
+        grid-row: 4;
     }
 
     .module__range {
         appearance: none;
         background: transparent;
-        height: 50px;
+        height: var(--control-size);
         min-width: 0;
         width: 100%;
     }
@@ -617,6 +596,7 @@ const PAD_LENGTH = 2;
         border: 2px solid var(--module-line);
         border-radius: 0;
         height: 20px;
+        transition: background var(--duration-fast) var(--motion-ease-ui);
         width: 20px;
     }
 
@@ -636,8 +616,19 @@ const PAD_LENGTH = 2;
         background: var(--color-accent);
         border: 2px solid var(--module-line);
         height: 20px;
+        transition: background var(--duration-fast) var(--motion-ease-ui);
         translate: 0 -9px;
         width: 20px;
+    }
+
+    .module__range:active::-moz-range-thumb,
+    .module__range:hover::-moz-range-thumb {
+        background: var(--module-accent);
+    }
+
+    .module__range:active::-webkit-slider-thumb,
+    .module__range:hover::-webkit-slider-thumb {
+        background: var(--module-accent);
     }
 
     .module__readout {
@@ -647,65 +638,224 @@ const PAD_LENGTH = 2;
         display: flex;
         font-size: var(--text-md);
         justify-content: center;
-        min-height: 50px;
+        min-height: var(--control-size);
         padding: var(--space-2xs) var(--space-xs);
         text-align: center;
     }
 
     .module__role {
-        grid-row: 1;
-    }
-
-    .module__stage {
-        min-height: 50px;
-    }
-
-    .module__stages {
+        align-items: baseline;
         display: flex;
         flex-wrap: wrap;
         gap: var(--space-2xs);
+        grid-row: 1;
     }
 
-    .module__stages .chip {
-        border-color: var(--module-line);
-        color: inherit;
-        transition: background var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease, transform var(--duration-fast) ease;
+    .module__viz {
+        grid-row: 5;
+        margin-bottom: 0;
     }
 
-    .module__stages .chip:active {
+    .rack {
+        display: grid;
+        gap: var(--space-md);
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    }
+
+    .rack .action-text:hover {
+        color: var(--color-accent-light);
+    }
+
+    .rack.is-decoding .rack__meta {
+        color: var(--color-accent-light);
+    }
+
+    .rack__deck {
+        align-items: center;
+        border: 1px solid var(--color-ink-inverse-10);
+        display: flex;
+        gap: var(--space-sm);
+        padding: var(--space-sm);
+    }
+
+    .rack__dock {
+        color: var(--color-accent-light);
+    }
+
+    .rack__drop {
+        align-items: center;
+        background-color: var(--color-ink-inverse-10);
+        background-image: repeating-linear-gradient(135deg, var(--color-ink-inverse-10) 0 6px, transparent 6px 12px);
+        border: 2px dashed var(--color-ink-inverse);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3xs);
+        justify-content: center;
+        min-height: 132px;
+        padding: var(--space-sm);
+        text-align: center;
+        transition: background var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .rack__drop:active {
         transform: translateY(1px);
     }
 
-    .module__stages .chip:hover {
-        background: var(--module-line);
-        border-color: var(--module-line);
-        color: var(--module-contrast);
+    .rack__drop:has(input:focus-visible) {
+        border-color: var(--color-accent-light);
+        outline: 2px solid var(--color-accent-light);
+        outline-offset: 2px;
     }
 
-    .module__stages .chip.is-active {
-        background: var(--module-line);
-        border-color: var(--module-line);
-        color: var(--module-contrast);
+    .rack__drop:hover {
+        border-color: var(--color-accent-light);
     }
 
-    .module__transport {
+    .rack__drop.is-dragging {
+        background-color: var(--color-accent-20);
+        border-color: var(--color-accent-light);
+        border-style: solid;
+    }
+
+    .rack__error {
+        color: var(--color-accent-light);
+    }
+
+    .rack__error:empty {
+        display: none;
+    }
+
+    .rack__eyebrow {
+        color: var(--color-accent-light);
+        margin-bottom: var(--space-2xs);
+    }
+
+    .rack__head {
+        grid-column: 1 / -1;
+    }
+
+    .rack__hint {
+        color: var(--color-ink-inverse-muted);
+    }
+
+    .rack__meta {
         align-items: center;
-        border-top: 2px solid transparent;
         display: flex;
         gap: var(--space-2xs);
-        grid-row: 8;
-        margin-bottom: 0;
-        padding-top: var(--space-2xs);
-        transition: border-color var(--duration-fast) ease;
     }
 
-    .module__value {
-        text-align: right;
+    .rack__meta-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .rack__node {
+        align-items: center;
+        border: 1px solid var(--color-ink-inverse-10);
+        color: var(--color-ink-inverse-muted);
+        display: inline-flex;
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        letter-spacing: 0.06em;
+        min-height: 36px;
+        padding: 0 var(--space-2xs);
+        position: relative;
+        text-transform: uppercase;
+    }
+
+    .rack__node + .rack__node::before {
+        color: var(--color-ink-inverse-muted);
+        content: '\2192';
+        inset: auto calc(100% + var(--space-3xs)) auto auto;
+        position: absolute;
+    }
+
+    .rack__node--idle {
+        border-style: dashed;
+    }
+
+    .rack__node--plug {
+        background-color: var(--color-accent);
+        border-color: var(--color-accent);
+        color: var(--color-ink);
+        font-weight: 700;
+    }
+
+    .rack__notes {
+        align-items: baseline;
+        border-top: 1px solid var(--color-ink-inverse-10);
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-sm);
+        grid-column: 1 / -1;
+        justify-content: space-between;
+        padding-top: var(--space-sm);
+    }
+
+    .rack__path {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-sm);
+    }
+
+    .rack__play {
+        align-items: center;
+        background-color: var(--color-accent);
+        border: 2px solid var(--color-accent);
+        color: var(--color-ink);
+        display: inline-flex;
+        flex: 0 0 auto;
+        height: 64px;
+        justify-content: center;
+        transition: background var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        width: 64px;
+    }
+
+    .rack__play:active:not(:disabled) {
+        transform: translateY(1px);
+    }
+
+    .rack__play:disabled {
+        background-color: transparent;
+        border-color: var(--color-ink-inverse-muted);
+        color: var(--color-ink-inverse-muted);
+        opacity: 0.55;
+    }
+
+    .rack__play:hover:not(:disabled) {
+        background-color: var(--color-accent-light);
+        border-color: var(--color-accent-light);
+    }
+
+    .rack__play[aria-pressed='true'] {
+        background-color: var(--color-ink-inverse);
+        border-color: var(--color-ink-inverse);
+    }
+
+    .rack__play[aria-pressed='true']:hover {
+        background-color: var(--color-ink-inverse-muted);
+        border-color: var(--color-ink-inverse-muted);
+    }
+
+    .rack__signal {
+        grid-column: 1 / -1;
+    }
+
+    .rack__signal-label {
+        color: var(--color-ink-inverse-muted);
+        margin-bottom: var(--space-2xs);
+    }
+
+    .rack__status {
+        min-width: 0;
     }
 
     .sandbox__card {
         display: grid;
-        grid-row: 1 / span 8;
+        grid-row: 1 / span 5;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
     }
 
@@ -715,7 +865,7 @@ const PAD_LENGTH = 2;
     }
 
     .sandbox__grid {
-        --rank-cols: repeat(6, minmax(0, 1fr));
+        --rank-cols: repeat(2, minmax(0, 1fr));
         column-gap: var(--space-lg);
         grid-auto-rows: auto;
         row-gap: 0;
@@ -725,44 +875,25 @@ const PAD_LENGTH = 2;
         --overhang-step: 2.5;
     }
 
-    .sandbox__link {
-        position: relative;
-    }
-
-    .sandbox__link::after {
-        content: '';
-        inset: -14px -4px;
-        position: absolute;
-    }
-
     .sandbox__tile {
         display: grid;
-        grid-row: span 9;
+        grid-row: span 6;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
     }
 
     .sandbox__tile::after {
         content: '';
         display: block;
-        grid-row: 9;
+        grid-row: 6;
         height: var(--space-lg);
     }
 
-    .sandbox__tile--2 {
-        grid-column: span 2;
-    }
-
-    @media (max-width: 1024px) {
-        .sandbox__grid {
-            --rank-cols: repeat(2, minmax(0, 1fr));
-        }
-
-        .sandbox__tile {
-            grid-column: span 1;
-        }
-    }
-
     @media (max-width: 768px) {
+        .rack {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
         .sandbox__grid {
             --rank-cols: minmax(0, 1fr);
         }
@@ -770,16 +901,36 @@ const PAD_LENGTH = 2;
 </style>
 
 <script>
-    import { ANALYSER_FFT, isAnalysisKind } from '@lib/audio/sandbox/blocks';
-    import { createSandboxEngine } from '@lib/audio/sandbox/engine';
-    import { formatDuration, registerPageScript } from '@lib/utils';
-    import { loadSandboxFile, validateSandboxFile } from '@lib/audio/sandbox/loader';
+    import { ANALYSER_FFT } from '@lib/audio/sandbox/blocks';
+    import {
+        MODULE_NAMES,
+        getRackAnalyser,
+        getRackReadout,
+        getRackState,
+        loadRackFile,
+        onRackChange,
+        setModuleActive,
+        setRackParam,
+        toggleRack,
+    } from '@lib/audio/sandbox/rack';
+    import { formatDuration, registerPageScript, setHidden, setText } from '@lib/utils';
+    import { validateSandboxFile } from '@lib/audio/sandbox/loader';
 
     interface MeterView {
         accent: string;
         height: number;
         ink: string;
         width: number;
+    }
+
+    interface ModuleView {
+        canvas: HTMLCanvasElement | null;
+        card: HTMLElement;
+        idle: string;
+        kind: SandboxKind;
+        meter: MeterView | null;
+        readout: HTMLElement | null;
+        toggle: HTMLButtonElement;
     }
 
     const ACCENT_SEGMENTS = 4;
@@ -789,6 +940,10 @@ const PAD_LENGTH = 2;
     const CUTOFF_MIN = 40;
 
     const HERTZ_PER_KILOHERTZ = 1_000;
+
+    const HIGHPASS_MAX = 2_000;
+
+    const HIGHPASS_MIN = 20;
 
     const METER_SEGMENTS = 24;
 
@@ -805,20 +960,87 @@ const PAD_LENGTH = 2;
         'compressor:threshold': value => `${Math.round(value)} dB`,
         'delay:feedback': value => `${Math.round(value * PERCENT)}%`,
         'delay:time': value => `${value.toFixed(2)} s`,
-        'eq:high': value => `${value >= 0 ? '+' : ''}${value.toFixed(1)} dB`,
-        'eq:low': value => `${value >= 0 ? '+' : ''}${value.toFixed(1)} dB`,
-        'filter:cutoff': value => (value >= HERTZ_PER_KILOHERTZ ? `${(value / HERTZ_PER_KILOHERTZ).toFixed(2)} kHz` : `${Math.round(value)} Hz`),
+        'eq:high': signedDecibels,
+        'eq:low': signedDecibels,
+        'filter:cutoff': formatHertz,
         'filter:resonance': value => `Q ${value.toFixed(1)}`,
         'gate:threshold': value => `${Math.round(value)} dB`,
+        'highpass:cutoff': formatHertz,
+        'highpass:resonance': value => `Q ${value.toFixed(1)}`,
         'limiter:threshold': value => `${value.toFixed(1)} dB`,
+        'pan:position': value => (value === 0 ? 'Center' : `${value < 0 ? 'L' : 'R'} ${Math.round(Math.abs(value) * PERCENT)}`),
         'reverb:decay': value => `${value.toFixed(1)} s`,
         'reverb:wet': value => `${Math.round(value * PERCENT)}%`,
         'saturator:drive': value => value.toFixed(1),
+        'tremolo:depth': value => `${Math.round(value * PERCENT)}%`,
+        'tremolo:rate': value => `${value.toFixed(1)} Hz`,
+        'trim:gain': signedDecibels,
     };
 
     const MAP: Record<string, (value: number) => number> = {
         'filter:cutoff': value => CUTOFF_MIN * (CUTOFF_MAX / CUTOFF_MIN) ** value,
+        'highpass:cutoff': value => HIGHPASS_MIN * (HIGHPASS_MAX / HIGHPASS_MIN) ** value,
     };
+
+    const meterData = new Float32Array(ANALYSER_FFT);
+
+    let depth = 0;
+    let frame = 0;
+    let requests = 0;
+    let unsubscribe: (() => void) | undefined;
+    let views: ModuleView[] = [];
+
+    function applyParam(view: ModuleView, range: HTMLInputElement) {
+        const param = range.dataset.moduleParam ?? '';
+        const key = `${view.kind}:${param}`;
+        const mapped = (MAP[key] ?? (value => value))(Number(range.value));
+        const text = (FORMAT[key] ?? String)(mapped);
+
+        range.ariaValueText = text;
+        setText(view.card.querySelector(`[data-module-value="${param}"]`), text);
+        setRackParam(view.kind, param, mapped);
+    }
+
+    function bindParam(view: ModuleView, range: HTMLInputElement, signal: AbortSignal) {
+        range.addEventListener('input', () => applyParam(view, range), { signal });
+        applyParam(view, range);
+    }
+
+    function buildView(card: HTMLElement, signal: AbortSignal) {
+        const canvas = card.querySelector<HTMLCanvasElement>('[data-module-canvas]');
+        const readout = card.querySelector<HTMLElement>('[data-module-readout]');
+        const toggle = card.querySelector<HTMLButtonElement>('[data-module-active]');
+
+        if (!toggle) return null;
+
+        const kind = card.dataset.module as SandboxKind;
+        const view: ModuleView = {
+            canvas,
+            card,
+            idle: readout?.textContent?.trim() ?? '',
+            kind,
+            meter: canvas ? createMeterView(canvas) : null,
+            readout,
+            toggle,
+        };
+
+        toggle.addEventListener('click', () => handleActiveClick(view), { signal });
+        card.querySelectorAll<HTMLInputElement>('[data-module-param]').forEach(range => bindParam(view, range, signal));
+
+        return view;
+    }
+
+    function collectViews(cards: NodeListOf<HTMLElement>, signal: AbortSignal) {
+        const collected: ModuleView[] = [];
+
+        cards.forEach((card) => {
+            const view = buildView(card, signal);
+
+            if (view) collected.push(view);
+        });
+
+        return collected;
+    }
 
     function createMeterView(canvas: HTMLCanvasElement) {
         const rect = canvas.getBoundingClientRect();
@@ -839,17 +1061,21 @@ const PAD_LENGTH = 2;
         };
     }
 
-    function drawMeter(canvas: HTMLCanvasElement, analyser: AnalyserNode, data: Float32Array<ArrayBuffer>, view: MeterView) {
+    function drawMeter(canvas: HTMLCanvasElement, analyser: AnalyserNode | undefined, view: MeterView) {
         const surface = canvas.getContext('2d');
 
         if (!surface) return;
 
-        analyser.getFloatTimeDomainData(data);
+        surface.clearRect(0, 0, view.width, view.height);
+
+        if (!analyser) return;
+
+        analyser.getFloatTimeDomainData(meterData);
 
         let peak = 0;
 
-        for (let index = 0; index < data.length; index += 1) {
-            const value = Math.abs(data[index]);
+        for (let index = 0; index < meterData.length; index += 1) {
+            const value = Math.abs(meterData[index]);
 
             if (value > peak) peak = value;
         }
@@ -857,8 +1083,6 @@ const PAD_LENGTH = 2;
         const level = Math.min(1, Math.sqrt(peak));
         const lit = Math.round(level * METER_SEGMENTS);
         const width = view.width / METER_SEGMENTS;
-
-        surface.clearRect(0, 0, view.width, view.height);
 
         for (let index = 0; index < METER_SEGMENTS; index += 1) {
             surface.fillStyle = index >= METER_SEGMENTS - ACCENT_SEGMENTS ? view.accent : view.ink;
@@ -869,219 +1093,201 @@ const PAD_LENGTH = 2;
         surface.globalAlpha = 1;
     }
 
-    function initCard(card: HTMLElement, engine: SandboxEngine, signal: AbortSignal) {
-        const kind = card.dataset.module as SandboxKind;
-        const bypass = card.querySelector<HTMLButtonElement>('[data-module-bypass]');
-        const canvas = card.querySelector<HTMLCanvasElement>('[data-module-canvas]');
-        const drop = card.querySelector<HTMLElement>('[data-module-drop]');
-        const error = card.querySelector<HTMLElement>('[data-module-error]');
-        const iconPlay = card.querySelector<HTMLElement>('[data-module-icon-play]');
-        const iconStop = card.querySelector<HTMLElement>('[data-module-icon-stop]');
-        const input = card.querySelector<HTMLInputElement>('[data-module-input]');
-        const meta = card.querySelector<HTMLElement>('[data-module-meta]');
-        const play = card.querySelector<HTMLButtonElement>('[data-module-play]');
-        const readout = card.querySelector<HTMLElement>('[data-module-readout]');
+    function formatHertz(value: number) {
+        if (value >= HERTZ_PER_KILOHERTZ) return `${(value / HERTZ_PER_KILOHERTZ).toFixed(2)} kHz`;
 
-        if (!bypass || !drop || !error || !iconPlay || !iconStop || !input || !meta || !play) return;
+        return `${Math.round(value)} Hz`;
+    }
 
-        const bypassButton = bypass;
-        const dropZone = drop;
-        const errorLine = error;
-        const fileInput = input;
-        const metaLine = meta;
-        const playButton = play;
-        const playIcon = iconPlay;
-        const stopIcon = iconStop;
+    function handleActiveClick(view: ModuleView) {
+        setModuleActive(view.kind, view.toggle.getAttribute('aria-pressed') !== 'true');
+    }
 
-        const meterData = new Float32Array(ANALYSER_FFT);
+    function handleDragEnter(event: DragEvent, zone: HTMLElement) {
+        preventNavigation(event);
+        setDragDepth(zone, depth + 1);
+    }
 
-        let depth = 0;
-        let loaded = meta.textContent?.trim() || 'No file loaded';
-        let module: SandboxModule | undefined;
-        let request = 0;
-        let view: MeterView | undefined;
+    function handleDragLeave(zone: HTMLElement) {
+        setDragDepth(zone, depth - 1);
+    }
 
-        function applyParam(range: HTMLInputElement) {
-            const param = range.dataset.moduleParam ?? '';
-            const key = `${kind}:${param}`;
-            const mapped = (MAP[key] ?? (value => value))(Number(range.value));
-            const text = (FORMAT[key] ?? String)(mapped);
-            const value = card.querySelector<HTMLElement>(`[data-module-value="${param}"]`);
+    function handleDrop(event: DragEvent, zone: HTMLElement, signal: AbortSignal) {
+        preventNavigation(event);
+        setDragDepth(zone, 0);
+        handleFiles(event.dataTransfer?.files, signal);
+    }
 
-            if (value) value.textContent = text;
+    function handleFiles(files: FileList | null | undefined, signal: AbortSignal) {
+        const file = files?.[0];
 
-            range.ariaValueText = text;
-            module?.setParam(param, mapped);
-        }
+        if (file) void intake(file, signal);
+    }
 
-        function ensureModule() {
-            if (module) return module;
+    function handleInputChange(input: HTMLInputElement, signal: AbortSignal) {
+        handleFiles(input.files, signal);
+        input.value = '';
+    }
 
-            if (canvas) view = createMeterView(canvas);
+    function handleInputKeydown(event: KeyboardEvent, input: HTMLInputElement) {
+        if (event.key !== 'Enter') return;
 
-            module = engine.createModule(kind, { onFrame: renderFrame, onStopped: () => setPlaying(false) });
-            card.querySelectorAll<HTMLInputElement>('[data-module-param]').forEach(range => applyParam(range));
-
-            return module;
-        }
-
-        function handleBypassClick() {
-            if (!module) return;
-
-            const next = !module.isBypassed();
-
-            module.bypass(next);
-            bypassButton.classList.toggle('is-active', next);
-            bypassButton.setAttribute('aria-pressed', String(next));
-        }
-
-        function handleDragEnter(event: DragEvent) {
-            event.preventDefault();
-            depth += 1;
-            dropZone.classList.add('is-dragging');
-        }
-
-        function handleDragLeave() {
-            depth = Math.max(0, depth - 1);
-
-            if (depth === 0) dropZone.classList.remove('is-dragging');
-        }
-
-        function handleDrop(event: DragEvent) {
-            event.preventDefault();
-            depth = 0;
-            dropZone.classList.remove('is-dragging');
-            handleFiles(event.dataTransfer?.files);
-        }
-
-        function handleFiles(files: FileList | null | undefined) {
-            const file = files?.[0];
-
-            if (file) void intake(file);
-        }
-
-        function handleInputChange() {
-            handleFiles(fileInput.files);
-            fileInput.value = '';
-        }
-
-        function handleInputKeydown(event: KeyboardEvent) {
-            if (event.key !== 'Enter') return;
-
-            event.preventDefault();
-            fileInput.click();
-        }
-
-        function handlePlayClick() {
-            if (!module) return;
-
-            if (module.isPlaying()) {
-                module.stop();
-                setPlaying(false);
-
-                return;
-            }
-
-            module.start();
-            setPlaying(true);
-        }
-
-        function handleStageClick(chip: HTMLButtonElement) {
-            const enabled = chip.getAttribute('aria-pressed') !== 'true';
-
-            chip.setAttribute('aria-pressed', String(enabled));
-            chip.classList.toggle('is-active', enabled);
-            ensureModule().block.setStage?.(chip.dataset.moduleStage ?? '', enabled);
-        }
-
-        async function intake(file: File) {
-            const invalid = validateSandboxFile(file);
-
-            if (invalid) {
-                errorLine.textContent = invalid;
-
-                return;
-            }
-
-            request += 1;
-
-            const token = request;
-
-            errorLine.textContent = '';
-            card.classList.add('is-decoding');
-            metaLine.textContent = 'Decoding\u2026';
-            metaLine.title = file.name;
-
-            const result = await loadSandboxFile(file, signal);
-
-            if (signal.aborted || token !== request) return;
-
-            card.classList.remove('is-decoding');
-
-            if (!result.ok) {
-                errorLine.textContent = result.message;
-                metaLine.textContent = loaded;
-                metaLine.title = loaded;
-
-                return;
-            }
-
-            loaded = `${file.name} \u00b7 ${formatDuration(result.buffer.duration)}`;
-            ensureModule().setBuffer(result.buffer);
-            metaLine.textContent = loaded;
-            metaLine.title = loaded;
-            bypassButton.disabled = false;
-            playButton.disabled = false;
-        }
-
-        function renderFrame() {
-            if (!module) return;
-            if (module.isBypassed() && isAnalysisKind(kind)) return;
-
-            if (canvas && view && module.block.analyser) drawMeter(canvas, module.block.analyser, meterData, view);
-            if (readout && module.block.state) readout.textContent = module.block.state();
-        }
-
-        function setPlaying(playing: boolean) {
-            playButton.setAttribute('aria-pressed', String(playing));
-            playIcon.hidden = playing;
-            stopIcon.hidden = !playing;
-            card.classList.toggle('is-playing', playing);
-        }
-
-        bypassButton.addEventListener('click', handleBypassClick, { signal });
-        dropZone.addEventListener('dragenter', handleDragEnter, { signal });
-        dropZone.addEventListener('dragleave', handleDragLeave, { signal });
-        dropZone.addEventListener('dragover', preventNavigation, { signal });
-        dropZone.addEventListener('drop', handleDrop, { signal });
-        fileInput.addEventListener('change', handleInputChange, { signal });
-        fileInput.addEventListener('keydown', handleInputKeydown, { signal });
-        playButton.addEventListener('click', handlePlayClick, { signal });
-
-        card.querySelectorAll<HTMLInputElement>('[data-module-param]').forEach((range) => {
-            range.addEventListener('input', () => applyParam(range), { signal });
-        });
-
-        card.querySelectorAll<HTMLButtonElement>('[data-module-stage]').forEach((chip) => {
-            chip.addEventListener('click', () => handleStageClick(chip), { signal });
-        });
+        event.preventDefault();
+        input.click();
     }
 
     function initSandbox(signal: AbortSignal) {
         const cards = document.querySelectorAll<HTMLElement>('[data-module]');
+        const input = document.querySelector<HTMLInputElement>('[data-rack-input]');
+        const toggle = document.querySelector<HTMLButtonElement>('[data-rack-toggle]');
+        const zone = document.querySelector<HTMLElement>('[data-rack-drop]');
 
-        if (cards.length === 0) return;
+        if (!input || !toggle || !zone || cards.length === 0) return;
 
-        const engine = createSandboxEngine();
-
-        signal.addEventListener('abort', () => engine.dispose(), { once: true });
+        unsubscribe?.();
+        views = collectViews(cards, signal);
+        unsubscribe = onRackChange(render);
+        signal.addEventListener('abort', teardown, { once: true });
+        input.addEventListener('change', () => handleInputChange(input, signal), { signal });
+        input.addEventListener('keydown', event => handleInputKeydown(event, input), { signal });
+        toggle.addEventListener('click', toggleRack, { signal });
+        zone.addEventListener('dragenter', event => handleDragEnter(event, zone), { signal });
+        zone.addEventListener('dragleave', () => handleDragLeave(zone), { signal });
+        zone.addEventListener('dragover', preventNavigation, { signal });
+        zone.addEventListener('drop', event => handleDrop(event, zone, signal), { signal });
         window.addEventListener('dragover', preventNavigation, { signal });
         window.addEventListener('drop', preventNavigation, { signal });
-        cards.forEach(card => initCard(card, engine, signal));
+        render();
+    }
+
+    async function intake(file: File, signal: AbortSignal) {
+        const invalid = validateSandboxFile(file);
+        const token = (requests += 1);
+
+        setText(document.querySelector('[data-rack-error]'), invalid ?? '');
+
+        if (invalid) {
+            setDecoding(false);
+
+            return;
+        }
+
+        setText(document.querySelector('[data-rack-meta-text]'), 'Decoding\u2026');
+        setDecoding(true);
+
+        const result = await loadRackFile(file);
+
+        if (signal.aborted || token !== requests) return;
+
+        setDecoding(false);
+        render();
+
+        if (!result.ok) setText(document.querySelector('[data-rack-error]'), result.message);
+    }
+
+    function paintView(view: ModuleView) {
+        if (view.canvas && view.meter) drawMeter(view.canvas, getRackAnalyser(view.kind), view.meter);
+        if (view.readout) setText(view.readout, getRackReadout(view.kind) ?? view.idle);
     }
 
     function preventNavigation(event: DragEvent) {
         event.preventDefault();
+    }
+
+    function render() {
+        const state = getRackState();
+
+        renderMaster(state);
+        renderPath(state);
+        views.forEach(view => renderView(view, state));
+        cancelAnimationFrame(frame);
+
+        if (state.playing) frame = requestAnimationFrame(renderFrame);
+    }
+
+    function renderFrame() {
+        views.forEach(paintView);
+        frame = requestAnimationFrame(renderFrame);
+    }
+
+    function renderMaster(state: RackState) {
+        const meta = document.querySelector<HTMLElement>('[data-rack-meta]');
+        const toggle = document.querySelector<HTMLButtonElement>('[data-rack-toggle]');
+
+        if (!meta || !toggle) return;
+
+        meta.title = state.fileName ?? '';
+        toggle.disabled = state.fileName === null;
+        toggle.setAttribute('aria-pressed', String(state.playing));
+        setHidden(document.querySelector<HTMLElement>('[data-rack-icon-pause]'), !state.playing);
+        setHidden(document.querySelector<HTMLElement>('[data-rack-icon-play]'), state.playing);
+        setText(document.querySelector('[data-rack-meta-text]'), state.fileName === null ? 'No file loaded' : `${state.fileName} \u00b7 ${formatDuration(state.durationSeconds)}`);
+        setText(document.querySelector('[data-rack-toggle-label]'), state.playing ? 'Pause the rack' : 'Play the rack');
+    }
+
+    function renderPath(state: RackState) {
+        const idle = document.querySelector<HTMLElement>('[data-rack-idle]');
+        const path = document.querySelector<HTMLElement>('[data-rack-path]');
+        const template = document.querySelector<HTMLTemplateElement>('[data-rack-chip]');
+
+        if (!idle || !path || !template) return;
+
+        path.querySelectorAll('[data-rack-plug]').forEach(node => node.remove());
+
+        for (const kind of state.activeKinds) {
+            const fragment = template.content.cloneNode(true) as DocumentFragment;
+            const node = fragment.querySelector<HTMLElement>('[data-rack-plug]');
+
+            if (!node) continue;
+
+            setText(node, MODULE_NAMES[kind]);
+            idle.before(fragment);
+        }
+
+        idle.hidden = state.activeKinds.length > 0;
+    }
+
+    function renderView(view: ModuleView, state: RackState) {
+        const active = state.activeKinds.includes(view.kind);
+
+        view.card.classList.toggle('is-active', active);
+        view.toggle.setAttribute('aria-pressed', String(active));
+
+        if (!active || !state.playing) resetView(view);
+    }
+
+    function resetView(view: ModuleView) {
+        if (view.canvas && view.meter) drawMeter(view.canvas, undefined, view.meter);
+        if (view.readout) setText(view.readout, view.idle);
+    }
+
+    function setDecoding(active: boolean) {
+        const master = document.querySelector<HTMLElement>('[data-rack-master]');
+        const zone = document.querySelector<HTMLElement>('[data-rack-drop]');
+
+        setHidden(document.querySelector<HTMLElement>('[data-rack-spinner]'), !active);
+        master?.classList.toggle('is-decoding', active);
+
+        if (active) zone?.setAttribute('aria-busy', 'true');
+        else zone?.removeAttribute('aria-busy');
+    }
+
+    function setDragDepth(zone: HTMLElement, next: number) {
+        depth = Math.max(0, next);
+        zone.classList.toggle('is-dragging', depth > 0);
+    }
+
+    function signedDecibels(value: number) {
+        return `${value >= 0 ? '+' : ''}${value.toFixed(1)} dB`;
+    }
+
+    function teardown() {
+        cancelAnimationFrame(frame);
+        unsubscribe?.();
+        depth = 0;
+        frame = 0;
+        unsubscribe = undefined;
+        views = [];
     }
 
     registerPageScript(initSandbox);

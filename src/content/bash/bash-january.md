@@ -1,5 +1,5 @@
 ---
-title: Producer Bash · January
+title: Bash · January
 edition: January
 date: 2026-01-24T13:30:00-06:00
 end: 2026-01-24T18:00:00-06:00

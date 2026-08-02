@@ -4,7 +4,7 @@ import { getCollection } from 'astro:content';
 import BrandLockup from '@components/brand/Lockup.astro';
 import BrandMark from '@components/brand/Mark.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { ASSET_KIND_LABELS, LINKS } from '@lib/constants';
+import { ASSET_KIND_LABELS, KIND_COLORS, LINKS } from '@lib/constants';
 import { BRAND, BRAND_DOWNLOADS, BRAND_SIZES } from '@lib/brand';
 import { formatDateOnly, toIsoDate } from '@lib/utils';
 
@@ -30,7 +30,7 @@ const press = downloads
             Brand assets
         </SectionHead>
         <p
-            class="max-w-2xl mb-8 text-[15px] text-ink-muted"
+            class="max-w-2xl mb-8 text-smd text-ink-muted"
             data-motion="rise"
         >
             The wordmark and lockup, in the formats a publication is likely to ask for.
@@ -54,8 +54,9 @@ const press = downloads
             data-motion="unfold"
         >
             <table class="press-kit__table border-2 border-ink">
+                <caption class="sr-only">Brand assets, their formats, and downloads</caption>
                 <thead>
-                    <tr class="border-b-2 border-ink font-bold font-mono text-[11px] tracking-wide uppercase text-ink-muted">
+                    <tr class="border-b-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
                         <th
                             class="px-4 py-3 text-left"
                             scope="col"
@@ -80,7 +81,7 @@ const press = downloads
                     {BRAND_DOWNLOADS.map(download => (
                         <tr>
                             <td class="px-4 py-4 font-bold font-sans">{download.label}</td>
-                            <td class="px-4 py-4 font-mono text-[12px] uppercase">{download.format}</td>
+                            <td class="px-4 py-4 font-mono text-xs uppercase">{download.format}</td>
                             <td class="px-4 py-4 text-right">
                                 <a
                                     class="action-text press-kit__download"
@@ -117,7 +118,7 @@ const press = downloads
             <table class="press-kit__table border-2 border-ink">
                 <caption class="sr-only">Press material, its format, and whether it is published</caption>
                 <thead>
-                    <tr class="border-b-2 border-ink font-bold font-mono text-[11px] tracking-wide uppercase text-ink-muted">
+                    <tr class="border-b-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
                         <th
                             class="px-4 py-3 text-left"
                             scope="col"
@@ -165,17 +166,26 @@ const press = downloads
                             >
                                 {asset.data.title}
                             </th>
-                            <td class="px-4 py-4 font-mono text-[12px] text-ink-muted">
-                                {ASSET_KIND_LABELS[asset.data.kind]}
+                            <td class="px-4 py-4 font-mono text-xs text-ink-muted">
+                                <span
+                                    class="press-kit__kind"
+                                    style={`--kind-color: ${KIND_COLORS[asset.data.kind]}`}
+                                >
+                                    <span
+                                        class="press-kit__swatch"
+                                        aria-hidden="true"
+                                    />
+                                    {ASSET_KIND_LABELS[asset.data.kind]}
+                                </span>
                             </td>
-                            <td class="px-4 py-4 font-mono text-[12px] uppercase">{asset.data.format}</td>
+                            <td class="px-4 py-4 font-mono text-xs uppercase">{asset.data.format}</td>
                             <td
-                                class="px-4 py-4 font-mono text-[12px] text-ink-muted"
+                                class="px-4 py-4 font-mono text-xs text-ink-muted"
                                 data-placeholder
                             >
                                 {asset.data.size}
                             </td>
-                            <td class="px-4 py-4 font-mono text-[12px] text-ink-muted">
+                            <td class="px-4 py-4 font-mono text-xs text-ink-muted">
                                 <time datetime={toIsoDate(asset.data.date)}>{formatDateOnly(asset.data.date)}</time>
                             </td>
                             <td class="px-4 py-4 text-right">
@@ -189,7 +199,7 @@ const press = downloads
                                             </a>
                                         )
                                     : (
-                                            <span class="font-mono text-[12px] text-ink-subtle">In preparation</span>
+                                            <span class="font-mono text-xs text-ink-subtle">In preparation</span>
                                         )}
                             </td>
                         </tr>
@@ -197,10 +207,10 @@ const press = downloads
                 </tbody>
             </table>
         </div>
-        <p class="mt-8 text-[15px] text-ink-muted">
+        <p class="mt-8 text-smd text-ink-muted">
             Each entry also has a card in the&#32;
             <a
-                class="press-kit__link hover:text-accent-deep underline underline-offset-4 transition-colors"
+                class="press-kit__link hover:text-accent-deep underline underline-offset-4"
                 href="#library-title"
             >
                 asset library
@@ -214,7 +224,10 @@ const press = downloads
     class="stage stage--tight"
     aria-labelledby="resources-ask-title"
 >
-    <div class="slab slab--roomy slab--sunk mark grid grid-cols-1 items-end gap-10 md:grid-cols-[1.2fr_1fr]">
+    <div
+        class="mark slab slab--roomy slab--sunk grid grid-cols-1 items-end gap-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]"
+        data-motion="unfold"
+    >
         <div>
             <SectionHead
                 class="font-extrabold font-sans leading-[1.05] text-3xl tracking-[-0.035em] md:text-5xl"
@@ -251,17 +264,24 @@ const press = downloads
         align-items: center;
         display: inline-flex;
         min-height: 50px;
-        transition: color var(--duration-fast) ease;
+        transition: color var(--duration-fast) var(--motion-ease-ui);
     }
 
-    .press-kit__download:hover {
-        color: var(--color-accent-deep);
+    .press-kit__kind {
+        align-items: center;
+        display: inline-flex;
+        gap: var(--space-3xs);
     }
 
     .press-kit__link {
         display: inline-block;
         min-height: 50px;
         padding-block: var(--space-xs);
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .press-kit__link:active {
+        transform: translateY(1px);
     }
 
     .press-kit__lockup {
@@ -281,6 +301,13 @@ const press = downloads
 
     .press-kit__scroller {
         overflow-x: auto;
+    }
+
+    .press-kit__swatch {
+        background-color: var(--kind-color);
+        block-size: 8px;
+        flex: none;
+        inline-size: 8px;
     }
 
     .press-kit__table {

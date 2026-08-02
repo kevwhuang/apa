@@ -36,7 +36,7 @@ Prods reward the things that make our community thrive. Here's how members earn 
 | Give a lightning talk       | 3     |
 | Lead a workshop             | 20    |
 
-### B. Producer Bash
+### B. Bash
 
 | Action                | Prods |
 | --------------------- | ----- |

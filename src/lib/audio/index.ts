@@ -29,7 +29,7 @@ const LOOKAHEAD_MS = 25;
 
 const MASTER_LEVEL = 0.55;
 
-const MIDI_A4 = 69;
+export const MIDI_A4 = 69;
 
 const MINIMUM_GAIN = 0.0001;
 
@@ -55,7 +55,7 @@ const SCHEDULE_AHEAD = 0.15;
 
 const SECONDS_PER_MINUTE = 60;
 
-const SEMITONES_PER_OCTAVE = 12;
+export const SEMITONES_PER_OCTAVE = 12;
 
 const START_PADDING = 0.06;
 
@@ -67,7 +67,7 @@ const TEMPO_SPREAD = 5;
 
 const TEMPO_STEP = 8;
 
-const TUNING_HERTZ = 440;
+export const TUNING_HERTZ = 440;
 
 const store = createStore<PlayerState>({
     fallback: { open: false, playing: false, position: 0 },
@@ -153,7 +153,7 @@ export function isMuted(): boolean {
     return muted;
 }
 
-function noteHertz(midi: number): number {
+export function noteHertz(midi: number): number {
     return TUNING_HERTZ * 2 ** ((midi - MIDI_A4) / SEMITONES_PER_OCTAVE);
 }
 
@@ -321,9 +321,9 @@ export function togglePlayback(): void {
 function whisper(at: number): void {
     if (!context || !master || !noise) return;
 
+    const filter = context.createBiquadFilter();
     const gain = context.createGain();
     const source = context.createBufferSource();
-    const filter = context.createBiquadFilter();
 
     filter.type = 'highpass';
     filter.frequency.value = HAT_CUTOFF_HERTZ;

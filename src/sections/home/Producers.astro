@@ -4,7 +4,7 @@ import { getCollection } from 'astro:content';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import ProducerTracks from '@components/producer/Tracks.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { PALETTE, PRODUCER_AVAILABILITY_LABELS } from '@lib/constants';
+import { PALETTE } from '@lib/constants';
 import { formatMonthOnly, getInitials, toIsoDate } from '@lib/utils';
 
 const STRIP_LIMIT = 4;
@@ -18,12 +18,13 @@ const track = featured?.data.tracks[0];
 
 {featured && (
     <section
-        class="slab--well stage border-b-2 border-ink"
+        class="slab--well stage overflow-clip border-b-2 border-ink"
         aria-labelledby="featured-producer-title"
     >
         <div
-            class="halftone--accent stage__item--full absolute inset-0 pointer-events-none"
+            class="halftone--accent producer-feature__drift stage__item--full absolute pointer-events-none"
             aria-hidden="true"
+            data-scrub="drift"
         />
         <div class="relative">
             <SectionHead
@@ -56,24 +57,21 @@ const track = featured?.data.tracks[0];
                     </p>
                 </div>
                 <div data-motion-stagger="rise">
-                    <div class="flex flex-wrap items-center gap-x-4 gap-y-3 mb-6">
-                        <p class="label inline-flex items-center h-8 px-3 bg-accent text-ink">
-                            {PRODUCER_AVAILABILITY_LABELS[featured.data.availability]}
-                        </p>
-                        <p
-                            class="font-mono text-xs uppercase text-ink-inverse-muted"
-                            data-placeholder
-                        >
-                            {featured.data.roles.join(' \u00b7 ')} &mdash; {featured.data.location}
-                        </p>
-                    </div>
+                    <p
+                        class="mb-6 font-mono text-xs uppercase text-ink-inverse-muted"
+                        data-placeholder
+                    >
+                        {featured.data.roles.length > 0
+                            ? `${featured.data.roles.join(' \u00b7 ')} \u2014 ${featured.data.location}`
+                            : featured.data.location}
+                    </p>
                     <p
                         class="max-w-xl mb-6 leading-relaxed text-md text-ink-inverse-muted"
                         data-placeholder
                     >
                         {featured.data.bio}
                     </p>
-                    <ul class="flex flex-wrap gap-2 mb-8 list-none">
+                    <ul class:list={['flex flex-wrap gap-2 list-none', track && 'mb-8']}>
                         {featured.data.genres.map(genre => (
                             <li class="label inline-flex items-center h-8 px-3 border-2 border-ink-inverse">{genre}</li>
                         ))}
@@ -87,14 +85,6 @@ const track = featured?.data.tracks[0];
                             />
                         </div>
                     )}
-                    <div class="flex flex-wrap items-center gap-6 mt-10">
-                        <a
-                            class="btn btn--accent"
-                            href={`/producers#${featured.id}`}
-                        >
-                            Full profile
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -121,8 +111,9 @@ const track = featured?.data.tracks[0];
             </a>
         </SectionHead>
         <ul
-            class="producer-strip grid grid-cols-1 gap-6 list-none lg:gap-8 lg:grid-cols-4 sm:grid-cols-2"
-            data-motion-stagger="rise"
+            class="producer-strip grid grid-cols-1 gap-6 list-none lg:gap-8 lg:grid-cols-4 md:grid-cols-2"
+            data-motion-from="center"
+            data-motion-stagger="flip"
         >
             {roster.map((producer, index) => (
                 <li>
@@ -170,6 +161,10 @@ const track = featured?.data.tracks[0];
 </script>
 
 <style>
+    .producer-feature__drift {
+        inset: -8% 0;
+    }
+
     .producer-feature__portrait {
         rotate: calc(var(--tilt-unit) * -2 * var(--drift-gate));
     }
@@ -183,6 +178,7 @@ const track = featured?.data.tracks[0];
         align-content: start;
         display: grid;
         grid-row: span 3;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
         row-gap: 0;
     }

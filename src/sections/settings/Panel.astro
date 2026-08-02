@@ -1,0 +1,435 @@
+---
+import PageHead from '@components/shared/PageHead.astro';
+import { PASSWORD_MIN_LENGTH } from '@lib/constants';
+
+const DISPLAY_NAME_MAX = 50;
+
+const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
+---
+
+<section
+    class="stage stage--narrow stage--tight"
+    aria-label="Settings access"
+    data-settings-out
+>
+    <div
+        class="settings__gate slab slab--card flex flex-col items-center gap-5"
+        data-motion="rise"
+    >
+        <p class="label text-accent-deep">Account / Settings</p>
+        <p class="text-lmd text-ink-muted">
+            Settings belong to an account. Sign in and this page fills with your display name,
+            your handle, and the password field that goes with them.
+        </p>
+        <a
+            class="btn btn--primary"
+            href="/sign-in"
+        >
+            Sign in &rarr;
+        </a>
+    </div>
+</section>
+
+<section
+    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    aria-labelledby="settings-title"
+    data-settings-in
+    hidden
+>
+    <div>
+        <PageHead
+            class="max-w-3xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            eyebrow="Account / Settings"
+            headingId="settings-title"
+        >
+            Your settings.
+        </PageHead>
+        <p
+            class="max-w-2xl mt-6 text-lmd text-ink-muted"
+            data-motion="rise"
+        >
+            Your name on the roster, the handle that points at you, and a password field that
+            reads what you type and forgets it. Everything on this page is written to this
+            browser, so read it as a working model of the account screen rather than the account.
+        </p>
+    </div>
+</section>
+
+<section
+    class="stage stage--narrow stage--tight"
+    aria-label="Account and profile"
+    data-settings-in
+    hidden
+>
+    <div
+        class="flex flex-col gap-8"
+        data-motion-stagger="rise"
+    >
+        <dl class="settings__summary slab slab--sunk">
+            <div class="settings__row">
+                <dt class="label text-ink-muted">Email</dt>
+                <dd
+                    class="font-mono text-sm wrap-break-word"
+                    data-settings-email
+                />
+            </div>
+            <div class="settings__row">
+                <dt class="label text-ink-muted">Prods balance</dt>
+                <dd
+                    class="font-mono text-sm"
+                    data-settings-prods
+                />
+            </div>
+            <div class="settings__row">
+                <dt class="label text-ink-muted">Member since</dt>
+                <dd
+                    class="font-mono text-sm"
+                    data-settings-since
+                />
+            </div>
+            <div class="settings__row">
+                <dt class="label text-ink-muted">Profile status</dt>
+                <dd class="flex flex-wrap items-center justify-end gap-3">
+                    <span
+                        class="font-mono text-sm"
+                        data-settings-profile
+                    />
+                    <a
+                        class="action-text settings__link transition-colors"
+                        data-settings-onboarding
+                        hidden
+                        href="/onboarding"
+                    >
+                        Finish it &rarr;
+                    </a>
+                </dd>
+            </div>
+        </dl>
+        <form
+            class="settings__panel slab slab--card flex flex-col gap-5"
+            data-settings-form
+        >
+            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
+                Profile
+            </h2>
+            <div class="flex flex-col gap-2">
+                <label class="block">
+                    <span class="label block mb-2 text-ink-muted">Display name</span>
+                    <input
+                        id="settings-name"
+                        class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-colors"
+                        aria-describedby="settings-name-error"
+                        aria-invalid="false"
+                        autocomplete="nickname"
+                        maxlength={DISPLAY_NAME_MAX}
+                        name="displayName"
+                        required
+                        type="text"
+                    />
+                </label>
+                <p
+                    id="settings-name-error"
+                    class="action-text text-accent-deep"
+                    data-field-error
+                    hidden
+                />
+                <p class="text-sm text-ink-subtle">
+                    Up to {DISPLAY_NAME_MAX} characters. This is what the roster shows.
+                </p>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="block">
+                    <span class="label block mb-2 text-ink-muted">Username</span>
+                    <input
+                        id="settings-username"
+                        class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-mono text-sm bg-transparent transition-colors"
+                        aria-describedby="settings-username-error"
+                        aria-invalid="false"
+                        autocomplete="username"
+                        name="username"
+                        pattern={USERNAME_PATTERN}
+                        required
+                        type="text"
+                    />
+                </label>
+                <p
+                    id="settings-username-error"
+                    class="action-text text-accent-deep"
+                    data-field-error
+                    hidden
+                />
+                <p class="text-sm text-ink-subtle">
+                    Three to twenty letters, numbers, or underscores. It is stored in lower case.
+                </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-4">
+                <button
+                    class="btn btn--primary"
+                    type="submit"
+                >
+                    Save profile
+                </button>
+                <p
+                    class="action-text text-ink-subtle"
+                    aria-live="polite"
+                    data-settings-status
+                />
+            </div>
+        </form>
+        <form
+            class="settings__panel slab slab--card flex flex-col gap-5"
+            data-password-form
+        >
+            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
+                Password
+            </h2>
+            <div class="flex flex-col gap-2">
+                <label class="block">
+                    <span class="label block mb-2 text-ink-muted">New password</span>
+                    <input
+                        id="settings-password"
+                        class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-colors"
+                        aria-describedby="settings-password-error"
+                        aria-invalid="false"
+                        autocomplete="new-password"
+                        minlength={PASSWORD_MIN_LENGTH}
+                        name="password"
+                        required
+                        type="password"
+                    />
+                </label>
+                <p
+                    id="settings-password-error"
+                    class="action-text text-accent-deep"
+                    data-field-error
+                    hidden
+                />
+                <p class="text-sm text-ink-subtle">
+                    At least {PASSWORD_MIN_LENGTH} characters with a letter and a digit. It is read
+                    to check its shape and then dropped &mdash; nothing here keeps a password.
+                </p>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="block">
+                    <span class="label block mb-2 text-ink-muted">Confirm new password</span>
+                    <input
+                        id="settings-confirm"
+                        class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-colors"
+                        aria-describedby="settings-confirm-error"
+                        aria-invalid="false"
+                        autocomplete="new-password"
+                        name="confirm"
+                        required
+                        type="password"
+                    />
+                </label>
+                <p
+                    id="settings-confirm-error"
+                    class="action-text text-accent-deep"
+                    data-field-error
+                    hidden
+                />
+            </div>
+            <div class="flex flex-wrap items-center gap-4">
+                <button
+                    class="btn btn--primary"
+                    type="submit"
+                >
+                    Update password
+                </button>
+                <p
+                    class="action-text text-ink-subtle"
+                    aria-live="polite"
+                    data-password-status
+                />
+            </div>
+        </form>
+        <p class="max-w-2xl text-sm text-ink-subtle">
+            Changes save to this browser. Clear your site data and the account goes with it.
+        </p>
+    </div>
+</section>
+
+<style>
+    .settings__gate {
+        margin-inline: auto;
+        max-width: 544px;
+        text-align: center;
+    }
+
+    .settings__link {
+        align-items: center;
+        display: inline-flex;
+        min-height: var(--control-size);
+        padding-inline: var(--space-3xs);
+        text-decoration: underline;
+    }
+
+    .settings__panel,
+    .settings__summary {
+        max-width: 640px;
+    }
+
+    .settings__row {
+        align-items: baseline;
+        border-bottom: 1px solid var(--color-ink-20);
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-md);
+        justify-content: space-between;
+        padding-bottom: var(--space-2xs);
+    }
+
+    .settings__row:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .settings__summary {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2xs);
+    }
+</style>
+
+<script>
+    import { MOCK_LATENCY_MS } from '@lib/constants';
+    import { clearFieldErrors, confirmRule, focusFirstError, passwordRule, setFieldErrors, validateFields } from '@lib/forms';
+    import { delay, formatDateStamp, registerPageScript, setPending, setText } from '@lib/utils';
+    import { getOnboardingHref, isReservedUsername } from '@lib/onboarding';
+    import { getSession, onSessionChange, updateSession } from '@lib/session';
+    import { toast } from '@lib/toasts';
+
+    const INVALID_MESSAGE = 'Nothing saved yet. Check the fields.';
+
+    const PASSWORD_RULES: Record<string, FieldRule> = {
+        confirm: confirmRule(),
+        password: passwordRule(),
+    };
+
+    const PROFILE_RULES: Record<string, FieldRule> = {
+        displayName: { message: 'Enter the name the roster should show.', required: true },
+        username: { message: 'Use 3 to 20 letters, numbers, or underscores.', pattern: /^[a-z0-9_]{3,20}$/i, required: true },
+    };
+
+    let unsubscribe: (() => void) | undefined;
+
+    async function handlePasswordSubmit(event: SubmitEvent, form: HTMLFormElement) {
+        event.preventDefault();
+
+        const errors = validateFields(form, PASSWORD_RULES);
+
+        clearFieldErrors(form);
+
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(form, errors);
+            focusFirstError(form, errors);
+            toast(INVALID_MESSAGE, 'error');
+
+            return;
+        }
+
+        const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        const status = form.querySelector<HTMLElement>('[data-password-status]');
+
+        setPending(button, true);
+        setText(status, 'Updating\u2026');
+
+        await delay(MOCK_LATENCY_MS);
+
+        setPending(button, false);
+        setText(status, '');
+        form.reset();
+        toast('Password updated.', 'success');
+    }
+
+    async function handleProfileSubmit(event: SubmitEvent, form: HTMLFormElement) {
+        event.preventDefault();
+
+        const values = new FormData(form);
+        const username = String(values.get('username') ?? '').trim();
+        const errors = validateFields(form, PROFILE_RULES);
+
+        if (!errors.username && isReservedUsername(username)) errors.username = 'That username is taken. Pick another.';
+
+        clearFieldErrors(form);
+
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(form, errors);
+            focusFirstError(form, errors);
+            toast(INVALID_MESSAGE, 'error');
+
+            return;
+        }
+
+        const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        const status = form.querySelector<HTMLElement>('[data-settings-status]');
+
+        setPending(button, true);
+        setText(status, 'Saving\u2026');
+
+        await updateSession({ displayName: String(values.get('displayName') ?? '').trim(), username: username.toLowerCase() });
+
+        setPending(button, false);
+        setText(status, '');
+        toast('Profile saved.', 'success');
+    }
+
+    function initSettings(signal: AbortSignal) {
+        const password = document.querySelector<HTMLFormElement>('[data-password-form]');
+        const profile = document.querySelector<HTMLFormElement>('[data-settings-form]');
+
+        if (!password || !profile) return;
+
+        password.noValidate = true;
+        profile.noValidate = true;
+
+        unsubscribe?.();
+        unsubscribe = onSessionChange(renderSession);
+        signal.addEventListener('abort', () => unsubscribe?.(), { once: true });
+
+        password.addEventListener('submit', event => void handlePasswordSubmit(event, password), { signal });
+        profile.addEventListener('submit', event => void handleProfileSubmit(event, profile), { signal });
+
+        prefillProfile(profile);
+        renderSession();
+    }
+
+    function prefillProfile(form: HTMLFormElement) {
+        const name = form.querySelector<HTMLInputElement>('[name="displayName"]');
+        const session = getSession();
+        const username = form.querySelector<HTMLInputElement>('[name="username"]');
+
+        if (!session) return;
+
+        if (name) name.value = session.displayName;
+        if (username) username.value = session.username;
+    }
+
+    function renderSession() {
+        const link = document.querySelector<HTMLAnchorElement>('[data-settings-onboarding]');
+        const session = getSession();
+
+        document.querySelectorAll<HTMLElement>('[data-settings-in]').forEach((element) => {
+            element.toggleAttribute('hidden', session === null);
+        });
+
+        document.querySelectorAll<HTMLElement>('[data-settings-out]').forEach((element) => {
+            element.toggleAttribute('hidden', session !== null);
+        });
+
+        if (!session) return;
+
+        setText(document.querySelector('[data-settings-email]'), session.email);
+        setText(document.querySelector('[data-settings-prods]'), session.prods === 1 ? '1 Prod' : `${session.prods} Prods`);
+        setText(document.querySelector('[data-settings-profile]'), session.onboarded ? 'Complete' : 'Not finished');
+        setText(document.querySelector('[data-settings-since]'), session.createdAt === 0 ? '\u2014' : formatDateStamp(new Date(session.createdAt)));
+
+        if (!link) return;
+
+        link.href = getOnboardingHref(session.email);
+        link.toggleAttribute('hidden', session.onboarded);
+    }
+
+    registerPageScript(initSettings);
+</script>

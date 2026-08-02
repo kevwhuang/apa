@@ -1,6 +1,12 @@
 ---
+import IconClose from '@components/icons/Close.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { formatDateOnly } from '@lib/utils';
+
+const DELTAS = [-10, -5, -1, 1, 5, 10].map(amount => ({
+    amount,
+    label: amount > 0 ? `+${amount}` : `\u2212${Math.abs(amount)}`,
+}));
 
 const MEMBERS = [
     {
@@ -11,7 +17,7 @@ const MEMBERS = [
             { amount: 1, date: '2023-11-04', reason: 'Welcome Prod' },
             { amount: 20, date: '2026-03-14', reason: 'Led a workshop \u2014 synthesis basics' },
             { amount: 1, date: '2026-05-09', reason: 'Attended the May Assembly' },
-            { amount: -35, date: '2026-06-20', reason: 'Redeemed \u2014 Tick tee' },
+            { amount: -8, date: '2026-06-27', reason: 'Redeemed \u2014 Sticker pack' },
         ],
         username: 'devonpark',
     },
@@ -127,256 +133,389 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
         >
             Prods management
         </SectionHead>
-        <div class="grid items-start gap-8 lg:grid-cols-2">
-            <div>
-                <label class="block">
-                    <span class="label block mb-2 text-ink-muted">Find a member</span>
-                    <input
-                        class="h-12 w-full px-4 border-2 border-ink font-mono text-[13px] bg-transparent"
-                        autocomplete="off"
-                        data-prods-search
-                        placeholder="Username or email"
-                        type="search"
-                    />
-                </label>
-                <p
-                    class="label mt-3 text-ink-subtle"
-                    aria-live="polite"
-                    data-prods-count
-                >
-                    {MEMBERS.length} members
-                </p>
-                <ul
-                    class="prods__members scroll-slot mt-4 border-2 border-ink divide-y divide-ink list-none"
-                    data-prods-seed={LEDGER_SEED}
-                >
-                    {MEMBERS.map(member => (
-                        <li>
-                            <button
-                                class="prods__member"
-                                aria-pressed="false"
-                                data-member-email={member.email}
-                                data-member-id={member.id}
-                                data-member-joined={formatDateOnly(new Date(member.joined))}
-                                data-member-username={member.username}
-                                type="button"
-                            >
-                                <span class="font-bold font-sans text-[15px] tracking-tight">@{member.username}</span>
-                                <span class="prods__member-meta font-mono text-[12px] text-ink-muted">{member.email}</span>
-                                <span class="prods__member-meta font-mono text-[11px] text-ink-subtle">Joined {formatDateOnly(new Date(member.joined))}</span>
-                            </button>
-                        </li>
-                    ))}
-                    <li
-                        class="hidden"
-                        data-prods-none
-                    >
-                        <p class="px-4 py-4 font-mono text-[13px] text-ink-muted">No members match that search.</p>
+        <div
+            class="max-w-2xl"
+            data-motion="rise"
+        >
+            <label class="block">
+                <span class="label block mb-2 text-ink-muted">Find a member</span>
+                <input
+                    class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-mono text-sm bg-transparent transition-colors"
+                    autocomplete="off"
+                    data-prods-search
+                    placeholder="Username or email"
+                    type="search"
+                />
+            </label>
+            <p
+                class="label mt-3 text-ink-subtle"
+                aria-live="polite"
+                data-prods-count
+            >
+                {MEMBERS.length} members
+            </p>
+            <ul
+                class="prods__members scroll-slot mt-4 border-2 border-ink divide-y divide-ink list-none"
+                data-prods-seed={LEDGER_SEED}
+            >
+                {MEMBERS.map(member => (
+                    <li>
+                        <button
+                            class="prods__member"
+                            aria-controls="prods-modal"
+                            aria-haspopup="dialog"
+                            data-member-email={member.email}
+                            data-member-id={member.id}
+                            data-member-joined={formatDateOnly(new Date(member.joined))}
+                            data-member-username={member.username}
+                            type="button"
+                        >
+                            <span class="font-bold font-sans text-smd tracking-tight">@{member.username}</span>
+                            <span class="font-mono text-xs text-ink-muted">{member.email}</span>
+                            <span class="font-mono text-2xs text-ink-subtle">Joined {formatDateOnly(new Date(member.joined))}</span>
+                        </button>
                     </li>
-                </ul>
-            </div>
-            <div>
-                <div
-                    class="slab slab--sunk"
-                    data-prods-empty
+                ))}
+                <li
+                    class="hidden"
+                    data-prods-none
                 >
-                    <p class="font-mono text-[13px] text-ink-muted">
-                        Select a member to see their balance, standing, and ledger history.
+                    <p class="px-4 py-4 font-mono text-sm text-ink-muted">No members match that search.</p>
+                </li>
+            </ul>
+        </div>
+        <dialog
+            id="prods-modal"
+            class="prods__modal"
+            aria-labelledby="prods-modal-title"
+            data-prods-modal
+        >
+            <div class="prods__head">
+                <div>
+                    <h3
+                        id="prods-modal-title"
+                        class="font-extrabold font-sans text-2xl tracking-tight"
+                    >
+                        <span data-prods-member>Member ledger</span>
+                    </h3>
+                    <p class="prods__meta mt-2 font-mono text-xs text-ink-muted">
+                        <span data-prods-email />
+                        <span
+                            class="text-ink-subtle"
+                            data-prods-joined
+                        />
                     </p>
                 </div>
-                <div
-                    data-prods-detail
-                    hidden
+                <button
+                    class="prods__close"
+                    data-prods-close
+                    type="button"
                 >
-                    <h3 class="font-extrabold font-sans text-lg tracking-tight">
-                        <span data-prods-member>Selected member</span>
-                    </h3>
-                    <dl class="grid gap-px mt-4 border-2 border-ink bg-ink sm:grid-cols-3">
-                        <div class="p-5 bg-surface-raised">
-                            <dt class="label mb-2 text-ink-muted">Prod balance</dt>
-                            <dd
-                                class="font-extrabold font-sans text-3xl tracking-tight"
-                                data-prods-balance
-                            />
-                        </div>
-                        <div class="p-5 bg-surface-raised">
-                            <dt class="label mb-2 text-ink-muted">Standing</dt>
-                            <dd
-                                class="action-text"
-                                data-prods-standing
-                            />
-                        </div>
-                        <div class="p-5 bg-surface-raised">
-                            <dt class="label mb-2 text-ink-muted">Member since</dt>
-                            <dd
-                                class="font-mono text-[13px]"
-                                data-prods-joined
-                            />
-                        </div>
-                    </dl>
-                    <p class="label mt-8 text-ink-muted">Ledger history</p>
-                    <div class="prods__scroller mt-3">
-                        <table class="prods__table border-2 border-ink">
-                            <caption class="sr-only">Dated ledger entries with reason, change, and running balance</caption>
-                            <thead>
-                                <tr class="border-b-2 border-ink font-bold font-mono text-[11px] tracking-wide uppercase text-ink-muted">
-                                    <th
-                                        class="px-4 py-3 text-left"
-                                        scope="col"
-                                    >
-                                        Date
-                                    </th>
-                                    <th
-                                        class="px-4 py-3 text-left"
-                                        scope="col"
-                                    >
-                                        Reason
-                                    </th>
-                                    <th
-                                        class="px-4 py-3 text-right"
-                                        scope="col"
-                                    >
-                                        Change
-                                    </th>
-                                    <th
-                                        class="px-4 py-3 text-right"
-                                        scope="col"
-                                    >
-                                        Balance
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody
-                                class="divide-y divide-ink"
-                                data-prods-ledger
-                            />
-                        </table>
+                    <IconClose />
+                    <span class="sr-only">Close member ledger</span>
+                </button>
+            </div>
+            <div class="prods__body">
+                <dl class="grid gap-px border-2 border-ink bg-ink md:grid-cols-3">
+                    <div class="p-5 bg-surface-raised">
+                        <dt class="label mb-2 text-ink-muted">Prod balance</dt>
+                        <dd
+                            class="font-extrabold font-sans text-3xl tracking-tight"
+                            data-prods-balance
+                        />
                     </div>
-                    <template data-prods-row>
-                        <tr>
-                            <td
-                                class="px-4 py-4 font-mono text-[12px] text-ink-muted"
-                                data-cell="date"
-                            />
-                            <td
-                                class="px-4 py-4 text-[14px]"
-                                data-cell="reason"
-                            />
-                            <td
-                                class="px-4 py-4 font-mono text-[12px] text-right"
-                                data-cell="change"
-                            />
-                            <td
-                                class="px-4 py-4 font-mono text-[12px] text-right"
-                                data-cell="balance"
-                            />
-                        </tr>
-                    </template>
-                    <form class="prods-form slab slab--card mt-8">
-                        <p class="label mb-4 text-ink-muted">Adjust balance</p>
-                        <div class="grid gap-4 sm:grid-cols-[160px_1fr]">
-                            <div>
-                                <label class="block">
-                                    <span class="label block mb-2 text-ink-muted">Amount</span>
-                                    <input
-                                        class="h-12 w-full px-4 border-2 border-ink font-mono text-[13px] bg-transparent"
-                                        aria-describedby="prods-amount-error"
-                                        aria-invalid="false"
-                                        autocomplete="off"
-                                        inputmode="numeric"
-                                        min="1"
-                                        name="amount"
-                                        step="1"
-                                        type="number"
-                                    />
-                                </label>
-                                <p
-                                    id="prods-amount-error"
-                                    class="action-text mt-2 text-accent-deep"
-                                    data-field-error
-                                    hidden
-                                />
-                            </div>
-                            <div>
-                                <label class="block">
-                                    <span class="label block mb-2 text-ink-muted">Reason</span>
-                                    <input
-                                        class="h-12 w-full px-4 border-2 border-ink font-sans bg-transparent"
-                                        aria-describedby="prods-reason-error"
-                                        aria-invalid="false"
-                                        autocomplete="off"
-                                        maxlength="80"
-                                        name="reason"
-                                        type="text"
-                                    />
-                                </label>
-                                <p
-                                    id="prods-reason-error"
-                                    class="action-text mt-2 text-accent-deep"
-                                    data-field-error
-                                    hidden
-                                />
-                            </div>
+                    <div class="p-5 bg-surface-raised">
+                        <dt class="label mb-2 text-ink-muted">Standing</dt>
+                        <dd
+                            class="action-text"
+                            data-prods-standing
+                        />
+                    </div>
+                    <div class="p-5 bg-surface-raised">
+                        <dt class="label mb-2 text-ink-muted">Member since</dt>
+                        <dd
+                            class="font-mono text-sm"
+                            data-prods-since
+                        />
+                    </div>
+                </dl>
+                <p class="label mt-8 text-ink-muted">Ledger history</p>
+                <div class="prods__scroller scroll-slot mt-3">
+                    <table class="prods__table border-2 border-ink">
+                        <caption class="sr-only">Dated ledger entries with reason, change, and running balance</caption>
+                        <thead>
+                            <tr class="border-b-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
+                                <th
+                                    class="px-4 py-3 text-left"
+                                    scope="col"
+                                >
+                                    Date
+                                </th>
+                                <th
+                                    class="px-4 py-3 text-left"
+                                    scope="col"
+                                >
+                                    Reason
+                                </th>
+                                <th
+                                    class="px-4 py-3 text-right"
+                                    scope="col"
+                                >
+                                    Change
+                                </th>
+                                <th
+                                    class="px-4 py-3 text-right"
+                                    scope="col"
+                                >
+                                    Balance
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody
+                            class="divide-y divide-ink"
+                            data-prods-ledger
+                        />
+                    </table>
+                </div>
+                <template data-prods-row>
+                    <tr>
+                        <td
+                            class="px-4 py-4 font-mono text-xs whitespace-nowrap text-ink-muted"
+                            data-cell="date"
+                        />
+                        <td
+                            class="px-4 py-4 text-sm"
+                            data-cell="reason"
+                        />
+                        <td
+                            class="px-4 py-4 font-mono text-right text-xs"
+                            data-cell="change"
+                        />
+                        <td
+                            class="px-4 py-4 font-mono text-right text-xs"
+                            data-cell="balance"
+                        />
+                    </tr>
+                </template>
+                <form
+                    class="slab slab--sunk mt-8"
+                    data-prods-form
+                >
+                    <p class="label mb-4 text-ink-muted">Adjust balance</p>
+                    <div
+                        class="prods__deltas"
+                        aria-describedby="prods-amount-error"
+                        aria-labelledby="prods-amount-label"
+                        role="group"
+                    >
+                        <p
+                            id="prods-amount-label"
+                            class="label text-ink-muted"
+                        >
+                            Amount
+                        </p>
+                        <div class="prods__chips">
+                            {DELTAS.map(step => (
+                                <button
+                                    class="chip prods__chip"
+                                    data-prods-delta={step.amount}
+                                    type="button"
+                                >
+                                    {step.label}
+                                </button>
+                            ))}
                         </div>
-                        <div class="flex flex-wrap items-center gap-3 mt-6">
-                            <button
-                                class="btn btn--primary"
-                                name="direction"
-                                type="submit"
-                                value="add"
+                        <div class="prods__pending">
+                            <output
+                                class="prods__readout prods__readout--quiet"
+                                data-prods-readout
                             >
-                                Add Prods
-                            </button>
+                                &plusmn;0
+                            </output>
                             <button
                                 class="btn"
-                                name="direction"
-                                type="submit"
-                                value="remove"
+                                data-prods-reset
+                                type="button"
                             >
-                                Remove Prods
+                                Reset
                             </button>
                         </div>
-                    </form>
-                </div>
-                <p
-                    class="action-text mt-4 text-ink-subtle"
-                    aria-live="polite"
-                    data-prods-feedback
-                />
+                    </div>
+                    <p
+                        id="prods-amount-error"
+                        class="action-text mt-3 text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                    <label class="block mt-6">
+                        <span class="label block mb-2 text-ink-muted">Reason</span>
+                        <input
+                            class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-colors"
+                            aria-describedby="prods-reason-error"
+                            aria-invalid="false"
+                            autocomplete="off"
+                            maxlength="80"
+                            name="reason"
+                            type="text"
+                        />
+                    </label>
+                    <p
+                        id="prods-reason-error"
+                        class="action-text mt-2 text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                    <button
+                        class="btn btn--primary mt-6"
+                        data-prods-apply
+                        type="submit"
+                    >
+                        Apply adjustment
+                    </button>
+                </form>
             </div>
-        </div>
+        </dialog>
     </div>
 </section>
 
 <style>
+    .prods__body {
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: var(--space-md);
+    }
+
+    .prods__chip {
+        min-height: var(--control-size);
+        transition: background-color var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .prods__chip:active {
+        transform: translateY(1px);
+    }
+
+    .prods__chip:hover {
+        background-color: var(--color-ink);
+        border-color: var(--color-ink);
+        color: var(--color-ink-inverse);
+    }
+
+    .prods__chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2xs);
+    }
+
+    .prods__close {
+        align-items: center;
+        border: 2px solid var(--color-ink);
+        display: inline-flex;
+        flex-shrink: 0;
+        height: var(--control-size);
+        justify-content: center;
+        transition: background-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        width: var(--control-size);
+    }
+
+    .prods__close:active {
+        transform: translateY(1px);
+    }
+
+    .prods__close:hover {
+        background-color: var(--color-ink);
+        color: var(--color-ink-inverse);
+    }
+
+    .prods__deltas {
+        display: grid;
+        gap: var(--space-xs);
+        justify-items: start;
+    }
+
+    .prods__head {
+        align-items: start;
+        border-bottom: 2px solid var(--color-ink);
+        display: flex;
+        gap: var(--space-sm);
+        justify-content: space-between;
+        padding: var(--space-md);
+    }
+
     .prods__member {
         display: grid;
         gap: 2px;
-        min-height: 50px;
+        min-height: var(--control-size);
         padding: var(--space-2xs) var(--space-sm);
         text-align: left;
-        transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
+        transition: background-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui);
         width: 100%;
+    }
+
+    .prods__member:active {
+        background-color: var(--color-surface);
     }
 
     .prods__member:hover {
         background-color: var(--color-surface-sunken);
     }
 
-    .prods__member[aria-pressed='true'] {
-        background-color: var(--color-surface-inverse);
-        color: var(--color-ink-inverse);
-    }
-
-    .prods__member[aria-pressed='true'] .prods__member-meta {
-        color: var(--color-ink-inverse-muted);
-    }
-
     .prods__members {
         --scroll-slot-max: 416px;
     }
 
+    .prods__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0 var(--space-2xs);
+    }
+
+    .prods__modal {
+        background-color: var(--color-surface-raised);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--lift) var(--lift) 0 0 var(--color-ink);
+        color: var(--color-ink);
+        inset: 50% auto auto 50%;
+        max-height: min(88vh, 760px);
+        padding: 0;
+        position: fixed;
+        translate: -50% -50%;
+        width: min(720px, calc(100vw - 2 * var(--space-md)));
+    }
+
+    .prods__modal::backdrop {
+        background-color: var(--color-ink-70);
+    }
+
+    .prods__modal[open] {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .prods__pending {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-sm);
+    }
+
+    .prods__readout {
+        font-family: var(--font-mono);
+        font-size: var(--text-3xl);
+        font-variant-numeric: tabular-nums;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .prods__readout--down {
+        color: var(--color-accent-deep);
+    }
+
+    .prods__readout--quiet {
+        color: var(--color-ink-subtle);
+    }
+
     .prods__scroller {
+        --scroll-slot-max: 280px;
         overflow-x: auto;
     }
 
@@ -391,7 +530,10 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
     import { MOCK_LATENCY_MS, STORAGE } from '@lib/constants';
     import { clearFieldErrors, focusFirstError, setFieldErrors, validateFields } from '@lib/forms';
     import { createStore } from '@lib/state';
-    import { delay, formatDateOnly, registerPageScript, setPending, setText } from '@lib/utils';
+    import { delay, formatDateStamp, registerPageScript, setMessage, setPending, setText } from '@lib/utils';
+    import { toast } from '@lib/toasts';
+
+    type LedgerMap = Record<string, LedgerEntry[]>;
 
     interface LedgerEntry {
         amount: number;
@@ -399,11 +541,16 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
         reason: string;
     }
 
-    type LedgerMap = Record<string, LedgerEntry[]>;
+    const AMOUNT_ERROR = 'Pick an adjustment amount.';
+
+    const DATE_ONLY_LENGTH = 10;
+
+    const DELTA_LIMIT = 200;
+
+    const REASON_MAX = 80;
 
     const RULES: Record<string, FieldRule> = {
-        amount: { message: 'Enter a whole number of Prods, 1 or more.', pattern: /^[1-9]\d*$/, required: true },
-        reason: { max: 80, message: 'Give the ledger a reason for this change.', required: true },
+        reason: { max: REASON_MAX, message: 'Give the ledger a reason for this change.', required: true },
     };
 
     const adjustments = createStore<LedgerMap>({
@@ -413,12 +560,38 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
         topic: STORAGE.adminProds.topic,
     });
 
+    let delta = 0;
     let pending = false;
     let seed: LedgerMap = {};
     let selectedId = '';
+    let trigger: HTMLButtonElement | null = null;
+
+    function amountError() {
+        return document.querySelector<HTMLElement>('#prods-amount-error');
+    }
 
     function formatChange(amount: number) {
         return amount > 0 ? `+${amount}` : String(amount);
+    }
+
+    function formatDelta(amount: number) {
+        if (amount === 0) return '\u00b10';
+        if (amount < 0) return `\u2212${Math.abs(amount)}`;
+
+        return `+${amount}`;
+    }
+
+    function formatLedgerDate(value: string) {
+        const date = new Date(value);
+
+        if (value.length !== DATE_ONLY_LENGTH) return formatDateStamp(date);
+
+        return date.toLocaleDateString('en-US', {
+            day: 'numeric',
+            month: 'short',
+            timeZone: 'UTC',
+            year: 'numeric',
+        });
     }
 
     function getLedger(id: string) {
@@ -438,49 +611,83 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
         if (!selectedId || pending) return;
 
         const errors = validateFields(form, RULES);
+        const missing = delta === 0;
 
         clearFieldErrors(form);
 
+        if (missing) setMessage(amountError(), AMOUNT_ERROR);
+        if (Object.keys(errors).length > 0) setFieldErrors(form, errors);
+
+        if (missing) {
+            form.querySelector<HTMLButtonElement>('[data-prods-delta]')?.focus();
+
+            return;
+        }
+
         if (Object.keys(errors).length > 0) {
-            setFieldErrors(form, errors);
             focusFirstError(form, errors);
 
             return;
         }
 
-        const buttons = Array.from(form.querySelectorAll<HTMLButtonElement>('button[type="submit"]'));
-        const feedback = document.querySelector<HTMLElement>('[data-prods-feedback]');
+        const amount = delta;
         const memberId = selectedId;
+        const submit = form.querySelector<HTMLButtonElement>('[data-prods-apply]');
         const username = selectedUsername();
         const values = new FormData(form);
 
-        const amount = Number(String(values.get('amount') ?? '').trim());
         const reason = String(values.get('reason') ?? '').trim();
-        const submitter = event.submitter instanceof HTMLButtonElement ? event.submitter : buttons.at(0);
-
-        const remove = submitter?.value === 'remove';
+        const size = Math.abs(amount);
 
         pending = true;
-        buttons.forEach(control => setPending(control, true));
-        setText(feedback, 'Recording\u2026');
+        setPending(submit, true);
 
         await delay(MOCK_LATENCY_MS);
 
         const entry: LedgerEntry = {
-            amount: remove ? -amount : amount,
+            amount,
             date: new Date().toISOString(),
             reason,
         };
 
         adjustments.update(value => ({ ...value, [memberId]: [...(value[memberId] ?? []), entry] }));
+        delta = 0;
         pending = false;
-        buttons.forEach(control => setPending(control, false));
-        submitter?.focus();
+        setPending(submit, false);
         form.reset();
+        clearFieldErrors(form);
+        renderDelta();
 
         if (selectedId === memberId) renderDetail();
 
-        setText(feedback, `${remove ? 'Removed' : 'Added'} ${amount} ${amount === 1 ? 'Prod' : 'Prods'} ${remove ? 'from' : 'to'} @${username}.`);
+        submit?.focus();
+        toast(`${amount < 0 ? 'Removed' : 'Added'} ${size} ${size === 1 ? 'Prod' : 'Prods'} ${amount < 0 ? 'from' : 'to'} @${username}.`, 'success');
+    }
+
+    function handleChipClick(button: HTMLButtonElement) {
+        const step = Number(button.dataset.prodsDelta ?? 0);
+
+        delta = Math.min(DELTA_LIMIT, Math.max(-DELTA_LIMIT, delta + step));
+        setMessage(amountError(), '');
+        renderDelta();
+    }
+
+    function handleModalClick(event: MouseEvent, dialog: HTMLDialogElement) {
+        if (event.target === dialog) dialog.close();
+    }
+
+    function handleModalClose() {
+        const previous = trigger;
+
+        selectedId = '';
+        trigger = null;
+        previous?.focus();
+    }
+
+    function handleReset() {
+        delta = 0;
+        setMessage(amountError(), '');
+        renderDelta();
     }
 
     function handleSearch(input: HTMLInputElement) {
@@ -504,38 +711,50 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
         setText(count, query.length === 0 ? `${buttons.length} members` : `${shown} of ${buttons.length} members match`);
     }
 
-    function handleSelect(button: HTMLButtonElement, form: HTMLFormElement) {
-        selectedId = button.dataset.memberId ?? '';
-
-        document.querySelectorAll<HTMLButtonElement>('[data-member-id]').forEach((candidate) => {
-            candidate.setAttribute('aria-pressed', String(candidate === button));
-        });
-
-        form.reset();
-        clearFieldErrors(form);
-        document.querySelector<HTMLElement>('[data-prods-empty]')?.setAttribute('hidden', '');
-        document.querySelector<HTMLElement>('[data-prods-detail]')?.removeAttribute('hidden');
-        renderDetail();
-        setText(document.querySelector<HTMLElement>('[data-prods-feedback]'), `Showing the ledger for @${button.dataset.memberUsername}.`);
-    }
-
     function initAdminProds(signal: AbortSignal) {
-        const form = document.querySelector<HTMLFormElement>('.prods-form');
+        const dialog = document.querySelector<HTMLDialogElement>('[data-prods-modal]');
+        const form = document.querySelector<HTMLFormElement>('[data-prods-form]');
         const search = document.querySelector<HTMLInputElement>('[data-prods-search]');
 
-        if (!form || !search) return;
+        if (!dialog || !form || !search) return;
 
+        if ('closedBy' in dialog) dialog.setAttribute('closedby', 'closerequest');
+
+        delta = 0;
         pending = false;
         seed = readSeed();
         selectedId = '';
-
+        trigger = null;
         form.noValidate = true;
-        form.addEventListener('submit', event => handleAdjustSubmit(event, form), { signal });
+
+        dialog.addEventListener('click', event => handleModalClick(event, dialog), { signal });
+        dialog.addEventListener('close', handleModalClose, { signal });
+        form.addEventListener('submit', event => void handleAdjustSubmit(event, form), { signal });
         search.addEventListener('input', () => handleSearch(search), { signal });
+        dialog.querySelector<HTMLButtonElement>('[data-prods-close]')?.addEventListener('click', () => dialog.close(), { signal });
+        form.querySelector<HTMLButtonElement>('[data-prods-reset]')?.addEventListener('click', handleReset, { signal });
+
+        form.querySelectorAll<HTMLButtonElement>('[data-prods-delta]').forEach((button) => {
+            button.addEventListener('click', () => handleChipClick(button), { signal });
+        });
 
         document.querySelectorAll<HTMLButtonElement>('[data-member-id]').forEach((button) => {
-            button.addEventListener('click', () => handleSelect(button, form), { signal });
+            button.addEventListener('click', () => openModal(button, dialog, form), { signal });
         });
+
+        renderDelta();
+    }
+
+    function openModal(button: HTMLButtonElement, dialog: HTMLDialogElement, form: HTMLFormElement) {
+        delta = 0;
+        selectedId = button.dataset.memberId ?? '';
+        trigger = button;
+        form.reset();
+        clearFieldErrors(form);
+        renderDelta();
+        renderDetail();
+        dialog.showModal();
+        dialog.querySelector<HTMLButtonElement>('[data-prods-close]')?.focus();
     }
 
     function readSeed() {
@@ -548,12 +767,22 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
         }
     }
 
+    function renderDelta() {
+        const readout = document.querySelector<HTMLElement>('[data-prods-readout]');
+
+        setText(readout, formatDelta(delta));
+        readout?.classList.toggle('prods__readout--down', delta < 0);
+        readout?.classList.toggle('prods__readout--quiet', delta === 0);
+    }
+
     function renderDetail() {
         const balance = document.querySelector<HTMLElement>('[data-prods-balance]');
         const body = document.querySelector<HTMLElement>('[data-prods-ledger]');
         const button = document.querySelector<HTMLButtonElement>(`[data-member-id="${selectedId}"]`);
+        const email = document.querySelector<HTMLElement>('[data-prods-email]');
         const joined = document.querySelector<HTMLElement>('[data-prods-joined]');
         const member = document.querySelector<HTMLElement>('[data-prods-member]');
+        const since = document.querySelector<HTMLElement>('[data-prods-since]');
         const standing = document.querySelector<HTMLElement>('[data-prods-standing]');
         const template = document.querySelector<HTMLTemplateElement>('[data-prods-row]');
 
@@ -573,7 +802,7 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
             const fragment = template.content.cloneNode(true) as DocumentFragment;
             const change = fragment.querySelector<HTMLElement>('[data-cell="change"]');
 
-            setText(fragment.querySelector<HTMLElement>('[data-cell="date"]'), formatDateOnly(new Date(row.date)));
+            setText(fragment.querySelector<HTMLElement>('[data-cell="date"]'), formatLedgerDate(row.date));
             setText(fragment.querySelector<HTMLElement>('[data-cell="reason"]'), row.reason);
             setText(change, formatChange(row.amount));
             change?.classList.toggle('text-accent-deep', row.amount < 0);
@@ -582,8 +811,10 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
         });
 
         setText(balance, String(total));
-        setText(joined, button.dataset.memberJoined ?? '');
+        setText(email, button.dataset.memberEmail ?? '');
+        setText(joined, `Joined ${button.dataset.memberJoined ?? ''}`);
         setText(member, `@${button.dataset.memberUsername}`);
+        setText(since, button.dataset.memberJoined ?? '');
         setText(standing, getStanding(total));
         standing?.classList.toggle('text-accent-deep', total < 0);
     }

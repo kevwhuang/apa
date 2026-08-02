@@ -3,12 +3,19 @@ import { getCollection } from 'astro:content';
 
 import PageHead from '@components/shared/PageHead.astro';
 import ProgramFlyer from '@components/program/Flyer.astro';
-import ProgramSheet from '@components/program/Sheet.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { EVENT_PROGRAMS, LINKS } from '@lib/constants';
 import { formatDate, formatTimeRange, getProgram, mergeCalendar } from '@lib/utils';
 
 type CalendarItem = ReturnType<typeof mergeCalendar>['upcoming'][number];
+
+const PAGE_INDEX = [
+    { href: '#assembly-title', label: 'Assembly' },
+    { href: '#hangout-title', label: 'Hangout' },
+    { href: '#bash-title', label: 'Bash' },
+    { href: '#past-title', label: 'Archive' },
+    { href: '#planned-title', label: 'Planned' },
+] as const;
 
 const programs = Object.values(EVENT_PROGRAMS);
 
@@ -17,6 +24,7 @@ const planned = programs.filter(program => program.state === 'planned');
 const bashEditions = await getCollection('bash');
 const events = await getCollection('events');
 
+const assemblyProgram = getProgram('assembly');
 const bashProgram = getProgram('bash');
 
 const endById = new Map<string, Date>(
@@ -25,25 +33,21 @@ const endById = new Map<string, Date>(
 
 const { past, upcoming } = mergeCalendar(events, bashEditions);
 
-const withEnd = (list: CalendarItem[]) => list.map(event => ({ ...event, end: endById.get(event.id) ?? event.date }));
-
 const pastEvents = withEnd(past);
 const upcomingEvents = withEnd(upcoming);
 
 const assemblies = upcomingEvents.filter(event => event.type === 'assembly');
 const hangouts = upcomingEvents.filter(event => event.type === 'hangout');
 
+const [nextAssembly, ...laterAssemblies] = assemblies;
+
 const upcomingBashes = bashEditions
     .filter(edition => edition.data.status === 'upcoming')
     .sort((a, b) => +a.data.date - +b.data.date);
 
-const pageIndex = [
-    { href: '#assembly-title', label: 'Assembly' },
-    { href: '#hangout-title', label: 'Hangout' },
-    { href: '#bash-title', label: 'Producer Bash' },
-    { href: '#planned-title', label: 'Planned' },
-    { href: '#past-title', label: 'Archive' },
-];
+function entryNo(value: number) {
+    return String(value).padStart(2, '0');
+}
 
 function stampDay(date: Date) {
     return date.toLocaleDateString('en-US', { day: '2-digit', timeZone: 'America/Chicago' });
@@ -51,6 +55,14 @@ function stampDay(date: Date) {
 
 function stampMonth(date: Date) {
     return date.toLocaleDateString('en-US', { month: 'short', timeZone: 'America/Chicago', year: 'numeric' });
+}
+
+function weekday(date: Date) {
+    return date.toLocaleDateString('en-US', { timeZone: 'America/Chicago', weekday: 'long' });
+}
+
+function withEnd(list: CalendarItem[]) {
+    return list.map(event => ({ ...event, end: endById.get(event.id) ?? event.date }));
 }
 ---
 
@@ -68,7 +80,7 @@ function stampMonth(date: Date) {
         </PageHead>
         <p
             class="max-w-2xl mt-6 text-lmd text-ink-muted"
-            data-motion="rise"
+            data-motion="blur"
         >
             Three programs run on a fixed cadence, each with its own shape and its own room.
             Below is the working calendar: every upcoming date with its hours, the programs
@@ -79,9 +91,9 @@ function stampMonth(date: Date) {
             aria-label="On this page"
             data-motion="rise"
         >
-            {pageIndex.map(item => (
+            {PAGE_INDEX.map(item => (
                 <a
-                    class="chip hover:bg-ink hover:text-ink-inverse"
+                    class="chip active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
                     href={item.href}
                 >
                     {item.label}
@@ -91,31 +103,177 @@ function stampMonth(date: Date) {
     </div>
 </section>
 
-<ProgramSheet
-    class="border-b-2 border-ink"
-    ctaHref="/assembly"
-    ctaLabel="About the Assembly"
-    detailed
-    events={assemblies}
-    headingId="assembly-title"
-/>
+<section
+    class="stage stage--assembly stage--tight border-b-2 border-ink"
+    aria-labelledby="assembly-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-5xl tracking-tight"
+            eyebrow={`${assemblyProgram.shortName} / ${assemblyProgram.cadence}`}
+            headingId="assembly-title"
+        >
+            {assemblyProgram.name}.
+        </SectionHead>
+        <p
+            class="max-w-2xl leading-relaxed text-md text-ink-muted"
+            data-motion="rise"
+        >
+            {assemblyProgram.summary}
+        </p>
+        <div
+            class="flex flex-wrap items-center gap-x-8 gap-y-3 mt-8"
+            data-motion="rise"
+        >
+            <a
+                class="btn"
+                href="/assembly"
+            >
+                About the {assemblyProgram.name}
+            </a>
+            <a
+                class="action-text hover:text-accent-deep inline-flex items-center min-h-[50px] underline underline-offset-4 transition-colors"
+                href={LINKS.meetup}
+                rel="noopener noreferrer"
+                target="_blank"
+            >
+                RSVP for {assemblyProgram.shortName} on Meetup &rarr;
+                <span class="sr-only"> (opens in a new tab)</span>
+            </a>
+        </div>
+        {nextAssembly
+            ? (
+                    <Fragment>
+                        <div class="mark mt-16">
+                            <article
+                                id={nextAssembly.id}
+                                class="sheet slab slab--bare slab--card"
+                            >
+                                <p
+                                    class="sheet__plate"
+                                    data-motion="stamp"
+                                    data-placeholder
+                                >
+                                    <span class="label sheet__tag px-2 py-1 bg-accent text-ink">
+                                        Next {assemblyProgram.shortName}
+                                    </span>
+                                    <time
+                                        class="sheet__stamp"
+                                        datetime={nextAssembly.date.toISOString()}
+                                    >
+                                        <span class="sheet__day">{stampDay(nextAssembly.date)}</span>
+                                        <span class="sheet__month">{stampMonth(nextAssembly.date)}</span>
+                                    </time>
+                                    <span class="sheet__weekday">{weekday(nextAssembly.date)}</span>
+                                </p>
+                                <div
+                                    class="sheet__body"
+                                    data-motion="rise"
+                                >
+                                    <p class="label mb-4 text-ink-subtle">
+                                        Entry {entryNo(1)} / {entryNo(assemblies.length)}
+                                    </p>
+                                    <h3 class="font-extrabold font-sans text-2xl tracking-tight">{nextAssembly.title}</h3>
+                                    <p
+                                        class="mt-3 font-mono text-xs uppercase text-ink-muted"
+                                        data-placeholder
+                                    >
+                                        {formatTimeRange(nextAssembly.date, nextAssembly.end)}
+                                    </p>
+                                    <address class="mt-1 font-mono not-italic text-xs uppercase text-ink-muted">
+                                        {nextAssembly.location}
+                                    </address>
+                                    <p class="max-w-2xl mt-4 leading-relaxed text-ink-muted">{nextAssembly.excerpt}</p>
+                                </div>
+                            </article>
+                        </div>
+                        {laterAssemblies.length > 0 && (
+                            <div class="docket mt-16">
+                                <div
+                                    class="docket__heads"
+                                    aria-hidden="true"
+                                >
+                                    <p class="docket__head label text-ink-subtle">No.</p>
+                                    <p class="docket__head label text-ink-subtle">Date</p>
+                                    <p class="docket__head docket__head--session label text-ink-subtle">Session</p>
+                                    <p class="docket__head docket__head--room label text-ink-subtle">Room</p>
+                                </div>
+                                <hr
+                                    class="docket__rule h-0.5 border-0 bg-ink"
+                                    data-motion="rule"
+                                />
+                                <ul
+                                    class="docket__rows list-none"
+                                    aria-label={`Later ${assemblyProgram.name} dates`}
+                                    data-motion-stagger="rise"
+                                >
+                                    {laterAssemblies.map((event, index) => (
+                                        <li
+                                            id={event.id}
+                                            class="docket__row"
+                                        >
+                                            <p class="docket__no">{entryNo(index + 2)}</p>
+                                            <p
+                                                class="docket__date"
+                                                data-placeholder
+                                            >
+                                                <time
+                                                    class="font-bold font-sans text-base"
+                                                    datetime={event.date.toISOString()}
+                                                >
+                                                    {formatDate(event.date)}
+                                                </time>
+                                                <span class="block mt-1 font-mono text-xs uppercase text-ink-muted">
+                                                    {formatTimeRange(event.date, event.end)}
+                                                </span>
+                                            </p>
+                                            <h3 class="docket__session font-bold font-sans text-base tracking-tight">{event.title}</h3>
+                                            <address class="docket__room font-mono not-italic text-xs uppercase text-ink-muted">
+                                                {event.location}
+                                            </address>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </Fragment>
+                )
+            : (
+                    <p
+                        class="mark slab slab--card mt-16 leading-relaxed text-ink-muted"
+                        data-motion="rise"
+                    >
+                        No {assemblyProgram.name} on the calendar right now &mdash; the next date goes up here and on Meetup as soon as the room is booked.
+                    </p>
+                )}
+    </div>
+</section>
 
 <ProgramFlyer
     class="border-b-2 border-ink"
     detailed
     events={hangouts}
     headingId="hangout-title"
+    tight
 />
 
 <section
-    class="stage stage--bash stage--overhang border-b-2 border-ink"
+    class="stage stage--bash stage--overhang stage--tight border-b-2 border-ink"
     aria-labelledby="bash-title"
 >
-    <div class="bash-well fold slab slab--well stage__item--runoff">
+    <div
+        class="bash-well fold slab slab--well stage__item--runoff"
+        data-motion="wipe"
+    >
         <div
-            class="halftone--accent absolute inset-0 pointer-events-none"
+            class="absolute inset-0 overflow-clip pointer-events-none"
             aria-hidden="true"
-        />
+        >
+            <div
+                class="bash-well__drift halftone--accent absolute"
+                data-scrub="drift"
+            />
+        </div>
         <div class="relative">
             <SectionHead
                 class="font-extrabold font-sans text-5xl tracking-tight"
@@ -142,7 +300,7 @@ function stampMonth(date: Date) {
                     Everything about the {bashProgram.name} &rarr;
                 </a>
                 <a
-                    class="action-text hover:text-accent inline-flex items-center min-h-[50px] underline underline-offset-8 text-ink-inverse transition-colors"
+                    class="action-text hover:text-accent inline-flex items-center min-h-[50px] underline underline-offset-4 text-ink-inverse transition-colors"
                     href={LINKS.meetup}
                     rel="noopener noreferrer"
                     target="_blank"
@@ -194,34 +352,7 @@ function stampMonth(date: Date) {
 </section>
 
 <section
-    class="stage border-b-2 border-ink"
-    aria-labelledby="planned-title"
->
-    <div>
-        <SectionHead
-            class="font-extrabold font-sans text-4xl tracking-tight"
-            eyebrow="Planned"
-            headingId="planned-title"
-        >
-            Written down, not yet dated.
-        </SectionHead>
-        <ul
-            class="grid grid-cols-1 gap-6 list-none lg:grid-cols-3 md:grid-cols-2"
-            data-motion-stagger="rise"
-        >
-            {planned.map(program => (
-                <li class="p-5 border-2 border-dashed border-ink-subtle">
-                    <p class="label mb-3 text-ink-muted">{program.cadence}</p>
-                    <h3 class="mb-2 font-bold font-sans text-lg tracking-tight">{program.name}</h3>
-                    <p class="text-sm text-ink-muted">{program.summary}</p>
-                </li>
-            ))}
-        </ul>
-    </div>
-</section>
-
-<section
-    class="slab--sunk stage"
+    class="slab--sunk stage stage--tight border-b-2 border-ink"
     aria-labelledby="past-title"
 >
     <div>
@@ -272,6 +403,33 @@ function stampMonth(date: Date) {
     </div>
 </section>
 
+<section
+    class="stage stage--tight"
+    aria-labelledby="planned-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-4xl tracking-tight"
+            eyebrow="Planned"
+            headingId="planned-title"
+        >
+            Written down, not yet dated.
+        </SectionHead>
+        <ul
+            class="grid grid-cols-1 gap-6 list-none lg:grid-cols-3 md:grid-cols-2"
+            data-motion-stagger="flip"
+        >
+            {planned.map(program => (
+                <li class="p-5 border-2 border-dashed border-ink-subtle">
+                    <p class="label mb-3 text-ink-muted">{program.cadence}</p>
+                    <h3 class="mb-2 font-bold font-sans text-lg tracking-tight">{program.name}</h3>
+                    <p class="text-sm text-ink-muted">{program.summary}</p>
+                </li>
+            ))}
+        </ul>
+    </div>
+</section>
+
 <style>
     .archive-card {
         display: grid;
@@ -302,6 +460,7 @@ function stampMonth(date: Date) {
         align-content: start;
         display: grid;
         grid-row: span 4;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
         padding: var(--space-sm) var(--space-md) var(--space-md);
     }
@@ -352,6 +511,7 @@ function stampMonth(date: Date) {
     .archive-grid > li {
         display: grid;
         grid-row: span 4;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
         padding-bottom: var(--space-md);
     }
@@ -361,9 +521,158 @@ function stampMonth(date: Date) {
         padding-inline: max(var(--shell-pad), calc(100% - var(--shell-inner))) 0;
     }
 
+    .bash-well__drift {
+        inset: -8% 0;
+    }
+
+    .docket {
+        --docket-no: 48px;
+        column-gap: var(--space-md);
+        display: grid;
+        grid-template-columns: var(--docket-no) minmax(0, 0.95fr) minmax(0, 1.3fr) minmax(0, 1fr);
+        position: relative;
+        row-gap: 0;
+    }
+
+    .docket::before {
+        background: var(--color-ink);
+        content: '';
+        inset-block: 0;
+        inset-inline-start: calc(var(--docket-no) + var(--space-md) / 2 - 1px);
+        position: absolute;
+        width: 2px;
+    }
+
+    .docket__head {
+        padding-bottom: var(--space-2xs);
+    }
+
+    .docket__heads,
+    .docket__row,
+    .docket__rows {
+        display: grid;
+        grid-column: 1 / -1;
+        grid-template-columns: subgrid;
+    }
+
+    .docket__no {
+        color: var(--color-ink-subtle);
+        font-family: var(--font-mono);
+        font-size: var(--text-base);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .docket__row {
+        align-items: baseline;
+        padding-block: var(--space-sm);
+    }
+
+    .docket__row + .docket__row {
+        border-top: 1px solid var(--color-ink-20);
+    }
+
+    .docket__row:target {
+        outline: 2px solid var(--color-accent-deep);
+        outline-offset: 3px;
+    }
+
+    .docket__rows {
+        row-gap: 0;
+    }
+
+    .docket__rule {
+        grid-column: 1 / -1;
+    }
+
+    .sheet {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        overflow: clip;
+    }
+
+    .sheet:target {
+        outline: 2px solid var(--color-accent-deep);
+        outline-offset: 3px;
+    }
+
+    .sheet__body {
+        padding: var(--space-lg);
+    }
+
+    .sheet__day {
+        font-family: var(--font-sans);
+        font-size: clamp(56px, calc(34.667px + 6.6667vw), 120px);
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 0.8;
+    }
+
+    .sheet__month {
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .sheet__plate {
+        align-content: center;
+        background: var(--color-ink);
+        color: var(--color-ink-inverse);
+        display: grid;
+        gap: var(--space-2xs);
+        justify-items: start;
+        padding: var(--space-lg);
+    }
+
+    .sheet__stamp {
+        display: contents;
+    }
+
+    .sheet__weekday {
+        color: var(--color-ink-inverse-muted);
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
     @media (max-width: 1024px) {
         .archive-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .docket {
+            grid-template-columns: var(--docket-no) minmax(0, 1fr) minmax(0, 1.25fr);
+        }
+
+        .docket__date {
+            grid-column: 2;
+            grid-row: span 2;
+        }
+
+        .docket__head--room {
+            display: none;
+        }
+
+        .docket__no {
+            grid-column: 1;
+            grid-row: span 2;
+        }
+
+        .docket__room {
+            grid-column: 3;
+            grid-row: 2;
+            padding-top: var(--space-3xs);
+        }
+
+        .docket__row {
+            align-items: start;
+        }
+
+        .docket__session {
+            grid-column: 3;
+            grid-row: 1;
         }
     }
 
@@ -390,6 +699,59 @@ function stampMonth(date: Date) {
 
         .archive-grid {
             grid-template-columns: minmax(0, 1fr);
+        }
+
+        .docket {
+            --docket-no: 34px;
+            column-gap: var(--space-sm);
+            grid-template-columns: var(--docket-no) minmax(0, 1fr);
+        }
+
+        .docket::before {
+            inset-inline-start: calc(var(--docket-no) + var(--space-sm) / 2 - 1px);
+        }
+
+        .docket__date {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .docket__head--session {
+            display: none;
+        }
+
+        .docket__no {
+            grid-row: span 3;
+        }
+
+        .docket__room {
+            grid-column: 2;
+            grid-row: 3;
+        }
+
+        .docket__session {
+            grid-column: 2;
+            grid-row: 2;
+            padding-top: var(--space-3xs);
+        }
+
+        .sheet {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .sheet__day {
+            grid-row: span 2;
+        }
+
+        .sheet__plate {
+            align-content: start;
+            column-gap: var(--space-sm);
+            grid-template-columns: auto minmax(0, 1fr);
+            padding: var(--space-md);
+        }
+
+        .sheet__tag {
+            grid-column: 1 / -1;
         }
     }
 </style>

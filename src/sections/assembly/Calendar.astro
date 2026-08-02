@@ -11,13 +11,15 @@ const events = await getCollection('events');
 const upcoming = events
     .filter(event => event.data.type === 'assembly' && event.data.status === 'upcoming')
     .sort((a, b) => +a.data.date - +b.data.date);
+
+const [next, ...later] = upcoming;
 ---
 
 <section
     class="stage stage--assembly stage--tight border-b-2 border-ink"
     aria-labelledby="assembly-next-title"
 >
-    <div class="mark">
+    <div>
         <SectionHead
             class="font-extrabold font-sans text-4xl tracking-tight"
             eyebrow={`${program.shortName} / ${program.cadence}`}
@@ -34,64 +36,113 @@ const upcoming = events
                 RSVP on Meetup &rarr;
             </a>
         </SectionHead>
-        <hr
-            class="border-0 border-t-2 border-ink"
-            data-motion="rule"
-        />
-        {upcoming.length > 0
+        {next
             ? (
-                    <ul
-                        class="list-none"
-                        data-motion-stagger="rise"
-                    >
-                        {upcoming.map((event, index) => (
-                            <li
-                                id={event.id}
-                                class="rank items-baseline py-4 border-b-2 border-ink"
+                    <Fragment>
+                        <div
+                            class="mark"
+                            data-motion="unfold"
+                        >
+                            <article
+                                id={next.id}
+                                class="slab slab--cut slab--lift grid grid-cols-12 items-start gap-x-6 gap-y-5"
                             >
-                                <div>
-                                    <p
-                                        class:list={['label inline-block mb-2 px-2 py-0.5 bg-accent text-ink', index > 0 && 'invisible']}
-                                        aria-hidden={index > 0 ? 'true' : undefined}
-                                    >
+                                <div class="col-span-12 md:col-span-4">
+                                    <p class="label inline-block mb-3 px-2 py-0.5 bg-accent text-ink">
                                         Next
                                     </p>
                                     <p
-                                        class="font-bold font-sans text-lg"
+                                        class="font-extrabold font-sans leading-[0.95] text-3xl tracking-tight"
                                         data-placeholder
                                     >
-                                        <time datetime={event.data.date.toISOString()}>{formatDate(event.data.date)}</time>
+                                        <time datetime={next.data.date.toISOString()}>{formatDate(next.data.date)}</time>
                                     </p>
                                     <p
-                                        class="font-mono text-xs uppercase text-ink-muted"
+                                        class="mt-2 font-mono text-xs uppercase text-ink-muted"
                                         data-placeholder
                                     >
-                                        {formatTimeRange(event.data.date, event.data.end)}
+                                        {formatTimeRange(next.data.date, next.data.end)}
                                     </p>
                                 </div>
-                                <h3 class="font-extrabold font-sans text-lg tracking-tight">
-                                    {event.data.title}
-                                </h3>
-                                <p class="leading-relaxed text-sm text-ink-muted">
-                                    {event.data.excerpt}
+                                <div class="col-span-12 md:col-span-8">
+                                    <h3 class="font-extrabold font-sans text-2xl tracking-tight">
+                                        {next.data.title}
+                                    </h3>
+                                    <address class="mt-2 font-mono not-italic text-xs uppercase text-ink-muted">
+                                        {next.data.location}
+                                    </address>
+                                    <p class="max-w-2xl mt-3 leading-relaxed text-ink-muted">
+                                        {next.data.excerpt}
+                                    </p>
+                                    <p class="mt-4">
+                                        <a
+                                            class="action-text assembly-next__rsvp hover:text-accent-deep underline underline-offset-4 transition-colors"
+                                            href={LINKS.meetup}
+                                            rel="noopener noreferrer"
+                                            target="_blank"
+                                        >
+                                            RSVP on Meetup &rarr;
+                                            <span class="sr-only"> (opens in a new tab)</span>
+                                        </a>
+                                    </p>
+                                </div>
+                            </article>
+                        </div>
+                        {later.length > 0 && (
+                            <Fragment>
+                                <p
+                                    class="label mb-4 mt-16 text-ink-muted"
+                                    data-motion="rise"
+                                >
+                                    And after that
                                 </p>
-                                <address class="font-mono not-italic text-xs uppercase text-ink-muted md:text-right">
-                                    {event.data.location}
-                                </address>
-                            </li>
-                        ))}
-                    </ul>
+                                <ul
+                                    class="border-2 border-ink list-none"
+                                    data-motion-stagger="rise"
+                                >
+                                    {later.map(event => (
+                                        <li
+                                            id={event.id}
+                                            class="assembly-next__row rank last:border-b-0 items-baseline px-5 py-3 border-b-2 border-ink"
+                                        >
+                                            <p
+                                                class="font-bold font-sans text-base"
+                                                data-placeholder
+                                            >
+                                                <time datetime={event.data.date.toISOString()}>{formatDate(event.data.date)}</time>
+                                            </p>
+                                            <p
+                                                class="assembly-next__meta font-mono text-xs uppercase text-ink-muted"
+                                                data-placeholder
+                                            >
+                                                {formatTimeRange(event.data.date, event.data.end)}
+                                            </p>
+                                            <h3 class="font-bold font-sans text-base tracking-tight">
+                                                {event.data.title}
+                                            </h3>
+                                            <address class="assembly-next__meta font-mono not-italic text-xs uppercase text-ink-muted">
+                                                {event.data.location}
+                                            </address>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </Fragment>
+                        )}
+                    </Fragment>
                 )
             : (
                     <p
-                        class="mt-6 text-ink-muted"
+                        class="slab slab--cut slab--lift leading-relaxed text-ink-muted"
                         data-motion="rise"
                     >
                         Nothing on the calendar right now &mdash; the next date goes up as soon as
                         the room is booked.
                     </p>
                 )}
-        <p class="mt-6 md:hidden">
+        <p
+            class="mt-6 md:hidden"
+            data-motion="rise"
+        >
             <a
                 class="action-text hover:text-accent-deep inline-flex items-center min-h-[50px] underline underline-offset-4 transition-colors"
                 href={LINKS.meetup}
@@ -105,9 +156,28 @@ const upcoming = events
 </section>
 
 <style>
+    .assembly-next__meta {
+        text-align: right;
+    }
+
+    .assembly-next__row {
+        gap: var(--space-xs) var(--space-md);
+    }
+
+    .assembly-next__rsvp {
+        align-items: center;
+        display: inline-flex;
+        min-height: 50px;
+    }
+
     @media (max-width: 768px) {
-        .rank {
+        .assembly-next__meta {
+            text-align: left;
+        }
+
+        .assembly-next__row {
             --rank-cols: minmax(0, 1fr);
+            gap: var(--space-3xs);
         }
     }
 </style>

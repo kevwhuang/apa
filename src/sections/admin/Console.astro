@@ -13,12 +13,12 @@ const ACTIONS = [
         result: 'Cleared 12 entries.',
     },
     {
-        blurb: 'Removes every track submitted for the current Producer Bash prompt, along with its uploaded stems.',
+        blurb: 'Removes every track submitted for the current Bash prompt, along with its uploaded stems.',
         confirm: 'Clear all 24 intake entries and their uploads? This cannot be undone.',
         count: '24 entries',
         id: 'bash-entries',
-        label: 'Clear Producer Bash intake',
-        name: 'Producer Bash intake',
+        label: 'Clear Bash intake',
+        name: 'Bash intake',
         result: 'Cleared 24 entries.',
     },
 ];
@@ -36,7 +36,7 @@ const SWITCHES = [
         blurb: 'Controls whether the submission form accepts new tracks for the current prompt.',
         checked: true,
         id: 'bash-intake',
-        name: 'Producer Bash intake',
+        name: 'Bash intake',
         off: 'Closed',
         on: 'Open',
     },
@@ -63,7 +63,7 @@ const SWITCHES = [
         >
             Operations.
         </PageHead>
-        <p class="max-w-2xl mt-6 text-[18px] text-ink-muted">
+        <p class="max-w-2xl mt-6 text-lmd text-ink-muted">
             Open and close Alliance programs, run cleanup actions, and manage member Prods.
             Access is not yet restricted &mdash; this console is linked from the site footer and
             open to anyone who opens it.
@@ -97,14 +97,9 @@ const SWITCHES = [
                             >
                                 {control.name}
                             </h3>
-                            <p class="max-w-xl mt-1 text-[14px] text-ink-muted">
+                            <p class="max-w-xl mt-1 text-sm text-ink-muted">
                                 {control.blurb}
                             </p>
-                            <p
-                                class="admin__feedback action-text mt-3 text-ink-subtle"
-                                aria-live="polite"
-                                data-admin-feedback={control.id}
-                            />
                         </div>
                         <p class="admin__state label">
                             <span class="admin__state-on">{control.on}</span>
@@ -115,6 +110,8 @@ const SWITCHES = [
                             class="admin__switch"
                             aria-labelledby={`${control.id}-name`}
                             checked={control.checked}
+                            data-admin-off={`${control.name} closed.`}
+                            data-admin-on={`${control.name} opened.`}
                             data-admin-toggle={control.id}
                             role="switch"
                             type="checkbox"
@@ -140,7 +137,7 @@ const SWITCHES = [
         </SectionHead>
         <ul
             class="admin__actions grid gap-6 list-none md:grid-cols-2"
-            data-motion-stagger="rise"
+            data-motion-stagger="flip"
         >
             {ACTIONS.map(action => (
                 <li class="admin__action">
@@ -149,7 +146,7 @@ const SWITCHES = [
                         <h3 class="font-extrabold font-sans text-lg tracking-tight">
                             {action.name}
                         </h3>
-                        <p class="text-[14px] text-ink-muted">
+                        <p class="text-sm text-ink-muted">
                             {action.blurb}
                         </p>
                         <button
@@ -159,36 +156,29 @@ const SWITCHES = [
                         >
                             {action.label}
                         </button>
-                        <div class="admin__tail">
-                            <div
-                                class="admin__confirm slab slab--sunk"
-                                data-admin-confirm={action.id}
-                                hidden
-                            >
-                                <p class="mb-3 text-[14px]">{action.confirm}</p>
-                                <div class="flex flex-wrap gap-2">
-                                    <button
-                                        class="btn btn--accent"
-                                        data-admin-commit={action.id}
-                                        type="button"
-                                    >
-                                        Yes, {action.label.toLowerCase()}
-                                    </button>
-                                    <button
-                                        class="btn"
-                                        data-admin-cancel={action.id}
-                                        type="button"
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
+                        <div
+                            class="admin__confirm slab slab--sunk"
+                            data-admin-confirm={action.id}
+                            hidden
+                        >
+                            <p class="mb-3 text-sm">{action.confirm}</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button
+                                    class="btn btn--accent"
+                                    data-admin-commit={action.id}
+                                    data-admin-result={action.result}
+                                    type="button"
+                                >
+                                    Yes, {action.label.toLowerCase()}
+                                </button>
+                                <button
+                                    class="btn"
+                                    data-admin-cancel={action.id}
+                                    type="button"
+                                >
+                                    Cancel
+                                </button>
                             </div>
-                            <p
-                                class="admin__feedback action-text text-ink-subtle"
-                                aria-live="polite"
-                                data-admin-feedback={action.id}
-                                data-admin-result={action.result}
-                            />
                         </div>
                     </article>
                 </li>
@@ -203,6 +193,7 @@ const SWITCHES = [
         align-content: start;
         display: grid;
         grid-row: span 5;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
         row-gap: var(--space-xs);
     }
@@ -242,7 +233,7 @@ const SWITCHES = [
         border: 2px solid var(--color-ink);
         flex-shrink: 0;
         height: 50px;
-        transition: background-color var(--duration-fast) ease, background-position var(--duration-fast) ease;
+        transition: background-color var(--duration-fast) var(--motion-ease-ui), background-position var(--duration-fast) var(--motion-ease-ui), box-shadow var(--duration-fast) var(--motion-ease-ui);
         width: 80px;
     }
 
@@ -255,18 +246,16 @@ const SWITCHES = [
         background-position: calc(100% - 5px) center;
     }
 
+    .admin__switch:focus-visible {
+        box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-accent-deep);
+    }
+
     .admin__switch:hover {
         border-color: var(--color-accent-deep);
     }
 
     .admin__switch[aria-busy='true'] {
         opacity: 0.6;
-    }
-
-    .admin__tail {
-        align-content: start;
-        display: grid;
-        gap: var(--space-xs);
     }
 
     @media (max-width: 768px) {
@@ -287,14 +276,26 @@ const SWITCHES = [
             background-color: SelectedItem;
             background-image: linear-gradient(SelectedItemText, SelectedItemText);
         }
+
+        .admin__switch:focus-visible {
+            box-shadow: 0 0 0 2px Canvas, 0 0 0 4px CanvasText;
+        }
     }
 </style>
 
 <script>
     import { MOCK_LATENCY_MS } from '@lib/constants';
-    import { delay, formatTime, registerPageScript, setText } from '@lib/utils';
+    import { delay, registerPageScript } from '@lib/utils';
+    import { toast } from '@lib/toasts';
 
     const pending = new Set<string>();
+
+    const timers = new Map<string, number>();
+
+    function clearTimers() {
+        timers.forEach(timer => window.clearTimeout(timer));
+        timers.clear();
+    }
 
     function closeConfirm(id: string, focusTrigger: boolean) {
         const panel = document.querySelector<HTMLElement>(`[data-admin-confirm="${id}"]`);
@@ -303,14 +304,6 @@ const SWITCHES = [
         panel?.setAttribute('hidden', '');
 
         if (focusTrigger) trigger?.focus();
-    }
-
-    function getFeedback(id: string) {
-        return document.querySelector<HTMLElement>(`[data-admin-feedback="${id}"]`);
-    }
-
-    function guardAdmin(): boolean {
-        return true;
     }
 
     async function handleActionClick(button: HTMLButtonElement) {
@@ -327,20 +320,19 @@ const SWITCHES = [
         await runAction(id, button);
     }
 
-    async function handleToggleChange(input: HTMLInputElement) {
+    function handleToggleChange(input: HTMLInputElement) {
         const id = input.dataset.adminToggle ?? '';
+        const queued = timers.get(id);
 
-        if (pending.has(id)) return;
+        if (queued !== undefined) window.clearTimeout(queued);
 
-        pending.add(id);
         input.setAttribute('aria-busy', 'true');
-        setText(getFeedback(id), 'Saving\u2026');
 
-        await delay(MOCK_LATENCY_MS);
-
-        input.removeAttribute('aria-busy');
-        pending.delete(id);
-        setText(getFeedback(id), `Saved at ${formatTime(new Date())}.`);
+        timers.set(id, window.setTimeout(() => {
+            timers.delete(id);
+            input.removeAttribute('aria-busy');
+            toast((input.checked ? input.dataset.adminOn : input.dataset.adminOff) ?? '', 'success');
+        }, MOCK_LATENCY_MS));
     }
 
     function initAdminConsole(signal: AbortSignal) {
@@ -348,13 +340,9 @@ const SWITCHES = [
 
         if (toggles.length === 0) return;
 
-        if (!guardAdmin()) {
-            window.location.replace('/404');
-
-            return;
-        }
-
+        clearTimers();
         pending.clear();
+        signal.addEventListener('abort', clearTimers, { once: true });
 
         toggles.forEach((input) => {
             input.addEventListener('change', () => handleToggleChange(input), { signal });
@@ -376,18 +364,17 @@ const SWITCHES = [
     async function runAction(id: string, control: HTMLButtonElement | null) {
         if (pending.has(id)) return;
 
-        const feedback = getFeedback(id);
+        const commit = document.querySelector<HTMLButtonElement>(`[data-admin-commit="${id}"]`);
 
         pending.add(id);
         control?.setAttribute('aria-busy', 'true');
-        setText(feedback, 'Working\u2026');
 
         await delay(MOCK_LATENCY_MS);
 
         control?.removeAttribute('aria-busy');
         pending.delete(id);
         closeConfirm(id, true);
-        setText(feedback, feedback?.dataset.adminResult ?? 'Done.');
+        toast(commit?.dataset.adminResult ?? 'Done.', 'success');
     }
 
     registerPageScript(initAdminConsole);

@@ -1,0 +1,186 @@
+<aside
+    class="toaster"
+    aria-label="Notifications"
+    popover="manual"
+    transition:persist
+>
+    <ol
+        class="toaster__list list-none"
+        aria-live="polite"
+        data-toast-list
+    />
+    <template data-toast-item>
+        <li class="toast">
+            <span
+                class="toast__message"
+                data-toast-message
+            />
+            <button
+                class="toast__close"
+                data-toast-close
+                type="button"
+            >
+                <span aria-hidden="true">&times;</span>
+                <span class="sr-only">Dismiss</span>
+            </button>
+        </li>
+    </template>
+</aside>
+
+<style>
+    .toast {
+        --focus-ring: var(--color-accent-light);
+        --toast-accent: var(--color-ink-inverse);
+        align-items: center;
+        animation: var(--duration-slow) var(--motion-ease-entrance) both toast__rise;
+        background: var(--color-surface-inverse);
+        border: 2px solid var(--color-ink);
+        border-inline-start: 4px solid var(--toast-accent);
+        box-shadow: var(--lift) var(--lift) 0 0 var(--color-ink-20);
+        color: var(--color-ink-inverse);
+        display: flex;
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        gap: var(--space-xs);
+        max-width: min(92vw, 480px);
+        padding: var(--space-2xs) var(--space-sm);
+        pointer-events: auto;
+    }
+
+    .toast--error {
+        --toast-accent: var(--color-accent);
+    }
+
+    .toast--info {
+        --toast-accent: var(--color-ink-inverse);
+    }
+
+    .toast--success {
+        --toast-accent: var(--color-pulse);
+    }
+
+    .toast__close {
+        align-items: center;
+        color: inherit;
+        display: inline-flex;
+        flex-shrink: 0;
+        height: 16px;
+        justify-content: center;
+        position: relative;
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        width: 16px;
+    }
+
+    .toast__close::after {
+        content: '';
+        inset: -16px;
+        position: absolute;
+    }
+
+    .toast__close:active {
+        transform: translateY(1px);
+    }
+
+    .toast__close:hover {
+        color: var(--color-accent-light);
+    }
+
+    .toast__message {
+        min-width: 0;
+    }
+
+    .toaster {
+        align-items: center;
+        background: transparent;
+        border: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2xs);
+        height: auto;
+        inset-block: auto var(--space-md);
+        inset-inline: 0;
+        margin: 0;
+        overflow: visible;
+        padding: 0;
+        pointer-events: none;
+        position: fixed;
+        width: auto;
+        z-index: var(--z-toast);
+    }
+
+    .toaster__list {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2xs);
+    }
+
+    @keyframes toast__rise {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+    }
+</style>
+
+<script>
+    import { TOAST_TOPIC } from '@lib/toasts';
+    import { setText } from '@lib/utils';
+
+    const TOAST_DISMISS_MS = 3_500;
+
+    const TOAST_LIMIT = 3;
+
+    const timers = new WeakMap<HTMLElement, number>();
+
+    function dismissToast(item: HTMLElement) {
+        const timer = timers.get(item);
+
+        if (timer !== undefined) window.clearTimeout(timer);
+
+        timers.delete(item);
+        item.remove();
+    }
+
+    function handleToast(event: WindowEventMap['apa:toast']) {
+        const { message, tone } = event.detail;
+        const aside = document.querySelector<HTMLElement>('.toaster');
+        const list = document.querySelector<HTMLElement>('[data-toast-list]');
+        const template = document.querySelector<HTMLTemplateElement>('[data-toast-item]');
+
+        if (!aside || !list || !template) return;
+
+        const fragment = template.content.cloneNode(true) as DocumentFragment;
+        const item = fragment.querySelector<HTMLElement>('.toast');
+
+        if (!item) return;
+
+        raiseToaster(aside);
+        item.classList.add(`toast--${tone}`);
+        setText(fragment.querySelector('[data-toast-message]'), message);
+        fragment.querySelector('[data-toast-close]')?.addEventListener('click', () => dismissToast(item));
+        list.append(fragment);
+        timers.set(item, window.setTimeout(() => dismissToast(item), TOAST_DISMISS_MS));
+        trimToasts(list);
+    }
+
+    function raiseToaster(aside: HTMLElement) {
+        if (!('showPopover' in aside)) return;
+
+        if (aside.matches(':popover-open')) aside.hidePopover();
+
+        aside.showPopover();
+    }
+
+    function trimToasts(list: HTMLElement) {
+        while (list.children.length > TOAST_LIMIT) {
+            const oldest = list.firstElementChild;
+
+            if (!(oldest instanceof HTMLElement)) return;
+
+            dismissToast(oldest);
+        }
+    }
+
+    window.addEventListener(TOAST_TOPIC, handleToast);
+</script>

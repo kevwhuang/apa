@@ -3,10 +3,10 @@ import { getCollection } from 'astro:content';
 
 import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import { PALETTE } from '@lib/constants';
+import { PALETTE, PRODUCT_CATEGORIES } from '@lib/constants';
 import { formatPrice, getStockLabel } from '@lib/utils';
 
-const CATEGORIES = ['all', 'accessory', 'apparel', 'music'] as const;
+const CATEGORIES = ['all', ...PRODUCT_CATEGORIES] as const;
 
 const cardColors = PALETTE.slice(0, 6);
 const products = await getCollection('products');
@@ -26,7 +26,7 @@ const products = await getCollection('products');
         </PageHead>
         <p
             class="max-w-2xl mt-6 text-lmd text-ink-muted"
-            data-motion="rise"
+            data-motion="blur"
         >
             Every order goes back into the calendar &mdash; room hire, gear for the Bash, and
             keeping Assembly free to attend. Runs are small and printed in Austin; collect at
@@ -35,12 +35,13 @@ const products = await getCollection('products');
         <div
             class="flex flex-wrap gap-2 mt-10"
             aria-label="Filter by category"
+            data-motion="rise"
             role="group"
         >
             {CATEGORIES.map((category, index) => (
                 <button
                     class:list={[
-                        'chip category-btn store__chip active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse',
+                        'category-btn chip store__chip active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse',
                         { 'is-active': index === 0 },
                     ]}
                     aria-pressed={index === 0 ? 'true' : 'false'}
@@ -51,6 +52,13 @@ const products = await getCollection('products');
                 </button>
             ))}
         </div>
+        <p
+            class="label mt-6 text-ink-subtle"
+            aria-live="polite"
+            data-store-status
+        >
+            Showing all {products.length} products.
+        </p>
     </div>
 </section>
 
@@ -66,7 +74,8 @@ const products = await getCollection('products');
     </h2>
     <ul
         class="rank rank--4 store__grid list-none"
-        data-motion-stagger="rise"
+        data-motion-from="center"
+        data-motion-stagger="flip"
     >
         {products.map((product, index) => (
             <li
@@ -95,12 +104,12 @@ const products = await getCollection('products');
                     <p class="label mt-4 text-ink-muted">
                         {product.data.category}
                     </p>
-                    <div class="flex flex-nowrap items-baseline justify-between gap-x-3 mt-1">
+                    <div class="flex flex-wrap items-baseline justify-between gap-x-3 mt-1">
                         <h3 class="min-w-0 font-bold font-sans tracking-tight">
                             {product.data.title}
                         </h3>
                         <p
-                            class="shrink-0 font-bold font-mono text-[13px] whitespace-nowrap"
+                            class="shrink-0 font-bold font-mono text-sm whitespace-nowrap"
                             data-placeholder
                         >
                             {formatPrice(product.data.priceCents)}
@@ -117,7 +126,12 @@ const products = await getCollection('products');
     .product-card > a {
         display: grid;
         grid-row: span 3;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
+    }
+
+    .product-card > a:focus-visible :global(.slab) {
+        box-shadow: none;
     }
 
     .store__chip {
@@ -141,14 +155,7 @@ const products = await getCollection('products');
 </style>
 
 <script>
-    import { applyFilter, registerPageScript, rovingFocus } from '@lib/utils';
-
-    let activeCategory = 'all';
-
-    function handleCategoryClick(button: HTMLButtonElement, buttons: NodeListOf<HTMLButtonElement>, cards: NodeListOf<HTMLElement>) {
-        activeCategory = button.dataset.category ?? 'all';
-        updateCategoryFilter(buttons, cards);
-    }
+    import { initFilterGroup, registerPageScript } from '@lib/utils';
 
     function initStoreGrid(signal: AbortSignal) {
         const buttons = document.querySelectorAll<HTMLButtonElement>('.category-btn');
@@ -156,17 +163,16 @@ const products = await getCollection('products');
 
         if (!buttons.length || !cards.length) return;
 
-        activeCategory = 'all';
-        updateCategoryFilter(buttons, cards);
-        rovingFocus(buttons, signal);
-
-        buttons.forEach((button) => {
-            button.addEventListener('click', () => handleCategoryClick(button, buttons, cards), { signal });
+        initFilterGroup({
+            buttons,
+            cards,
+            dataKey: 'category',
+            initial: 'all',
+            matches: (card, category) => category === 'all' || card.dataset.category === category,
+            signal,
+            status: (shown, total, category) => (category === 'all' ? `Showing all ${total} products.` : `Showing ${shown} of ${total} products.`),
+            statusElement: document.querySelector<HTMLElement>('[data-store-status]'),
         });
-    }
-
-    function updateCategoryFilter(buttons: NodeListOf<HTMLButtonElement>, cards: NodeListOf<HTMLElement>) {
-        applyFilter(buttons, cards, activeCategory, 'category', (card, active) => active === 'all' || card.dataset.category === active);
     }
 
     registerPageScript(initStoreGrid);

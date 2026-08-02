@@ -16,41 +16,79 @@ const nextEvent = upcoming.at(0);
     class="stage stage--narrow stage--tight border-b-2 border-ink"
     aria-labelledby="checkin-title"
 >
-    <div>
-        <PageHead
-            class="max-w-3xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
-            eyebrow="Events / Check-in"
-            headingId="checkin-title"
-        >
-            You made it.
-        </PageHead>
-        <p class="max-w-2xl mt-6 text-[18px] text-ink-muted">
-            This is where the welcome code at the door sends you. Leave an address and the Alliance
-            opens an account for you with your first Prod already on it. Nothing is emailed &mdash;
-            the message is composed here and shown to you instead.
-        </p>
-    </div>
-    <aside
-        class="checkin__scanned slab slab--well flex flex-col gap-3"
-        aria-label="What you scanned"
-    >
-        <p class="label text-ink-inverse-muted">You scanned</p>
-        <p class="checkin__url font-mono wrap-break-word text-[15px]">
-            austinproduceralliance.com/check-in
-        </p>
-        {nextEvent && (
-            <p class="text-[15px] text-ink-inverse-muted">
-                Next on the calendar:&#32;
-                <span data-placeholder>
-                    {nextEvent.title} &middot;&#32;
-                    <time datetime={nextEvent.date.toISOString()}>
-                        {formatDate(nextEvent.date)}, {formatTime(nextEvent.date)}
-                    </time>&#32;
-                    &middot; {nextEvent.location}
-                </span>
+    <div class="grid grid-cols-1 gap-10 md:gap-12 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:items-start">
+        <div>
+            <PageHead
+                class="max-w-3xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+                eyebrow="Events / Check-in"
+                headingId="checkin-title"
+            >
+                You made it.
+            </PageHead>
+            <p
+                class="max-w-2xl mt-6 text-lmd text-ink-muted"
+                data-motion="blur"
+            >
+                This is where the welcome code at the door sends you. Leave an address and the
+                Alliance opens your account with your first Prod already on it.
             </p>
-        )}
-    </aside>
+        </div>
+        <aside
+            class="checkin-ticket mark self-start"
+            aria-label="What you scanned"
+            data-motion="wipe"
+        >
+            <div class="checkin-ticket__panel slab slab--well flex flex-col gap-4">
+                <header class="checkin-ticket__masthead">
+                    <p class="label text-accent-light">Door pass</p>
+                    <p class="label text-ink-inverse-muted">APA / Door 01</p>
+                </header>
+                <div class="flex flex-col gap-2">
+                    <p class="label text-ink-inverse-muted">You scanned</p>
+                    <p class="checkin-ticket__url font-mono text-smd wrap-break-word">
+                        austinproduceralliance.com/check-in
+                    </p>
+                </div>
+                {nextEvent && (
+                    <dl class="checkin-ticket__rows">
+                        <div class="checkin-ticket__row">
+                            <dt class="label text-ink-inverse-muted">Next</dt>
+                            <dd
+                                class="text-smd"
+                                data-placeholder
+                            >
+                                {nextEvent.title}
+                            </dd>
+                        </div>
+                        <div class="checkin-ticket__row">
+                            <dt class="label text-ink-inverse-muted">When</dt>
+                            <dd
+                                class="text-smd"
+                                data-placeholder
+                            >
+                                <time datetime={nextEvent.date.toISOString()}>
+                                    {formatDate(nextEvent.date)}, {formatTime(nextEvent.date)}
+                                </time>
+                            </dd>
+                        </div>
+                        <div class="checkin-ticket__row">
+                            <dt class="label text-ink-inverse-muted">Where</dt>
+                            <dd
+                                class="text-smd"
+                                data-placeholder
+                            >
+                                {nextEvent.location}
+                            </dd>
+                        </div>
+                    </dl>
+                )}
+                <div class="checkin-ticket__foot">
+                    <p class="action-text checkin-ticket__stamp">Checked</p>
+                    <p class="label text-ink-inverse-muted">1 Prod on arrival</p>
+                </div>
+            </div>
+        </aside>
+    </div>
 </section>
 
 <section
@@ -58,24 +96,29 @@ const nextEvent = upcoming.at(0);
     aria-label="Check in"
 >
     <form
-        class="checkin__form slab slab--card flex flex-col gap-5"
+        class="checkin-form slab slab--card flex flex-col gap-6"
         data-checkin-form
+        data-motion="unfold"
     >
+        <header class="checkin__masthead">
+            <p class="label text-accent-deep">Check-in</p>
+            <p class="label text-ink-subtle">APA / Door 01</p>
+        </header>
         <h2 class="font-extrabold font-sans text-2xl tracking-tight">
             Check in
         </h2>
         <p
-            class="checkin__alert action-text px-3 py-3 bg-accent text-ink"
+            class="action-text px-3 py-3 bg-accent text-ink"
             data-form-error
             hidden
             role="alert"
         />
         <div class="flex flex-col gap-2">
-            <label class="block">
-                <span class="label block mb-2 text-ink-muted">Email</span>
+            <label class="flex flex-col gap-2">
+                <span class="checkin-field__head label text-ink"><span class="checkin-field__index">01</span>Email</span>
                 <input
                     id="checkin-email"
-                    class="h-12 w-full px-4 border-2 border-ink font-mono text-[13px] bg-transparent"
+                    class="checkin-field__control font-mono text-sm"
                     aria-describedby="checkin-email-error"
                     aria-invalid="false"
                     autocomplete="email"
@@ -93,6 +136,7 @@ const nextEvent = upcoming.at(0);
             />
         </div>
         <div class="flex flex-col gap-2">
+            <p class="checkin-field__head label text-ink"><span class="checkin-field__index">02</span>Terms</p>
             <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <label class="checkin__check">
                     <input
@@ -107,7 +151,7 @@ const nextEvent = upcoming.at(0);
                     I accept the terms
                 </label>
                 <a
-                    class="checkin__link hover:text-accent-deep underline text-[14px] transition-colors"
+                    class="checkin__link hover:text-accent-deep text-sm underline"
                     href="/terms"
                 >
                     Read them first
@@ -120,19 +164,22 @@ const nextEvent = upcoming.at(0);
                 hidden
             />
         </div>
-        <label class="checkin__check">
-            <input
-                id="checkin-newsletter"
-                class="checkin__box"
-                checked
-                name="newsletter"
-                type="checkbox"
-            />
-            Add me to the seasonal newsletter
-        </label>
-        <div class="flex flex-wrap items-center gap-4">
+        <div class="flex flex-col gap-2">
+            <p class="checkin-field__head label text-ink"><span class="checkin-field__index">03</span>Newsletter</p>
+            <label class="checkin__check">
+                <input
+                    id="checkin-newsletter"
+                    class="checkin__box"
+                    checked
+                    name="newsletter"
+                    type="checkbox"
+                />
+                Add me to the seasonal newsletter
+            </label>
+        </div>
+        <div class="checkin-form__foot">
             <button
-                class="btn btn--primary"
+                class="btn btn--primary checkin-form__submit"
                 type="submit"
             >
                 Check in &rarr;
@@ -149,7 +196,11 @@ const nextEvent = upcoming.at(0);
         data-checkin-done
         hidden
     >
-        <div class="slab slab--card flex flex-col gap-4">
+        <div class="checkin__receipt slab slab--card flex flex-col gap-4">
+            <header class="checkin__masthead">
+                <p class="label text-accent-deep">Arrival receipt</p>
+                <p class="label text-ink-subtle">APA / Door 01</p>
+            </header>
             <h2
                 class="font-extrabold font-sans text-3xl tracking-tight"
                 data-checkin-heading
@@ -157,22 +208,22 @@ const nextEvent = upcoming.at(0);
             >
                 You are checked in.
             </h2>
-            <p class="text-[16px] text-ink-muted">
+            <p class="text-md text-ink-muted">
                 An account is open for&#32;
                 <span
-                    class="font-mono wrap-break-word text-[14px]"
+                    class="font-mono text-sm wrap-break-word"
                     data-checkin-email
                 />&#32;
                 with&#32;
                 <span
-                    class="font-mono text-[14px]"
+                    class="font-mono text-sm"
                     data-checkin-prods
                 />&#32;
                 on it.&#32;
                 <span data-checkin-newsletter />
             </p>
             <p class="action-text px-3 py-3 bg-accent text-ink">
-                This is what we would email you. Nothing was sent &mdash; read it below.
+                Your welcome email is below.
             </p>
             <button
                 class="btn self-start"
@@ -184,55 +235,62 @@ const nextEvent = upcoming.at(0);
         </div>
         <article
             class="mail slab slab--lift flex flex-col gap-4"
-            aria-label="Welcome email preview"
+            aria-label="Welcome email"
             data-checkin-mail
             data-event={nextEvent?.title}
         >
+            <header class="mail__masthead">
+                <p class="label text-accent-deep">Welcome email</p>
+                <p class="action-text mail__stamp">Sent</p>
+            </header>
             <dl class="mail__head">
                 <div class="mail__row">
                     <dt class="label text-ink-subtle">From</dt>
                     <dd
-                        class="font-mono wrap-break-word text-[13px]"
+                        class="font-mono text-sm wrap-break-word"
                         data-mail-from
                     />
                 </div>
                 <div class="mail__row">
                     <dt class="label text-ink-subtle">To</dt>
                     <dd
-                        class="font-mono wrap-break-word text-[13px]"
+                        class="font-mono text-sm wrap-break-word"
                         data-mail-to
                     />
                 </div>
                 <div class="mail__row">
                     <dt class="label text-ink-subtle">Reply to</dt>
                     <dd
-                        class="font-mono wrap-break-word text-[13px]"
+                        class="font-mono text-sm wrap-break-word"
                         data-mail-reply
                     />
                 </div>
                 <div class="mail__row">
                     <dt class="label text-ink-subtle">Subject</dt>
                     <dd
-                        class="font-bold font-sans text-[16px]"
+                        class="font-bold font-sans text-md"
                         data-mail-subject
                     />
                 </div>
             </dl>
             <p
-                class="mail__preheader text-[13px] text-ink-subtle"
+                class="mail__preheader text-sm text-ink-subtle"
                 data-mail-preheader
             />
             <div
-                class="mail__body flex flex-col gap-4 text-[15px]"
+                class="mail__body flex flex-col gap-4 text-smd"
                 data-mail-body
             />
-            <a
-                class="btn btn--accent self-start"
-                data-mail-action
-                href="/onboarding"
-            >
-                Finish your profile
-            </a>
+            <div class="mail__actions">
+                <a
+                    class="btn btn--accent"
+                    data-mail-action
+                    href="/onboarding"
+                >
+                    Finish your profile
+                </a>
+                <p class="action-text text-ink-subtle">Link lasts 24 hours</p>
+            </div>
         </article>
         <template data-mail-template>
             <p class="mail__paragraph leading-relaxed" />
@@ -241,6 +299,113 @@ const nextEvent = upcoming.at(0);
 </section>
 
 <style>
+    .checkin-field__control {
+        background-color: var(--color-surface);
+        border: 2px solid var(--color-ink);
+        color: var(--color-ink);
+        min-height: var(--control-size);
+        padding: 0 var(--space-sm);
+        transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            box-shadow var(--duration-fast) var(--motion-ease-ui);
+        width: 100%;
+    }
+
+    .checkin-field__control:focus-visible,
+    .checkin-field__control:hover {
+        background-color: var(--color-surface-raised);
+    }
+
+    .checkin-field__control[aria-invalid='true'] {
+        border-color: var(--color-accent-deep);
+        box-shadow: 3px 3px 0 0 var(--color-accent-20);
+    }
+
+    .checkin-field__head {
+        align-items: baseline;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .checkin-field__index {
+        color: var(--color-accent-deep);
+        padding-right: var(--space-2xs);
+    }
+
+    .checkin-form,
+    .checkin__receipt,
+    .mail {
+        padding: var(--space-lg);
+    }
+
+    .checkin-form__foot {
+        align-items: center;
+        border-top: 2px solid var(--color-ink);
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-sm);
+        padding-top: var(--space-md);
+    }
+
+    .checkin-ticket__foot,
+    .checkin-ticket__rows {
+        background-image: repeating-linear-gradient(90deg, var(--color-ink-inverse-muted) 0 8px, transparent 8px 16px);
+        background-position: top left;
+        background-repeat: no-repeat;
+        background-size: 100% 1px;
+        padding-top: var(--space-sm);
+    }
+
+    .checkin-ticket__foot {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-xs);
+        justify-content: space-between;
+    }
+
+    .checkin-ticket__masthead,
+    .checkin__masthead,
+    .mail__masthead {
+        align-items: center;
+        border-bottom: 2px solid var(--color-ink);
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-xs);
+        justify-content: space-between;
+        padding-bottom: var(--space-xs);
+    }
+
+    .checkin-ticket__masthead {
+        border-bottom-color: var(--color-ink-inverse-muted);
+        border-bottom-width: 1px;
+    }
+
+    .checkin-ticket__row {
+        align-items: baseline;
+        display: grid;
+        gap: var(--space-sm);
+        grid-template-columns: 56px minmax(0, 1fr);
+        padding-block: var(--space-3xs);
+    }
+
+    .checkin-ticket__rows {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .checkin-ticket__stamp {
+        border: 2px solid var(--color-accent-light);
+        color: var(--color-accent-light);
+        padding: var(--space-3xs) var(--space-2xs);
+        rotate: calc(var(--tilt-unit) * -4);
+    }
+
+    .checkin-ticket__url {
+        color: var(--color-pulse);
+    }
+
     .checkin__box {
         appearance: none;
         background-color: transparent;
@@ -248,6 +413,10 @@ const nextEvent = upcoming.at(0);
         flex-shrink: 0;
         height: 24px;
         margin: 0;
+        transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            box-shadow var(--duration-fast) var(--motion-ease-ui);
         width: 24px;
     }
 
@@ -255,6 +424,17 @@ const nextEvent = upcoming.at(0);
         background-color: var(--color-accent-deep);
         border-color: var(--color-accent-deep);
         box-shadow: inset 0 0 0 4px var(--color-surface-raised);
+    }
+
+    .checkin__box:checked:focus-visible {
+        box-shadow:
+            inset 0 0 0 4px var(--color-surface-raised),
+            0 0 0 2px var(--color-surface),
+            0 0 0 4px var(--color-accent-deep);
+    }
+
+    .checkin__box[aria-invalid='true'] {
+        border-color: var(--color-accent-deep);
     }
 
     .checkin__check {
@@ -265,8 +445,10 @@ const nextEvent = upcoming.at(0);
         gap: var(--space-xs);
         min-height: 50px;
         padding: var(--space-2xs) var(--space-sm);
+        transition: background-color var(--duration-fast) var(--motion-ease-ui);
     }
 
+    .checkin__check:active,
     .checkin__check:hover {
         background-color: var(--color-surface-sunken);
     }
@@ -276,31 +458,59 @@ const nextEvent = upcoming.at(0);
         display: inline-flex;
         min-height: 50px;
         padding-inline: var(--space-3xs);
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
     }
 
-    .checkin__url {
-        color: var(--color-pulse);
+    .checkin__link:active {
+        transform: translateY(1px);
+    }
+
+    .mail__actions {
+        align-items: center;
+        background-image: repeating-linear-gradient(90deg, var(--color-ink-20) 0 8px, transparent 8px 16px);
+        background-position: top left;
+        background-repeat: no-repeat;
+        background-size: 100% 1px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-sm);
+        padding-top: var(--space-md);
     }
 
     .mail__head {
-        border-bottom: 1px solid var(--color-ink-20);
         display: flex;
         flex-direction: column;
-        gap: var(--space-3xs);
-        padding-bottom: var(--space-xs);
     }
 
     .mail__row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-xs);
+        align-items: baseline;
+        border-bottom: 1px solid var(--color-ink-20);
+        display: grid;
+        gap: var(--space-sm);
+        grid-template-columns: 72px minmax(0, 1fr);
+        padding-block: var(--space-2xs);
     }
 
-    .mail__row dt {
-        min-width: 72px;
+    .mail__stamp {
+        border: 2px solid var(--color-accent-deep);
+        color: var(--color-accent-deep);
+        padding: var(--space-3xs) var(--space-2xs);
+        rotate: calc(var(--tilt-unit) * -3);
+    }
+
+    @media (max-width: 768px) {
+        .checkin-form__submit {
+            width: 100%;
+        }
     }
 
     @media (forced-colors: active) {
+        .checkin-ticket__stamp,
+        .mail__stamp {
+            border-color: CanvasText;
+            color: CanvasText;
+        }
+
         .checkin__box {
             background-color: Canvas;
             border-color: CanvasText;
@@ -321,6 +531,7 @@ const nextEvent = upcoming.at(0);
     import { createOnboardingToken } from '@lib/onboarding';
     import { registerPageScript, setMessage, setPending, setText } from '@lib/utils';
     import { startSession } from '@lib/session';
+    import { toast } from '@lib/toasts';
 
     const RULES: Record<string, FieldRule> = {
         email: { message: 'Enter your email address.', required: true },
@@ -434,6 +645,7 @@ const nextEvent = upcoming.at(0);
         }
 
         document.querySelector<HTMLElement>('[data-checkin-heading]')?.focus();
+        toast(`Checked in as ${session.email}.`, 'success');
     }
 
     registerPageScript(initCheckInForm);

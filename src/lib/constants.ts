@@ -47,6 +47,10 @@ export const CONTACT_LIMITS = {
     name: 50,
 } as const;
 
+export const SPONSOR_INQUIRY_TOPIC = 'Sponsor inquiry';
+
+export const CONTACT_TOPICS = ['Booking', 'Membership', 'Press', SPONSOR_INQUIRY_TOPIC, 'Something else'] as const;
+
 export const CONTENT_DIR = 'src/content';
 
 export const DEMO_CARDS = {
@@ -84,7 +88,7 @@ export const EVENT_PROGRAMS: Record<EventType, EventProgram> = {
     },
     'bash': {
         cadence: 'bimonthly',
-        name: 'Producer Bash',
+        name: 'Bash',
         shortName: 'Bash',
         state: 'active',
         summary: 'An afternoon of producing against the clock at Austin Community College, sparked by a prompt and capped by a final showdown.',
@@ -137,6 +141,18 @@ export const FIELD_LIMITS = {
 
 export const JOIN_ROUTE = '/contact#contact-topic';
 
+export const KIND_COLORS: Record<AssetKind, string> = {
+    'brochure': 'var(--color-signal)',
+    'document': 'var(--color-ink-muted)',
+    'media-kit': 'var(--color-bloom-deep)',
+    'photo-pack': 'var(--color-pulse-deep)',
+    'press-kit': 'var(--color-accent-deep)',
+    'sample-pack': 'var(--color-surface-violet)',
+    'slides': 'var(--color-signal-deep)',
+    'stems': 'var(--color-accent)',
+    'video': 'var(--color-bloom)',
+};
+
 export const LINKS = {
     aephonics: 'https://instagram.com/aephonics',
     discord: 'https://discord.gg/aVM3mbRRpU',
@@ -165,7 +181,8 @@ export const NAV_GROUPS = [
         items: [
             { href: '/events', label: 'All events' },
             { href: '/assembly', label: 'Assembly' },
-            { href: '/bash', label: 'Producer Bash' },
+            { href: '/bash', label: 'Bash' },
+            { href: '/hangout', label: 'Hangout' },
         ],
         label: 'Events',
     },
@@ -219,6 +236,8 @@ export const PALETTE = [
     'var(--color-accent-deep)',
 ] as const;
 
+export const CARD_COLORS = PALETTE.slice(0, 4);
+
 export const PASSWORD_MIN_LENGTH = 12;
 
 export const PLATFORMS = [
@@ -226,14 +245,6 @@ export const PLATFORMS = [
     { blurb: 'Recaps, announcements, and work from across the roster.', href: LINKS.instagram, label: 'Instagram' },
     { blurb: 'The day-to-day room where the community actually talks.', href: LINKS.discord, label: 'Discord' },
 ] as const;
-
-export const PRODUCER_AVAILABILITIES = ['open', 'selective', 'booked'] as const;
-
-export const PRODUCER_AVAILABILITY_LABELS: Record<ProducerAvailability, string> = {
-    booked: 'Booked up',
-    open: 'Open to work',
-    selective: 'Selective',
-};
 
 export const PRODUCT_CATEGORIES = ['accessory', 'apparel', 'music'] as const;
 
@@ -333,6 +344,8 @@ export const UPLOAD = {
     maxFiles: 5,
     maxTotalBytes: MAX_TOTAL_MEGABYTES * BYTES_PER_MEGABYTE,
 } as const;
+
+export const UPLOAD_EXTENSIONS_LABEL = UPLOAD.extensions.map(extension => extension.toUpperCase()).join(', ');
 
 export const US_STATES = [
     { code: 'AL', name: 'Alabama' },

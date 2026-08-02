@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 
 import PageHead from '@components/shared/PageHead.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { EVENT_PROGRAMS, SPONSORS, SPONSOR_LOGO_WIDTH } from '@lib/constants';
+import { EVENT_PROGRAMS, SPONSORS, SPONSOR_INQUIRY_TOPIC, SPONSOR_LOGO_WIDTH } from '@lib/constants';
 import { getProgram } from '@lib/utils';
 
 interface Tier {
@@ -13,10 +13,6 @@ interface Tier {
     price: string;
 }
 
-const FOUNDING_YEAR = '2022';
-
-const PRODUCERS_WELCOMED = '1,000+';
-
 const DONATION_AMOUNTS = ['$10', '$25', '$50', '$100'];
 
 const DONATION_USES = [
@@ -24,6 +20,10 @@ const DONATION_USES = [
     'Cables, adapters, and spare gear',
     'Showcase staging and production',
 ];
+
+const FOUNDING_YEAR = '2022';
+
+const PRODUCERS_WELCOMED = '1,000+';
 
 const assembly = getProgram('assembly');
 const bash = getProgram('bash');
@@ -49,15 +49,15 @@ const TIERS: Tier[] = [
 >
     <div>
         <PageHead
-            class="max-w-4xl mb-8 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="max-w-4xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
             eyebrow="Sponsor APA"
             headingId="sponsor-title"
         >
             Reach the producers building Austin's sound.
         </PageHead>
         <p
-            class="max-w-2xl text-lmd text-ink-muted"
-            data-motion="rise"
+            class="max-w-2xl mt-6 text-lmd text-ink-muted"
+            data-motion="blur"
         >
             Sponsorship keeps the rooms booked, the gear working, and the calendar full.
             It reaches producers of every genre and experience level, in person, every month.
@@ -79,7 +79,8 @@ const TIERS: Tier[] = [
         </SectionHead>
         <ul
             class="tiers grid grid-cols-1 gap-5 list-none lg:grid-cols-3"
-            data-motion-stagger="unfold"
+            data-motion-from="center"
+            data-motion-stagger="flip"
         >
             {TIERS.map((tier, index) => (
                 <li>
@@ -114,7 +115,7 @@ const TIERS: Tier[] = [
                         </ul>
                         <a
                             class:list={['btn', tier.featured ? 'btn--accent' : 'btn--primary']}
-                            href="/contact?topic=Sponsor%20inquiry#contact-topic"
+                            href={`/contact?topic=${encodeURIComponent(SPONSOR_INQUIRY_TOPIC)}#contact-topic`}
                         >
                             Start a conversation
                         </a>
@@ -137,7 +138,7 @@ const TIERS: Tier[] = [
         >
             Chip in once
         </SectionHead>
-        <div class="grid grid-cols-1 gap-10 md:grid-cols-[1.4fr_1fr]">
+        <div class="grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
             <div data-motion="rise">
                 <p class="max-w-2xl mb-8 text-base text-ink-muted">
                     Sponsorship is a year-long relationship &mdash; a donation is one good afternoon.
@@ -202,6 +203,7 @@ const TIERS: Tier[] = [
         </SectionHead>
         <ul
             class="grid grid-cols-1 gap-px border-2 border-ink list-none bg-ink md:grid-cols-2"
+            data-motion-from="center"
             data-motion-stagger="stamp"
         >
             {SPONSORS.map(sponsor => (
@@ -236,7 +238,7 @@ const TIERS: Tier[] = [
         </SectionHead>
         <dl
             class="mark grid grid-cols-2 gap-px border-2 border-ink bg-ink md:grid-cols-4"
-            data-motion-stagger="unfold"
+            data-motion-stagger="stamp"
         >
             {STATS.map(stat => (
                 <div class="flex flex-col-reverse gap-3 p-4 text-center bg-surface md:p-8">
@@ -258,6 +260,7 @@ const TIERS: Tier[] = [
         align-content: start;
         display: grid;
         grid-row: span 5;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
         padding: var(--space-lg);
     }
@@ -276,6 +279,7 @@ const TIERS: Tier[] = [
         align-content: start;
         display: grid;
         grid-row: span 5;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
     }
 </style>

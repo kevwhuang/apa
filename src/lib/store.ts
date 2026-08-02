@@ -1,6 +1,13 @@
 import { BASIS_POINTS_DIVISOR, CENTS_PER_DOLLAR, COMMERCE, STORAGE } from '@lib/constants';
 import { createStore } from '@lib/state';
 
+const SEED_ITEMS: CartItem[] = [
+    { color: 'Bone', image: 'tick-tee-1', priceCents: 3_500, productSlug: 'tick-tee', quantity: 1, size: 'M', title: 'Tick Tee' },
+    { image: 'stickers-1', priceCents: 800, productSlug: 'sticker-pack', quantity: 2, title: 'Sticker Pack' },
+];
+
+const SEED_MARKER_KEY = 'apa.cart-seeded';
+
 const cart = createStore<CartItem[]>({
     fallback: [],
     key: STORAGE.cart.key,
@@ -111,6 +118,22 @@ export function remove(index: number): void {
 
         return next;
     });
+}
+
+export function seedCart(): void {
+    if (typeof localStorage === 'undefined') return;
+
+    try {
+        if (localStorage.getItem(SEED_MARKER_KEY) !== null) return;
+
+        localStorage.setItem(SEED_MARKER_KEY, String(Date.now()));
+    } catch {
+        return;
+    }
+
+    if (getItems().length > 0) return;
+
+    cart.set(SEED_ITEMS.map(item => ({ ...item })));
 }
 
 export function setQuantity(index: number, quantity: number, maxQuantity: number = COMMERCE.maxQuantityPerItem): void {

@@ -6,11 +6,11 @@ interface Props {
     kind: 'privacy' | 'terms';
 }
 
-const SECTIONS: Record<'privacy' | 'terms', { body: string[]; heading: string }[]> = {
+const SECTIONS: Record<Props['kind'], { body: string[]; heading: string }[]> = {
     privacy: [
         {
             body: [
-                'Nothing, on our side. This site has no backend and no database \u2014 the interactive features you will find here (the contact form, the store checkout, the sign-in, the member chat, the Producer Bash uploader, the assembly track-feedback uploader, the Sandbox) are working demonstrations that run entirely in your browser. Submitting them does not send, transmit, or store your name, email, message, files, or payment details anywhere. The <a href="/terms">terms of service</a> describe how those demonstrations behave; this page covers what they keep, which is very little and never leaves your device.',
+                'Nothing, on our side. This site has no backend and no database \u2014 the interactive features you will find here (the contact form, the store checkout, the sign-in, the member chat, the Bash uploader, the assembly track-feedback uploader, the Sandbox) are working demonstrations that run entirely in your browser. Submitting them does not send, transmit, or store your name, email, message, files, or payment details anywhere. The <a href="/terms">terms of service</a> describe how those demonstrations behave; this page covers what they keep, which is very little and never leaves your device.',
                 'When a form offers to send a message, it composes an ordinary email in your own mail app through a mailto link and shows you exactly what it wrote \u2014 nothing is transmitted unless you press send there, and at that point you are simply emailing us, which the Email section below covers. Files you hand to the Bash submission form, to the assembly track-feedback uploader, or to the Sandbox are read locally to draw the waveforms, meters, and progress readouts you see, then go nowhere.',
             ],
             heading: 'What we collect',
@@ -18,8 +18,8 @@ const SECTIONS: Record<'privacy' | 'terms', { body: string[]; heading: string }[
         {
             body: [
                 'A few features remember things between pages or visits. They do it with your browser\'s built-in storage, on your device, and none of it is ever transmitted to us or to anyone else. The demo audio player keeps its state in page memory only \u2014 it does not survive a reload.',
-                `Longer-lived storage (localStorage) holds three keys: <code>${STORAGE.adminProds.key}</code>, the operations-console Prods ledger, which never expires on its own; <code>${STORAGE.cart.key}</code>, the contents of your demonstration store cart; and <code>${STORAGE.session.key}</code>, the demo sign-in session, which expires by itself after ${SESSION_TTL_DAYS} days.`,
-                `Per-tab storage (sessionStorage) empties as soon as the tab closes. It holds <code>${STORAGE.bashBoard.key}</code>, the cached Producer Bash submission board; <code>${STORAGE.chat.key}</code>, the demo member chat threads; <code>${STORAGE.onboardingDraft.key}</code>, an in-progress draft of the onboarding questionnaire; and <code>${STORAGE.order.key}</code>, the receipt from your most recent demonstration checkout. Clearing site data in your browser settings wipes every one of these \u2014 there is nothing to ask us to delete, because we hold nothing.`,
+                `Longer-lived storage (localStorage) holds four keys: <code>${STORAGE.adminProds.key}</code>, the operations-console Prods ledger, which never expires on its own; <code>${STORAGE.cart.key}</code>, the contents of your demonstration store cart; <code>apa.cart-seeded</code>, a one-time marker that the demonstration cart was pre-filled; and <code>${STORAGE.session.key}</code>, the demo sign-in session, which expires by itself after ${SESSION_TTL_DAYS} days.`,
+                `Per-tab storage (sessionStorage) empties as soon as the tab closes. It holds <code>${STORAGE.bashBoard.key}</code>, the cached Bash submission board; <code>${STORAGE.chat.key}</code>, the demo member chat room; <code>${STORAGE.onboardingDraft.key}</code>, an in-progress draft of the onboarding questionnaire; and <code>${STORAGE.order.key}</code>, the receipt from your most recent demonstration checkout. Clearing site data in your browser settings wipes every one of these \u2014 there is nothing to ask us to delete, because we hold nothing.`,
             ],
             heading: 'Data stored in your browser',
         },
@@ -84,10 +84,10 @@ const SECTIONS: Record<'privacy' | 'terms', { body: string[]; heading: string }[
         },
         {
             body: [
-                'The <a href="/bash">Producer Bash</a> runs on submitted work \u2014 samples contributed to the pack and tracks built from it. You keep your work: submitting transfers no ownership of anything, and every right in your samples and tracks stays with you.',
+                'The <a href="/bash">Bash</a> runs on submitted work \u2014 samples contributed to the pack and tracks built from it. You keep your work: submitting transfers no ownership of anything, and every right in your samples and tracks stays with you.',
                 'What you grant the Alliance is only what the event needs \u2014 permission to play submissions at the Bash, to feature them in recaps, and to include them, with credit, in the community compilation when a round produces one. Submit only material you have the rights to share; if a submission turns out to contain uncleared third-party work, we will pull it from anything we have published, and the clearance stays your responsibility.',
             ],
-            heading: 'Producer Bash submissions',
+            heading: 'Bash submissions',
         },
         {
             body: [
@@ -139,14 +139,6 @@ const SECTIONS: Record<'privacy' | 'terms', { body: string[]; heading: string }[
     ],
 };
 
-function slugify(heading: string) {
-    return heading
-        .toLowerCase()
-        .replace(/&/g, 'and')
-        .replace(/[^a-z\d]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-}
-
 const { kind } = Astro.props;
 
 const crossLink = kind === 'privacy'
@@ -156,6 +148,14 @@ const crossLink = kind === 'privacy'
 const title = kind === 'privacy' ? 'Privacy policy' : 'Terms of service';
 
 const updated = new Date(SITE_UPDATED);
+
+function slugify(heading: string) {
+    return heading
+        .toLowerCase()
+        .replace(/&/g, 'and')
+        .replace(/[^a-z\d]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
 ---
 
 <section
@@ -171,13 +171,13 @@ const updated = new Date(SITE_UPDATED);
         </p>
         <h1
             id={`${kind}-title`}
-            class="mb-10 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em]"
+            class="mb-10 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
             data-motion="strike"
         >
             {title}
         </h1>
         <div
-            class="legal__body space-y-6 leading-[1.7] text-[16px]"
+            class="legal__body space-y-6 leading-[1.7] text-base"
             data-motion="rise"
         >
             {SECTIONS[kind].map(section => (
@@ -206,11 +206,16 @@ const updated = new Date(SITE_UPDATED);
 
 <style>
     .legal__body :global(a) {
+        display: inline-block;
         text-decoration-color: var(--color-accent);
         text-decoration-line: underline;
         text-decoration-thickness: 2px;
         text-underline-offset: 4px;
-        transition: color var(--duration-fast) ease;
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .legal__body :global(a:active) {
+        transform: translateY(1px);
     }
 
     .legal__body :global(a:hover) {

@@ -1,309 +1,304 @@
 ---
 import PageHead from '@components/shared/PageHead.astro';
-import { DEMO_CREDENTIALS, PASSWORD_MIN_LENGTH } from '@lib/constants';
+import { PASSWORD_MIN_LENGTH } from '@lib/constants';
 ---
 
 <section
-    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    class="stage stage--narrow stage--tight"
     aria-labelledby="signin-title"
 >
-    <div>
+    <div class="flex flex-col max-w-[544px] w-full gap-8 mx-auto">
         <PageHead
-            class="max-w-3xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="font-extrabold font-sans text-4xl text-center tracking-tight"
             eyebrow="Account"
+            eyebrowClass="mb-3 text-center"
             headingId="signin-title"
         >
-            Your side of the Alliance.
+            Sign in.
         </PageHead>
-        <p class="max-w-2xl mt-6 text-[18px] text-ink-muted">
-            An account keeps your profile, your Prods balance, and your Producer Bash entries in
-            one place. Nothing here talks to a server, so use it as a demonstration rather than a
-            login. Sign in with any address; {DEMO_CREDENTIALS.takenEmail} is already registered,
-            and the password {DEMO_CREDENTIALS.wrongPassword} is always rejected.
-        </p>
-    </div>
-</section>
-
-<section
-    class="stage stage--narrow stage--tight"
-    aria-label="Account access"
->
-    <div
-        class="signin"
-        data-auth-gate
-    >
-        <fieldset class="signin__modes">
-            <legend class="label mb-3 text-ink-muted">What do you want to do?</legend>
-            <div class="signin__mode-row flex flex-wrap gap-2">
-                <label class="signin__mode action-text">
-                    <input
-                        id="mode-signin"
-                        class="signin__radio"
-                        checked
-                        name="mode"
-                        type="radio"
-                    />
+        <div
+            class="signin"
+            data-auth-gate
+        >
+            <fieldset
+                class="signin__modes"
+                data-motion="stamp"
+            >
+                <legend class="label w-full mb-3 text-center text-ink-muted">What do you want to do?</legend>
+                <div class="signin__mode-row flex flex-wrap justify-center gap-2">
+                    <label class="action-text signin__mode">
+                        <input
+                            id="mode-signin"
+                            class="signin__radio"
+                            checked
+                            name="mode"
+                            type="radio"
+                        />
+                        Sign in
+                    </label>
+                    <label class="action-text signin__mode">
+                        <input
+                            id="mode-signup"
+                            class="signin__radio"
+                            name="mode"
+                            type="radio"
+                        />
+                        Create account
+                    </label>
+                </div>
+            </fieldset>
+            <form
+                class="signin__panel signin__panel--in slab slab--card flex flex-col gap-5"
+                data-auth-form="signin"
+                data-motion="unfold"
+            >
+                <h2 class="font-extrabold font-sans text-2xl tracking-tight">
                     Sign in
-                </label>
-                <label class="signin__mode action-text">
-                    <input
-                        id="mode-signup"
-                        class="signin__radio"
-                        name="mode"
-                        type="radio"
+                </h2>
+                <p
+                    class="action-text signin__alert px-3 py-3 bg-accent text-ink"
+                    data-form-error
+                    hidden
+                    role="alert"
+                />
+                <div class="signin__field flex flex-col gap-2">
+                    <label class="block">
+                        <span class="label block mb-2 text-ink-muted">Email</span>
+                        <input
+                            id="signin-email"
+                            class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-mono text-sm bg-transparent transition-colors"
+                            aria-describedby="signin-email-error"
+                            aria-invalid="false"
+                            autocomplete="email"
+                            name="email"
+                            required
+                            type="email"
+                        />
+                    </label>
+                    <p
+                        id="signin-email-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
                     />
+                </div>
+                <div class="signin__field flex flex-col gap-2">
+                    <label class="block">
+                        <span class="label block mb-2 text-ink-muted">Password</span>
+                        <input
+                            id="signin-password"
+                            class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-colors"
+                            aria-describedby="signin-password-error"
+                            aria-invalid="false"
+                            autocomplete="current-password"
+                            name="password"
+                            required
+                            type="password"
+                        />
+                    </label>
+                    <p
+                        id="signin-password-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </div>
+                <div class="flex flex-wrap items-center gap-4">
+                    <button
+                        class="btn btn--primary"
+                        type="submit"
+                    >
+                        Sign in &rarr;
+                    </button>
+                    <p
+                        class="action-text text-ink-subtle"
+                        aria-live="polite"
+                        data-auth-status
+                    />
+                </div>
+            </form>
+            <form
+                class="signin__panel signin__panel--up slab slab--card flex flex-col gap-5"
+                data-auth-form="signup"
+            >
+                <h2 class="font-extrabold font-sans text-2xl tracking-tight">
                     Create account
-                </label>
-            </div>
-        </fieldset>
-        <form
-            class="signin__panel signin__panel--in slab slab--card flex flex-col gap-5"
-            data-auth-form="signin"
+                </h2>
+                <p
+                    class="action-text signin__alert px-3 py-3 bg-accent text-ink"
+                    data-form-error
+                    hidden
+                    role="alert"
+                />
+                <div class="signin__field flex flex-col gap-2">
+                    <label class="block">
+                        <span class="label block mb-2 text-ink-muted">Email</span>
+                        <input
+                            id="signup-email"
+                            class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-mono text-sm bg-transparent transition-colors"
+                            aria-describedby="signup-email-error"
+                            aria-invalid="false"
+                            autocomplete="email"
+                            name="email"
+                            required
+                            type="email"
+                        />
+                    </label>
+                    <p
+                        id="signup-email-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </div>
+                <div class="signin__field flex flex-col gap-2">
+                    <label class="block">
+                        <span class="label block mb-2 text-ink-muted">Display name <span class="signin__optional">optional</span></span>
+                        <input
+                            id="signup-name"
+                            class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-colors"
+                            aria-describedby="signup-name-error"
+                            aria-invalid="false"
+                            autocomplete="nickname"
+                            maxlength="50"
+                            name="displayName"
+                            type="text"
+                        />
+                    </label>
+                    <p
+                        id="signup-name-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </div>
+                <div class="signin__field flex flex-col gap-2">
+                    <label class="block">
+                        <span class="label block mb-2 text-ink-muted">Password</span>
+                        <input
+                            id="signup-password"
+                            class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-colors"
+                            aria-describedby="signup-password-error"
+                            aria-invalid="false"
+                            autocomplete="new-password"
+                            minlength={PASSWORD_MIN_LENGTH}
+                            name="password"
+                            required
+                            type="password"
+                        />
+                    </label>
+                    <p
+                        id="signup-password-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                    <p class="text-sm text-ink-subtle">
+                        At least {PASSWORD_MIN_LENGTH} characters with a letter and a digit. It is
+                        read to check its shape and then thrown away &mdash; no password is ever
+                        stored.
+                    </p>
+                </div>
+                <div class="signin__field flex flex-col gap-2">
+                    <label class="block">
+                        <span class="label block mb-2 text-ink-muted">Confirm password</span>
+                        <input
+                            id="signup-confirm"
+                            class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-colors"
+                            aria-describedby="signup-confirm-error"
+                            aria-invalid="false"
+                            autocomplete="new-password"
+                            name="confirm"
+                            required
+                            type="password"
+                        />
+                    </label>
+                    <p
+                        id="signup-confirm-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </div>
+                <div class="flex flex-wrap items-center gap-4">
+                    <button
+                        class="btn btn--primary"
+                        type="submit"
+                    >
+                        Create account &rarr;
+                    </button>
+                    <p
+                        class="action-text text-ink-subtle"
+                        aria-live="polite"
+                        data-auth-status
+                    />
+                </div>
+            </form>
+        </div>
+        <div
+            class="signin__done slab slab--well flex flex-col gap-5"
+            data-auth-done
+            data-motion="rise"
+            hidden
         >
-            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
-                Sign in
+            <h2
+                class="font-extrabold font-sans text-3xl tracking-tight"
+                data-auth-heading
+                tabindex="-1"
+            >
+                You are signed in.
             </h2>
-            <p
-                class="signin__alert action-text px-3 py-3 bg-accent text-ink"
-                data-form-error
-                hidden
-                role="alert"
-            />
-            <div class="signin__field flex flex-col gap-2">
-                <label class="block">
-                    <span class="label block mb-2 text-ink-muted">Email</span>
-                    <input
-                        id="signin-email"
-                        class="h-12 w-full px-4 border-2 border-ink font-mono text-[13px] bg-transparent"
-                        aria-describedby="signin-email-error"
-                        aria-invalid="false"
-                        autocomplete="email"
-                        name="email"
-                        required
-                        type="email"
+            <dl class="signin__summary">
+                <div class="signin__summary-row">
+                    <dt class="label text-ink-inverse-muted">Account</dt>
+                    <dd
+                        class="font-mono text-sm wrap-break-word"
+                        data-auth-email
                     />
-                </label>
-                <p
-                    id="signin-email-error"
-                    class="action-text text-accent-deep"
-                    data-field-error
-                    hidden
-                />
-            </div>
-            <div class="signin__field flex flex-col gap-2">
-                <label class="block">
-                    <span class="label block mb-2 text-ink-muted">Password</span>
-                    <input
-                        id="signin-password"
-                        class="h-12 w-full px-4 border-2 border-ink font-sans bg-transparent"
-                        aria-describedby="signin-password-error"
-                        aria-invalid="false"
-                        autocomplete="current-password"
-                        name="password"
-                        required
-                        type="password"
+                </div>
+                <div class="signin__summary-row">
+                    <dt class="label text-ink-inverse-muted">Balance</dt>
+                    <dd
+                        class="font-mono text-sm"
+                        data-auth-prods
                     />
-                </label>
-                <p
-                    id="signin-password-error"
-                    class="action-text text-accent-deep"
-                    data-field-error
+                </div>
+                <div class="signin__summary-row">
+                    <dt class="label text-ink-inverse-muted">Profile</dt>
+                    <dd
+                        class="font-mono text-sm"
+                        data-auth-profile
+                    />
+                </div>
+            </dl>
+            <p class="text-smd text-ink-inverse-muted">
+                This session expires on its own. The link below mints a
+                fresh 24-hour onboarding token, exactly the way the welcome email does &mdash;
+                which is also why that token is not a credential.
+            </p>
+            <div class="flex flex-wrap gap-3">
+                <a
+                    class="btn btn--accent"
+                    data-auth-onboarding
                     hidden
-                />
-            </div>
-            <div class="flex flex-wrap items-center gap-4">
-                <button
-                    class="btn btn--primary"
-                    type="submit"
+                    href="/onboarding"
                 >
-                    Sign in &rarr;
-                </button>
-                <p
-                    class="action-text text-ink-subtle"
-                    aria-live="polite"
-                    data-auth-status
-                />
-            </div>
-        </form>
-        <form
-            class="signin__panel signin__panel--up slab slab--card flex flex-col gap-5"
-            data-auth-form="signup"
-        >
-            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
-                Create account
-            </h2>
-            <p
-                class="signin__alert action-text px-3 py-3 bg-accent text-ink"
-                data-form-error
-                hidden
-                role="alert"
-            />
-            <div class="signin__field flex flex-col gap-2">
-                <label class="block">
-                    <span class="label block mb-2 text-ink-muted">Email</span>
-                    <input
-                        id="signup-email"
-                        class="h-12 w-full px-4 border-2 border-ink font-mono text-[13px] bg-transparent"
-                        aria-describedby="signup-email-error"
-                        aria-invalid="false"
-                        autocomplete="email"
-                        name="email"
-                        required
-                        type="email"
-                    />
-                </label>
-                <p
-                    id="signup-email-error"
-                    class="action-text text-accent-deep"
-                    data-field-error
-                    hidden
-                />
-            </div>
-            <div class="signin__field flex flex-col gap-2">
-                <label class="block">
-                    <span class="label block mb-2 text-ink-muted">Display name <span class="signin__optional">optional</span></span>
-                    <input
-                        id="signup-name"
-                        class="h-12 w-full px-4 border-2 border-ink font-sans bg-transparent"
-                        aria-describedby="signup-name-error"
-                        aria-invalid="false"
-                        autocomplete="nickname"
-                        maxlength="50"
-                        name="displayName"
-                        type="text"
-                    />
-                </label>
-                <p
-                    id="signup-name-error"
-                    class="action-text text-accent-deep"
-                    data-field-error
-                    hidden
-                />
-            </div>
-            <div class="signin__field flex flex-col gap-2">
-                <label class="block">
-                    <span class="label block mb-2 text-ink-muted">Password</span>
-                    <input
-                        id="signup-password"
-                        class="h-12 w-full px-4 border-2 border-ink font-sans bg-transparent"
-                        aria-describedby="signup-password-error"
-                        aria-invalid="false"
-                        autocomplete="new-password"
-                        minlength={PASSWORD_MIN_LENGTH}
-                        name="password"
-                        required
-                        type="password"
-                    />
-                </label>
-                <p
-                    id="signup-password-error"
-                    class="action-text text-accent-deep"
-                    data-field-error
-                    hidden
-                />
-                <p class="text-[13px] text-ink-subtle">
-                    At least {PASSWORD_MIN_LENGTH} characters. It is read to check its length and
-                    then thrown away &mdash; no password is ever stored by this demo.
-                </p>
-            </div>
-            <div class="signin__field flex flex-col gap-2">
-                <label class="block">
-                    <span class="label block mb-2 text-ink-muted">Confirm password</span>
-                    <input
-                        id="signup-confirm"
-                        class="h-12 w-full px-4 border-2 border-ink font-sans bg-transparent"
-                        aria-describedby="signup-confirm-error"
-                        aria-invalid="false"
-                        autocomplete="new-password"
-                        name="confirm"
-                        required
-                        type="password"
-                    />
-                </label>
-                <p
-                    id="signup-confirm-error"
-                    class="action-text text-accent-deep"
-                    data-field-error
-                    hidden
-                />
-            </div>
-            <div class="flex flex-wrap items-center gap-4">
-                <button
-                    class="btn btn--primary"
-                    type="submit"
+                    Finish your profile &rarr;
+                </a>
+                <a
+                    class="btn"
+                    href="/store"
                 >
-                    Create account &rarr;
+                    Spend your Prods
+                </a>
+                <button
+                    class="btn"
+                    data-auth-signout
+                    type="button"
+                >
+                    Sign out
                 </button>
-                <p
-                    class="action-text text-ink-subtle"
-                    aria-live="polite"
-                    data-auth-status
-                />
             </div>
-        </form>
-    </div>
-    <div
-        class="signin__done slab slab--well flex flex-col gap-5"
-        data-auth-done
-        hidden
-    >
-        <h2
-            class="font-extrabold font-sans text-3xl tracking-tight"
-            data-auth-heading
-            tabindex="-1"
-        >
-            You are signed in.
-        </h2>
-        <dl class="signin__summary">
-            <div class="signin__summary-row">
-                <dt class="label text-ink-inverse-muted">Account</dt>
-                <dd
-                    class="font-mono wrap-break-word text-[14px]"
-                    data-auth-email
-                />
-            </div>
-            <div class="signin__summary-row">
-                <dt class="label text-ink-inverse-muted">Balance</dt>
-                <dd
-                    class="font-mono text-[14px]"
-                    data-auth-prods
-                />
-            </div>
-            <div class="signin__summary-row">
-                <dt class="label text-ink-inverse-muted">Profile</dt>
-                <dd
-                    class="font-mono text-[14px]"
-                    data-auth-profile
-                />
-            </div>
-        </dl>
-        <p class="max-w-2xl text-[15px] text-ink-inverse-muted">
-            This session lives in this browser and expires on its own. The link below mints a fresh
-            24-hour onboarding token, exactly the way the welcome email does &mdash; which is also
-            why that token is not a credential.
-        </p>
-        <div class="flex flex-wrap gap-3">
-            <a
-                class="btn btn--accent"
-                data-auth-onboarding
-                hidden
-                href="/onboarding"
-            >
-                Finish your profile &rarr;
-            </a>
-            <a
-                class="btn"
-                href="/store"
-            >
-                Spend your Prods
-            </a>
-            <button
-                class="btn"
-                data-auth-signout
-                type="button"
-            >
-                Sign out
-            </button>
         </div>
     </div>
 </section>
@@ -336,7 +331,7 @@ import { DEMO_CREDENTIALS, PASSWORD_MIN_LENGTH } from '@lib/constants';
         gap: var(--space-xs);
         min-height: 50px;
         padding: var(--space-2xs) var(--space-md);
-        transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
+        transition: background-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui);
     }
 
     .signin__mode:active {
@@ -350,11 +345,6 @@ import { DEMO_CREDENTIALS, PASSWORD_MIN_LENGTH } from '@lib/constants';
 
     .signin__mode:hover:not(:has(.signin__radio:checked)) {
         background-color: var(--color-surface-sunken);
-    }
-
-    .signin__modes,
-    .signin__panel {
-        max-width: 544px;
     }
 
     .signin__modes {
@@ -374,12 +364,23 @@ import { DEMO_CREDENTIALS, PASSWORD_MIN_LENGTH } from '@lib/constants';
         flex-shrink: 0;
         height: 20px;
         margin: 0;
+        transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            box-shadow var(--duration-fast) var(--motion-ease-ui);
         width: 20px;
     }
 
     .signin__radio:checked {
         background-color: currentcolor;
         box-shadow: inset 0 0 0 3px var(--color-ink);
+    }
+
+    .signin__radio:checked:focus-visible {
+        box-shadow:
+            inset 0 0 0 3px var(--color-ink),
+            0 0 0 2px var(--color-surface),
+            0 0 0 4px var(--color-accent-deep);
     }
 
     .signin__summary {
@@ -412,11 +413,11 @@ import { DEMO_CREDENTIALS, PASSWORD_MIN_LENGTH } from '@lib/constants';
 </style>
 
 <script>
-    import { PASSWORD_MIN_LENGTH } from '@lib/constants';
-    import { clearFieldErrors, focusFirstError, setFieldErrors, validateFields } from '@lib/forms';
+    import { clearFieldErrors, confirmRule, focusFirstError, passwordRule, setFieldErrors, validateFields } from '@lib/forms';
     import { endSession, getSession, startSession } from '@lib/session';
     import { getOnboardingHref } from '@lib/onboarding';
     import { registerPageScript, setMessage, setPending, setText } from '@lib/utils';
+    import { toast } from '@lib/toasts';
 
     const ERROR_FIELDS: Record<SessionErrorCode, string> = {
         'already-registered': 'email',
@@ -431,9 +432,9 @@ import { DEMO_CREDENTIALS, PASSWORD_MIN_LENGTH } from '@lib/constants';
     };
 
     const SIGNUP_RULES: Record<string, FieldRule> = {
-        confirm: { message: 'Both passwords must match.', required: true, validate: (value, values) => value === values.get('password') },
+        confirm: confirmRule(),
         email: { message: 'Enter your email address.', required: true },
-        password: { message: `Use at least ${PASSWORD_MIN_LENGTH} characters.`, min: PASSWORD_MIN_LENGTH, required: true },
+        password: passwordRule(),
     };
 
     async function handleSignOut(button: HTMLButtonElement) {
@@ -443,13 +444,15 @@ import { DEMO_CREDENTIALS, PASSWORD_MIN_LENGTH } from '@lib/constants';
 
         setPending(button, false);
         renderSession();
+        toast('Signed out.', 'info');
         document.querySelector<HTMLInputElement>('#signin-email')?.focus();
     }
 
     async function handleSubmit(event: SubmitEvent, form: HTMLFormElement) {
         event.preventDefault();
 
-        const rules = form.dataset.authForm === 'signup' ? SIGNUP_RULES : SIGNIN_RULES;
+        const signup = form.dataset.authForm === 'signup';
+        const rules = signup ? SIGNUP_RULES : SIGNIN_RULES;
         const summary = form.querySelector<HTMLElement>('[data-form-error]');
         const values = new FormData(form);
         const errors = validateFields(form, rules);
@@ -490,8 +493,11 @@ import { DEMO_CREDENTIALS, PASSWORD_MIN_LENGTH } from '@lib/constants';
             return;
         }
 
+        const message = signup ? 'Account created. You are signed in.' : `Signed in as ${sessionLabel(result.session)}.`;
+
         form.reset();
         renderSession();
+        toast(message, 'success');
         document.querySelector<HTMLElement>('[data-auth-heading]')?.focus();
     }
 
@@ -529,6 +535,10 @@ import { DEMO_CREDENTIALS, PASSWORD_MIN_LENGTH } from '@lib/constants';
 
         link.href = getOnboardingHref(session.email);
         link.toggleAttribute('hidden', session.onboarded);
+    }
+
+    function sessionLabel(session: Session) {
+        return session.displayName || session.username || session.email;
     }
 
     registerPageScript(initSignInForm);

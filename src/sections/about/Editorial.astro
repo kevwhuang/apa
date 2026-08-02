@@ -117,7 +117,7 @@ const openingColors = PALETTE.slice(0, 3);
                     {SECTIONS.map(section => (
                         <li>
                             <a
-                                class="about__link hover:text-accent-deep transition-colors"
+                                class="about__link hover:text-accent-deep"
                                 href={section.href}
                             >
                                 {section.label}
@@ -206,7 +206,7 @@ const openingColors = PALETTE.slice(0, 3);
                 </p>
                 <ul
                     class="grid grid-cols-1 gap-5 mb-6 list-none md:grid-cols-3"
-                    data-motion-stagger="unfold"
+                    data-motion-stagger="flip"
                 >
                     {OPENINGS.map((opening, index) => (
                         <li class="slab slab--bare slab--card slab--hover">
@@ -278,7 +278,7 @@ const openingColors = PALETTE.slice(0, 3);
                 <p class="label mb-4 text-ink-muted">Active workstreams</p>
                 <div
                     class="grid grid-cols-1 gap-5 md:grid-cols-2"
-                    data-motion-stagger="unfold"
+                    data-motion-stagger="flip"
                 >
                     {ACTIONS.map(action => (
                         <section
@@ -357,6 +357,11 @@ const openingColors = PALETTE.slice(0, 3);
         display: inline-flex;
         min-height: 50px;
         min-width: 50px;
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .about__link:active {
+        transform: translateY(1px);
     }
 
     .roadmap {
@@ -452,7 +457,7 @@ const openingColors = PALETTE.slice(0, 3);
 
     .roadmap__step[data-status='next'] .roadmap__node {
         background-color: var(--color-accent);
-        color: var(--color-ink-inverse);
+        color: var(--color-ink);
     }
 
     .roadmap__step[data-status='next'] .roadmap__status {
@@ -479,6 +484,10 @@ const openingColors = PALETTE.slice(0, 3);
         .about__link {
             min-width: auto;
             padding-inline: var(--space-xs);
+        }
+
+        .about__link:focus-visible {
+            outline-offset: -2px;
         }
 
         .about__toc {

@@ -1,11 +1,3 @@
-export interface TrackLink {
-    host: string;
-    href: string;
-    id: string;
-}
-
-export type TrackLinkResult = { link: TrackLink; ok: true } | { message: string; ok: false };
-
 const KNOWN_HOSTS = [
     { label: 'Audius', pattern: /(^|\.)audius\.co$/ },
     { label: 'Bandcamp', pattern: /(^|\.)bandcamp\.com$/ },

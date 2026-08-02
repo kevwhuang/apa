@@ -3,62 +3,34 @@
 declare module 'eslint-plugin-jsx-a11y';
 
 type AssetKind = (typeof import('@lib/constants').ASSET_KINDS)[number];
-
 type CartIssueKind = 'out-of-stock' | 'price-changed' | 'quantity-reduced' | 'removed';
-
-type ChatAuthor = 'member' | 'you';
-
 type EventCadence = (typeof import('@lib/constants').EVENT_CADENCES)[number];
-
 type EventStatus = (typeof import('@lib/constants').EVENT_STATUSES)[number];
-
 type EventType = (typeof import('@lib/constants').EVENT_TYPES)[number];
-
 type FieldErrors = Record<string, string>;
-
-interface ImportMetaEnv {
-    readonly SUPABASE_PUBLISHABLE_KEY: string;
-    readonly SUPABASE_URL: string;
-}
-
 type MotionBezier = [number, number, number, number];
-
 type MotionDurationToken = 'base' | 'cinematic' | 'fast' | 'slow' | 'slower' | 'slowest';
-
 type MotionEase = (progress: number) => number;
-
 type MotionEaseToken = 'entrance' | 'linear' | 'mechanical' | 'snap' | 'standard';
-
-type MotionPresetName = 'rise' | 'rule' | 'stamp' | 'strike' | 'unfold';
-
+type MotionPresetName = 'blur' | 'flip' | 'rise' | 'rule' | 'stamp' | 'strike' | 'tilt' | 'unfold' | 'wipe';
+type MotionScrubName = 'drift' | 'float';
+type MotionStaggerOrigin = 'center' | 'end' | 'start';
 type MotionStaggerToken = 'base' | 'tight';
-
 type OnboardingGate = { email: string; state: 'granted'; token: OnboardingToken } | { reason: OnboardingRejection; state: 'rejected' };
-
 type OnboardingRejection = 'completed' | 'expired' | 'malformed' | 'missing';
-
 type OrderResult = { code: PaymentErrorCode; message: string; ok: false } | { ok: true; order: Order };
-
 type PaymentErrorCode = 'card-declined' | 'cart-changed' | 'empty-cart';
-
-type ProducerAvailability = (typeof import('@lib/constants').PRODUCER_AVAILABILITIES)[number];
-
 type ProductCategory = (typeof import('@lib/constants').PRODUCT_CATEGORIES)[number];
-
 type ProgramState = 'active' | 'planned';
-
-type SandboxKind = 'chorus' | 'compressor' | 'delay' | 'eq' | 'filter' | 'gate' | 'limiter' | 'meter' | 'rack' | 'reverb' | 'saturator' | 'tuner';
-
+type SandboxKind = 'chorus' | 'compressor' | 'delay' | 'eq' | 'filter' | 'gate' | 'highpass' | 'limiter' | 'meter' | 'pan' | 'reverb' | 'saturator' | 'tremolo' | 'trim' | 'tuner';
+type SandboxLoadResult = { buffer: AudioBuffer; ok: true } | { message: string; ok: false };
 type SessionErrorCode = 'already-registered' | 'invalid-credentials' | 'invalid-email' | 'weak-password';
-
 type SessionResult = { code: SessionErrorCode; message: string; ok: false } | { ok: true; session: Session };
-
 type StorageScope = 'local' | 'memory' | 'session';
-
 type Timer = ReturnType<typeof setInterval>;
-
+type ToastTone = 'error' | 'info' | 'success';
+type TrackLinkResult = { link: TrackLink; ok: true } | { message: string; ok: false };
 type UploadResult = { entry: UploadEntry; ok: true } | { message: string; ok: false };
-
 type UploadStatus = 'failed' | 'queued' | 'reading' | 'ready' | 'rejected';
 
 interface BashSubmission {
@@ -116,15 +88,15 @@ interface CatalogEntry {
 }
 
 interface ChatMessage {
-    author: ChatAuthor;
     body: string;
+    name: string;
+    self: boolean;
     sentAt: number;
 }
 
 interface ChatState {
+    messages: ChatMessage[];
     open: boolean;
-    threadId: string;
-    threads: Record<string, ChatMessage[]>;
 }
 
 interface ContactEmailInput {
@@ -151,6 +123,11 @@ interface FieldRule {
     validate?: (value: string, values: FormData) => boolean;
 }
 
+interface ImportMetaEnv {
+    readonly SUPABASE_PUBLISHABLE_KEY: string;
+    readonly SUPABASE_URL: string;
+}
+
 interface MockEmail {
     actionHref: string;
     actionLabel: string;
@@ -170,6 +147,12 @@ interface MotionBridge {
     live: () => boolean;
 }
 
+interface MotionGroup {
+    from: MotionStaggerOrigin;
+    name: MotionPresetName;
+    targets: Element[];
+}
+
 interface MotionPreset {
     duration: MotionDurationToken;
     ease: MotionEaseToken;
@@ -179,8 +162,15 @@ interface MotionPreset {
 }
 
 interface MotionRoot {
+    from: MotionStaggerOrigin;
     preset: MotionPresetName;
     targets: Element[];
+}
+
+interface MotionScrubPreset {
+    from: gsap.TweenVars;
+    scrub: number;
+    to: gsap.TweenVars;
 }
 
 interface MotionTokens {
@@ -252,46 +242,21 @@ interface ProducerRecord extends Omit<import('astro:content').CollectionEntry<'p
     joined: string;
 }
 
+interface RackState {
+    activeKinds: SandboxKind[];
+    durationSeconds: number;
+    fileName: string | null;
+    playing: boolean;
+}
+
 interface SandboxBlock {
     analyser?: AnalyserNode;
     dispose(): void;
-    flushTails?(): void;
     input: AudioNode;
     output: AudioNode;
-    restoreTails?(): void;
     setParam(name: string, value: number): void;
-    setStage?(name: string, enabled: boolean): void;
     state?(): string;
     tick?(): void;
-}
-
-interface SandboxChain {
-    dispose(): void;
-    flushTails(): void;
-    input: GainNode;
-    restoreTails(): void;
-    setBypass(bypassed: boolean): void;
-}
-
-interface SandboxEngine {
-    createModule(kind: SandboxKind, hooks?: SandboxModuleHooks): SandboxModule;
-    dispose(): void;
-}
-
-interface SandboxModule {
-    block: SandboxBlock;
-    bypass(bypassed: boolean): void;
-    isBypassed(): boolean;
-    isPlaying(): boolean;
-    setBuffer(buffer: AudioBuffer): void;
-    setParam(name: string, value: number): void;
-    start(): void;
-    stop(): void;
-}
-
-interface SandboxModuleHooks {
-    onFrame?: () => void;
-    onStopped?: () => void;
 }
 
 interface Session {
@@ -327,6 +292,17 @@ interface StoreOptions<T> {
     topic: string;
 }
 
+interface ToastDetail {
+    message: string;
+    tone: ToastTone;
+}
+
+interface TrackLink {
+    host: string;
+    href: string;
+    id: string;
+}
+
 interface TrackState {
     playing: boolean;
     trackId: string;
@@ -353,6 +329,7 @@ interface Window {
 }
 
 interface WindowEventMap {
+    'apa:toast': CustomEvent<ToastDetail>;
     'apa:track-play': CustomEvent<{ track: PlayerTrack }>;
     'apa:track-state': CustomEvent<TrackState>;
 }

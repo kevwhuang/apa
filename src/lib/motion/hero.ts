@@ -98,7 +98,7 @@ function buildSprites(color: string, pitch: number, ratio: number): HTMLCanvasEl
         const radius = (level / (SPRITE_LEVELS - 1)) * pitch * DOT_RATIO * ratio;
 
         context.beginPath();
-        context.arc(cell * level + cell / 2, cell / 2, radius, 0, Math.PI * 2);
+        context.arc(cell * level + cell / 2, cell / 2, radius, 0, TAU);
         context.fill();
     }
 
@@ -116,6 +116,27 @@ export function initHeroField(signal: AbortSignal, still: boolean): void {
     if (!holder || !accentColor || !inkColor) return;
 
     mountField({ accentColor, holder, inkColor, signal, still });
+}
+
+function initPlayhead(signal: AbortSignal, still: boolean): void {
+    const playhead = document.querySelector<HTMLElement>(PLAYHEAD_SELECTOR);
+
+    if (!playhead || still) return;
+
+    const tokens = getMotionTokens();
+
+    const sweep = gsap.fromTo(playhead, { xPercent: PLAYHEAD_START }, {
+        duration: STEP_COUNT * stepDuration(),
+        ease: tokens.ease.linear,
+        repeat: -1,
+        xPercent: PLAYHEAD_END,
+    });
+
+    const observer = new IntersectionObserver(entries => (entries[0]?.isIntersecting ? sweep.play() : sweep.pause()));
+
+    observer.observe(playhead);
+    document.addEventListener('visibilitychange', () => (document.hidden ? sweep.pause() : sweep.play()), { signal });
+    signal.addEventListener('abort', () => observer.disconnect());
 }
 
 function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptions): void {
@@ -196,6 +217,11 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
         watch(performance.now() - started);
     }
 
+    function redraw() {
+        resize();
+        draw(0);
+    }
+
     function resize() {
         const pitch = QUALITY_STEPS[quality].pitch * (mobile ? MOBILE_PITCH_SCALE : 1);
         const width = holder.clientWidth;
@@ -267,6 +293,7 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
     if (still) {
         draw(0);
 
+        window.addEventListener('resize', redraw, { signal });
         signal.addEventListener('abort', () => canvas.remove());
 
         return;
@@ -282,27 +309,6 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
         observer.disconnect();
         canvas.remove();
     });
-}
-
-function initPlayhead(signal: AbortSignal, still: boolean): void {
-    const playhead = document.querySelector<HTMLElement>(PLAYHEAD_SELECTOR);
-
-    if (!playhead || still) return;
-
-    const tokens = getMotionTokens();
-
-    const sweep = gsap.fromTo(playhead, { xPercent: PLAYHEAD_START }, {
-        duration: STEP_COUNT * stepDuration(),
-        ease: tokens.ease.linear,
-        repeat: -1,
-        xPercent: PLAYHEAD_END,
-    });
-
-    const observer = new IntersectionObserver(entries => (entries[0]?.isIntersecting ? sweep.play() : sweep.pause()));
-
-    observer.observe(playhead);
-    document.addEventListener('visibilitychange', () => (document.hidden ? sweep.pause() : sweep.play()), { signal });
-    signal.addEventListener('abort', () => observer.disconnect());
 }
 
 function slowDevice(): boolean {

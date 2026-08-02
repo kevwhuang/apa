@@ -17,11 +17,19 @@ const [next] = editions
     class="stage stage--bash stage--overhang border-b-2 border-ink"
     aria-labelledby="bash-title"
 >
-    <div class="bash-well fold slab slab--well stage__item--runoff">
+    <div
+        class="bash-well fold slab slab--well stage__item--runoff"
+        data-motion="wipe"
+    >
         <div
-            class="halftone--accent absolute inset-0 pointer-events-none"
+            class="absolute inset-0 overflow-clip pointer-events-none"
             aria-hidden="true"
-        />
+        >
+            <div
+                class="bash-well__drift halftone--accent absolute"
+                data-scrub="drift"
+            />
+        </div>
         <div class="relative">
             <SectionHead
                 class="font-extrabold font-sans leading-[0.9] text-display tracking-[-0.04em]"
@@ -33,7 +41,7 @@ const [next] = editions
                 {program.name}.
             </SectionHead>
             <p
-                class="max-w-xl mt-8 leading-relaxed text-md text-ink-inverse-muted"
+                class="max-w-xl leading-relaxed text-md text-ink-inverse-muted"
                 data-motion="rise"
             >
                 {program.summary}
@@ -49,7 +57,7 @@ const [next] = editions
                     {program.shortName} details
                 </a>
                 <a
-                    class="action-text hover:text-accent inline-flex items-center min-h-[50px] text-ink-inverse underline underline-offset-8 transition-colors"
+                    class="action-text hover:text-accent inline-flex items-center min-h-[50px] underline underline-offset-8 text-ink-inverse transition-colors"
                     href="/sponsor"
                 >
                     Sponsor it &rarr;
@@ -63,7 +71,7 @@ const [next] = editions
     >
         <div>
             <dt class="label mb-2 text-ink-muted">Cadence</dt>
-            <dd class="font-extrabold font-sans text-3xl capitalize">{program.cadence}</dd>
+            <dd class="capitalize font-extrabold font-sans text-3xl">{program.cadence}</dd>
         </div>
         <div>
             <dt class="label mb-2 text-ink-muted">Next</dt>
@@ -103,5 +111,9 @@ const [next] = editions
     .bash-well {
         padding-block: var(--space-2xl);
         padding-inline: max(var(--shell-pad), calc(100% - var(--shell-inner))) 0;
+    }
+
+    .bash-well__drift {
+        inset: -8% 0;
     }
 </style>

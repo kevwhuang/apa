@@ -119,16 +119,23 @@ const { hasHero = false } = Astro.props;
 
 <style>
     .cart-count {
+        align-items: center;
         background: var(--color-accent);
+        border-radius: 9999px;
+        box-shadow: 0 0 0 2px var(--color-surface);
         color: var(--color-ink);
+        display: inline-flex;
         font-family: var(--font-mono);
         font-size: var(--text-2xs);
+        font-weight: 700;
+        height: 16px;
+        justify-content: center;
         line-height: 1;
-        min-width: 18px;
-        padding: 3px 4px;
+        min-width: 16px;
+        padding: 0 3px;
         position: absolute;
         right: 3px;
-        top: 7px;
+        top: 4px;
     }
 
     .cart-link {
@@ -137,8 +144,12 @@ const { hasHero = false } = Astro.props;
         height: var(--control-size);
         justify-content: center;
         position: relative;
-        transition: color var(--duration-fast) var(--motion-ease-ui);
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
         width: var(--control-size);
+    }
+
+    .cart-link:active {
+        transform: translateY(1px);
     }
 
     .cart-link:hover {
@@ -150,8 +161,12 @@ const { hasHero = false } = Astro.props;
         display: none;
         height: var(--control-size);
         justify-content: center;
-        transition: color var(--duration-fast) var(--motion-ease-ui);
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
         width: var(--control-size);
+    }
+
+    .nav-toggle:active {
+        transform: translateY(1px);
     }
 
     .nav-toggle:hover {
@@ -159,6 +174,8 @@ const { hasHero = false } = Astro.props;
     }
 
     .site-header {
+        --nav-gap: clamp(12px, calc(-28.2px + 3.9216vw), 22px);
+        --nav-pad: clamp(8px, calc(-8.1px + 1.5686vw), 12px);
         background: var(--color-surface);
         border-bottom: 2px solid var(--color-ink);
         height: var(--header-height);
@@ -191,7 +208,7 @@ const { hasHero = false } = Astro.props;
     .site-header__bar {
         align-items: center;
         display: flex;
-        gap: var(--space-md);
+        gap: var(--nav-gap);
         height: 100%;
     }
 
@@ -201,7 +218,16 @@ const { hasHero = false } = Astro.props;
         flex-shrink: 0;
         gap: var(--space-2xs);
         height: var(--control-size);
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
         user-select: none;
+    }
+
+    .site-header__brand:active {
+        transform: translateY(1px);
+    }
+
+    .site-header__brand:hover {
+        color: var(--color-accent-deep);
     }
 
     .site-header__controls {
@@ -212,7 +238,7 @@ const { hasHero = false } = Astro.props;
     }
 
     .site-header__name {
-        font-size: var(--text-2xs);
+        font-size: var(--text-sm);
         font-weight: 800;
         letter-spacing: -0.01em;
         text-transform: uppercase;
@@ -223,21 +249,27 @@ const { hasHero = false } = Astro.props;
     }
 
     .site-nav__item {
-        --nav-item-hover-bg: var(--color-ink);
-        --nav-item-hover-ink: var(--color-surface);
+        --nav-item-hover-bg: var(--color-surface-sunken);
+        --nav-item-hover-ink: var(--color-accent-deep);
         align-items: center;
+        border-radius: 4px;
         display: flex;
         font-family: var(--font-mono);
-        font-size: var(--text-2xs);
+        font-size: var(--text-sm);
         letter-spacing: 0.04em;
         min-height: var(--control-size);
         padding-inline: var(--space-sm);
         text-transform: uppercase;
         transition:
             background var(--duration-fast) var(--motion-ease-ui),
-            color var(--duration-fast) var(--motion-ease-ui);
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
         white-space: nowrap;
         width: 100%;
+    }
+
+    .site-nav__item:active {
+        transform: translateY(1px);
     }
 
     .site-nav__item:hover,
@@ -254,19 +286,23 @@ const { hasHero = false } = Astro.props;
 
     .site-nav__item[aria-current]:hover,
     .site-nav__item[aria-current]:focus-visible {
-        color: var(--color-accent);
+        color: var(--color-accent-deep);
     }
 
     .site-nav__link {
         align-items: center;
         display: flex;
         font-family: var(--font-mono);
-        font-size: var(--text-2xs);
+        font-size: var(--text-sm);
         letter-spacing: 0.04em;
         min-height: var(--control-size);
-        padding-inline: var(--space-xs);
+        padding-inline: var(--nav-pad);
         text-transform: uppercase;
-        transition: color var(--duration-fast) var(--motion-ease-ui);
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .site-nav__link:active {
+        transform: translateY(1px);
     }
 
     .site-nav__link:hover {
@@ -284,43 +320,55 @@ const { hasHero = false } = Astro.props;
 
     .site-nav__menu {
         background: var(--color-surface-raised);
-        border: 2px solid var(--color-ink);
-        box-shadow: var(--lift) var(--lift) 0 0 var(--color-ink);
+        border: 1px solid var(--color-ink-10);
+        border-radius: 6px;
+        box-shadow: 0 12px 32px 0 var(--color-ink-20);
         display: flex;
         flex-direction: column;
+        gap: 2px;
         inset: calc(100% + 6px) auto auto 0;
         min-width: 240px;
-        padding-bottom: var(--space-3xs);
+        opacity: 1;
+        padding: var(--space-2xs);
         position: absolute;
+        transition: opacity var(--duration-fast) var(--motion-ease-ui), translate var(--duration-fast) var(--motion-ease-ui);
+        translate: 0 0;
         z-index: var(--z-header);
     }
 
     .site-nav__menu::before {
         background: var(--color-accent);
         content: '';
-        height: 4px;
+        height: 2px;
         margin-bottom: var(--space-3xs);
     }
 
-    .site-nav__menu li + li {
-        border-top: 1px solid var(--color-ink-20);
+    @starting-style {
+        .site-nav__menu {
+            opacity: 0;
+            translate: 0 -4px;
+        }
     }
 
     .site-nav__trigger {
         align-items: center;
         display: flex;
         font-family: var(--font-mono);
-        font-size: var(--text-2xs);
+        font-size: var(--text-sm);
         gap: var(--space-3xs);
         letter-spacing: 0.04em;
         min-height: var(--control-size);
-        padding-inline: var(--space-xs);
+        padding-inline: var(--nav-pad);
         text-transform: uppercase;
-        transition: color var(--duration-fast) var(--motion-ease-ui);
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .site-nav__trigger :global(svg) {
         transition: rotate var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .site-nav__trigger:active {
+        transform: translateY(1px);
     }
 
     .site-nav__trigger:hover {
@@ -357,30 +405,33 @@ const { hasHero = false } = Astro.props;
             --nav-item-hover-ink: var(--color-accent-deep);
         }
 
+        .site-nav__item:focus-visible,
+        .site-nav__link:focus-visible,
+        .site-nav__trigger:focus-visible {
+            outline-offset: -2px;
+        }
+
         .site-nav__list {
             flex-direction: column;
             padding: var(--space-2xs) 0;
             padding-inline-end: var(--launcher-rail);
-            padding-inline-start: calc(var(--shell-pad) - var(--space-xs));
+            padding-inline-start: calc(var(--shell-pad) - var(--nav-pad));
         }
 
         .site-nav__menu {
             background: none;
             border: 0;
+            border-radius: 0;
             box-shadow: none;
+            gap: 0;
             inset: auto;
             min-width: 0;
-            padding-bottom: 0;
-            padding-left: var(--space-md);
+            padding: 0 0 0 var(--space-md);
             position: static;
         }
 
         .site-nav__menu::before {
             display: none;
-        }
-
-        .site-nav__menu li + li {
-            border-top: 0;
         }
 
         .site-nav__trigger {
@@ -400,7 +451,7 @@ const { hasHero = false } = Astro.props;
 </style>
 
 <script>
-    import { count, getItems, onChange } from '@lib/store';
+    import { count, getItems, onChange, seedCart } from '@lib/store';
     import { registerPageScript } from '@lib/utils';
 
     const HOVER_CLICK_GRACE = 500;
@@ -586,6 +637,7 @@ const { hasHero = false } = Astro.props;
         header.classList.remove('is-hidden');
         lastScrollY = window.scrollY;
         scrollTicking = false;
+        seedCart();
         updateActiveLink();
         updateCart();
         updateHeader(header);

@@ -1,3 +1,4 @@
+import { PASSWORD_MIN_LENGTH } from '@lib/constants';
 import { describeCartIssue, setText } from '@lib/utils';
 
 export function clearFieldErrors(form: HTMLFormElement): void {
@@ -9,6 +10,10 @@ export function clearFieldErrors(form: HTMLFormElement): void {
         element.textContent = '';
         element.setAttribute('hidden', '');
     });
+}
+
+export function confirmRule(): FieldRule {
+    return { message: 'Both passwords must match.', required: true, validate: (value, values) => value === values.get('password') };
 }
 
 export function focusFirstError(form: HTMLFormElement, errors: FieldErrors): void {
@@ -44,6 +49,14 @@ function getValue(values: FormData, name: string) {
     return typeof value === 'string' ? value : '';
 }
 
+export function hasLetterAndDigit(value: string): boolean {
+    return /[a-z]/i.test(value) && /\d/.test(value);
+}
+
+export function passwordRule(): FieldRule {
+    return { message: `Use at least ${PASSWORD_MIN_LENGTH} characters, including a letter and a digit.`, min: PASSWORD_MIN_LENGTH, required: true, validate: hasLetterAndDigit };
+}
+
 export function renderErrorSummary(form: HTMLFormElement, errors: FieldErrors, anchorPrefix: string): void {
     const list = form.querySelector<HTMLElement>('[data-form-error-list]');
     const names = Object.keys(errors);
@@ -54,7 +67,7 @@ export function renderErrorSummary(form: HTMLFormElement, errors: FieldErrors, a
 
     list.replaceChildren();
     summary.toggleAttribute('hidden', names.length === 0);
-    setText(summary.querySelector('[data-form-error-message]'), names.length === 0 ? '' : `Check ${names.length === 1 ? 'this field' : `these ${names.length} fields`} before you send.`);
+    setText(summary.querySelector('[data-form-error-message]'), names.length === 0 ? '' : `Check ${names.length === 1 ? 'this field' : `these ${names.length} fields`} before you continue.`);
 
     if (names.length === 0 || !template) return;
 

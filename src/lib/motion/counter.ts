@@ -93,8 +93,8 @@ export function initCounters(): void {
         gsap.set(reels, { yPercent: (_index: number, reel: Element) => restOf(reel) });
 
         ScrollTrigger.create({
-            once: true,
             onEnter: () => rollReels(reels, tokens),
+            once: true,
             start: TRIGGER_START,
             trigger: host,
         });

@@ -3,6 +3,10 @@ import { formatBytes } from '@lib/utils';
 
 const PEAK_COUNT = 200;
 
+export const QUEUE_FULL_MESSAGE = `You can queue ${UPLOAD.maxFiles} files at a time.`;
+
+export const UPLOAD_EXTENSIONS_OR_LIST = formatExtensions(UPLOAD.extensions);
+
 let audioContext: AudioContext | undefined;
 
 export function acceptFiles(files: FileList | File[], queued: UploadEntry[]): UploadEntry[] {
@@ -65,10 +69,27 @@ function extractPeaks(buffer: AudioBuffer) {
     return peaks;
 }
 
-function getExtension(name: string) {
+function formatExtensions(extensions: readonly string[]) {
+    const names = extensions
+        .filter(extension => !extensions.some(other => other !== extension && other.startsWith(extension)))
+        .map(extension => extension.toUpperCase());
+    const last = names.pop() ?? '';
+
+    return names.length > 0 ? `${names.join(', ')} or ${last}` : last;
+}
+
+export function getExtension(name: string): string {
     const index = name.lastIndexOf('.');
 
     return index < 0 ? '' : name.slice(index + 1).toLowerCase();
+}
+
+export function getSizeError(file: File, limit: number): string | undefined {
+    if (file.size === 0) return 'That file is empty.';
+
+    if (file.size > limit) return `That file is ${formatBytes(file.size)} \u2014 the limit is ${formatBytes(limit)}.`;
+
+    return undefined;
 }
 
 function isDuplicate(file: File, queued: UploadEntry[]) {
@@ -94,22 +115,19 @@ function readArrayBuffer(file: File, options: UploadOptions) {
 
 function rejectionReason(file: File, queued: UploadEntry[]) {
     const extension = getExtension(file.name);
+    const oversize = getSizeError(file, UPLOAD.maxFileBytes);
 
     if (!UPLOAD.extensions.some(allowed => allowed === extension)) {
-        return `That is a .${extension || 'file'} \u2014 we take WAV, AIFF, FLAC, MP3 or M4A.`;
+        return `That is a .${extension || 'file'} \u2014 we take ${UPLOAD_EXTENSIONS_OR_LIST}.`;
     }
 
     if (file.type.length > 0 && !file.type.startsWith('audio/') && !UPLOAD.acceptAttribute.includes(file.type)) {
         return 'That does not look like an audio file.';
     }
 
-    if (file.size === 0) return 'That file is empty.';
+    if (oversize) return oversize;
 
-    if (file.size > UPLOAD.maxFileBytes) {
-        return `That file is ${formatBytes(file.size)} \u2014 the limit is ${formatBytes(UPLOAD.maxFileBytes)}.`;
-    }
-
-    if (queued.length >= UPLOAD.maxFiles) return `You can queue ${UPLOAD.maxFiles} files at a time.`;
+    if (queued.length >= UPLOAD.maxFiles) return QUEUE_FULL_MESSAGE;
 
     if (totalBytes(queued) + file.size > UPLOAD.maxTotalBytes) {
         return `That would take the queue over ${formatBytes(UPLOAD.maxTotalBytes)}.`;

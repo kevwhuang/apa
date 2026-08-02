@@ -3,17 +3,25 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { MOTION_SELECTOR, buildEntrances, revealAll, revealTarget } from '@lib/motion/entrances';
 import { REDUCED_MOTION_QUERY } from '@lib/constants';
+import { clearScrub, initScrub } from '@lib/motion/scrub';
 import { clearTransport, initTransport } from '@lib/motion/transport';
 import { initCounters } from '@lib/motion/counter';
 import { initHeroField } from '@lib/motion/hero';
 import { refreshMotionTokens } from '@lib/motion/tokens';
 import { registerPageScript } from '@lib/utils';
 
+const GROWTH_DELAY_MS = 200;
+
+const GROWTH_THRESHOLD = 24;
+
 const reducedMotionQuery = window.matchMedia(REDUCED_MOTION_QUERY);
 
 let context: gsap.Context | undefined;
 let controller: AbortController | undefined;
+let heightObserver: ResizeObserver | undefined;
+let lastDocumentHeight = 0;
 let lastViewportWidth = window.innerWidth;
+let refreshTimer: Timer | undefined;
 let registered = false;
 
 function boot(signal: AbortSignal): void {
@@ -35,6 +43,7 @@ function boot(signal: AbortSignal): void {
             if (armed) buildEntrances();
 
             initCounters();
+            initScrub();
             initTransport();
             initHeroField(signal, false);
         });
@@ -44,7 +53,12 @@ function boot(signal: AbortSignal): void {
         return;
     }
 
-    refreshTriggers();
+    observeDocumentHeight();
+    void refreshTriggers();
+}
+
+function documentHeight(): number {
+    return document.documentElement.scrollHeight;
 }
 
 function handleAfterPrint(): void {
@@ -55,6 +69,14 @@ function handleAfterPrint(): void {
 function handleBeforePrint(): void {
     teardown();
     hardDisarm();
+}
+
+function handleDocumentResize(): void {
+    if (Math.abs(documentHeight() - lastDocumentHeight) < GROWTH_THRESHOLD) return;
+
+    clearTimeout(refreshTimer);
+
+    refreshTimer = setTimeout(refreshAfterGrowth, GROWTH_DELAY_MS);
 }
 
 function handleFocusIn(event: FocusEvent): void {
@@ -102,10 +124,22 @@ export function initMotion(): void {
     window.addEventListener('resize', handleResize);
 }
 
+function observeDocumentHeight(): void {
+    lastDocumentHeight = documentHeight();
+    heightObserver = new ResizeObserver(handleDocumentResize);
+    heightObserver.observe(document.body);
+}
+
 function reboot(): void {
     teardown();
     controller = new AbortController();
     boot(controller.signal);
+}
+
+function refreshAfterGrowth(): void {
+    refreshTimer = undefined;
+    ScrollTrigger.refresh();
+    lastDocumentHeight = documentHeight();
 }
 
 async function refreshTriggers(): Promise<void> {
@@ -126,8 +160,13 @@ function teardown(): void {
     previous?.abort();
     context?.revert();
     context = undefined;
+    clearTimeout(refreshTimer);
+    heightObserver?.disconnect();
+    heightObserver = undefined;
+    refreshTimer = undefined;
     ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     ScrollTrigger.clearScrollMemory();
+    clearScrub();
     clearTransport();
 }
 

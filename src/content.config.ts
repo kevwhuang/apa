@@ -7,7 +7,6 @@ import {
     CONTENT_DIR,
     EVENT_STATUSES,
     EVENT_TYPES,
-    PRODUCER_AVAILABILITIES,
     PRODUCT_CATEGORIES,
 } from '@lib/constants';
 
@@ -66,7 +65,6 @@ const events = defineCollection({
 const producers = defineCollection({
     loader: glob({ base: `./${CONTENT_DIR}/producers`, pattern: '**/*.md' }),
     schema: z.object({
-        availability: z.enum(PRODUCER_AVAILABILITIES).default('open'),
         avatar: z.string().optional(),
         bio: z.string(),
         featured: z.boolean().default(false),

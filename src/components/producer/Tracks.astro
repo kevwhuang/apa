@@ -36,7 +36,7 @@ const waveHeights = Array.from({ length: WAVE_BAR_COUNT }, (_, index) => Math.ro
 
 <button
     class:list={[
-        'producer-track group aria-pressed:bg-accent hover:bg-ink-10 flex items-center gap-3 min-h-[50px] w-full px-3 py-2 border-2 border-ink text-left transition-colors',
+        'producer-track group aria-pressed:bg-accent hover:bg-ink-10 flex items-center min-h-[50px] w-full gap-3 px-3 py-2 border-2 border-ink text-left transition-colors',
         rowClass,
     ]}
     aria-pressed="false"
@@ -59,7 +59,7 @@ const waveHeights = Array.from({ length: WAVE_BAR_COUNT }, (_, index) => Math.ro
         Play
     </span>
     <span
-        class="flex-1 min-w-0 truncate font-bold font-mono text-[13px]"
+        class="flex-1 min-w-0 font-bold font-mono text-sm truncate"
         data-placeholder
     >
         {track.title}
@@ -76,7 +76,7 @@ const waveHeights = Array.from({ length: WAVE_BAR_COUNT }, (_, index) => Math.ro
         ))}
     </span>
     <span
-        class="group-aria-pressed:text-ink shrink-0 font-mono text-[12px] tabular-nums text-ink-muted"
+        class="group-aria-pressed:text-ink shrink-0 font-mono tabular-nums text-xs text-ink-muted"
         data-placeholder
     >
         {formatDuration(track.durationSeconds)}
@@ -84,6 +84,18 @@ const waveHeights = Array.from({ length: WAVE_BAR_COUNT }, (_, index) => Math.ro
 </button>
 
 <style>
+    .producer-track {
+        transition: background-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .producer-track:active {
+        transform: translateY(1px);
+    }
+
+    .producer-track:focus-visible {
+        outline-offset: -2px;
+    }
+
     .producer-track[aria-pressed='true'] .producer-track__bar {
         opacity: 0.75;
     }

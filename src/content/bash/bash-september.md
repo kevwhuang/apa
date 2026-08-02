@@ -1,5 +1,5 @@
 ---
-title: Producer Bash · September
+title: Bash · September
 edition: September
 date: 2026-09-19T13:30:00-05:00
 end: 2026-09-19T18:00:00-05:00

@@ -1,9 +1,4 @@
-interface RackStage {
-    dispose(): void;
-    input: GainNode;
-    output: GainNode;
-    set(enabled: boolean): void;
-}
+import { MIDI_A4, SEMITONES_PER_OCTAVE, TUNING_HERTZ, noteHertz } from '@lib/audio';
 
 export const ANALYSER_FFT = 2_048;
 
@@ -33,6 +28,8 @@ export const COMPRESSOR_THRESHOLD_DEFAULT = -28;
 
 const CURVE_LENGTH = 1_024;
 
+const DECIBEL_SCALE = 20;
+
 export const DELAY_FEEDBACK_DEFAULT = 0.45;
 
 const DELAY_MAX_SECONDS = 2;
@@ -61,6 +58,10 @@ const GATE_RELEASE = 0.08;
 
 export const GATE_THRESHOLD_DEFAULT = -45;
 
+const HIGHPASS_CUTOFF_DEFAULT = 120;
+
+export const HIGHPASS_RESONANCE_DEFAULT = 1;
+
 const IMPULSE_SHAPE = 3;
 
 const LIMITER_ATTACK = 0.001;
@@ -71,13 +72,13 @@ const LIMITER_RELEASE = 0.1;
 
 export const LIMITER_THRESHOLD_DEFAULT = -12;
 
-const MIDI_A4 = 69;
-
 const MIDI_OCTAVE_OFFSET = 1;
 
 const MIN_RMS = 0.008;
 
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+export const PAN_POSITION_DEFAULT = 0;
 
 const PITCH_MAX_HERTZ = 1_000;
 
@@ -85,31 +86,23 @@ const PITCH_MIN_CORRELATION = 0.5;
 
 const PITCH_MIN_HERTZ = 60;
 
-const RACK_DELAY_FEEDBACK = 0.35;
-
-const RACK_DELAY_TIME = 0.28;
-
-const RACK_DRIVE = 4;
-
-const RACK_FILTER_HERTZ = 1_800;
-
-const RACK_RESONANCE = 2;
-
 export const REVERB_DECAY_DEFAULT = 2.4;
 
 export const REVERB_WET_DEFAULT = 0.4;
 
 export const SATURATOR_DRIVE_DEFAULT = 3;
 
-const SEMITONES_PER_OCTAVE = 12;
-
 const SMOOTHING = 0.02;
-
-const TAIL_SECONDS = 0.05;
 
 const TICK_INTERVAL = 4;
 
-const TUNING_HERTZ = 440;
+export const TREMOLO_DEPTH_DEFAULT = 0.6;
+
+export const TREMOLO_RATE_DEFAULT = 4.5;
+
+const TREMOLO_SWING = 0.5;
+
+export const TRIM_GAIN_DEFAULT = 0;
 
 export function buildBlock(kind: SandboxKind, context: AudioContext): SandboxBlock {
     switch (kind) {
@@ -119,11 +112,14 @@ export function buildBlock(kind: SandboxKind, context: AudioContext): SandboxBlo
         case 'eq': return buildEq(context);
         case 'filter': return buildFilter(context);
         case 'gate': return buildGate(context);
+        case 'highpass': return buildHighpass(context);
         case 'limiter': return buildLimiter(context);
         case 'meter': return buildMeter(context);
-        case 'rack': return buildRack(context);
+        case 'pan': return buildPan(context);
         case 'reverb': return buildReverb(context);
         case 'saturator': return buildSaturator(context);
+        case 'tremolo': return buildTremolo(context);
+        case 'trim': return buildTrim(context);
         case 'tuner': return buildTuner(context);
     }
 }
@@ -202,11 +198,8 @@ function buildDelay(context: AudioContext) {
     const output = context.createGain();
     const wet = context.createGain();
 
-    let flushed = false;
-    let level = DELAY_FEEDBACK_DEFAULT;
-
     delay.delayTime.value = DELAY_TIME_DEFAULT;
-    feedback.gain.value = level;
+    feedback.gain.value = DELAY_FEEDBACK_DEFAULT;
     wet.gain.value = DELAY_WET_LEVEL;
     input.connect(dry).connect(output);
     input.connect(delay).connect(wet).connect(output);
@@ -214,24 +207,11 @@ function buildDelay(context: AudioContext) {
 
     return {
         dispose: () => [delay, dry, feedback, input, output, wet].forEach(node => node.disconnect()),
-        flushTails(): void {
-            flushed = true;
-            fade(context, feedback.gain, 0, TAIL_SECONDS);
-        },
         input,
         output,
-        restoreTails(): void {
-            flushed = false;
-            smooth(context, feedback.gain, level);
-        },
         setParam(name: string, value: number): void {
+            if (name === 'feedback') smooth(context, feedback.gain, Math.min(value, FEEDBACK_CAP));
             if (name === 'time') smooth(context, delay.delayTime, value);
-
-            if (name === 'feedback') {
-                level = Math.min(value, FEEDBACK_CAP);
-
-                if (!flushed) smooth(context, feedback.gain, level);
-            }
         },
     };
 }
@@ -306,13 +286,31 @@ function buildGate(context: AudioContext) {
         tick(): void {
             analyser.getFloatTimeDomainData(data);
 
-            const decibels = 20 * Math.log10(Math.max(rootMeanSquare(data), GATE_FLOOR));
+            const decibels = DECIBEL_SCALE * Math.log10(Math.max(rootMeanSquare(data), GATE_FLOOR));
             const next = decibels > threshold;
 
             if (next === open) return;
 
             open = next;
             gate.gain.setTargetAtTime(next ? 1 : 0, context.currentTime, next ? GATE_ATTACK : GATE_RELEASE);
+        },
+    };
+}
+
+function buildHighpass(context: AudioContext) {
+    const node = context.createBiquadFilter();
+
+    node.type = 'highpass';
+    node.frequency.value = HIGHPASS_CUTOFF_DEFAULT;
+    node.Q.value = HIGHPASS_RESONANCE_DEFAULT;
+
+    return {
+        dispose: () => node.disconnect(),
+        input: node,
+        output: node,
+        setParam(name: string, value: number): void {
+            if (name === 'cutoff') smooth(context, node.frequency, value);
+            if (name === 'resonance') smooth(context, node.Q, value);
         },
     };
 }
@@ -351,37 +349,17 @@ function buildMeter(context: AudioContext) {
     };
 }
 
-function buildRack(context: AudioContext) {
-    const delay = buildDelay(context);
-    const filter = buildFilter(context);
-    const saturator = buildSaturator(context);
+function buildPan(context: AudioContext) {
+    const node = context.createStereoPanner();
 
-    delay.setParam('feedback', RACK_DELAY_FEEDBACK);
-    delay.setParam('time', RACK_DELAY_TIME);
-    filter.setParam('cutoff', RACK_FILTER_HERTZ);
-    filter.setParam('resonance', RACK_RESONANCE);
-    saturator.setParam('drive', RACK_DRIVE);
-
-    const stageDelay = wrapStage(context, delay);
-    const stageFilter = wrapStage(context, filter);
-    const stageSaturator = wrapStage(context, saturator);
-    const stages: Record<string, RackStage> = { delay: stageDelay, filter: stageFilter, saturator: stageSaturator };
-
-    stageSaturator.output.connect(stageFilter.input);
-    stageFilter.output.connect(stageDelay.input);
+    node.pan.value = PAN_POSITION_DEFAULT;
 
     return {
-        dispose(): void {
-            [delay, filter, saturator].forEach(block => block.dispose());
-            [stageDelay, stageFilter, stageSaturator].forEach(stage => stage.dispose());
-        },
-        flushTails: () => delay.flushTails?.(),
-        input: stageSaturator.input,
-        output: stageDelay.output,
-        restoreTails: () => delay.restoreTails?.(),
-        setParam: () => undefined,
-        setStage(name: string, enabled: boolean): void {
-            stages[name]?.set(enabled);
+        dispose: () => node.disconnect(),
+        input: node,
+        output: node,
+        setParam(name: string, value: number): void {
+            if (name === 'position') smooth(context, node.pan, value);
         },
     };
 }
@@ -476,6 +454,50 @@ function buildSaturator(context: AudioContext) {
     };
 }
 
+function buildTremolo(context: AudioContext) {
+    const depth = context.createGain();
+    const input = context.createGain();
+    const lfo = context.createOscillator();
+
+    depth.gain.value = TREMOLO_DEPTH_DEFAULT * TREMOLO_SWING;
+    input.gain.value = 1 - TREMOLO_DEPTH_DEFAULT * TREMOLO_SWING;
+    lfo.frequency.value = TREMOLO_RATE_DEFAULT;
+    lfo.connect(depth).connect(input.gain);
+    lfo.start();
+
+    return {
+        dispose(): void {
+            lfo.stop();
+            [depth, input, lfo].forEach(node => node.disconnect());
+        },
+        input,
+        output: input,
+        setParam(name: string, value: number): void {
+            if (name === 'rate') smooth(context, lfo.frequency, value);
+
+            if (name === 'depth') {
+                smooth(context, depth.gain, value * TREMOLO_SWING);
+                smooth(context, input.gain, 1 - value * TREMOLO_SWING);
+            }
+        },
+    };
+}
+
+function buildTrim(context: AudioContext) {
+    const node = context.createGain();
+
+    node.gain.value = decibelsToGain(TRIM_GAIN_DEFAULT);
+
+    return {
+        dispose: () => node.disconnect(),
+        input: node,
+        output: node,
+        setParam(name: string, value: number): void {
+            if (name === 'gain') smooth(context, node.gain, decibelsToGain(value));
+        },
+    };
+}
+
 function buildTuner(context: AudioContext) {
     const analyser = context.createAnalyser();
 
@@ -507,6 +529,10 @@ function buildTuner(context: AudioContext) {
     };
 }
 
+function decibelsToGain(decibels: number) {
+    return 10 ** (decibels / DECIBEL_SCALE);
+}
+
 function detectPitch(data: Float32Array, sampleRate: number) {
     let power = 0;
 
@@ -536,17 +562,9 @@ function detectPitch(data: Float32Array, sampleRate: number) {
     return bestCorrelation > PITCH_MIN_CORRELATION && bestLag > 0 ? sampleRate / bestLag : 0;
 }
 
-function fade(context: AudioContext, param: AudioParam, target: number, seconds: number) {
-    const now = context.currentTime;
-
-    param.cancelScheduledValues(now);
-    param.setValueAtTime(param.value, now);
-    param.linearRampToValueAtTime(target, now + seconds);
-}
-
 function formatPitch(hertz: number) {
     const midi = Math.round(MIDI_A4 + SEMITONES_PER_OCTAVE * Math.log2(hertz / TUNING_HERTZ));
-    const target = TUNING_HERTZ * 2 ** ((midi - MIDI_A4) / SEMITONES_PER_OCTAVE);
+    const target = noteHertz(midi);
     const cents = Math.round(CENTS_PER_OCTAVE * Math.log2(hertz / target));
     const note = `${NOTE_NAMES[((midi % SEMITONES_PER_OCTAVE) + SEMITONES_PER_OCTAVE) % SEMITONES_PER_OCTAVE]}${Math.floor(midi / SEMITONES_PER_OCTAVE) - MIDI_OCTAVE_OFFSET}`;
 
@@ -566,10 +584,6 @@ function impulse(context: AudioContext, seconds: number) {
     }
 
     return buffer;
-}
-
-export function isAnalysisKind(kind: SandboxKind): boolean {
-    return kind === 'meter' || kind === 'tuner';
 }
 
 function makeupFor(drive: number) {
@@ -599,27 +613,4 @@ function saturationCurve(drive: number) {
 
 function smooth(context: AudioContext, param: AudioParam, value: number) {
     param.setTargetAtTime(value, context.currentTime, SMOOTHING);
-}
-
-function wrapStage(context: AudioContext, block: SandboxBlock) {
-    const dry = context.createGain();
-    const input = context.createGain();
-    const output = context.createGain();
-    const wet = context.createGain();
-
-    dry.gain.value = 0;
-    wet.gain.value = 1;
-    input.connect(block.input);
-    block.output.connect(wet).connect(output);
-    input.connect(dry).connect(output);
-
-    return {
-        dispose: () => [dry, input, output, wet].forEach(node => node.disconnect()),
-        input,
-        output,
-        set(enabled: boolean): void {
-            smooth(context, dry.gain, enabled ? 0 : 1);
-            smooth(context, wet.gain, enabled ? 1 : 0);
-        },
-    };
 }

@@ -49,7 +49,7 @@ const year = new Date().getFullYear();
             </div>
             {columns.map(column => (
                 <div>
-                    <h2 class="label footer__head">{column.head}</h2>
+                    <h2 class="footer__head label">{column.head}</h2>
                     <ul class="footer__links list-none">
                         {column.items.map(item => (
                             <li>
@@ -158,16 +158,19 @@ const year = new Date().getFullYear();
     }
 
     .footer__link {
+        align-items: center;
+        display: inline-flex;
         font-size: var(--text-sm);
-        transition: color var(--duration-fast) var(--motion-ease-ui);
+        min-height: 50px;
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .footer__link:active {
+        transform: translateY(1px);
     }
 
     .footer__link:hover {
         color: var(--color-accent-deep);
-    }
-
-    .footer__links li {
-        padding-block: var(--space-3xs);
     }
 
     :global(.footer__lockup) {
@@ -183,7 +186,11 @@ const year = new Date().getFullYear();
         min-height: 50px;
         padding-inline: var(--space-2xs);
         text-transform: uppercase;
-        transition: color var(--duration-fast) var(--motion-ease-ui);
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .footer__meta:active {
+        transform: translateY(1px);
     }
 
     .footer__meta:hover {
@@ -199,8 +206,12 @@ const year = new Date().getFullYear();
         display: inline-flex;
         height: 50px;
         justify-content: center;
-        transition: color var(--duration-fast) var(--motion-ease-ui);
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
         width: 50px;
+    }
+
+    .footer__social:active {
+        transform: translateY(1px);
     }
 
     .footer__social:hover {
@@ -228,10 +239,6 @@ const year = new Date().getFullYear();
     }
 
     @media (max-width: 768px) {
-        .footer__grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
         .footer__grid > :first-child {
             grid-column: 1 / -1;
         }

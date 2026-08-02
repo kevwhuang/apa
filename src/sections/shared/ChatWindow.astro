@@ -1,18 +1,6 @@
 ---
-import { getCollection } from 'astro:content';
-
 import IconChat from '@components/icons/Chat.astro';
 import IconClose from '@components/icons/Close.astro';
-import { CHAT_OPENERS } from '@lib/chat';
-
-const producers = await getCollection('producers');
-
-const threads = producers.slice(0, CHAT_OPENERS.length).map((producer, index) => ({
-    handle: producer.data.handle,
-    id: producer.id,
-    name: producer.data.name,
-    opener: CHAT_OPENERS[index],
-}));
 ---
 
 <aside
@@ -37,12 +25,17 @@ const threads = producers.slice(0, CHAT_OPENERS.length).map((producer, index) =>
         data-chat-window
     >
         <div class="chat__head">
-            <h2
-                id="chat-title"
-                class="label chat__eyebrow"
-            >
-                Messages
-            </h2>
+            <div class="chat__title">
+                <h2
+                    id="chat-title"
+                    class="chat__eyebrow label"
+                >
+                    Global
+                </h2>
+                <p class="chat__tally">
+                    <span data-chat-online>0 online</span>
+                </p>
+            </div>
             <button
                 class="chat__close"
                 data-chat-close
@@ -52,71 +45,55 @@ const threads = producers.slice(0, CHAT_OPENERS.length).map((producer, index) =>
                 <span class="sr-only">Close member chat</span>
             </button>
         </div>
-        <div class="chat__stack">
-            <div
-                class="chat__body"
-                data-chat-body
+        <ol
+            class="chat__log list-none"
+            aria-live="polite"
+            data-chat-log
+        />
+        <form
+            class="chat__form"
+            data-chat-form
+        >
+            <input
+                id="chat-message"
+                class="chat__field"
+                aria-label="Message"
+                autocomplete="off"
+                data-chat-field
+                name="message"
+                placeholder="Write a message"
+                type="text"
+            />
+            <button
+                class="btn btn--accent chat__send"
+                type="submit"
             >
-                <ul class="chat__threads list-none">
-                    {threads.map(thread => (
-                        <li>
-                            <button
-                                class="chat__thread"
-                                aria-pressed="false"
-                                data-chat-opener={thread.opener}
-                                data-chat-thread={thread.id}
-                                type="button"
-                            >
-                                {thread.name}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-                <ol
-                    class="chat__log list-none"
-                    aria-live="polite"
-                    data-chat-log
+                Send
+            </button>
+        </form>
+        <template data-chat-message>
+            <li class="chat__message">
+                <span
+                    class="chat__avatar"
+                    aria-hidden="true"
+                    data-chat-avatar
                 />
-                <form
-                    class="chat__form"
-                    data-chat-form
-                >
-                    <input
-                        id="chat-message"
-                        class="chat__field"
-                        aria-label="Message"
-                        autocomplete="off"
-                        data-chat-field
-                        name="message"
-                        placeholder="Write a message"
-                        type="text"
+                <span class="chat__meta">
+                    <span
+                        class="chat__author"
+                        data-chat-author
                     />
-                    <button
-                        class="btn btn--accent chat__send"
-                        type="submit"
-                    >
-                        Send
-                    </button>
-                </form>
-                <p class="chat__note">Messages live in this browser only.</p>
-            </div>
-            <div
-                class="chat__guard"
-                data-chat-guard
-            >
-                <div class="chat__guard-card">
-                    <p class="label chat__guard-eyebrow">Members only</p>
-                    <p class="chat__lede">Member messaging is for signed-in producers.</p>
-                    <a
-                        class="btn btn--accent chat__signin"
-                        data-chat-signin
-                        href="/sign-in"
-                    >
-                        Sign in
-                    </a>
-                </div>
-            </div>
-        </div>
+                    <span
+                        class="chat__time"
+                        data-chat-time
+                    />
+                </span>
+                <span
+                    class="chat__body"
+                    data-chat-text
+                />
+            </li>
+        </template>
     </dialog>
 </aside>
 
@@ -129,41 +106,54 @@ const threads = producers.slice(0, CHAT_OPENERS.length).map((producer, index) =>
         display: block;
     }
 
-    .chat__body {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        min-height: 0;
-        transition: opacity var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .chat__body--locked {
-        filter: grayscale(1);
-        opacity: 0.4;
-        pointer-events: none;
-        user-select: none;
-    }
-
-    .chat__bubble {
-        border: 1px solid var(--color-ink-20);
+    .chat__author {
         font-size: var(--text-sm);
-        padding: var(--space-2xs) var(--space-xs);
+        font-weight: 700;
+        line-height: 1.2;
     }
 
-    .chat__bubble--you {
-        background: var(--color-accent);
-        border-color: var(--color-accent);
-        color: var(--color-ink);
-        margin-inline-start: var(--space-2xl);
+    .chat__avatar {
+        align-items: center;
+        align-self: start;
+        border: 2px solid var(--color-ink);
+        border-radius: 9999px;
+        color: var(--color-surface-raised);
+        display: flex;
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        font-weight: 700;
+        grid-area: avatar;
+        height: 30px;
+        justify-content: center;
+        line-height: 1;
+        text-transform: uppercase;
+        user-select: none;
+        width: 30px;
+    }
+
+    .chat__body {
+        font-size: var(--text-sm);
+        grid-area: body;
+        line-height: 1.45;
+        overflow-wrap: anywhere;
     }
 
     .chat__close {
         align-items: center;
         display: inline-flex;
+        flex-shrink: 0;
         height: 50px;
         justify-content: center;
-        transition: color var(--duration-fast) var(--motion-ease-ui);
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
         width: 50px;
+    }
+
+    .chat__close:active {
+        transform: translateY(1px);
+    }
+
+    .chat__close:focus-visible {
+        outline-offset: -2px;
     }
 
     .chat__close:hover {
@@ -172,16 +162,22 @@ const threads = producers.slice(0, CHAT_OPENERS.length).map((producer, index) =>
 
     .chat__eyebrow {
         color: var(--color-accent-deep);
-        padding-left: var(--space-sm);
     }
 
     .chat__field {
+        background-color: var(--color-surface);
         border: 2px solid var(--color-ink);
         flex: 1;
         font-size: var(--text-sm);
         min-height: 50px;
         min-width: 0;
         padding-inline: var(--space-2xs);
+        transition: background-color var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .chat__field:focus-visible,
+    .chat__field:hover {
+        background-color: var(--color-surface-raised);
     }
 
     .chat__form {
@@ -192,39 +188,18 @@ const threads = producers.slice(0, CHAT_OPENERS.length).map((producer, index) =>
         padding: var(--space-sm);
     }
 
-    .chat__guard {
-        align-items: center;
-        display: flex;
-        inset: 0;
-        justify-content: center;
-        padding: var(--space-sm);
-        position: absolute;
-    }
-
-    .chat__guard-card {
-        background: var(--color-surface-raised);
-        border: 2px solid var(--color-ink);
-        box-shadow: var(--lift) var(--lift) 0 0 var(--color-ink);
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-sm);
-        padding: var(--space-sm);
-        width: min(260px, 100%);
-    }
-
-    .chat__guard-eyebrow {
-        color: var(--color-accent-deep);
-    }
-
     .chat__head {
         align-items: center;
         border-bottom: 1px solid var(--color-ink-20);
         display: flex;
         flex-shrink: 0;
+        gap: var(--space-2xs);
         justify-content: space-between;
+        padding-left: var(--space-sm);
     }
 
     .chat__launcher {
+        --focus-ring: var(--color-accent-light);
         align-items: center;
         background: var(--color-surface-inverse);
         border: 2px solid var(--color-ink);
@@ -235,18 +210,23 @@ const threads = producers.slice(0, CHAT_OPENERS.length).map((producer, index) =>
         inset: auto 0 var(--space-md) auto;
         justify-content: center;
         position: fixed;
-        transition: background var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui);
+        transition: background var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
         width: var(--launcher-size);
         z-index: var(--z-drawer);
     }
 
-    .chat__launcher:hover {
-        background: var(--color-accent);
-        color: var(--color-ink);
+    .chat__launcher:active {
+        transform: translateY(1px);
     }
 
-    .chat__lede {
-        font-size: var(--text-sm);
+    .chat__launcher:focus-visible {
+        outline-offset: -2px;
+    }
+
+    .chat__launcher:hover {
+        --focus-ring: var(--color-ink);
+        background: var(--color-accent);
+        color: var(--color-ink);
     }
 
     .chat__log {
@@ -260,68 +240,76 @@ const threads = producers.slice(0, CHAT_OPENERS.length).map((producer, index) =>
         padding: var(--space-sm);
     }
 
-    .chat__note {
-        border-top: 1px solid var(--color-ink-20);
-        color: var(--color-ink-muted);
-        flex-shrink: 0;
-        font-size: var(--text-2xs);
-        padding: var(--space-2xs) var(--space-sm) var(--space-sm);
+    .chat__message {
+        column-gap: var(--space-2xs);
+        display: grid;
+        grid-template-areas:
+            'avatar meta'
+            'avatar body';
+        grid-template-columns: 30px minmax(0, 1fr);
+        row-gap: var(--space-3xs);
+    }
+
+    .chat__message:has(+ .chat__message:not(.chat__message--grouped)) {
+        margin-bottom: calc(var(--space-sm) - var(--space-2xs));
+    }
+
+    .chat__message--grouped {
+        grid-template-areas: 'avatar body';
+    }
+
+    .chat__message--grouped .chat__avatar,
+    .chat__message--grouped .chat__meta {
+        display: none;
+    }
+
+    .chat__meta {
+        align-items: baseline;
+        column-gap: var(--space-2xs);
+        display: flex;
+        flex-wrap: wrap;
+        grid-area: meta;
+        min-width: 0;
     }
 
     .chat__send {
         height: 50px;
     }
 
-    .chat__signin {
-        height: 50px;
-    }
-
-    .chat__stack {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        min-height: 0;
-        position: relative;
-    }
-
-    .chat__thread {
-        font-family: var(--font-mono);
-        font-size: var(--text-2xs);
-        min-height: 50px;
-        padding-inline: var(--space-2xs);
-        text-transform: uppercase;
-        transition: color var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .chat__thread:hover {
-        color: var(--color-accent-deep);
-    }
-
-    .chat__thread[aria-pressed='true'] {
-        color: var(--color-accent-deep);
-        font-weight: 700;
-    }
-
-    .chat__threads {
-        border-bottom: 1px solid var(--color-ink-20);
+    .chat__tally {
+        align-items: center;
+        color: var(--color-ink-muted);
         display: flex;
         flex-shrink: 0;
-        flex-wrap: wrap;
-        gap: var(--space-2xs);
-        padding-inline: var(--space-sm);
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        line-height: 1;
+    }
+
+    .chat__time {
+        color: var(--color-ink-muted);
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+    }
+
+    .chat__title {
+        align-items: center;
+        display: flex;
+        gap: var(--space-sm);
+        min-width: 0;
     }
 
     .chat__window {
         background: var(--color-surface-raised);
         border: 2px solid var(--color-ink);
-        box-shadow: var(--lift) var(--lift) 0 0 var(--color-ink);
+        box-shadow: calc(-1 * var(--lift)) var(--lift) 0 0 var(--color-ink);
         color: var(--color-ink);
-        height: min(70vh, 560px);
-        inset: auto var(--launcher-rail) var(--space-md) auto;
+        height: min(72vh, 600px);
+        inset: auto var(--launcher-size) var(--space-md) auto;
         overflow: hidden;
         padding: 0;
         position: fixed;
-        width: min(340px, calc(100vw - var(--launcher-rail) - 2 * var(--space-md)));
+        width: min(340px, calc(100vw - var(--launcher-size) - 2 * var(--space-md)));
         z-index: var(--z-drawer);
     }
 
@@ -332,21 +320,42 @@ const threads = producers.slice(0, CHAT_OPENERS.length).map((producer, index) =>
 </style>
 
 <script>
-    import { CHAT_PREVIEW, closeChat, getChatState, getMessages, onChatChange, openChat, selectThread, sendChatMessage } from '@lib/chat';
-    import { getSession, onSessionChange } from '@lib/session';
-    import { registerPageScript } from '@lib/utils';
+    import { PALETTE } from '@lib/constants';
+    import { ROOM_MEMBERS, closeChat, getChatState, getMessages, getOnlineCount, onChatChange, openChat, seedRoom, sendChatMessage } from '@lib/chat';
+    import { formatTime, getInitials, registerPageScript, setText } from '@lib/utils';
+
+    const GROUP_WINDOW_MS = 300_000;
 
     const LIVE_RESET_DELAY = 200;
 
-    let renderedKey: string | undefined;
+    const MEMBER_COLORS = new Map<string, string>(ROOM_MEMBERS.map((member, index) => [member.name, PALETTE[(index + 1) % PALETTE.length]]));
+
+    const TALLY_INTERVAL_MS = 60_000;
+
+    let tallyTimer: number | undefined;
     let unsubscribeChat: (() => void) | undefined;
-    let unsubscribeSession: (() => void) | undefined;
 
-    function activeThread() {
-        const id = getChatState().threadId;
-        const buttons = document.querySelectorAll<HTMLButtonElement>('[data-chat-thread]');
+    function buildMessage(message: ChatMessage, previous: ChatMessage | undefined) {
+        const template = document.querySelector<HTMLTemplateElement>('[data-chat-message]');
 
-        return Array.from(buttons).find(button => button.dataset.chatThread === id) ?? buttons[0] ?? null;
+        if (!template) return null;
+
+        const fragment = template.content.cloneNode(true) as DocumentFragment;
+        const avatar = fragment.querySelector<HTMLElement>('[data-chat-avatar]');
+        const item = fragment.querySelector<HTMLElement>('.chat__message');
+
+        if (!avatar || !item) return null;
+
+        const grouped = previous !== undefined && previous.name === message.name && message.sentAt - previous.sentAt < GROUP_WINDOW_MS;
+
+        item.classList.toggle('chat__message--grouped', grouped);
+        avatar.style.background = message.self ? PALETTE[0] : (MEMBER_COLORS.get(message.name) ?? PALETTE[PALETTE.length - 1]);
+        setText(avatar, message.self ? message.name : getInitials(message.name));
+        setText(fragment.querySelector('[data-chat-author]'), message.name);
+        setText(fragment.querySelector('[data-chat-time]'), formatTime(new Date(message.sentAt)));
+        setText(fragment.querySelector('[data-chat-text]'), message.body);
+
+        return item;
     }
 
     function closeWindow() {
@@ -397,21 +406,14 @@ const threads = producers.slice(0, CHAT_OPENERS.length).map((producer, index) =>
     async function handleSubmit(event: SubmitEvent) {
         event.preventDefault();
 
-        if (getSession() === null) return;
-
         const field = document.querySelector<HTMLInputElement>('[data-chat-field]');
-        const thread = activeThread();
 
-        if (!field || !thread?.dataset.chatThread) return;
+        if (!field) return;
 
         const body = field.value;
 
         field.value = '';
-        await sendChatMessage(thread.dataset.chatThread, body);
-    }
-
-    function handleThreadClick(button: HTMLButtonElement) {
-        if (button.dataset.chatThread) selectThread(button.dataset.chatThread);
+        await sendChatMessage(body);
     }
 
     function initChat(signal: AbortSignal) {
@@ -426,9 +428,7 @@ const threads = producers.slice(0, CHAT_OPENERS.length).map((producer, index) =>
 
         aside.classList.add('is-ready');
         unsubscribeChat?.();
-        unsubscribeSession?.();
         unsubscribeChat = onChatChange(render);
-        unsubscribeSession = onSessionChange(render);
         signal.addEventListener('abort', teardown, { once: true });
 
         aside.addEventListener('keydown', handleKeydown, { signal });
@@ -437,9 +437,10 @@ const threads = producers.slice(0, CHAT_OPENERS.length).map((producer, index) =>
         form.addEventListener('submit', event => void handleSubmit(event), { signal });
         launcher.addEventListener('click', handleLaunch, { signal });
 
-        document.querySelectorAll<HTMLButtonElement>('[data-chat-thread]').forEach((button) => {
-            button.addEventListener('click', () => handleThreadClick(button), { signal });
-        });
+        seedRoom();
+
+        window.clearInterval(tallyTimer);
+        tallyTimer = window.setInterval(renderTally, TALLY_INTERVAL_MS);
 
         if (getChatState().open) openWindow(false);
 
@@ -457,11 +458,7 @@ const threads = producers.slice(0, CHAT_OPENERS.length).map((producer, index) =>
         document.querySelector<HTMLElement>('[data-chat-launcher]')?.setAttribute('aria-expanded', 'true');
 
         if (moveFocus) {
-            const target = getSession() !== null
-                ? field
-                : dialog.querySelector<HTMLElement>('[data-chat-signin]');
-
-            (target ?? dialog.querySelector<HTMLElement>('[data-chat-close]'))?.focus();
+            (field ?? dialog.querySelector<HTMLElement>('[data-chat-close]'))?.focus();
 
             return;
         }
@@ -474,56 +471,41 @@ const threads = producers.slice(0, CHAT_OPENERS.length).map((producer, index) =>
     }
 
     function render() {
-        const body = document.querySelector<HTMLElement>('[data-chat-body]');
-        const guard = document.querySelector<HTMLElement>('[data-chat-guard]');
         const log = document.querySelector<HTMLElement>('[data-chat-log]');
-        const signedIn = getSession() !== null;
-        const thread = activeThread();
 
-        if (!body || !guard || !log) return;
+        renderTally();
 
-        body.classList.toggle('chat__body--locked', !signedIn);
-        body.toggleAttribute('inert', !signedIn);
-        guard.hidden = signedIn;
-
-        document.querySelectorAll<HTMLButtonElement>('[data-chat-thread]').forEach((button) => {
-            button.setAttribute('aria-pressed', String(button === thread));
-        });
-
-        if (!thread?.dataset.chatThread) return;
-
-        const key = `${thread.dataset.chatThread}:${String(signedIn)}`;
-        const messages = signedIn ? getMessages(thread.dataset.chatThread) : CHAT_PREVIEW;
-
-        renderLog(log, key, thread.dataset.chatOpener ?? '', messages);
+        if (log) renderLog(log, getMessages());
     }
 
-    function renderLog(log: HTMLElement, key: string, opener: string, messages: ChatMessage[]) {
-        const entries = [{ author: 'member' as const, body: opener, sentAt: 0 }, ...messages];
-        const stale = renderedKey !== key || !log.children.length || log.children.length > entries.length;
+    function renderLog(log: HTMLElement, messages: ChatMessage[]) {
+        const stale = !log.children.length || log.children.length > messages.length;
 
         if (stale) {
             log.setAttribute('aria-live', 'off');
             log.replaceChildren();
-            renderedKey = key;
             window.setTimeout(() => log.setAttribute('aria-live', 'polite'), LIVE_RESET_DELAY);
         }
 
-        entries.slice(log.children.length).forEach((message) => {
-            const item = document.createElement('li');
+        const start = log.children.length;
 
-            item.className = message.author === 'you' ? 'chat__bubble chat__bubble--you' : 'chat__bubble';
-            item.textContent = message.body;
-            log.append(item);
+        messages.slice(start).forEach((message, offset) => {
+            const item = buildMessage(message, messages[start + offset - 1]);
+
+            if (item) log.append(item);
         });
         log.scrollTop = log.scrollHeight;
     }
 
+    function renderTally() {
+        setText(document.querySelector('[data-chat-online]'), `${getOnlineCount(Date.now())} online`);
+    }
+
     function teardown() {
+        window.clearInterval(tallyTimer);
         unsubscribeChat?.();
-        unsubscribeSession?.();
+        tallyTimer = undefined;
         unsubscribeChat = undefined;
-        unsubscribeSession = undefined;
     }
 
     registerPageScript(initChat);

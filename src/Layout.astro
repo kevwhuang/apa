@@ -7,6 +7,7 @@ import AudioSidebar from '@sections/shared/AudioSidebar.astro';
 import ChatWindow from '@sections/shared/ChatWindow.astro';
 import Footer from '@sections/shared/Footer.astro';
 import Navbar from '@sections/shared/Navbar.astro';
+import Toaster from '@sections/shared/Toaster.astro';
 import { BRAND, BRAND_ICONS, BRAND_OG } from '@lib/brand';
 import { LINKS, STORAGE } from '@lib/constants';
 
@@ -43,7 +44,7 @@ const bootstrap = `(function () {
     const REDUCE = '(prefers-reduced-motion: reduce)';
     const WATCHDOG_MS = 2_500;
     const root = document.documentElement;
-    const state = { arm: arm, armedClass: ARMED_CLASS, disarm: disarm, expired: false, live: live };
+    const state = { arm, armedClass: ARMED_CLASS, disarm, expired: false, live };
 
     let watchdog;
 
@@ -83,6 +84,31 @@ const bootstrap = `(function () {
     document.addEventListener('astro:after-swap', arm);
     document.addEventListener('astro:before-swap', preArm);
     window.addEventListener('beforeprint', disarm);
+})();
+
+(function () {
+    let navigation = 'push';
+
+    function anchor() {
+        const target = document.getElementById(window.location.hash.slice(1));
+
+        if (target) target.scrollIntoView({ behavior: 'instant', block: 'start' });
+    }
+
+    function settle() {
+        const state = window.history.state;
+
+        if (navigation !== 'traverse') return anchor();
+        if (state && typeof state.scrollY === 'number') window.scrollTo({ behavior: 'instant', left: state.scrollX, top: state.scrollY });
+    }
+
+    function track(event) {
+        navigation = event.navigationType;
+    }
+
+    document.addEventListener('DOMContentLoaded', settle, { once: true });
+    document.addEventListener('astro:before-preparation', track);
+    document.addEventListener('astro:page-load', settle);
 })();`;
 ---
 
@@ -152,6 +178,7 @@ const bootstrap = `(function () {
         </div>
         <AudioSidebar />
         <ChatWindow />
+        <Toaster />
     </body>
 </html>
 

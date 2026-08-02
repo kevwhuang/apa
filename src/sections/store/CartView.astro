@@ -27,7 +27,7 @@ const catalog = toCatalog(await getCollection('products'));
     aria-label="Cart contents"
     data-catalog={JSON.stringify(catalog)}
 >
-    <div class="cart__grid grid grid-cols-1 gap-12 md:grid-cols-[1.5fr_1fr]">
+    <div class="cart__grid grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <div class="cart__main flex flex-col gap-6">
             <aside
                 class="cart__notice slab slab--card flex flex-col gap-4"
@@ -79,7 +79,7 @@ const catalog = toCatalog(await getCollection('products'));
             data-cart-summary
         >
             <h2 class="label mb-4 text-ink-muted">Summary</h2>
-            <dl class="space-y-2 font-mono text-[14px]">
+            <dl class="space-y-2 font-mono text-sm">
                 <div class="flex justify-between gap-3">
                     <dt>Subtotal</dt>
                     <dd data-subtotal>$0.00</dd>
@@ -119,7 +119,7 @@ const catalog = toCatalog(await getCollection('products'));
     <template data-cart-row>
         <li class="slab slab--card flex gap-5">
             <div
-                class="flex items-center justify-center overflow-hidden relative shrink-0 h-28 w-28"
+                class="flex items-center justify-center overflow-hidden relative shrink-0 h-14 w-14 md:h-28 md:w-28"
                 aria-hidden="true"
                 data-row-tile
             >
@@ -146,7 +146,7 @@ const catalog = toCatalog(await getCollection('products'));
                 <div class="flex flex-wrap items-center gap-4 mt-2">
                     <div class="inline-flex items-center border-2 border-ink">
                         <button
-                            class="active:bg-ink active:text-ink-inverse aria-disabled:cursor-not-allowed aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-[50px] w-[50px] font-bold transition"
+                            class="active:bg-ink active:text-ink-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-ink aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-[50px] w-[50px] font-bold transition-colors"
                             data-row-decrease
                             type="button"
                         >
@@ -157,7 +157,7 @@ const catalog = toCatalog(await getCollection('products'));
                             data-row-quantity
                         />
                         <button
-                            class="active:bg-ink active:text-ink-inverse aria-disabled:cursor-not-allowed aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-[50px] w-[50px] font-bold transition"
+                            class="active:bg-ink active:text-ink-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-ink aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-[50px] w-[50px] font-bold transition-colors"
                             data-row-increase
                             type="button"
                         >
@@ -165,7 +165,7 @@ const catalog = toCatalog(await getCollection('products'));
                         </button>
                     </div>
                     <button
-                        class="action-text active:text-accent-deep flex items-center min-h-[50px] px-1 text-ink-muted transition-colors"
+                        class="action-text hover:text-accent-deep flex items-center min-h-[50px] px-1 text-ink-muted transition-colors"
                         data-row-remove
                         type="button"
                     >
@@ -180,7 +180,7 @@ const catalog = toCatalog(await getCollection('products'));
         </li>
     </template>
     <template data-cart-issue>
-        <li class="flex gap-2 text-[14px] text-ink-muted">
+        <li class="flex gap-2 text-sm text-ink-muted">
             <span
                 class="font-bold text-accent-deep"
                 aria-hidden="true"
@@ -193,22 +193,8 @@ const catalog = toCatalog(await getCollection('products'));
 </section>
 
 <style>
-    .cart__grid:has([data-cart-summary][hidden]) > .cart__main {
-        grid-column: 1 / -1;
-    }
-
-    .cart__issues {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-3xs);
-    }
-
-    .cart__notice {
-        border-left: 2px solid var(--color-accent-deep);
-    }
-
     .cart-checkout {
-        transition: background var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease, transform var(--duration-fast) ease;
+        transition: background var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .cart-checkout[aria-disabled='true'] {
@@ -232,13 +218,28 @@ const catalog = toCatalog(await getCollection('products'));
     .cart-items:empty {
         display: none;
     }
+
+    .cart__grid:has([data-cart-summary][hidden]) > .cart__main {
+        grid-column: 1 / -1;
+    }
+
+    .cart__issues {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3xs);
+    }
+
+    .cart__notice {
+        border-left: 2px solid var(--color-accent-deep);
+    }
 </style>
 
 <script>
-    import { COMMERCE, PALETTE } from '@lib/constants';
+    import { CARD_COLORS, COMMERCE } from '@lib/constants';
     import { formatPrice, formatVariant, getStockLabel, parseCatalog, registerPageScript, setText } from '@lib/utils';
     import { getItems, onChange, reconcile, remove, setQuantity, totals } from '@lib/store';
     import { renderIssueList } from '@lib/forms';
+    import { toast } from '@lib/toasts';
 
     interface FocusMark {
         control: string;
@@ -247,8 +248,6 @@ const catalog = toCatalog(await getCollection('products'));
     }
 
     const ROW_CONTROLS = ['[data-row-decrease]', '[data-row-increase]', '[data-row-remove]'];
-
-    const cardColors = PALETTE.slice(0, 4);
 
     let catalog: CatalogEntry[] = [];
 
@@ -291,7 +290,7 @@ const catalog = toCatalog(await getCollection('products'));
 
     function handleRemoveClick(index: number, item: CartItem) {
         remove(index);
-        announce(`Removed ${item.title} from your cart.`);
+        toast(`Removed ${item.title} from your cart.`, 'info');
     }
 
     function initCartView(signal: AbortSignal) {
@@ -354,7 +353,7 @@ const catalog = toCatalog(await getCollection('products'));
         setText(fragment.querySelector('[data-row-title]'), item.title);
         setText(fragment.querySelector('[data-row-variant]'), variant.length > 0 ? variant : 'One option');
 
-        if (tile) tile.style.background = cardColors[index % cardColors.length];
+        if (tile) tile.style.background = CARD_COLORS[index % CARD_COLORS.length];
 
         if (stock && stockLabel.length > 0) {
             stock.textContent = stockLabel;

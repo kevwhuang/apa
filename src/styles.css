@@ -13,11 +13,11 @@
         text-transform: uppercase;
     }
 
-    .action-text:active {
+    :is(a, button, summary).action-text:active {
         transform: translateY(1px);
     }
 
-    .action-text:hover {
+    :is(a, button, summary).action-text:hover {
         color: var(--color-accent-deep);
     }
 
@@ -34,7 +34,7 @@
         gap: var(--space-2xs);
         justify-content: center;
         letter-spacing: 0.025em;
-        min-height: 50px;
+        min-height: var(--control-size);
         padding: 0 24px;
         text-transform: uppercase;
         transition: background var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
@@ -57,6 +57,16 @@
     .btn:hover {
         background: var(--btn-fill);
         color: var(--btn-text);
+    }
+
+    .btn[aria-busy='true']::after {
+        animation: 0.7s var(--motion-ease-linear) infinite spinner__turn;
+        border: 2px solid transparent;
+        border-radius: 9999px;
+        border-top-color: currentColor;
+        content: '';
+        height: 1em;
+        width: 1em;
     }
 
     .btn--accent {
@@ -102,7 +112,7 @@
         font-weight: 700;
         justify-content: center;
         letter-spacing: 0.025em;
-        min-height: 50px;
+        min-height: var(--control-size);
         padding: 0 var(--space-sm);
         text-transform: uppercase;
         transition: background var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui);
@@ -302,11 +312,16 @@
         font-size: var(--text-2xs);
         inset: auto auto 100% var(--space-sm);
         letter-spacing: 0.04em;
-        min-height: 50px;
+        min-height: var(--control-size);
         padding-inline: var(--space-sm);
         position: fixed;
         text-transform: uppercase;
+        transition: background var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
         z-index: calc(var(--z-drawer) + 1);
+    }
+
+    .skip-link:active {
+        transform: translateY(1px);
     }
 
     .skip-link:focus {
@@ -318,6 +333,7 @@
     }
 
     .slab {
+        --focus-ring: var(--color-accent-deep);
         --slab-fill: var(--color-surface);
         --slab-level: var(--z-page);
         --slab-line: var(--color-ink);
@@ -373,11 +389,12 @@
         z-index: -2;
     }
 
+    .slab--cut.slab--hover:active,
     .slab--cut.slab--hover:hover {
         box-shadow: none;
     }
 
-    .slab--cut.slab--hover:hover::before {
+    .slab--cut.slab--hover:hover:not(:active)::before {
         inset: 0 calc(-1 * (var(--slab-level) + 1) * var(--lift)) calc(-1 * (var(--slab-level) + 1) * var(--lift)) 0;
     }
 
@@ -385,7 +402,12 @@
         transition: box-shadow var(--duration-base) var(--motion-ease-entrance), translate var(--duration-base) var(--motion-ease-entrance);
     }
 
-    .slab--hover:hover {
+    .slab--hover:active {
+        box-shadow: calc(var(--slab-level) * var(--lift)) calc(var(--slab-level) * var(--lift)) 0 0 var(--slab-shadow);
+        translate: 0 0;
+    }
+
+    .slab--hover:hover:not(:active) {
         box-shadow: calc((var(--slab-level) + 1) * var(--lift)) calc((var(--slab-level) + 1) * var(--lift)) 0 0 var(--slab-shadow);
         translate: calc(-0.5 * var(--lift)) calc(-0.5 * var(--lift));
     }
@@ -410,6 +432,7 @@
     }
 
     .slab--well {
+        --focus-ring: var(--color-accent-light);
         --slab-fill: var(--color-surface-inverse);
         --slab-level: var(--z-ground);
         --slab-rule: 0;
@@ -427,6 +450,22 @@
     .slab--well .slab {
         --slab-line: var(--color-ink-inverse);
         --slab-shadow: var(--color-ink-inverse);
+    }
+
+    .slab--well .spinner {
+        border-color: var(--color-ink-inverse-10);
+        border-top-color: currentColor;
+    }
+
+    .spinner {
+        animation: 0.7s var(--motion-ease-linear) infinite spinner__turn;
+        border: 2px solid var(--color-ink-20);
+        border-radius: 9999px;
+        border-top-color: currentColor;
+        display: inline-block;
+        flex: 0 0 auto;
+        height: 1em;
+        width: 1em;
     }
 
     .stage {
@@ -532,6 +571,12 @@
     @media (max-width: 768px) {
         :root {
             --launcher-rail: 0px;
+        }
+    }
+
+    @keyframes spinner__turn {
+        to {
+            rotate: 1turn;
         }
     }
 }

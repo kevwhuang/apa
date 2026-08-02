@@ -1,5 +1,5 @@
 ---
-title: Producer Bash · March
+title: Bash · March
 edition: March
 date: 2026-03-21T13:30:00-05:00
 end: 2026-03-21T18:00:00-05:00

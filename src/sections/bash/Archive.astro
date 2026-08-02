@@ -22,7 +22,8 @@ const past = editions.filter(edition => edition.data.status === 'past').sort((a,
         </SectionHead>
         <ul
             class="bash-archive list-none"
-            data-motion-stagger="unfold"
+            data-motion-from="center"
+            data-motion-stagger="flip"
         >
             {past.map(edition => (
                 <li>
@@ -71,6 +72,7 @@ const past = editions.filter(edition => edition.data.status === 'past').sort((a,
     .bash-archive > li {
         display: grid;
         grid-row: span 5;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
         padding-bottom: var(--space-md);
     }
@@ -79,6 +81,7 @@ const past = editions.filter(edition => edition.data.status === 'past').sort((a,
         align-content: start;
         display: grid;
         grid-row: span 5;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
     }
 

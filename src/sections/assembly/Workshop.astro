@@ -1,12 +1,13 @@
 ---
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import SectionHead from '@components/shared/SectionHead.astro';
 import { PALETTE } from '@lib/constants';
+
+const INDEX_PAD = 2;
 
 const SESSION_FILES = [
     { description: 'Every chart from the session, annotated after the fact.', meta: 'PDF \u00b7 24 pages', title: 'Workshop slides' },
     { description: 'The bus chain Rae builds live, saved out for six DAWs.', meta: 'ZIP \u00b7 6 presets', title: 'Low-end reference chain' },
-    { description: 'The demo session bounced at the start and the end of the night.', meta: 'ZIP \u00b7 210 MB', title: 'Before-and-after stems' },
+    { description: 'The session bounced at the start and the end of the night.', meta: 'ZIP \u00b7 210 MB', title: 'Before-and-after stems' },
 ] as const;
 ---
 
@@ -14,31 +15,47 @@ const SESSION_FILES = [
     class="stage stage--assembly stage--tight border-b-2 border-ink"
     aria-labelledby="workshop-title"
 >
-    <div class="mark">
-        <SectionHead
-            class="font-extrabold font-sans text-4xl tracking-tight"
-            eyebrow="Next workshop / August"
-            headingId="workshop-title"
+    <div
+        class="slab slab--cut workshop"
+        data-motion="unfold"
+    >
+        <div
+            class="mark slab slab--accent workshop__marker"
+            data-motion="stamp"
+        >
+            <p class="label workshop__flag">Next workshop</p>
+            <p
+                class="label workshop__edition"
+                data-placeholder
+            >
+                Workshop 08
+            </p>
+            <p class="workshop__stamp font-bold font-mono leading-none text-4xl uppercase">
+                August
+            </p>
+        </div>
+        <h2
+            id="workshop-title"
+            class="workshop__title font-extrabold font-sans leading-[0.95] text-5xl tracking-[-0.03em]"
         >
             Low end, under control
-        </SectionHead>
-        <div class="grid grid-cols-1 gap-12 md:grid-cols-[0.9fr_1.1fr]">
-            <div>
-                <PlaceholderTile
-                    class="slab slab--bare slab--card aspect-[4/3] mb-6"
-                    color={PALETTE[1]}
-                    data-motion="unfold"
-                    label="08"
-                    labelClass="leading-none text-[96px] text-surface-raised/80 [text-shadow:2px_2px_0_var(--color-ink-20)]"
-                >
-                    <div
-                        class="label absolute bottom-0 inset-x-0 p-3 bg-linear-to-t from-ink-70 text-ink-inverse to-transparent"
-                        data-placeholder
+        </h2>
+        <div class="grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+            <div class="workshop__aside">
+                <div class="slab slab--card">
+                    <PlaceholderTile
+                        class="slab slab--bare slab--card aspect-[4/3] mb-6"
+                        color={PALETTE[1]}
+                        label="08"
+                        labelClass="leading-none text-[96px] text-surface-raised/80 [text-shadow:2px_2px_0_var(--color-ink-20)]"
                     >
-                        Workshop 08 / Low end
-                    </div>
-                </PlaceholderTile>
-                <div data-motion="rise">
+                        <div
+                            class="label absolute bottom-0 inset-x-0 p-3 bg-linear-to-t from-ink-70 text-ink-inverse to-transparent"
+                            data-placeholder
+                        >
+                            Workshop 08 / Low end
+                        </div>
+                    </PlaceholderTile>
                     <p class="label mb-2 text-accent-deep">Presented by</p>
                     <p
                         class="font-extrabold font-sans text-xl tracking-tight"
@@ -57,35 +74,22 @@ const SESSION_FILES = [
                         data-placeholder
                     >
                         Rae has spent a decade mixing club records out of an East Austin control
-                        room and teaches low end the way she learned it &mdash; by breaking a good
-                        mix in front of you and putting it back together.
+                        room and teaches low end the way she learned it &mdash; by breaking a
+                        good mix in front of you and putting it back together.
                     </p>
                 </div>
             </div>
             <div>
-                <p
-                    class="leading-relaxed text-base text-ink-muted"
-                    data-motion="rise"
-                >
+                <p class="leading-relaxed text-lmd text-ink-muted">
                     Sub that swallows the kick. Basslines that vanish on a phone speaker. Mixes
                     that fall apart the moment a real system turns on. This session takes the
                     bottom octaves apart and puts them back in order.
                 </p>
-                <p
-                    class="mt-4 leading-relaxed text-smd text-ink-muted"
-                    data-motion="rise"
-                >
+                <p class="mt-4 leading-relaxed text-smd text-ink-muted">
                     Rae works through a live session from the roster &mdash; carving the
                     kick-and-bass pocket, choosing what carries the weight, and checking the
                     result on the worst speaker in the building. Bring headphones to follow along
                     in your own project.
-                </p>
-                <p
-                    class="mt-4 text-sm text-ink-subtle"
-                    data-motion="rise"
-                >
-                    Rae and this session are invented stand-ins showing how a workshop night reads
-                    &mdash; the real August presenter and files land here once they are booked.
                 </p>
                 <div class="mt-10">
                     <p class="label mb-2 text-ink-muted">Session files</p>
@@ -93,11 +97,17 @@ const SESSION_FILES = [
                         class="workshop__list list-none"
                         data-motion-stagger="rise"
                     >
-                        {SESSION_FILES.map(file => (
+                        {SESSION_FILES.map((file, index) => (
                             <li class="workshop__row">
+                                <p
+                                    class="label workshop__index"
+                                    aria-hidden="true"
+                                >
+                                    {String(index + 1).padStart(INDEX_PAD, '0')}
+                                </p>
                                 <div class="flex flex-col gap-1">
                                     <a
-                                        class="workshop__link hover:text-accent-deep font-bold font-sans underline decoration-2 decoration-accent underline-offset-4 transition-colors"
+                                        class="workshop__link hover:text-accent-deep decoration-2 decoration-accent font-bold font-sans underline underline-offset-4"
                                         href="/resources"
                                     >
                                         {file.title}
@@ -105,7 +115,7 @@ const SESSION_FILES = [
                                     <p class="text-sm text-ink-muted">{file.description}</p>
                                 </div>
                                 <p
-                                    class="label shrink-0 text-ink-subtle"
+                                    class="label workshop__meta text-ink-subtle"
                                     data-placeholder
                                 >
                                     {file.meta}
@@ -126,9 +136,44 @@ const SESSION_FILES = [
 </section>
 
 <style>
+    .workshop {
+        --slab-fill: var(--color-surface-sunken);
+        --slab-level: var(--z-lift);
+        --slab-rule: 2px;
+        padding: var(--space-2xl);
+    }
+
+    .workshop__aside {
+        align-self: start;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .workshop__edition {
+        font-weight: 700;
+    }
+
+    .workshop__flag {
+        background-color: var(--color-ink);
+        color: var(--color-ink-inverse);
+        font-weight: 700;
+        padding: var(--space-2xs) var(--space-xs);
+    }
+
+    .workshop__index {
+        color: var(--color-accent-deep);
+        font-weight: 700;
+    }
+
     .workshop__link {
         display: inline-block;
         padding-block: var(--space-sm);
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .workshop__link:active {
+        transform: translateY(1px);
     }
 
     .workshop__list {
@@ -136,18 +181,52 @@ const SESSION_FILES = [
         flex-direction: column;
     }
 
+    .workshop__marker {
+        --slab-level: var(--z-ground);
+        --slab-rule: 2px;
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-sm) var(--space-md);
+        justify-content: space-between;
+        margin-bottom: var(--space-lg);
+    }
+
     .workshop__row {
         align-items: baseline;
         border-top: 1px solid var(--color-ink-20);
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-sm);
-        justify-content: space-between;
-        padding-block: var(--space-md);
+        display: grid;
+        gap: var(--space-2xs) var(--space-sm);
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        padding-block: var(--space-xs);
     }
 
     .workshop__row:first-child {
         border-top: 0;
         padding-top: 0;
+    }
+
+    .workshop__stamp {
+        flex-basis: 100%;
+        rotate: calc(var(--tilt-unit) * -3);
+        transform-origin: 0 50%;
+    }
+
+    .workshop__title {
+        margin-bottom: var(--space-lg);
+    }
+
+    @media (max-width: 768px) {
+        .workshop {
+            padding: var(--space-lg);
+        }
+
+        .workshop__meta {
+            grid-column: 2;
+        }
+
+        .workshop__row {
+            grid-template-columns: auto minmax(0, 1fr);
+        }
     }
 </style>

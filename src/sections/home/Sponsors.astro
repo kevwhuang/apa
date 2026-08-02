@@ -5,7 +5,7 @@ import { SPONSORS, SPONSOR_LOGO_WIDTH } from '@lib/constants';
 ---
 
 <section
-    class="sponsors-stage stage stage--tight border-b-2 border-ink"
+    class="stage border-b-2 border-ink"
     aria-labelledby="sponsors-title"
 >
     <div>
@@ -23,6 +23,7 @@ import { SPONSORS, SPONSOR_LOGO_WIDTH } from '@lib/constants';
         </p>
         <ul
             class="grid grid-cols-2 gap-px mb-8 border-2 border-ink list-none bg-ink"
+            data-motion-from="center"
             data-motion-stagger="stamp"
         >
             {SPONSORS.map(sponsor => (
@@ -38,7 +39,7 @@ import { SPONSORS, SPONSOR_LOGO_WIDTH } from '@lib/constants';
             ))}
         </ul>
         <p
-            class="font-mono text-xs text-center uppercase text-ink-muted"
+            class="font-mono text-center text-xs uppercase text-ink-muted"
             data-motion="rise"
         >
             Become a sponsor &mdash;&#32;
@@ -51,9 +52,3 @@ import { SPONSORS, SPONSOR_LOGO_WIDTH } from '@lib/constants';
         </p>
     </div>
 </section>
-
-<style>
-    .sponsors-stage.stage {
-        --stage-pad-top: calc(var(--section-pad-sm) + var(--drift-unit));
-    }
-</style>

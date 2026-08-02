@@ -1,5 +1,5 @@
 ---
-title: Producer Bash · November
+title: Bash · November
 edition: November
 date: 2026-11-21T13:30:00-06:00
 end: 2026-11-21T18:00:00-06:00

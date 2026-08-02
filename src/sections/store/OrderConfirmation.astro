@@ -4,7 +4,7 @@ import PageHead from '@components/shared/PageHead.astro';
 ---
 
 <section
-    class="stage stage--narrow"
+    class="stage stage--narrow stage--tight"
     aria-labelledby="order-title"
 >
     <div class="text-center">
@@ -61,18 +61,17 @@ import PageHead from '@components/shared/PageHead.astro';
         hidden
     >
         <p class="text-center text-lmd text-ink-muted">
-            A receipt would have gone to&#32;
+            A receipt is on its way to&#32;
             <span
                 class="font-mono wrap-break-word text-smd"
                 data-order-email
-            />&#32;
-            &mdash; nothing was sent.
+            />.
         </p>
         <ul
             class="order__list scroll-slot border-2 border-ink list-none"
             data-order-list
         />
-        <dl class="slab slab--sunk space-y-1.5 font-mono text-[14px]">
+        <dl class="slab slab--sunk space-y-1.5 font-mono text-sm">
             <div class="flex justify-between gap-3">
                 <dt>Subtotal</dt>
                 <dd data-order-subtotal>$0.00</dd>

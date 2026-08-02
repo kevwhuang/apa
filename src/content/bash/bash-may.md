@@ -1,5 +1,5 @@
 ---
-title: Producer Bash · May
+title: Bash · May
 edition: May
 date: 2026-05-16T13:30:00-05:00
 end: 2026-05-16T18:00:00-05:00

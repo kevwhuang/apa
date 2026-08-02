@@ -24,7 +24,7 @@ const past = events
         </SectionHead>
         <ol
             class="assembly-archive list-none"
-            data-motion-stagger="rise"
+            data-motion-stagger="flip"
         >
             {past.map((event, index) => (
                 <li>
@@ -77,6 +77,7 @@ const past = events
     .assembly-archive > li {
         display: grid;
         grid-row: span 4;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
         padding-bottom: var(--space-lg);
     }
@@ -85,6 +86,7 @@ const past = events
         align-content: start;
         display: grid;
         grid-row: span 4;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
     }
 

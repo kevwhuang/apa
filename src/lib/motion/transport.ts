@@ -9,7 +9,15 @@ const VELOCITY_PRECISION = 4;
 
 const VELOCITY_PROPERTY = '--scroll-velocity';
 
+let decay: gsap.core.Tween | undefined;
+
+let trigger: ScrollTrigger | undefined;
+
 export function clearTransport(): void {
+    decay?.kill();
+    trigger?.kill();
+    decay = undefined;
+    trigger = undefined;
     document.documentElement.style.removeProperty(VELOCITY_PROPERTY);
 }
 
@@ -22,12 +30,12 @@ export function initTransport(): void {
         root.style.setProperty(VELOCITY_PROPERTY, velocity.value.toFixed(VELOCITY_PRECISION));
     }
 
-    ScrollTrigger.create({
+    trigger = ScrollTrigger.create({
         end: 'max',
         onUpdate(self) {
             velocity.value = gsap.utils.clamp(-VELOCITY_LIMIT, VELOCITY_LIMIT, self.getVelocity() / tokens.velocityCap);
             writeVelocity();
-            gsap.to(velocity, {
+            decay = gsap.to(velocity, {
                 duration: tokens.duration.slow,
                 ease: tokens.ease.standard,
                 onUpdate: writeVelocity,
