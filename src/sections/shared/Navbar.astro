@@ -15,9 +15,10 @@ const { hasHero = false } = Astro.props;
 ---
 
 <header
-    class:list={['site-header', hasHero && 'site-header--overlay']}
+    class:list={['site-header', hasHero && 'site-header--overlay', 'is-instant']}
     data-has-hero={hasHero ? 'true' : undefined}
     style={`--mark-compact: ${BRAND_SIZES.markNavCompact}px`}
+    transition:animate="none"
 >
     <div class="stage stage--flush h-full">
         <div class="site-header__bar">
@@ -174,6 +175,7 @@ const { hasHero = false } = Astro.props;
     }
 
     .site-header {
+        --control-compact: 40px;
         --nav-gap: clamp(12px, calc(-28.2px + 3.9216vw), 22px);
         --nav-pad: clamp(8px, calc(-8.1px + 1.5686vw), 12px);
         background: var(--color-surface);
@@ -203,6 +205,10 @@ const { hasHero = false } = Astro.props;
 
     .site-header.is-hidden {
         transform: translateY(-100%);
+    }
+
+    .site-header.is-instant {
+        transition: none;
     }
 
     .site-header__bar {
@@ -272,8 +278,8 @@ const { hasHero = false } = Astro.props;
         transform: translateY(1px);
     }
 
-    .site-nav__item:hover,
-    .site-nav__item:focus-visible {
+    .site-nav__item:focus-visible,
+    .site-nav__item:hover {
         background: var(--nav-item-hover-bg);
         color: var(--nav-item-hover-ink);
     }
@@ -284,8 +290,8 @@ const { hasHero = false } = Astro.props;
         font-weight: 700;
     }
 
-    .site-nav__item[aria-current]:hover,
-    .site-nav__item[aria-current]:focus-visible {
+    .site-nav__item[aria-current]:focus-visible,
+    .site-nav__item[aria-current]:hover {
         color: var(--color-accent-deep);
     }
 
@@ -440,6 +446,15 @@ const { hasHero = false } = Astro.props;
     }
 
     @media (max-width: 768px) {
+        .cart-link,
+        .nav-toggle {
+            width: var(--control-compact);
+        }
+
+        .site-header {
+            --nav-gap: var(--space-3xs);
+        }
+
         .site-header__name {
             display: none;
         }
@@ -451,9 +466,11 @@ const { hasHero = false } = Astro.props;
 </style>
 
 <script>
-    import { count, getItems, onChange, seedCart } from '@lib/store';
+    import { count, getItems, onChange, seedCart } from '@lib/commerce/cart';
     import { registerPageScript } from '@lib/utils';
 
+    const HEADER_INSTANT_CLASS = 'is-instant';
+    const HEADER_STATE_CLASSES = ['is-hidden', 'is-solid'] as const;
     const HOVER_CLICK_GRACE = 500;
     const HOVER_CLOSE_DELAY = 200;
     const HOVER_QUERY = '(hover: hover) and (min-width: 1024.01px)';
@@ -503,6 +520,28 @@ const { hasHero = false } = Astro.props;
         if (!items.length) return;
 
         items[(index + items.length) % items.length].focus();
+    }
+
+    function handleAfterSwap() {
+        const header = document.querySelector<HTMLElement>('.site-header');
+
+        if (!header) return;
+
+        header.classList.remove('is-hidden');
+        lastScrollY = window.scrollY;
+        scrollTicking = false;
+        updateHeader(header);
+        settleHeader(header);
+    }
+
+    function handleBeforeSwap(event: DocumentEventMap['astro:before-swap']) {
+        const current = document.querySelector<HTMLElement>('.site-header');
+        const next = event.newDocument.querySelector<HTMLElement>('.site-header');
+
+        if (!current || !next) return;
+
+        next.classList.add(HEADER_INSTANT_CLASS);
+        HEADER_STATE_CLASSES.forEach(name => next.classList.toggle(name, current.classList.contains(name)));
     }
 
     function handleDocumentClick(event: MouseEvent, menu: HTMLElement, toggle: HTMLElement) {
@@ -642,6 +681,8 @@ const { hasHero = false } = Astro.props;
         updateCart();
         updateHeader(header);
 
+        settleHeader(header);
+
         document.addEventListener('click', event => handleDocumentClick(event, menu, toggle), { signal });
         document.addEventListener('click', handlePointerSettle, { signal });
         document.addEventListener('focusout', handleFocusOut, { signal });
@@ -692,6 +733,11 @@ const { hasHero = false } = Astro.props;
 
         trigger.setAttribute('aria-expanded', String(expanded));
         menu.hidden = !expanded;
+    }
+
+    function settleHeader(header: HTMLElement) {
+        header.getBoundingClientRect();
+        header.classList.remove(HEADER_INSTANT_CLASS);
     }
 
     function toggleMenu(menu: HTMLElement, toggle: HTMLElement) {
@@ -757,5 +803,7 @@ const { hasHero = false } = Astro.props;
         scrollTicking = false;
     }
 
+    document.addEventListener('astro:after-swap', handleAfterSwap);
+    document.addEventListener('astro:before-swap', handleBeforeSwap);
     registerPageScript(initNavbar);
 </script>

@@ -1,8 +1,8 @@
 import { DEMO_CARDS, MOCK_LATENCY_MS, ORDER_ID, STORAGE } from '@lib/constants';
-import { clear, getItems, totals } from '@lib/store';
+import { clear, getItems, totals } from '@lib/commerce/cart';
 import { createStore } from '@lib/state';
 import { delay } from '@lib/utils';
-import { getSession, updateSession } from '@lib/session';
+import { getSession, updateSession } from '@lib/account/session';
 
 const MESSAGES: Record<PaymentErrorCode, string> = {
     'card-declined': 'That card was declined. Try the approved demo number instead.',

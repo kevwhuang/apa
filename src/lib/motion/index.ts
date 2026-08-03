@@ -2,7 +2,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { MOTION_SELECTOR, buildEntrances, revealAll, revealTarget } from '@lib/motion/entrances';
-import { REDUCED_MOTION_QUERY } from '@lib/constants';
+import { REDUCED_MOTION_QUERY, STORAGE } from '@lib/constants';
 import { clearScrub, initScrub } from '@lib/motion/scrub';
 import { clearTransport, initTransport } from '@lib/motion/transport';
 import { initCounters } from '@lib/motion/counter';
@@ -17,19 +17,20 @@ const GROWTH_THRESHOLD = 24;
 const reducedMotionQuery = window.matchMedia(REDUCED_MOTION_QUERY);
 
 let context: gsap.Context | undefined;
-let controller: AbortController | undefined;
 let heightObserver: ResizeObserver | undefined;
+let heroContext: gsap.Context | undefined;
+let heroController: AbortController | undefined;
 let lastDocumentHeight = 0;
 let lastViewportWidth = window.innerWidth;
 let refreshTimer: Timer | undefined;
 let registered = false;
 
-function boot(signal: AbortSignal): void {
+function boot(): void {
     refreshMotionTokens();
 
     if (reducedMotionQuery.matches) {
         hardDisarm();
-        initHeroField(signal, true);
+        bootHeroField();
 
         return;
     }
@@ -45,7 +46,6 @@ function boot(signal: AbortSignal): void {
             initCounters();
             initScrub();
             initTransport();
-            initHeroField(signal, false);
         });
     } catch {
         hardDisarm();
@@ -53,8 +53,26 @@ function boot(signal: AbortSignal): void {
         return;
     }
 
+    bootHeroField();
     observeDocumentHeight();
     void refreshTriggers();
+}
+
+function bootHeroField(): void {
+    const controller = new AbortController();
+
+    clearHeroField();
+    heroController = controller;
+    heroContext = gsap.context(() => initHeroField(controller.signal, reducedMotionQuery.matches));
+}
+
+function clearHeroField(): void {
+    const previous = heroController;
+
+    heroController = undefined;
+    previous?.abort();
+    heroContext?.revert();
+    heroContext = undefined;
 }
 
 function documentHeight(): number {
@@ -106,6 +124,11 @@ function handleResize(): void {
     ScrollTrigger.refresh();
 }
 
+function handleThemeChange(): void {
+    refreshMotionTokens();
+    bootHeroField();
+}
+
 function hardDisarm(): void {
     window.__apaMotion?.disarm();
     revealAll();
@@ -120,6 +143,7 @@ export function initMotion(): void {
     reducedMotionQuery.addEventListener('change', handlePreferenceChange);
     document.addEventListener('focusin', handleFocusIn);
     window.addEventListener('afterprint', handleAfterPrint);
+    window.addEventListener(STORAGE.theme.topic, handleThemeChange);
     window.addEventListener('beforeprint', handleBeforePrint);
     window.addEventListener('resize', handleResize);
 }
@@ -132,8 +156,7 @@ function observeDocumentHeight(): void {
 
 function reboot(): void {
     teardown();
-    controller = new AbortController();
-    boot(controller.signal);
+    boot();
 }
 
 function refreshAfterGrowth(): void {
@@ -154,10 +177,7 @@ function start(signal: AbortSignal): void {
 }
 
 function teardown(): void {
-    const previous = controller;
-
-    controller = undefined;
-    previous?.abort();
+    clearHeroField();
     context?.revert();
     context = undefined;
     clearTimeout(refreshTimer);

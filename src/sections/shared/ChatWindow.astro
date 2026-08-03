@@ -23,7 +23,12 @@ import IconClose from '@components/icons/Close.astro';
         class="chat__window"
         aria-labelledby="chat-title"
         data-chat-window
+        data-float-window
     >
+        <div
+            class="grip"
+            data-chat-grip
+        />
         <div class="chat__head">
             <div class="chat__title">
                 <h2
@@ -99,6 +104,7 @@ import IconClose from '@components/icons/Close.astro';
 
 <style>
     .chat {
+        --chat-offset: calc(var(--space-md) + var(--launcher-size) + var(--space-2xs));
         display: none;
     }
 
@@ -207,7 +213,7 @@ import IconClose from '@components/icons/Close.astro';
         color: var(--color-ink-inverse);
         display: inline-flex;
         height: var(--launcher-size);
-        inset: auto 0 var(--space-md) auto;
+        inset: auto 0 var(--chat-offset) auto;
         justify-content: center;
         position: fixed;
         transition: background var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
@@ -304,12 +310,12 @@ import IconClose from '@components/icons/Close.astro';
         border: 2px solid var(--color-ink);
         box-shadow: calc(-1 * var(--lift)) var(--lift) 0 0 var(--color-ink);
         color: var(--color-ink);
-        height: min(72vh, 600px);
-        inset: auto var(--launcher-size) var(--space-md) auto;
+        height: min(600px, calc(100dvh - var(--header-height) - var(--space-md) - var(--chat-offset)));
+        inset: auto var(--launcher-size) var(--chat-offset) auto;
         overflow: hidden;
         padding: 0;
         position: fixed;
-        width: min(340px, calc(100vw - var(--launcher-size) - 2 * var(--space-md)));
+        width: var(--chat-width, min(340px, calc(100vw - var(--launcher-size) - 2 * var(--space-md))));
         z-index: var(--z-drawer);
     }
 
@@ -322,16 +328,27 @@ import IconClose from '@components/icons/Close.astro';
 <script>
     import { PALETTE } from '@lib/constants';
     import { ROOM_MEMBERS, closeChat, getChatState, getMessages, getOnlineCount, onChatChange, openChat, seedRoom, sendChatMessage } from '@lib/chat';
-    import { formatTime, getInitials, registerPageScript, setText } from '@lib/utils';
+    import { formatTime, getInitials, initPanelResize, isTopFloatWindow, raiseWindow, registerPageScript, setText } from '@lib/utils';
+
+    const CHAT_MIN_WIDTH = 340;
 
     const GROUP_WINDOW_MS = 300_000;
+
+    const LAUNCHER_SIZE = 50;
 
     const LIVE_RESET_DELAY = 200;
 
     const MEMBER_COLORS = new Map<string, string>(ROOM_MEMBERS.map((member, index) => [member.name, PALETTE[(index + 1) % PALETTE.length]]));
 
+    const RESIZE_LABEL = 'Resize member chat';
+
+    const SELF_COLOR = PALETTE[PALETTE.length - 1];
+
     const TALLY_INTERVAL_MS = 60_000;
 
+    const WINDOW_MARGINS = 48;
+
+    let liveTimer: number | undefined;
     let tallyTimer: number | undefined;
     let unsubscribeChat: (() => void) | undefined;
 
@@ -349,7 +366,7 @@ import IconClose from '@components/icons/Close.astro';
         const grouped = previous !== undefined && previous.name === message.name && message.sentAt - previous.sentAt < GROUP_WINDOW_MS;
 
         item.classList.toggle('chat__message--grouped', grouped);
-        avatar.style.background = message.self ? PALETTE[0] : (MEMBER_COLORS.get(message.name) ?? PALETTE[PALETTE.length - 1]);
+        avatar.style.background = message.self ? SELF_COLOR : (MEMBER_COLORS.get(message.name) ?? SELF_COLOR);
         setText(avatar, message.self ? message.name : getInitials(message.name));
         setText(fragment.querySelector('[data-chat-author]'), message.name);
         setText(fragment.querySelector('[data-chat-time]'), formatTime(new Date(message.sentAt)));
@@ -393,14 +410,22 @@ import IconClose from '@components/icons/Close.astro';
     }
 
     function handleLaunch() {
-        if (getChatState().open) {
-            closeWindow();
+        const dialog = document.querySelector<HTMLDialogElement>('[data-chat-window]');
+
+        if (!getChatState().open) {
+            openChat();
+            openWindow(true);
 
             return;
         }
 
-        openChat();
-        openWindow(true);
+        if (dialog?.open && !isTopFloatWindow(dialog)) {
+            raiseWindow(dialog);
+
+            return;
+        }
+
+        closeWindow();
     }
 
     async function handleSubmit(event: SubmitEvent) {
@@ -420,9 +445,10 @@ import IconClose from '@components/icons/Close.astro';
         const aside = document.querySelector<HTMLElement>('.chat');
         const dialog = document.querySelector<HTMLDialogElement>('[data-chat-window]');
         const form = document.querySelector<HTMLFormElement>('[data-chat-form]');
+        const grip = document.querySelector<HTMLElement>('[data-chat-grip]');
         const launcher = document.querySelector<HTMLElement>('[data-chat-launcher]');
 
-        if (!aside || !dialog || !form || !launcher) return;
+        if (!aside || !dialog || !form || !grip || !launcher) return;
 
         if ('closedBy' in dialog) dialog.setAttribute('closedby', 'closerequest');
 
@@ -430,6 +456,15 @@ import IconClose from '@components/icons/Close.astro';
         unsubscribeChat?.();
         unsubscribeChat = onChatChange(render);
         signal.addEventListener('abort', teardown, { once: true });
+        initPanelResize({
+            handle: grip,
+            label: RESIZE_LABEL,
+            minWidth: CHAT_MIN_WIDTH,
+            panel: dialog,
+            property: '--chat-width',
+            reservedRight: LAUNCHER_SIZE + WINDOW_MARGINS,
+            signal,
+        });
 
         aside.addEventListener('keydown', handleKeydown, { signal });
         dialog.addEventListener('close', () => handleClose(dialog), { signal });
@@ -455,6 +490,7 @@ import IconClose from '@components/icons/Close.astro';
         if (!dialog || dialog.open) return;
 
         dialog.show();
+        raiseWindow(dialog);
         document.querySelector<HTMLElement>('[data-chat-launcher]')?.setAttribute('aria-expanded', 'true');
 
         if (moveFocus) {
@@ -484,7 +520,8 @@ import IconClose from '@components/icons/Close.astro';
         if (stale) {
             log.setAttribute('aria-live', 'off');
             log.replaceChildren();
-            window.setTimeout(() => log.setAttribute('aria-live', 'polite'), LIVE_RESET_DELAY);
+            window.clearTimeout(liveTimer);
+            liveTimer = window.setTimeout(() => log.setAttribute('aria-live', 'polite'), LIVE_RESET_DELAY);
         }
 
         const start = log.children.length;
@@ -503,7 +540,9 @@ import IconClose from '@components/icons/Close.astro';
 
     function teardown() {
         window.clearInterval(tallyTimer);
+        window.clearTimeout(liveTimer);
         unsubscribeChat?.();
+        liveTimer = undefined;
         tallyTimer = undefined;
         unsubscribeChat = undefined;
     }

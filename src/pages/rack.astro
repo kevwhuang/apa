@@ -1,0 +1,12 @@
+---
+import Layout from '@/Layout.astro';
+import RackRig from '@sections/rack/Rig.astro';
+import { brandTitle } from '@lib/brand';
+---
+
+<Layout
+    description={'A live Web Audio rack from the Austin Producer Alliance \u2014 load one file, switch sixteen modules in and out of the chain, and play it through the site player.'}
+    title={brandTitle('Rack')}
+>
+    <RackRig />
+</Layout>

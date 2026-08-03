@@ -1,0 +1,587 @@
+---
+import IconClose from '@components/icons/Close.astro';
+import IconSpark from '@components/icons/Spark.astro';
+---
+
+<aside
+    class="ai"
+    aria-label="AI assistant"
+    transition:persist
+>
+    <button
+        class="ai__launcher"
+        aria-controls="ai-window"
+        aria-expanded="false"
+        data-ai-launcher
+        type="button"
+    >
+        <IconSpark />
+        <span class="sr-only">Open the AI assistant</span>
+    </button>
+    <dialog
+        id="ai-window"
+        class="ai__window"
+        aria-labelledby="ai-title"
+        data-ai-window
+        data-float-window
+    >
+        <div
+            class="grip"
+            data-ai-grip
+        />
+        <div class="ai__head">
+            <h2
+                id="ai-title"
+                class="ai__eyebrow label"
+            >
+                Ask the Alliance
+            </h2>
+            <button
+                class="ai__close"
+                data-ai-close
+                type="button"
+            >
+                <IconClose />
+                <span class="sr-only">Close the AI assistant</span>
+            </button>
+        </div>
+        <ol
+            class="ai__log list-none"
+            aria-live="polite"
+            data-ai-log
+        />
+        <form
+            class="ai__form"
+            data-ai-form
+        >
+            <input
+                id="ai-question"
+                class="ai__field"
+                aria-label="Question"
+                autocomplete="off"
+                data-ai-field
+                name="question"
+                placeholder="Ask a question"
+                type="text"
+            />
+            <button
+                class="btn btn--accent ai__send"
+                data-ai-send
+                type="submit"
+            >
+                Ask
+            </button>
+        </form>
+        <template data-ai-answer>
+            <li class="ai__card">
+                <p
+                    class="ai__body"
+                    data-ai-text
+                />
+                <a
+                    class="action-text ai__source"
+                    data-ai-source
+                    href="/"
+                >
+                    Source
+                </a>
+            </li>
+        </template>
+        <template data-ai-ask>
+            <li class="ai__ask" />
+        </template>
+        <template data-ai-thinking>
+            <li
+                class="ai__thinking"
+                data-ai-pending
+            >
+                <span
+                    class="spinner"
+                    aria-hidden="true"
+                />
+                Thinking&hellip;
+            </li>
+        </template>
+    </dialog>
+</aside>
+
+<style>
+    .ai {
+        --ai-offset: calc(var(--space-md) + 2 * (var(--launcher-size) + var(--space-2xs)));
+        display: none;
+    }
+
+    .ai.is-ready {
+        display: block;
+    }
+
+    .ai__ask {
+        align-self: flex-end;
+        background: var(--color-ink);
+        color: var(--color-ink-inverse);
+        font-size: var(--text-sm);
+        line-height: 1.45;
+        max-width: 85%;
+        overflow-wrap: anywhere;
+        padding: var(--space-2xs) var(--space-xs);
+    }
+
+    .ai__body {
+        font-size: var(--text-sm);
+        line-height: 1.45;
+        overflow-wrap: anywhere;
+    }
+
+    .ai__card {
+        align-self: flex-start;
+        background: var(--color-surface-sunken);
+        border-left: 3px solid var(--color-accent-deep);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2xs);
+        max-width: 95%;
+        padding: var(--space-2xs) var(--space-xs);
+    }
+
+    .ai__close {
+        align-items: center;
+        display: inline-flex;
+        flex-shrink: 0;
+        height: 50px;
+        justify-content: center;
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        width: 50px;
+    }
+
+    .ai__close:active {
+        transform: translateY(1px);
+    }
+
+    .ai__close:focus-visible {
+        outline-offset: -2px;
+    }
+
+    .ai__close:hover {
+        color: var(--color-accent-deep);
+    }
+
+    .ai__eyebrow {
+        color: var(--color-accent-deep);
+    }
+
+    .ai__field {
+        background-color: var(--color-surface);
+        border: 2px solid var(--color-ink);
+        flex: 1;
+        font-size: var(--text-sm);
+        min-height: 50px;
+        min-width: 0;
+        padding-inline: var(--space-2xs);
+        transition: background-color var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .ai__field:focus-visible,
+    .ai__field:hover {
+        background-color: var(--color-surface-raised);
+    }
+
+    .ai__form {
+        border-top: 1px solid var(--color-ink-20);
+        display: flex;
+        flex-shrink: 0;
+        gap: var(--space-2xs);
+        padding: var(--space-sm);
+    }
+
+    .ai__head {
+        align-items: center;
+        border-bottom: 1px solid var(--color-ink-20);
+        display: flex;
+        flex-shrink: 0;
+        gap: var(--space-2xs);
+        justify-content: space-between;
+        padding-left: var(--space-sm);
+    }
+
+    .ai__launcher {
+        --focus-ring: var(--color-accent-light);
+        align-items: center;
+        background: var(--color-surface-inverse);
+        border: 2px solid var(--color-ink);
+        border-right: 0;
+        color: var(--color-ink-inverse);
+        display: inline-flex;
+        height: var(--launcher-size);
+        inset: auto 0 var(--ai-offset) auto;
+        justify-content: center;
+        position: fixed;
+        transition: background var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        width: var(--launcher-size);
+        z-index: var(--z-drawer);
+    }
+
+    .ai__launcher:active {
+        transform: translateY(1px);
+    }
+
+    .ai__launcher:focus-visible {
+        outline-offset: -2px;
+    }
+
+    .ai__launcher:hover {
+        --focus-ring: var(--color-ink);
+        background: var(--color-accent);
+        color: var(--color-ink);
+    }
+
+    .ai__log {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: var(--space-2xs);
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: var(--space-sm);
+    }
+
+    .ai__send {
+        height: 50px;
+    }
+
+    .ai__source {
+        align-items: center;
+        align-self: flex-start;
+        display: inline-flex;
+        min-height: 24px;
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .ai__source:active {
+        transform: translateY(1px);
+    }
+
+    .ai__source:focus-visible {
+        outline-offset: 2px;
+    }
+
+    .ai__source:hover {
+        color: var(--color-accent-deep);
+    }
+
+    .ai__thinking {
+        align-items: center;
+        align-self: flex-start;
+        color: var(--color-ink-muted);
+        display: flex;
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        gap: var(--space-2xs);
+        padding: var(--space-2xs) 0;
+    }
+
+    .ai__window {
+        background: var(--color-surface-raised);
+        border: 2px solid var(--color-ink);
+        box-shadow: calc(-1 * var(--lift)) var(--lift) 0 0 var(--color-ink);
+        color: var(--color-ink);
+        height: min(600px, calc(100dvh - var(--header-height) - var(--space-md) - var(--ai-offset)));
+        inset: auto var(--launcher-size) var(--ai-offset) auto;
+        overflow: hidden;
+        padding: 0;
+        position: fixed;
+        width: var(--ai-width, min(340px, calc(100vw - var(--launcher-size) - 2 * var(--space-md))));
+        z-index: var(--z-drawer);
+    }
+
+    .ai__window[open] {
+        display: flex;
+        flex-direction: column;
+    }
+</style>
+
+<script>
+    import { MOCK_LATENCY_MS } from '@lib/constants';
+    import { delay, initPanelResize, isTopFloatWindow, raiseWindow, registerPageScript, setPending, setText } from '@lib/utils';
+
+    interface AiAnswer {
+        body: string;
+        href: string;
+        keywords: string[];
+        label: string;
+    }
+
+    interface AiMessage {
+        answer: AiAnswer | null;
+        text: string;
+    }
+
+    const AI_MIN_WIDTH = 340;
+
+    const ANSWERS: AiAnswer[] = [
+        {
+            body: 'Assembly is the monthly centerpiece at Station Austin \u2014 an evening built around craft, community, and hearing tracks on a proper system. The calendar carries the next date and everything else on the schedule.',
+            href: '/events',
+            keywords: ['assembly', 'calendar', 'date', 'event', 'meeting', 'next', 'schedule', 'when'],
+            label: 'See the calendar',
+        },
+        {
+            body: 'Prods are the credit you earn for taking part \u2014 they add up as you show up, and they spend like cash at checkout. The Prods doc in the resources library spells out the rules.',
+            href: '/resources',
+            keywords: ['credit', 'currency', 'earn', 'point', 'prod', 'reward'],
+            label: 'Read the Prods doc',
+        },
+        {
+            body: 'Membership is open to anyone producing in Austin. Come to an Assembly or a Hangout, say hello, and we will set you up with an account and a profile from there.',
+            href: '/contact',
+            keywords: ['apply', 'become', 'join', 'member', 'membership', 'sign up', 'signup'],
+            label: 'Get in touch',
+        },
+        {
+            body: 'The Bash is a bimonthly afternoon of producing against the clock at Austin Community College \u2014 one prompt, a few hours, and a final showdown between the best of the room.',
+            href: '/bash',
+            keywords: ['bash', 'battle', 'competition', 'prompt', 'showdown'],
+            label: 'Read the Bash brief',
+        },
+        {
+            body: 'The store carries Alliance merch and event passes, and Prods come off the total at checkout \u2014 one Prod to the dollar.',
+            href: '/store',
+            keywords: ['buy', 'cart', 'checkout', 'merch', 'order', 'price', 'shirt', 'shop', 'store'],
+            label: 'Browse the store',
+        },
+        {
+            body: 'The rack is a Web Audio chain in the browser. Load a file, switch a few modules on, and the dock plays the result back with those modules in the signal path.',
+            href: '/rack',
+            keywords: ['audio', 'effect', 'module', 'plugin', 'rack', 'synth'],
+            label: 'Open the rack',
+        },
+    ];
+
+    const FALLBACK_ANSWER: AiAnswer = {
+        body: 'I only know the site basics \u2014 try asking about Assembly, the Bash, the Hangout, Prods, or the store.',
+        href: '/contact',
+        keywords: [],
+        label: 'Ask a person instead',
+    };
+
+    const LAUNCHER_SIZE = 50;
+
+    const RESIZE_LABEL = 'Resize the AI assistant';
+
+    const THINKING_FACTOR = 2;
+
+    const WELCOME_ANSWER: AiAnswer = {
+        body: 'Hey \u2014 I\u2019m the Alliance assistant. Ask me about Assembly, the Bash, the Hangout, Prods, or the store.',
+        href: '/events',
+        keywords: [],
+        label: 'See the calendar',
+    };
+
+    const WINDOW_MARGINS = 48;
+
+    let messages: AiMessage[] = [];
+    let pending = false;
+
+    async function askQuestion(question: string) {
+        const text = question.trim();
+
+        if (pending || !text) return;
+
+        messages = [...messages, { answer: null, text }];
+        pending = true;
+
+        render();
+        await delay(MOCK_LATENCY_MS * THINKING_FACTOR);
+
+        const answer = matchAnswer(text);
+
+        messages = [...messages, { answer, text: answer.body }];
+        pending = false;
+
+        render();
+    }
+
+    function buildAnswer(answer: AiAnswer) {
+        const item = cloneRow('[data-ai-answer]');
+        const source = item?.querySelector<HTMLAnchorElement>('[data-ai-source]');
+
+        if (!item || !source) return null;
+
+        source.href = answer.href;
+        setText(item.querySelector('[data-ai-text]'), answer.body);
+        setText(source, `${answer.label} \u2192`);
+
+        return item;
+    }
+
+    function buildAsk(text: string) {
+        const item = cloneRow('[data-ai-ask]');
+
+        setText(item, text);
+
+        return item;
+    }
+
+    function cloneRow(selector: string) {
+        const template = document.querySelector<HTMLTemplateElement>(selector);
+
+        if (!template) return null;
+
+        const fragment = template.content.cloneNode(true) as DocumentFragment;
+
+        return fragment.querySelector<HTMLElement>('li');
+    }
+
+    function closeWindow() {
+        const dialog = document.querySelector<HTMLDialogElement>('[data-ai-window]');
+
+        if (dialog?.open) {
+            dialog.close();
+
+            return;
+        }
+
+        handleClose(dialog);
+    }
+
+    function handleClose(dialog: HTMLDialogElement | null) {
+        const active = document.activeElement;
+        const launcher = document.querySelector<HTMLElement>('[data-ai-launcher]');
+        const held = active === null || active === document.body || (dialog?.contains(active) ?? false);
+
+        launcher?.setAttribute('aria-expanded', 'false');
+
+        if (held) launcher?.focus();
+    }
+
+    function handleKeydown(event: KeyboardEvent) {
+        if (event.key !== 'Escape') return;
+
+        const dialog = document.querySelector<HTMLDialogElement>('[data-ai-window]');
+
+        if (!dialog?.open) return;
+
+        event.preventDefault();
+        closeWindow();
+    }
+
+    function handleLaunch() {
+        const dialog = document.querySelector<HTMLDialogElement>('[data-ai-window]');
+
+        if (!dialog?.open) {
+            openWindow();
+
+            return;
+        }
+
+        if (!isTopFloatWindow(dialog)) {
+            raiseWindow(dialog);
+
+            return;
+        }
+
+        closeWindow();
+    }
+
+    async function handleSubmit(event: SubmitEvent) {
+        event.preventDefault();
+
+        const field = document.querySelector<HTMLInputElement>('[data-ai-field]');
+
+        if (!field) return;
+
+        const question = field.value;
+
+        field.value = '';
+        await askQuestion(question);
+    }
+
+    function initAi(signal: AbortSignal) {
+        const aside = document.querySelector<HTMLElement>('.ai');
+        const dialog = document.querySelector<HTMLDialogElement>('[data-ai-window]');
+        const form = document.querySelector<HTMLFormElement>('[data-ai-form]');
+        const grip = document.querySelector<HTMLElement>('[data-ai-grip]');
+        const launcher = document.querySelector<HTMLElement>('[data-ai-launcher]');
+
+        if (!aside || !dialog || !form || !grip || !launcher) return;
+
+        if ('closedBy' in dialog) dialog.setAttribute('closedby', 'closerequest');
+
+        aside.classList.add('is-ready');
+        launcher.setAttribute('aria-expanded', String(dialog.open));
+        initPanelResize({
+            handle: grip,
+            label: RESIZE_LABEL,
+            minWidth: AI_MIN_WIDTH,
+            panel: dialog,
+            property: '--ai-width',
+            reservedRight: LAUNCHER_SIZE + WINDOW_MARGINS,
+            signal,
+        });
+
+        aside.addEventListener('keydown', handleKeydown, { signal });
+        dialog.addEventListener('close', () => handleClose(dialog), { signal });
+        document.querySelector<HTMLElement>('[data-ai-close]')?.addEventListener('click', closeWindow, { signal });
+        form.addEventListener('submit', event => void handleSubmit(event), { signal });
+        launcher.addEventListener('click', handleLaunch, { signal });
+
+        if (!messages.length) messages = [{ answer: WELCOME_ANSWER, text: WELCOME_ANSWER.body }];
+
+        render();
+    }
+
+    function matchAnswer(question: string) {
+        const text = question.toLowerCase();
+
+        let best = FALLBACK_ANSWER;
+        let score = 0;
+
+        for (const answer of ANSWERS) {
+            const hits = answer.keywords.filter(keyword => text.includes(keyword)).length;
+
+            if (hits > score) {
+                best = answer;
+                score = hits;
+            }
+        }
+
+        return best;
+    }
+
+    function openWindow() {
+        const dialog = document.querySelector<HTMLDialogElement>('[data-ai-window]');
+        const field = document.querySelector<HTMLInputElement>('[data-ai-field]');
+
+        if (!dialog || dialog.open) return;
+
+        dialog.show();
+        raiseWindow(dialog);
+        document.querySelector<HTMLElement>('[data-ai-launcher]')?.setAttribute('aria-expanded', 'true');
+        (field ?? dialog.querySelector<HTMLElement>('[data-ai-close]'))?.focus();
+    }
+
+    function render() {
+        const log = document.querySelector<HTMLElement>('[data-ai-log]');
+
+        if (!log) return;
+
+        log.querySelector('[data-ai-pending]')?.remove();
+        setPending(document.querySelector<HTMLButtonElement>('[data-ai-send]'), pending);
+
+        messages.slice(log.children.length).forEach((message) => {
+            const item = message.answer ? buildAnswer(message.answer) : buildAsk(message.text);
+
+            if (item) log.append(item);
+        });
+
+        if (pending) {
+            const thinking = cloneRow('[data-ai-thinking]');
+
+            if (thinking) log.append(thinking);
+        }
+
+        log.scrollTop = log.scrollHeight;
+    }
+
+    registerPageScript(initAi);
+</script>

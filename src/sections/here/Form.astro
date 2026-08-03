@@ -2,8 +2,11 @@
 import { getCollection } from 'astro:content';
 
 import PageHead from '@components/shared/PageHead.astro';
+import QrCode from '@components/shared/QrCode.astro';
 import { EMAIL_MAX_LENGTH } from '@lib/constants';
 import { formatDate, formatTime, mergeCalendar } from '@lib/utils';
+
+const DOOR_URL = 'austinproduceralliance.com/here';
 
 const bashEditions = await getCollection('bash');
 const events = await getCollection('events');
@@ -13,46 +16,44 @@ const nextEvent = upcoming.at(0);
 ---
 
 <section
-    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    class="stage stage--focus stage--tight border-b-2 border-ink"
     aria-labelledby="checkin-title"
 >
-    <div class="grid grid-cols-1 gap-10 md:gap-12 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:items-start">
-        <div>
-            <PageHead
-                class="max-w-3xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
-                eyebrow="Events / Check-in"
-                headingId="checkin-title"
-            >
-                You made it.
-            </PageHead>
-            <p
-                class="max-w-2xl mt-6 text-lmd text-ink-muted"
-                data-motion="blur"
-            >
-                This is where the welcome code at the door sends you. Leave an address and the
-                Alliance opens your account with your first Prod already on it.
-            </p>
-        </div>
+    <PageHead
+        class="max-w-3xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+        eyebrow="Events / Check-in"
+        headingId="checkin-title"
+    >
+        You made it.
+    </PageHead>
+    <p
+        class="max-w-2xl mt-6 text-lmd text-ink-muted"
+        data-motion="blur"
+    >
+        This is where the welcome code at the door sends you. Leave an address and the
+        Alliance opens your account with your first Prod already on it.
+    </p>
+</section>
+
+<section
+    class="stage stage--focus stage--tight border-b-2 border-ink"
+    aria-label="Door pass"
+>
+    <div class="rank rank--2 items-stretch">
         <aside
-            class="checkin-ticket mark self-start"
+            class="door-pass mark"
             aria-label="What you scanned"
             data-motion="wipe"
         >
-            <div class="checkin-ticket__panel slab slab--well flex flex-col gap-4">
-                <header class="checkin-ticket__masthead">
-                    <p class="label text-accent-light">Door pass</p>
-                    <p class="label text-ink-inverse-muted">APA / Door 01</p>
-                </header>
-                <div class="flex flex-col gap-2">
-                    <p class="label text-ink-inverse-muted">You scanned</p>
-                    <p class="checkin-ticket__url font-mono text-smd wrap-break-word">
-                        austinproduceralliance.com/check-in
-                    </p>
-                </div>
+            <div class="door-pass__panel slab slab--well flex flex-col gap-6 h-full">
+                <p class="label text-accent-light">Door pass</p>
+                <p class="door-pass__url font-mono md:text-lmd text-sm wrap-break-word">
+                    {DOOR_URL}
+                </p>
                 {nextEvent && (
-                    <dl class="checkin-ticket__rows">
-                        <div class="checkin-ticket__row">
-                            <dt class="label text-ink-inverse-muted">Next</dt>
+                    <dl class="door-pass__rows">
+                        <div class="door-pass__row">
+                            <dt class="label text-ink-inverse-muted">Event</dt>
                             <dd
                                 class="text-smd"
                                 data-placeholder
@@ -60,7 +61,7 @@ const nextEvent = upcoming.at(0);
                                 {nextEvent.title}
                             </dd>
                         </div>
-                        <div class="checkin-ticket__row">
+                        <div class="door-pass__row">
                             <dt class="label text-ink-inverse-muted">When</dt>
                             <dd
                                 class="text-smd"
@@ -71,7 +72,7 @@ const nextEvent = upcoming.at(0);
                                 </time>
                             </dd>
                         </div>
-                        <div class="checkin-ticket__row">
+                        <div class="door-pass__row">
                             <dt class="label text-ink-inverse-muted">Where</dt>
                             <dd
                                 class="text-smd"
@@ -82,17 +83,27 @@ const nextEvent = upcoming.at(0);
                         </div>
                     </dl>
                 )}
-                <div class="checkin-ticket__foot">
-                    <p class="action-text checkin-ticket__stamp">Checked</p>
+                <div class="door-pass__foot">
+                    <p class="action-text door-pass__stamp">Checked</p>
                     <p class="label text-ink-inverse-muted">1 Prod on arrival</p>
                 </div>
             </div>
         </aside>
+        <div
+            class="door-scan slab slab--card flex items-center justify-center"
+            data-motion="rise"
+        >
+            <QrCode
+                caption={`Scan to check in \u00b7 ${DOOR_URL}`}
+                data={DOOR_URL}
+                label={`QR code for ${DOOR_URL}`}
+            />
+        </div>
     </div>
 </section>
 
 <section
-    class="stage stage--narrow stage--tight"
+    class="stage stage--focus stage--tight"
     aria-label="Check in"
 >
     <form
@@ -335,6 +346,8 @@ const nextEvent = upcoming.at(0);
 
     .checkin-form,
     .checkin__receipt,
+    .door-pass__panel,
+    .door-scan,
     .mail {
         padding: var(--space-lg);
     }
@@ -348,24 +361,6 @@ const nextEvent = upcoming.at(0);
         padding-top: var(--space-md);
     }
 
-    .checkin-ticket__foot,
-    .checkin-ticket__rows {
-        background-image: repeating-linear-gradient(90deg, var(--color-ink-inverse-muted) 0 8px, transparent 8px 16px);
-        background-position: top left;
-        background-repeat: no-repeat;
-        background-size: 100% 1px;
-        padding-top: var(--space-sm);
-    }
-
-    .checkin-ticket__foot {
-        align-items: center;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-xs);
-        justify-content: space-between;
-    }
-
-    .checkin-ticket__masthead,
     .checkin__masthead,
     .mail__masthead {
         align-items: center;
@@ -375,35 +370,6 @@ const nextEvent = upcoming.at(0);
         gap: var(--space-xs);
         justify-content: space-between;
         padding-bottom: var(--space-xs);
-    }
-
-    .checkin-ticket__masthead {
-        border-bottom-color: var(--color-ink-inverse-muted);
-        border-bottom-width: 1px;
-    }
-
-    .checkin-ticket__row {
-        align-items: baseline;
-        display: grid;
-        gap: var(--space-sm);
-        grid-template-columns: 56px minmax(0, 1fr);
-        padding-block: var(--space-3xs);
-    }
-
-    .checkin-ticket__rows {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .checkin-ticket__stamp {
-        border: 2px solid var(--color-accent-light);
-        color: var(--color-accent-light);
-        padding: var(--space-3xs) var(--space-2xs);
-        rotate: calc(var(--tilt-unit) * -4);
-    }
-
-    .checkin-ticket__url {
-        color: var(--color-pulse);
     }
 
     .checkin__box {
@@ -465,6 +431,54 @@ const nextEvent = upcoming.at(0);
         transform: translateY(1px);
     }
 
+    .door-pass__foot,
+    .door-pass__rows {
+        background-image: repeating-linear-gradient(90deg, var(--color-ink-inverse-muted) 0 8px, transparent 8px 16px);
+        background-position: top left;
+        background-repeat: no-repeat;
+        background-size: 100% 1px;
+        padding-top: var(--space-md);
+    }
+
+    .door-pass__foot {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-xs);
+        justify-content: space-between;
+        margin-top: auto;
+    }
+
+    .door-pass__row {
+        align-items: baseline;
+        border-bottom: 1px solid var(--color-ink-inverse-10);
+        display: grid;
+        gap: var(--space-sm);
+        grid-template-columns: 64px minmax(0, 1fr);
+        padding-block: var(--space-2xs);
+    }
+
+    .door-pass__row:last-child {
+        border-bottom: 0;
+    }
+
+    .door-pass__rows {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .door-pass__stamp {
+        border: 2px solid var(--color-accent-light);
+        color: var(--color-accent-light);
+        padding: var(--space-3xs) var(--space-2xs);
+        rotate: calc(var(--tilt-unit) * -4);
+    }
+
+    .door-pass__url {
+        color: var(--color-pulse);
+        letter-spacing: -0.01em;
+    }
+
     .mail__actions {
         align-items: center;
         background-image: repeating-linear-gradient(90deg, var(--color-ink-20) 0 8px, transparent 8px 16px);
@@ -505,12 +519,6 @@ const nextEvent = upcoming.at(0);
     }
 
     @media (forced-colors: active) {
-        .checkin-ticket__stamp,
-        .mail__stamp {
-            border-color: CanvasText;
-            color: CanvasText;
-        }
-
         .checkin__box {
             background-color: Canvas;
             border-color: CanvasText;
@@ -522,16 +530,22 @@ const nextEvent = upcoming.at(0);
             border-color: CanvasText;
             box-shadow: inset 0 0 0 4px Canvas;
         }
+
+        .door-pass__stamp,
+        .mail__stamp {
+            border-color: CanvasText;
+            color: CanvasText;
+        }
     }
 </style>
 
 <script>
-    import { clearFieldErrors, focusFirstError, setFieldErrors, validateFields } from '@lib/forms';
+    import { clearFieldErrors, focusFirstError, setFieldErrors, validateFields } from '@lib/ui/forms';
     import { composeOnboardingEmail } from '@lib/email';
-    import { createOnboardingToken } from '@lib/onboarding';
-    import { registerPageScript, setMessage, setPending, setText } from '@lib/utils';
-    import { startSession } from '@lib/session';
-    import { toast } from '@lib/toasts';
+    import { createOnboardingToken } from '@lib/account/onboarding';
+    import { formatProds, registerPageScript, setMessage, setPending, setText } from '@lib/utils';
+    import { startSession } from '@lib/account/session';
+    import { toast } from '@lib/ui/toasts';
 
     const RULES: Record<string, FieldRule> = {
         email: { message: 'Enter your email address.', required: true },
@@ -630,7 +644,7 @@ const nextEvent = upcoming.at(0);
         done.removeAttribute('hidden');
 
         setText(document.querySelector<HTMLElement>('[data-checkin-email]'), session.email);
-        setText(document.querySelector<HTMLElement>('[data-checkin-prods]'), session.prods === 1 ? '1 Prod' : `${session.prods} Prods`);
+        setText(document.querySelector<HTMLElement>('[data-checkin-prods]'), formatProds(session.prods));
         setText(document.querySelector<HTMLElement>('[data-checkin-newsletter]'), newsletter ? 'You are on the seasonal newsletter too.' : 'You are not on the newsletter.');
         setText(document.querySelector<HTMLElement>('[data-mail-from]'), message.from);
         setText(document.querySelector<HTMLElement>('[data-mail-preheader]'), message.preheader);

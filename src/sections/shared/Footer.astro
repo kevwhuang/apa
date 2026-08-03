@@ -3,14 +3,22 @@ import BrandLockup from '@components/brand/Lockup.astro';
 import IconDiscord from '@components/icons/Discord.astro';
 import IconInstagram from '@components/icons/Instagram.astro';
 import IconMeetup from '@components/icons/Meetup.astro';
+import IconMoon from '@components/icons/Moon.astro';
+import IconSun from '@components/icons/Sun.astro';
 import { BRAND } from '@lib/brand';
 import { LINKS, NAV_GROUPS, SITE_UPDATED } from '@lib/constants';
 import { formatDateOnly } from '@lib/utils';
 
+const SITE_LINKS = [
+    { href: '/privacy', label: 'Privacy' },
+    { href: '/terms', label: 'Terms' },
+    { href: '/admin', label: 'Admin' },
+] as const;
+
 const SOCIALS = [
+    { Icon: IconMeetup, href: LINKS.meetup, label: 'Meetup' },
     { Icon: IconInstagram, href: LINKS.instagram, label: 'Instagram' },
     { Icon: IconDiscord, href: LINKS.discord, label: 'Discord' },
-    { Icon: IconMeetup, href: LINKS.meetup, label: 'Meetup' },
 ];
 
 const columns = [
@@ -18,6 +26,10 @@ const columns = [
     {
         head: 'Browse',
         items: NAV_GROUPS.flatMap(group => ('href' in group ? [{ href: group.href, label: group.label }] : [])),
+    },
+    {
+        head: 'Site',
+        items: [...SITE_LINKS],
     },
 ];
 
@@ -46,6 +58,19 @@ const year = new Date().getFullYear();
                 <p class="footer__updated">
                     Last updated <time datetime={SITE_UPDATED}>{formatDateOnly(updated)}</time>
                 </p>
+                <button
+                    class="theme-toggle"
+                    aria-label="Dark theme"
+                    aria-pressed="false"
+                    type="button"
+                >
+                    <span class="theme-toggle__moon">
+                        <IconMoon />
+                    </span>
+                    <span class="theme-toggle__sun">
+                        <IconSun />
+                    </span>
+                </button>
             </div>
             {columns.map(column => (
                 <div>
@@ -68,7 +93,12 @@ const year = new Date().getFullYear();
     </div>
     <div class="stage stage--flush border-t-2 border-ink">
         <div class="footer__bar">
-            <p>&copy; {year} {BRAND.name}.</p>
+            <div class="footer__credit">
+                <p>&copy; {year} {BRAND.name}. All rights reserved.</p>
+                <p>
+                    Made by <a class="footer__credit-link" href={LINKS.aephonics} rel="noopener noreferrer" target="_blank">Aephonics<span class="sr-only"> (opens in a new tab)</span></a>.
+                </p>
+            </div>
             <ul class="footer__socials list-none">
                 {SOCIALS.map(({ Icon, href, label }) => (
                     <li>
@@ -84,37 +114,6 @@ const year = new Date().getFullYear();
                     </li>
                 ))}
             </ul>
-            <nav
-                class="footer__legal"
-                aria-label="Legal and operations"
-            >
-                <a
-                    class="footer__meta"
-                    href="/privacy"
-                >
-                    Privacy
-                </a>
-                <a
-                    class="footer__meta"
-                    href="/terms"
-                >
-                    Terms
-                </a>
-                <a
-                    class="footer__meta footer__meta--quiet"
-                    href="/admin"
-                >
-                    Admin
-                </a>
-                <a
-                    class="footer__meta footer__meta--quiet"
-                    href={LINKS.aephonics}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                >
-                    Made by Aephonics<span class="sr-only"> (opens in a new tab)</span>
-                </a>
-            </nav>
         </div>
     </div>
 </footer>
@@ -130,6 +129,34 @@ const year = new Date().getFullYear();
         gap: var(--space-sm);
         justify-content: space-between;
         padding-block: var(--space-2xs);
+    }
+
+    .footer__credit {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-xs);
+    }
+
+    .footer__credit-link {
+        color: var(--color-accent-deep);
+        display: inline-block;
+        text-decoration-color: transparent;
+        text-decoration-line: underline;
+        text-underline-offset: 3px;
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            text-decoration-color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .footer__credit-link:active {
+        transform: translateY(1px);
+    }
+
+    .footer__credit-link:hover {
+        color: var(--color-accent);
+        text-decoration-color: currentcolor;
     }
 
     .footer__grid {
@@ -151,17 +178,11 @@ const year = new Date().getFullYear();
         max-width: 34ch;
     }
 
-    .footer__legal {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-xs);
-    }
-
     .footer__link {
         align-items: center;
         display: inline-flex;
         font-size: var(--text-sm);
-        min-height: 50px;
+        min-height: 36px;
         transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
     }
 
@@ -177,28 +198,6 @@ const year = new Date().getFullYear();
         color: var(--color-ink);
         display: block;
         margin-bottom: var(--space-md);
-    }
-
-    .footer__meta {
-        align-items: center;
-        display: inline-flex;
-        letter-spacing: 0.04em;
-        min-height: 50px;
-        padding-inline: var(--space-2xs);
-        text-transform: uppercase;
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .footer__meta:active {
-        transform: translateY(1px);
-    }
-
-    .footer__meta:hover {
-        color: var(--color-accent-deep);
-    }
-
-    .footer__meta--quiet {
-        color: var(--color-ink-subtle);
     }
 
     .footer__social {
@@ -232,15 +231,77 @@ const year = new Date().getFullYear();
         text-transform: uppercase;
     }
 
+    .theme-toggle {
+        align-items: center;
+        border: 1px solid var(--color-ink-20);
+        border-radius: 4px;
+        color: var(--color-ink-subtle);
+        display: inline-flex;
+        justify-content: center;
+        margin-top: var(--space-xs);
+        min-height: 36px;
+        min-width: 36px;
+        transition:
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .theme-toggle:active {
+        transform: translateY(1px);
+    }
+
+    .theme-toggle:hover {
+        border-color: var(--color-accent-deep);
+        color: var(--color-accent-deep);
+    }
+
+    .theme-toggle__moon {
+        display: flex;
+    }
+
+    .theme-toggle__sun {
+        display: none;
+    }
+
+    :global(html[data-theme='dark']) .theme-toggle__moon {
+        display: none;
+    }
+
+    :global(html[data-theme='dark']) .theme-toggle__sun {
+        display: flex;
+    }
+
     @media (max-width: 1024px) {
         .footer__grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
-    }
 
-    @media (max-width: 768px) {
         .footer__grid > :first-child {
             grid-column: 1 / -1;
         }
     }
 </style>
+
+<script>
+    import { STORAGE } from '@lib/constants';
+    import { getTheme, toggleTheme } from '@lib/ui/theme';
+    import { registerPageScript } from '@lib/utils';
+
+    function initFooter(signal: AbortSignal) {
+        const toggle = document.querySelector<HTMLElement>('.theme-toggle');
+
+        if (!toggle) return;
+
+        updateThemeToggle(toggle);
+
+        toggle.addEventListener('click', () => toggleTheme(), { signal });
+        window.addEventListener(STORAGE.theme.topic, () => updateThemeToggle(toggle), { signal });
+    }
+
+    function updateThemeToggle(button: HTMLElement) {
+        button.setAttribute('aria-pressed', String(getTheme() === 'dark'));
+    }
+
+    registerPageScript(initFooter);
+</script>

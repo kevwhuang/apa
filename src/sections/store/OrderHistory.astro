@@ -4,7 +4,7 @@ import PageHead from '@components/shared/PageHead.astro';
 ---
 
 <section
-    class="stage stage--narrow stage--tight"
+    class="stage stage--tight"
     aria-labelledby="order-title"
 >
     <div class="text-center">
@@ -18,50 +18,33 @@ import PageHead from '@components/shared/PageHead.astro';
         </div>
         <PageHead
             class="font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
-            eyebrow="Store / Order"
+            eyebrow="Store / Orders"
             headingId="order-title"
         >
-            <span data-order-heading>No recent order</span>
+            <span data-order-heading>Orders</span>
         </PageHead>
-        <p
-            class="label mt-6 text-ink-muted"
-            data-order-number
-            data-placeholder
-            hidden
-        />
-    </div>
-    <div
-        class="flex flex-col items-center gap-8 text-center"
-        data-motion="rise"
-        data-order-empty
-    >
-        <p class="max-w-xl text-lmd text-ink-muted">
-            Nothing has been placed from this tab. A confirmation only lives for the length of a browsing
-            session, so a fresh tab &mdash; or a reload after closing this one &mdash; starts here.
-        </p>
-        <div class="flex flex-wrap justify-center gap-3">
-            <a
-                class="btn btn--primary"
-                href="/store"
+        <div class="flex flex-wrap items-center justify-center gap-3 mt-6">
+            <span
+                class="chip"
+                data-order-sample
+                hidden
             >
-                Browse the store
-            </a>
-            <a
-                class="btn"
-                href="/store/cart"
-            >
-                Go to the cart
-            </a>
+                Sample order
+            </span>
+            <p
+                class="label text-ink-muted"
+                data-order-number
+                data-placeholder
+            />
         </div>
     </div>
     <div
         class="flex flex-col gap-8"
         data-motion="rise"
         data-order-detail
-        hidden
     >
         <p class="text-center text-lmd text-ink-muted">
-            A receipt is on its way to&#32;
+            Receipt sent to&#32;
             <span
                 class="font-mono wrap-break-word text-smd"
                 data-order-email
@@ -106,9 +89,9 @@ import PageHead from '@components/shared/PageHead.astro';
             </a>
             <a
                 class="btn"
-                href="/"
+                href="/store/cart"
             >
-                Home
+                Go to the cart
             </a>
         </div>
     </div>
@@ -139,35 +122,40 @@ import PageHead from '@components/shared/PageHead.astro';
 </style>
 
 <script>
-    import { formatPrice, formatVariant, registerPageScript, setText } from '@lib/utils';
-    import { getLastOrder } from '@lib/checkout';
+    import { MILLISECONDS_PER_DAY } from '@lib/constants';
+    import { formatDateStamp, formatPrice, formatVariant, registerPageScript, setText } from '@lib/utils';
+    import { getLastOrder } from '@lib/commerce/checkout';
+    import { totals } from '@lib/commerce/cart';
 
-    function initOrderConfirmation() {
-        const detail = document.querySelector<HTMLElement>('[data-order-detail]');
-        const empty = document.querySelector<HTMLElement>('[data-order-empty]');
-        const order = getLastOrder();
+    const SAMPLE_AGE_DAYS = 9;
+    const SAMPLE_ITEMS: CartItem[] = [
+        { color: 'Bone', image: 'tick-tee-1', priceCents: 3_500, productSlug: 'tick-tee', quantity: 1, size: 'M', title: 'Tick Tee' },
+        { image: 'stickers-1', priceCents: 800, productSlug: 'sticker-pack', quantity: 2, title: 'Sticker Pack' },
+        { color: 'Natural', image: 'tote-1', priceCents: 2_200, productSlug: 'tote-bag', quantity: 1, title: 'Tote Bag' },
+    ];
+    const SAMPLE_ORDER: Order = {
+        email: 'p\u2022\u2022\u2022\u2022\u2022\u2022@example.com',
+        id: 'APA-04217',
+        items: SAMPLE_ITEMS,
+        placedAt: Date.now() - SAMPLE_AGE_DAYS * MILLISECONDS_PER_DAY,
+        totals: totals(SAMPLE_ITEMS),
+    };
 
-        if (!detail || !empty || !order) return;
+    function initOrderHistory() {
+        const placed = getLastOrder();
+        const order = placed ?? SAMPLE_ORDER;
 
-        empty.setAttribute('hidden', '');
-        detail.removeAttribute('hidden');
-        document.querySelector<HTMLElement>('[data-order-mark]')?.removeAttribute('hidden');
+        document.querySelector<HTMLElement>(placed ? '[data-order-mark]' : '[data-order-sample]')?.removeAttribute('hidden');
 
-        renderHeading(order);
+        renderHeading(order, placed !== null);
         renderItems(order);
         renderTotals(order.totals);
     }
 
-    function renderHeading(order: Order) {
-        const number = document.querySelector<HTMLElement>('[data-order-number]');
-
+    function renderHeading(order: Order, placed: boolean) {
         setText(document.querySelector('[data-order-email]'), order.email);
-        setText(document.querySelector('[data-order-heading]'), 'Order received.');
-
-        if (!number) return;
-
-        number.textContent = `Order ${order.id}`;
-        number.removeAttribute('hidden');
+        setText(document.querySelector('[data-order-heading]'), placed ? 'Order received.' : 'Orders');
+        setText(document.querySelector('[data-order-number]'), `Order ${order.id} \u00b7 ${formatDateStamp(new Date(order.placedAt))}`);
     }
 
     function renderItems(order: Order) {
@@ -189,17 +177,17 @@ import PageHead from '@components/shared/PageHead.astro';
         });
     }
 
-    function renderTotals(totals: CartTotals) {
+    function renderTotals(summary: CartTotals) {
         const row = document.querySelector<HTMLElement>('[data-order-discount-row]');
 
-        row?.toggleAttribute('hidden', totals.discountCents === 0);
+        row?.toggleAttribute('hidden', summary.discountCents === 0);
 
-        setText(document.querySelector('[data-order-discount]'), `\u2212${formatPrice(totals.discountCents)}`);
-        setText(document.querySelector('[data-order-shipping]'), totals.shippingCents === 0 ? 'Free' : formatPrice(totals.shippingCents));
-        setText(document.querySelector('[data-order-subtotal]'), formatPrice(totals.subtotalCents));
-        setText(document.querySelector('[data-order-tax]'), formatPrice(totals.taxCents));
-        setText(document.querySelector('[data-order-total]'), formatPrice(totals.totalCents));
+        setText(document.querySelector('[data-order-discount]'), `\u2212${formatPrice(summary.discountCents)}`);
+        setText(document.querySelector('[data-order-shipping]'), summary.shippingCents === 0 ? 'Free' : formatPrice(summary.shippingCents));
+        setText(document.querySelector('[data-order-subtotal]'), formatPrice(summary.subtotalCents));
+        setText(document.querySelector('[data-order-tax]'), formatPrice(summary.taxCents));
+        setText(document.querySelector('[data-order-total]'), formatPrice(summary.totalCents));
     }
 
-    registerPageScript(initOrderConfirmation);
+    registerPageScript(initOrderHistory);
 </script>

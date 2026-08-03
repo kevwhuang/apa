@@ -1,4 +1,5 @@
-import { QUEUE_FULL_MESSAGE, acceptFiles, releaseAudioContext, uploadSubmission } from '@lib/uploads';
+import { QUEUE_FULL_MESSAGE, acceptFiles, releaseAudioContext, uploadSubmission } from '@lib/audio/uploads';
+import { STORAGE } from '@lib/constants';
 import { formatBytes, formatDuration, setText } from '@lib/utils';
 
 export interface Dropzone {
@@ -197,6 +198,14 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
         if (queue.length === 0) releaseAudioContext();
     }
 
+    function handleThemeChange() {
+        queue.forEach(({ entry, row }) => {
+            const canvas = row.querySelector<HTMLCanvasElement>('[data-row-canvas]');
+
+            if (canvas && entry.peaks) draw(canvas, entry.peaks);
+        });
+    }
+
     function intake(files: File[] | FileList) {
         const room = options.capacity?.();
 
@@ -321,6 +330,7 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
     zone.addEventListener('dragleave', handleDragLeave, { signal });
     zone.addEventListener('dragover', preventNavigation, { signal });
     zone.addEventListener('drop', handleDrop, { signal });
+    window.addEventListener(STORAGE.theme.topic, handleThemeChange, { signal });
     window.addEventListener('dragover', preventNavigation, { signal });
     window.addEventListener('drop', preventNavigation, { signal });
     signal.addEventListener('abort', releaseAudioContext, { once: true });

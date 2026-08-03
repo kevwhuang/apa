@@ -40,7 +40,7 @@ Prods reward the things that make our community thrive. Here's how members earn 
 
 | Action                | Prods |
 | --------------------- | ----- |
-| Attend the bash       | 1     |
+| Attend the Bash       | 1     |
 | Finish a track        | 2     |
 | Get a sample accepted | 2     |
 | Win the competition   | 10    |

@@ -24,8 +24,13 @@ import IconWaveform from '@components/icons/Waveform.astro';
     <div
         id="dock-panel"
         class="dock__panel"
+        data-float-window
         hidden
     >
+        <div
+            class="grip"
+            data-dock-grip
+        />
         <div class="dock__head">
             <p class="dock__eyebrow label">Now playing</p>
             <button
@@ -37,90 +42,13 @@ import IconWaveform from '@components/icons/Waveform.astro';
                 <span class="sr-only">Close the track player</span>
             </button>
         </div>
-        <p
-            class="dock__title"
-            data-dock-title
-        >
-            Nothing playing
-        </p>
-        <p
-            class="dock__artist"
-            data-dock-artist
-        >
-            Play a track to load it here
-        </p>
-        <div class="dock__transport">
-            <button
-                class="dock__control dock__control--play"
-                data-dock-toggle
-                disabled
-                type="button"
-            >
-                <span class="dock__icon dock__icon--play">
-                    <IconPlay />
-                </span>
-                <span
-                    class="dock__icon dock__icon--pause"
-                    hidden
-                >
-                    <IconPause />
-                </span>
-                <span
-                    class="sr-only"
-                    data-dock-toggle-label
-                >
-                    Play
-                </span>
-            </button>
-            <button
-                class="dock__control"
-                aria-pressed="false"
-                data-dock-mute
-                type="button"
-            >
-                <span class="dock__icon dock__icon--sound">
-                    <IconVolume />
-                </span>
-                <span
-                    class="dock__icon dock__icon--muted"
-                    hidden
-                >
-                    <IconVolume muted />
-                </span>
-                <span class="sr-only">Mute</span>
-            </button>
-        </div>
-        <div class="dock__seek-row">
-            <input
-                class="dock__seek"
-                aria-label="Seek within the track"
-                data-dock-seek
-                disabled
-                max="0"
-                min="0"
-                step="1"
-                type="range"
-                value="0"
-            />
-        </div>
-        <p class="dock__clock">
-            <span data-dock-position>0:00</span>
-            <span data-dock-duration>0:00</span>
-        </p>
-        <a
-            class="action-text dock__link"
-            href="/producers"
-        >
-            Find a track on the roster &rarr;
-        </a>
-        <p class="dock__note">Tracks are synthesized in your browser.</p>
         <div
             class="dock__rack"
             data-dock-rack
             hidden
         >
             <div class="dock__rack-head">
-                <p class="dock__rack-label label">Sandbox rack</p>
+                <p class="dock__rack-label label">Rack</p>
                 <p
                     class="dock__rack-file"
                     data-dock-rack-file
@@ -137,46 +65,111 @@ import IconWaveform from '@components/icons/Waveform.astro';
             >
                 Straight through
             </p>
-            <div class="dock__rack-deck">
+            <template data-dock-plugin>
+                <li class="dock__plugin" />
+            </template>
+        </div>
+        <a
+            class="action-text dock__link"
+            href="/rack"
+        >
+            Open the rack &rarr;
+        </a>
+        <div class="dock__player">
+            <div class="dock__meta">
+                <p
+                    class="dock__title"
+                    data-dock-title
+                >
+                    Nothing playing
+                </p>
+                <p
+                    class="dock__artist"
+                    data-dock-artist
+                >
+                    Play a track to load it here
+                </p>
+            </div>
+            <div class="dock__row">
                 <button
-                    class="dock__control dock__rack-toggle"
+                    class="dock__control dock__control--play"
                     aria-pressed="false"
-                    data-dock-rack-toggle
+                    data-dock-toggle
                     disabled
                     type="button"
                 >
-                    <span data-dock-rack-play>
+                    <span class="dock__icon dock__icon--play">
                         <IconPlay />
                     </span>
                     <span
-                        data-dock-rack-pause
+                        class="dock__icon dock__icon--pause"
                         hidden
                     >
                         <IconPause />
                     </span>
                     <span
                         class="sr-only"
-                        data-dock-rack-label
+                        data-dock-toggle-label
                     >
-                        Play the sandbox rack
+                        Play
                     </span>
                 </button>
-                <p
-                    class="dock__rack-time"
-                    data-dock-rack-duration
-                >
-                    0:00
-                </p>
+                <div class="dock__row-slider">
+                    <input
+                        class="dock__slider"
+                        aria-label="Seek within the track"
+                        data-dock-seek
+                        disabled
+                        max="0"
+                        min="0"
+                        step="1"
+                        type="range"
+                        value="0"
+                    />
+                    <p class="dock__ends">
+                        <span data-dock-position>0:00</span>
+                        <span data-dock-duration>0:00</span>
+                    </p>
+                </div>
             </div>
-            <a
-                class="action-text dock__link"
-                href="/sandbox"
-            >
-                Open the sandbox &rarr;
-            </a>
-            <template data-dock-plugin>
-                <li class="dock__plugin" />
-            </template>
+            <div class="dock__row">
+                <button
+                    class="dock__control"
+                    aria-pressed="false"
+                    data-dock-mute
+                    type="button"
+                >
+                    <span class="dock__icon dock__icon--sound">
+                        <IconVolume />
+                    </span>
+                    <span
+                        class="dock__icon dock__icon--muted"
+                        hidden
+                    >
+                        <IconVolume muted />
+                    </span>
+                    <span class="sr-only">Mute</span>
+                </button>
+                <div class="dock__row-slider">
+                    <input
+                        class="dock__slider"
+                        aria-label="Volume"
+                        data-dock-volume
+                        max="100"
+                        min="0"
+                        step="1"
+                        type="range"
+                        value="100"
+                    />
+                    <p
+                        class="dock__ends"
+                        aria-hidden="true"
+                    >
+                        <span>0</span>
+                        <span>100</span>
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
     <p
@@ -196,19 +189,9 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     .dock__artist {
-        color: var(--color-ink-inverse-muted);
+        color: var(--color-ink-muted);
         font-family: var(--font-mono);
         font-size: var(--text-2xs);
-        padding: 0 var(--space-md) var(--space-2xs);
-    }
-
-    .dock__clock {
-        color: var(--color-ink-inverse-muted);
-        display: flex;
-        font-family: var(--font-mono);
-        font-size: var(--text-2xs);
-        justify-content: space-between;
-        padding: 0 var(--space-md) var(--space-2xs);
     }
 
     .dock__close {
@@ -229,12 +212,12 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     .dock__close:hover {
-        color: var(--color-accent-light);
+        color: var(--color-accent-deep);
     }
 
     .dock__control {
         align-items: center;
-        border: 2px solid var(--color-ink-inverse);
+        border: 2px solid var(--color-ink);
         display: inline-flex;
         flex: 0 0 auto;
         height: 50px;
@@ -253,8 +236,8 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     .dock__control:hover:not(:disabled) {
-        background: var(--color-ink-inverse);
-        color: var(--color-ink);
+        background: var(--color-ink);
+        color: var(--color-ink-inverse);
     }
 
     .dock__control--play {
@@ -264,21 +247,31 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     .dock__control--play:hover:not(:disabled) {
-        background: var(--color-accent-light);
-        border-color: var(--color-accent-light);
-        color: var(--color-ink);
+        background: var(--color-accent-deep);
+        border-color: var(--color-accent-deep);
+        color: var(--color-ink-inverse);
+    }
+
+    .dock__ends {
+        color: var(--color-ink-muted);
+        display: flex;
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        justify-content: space-between;
+        width: 100%;
     }
 
     .dock__eyebrow {
-        color: var(--color-accent-light);
-        padding: var(--space-sm) var(--space-md) var(--space-2xs);
+        color: var(--color-accent-deep);
     }
 
     .dock__head {
         align-items: center;
         display: flex;
+        flex: 0 0 auto;
         justify-content: space-between;
-        padding-right: var(--space-2xs);
+        min-height: 50px;
+        padding: 0 var(--space-2xs) 0 var(--space-md);
     }
 
     .dock__launcher {
@@ -290,7 +283,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
         color: var(--color-ink-inverse);
         display: inline-flex;
         height: var(--launcher-size);
-        inset: auto 0 calc(var(--space-md) + var(--launcher-size) + var(--space-2xs)) auto;
+        inset: auto 0 var(--space-md) auto;
         justify-content: center;
         position: fixed;
         transition: background var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
@@ -314,9 +307,10 @@ import IconWaveform from '@components/icons/Waveform.astro';
 
     .dock__link {
         align-items: center;
-        border-top: 1px solid var(--color-ink-inverse-10);
-        color: var(--color-ink-inverse);
+        border-top: 1px solid var(--color-ink-20);
+        color: var(--color-ink);
         display: flex;
+        flex: 0 0 auto;
         min-height: 50px;
         padding: 0 var(--space-md);
         transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
@@ -331,43 +325,57 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     .dock__link:hover {
-        color: var(--color-accent-light);
+        color: var(--color-accent-deep);
     }
 
-    .dock__note {
-        border-top: 1px solid var(--color-ink-inverse-10);
-        color: var(--color-ink-inverse-muted);
-        font-size: var(--text-2xs);
-        padding: var(--space-2xs) var(--space-md);
+    .dock__meta {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3xs);
+        padding: 0 var(--space-md);
     }
 
     .dock__panel {
-        --focus-ring: var(--color-accent-light);
-        background: var(--color-surface-inverse);
-        border-left: 2px solid var(--color-ink);
-        color: var(--color-ink-inverse);
-        inset: var(--header-height) var(--launcher-size) 0 auto;
-        overflow-y: auto;
-        overscroll-behavior: contain;
+        background: var(--color-surface-raised);
+        border: 2px solid var(--color-ink);
+        box-shadow: calc(-1 * var(--lift)) var(--lift) 0 0 var(--color-ink);
+        color: var(--color-ink);
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        inset: auto var(--launcher-size) var(--space-md) auto;
+        max-height: calc(100dvh - var(--header-height) - 2 * var(--space-md));
         position: fixed;
-        width: min(340px, calc(100vw - var(--launcher-size)));
+        width: var(--dock-width, min(340px, calc(100vw - var(--launcher-size) - 2 * var(--space-md))));
         z-index: var(--z-drawer);
     }
 
+    .dock__player {
+        border-top: 1px solid var(--color-ink-20);
+        display: flex;
+        flex: 0 0 auto;
+        flex-direction: column;
+        gap: var(--space-2xs);
+        padding-block: var(--space-sm);
+    }
+
     .dock__plugin {
-        border: 1px solid var(--color-ink-inverse-10);
-        color: var(--color-ink-inverse-muted);
+        align-items: center;
+        border: 1px solid var(--color-ink-20);
+        color: var(--color-ink-muted);
+        display: flex;
         font-family: var(--font-mono);
-        font-size: var(--text-2xs);
-        padding: 2px var(--space-2xs);
+        font-size: var(--text-xs);
+        min-height: 36px;
+        padding: var(--space-2xs) var(--space-sm);
         transition: border-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui);
+        width: 100%;
     }
 
     .dock__plugins {
         display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-3xs);
-        padding: 0 var(--space-md) var(--space-2xs);
+        flex-direction: column;
+        gap: var(--space-2xs);
     }
 
     .dock__plugins:empty {
@@ -375,24 +383,24 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     .dock__rack {
-        border-top: 1px solid var(--color-ink-inverse-10);
-        padding-top: var(--space-2xs);
+        border-top: 1px solid var(--color-ink-20);
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        gap: var(--space-2xs);
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: var(--space-sm) var(--space-md);
     }
 
     .dock__rack.is-playing .dock__plugin {
-        border-color: var(--color-accent-light);
-        color: var(--color-accent-light);
-    }
-
-    .dock__rack-deck {
-        align-items: center;
-        display: flex;
-        gap: var(--space-2xs);
-        padding: 0 var(--space-md) var(--space-2xs);
+        border-color: var(--color-accent-deep);
+        color: var(--color-accent-deep);
     }
 
     .dock__rack-file {
-        color: var(--color-ink-inverse-muted);
+        color: var(--color-ink-muted);
         font-family: var(--font-mono);
         font-size: var(--text-2xs);
         min-width: 0;
@@ -406,85 +414,60 @@ import IconWaveform from '@components/icons/Waveform.astro';
         display: flex;
         gap: var(--space-2xs);
         justify-content: space-between;
-        padding: 0 var(--space-md) var(--space-2xs);
     }
 
     .dock__rack-label {
-        color: var(--color-accent-light);
+        color: var(--color-accent-deep);
         flex: 0 0 auto;
     }
 
-    .dock__rack-time {
-        color: var(--color-ink-inverse-muted);
-        font-family: var(--font-mono);
-        font-size: var(--text-2xs);
+    .dock__row {
+        align-items: center;
+        display: flex;
+        gap: var(--space-2xs);
+        padding: 0 var(--space-md);
     }
 
-    .dock__rack-toggle {
-        transition: background var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .dock__rack-toggle:active:not(:disabled) {
-        transform: translateY(1px);
-    }
-
-    .dock__rack-toggle[aria-pressed='true'] {
-        background: var(--color-accent);
-        border-color: var(--color-accent);
-        color: var(--color-ink);
-    }
-
-    .dock__rack-toggle[aria-pressed='true']:hover {
-        background: var(--color-accent-light);
-        border-color: var(--color-accent-light);
-        color: var(--color-ink);
-    }
-
-    .dock__seek {
-        accent-color: var(--color-accent);
+    .dock__row-slider {
+        display: flex;
         flex: 1 1 auto;
-        height: 50px;
+        flex-direction: column;
+        gap: var(--space-3xs);
         min-width: 0;
+    }
+
+    .dock__slider {
+        accent-color: var(--color-accent);
+        height: 24px;
         transition: accent-color var(--duration-fast) var(--motion-ease-ui);
+        width: 100%;
     }
 
-    .dock__seek:active:not(:disabled),
-    .dock__seek:hover:not(:disabled) {
-        accent-color: var(--color-accent-light);
+    .dock__slider:active:not(:disabled),
+    .dock__slider:focus-visible,
+    .dock__slider:hover:not(:disabled) {
+        accent-color: var(--color-accent-deep);
     }
 
-    .dock__seek:disabled {
+    .dock__slider:disabled {
+        cursor: not-allowed;
         opacity: 0.55;
     }
 
-    .dock__seek-row {
-        display: flex;
-        padding: 0 var(--space-md) var(--space-2xs);
-    }
-
     .dock__straight {
-        color: var(--color-ink-inverse-muted);
+        color: var(--color-ink-muted);
         font-family: var(--font-mono);
         font-size: var(--text-2xs);
-        padding: 0 var(--space-md) var(--space-2xs);
     }
 
     .dock__title {
         font-size: var(--text-md);
         font-weight: 800;
-        padding: 0 var(--space-md);
-    }
-
-    .dock__transport {
-        align-items: center;
-        display: flex;
-        gap: var(--space-2xs);
-        padding: 0 var(--space-md) var(--space-3xs);
     }
 </style>
 
 <script>
-    import { MODULE_NAMES, getRackState, onRackChange, toggleRack } from '@lib/audio/sandbox/rack';
+    import { MODULE_NAMES, getRackPosition, getRackState, onRackChange, seekRack, toggleRack } from '@lib/audio/rack/rack';
     import { TRACK_PLAY_TOPIC } from '@lib/constants';
     import {
         announceTrackState,
@@ -492,19 +475,78 @@ import IconWaveform from '@components/icons/Waveform.astro';
         getPlayerState,
         getPosition,
         getTrack,
+        getVolume,
         isMuted,
         onPlayerChange,
         openPlayer,
         playTrack,
         seekTo,
         setMuted,
+        setVolume,
         togglePlayback,
     } from '@lib/audio';
-    import { formatDuration, registerPageScript, setHidden, setText } from '@lib/utils';
+    import { formatDuration, initPanelResize, isTopFloatWindow, raiseWindow, registerPageScript, setHidden, setText } from '@lib/utils';
+
+    interface DockSource {
+        artist: string;
+        durationSeconds: number;
+        playing: boolean;
+        rack: boolean;
+        title: string;
+    }
+
+    const DOCK_MIN_WIDTH = 340;
+
+    const EMPTY_ARTIST = 'Play a track to load it here';
+
+    const EMPTY_TITLE = 'Nothing playing';
+
+    const LAUNCHER_SIZE = 50;
+
+    const RACK_ARTIST = 'Rack';
+
+    const RACK_EMPTY = 'No file loaded';
+
+    const RESIZE_LABEL = 'Resize track player';
+
+    const SEEK_LABEL_RACK = 'Seek within the rack';
+
+    const SEEK_LABEL_TRACK = 'Seek within the track';
+
+    const VOLUME_SCALE = 100;
+
+    const WINDOW_MARGINS = 48;
 
     let frame = 0;
+    let opened = false;
     let unsubscribe: (() => void) | undefined;
     let unsubscribeRack: (() => void) | undefined;
+
+    function getSource(): DockSource | undefined {
+        const player = getPlayerState();
+        const rack = getRackState();
+        const track = getTrack();
+
+        if (rack.fileName !== null && !player.playing) {
+            return {
+                artist: RACK_ARTIST,
+                durationSeconds: rack.durationSeconds,
+                playing: rack.playing,
+                rack: true,
+                title: rack.fileName,
+            };
+        }
+
+        if (!track) return undefined;
+
+        return {
+            artist: track.artist,
+            durationSeconds: track.durationSeconds,
+            playing: player.playing,
+            rack: false,
+            title: track.title,
+        };
+    }
 
     function handleCloseClick() {
         closePlayer();
@@ -520,18 +562,47 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     function handleLaunch() {
+        const panel = document.querySelector<HTMLElement>('#dock-panel');
+
         if (getPlayerState().open) {
+            if (panel && !panel.hidden && !isTopFloatWindow(panel)) {
+                raiseWindow(panel);
+
+                return;
+            }
+
             closePlayer();
 
             return;
         }
 
         openPlayer();
+
+        if (panel) raiseWindow(panel);
+
         document.querySelector<HTMLElement>('[data-dock-close]')?.focus();
     }
 
     function handleSeek(input: HTMLInputElement) {
-        seekTo(Number(input.value));
+        const seconds = Number(input.value);
+
+        if (getSource()?.rack) {
+            seekRack(seconds);
+
+            return;
+        }
+
+        seekTo(seconds);
+    }
+
+    function handleToggle() {
+        if (getSource()?.rack) {
+            toggleRack();
+
+            return;
+        }
+
+        togglePlayback();
     }
 
     function handleTrackPlay(event: WindowEventMap['apa:track-play']) {
@@ -543,89 +614,104 @@ import IconWaveform from '@components/icons/Waveform.astro';
         setText(document.querySelector('[data-dock-status]'), `Playing ${track.title} by ${track.artist}`);
     }
 
+    function handleVolume(input: HTMLInputElement) {
+        setVolume(Number(input.value) / VOLUME_SCALE);
+    }
+
     function initDock(signal: AbortSignal) {
         const dock = document.querySelector<HTMLElement>('.dock');
+        const grip = document.querySelector<HTMLElement>('[data-dock-grip]');
         const launcher = document.querySelector<HTMLElement>('[data-dock-launcher]');
+        const panel = document.querySelector<HTMLElement>('#dock-panel');
         const seek = document.querySelector<HTMLInputElement>('[data-dock-seek]');
+        const volume = document.querySelector<HTMLInputElement>('[data-dock-volume]');
 
-        if (!dock || !launcher || !seek) return;
+        if (!dock || !grip || !launcher || !panel || !seek || !volume) return;
 
         dock.classList.add('is-ready');
+        volume.value = String(Math.round(getVolume() * VOLUME_SCALE));
         announceTrackState();
         unsubscribe?.();
         unsubscribeRack?.();
         unsubscribe = onPlayerChange(render);
-        unsubscribeRack = onRackChange(renderRack);
+        unsubscribeRack = onRackChange(render);
         signal.addEventListener('abort', teardown, { once: true });
+        initPanelResize({
+            handle: grip,
+            label: RESIZE_LABEL,
+            minWidth: DOCK_MIN_WIDTH,
+            panel,
+            property: '--dock-width',
+            reservedRight: LAUNCHER_SIZE + WINDOW_MARGINS,
+            signal,
+        });
 
         document.querySelector<HTMLElement>('[data-dock-close]')?.addEventListener('click', handleCloseClick, { signal });
         document.querySelector<HTMLElement>('[data-dock-mute]')?.addEventListener('click', toggleMute, { signal });
-        document.querySelector<HTMLElement>('[data-dock-rack-toggle]')?.addEventListener('click', toggleRack, { signal });
-        document.querySelector<HTMLElement>('[data-dock-toggle]')?.addEventListener('click', togglePlayback, { signal });
+        document.querySelector<HTMLElement>('[data-dock-toggle]')?.addEventListener('click', handleToggle, { signal });
         dock.addEventListener('keydown', handleKeydown, { signal });
         launcher.addEventListener('click', handleLaunch, { signal });
         seek.addEventListener('input', () => handleSeek(seek), { signal });
+        volume.addEventListener('input', () => handleVolume(volume), { signal });
         window.addEventListener(TRACK_PLAY_TOPIC, handleTrackPlay, { signal });
         render();
-        renderRack();
     }
 
     function render() {
-        const state = getPlayerState();
-        const track = getTrack();
         const launcher = document.querySelector<HTMLElement>('[data-dock-launcher]');
         const panel = document.querySelector<HTMLElement>('#dock-panel');
         const seek = document.querySelector<HTMLInputElement>('[data-dock-seek]');
+        const source = getSource();
+        const state = getPlayerState();
         const toggle = document.querySelector<HTMLElement>('[data-dock-toggle]');
 
         if (!launcher || !panel || !seek || !toggle) return;
 
+        const playing = source?.playing ?? false;
+
         panel.hidden = !state.open;
         launcher.setAttribute('aria-expanded', String(state.open));
-        seek.toggleAttribute('disabled', !track);
-        toggle.toggleAttribute('disabled', !track);
-        setText(document.querySelector('[data-dock-toggle-label]'), state.playing ? 'Pause' : 'Play');
-        setHidden(document.querySelector<HTMLElement>('.dock__icon--pause'), !state.playing);
-        setHidden(document.querySelector<HTMLElement>('.dock__icon--play'), state.playing);
+        seek.max = String(Math.max(0, Math.floor(source?.durationSeconds ?? 0)));
+        seek.setAttribute('aria-label', source?.rack ? SEEK_LABEL_RACK : SEEK_LABEL_TRACK);
+        seek.toggleAttribute('disabled', !source);
+        toggle.setAttribute('aria-pressed', String(playing));
+        toggle.toggleAttribute('disabled', !source);
+        setText(document.querySelector('[data-dock-toggle-label]'), toggleLabel(source));
+        setText(document.querySelector('[data-dock-title]'), source?.title ?? EMPTY_TITLE);
+        setText(document.querySelector('[data-dock-artist]'), source?.artist ?? EMPTY_ARTIST);
+        setText(document.querySelector('[data-dock-duration]'), formatDuration(source?.durationSeconds ?? 0));
+        setHidden(document.querySelector<HTMLElement>('.dock__icon--pause'), !playing);
+        setHidden(document.querySelector<HTMLElement>('.dock__icon--play'), playing);
 
-        if (track) {
-            seek.max = String(track.durationSeconds);
-            setText(document.querySelector('[data-dock-title]'), track.title);
-            setText(document.querySelector('[data-dock-artist]'), track.artist);
-            setText(document.querySelector('[data-dock-duration]'), formatDuration(track.durationSeconds));
-        }
+        if (state.open && !opened) raiseWindow(panel);
 
+        opened = state.open;
+
+        renderRack();
         cancelAnimationFrame(frame);
 
         if (state.open) tickProgress();
     }
 
     function renderRack() {
-        const state = getRackState();
         const file = document.querySelector<HTMLElement>('[data-dock-rack-file]');
         const list = document.querySelector<HTMLElement>('[data-dock-plugins]');
         const rack = document.querySelector<HTMLElement>('[data-dock-rack]');
+        const state = getRackState();
         const template = document.querySelector<HTMLTemplateElement>('[data-dock-plugin]');
-        const toggle = document.querySelector<HTMLElement>('[data-dock-rack-toggle]');
 
-        if (!file || !list || !rack || !template || !toggle) return;
+        if (!file || !list || !rack || !template) return;
 
         const loaded = state.fileName !== null;
 
         rack.hidden = !loaded && state.activeKinds.length === 0;
         rack.classList.toggle('is-playing', state.playing);
-        file.textContent = state.fileName ?? 'No file loaded';
+        file.textContent = state.fileName ?? RACK_EMPTY;
         file.title = state.fileName ?? '';
-        toggle.setAttribute('aria-pressed', String(state.playing));
-        toggle.toggleAttribute('disabled', !loaded);
-        setHidden(document.querySelector<HTMLElement>('[data-dock-rack-pause]'), !state.playing);
-        setHidden(document.querySelector<HTMLElement>('[data-dock-rack-play]'), state.playing);
         setHidden(document.querySelector<HTMLElement>('[data-dock-straight]'), !loaded || state.activeKinds.length > 0);
-        setText(document.querySelector('[data-dock-rack-duration]'), formatDuration(state.durationSeconds));
-        setText(document.querySelector('[data-dock-rack-label]'), state.playing ? 'Pause the sandbox rack' : 'Play the sandbox rack');
         list.replaceChildren();
 
-        for (const kind of state.activeKinds) {
+        for (const kind of [...state.activeKinds].reverse()) {
             const fragment = template.content.cloneNode(true) as DocumentFragment;
             const chip = fragment.querySelector<HTMLElement>('.dock__plugin');
 
@@ -645,19 +731,26 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     function tickProgress() {
-        const position = getPosition();
+        const source = getSource();
+        const position = source?.rack ? getRackPosition() : getPosition();
         const seek = document.querySelector<HTMLInputElement>('[data-dock-seek]');
 
         if (seek && document.activeElement !== seek) seek.value = String(Math.floor(position));
 
         setText(document.querySelector('[data-dock-position]'), formatDuration(position));
 
-        if (getPlayerState().playing) frame = requestAnimationFrame(tickProgress);
+        if (source?.playing) frame = requestAnimationFrame(tickProgress);
+    }
+
+    function toggleLabel(source: DockSource | undefined) {
+        if (source?.rack) return source.playing ? 'Pause the rack' : 'Play the rack';
+
+        return source?.playing ? 'Pause' : 'Play';
     }
 
     function toggleMute() {
-        const next = !isMuted();
         const button = document.querySelector<HTMLElement>('[data-dock-mute]');
+        const next = !isMuted();
 
         setMuted(next);
         button?.setAttribute('aria-pressed', String(next));

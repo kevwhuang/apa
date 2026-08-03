@@ -1,4 +1,5 @@
 import { LINKS, ONBOARDING_ROUTE, ONBOARDING_TOKEN_PARAM } from '@lib/constants';
+import { formatProds } from '@lib/utils';
 
 const SENDER_NAME = 'Austin Producer Alliance';
 
@@ -41,10 +42,4 @@ export function composeOnboardingEmail(input: OnboardingEmailInput): MockEmail {
         subject: `Welcome to ${SENDER_NAME}`,
         to: email,
     };
-}
-
-function formatProds(prods: number): string {
-    const count = Math.max(0, Math.trunc(prods) || 0);
-
-    return count === 1 ? '1 Prod' : `${count} Prods`;
 }

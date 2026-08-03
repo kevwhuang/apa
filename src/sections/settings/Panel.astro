@@ -1,40 +1,11 @@
 ---
 import PageHead from '@components/shared/PageHead.astro';
-import { PASSWORD_MIN_LENGTH } from '@lib/constants';
-
-const DISPLAY_NAME_MAX = 50;
-
-const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
+import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@lib/constants';
 ---
 
 <section
-    class="stage stage--narrow stage--tight"
-    aria-label="Settings access"
-    data-settings-out
->
-    <div
-        class="settings__gate slab slab--card flex flex-col items-center gap-5"
-        data-motion="rise"
-    >
-        <p class="label text-accent-deep">Account / Settings</p>
-        <p class="text-lmd text-ink-muted">
-            Settings belong to an account. Sign in and this page fills with your display name,
-            your handle, and the password field that goes with them.
-        </p>
-        <a
-            class="btn btn--primary"
-            href="/sign-in"
-        >
-            Sign in &rarr;
-        </a>
-    </div>
-</section>
-
-<section
-    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    class="stage stage--focus stage--tight border-b-2 border-ink"
     aria-labelledby="settings-title"
-    data-settings-in
-    hidden
 >
     <div>
         <PageHead
@@ -56,10 +27,8 @@ const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
 </section>
 
 <section
-    class="stage stage--narrow stage--tight"
+    class="stage stage--focus stage--tight"
     aria-label="Account and profile"
-    data-settings-in
-    hidden
 >
     <div
         class="flex flex-col gap-8"
@@ -106,7 +75,7 @@ const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
             </div>
         </dl>
         <form
-            class="settings__panel slab slab--card flex flex-col gap-5"
+            class="slab slab--card flex flex-col gap-5"
             data-settings-form
         >
             <h2 class="font-extrabold font-sans text-2xl tracking-tight">
@@ -114,15 +83,15 @@ const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
             </h2>
             <div class="flex flex-col gap-2">
                 <label class="block">
-                    <span class="label block mb-2 text-ink-muted">Display name</span>
+                    <span class="label block mb-2 text-ink-muted">Artist name</span>
                     <input
                         id="settings-name"
-                        class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-colors"
+                        class="aria-invalid:border-accent-deep aria-invalid:shadow-[3px_3px_0_0_var(--color-accent-20)] focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-[background-color,border-color,box-shadow]"
                         aria-describedby="settings-name-error"
                         aria-invalid="false"
                         autocomplete="nickname"
-                        maxlength={DISPLAY_NAME_MAX}
-                        name="displayName"
+                        maxlength={ARTIST_NAME_MAX_LENGTH}
+                        name="artistName"
                         required
                         type="text"
                     />
@@ -134,7 +103,8 @@ const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
                     hidden
                 />
                 <p class="text-sm text-ink-subtle">
-                    Up to {DISPLAY_NAME_MAX} characters. This is what the roster shows.
+                    Up to {ARTIST_NAME_MAX_LENGTH} characters. This is what the roster shows
+                    &mdash; it cannot be used to sign in.
                 </p>
             </div>
             <div class="flex flex-col gap-2">
@@ -142,7 +112,7 @@ const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
                     <span class="label block mb-2 text-ink-muted">Username</span>
                     <input
                         id="settings-username"
-                        class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-mono text-sm bg-transparent transition-colors"
+                        class="aria-invalid:border-accent-deep aria-invalid:shadow-[3px_3px_0_0_var(--color-accent-20)] focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-mono text-sm bg-transparent transition-[background-color,border-color,box-shadow]"
                         aria-describedby="settings-username-error"
                         aria-invalid="false"
                         autocomplete="username"
@@ -177,7 +147,7 @@ const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
             </div>
         </form>
         <form
-            class="settings__panel slab slab--card flex flex-col gap-5"
+            class="slab slab--card flex flex-col gap-5"
             data-password-form
         >
             <h2 class="font-extrabold font-sans text-2xl tracking-tight">
@@ -188,7 +158,7 @@ const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
                     <span class="label block mb-2 text-ink-muted">New password</span>
                     <input
                         id="settings-password"
-                        class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-colors"
+                        class="aria-invalid:border-accent-deep aria-invalid:shadow-[3px_3px_0_0_var(--color-accent-20)] focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-[background-color,border-color,box-shadow]"
                         aria-describedby="settings-password-error"
                         aria-invalid="false"
                         autocomplete="new-password"
@@ -214,7 +184,7 @@ const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
                     <span class="label block mb-2 text-ink-muted">Confirm new password</span>
                     <input
                         id="settings-confirm"
-                        class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-colors"
+                        class="aria-invalid:border-accent-deep aria-invalid:shadow-[3px_3px_0_0_var(--color-accent-20)] focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-[background-color,border-color,box-shadow]"
                         aria-describedby="settings-confirm-error"
                         aria-invalid="false"
                         autocomplete="new-password"
@@ -251,23 +221,12 @@ const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
 </section>
 
 <style>
-    .settings__gate {
-        margin-inline: auto;
-        max-width: 544px;
-        text-align: center;
-    }
-
     .settings__link {
         align-items: center;
         display: inline-flex;
         min-height: var(--control-size);
         padding-inline: var(--space-3xs);
         text-decoration: underline;
-    }
-
-    .settings__panel,
-    .settings__summary {
-        max-width: 640px;
     }
 
     .settings__row {
@@ -293,12 +252,12 @@ const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
 </style>
 
 <script>
-    import { MOCK_LATENCY_MS } from '@lib/constants';
-    import { clearFieldErrors, confirmRule, focusFirstError, passwordRule, setFieldErrors, validateFields } from '@lib/forms';
-    import { delay, formatDateStamp, registerPageScript, setPending, setText } from '@lib/utils';
-    import { getOnboardingHref, isReservedUsername } from '@lib/onboarding';
-    import { getSession, onSessionChange, updateSession } from '@lib/session';
-    import { toast } from '@lib/toasts';
+    import { MOCK_LATENCY_MS, USERNAME_TAKEN_MESSAGE } from '@lib/constants';
+    import { clearFieldErrors, confirmRule, focusFirstError, passwordRule, setFieldErrors, usernameRule, validateFields } from '@lib/ui/forms';
+    import { delay, formatDateStamp, formatProds, registerPageScript, setPending, setText } from '@lib/utils';
+    import { getOnboardingHref, isReservedUsername } from '@lib/account/onboarding';
+    import { getSession, onSessionChange, updateSession } from '@lib/account/session';
+    import { toast } from '@lib/ui/toasts';
 
     const INVALID_MESSAGE = 'Nothing saved yet. Check the fields.';
 
@@ -307,10 +266,14 @@ const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
         password: passwordRule(),
     };
 
+    const PLACEHOLDER = '\u2014';
+
     const PROFILE_RULES: Record<string, FieldRule> = {
-        displayName: { message: 'Enter the name the roster should show.', required: true },
-        username: { message: 'Use 3 to 20 letters, numbers, or underscores.', pattern: /^[a-z0-9_]{3,20}$/i, required: true },
+        artistName: { message: 'Enter the name the roster should show.', required: true },
+        username: usernameRule(),
     };
+
+    const SIGNED_OUT_MESSAGE = 'Sign in to save changes.';
 
     let unsubscribe: (() => void) | undefined;
 
@@ -339,6 +302,13 @@ const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
 
         setPending(button, false);
         setText(status, '');
+
+        if (!getSession()) {
+            toast(SIGNED_OUT_MESSAGE, 'info');
+
+            return;
+        }
+
         form.reset();
         toast('Password updated.', 'success');
     }
@@ -350,7 +320,7 @@ const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
         const username = String(values.get('username') ?? '').trim();
         const errors = validateFields(form, PROFILE_RULES);
 
-        if (!errors.username && isReservedUsername(username)) errors.username = 'That username is taken. Pick another.';
+        if (!errors.username && isReservedUsername(username)) errors.username = USERNAME_TAKEN_MESSAGE;
 
         clearFieldErrors(form);
 
@@ -368,10 +338,17 @@ const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
         setPending(button, true);
         setText(status, 'Saving\u2026');
 
-        await updateSession({ displayName: String(values.get('displayName') ?? '').trim(), username: username.toLowerCase() });
+        const saved = await updateSession({ artistName: String(values.get('artistName') ?? '').trim(), username: username.toLowerCase() });
 
         setPending(button, false);
         setText(status, '');
+
+        if (!saved) {
+            toast(SIGNED_OUT_MESSAGE, 'info');
+
+            return;
+        }
+
         toast('Profile saved.', 'success');
     }
 
@@ -396,39 +373,33 @@ const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
     }
 
     function prefillProfile(form: HTMLFormElement) {
-        const name = form.querySelector<HTMLInputElement>('[name="displayName"]');
+        const name = form.querySelector<HTMLInputElement>('[name="artistName"]');
         const session = getSession();
         const username = form.querySelector<HTMLInputElement>('[name="username"]');
 
         if (!session) return;
 
-        if (name) name.value = session.displayName;
+        if (name) name.value = session.artistName;
         if (username) username.value = session.username;
     }
 
     function renderSession() {
         const link = document.querySelector<HTMLAnchorElement>('[data-settings-onboarding]');
         const session = getSession();
+        const profile = session?.onboarded ? 'Complete' : 'Not finished';
 
-        document.querySelectorAll<HTMLElement>('[data-settings-in]').forEach((element) => {
-            element.toggleAttribute('hidden', session === null);
-        });
-
-        document.querySelectorAll<HTMLElement>('[data-settings-out]').forEach((element) => {
-            element.toggleAttribute('hidden', session !== null);
-        });
-
-        if (!session) return;
-
-        setText(document.querySelector('[data-settings-email]'), session.email);
-        setText(document.querySelector('[data-settings-prods]'), session.prods === 1 ? '1 Prod' : `${session.prods} Prods`);
-        setText(document.querySelector('[data-settings-profile]'), session.onboarded ? 'Complete' : 'Not finished');
-        setText(document.querySelector('[data-settings-since]'), session.createdAt === 0 ? '\u2014' : formatDateStamp(new Date(session.createdAt)));
+        setText(document.querySelector('[data-settings-email]'), session?.email ?? PLACEHOLDER);
+        setText(document.querySelector('[data-settings-prods]'), session ? formatProds(session.prods) : PLACEHOLDER);
+        setText(document.querySelector('[data-settings-profile]'), session ? profile : PLACEHOLDER);
+        setText(document.querySelector('[data-settings-since]'), session?.createdAt ? formatDateStamp(new Date(session.createdAt)) : PLACEHOLDER);
 
         if (!link) return;
 
+        link.toggleAttribute('hidden', !session || session.onboarded);
+
+        if (!session) return;
+
         link.href = getOnboardingHref(session.email);
-        link.toggleAttribute('hidden', session.onboarded);
     }
 
     registerPageScript(initSettings);

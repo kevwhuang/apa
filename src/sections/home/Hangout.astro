@@ -1,0 +1,249 @@
+---
+import { getCollection } from 'astro:content';
+
+import SectionHead from '@components/shared/SectionHead.astro';
+import { LINKS } from '@lib/constants';
+import { formatCalendarDay, formatCalendarMonth, formatTimeRange, formatWeekday, getProgram } from '@lib/utils';
+
+const events = await getCollection('events');
+
+const [next] = events
+    .filter(event => event.data.type === 'hangout' && event.data.status === 'upcoming')
+    .sort((a, b) => +a.data.date - +b.data.date);
+
+const program = getProgram('hangout');
+---
+
+<section
+    class="stage stage--hangout border-b-2 border-ink"
+    aria-labelledby="landing-hangout-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-5xl tracking-tight"
+            eyebrow={`${program.shortName} / ${program.cadence}`}
+            headingId="landing-hangout-title"
+        >
+            Next {program.name}.
+            <a
+                class="action-text hover:text-accent-deep hidden items-center min-h-[50px] transition-colors md:inline-flex"
+                href="/events"
+                slot="cta"
+            >
+                All events &rarr;
+            </a>
+        </SectionHead>
+        <p class="max-w-2xl mb-14 leading-relaxed text-base text-ink-muted">
+            {program.summary}
+        </p>
+        {next
+            ? (
+                    <div class="hangout-flyer">
+                        <div
+                            class="halftone--accent hangout-flyer__field absolute pointer-events-none"
+                            aria-hidden="true"
+                        />
+                        <div class="hangout-flyer__frame mark tilt">
+                            <article
+                                id={next.id}
+                                class="hangout-flyer__card slab slab--bare slab--card"
+                                data-motion="tilt"
+                            >
+                                <p
+                                    class="hangout-flyer__stamp"
+                                    data-placeholder
+                                >
+                                    <span class="hangout-flyer__tag label px-2 py-1 bg-ink text-ink-inverse">
+                                        Next {program.shortName}
+                                    </span>
+                                    <time datetime={next.data.date.toISOString()}>
+                                        <span class="hangout-flyer__day">{formatCalendarDay(next.data.date)}</span>
+                                        <span class="hangout-flyer__month">{formatCalendarMonth(next.data.date)}</span>
+                                    </time>
+                                    <span class="hangout-flyer__weekday">{formatWeekday(next.data.date)}</span>
+                                </p>
+                                <div class="hangout-flyer__body">
+                                    <h3 class="font-extrabold font-sans leading-[0.95] text-4xl tracking-[-0.03em]">{next.data.title}</h3>
+                                    <p
+                                        class="mt-5 font-mono text-xs uppercase text-ink-muted"
+                                        data-placeholder
+                                    >
+                                        {formatTimeRange(next.data.date, next.data.end)}
+                                    </p>
+                                    <address class="mt-1 font-mono not-italic text-xs uppercase text-ink-muted">
+                                        {next.data.location}
+                                    </address>
+                                    <p class="max-w-2xl mt-5 leading-relaxed text-md text-ink-muted">{next.data.excerpt}</p>
+                                    <div class="flex flex-wrap gap-3 mt-8">
+                                        <a
+                                            class="btn btn--accent"
+                                            href={LINKS.meetup}
+                                            rel="noopener noreferrer"
+                                            target="_blank"
+                                        >
+                                            RSVP on Meetup
+                                            <span class="sr-only"> (opens in a new tab)</span>
+                                        </a>
+                                        <a
+                                            class="btn"
+                                            href="/events"
+                                        >
+                                            All events
+                                        </a>
+                                    </div>
+                                </div>
+                                <p
+                                    class="hangout-flyer__rail"
+                                    aria-hidden="true"
+                                >
+                                    {program.shortName} &middot; {program.cadence}
+                                </p>
+                            </article>
+                        </div>
+                    </div>
+                )
+            : (
+                    <div data-motion="rise">
+                        <p class="text-ink-muted">
+                            No {program.name} on the calendar right now &mdash; the next date goes up as soon as the room is booked.
+                        </p>
+                        <div class="flex flex-wrap gap-3 mt-8">
+                            <a
+                                class="btn btn--accent"
+                                href={LINKS.meetup}
+                                rel="noopener noreferrer"
+                                target="_blank"
+                            >
+                                RSVP on Meetup
+                                <span class="sr-only"> (opens in a new tab)</span>
+                            </a>
+                            <a
+                                class="btn"
+                                href="/events"
+                            >
+                                All events
+                            </a>
+                        </div>
+                    </div>
+                )}
+    </div>
+</section>
+
+<style>
+    .hangout-flyer {
+        position: relative;
+    }
+
+    .hangout-flyer__body {
+        align-content: start;
+        padding: var(--space-lg);
+    }
+
+    .hangout-flyer__card {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        overflow: clip;
+    }
+
+    .hangout-flyer__day {
+        display: block;
+        font-family: var(--font-sans);
+        font-size: clamp(64px, calc(37.333px + 8.3333vw), 144px);
+        font-weight: 800;
+        letter-spacing: -0.05em;
+        line-height: 0.78;
+    }
+
+    .hangout-flyer__field {
+        inset: calc(-1 * var(--space-lg)) calc(-1 * var(--space-2xl));
+    }
+
+    .hangout-flyer__month {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .hangout-flyer__rail {
+        align-items: center;
+        background: var(--color-ink);
+        border-left: 2px solid var(--color-ink);
+        color: var(--color-ink-inverse);
+        display: flex;
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        justify-content: center;
+        letter-spacing: 0.32em;
+        padding-block: var(--space-md);
+        padding-inline: var(--space-xs);
+        text-transform: uppercase;
+        writing-mode: vertical-rl;
+    }
+
+    .hangout-flyer__stamp {
+        align-content: center;
+        background: var(--color-accent);
+        border-right: 2px solid var(--color-ink);
+        display: grid;
+        gap: var(--space-2xs);
+        justify-items: start;
+        padding: var(--space-lg);
+    }
+
+    .hangout-flyer__stamp time {
+        display: contents;
+    }
+
+    .hangout-flyer__weekday {
+        color: var(--color-ink-70);
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    @media (max-width: 768px) {
+        .hangout-flyer__card {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .hangout-flyer__day {
+            align-self: center;
+            grid-row: span 2;
+        }
+
+        .hangout-flyer__field {
+            inset: calc(-1 * var(--space-md)) calc(-1 * var(--space-lg));
+        }
+
+        .hangout-flyer__month {
+            align-self: center;
+            justify-self: end;
+        }
+
+        .hangout-flyer__rail {
+            display: none;
+        }
+
+        .hangout-flyer__stamp {
+            align-content: start;
+            border-bottom: 2px solid var(--color-ink);
+            border-right: 0;
+            column-gap: var(--space-sm);
+            grid-template-columns: auto minmax(0, 1fr);
+            padding: var(--space-md);
+        }
+
+        .hangout-flyer__tag {
+            grid-column: 1 / -1;
+        }
+
+        .hangout-flyer__weekday {
+            align-self: center;
+            justify-self: end;
+        }
+    }
+</style>

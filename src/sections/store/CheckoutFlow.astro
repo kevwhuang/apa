@@ -32,20 +32,20 @@ const PAYMENT_FIELDS: CheckoutField[] = [
 ];
 
 const SHIPPING_FIELDS: CheckoutField[] = [
-    { autocomplete: 'given-name', column: 'md:col-span-3', label: 'First name', maxlength: FIELD_LIMITS.name, name: 'given-name' },
-    { autocomplete: 'family-name', column: 'md:col-span-3', label: 'Last name', maxlength: FIELD_LIMITS.name, name: 'family-name' },
-    { autocomplete: 'email', column: 'md:col-span-6', label: 'Email', maxlength: FIELD_LIMITS.email, name: 'email', type: 'email' },
-    { autocomplete: 'street-address', column: 'md:col-span-6', label: 'Street address', maxlength: FIELD_LIMITS.address, name: 'address' },
-    { autocomplete: 'address-level2', column: 'md:col-span-2', label: 'City', maxlength: FIELD_LIMITS.name, name: 'city' },
-    { autocomplete: 'address-level1', column: 'md:col-span-2', kind: 'select', label: 'State', name: 'state' },
-    { autocomplete: 'postal-code', column: 'md:col-span-2', inputmode: 'numeric', label: 'ZIP code', name: 'zip', pattern: '[0-9]{5}(-[0-9]{4})?' },
+    { autocomplete: 'given-name', column: 'md:col-span-6', label: 'First name', maxlength: FIELD_LIMITS.name, name: 'given-name' },
+    { autocomplete: 'family-name', column: 'md:col-span-6', label: 'Last name', maxlength: FIELD_LIMITS.name, name: 'family-name' },
+    { autocomplete: 'email', column: 'md:col-span-12', label: 'Email', maxlength: FIELD_LIMITS.email, name: 'email', type: 'email' },
+    { autocomplete: 'street-address', column: 'md:col-span-12', label: 'Street address', maxlength: FIELD_LIMITS.address, name: 'address' },
+    { autocomplete: 'address-level2', column: 'md:col-span-12', label: 'City', maxlength: FIELD_LIMITS.name, name: 'city' },
+    { autocomplete: 'address-level1', column: 'lg:col-span-7 md:col-span-12', kind: 'select', label: 'State', name: 'state' },
+    { autocomplete: 'postal-code', column: 'lg:col-span-5 md:col-span-12', inputmode: 'numeric', label: 'ZIP code', name: 'zip', pattern: '[0-9]{5}(-[0-9]{4})?' },
 ];
 
 const catalog = toCatalog(await getCollection('products'));
 ---
 
 <section
-    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    class="stage stage--focus stage--tight border-b-2 border-ink"
     aria-labelledby="checkout-title"
 >
     <div>
@@ -78,7 +78,7 @@ const catalog = toCatalog(await getCollection('products'));
 </section>
 
 <section
-    class="stage stage--narrow stage--tight"
+    class="stage stage--focus stage--tight"
     aria-label="Checkout form"
     data-catalog={JSON.stringify(catalog)}
 >
@@ -104,22 +104,6 @@ const catalog = toCatalog(await getCollection('products'));
             class="checkout-form flex flex-col gap-6"
             data-checkout-form
         >
-            <div
-                class="checkout__alert slab slab--card flex flex-col gap-3"
-                data-form-error
-                hidden
-                role="alert"
-                tabindex="-1"
-            >
-                <p
-                    class="action-text text-accent-deep"
-                    data-form-error-message
-                />
-                <ul
-                    class="checkout__alert-list list-none"
-                    data-form-error-list
-                />
-            </div>
             <fieldset
                 class="step-pane"
                 data-step="0"
@@ -127,27 +111,29 @@ const catalog = toCatalog(await getCollection('products'));
                 <legend class="mb-6 font-extrabold font-sans text-2xl tracking-tight">
                     Shipping
                 </legend>
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-6">
+                <div class="checkout__fields grid grid-cols-1 md:grid-cols-12">
                     {SHIPPING_FIELDS.map(field => (
                         <div class:list={['flex flex-col gap-2', field.column]}>
                             <label class="flex flex-col gap-2">
                                 <span class="label text-ink-muted">{field.label}</span>
                                 {field.kind === 'select'
                                     ? (
-                                            <select
-                                                id={`checkout-${field.name}`}
-                                                class="checkout-field__control h-[50px] w-full px-4 border-2 border-ink bg-transparent"
-                                                aria-describedby={`checkout-${field.name}-error`}
-                                                aria-invalid="false"
-                                                autocomplete={field.autocomplete}
-                                                name={field.name}
-                                                required
-                                            >
-                                                <option value="">Choose&hellip;</option>
-                                                {US_STATES.map(state => (
-                                                    <option value={state.code}>{state.name}</option>
-                                                ))}
-                                            </select>
+                                            <span class="select">
+                                                <select
+                                                    id={`checkout-${field.name}`}
+                                                    class="checkout-field__control h-[50px] w-full pl-4 border-2 border-ink bg-transparent"
+                                                    aria-describedby={`checkout-${field.name}-error`}
+                                                    aria-invalid="false"
+                                                    autocomplete={field.autocomplete}
+                                                    name={field.name}
+                                                    required
+                                                >
+                                                    <option value="">Choose&hellip;</option>
+                                                    {US_STATES.map(state => (
+                                                        <option value={state.code}>{state.name}</option>
+                                                    ))}
+                                                </select>
+                                            </span>
                                         )
                                     : (
                                             <input
@@ -184,7 +170,7 @@ const catalog = toCatalog(await getCollection('products'));
                 <legend class="mb-6 font-extrabold font-sans text-2xl tracking-tight">
                     Payment
                 </legend>
-                <div class="grid grid-cols-1 gap-4 mb-4 md:grid-cols-6">
+                <div class="checkout__fields grid grid-cols-1 md:grid-cols-6">
                     {PAYMENT_FIELDS.map(field => (
                         <div class:list={['flex flex-col gap-2', field.column]}>
                             <label class="flex flex-col gap-2">
@@ -213,17 +199,22 @@ const catalog = toCatalog(await getCollection('products'));
                         </div>
                     ))}
                 </div>
-                <p class="label mb-3 text-ink-muted">Card numbers</p>
-                <dl class="checkout__cards">
-                    <div class="checkout__card-row">
-                        <dt class="font-mono text-sm">{DEMO_CARDS.approved}</dt>
-                        <dd class="text-sm text-ink-muted">Approved</dd>
-                    </div>
-                    <div class="checkout__card-row">
-                        <dt class="font-mono text-sm">{DEMO_CARDS.declined}</dt>
-                        <dd class="text-sm text-ink-muted">Declined</dd>
-                    </div>
-                </dl>
+                <div class="checkout__demo slab slab--sunk">
+                    <p class="label text-ink-muted">Demo card numbers</p>
+                    <dl class="checkout__cards">
+                        <div class="checkout__card">
+                            <dt class="checkout__card-number">{DEMO_CARDS.approved}</dt>
+                            <dd class="checkout__card-tag checkout__card-tag--ok label">Approved</dd>
+                        </div>
+                        <div class="checkout__card">
+                            <dt class="checkout__card-number">{DEMO_CARDS.declined}</dt>
+                            <dd class="checkout__card-tag label">Declined</dd>
+                        </div>
+                    </dl>
+                    <p class="checkout__note">
+                        Use any future expiration date and any three or four digit security code.
+                    </p>
+                </div>
             </fieldset>
             <fieldset
                 class="step-pane hidden"
@@ -247,52 +238,54 @@ const catalog = toCatalog(await getCollection('products'));
                     />
                 </aside>
                 <ul
-                    class="review-list scroll-slot mb-6 border-2 border-ink list-none"
+                    class="review-list scroll-slot border-2 border-ink list-none"
                     data-review-list
                 />
-                <div class="flex flex-col gap-2">
-                    <label class="checkout__check">
+                <div class="checkout__consent">
+                    <div class="checkout__check-field">
+                        <label class="checkout__check">
+                            <input
+                                id="checkout-terms"
+                                class="checkout__box"
+                                aria-describedby="checkout-terms-error"
+                                aria-invalid="false"
+                                name="terms"
+                                required
+                                type="checkbox"
+                            />
+                            <span>I accept the terms and conditions</span>
+                        </label>
+                        <p
+                            id="checkout-terms-error"
+                            class="action-text text-accent-deep"
+                            data-field-error
+                            hidden
+                        />
+                    </div>
+                    <label
+                        class="checkout__check"
+                        data-prods-field
+                        hidden
+                    >
                         <input
-                            id="checkout-terms"
+                            id="checkout-prods"
                             class="checkout__box"
-                            aria-describedby="checkout-terms-error"
-                            aria-invalid="false"
-                            name="terms"
-                            required
+                            name="prods"
                             type="checkbox"
                         />
-                        I accept the terms and conditions
+                        <span data-prods-label>Apply your Prods</span>
                     </label>
-                    <p
-                        id="checkout-terms-error"
-                        class="action-text text-accent-deep"
-                        data-field-error
-                        hidden
-                    />
+                    <p class="checkout__note">
+                        Read the&#32;
+                        <a
+                            class="checkout__link"
+                            href="/terms"
+                        >
+                            terms
+                        </a>&#32;
+                        before you accept them.
+                    </p>
                 </div>
-                <label
-                    class="checkout__check"
-                    data-prods-field
-                    hidden
-                >
-                    <input
-                        id="checkout-prods"
-                        class="checkout__box"
-                        name="prods"
-                        type="checkbox"
-                    />
-                    <span data-prods-label>Apply your Prods</span>
-                </label>
-                <p class="mt-4 text-sm text-ink-muted">
-                    Read the&#32;
-                    <a
-                        class="checkout__link hover:text-accent-deep decoration-2 decoration-accent underline underline-offset-4 transition-colors"
-                        href="/terms"
-                    >
-                        terms
-                    </a>&#32;
-                    before you accept them.
-                </p>
             </fieldset>
             <div class="flex flex-wrap justify-between gap-4">
                 <button
@@ -315,7 +308,7 @@ const catalog = toCatalog(await getCollection('products'));
             />
         </form>
         <aside
-            class="slab slab--sunk self-start"
+            class="checkout__aside slab slab--sunk self-start"
             aria-label="Order summary"
         >
             <h2 class="label mb-4 text-ink-muted">Summary</h2>
@@ -356,17 +349,6 @@ const catalog = toCatalog(await getCollection('products'));
             </dl>
         </aside>
     </div>
-    <template data-error-anchor>
-        <li>
-            <a
-                class="checkout__anchor hover:text-accent-deep flex items-center min-h-[50px] text-sm underline"
-                data-anchor
-                href="#checkout-email"
-            >
-                Fix this field
-            </a>
-        </li>
-    </template>
     <template data-issue-row>
         <li class="flex gap-2 text-sm text-ink-muted">
             <span
@@ -379,26 +361,33 @@ const catalog = toCatalog(await getCollection('products'));
         </li>
     </template>
     <template data-review-row>
-        <li class="first:border-t-0 flex items-center gap-4 p-4 border-t-2 border-ink">
+        <li class="review-row first:border-t-0 border-t-2 border-ink">
             <div
-                class="flex items-center justify-center overflow-hidden relative shrink-0 h-14 w-14"
+                class="review-row__tile"
                 aria-hidden="true"
                 data-review-tile
             >
                 <div class="halftone absolute inset-0" />
             </div>
-            <div class="flex-1 min-w-0">
+            <div class="review-row__body">
                 <p
                     class="font-bold font-sans"
                     data-review-title
                 />
-                <p
-                    class="label text-ink-muted"
-                    data-review-variant
-                />
+                <p class="review-row__meta">
+                    <span
+                        class="label text-ink-muted"
+                        data-review-variant
+                        hidden
+                    />
+                    <span
+                        class="label review-row__qty"
+                        data-review-qty
+                    />
+                </p>
             </div>
             <p
-                class="font-bold font-mono"
+                class="review-row__price font-bold font-mono"
                 data-review-price
             />
         </li>
@@ -432,23 +421,9 @@ const catalog = toCatalog(await getCollection('products'));
         box-shadow: 3px 3px 0 0 var(--color-accent-20);
     }
 
-    .checkout__alert {
-        border-left: 2px solid var(--color-accent-deep);
-    }
-
-    .checkout__alert-list,
-    .checkout__issues {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-3xs);
-    }
-
-    .checkout__anchor {
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .checkout__anchor:active {
-        transform: translateY(1px);
+    .checkout__aside {
+        position: sticky;
+        top: calc(var(--header-height) + var(--space-md));
     }
 
     .checkout__box {
@@ -485,17 +460,33 @@ const catalog = toCatalog(await getCollection('products'));
             0 0 0 4px var(--color-accent-deep);
     }
 
-    .checkout__card-row {
+    .checkout__card {
+        align-items: baseline;
         display: flex;
-        gap: var(--space-xs);
+        gap: var(--space-sm);
         justify-content: space-between;
+    }
+
+    .checkout__card-number {
+        font-family: var(--font-mono);
+        font-size: var(--text-smd);
+        letter-spacing: 0.04em;
+    }
+
+    .checkout__card-tag {
+        color: var(--color-accent-deep);
+        white-space: nowrap;
+    }
+
+    .checkout__card-tag--ok {
+        color: var(--color-pulse-deep);
     }
 
     .checkout__cards {
         border-top: 1px solid var(--color-ink-20);
         display: flex;
         flex-direction: column;
-        gap: var(--space-3xs);
+        gap: var(--space-2xs);
         padding-top: var(--space-xs);
     }
 
@@ -510,19 +501,73 @@ const catalog = toCatalog(await getCollection('products'));
         transition: background-color var(--duration-fast) var(--motion-ease-ui);
     }
 
+    .checkout__check-field {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3xs);
+    }
+
     .checkout__check:active,
     .checkout__check:hover {
         background-color: var(--color-surface-sunken);
     }
 
+    .checkout__check:active .checkout__box,
+    .checkout__check:hover .checkout__box {
+        border-color: var(--color-accent-deep);
+    }
+
+    .checkout__consent {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xs);
+        margin-top: var(--space-lg);
+    }
+
+    .checkout__demo {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xs);
+        margin-top: var(--space-lg);
+    }
+
+    .checkout__fields {
+        column-gap: var(--space-sm);
+        row-gap: var(--space-md);
+    }
+
+    .checkout__issues {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3xs);
+    }
+
     .checkout__link {
+        color: var(--color-ink);
         display: inline-block;
-        padding-block: var(--space-sm);
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        padding-block: var(--space-3xs);
+        text-decoration-color: var(--color-accent);
+        text-decoration-line: underline;
+        text-decoration-thickness: 2px;
+        text-underline-offset: 4px;
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            text-decoration-color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .checkout__link:active {
         transform: translateY(1px);
+    }
+
+    .checkout__link:hover {
+        color: var(--color-accent-deep);
+        text-decoration-color: var(--color-accent-deep);
+    }
+
+    .checkout__note {
+        color: var(--color-ink-muted);
+        font-size: var(--text-sm);
     }
 
     .checkout__notice {
@@ -532,6 +577,49 @@ const catalog = toCatalog(await getCollection('products'));
     .checkout__summary,
     .review-list {
         --scroll-slot-max: 40vh;
+    }
+
+    .review-row {
+        align-items: center;
+        display: flex;
+        gap: var(--space-sm);
+        padding: var(--space-md);
+    }
+
+    .review-row__body {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: var(--space-2xs);
+        min-width: 0;
+    }
+
+    .review-row__meta {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2xs);
+    }
+
+    .review-row__price {
+        white-space: nowrap;
+    }
+
+    .review-row__qty {
+        border: 1px solid var(--color-ink-20);
+        font-weight: 700;
+        padding: var(--space-3xs) var(--space-2xs);
+    }
+
+    .review-row__tile {
+        align-items: center;
+        display: flex;
+        flex-shrink: 0;
+        height: 56px;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+        width: 56px;
     }
 
     .step--done {
@@ -566,11 +654,12 @@ const catalog = toCatalog(await getCollection('products'));
     import { navigate } from 'astro:transitions/client';
 
     import { CARD_COLORS, CENTS_PER_DOLLAR, CHECKOUT_STEPS, EMAIL_PATTERN, FIELD_LIMITS } from '@lib/constants';
-    import { clearFieldErrors, renderErrorSummary, renderIssueList, setFieldErrors, validateFields } from '@lib/forms';
-    import { formatPrice, formatVariant, parseCatalog, registerPageScript, setPending, setText } from '@lib/utils';
-    import { getItems, reconcile, totals } from '@lib/store';
-    import { getSession } from '@lib/session';
-    import { isDemoCardNumber, placeOrder } from '@lib/checkout';
+    import { clearFieldErrors, focusFirstError, renderIssueList, setFieldErrors, validateFields } from '@lib/ui/forms';
+    import { formatPrice, formatProds, formatVariant, parseCatalog, registerPageScript, setPending, setText } from '@lib/utils';
+    import { getItems, reconcile, totals } from '@lib/commerce/cart';
+    import { getSession } from '@lib/account/session';
+    import { isDemoCardNumber, placeOrder } from '@lib/commerce/checkout';
+    import { toast } from '@lib/ui/toasts';
 
     interface CheckoutControls {
         backButton: HTMLButtonElement;
@@ -668,10 +757,10 @@ const catalog = toCatalog(await getCollection('products'));
         const errors = validateFields(controls.form, STEP_RULES[step]);
 
         clearFieldErrors(controls.form);
-        renderErrorSummary(controls.form, errors, 'checkout');
 
         if (Object.keys(errors).length > 0) {
             setFieldErrors(controls.form, errors);
+            focusFirstError(controls.form, errors);
 
             return;
         }
@@ -724,7 +813,7 @@ const catalog = toCatalog(await getCollection('products'));
         renderSummary(form);
 
         backButton.addEventListener('click', () => handleBackClick(controls), { signal });
-        form.addEventListener('submit', event => handleFormSubmit(event, controls), { signal });
+        form.addEventListener('submit', event => void handleFormSubmit(event, controls), { signal });
         signal.addEventListener('abort', () => clearCardFields(form), { once: true });
 
         form.querySelectorAll<HTMLInputElement>('[name="cc-number"], [name="cc-csc"]').forEach((input) => {
@@ -771,7 +860,7 @@ const catalog = toCatalog(await getCollection('products'));
 
         if (prods === 0) return;
 
-        setText(field.querySelector('[data-prods-label]'), `Apply ${prods} ${prods === 1 ? 'Prod' : 'Prods'} (${formatPrice(prods * CENTS_PER_DOLLAR)} credit)`);
+        setText(field.querySelector('[data-prods-label]'), `Apply ${formatProds(prods)} (${formatPrice(prods * CENTS_PER_DOLLAR)} credit)`);
     }
 
     function renderReview(form: HTMLFormElement) {
@@ -789,14 +878,18 @@ const catalog = toCatalog(await getCollection('products'));
 
         orderItems.forEach((item, index) => {
             const fragment = template.content.cloneNode(true) as DocumentFragment;
+            const label = fragment.querySelector<HTMLElement>('[data-review-variant]');
             const tile = fragment.querySelector<HTMLElement>('[data-review-tile]');
             const variant = formatVariant(item);
 
             if (tile) tile.style.background = CARD_COLORS[index % CARD_COLORS.length];
 
+            label?.toggleAttribute('hidden', variant.length === 0);
+
             setText(fragment.querySelector('[data-review-price]'), formatPrice(item.priceCents * item.quantity));
+            setText(fragment.querySelector('[data-review-qty]'), `\u00d7 ${item.quantity}`);
             setText(fragment.querySelector('[data-review-title]'), item.title);
-            setText(fragment.querySelector('[data-review-variant]'), [variant, `\u00d7 ${item.quantity}`].filter(Boolean).join(' / '));
+            setText(label, variant);
             list.append(fragment);
         });
     }
@@ -830,18 +923,6 @@ const catalog = toCatalog(await getCollection('products'));
         setText(document.querySelector('[data-total]'), formatPrice(summary.totalCents));
     }
 
-    function showAlert(form: HTMLFormElement, message: string) {
-        const list = form.querySelector<HTMLElement>('[data-form-error-list]');
-        const summary = form.querySelector<HTMLElement>('[data-form-error]');
-
-        if (!list || !summary) return;
-
-        list.replaceChildren();
-        summary.removeAttribute('hidden');
-        setText(summary.querySelector('[data-form-error-message]'), message);
-        summary.focus();
-    }
-
     async function submitOrder(controls: CheckoutControls) {
         const issues = reconcile(catalog);
 
@@ -869,25 +950,28 @@ const catalog = toCatalog(await getCollection('products'));
         setPending(controls.nextButton, false);
         setText(status, '');
 
-        if (!result.ok) {
-            if (result.code !== 'card-declined') {
-                blocked = true;
-                controls.nextButton.textContent = 'Back to cart';
-                showAlert(controls.form, result.message);
+        if (!result.ok && result.code !== 'card-declined') {
+            blocked = true;
+            controls.nextButton.textContent = 'Back to cart';
+            setText(status, result.message);
+            toast(result.message, 'error');
 
-                return;
-            }
+            return;
+        }
+
+        if (!result.ok) {
+            const failure = { 'cc-number': result.message };
 
             step = 1;
             updateSteps(controls, true);
-            setFieldErrors(controls.form, { 'cc-number': result.message });
-            renderErrorSummary(controls.form, { 'cc-number': result.message }, 'checkout');
+            setFieldErrors(controls.form, failure);
+            focusFirstError(controls.form, failure);
 
             return;
         }
 
         clearCardFields(controls.form);
-        await navigate('/store/order');
+        await navigate('/store/orders');
     }
 
     function updateSteps(controls: CheckoutControls, moveFocus: boolean) {

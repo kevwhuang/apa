@@ -9,20 +9,20 @@ interface Props {
     lede: string;
 }
 
-const MARK_HEIGHT = 72;
+const MARK_HEIGHT = 140;
 
 const ROUTES = [
     { href: '/', label: 'Home', primary: true },
     { href: '/events', label: 'Events', primary: false },
     { href: '/producers', label: 'Producers', primary: false },
-    { href: '/store', label: 'Store', primary: false },
+    { href: '/resources', label: 'Resources', primary: false },
 ];
 
 const { code, eyebrow, headingId, lede } = Astro.props;
 ---
 
 <section
-    class="stage stage--narrow"
+    class="stage"
     aria-labelledby={headingId}
 >
     <div class="mark rank rank--2 items-center">
@@ -67,7 +67,7 @@ const { code, eyebrow, headingId, lede } = Astro.props;
                 aria-hidden="true"
             />
             <BrandMark
-                class="relative text-ink-inverse"
+                class="error__mark relative text-ink-inverse"
                 height={MARK_HEIGHT}
             />
         </div>
@@ -87,6 +87,11 @@ const { code, eyebrow, headingId, lede } = Astro.props;
     @media (max-width: 768px) {
         .error__plate {
             aspect-ratio: 2;
+        }
+
+        .error__plate :global(.error__mark) {
+            height: auto;
+            width: 55%;
         }
     }
 </style>

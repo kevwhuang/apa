@@ -55,31 +55,93 @@ import SectionHead from '@components/shared/SectionHead.astro';
 </section>
 
 <script>
+    import { EMAIL_PATTERN, STORAGE } from '@lib/constants';
+    import { createStore } from '@lib/state';
+    import { toast } from '@lib/ui/toasts';
     import { registerPageScript } from '@lib/utils';
 
-    function handleNewsletterSubmit(event: SubmitEvent, form: HTMLFormElement) {
+    interface NewsletterElements {
+        button: HTMLButtonElement;
+        input: HTMLInputElement;
+        output: HTMLElement;
+    }
+
+    const INVALID_MESSAGE = 'Enter a valid email address.';
+
+    const subscription = createStore<string | null>({
+        fallback: null,
+        key: STORAGE.newsletter.key,
+        normalize: normalizeEmail,
+        scope: STORAGE.newsletter.scope,
+        topic: STORAGE.newsletter.topic,
+    });
+
+    function confirmationMessage(email: string, returning: boolean) {
+        return returning
+            ? `You are already on the list \u2014 the next dispatch goes to ${email}.`
+            : 'You are on the list. The next dispatch lands in your inbox.';
+    }
+
+    function handleNewsletterSubmit(event: SubmitEvent, elements: NewsletterElements) {
         event.preventDefault();
 
-        const button = form.querySelector<HTMLButtonElement>('button');
-        const input = form.querySelector<HTMLInputElement>('input');
-        const output = form.querySelector<HTMLElement>('[data-output]');
+        const subscribed = subscription.get();
 
-        if (!button || !input || !output) return;
+        if (subscribed !== null) {
+            showConfirmation(elements, subscribed, true);
+            toast('You are already on the list.', 'info');
 
-        button.disabled = true;
-        input.disabled = true;
-        output.textContent = 'You are on the list. The next dispatch lands in your inbox.';
-        output.classList.remove('hidden');
-        output.tabIndex = -1;
-        output.focus();
+            return;
+        }
+
+        const email = normalizeEmail(elements.input.value);
+
+        if (email === null) {
+            toast(INVALID_MESSAGE, 'error');
+
+            return;
+        }
+
+        subscription.set(email);
+        showConfirmation(elements, email, false);
+        toast('You are on the list \u2014 the next dispatch lands in your inbox.', 'success');
     }
 
     function initNewsletter(signal: AbortSignal) {
         const form = document.querySelector<HTMLFormElement>('.newsletter-form');
+        const button = form?.querySelector<HTMLButtonElement>('button');
+        const input = form?.querySelector<HTMLInputElement>('input');
+        const output = form?.querySelector<HTMLElement>('[data-output]');
 
-        if (!form) return;
+        if (!form || !button || !input || !output) return;
 
-        form.addEventListener('submit', event => handleNewsletterSubmit(event, form), { signal });
+        const elements = { button, input, output };
+        const subscribed = subscription.get();
+
+        form.addEventListener('submit', event => handleNewsletterSubmit(event, elements), { signal });
+
+        if (subscribed !== null) showConfirmation(elements, subscribed, true);
+    }
+
+    function normalizeEmail(value: string | null) {
+        const email = typeof value === 'string' ? value.trim().toLowerCase() : '';
+
+        return EMAIL_PATTERN.test(email) ? email : null;
+    }
+
+    function showConfirmation(elements: NewsletterElements, email: string, returning: boolean) {
+        const { button, input, output } = elements;
+
+        button.disabled = true;
+        input.disabled = true;
+        input.value = email;
+        output.textContent = confirmationMessage(email, returning);
+        output.classList.remove('hidden');
+
+        if (returning) return;
+
+        output.tabIndex = -1;
+        output.focus();
     }
 
     registerPageScript(initNewsletter);

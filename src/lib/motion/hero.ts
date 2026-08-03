@@ -67,6 +67,8 @@ const SLOW_CORE_COUNT = 4;
 
 const SPRITE_LEVELS = 10;
 
+const SWEEP_SLOWDOWN = 2;
+
 const SWELL_CYCLES = 1.2;
 
 const SWELL_FLOOR = 0.3;
@@ -126,7 +128,7 @@ function initPlayhead(signal: AbortSignal, still: boolean): void {
     const tokens = getMotionTokens();
 
     const sweep = gsap.fromTo(playhead, { xPercent: PLAYHEAD_START }, {
-        duration: STEP_COUNT * stepDuration(),
+        duration: STEP_COUNT * stepDuration() * SWEEP_SLOWDOWN,
         ease: tokens.ease.linear,
         repeat: -1,
         xPercent: PLAYHEAD_END,

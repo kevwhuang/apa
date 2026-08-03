@@ -1,0 +1,191 @@
+---
+interface ModuleRun {
+    length: number;
+    x: number;
+    y: number;
+}
+
+interface Props {
+    caption?: string;
+    class?: string;
+    data: string;
+    label: string;
+}
+
+const ALIGNMENT_CENTER = 22;
+
+const FINDER_SIZE = 7;
+
+const HASH_OFFSET = 2166136261;
+
+const HASH_PRIME = 16777619;
+
+const MODULE_COUNT = 29;
+
+const QUIET_ZONE = 4;
+
+const TIMING_INDEX = 6;
+
+const { caption, class: qrClass, data, label } = Astro.props;
+
+function buildModules(seed: string): boolean[][] {
+    const grid: boolean[][] = [];
+    const random = createRandom(hashSeed(seed));
+
+    for (let y = 0; y < MODULE_COUNT; y += 1) {
+        const row: boolean[] = [];
+
+        for (let x = 0; x < MODULE_COUNT; x += 1) {
+            const fixed = fixedModule(x, y);
+
+            row.push(fixed === null ? random() < 0.5 : fixed);
+        }
+
+        grid.push(row);
+    }
+
+    return grid;
+}
+
+function createRandom(seed: number): () => number {
+    let state = seed >>> 0;
+
+    return () => {
+        state = (state + 0x6d2b79f5) >>> 0;
+
+        let value = Math.imul(state ^ (state >>> 15), state | 1);
+
+        value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+
+        return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+function fixedModule(x: number, y: number): boolean | null {
+    const finderOrigins = [[0, 0], [MODULE_COUNT - FINDER_SIZE, 0], [0, MODULE_COUNT - FINDER_SIZE]];
+
+    for (const [originX, originY] of finderOrigins) {
+        const finderX = x - originX;
+        const finderY = y - originY;
+
+        if (finderX < -1 || finderX > FINDER_SIZE || finderY < -1 || finderY > FINDER_SIZE) continue;
+
+        if (finderX < 0 || finderX > 6 || finderY < 0 || finderY > 6) return false;
+
+        return Math.max(Math.abs(finderX - 3), Math.abs(finderY - 3)) !== 2;
+    }
+
+    if (x === TIMING_INDEX || y === TIMING_INDEX) return (x + y) % 2 === 0;
+
+    const alignmentX = x - ALIGNMENT_CENTER;
+    const alignmentY = y - ALIGNMENT_CENTER;
+
+    if (Math.abs(alignmentX) <= 2 && Math.abs(alignmentY) <= 2) {
+        return Math.max(Math.abs(alignmentX), Math.abs(alignmentY)) !== 1;
+    }
+
+    if (x === 8 && y === MODULE_COUNT - 8) return true;
+
+    return null;
+}
+
+function hashSeed(value: string): number {
+    let hash = HASH_OFFSET;
+
+    for (let index = 0; index < value.length; index += 1) {
+        hash = Math.imul(hash ^ value.charCodeAt(index), HASH_PRIME);
+    }
+
+    return hash >>> 0;
+}
+
+function toRuns(grid: boolean[][]): ModuleRun[] {
+    const runs: ModuleRun[] = [];
+
+    grid.forEach((row, y) => {
+        let start = -1;
+
+        row.forEach((dark, x) => {
+            if (dark && start < 0) start = x;
+
+            if (!dark && start >= 0) {
+                runs.push({ length: x - start, x: start, y });
+                start = -1;
+            }
+        });
+
+        if (start >= 0) runs.push({ length: row.length - start, x: start, y });
+    });
+
+    return runs;
+}
+
+const runs = toRuns(buildModules(data));
+
+const viewSize = MODULE_COUNT + QUIET_ZONE * 2;
+---
+
+<figure class:list={['qr', qrClass]}>
+    <svg
+        class="qr__code"
+        aria-label={label}
+        role="img"
+        shape-rendering="crispEdges"
+        viewBox={`0 0 ${viewSize} ${viewSize}`}
+    >
+        <rect
+            class="qr__quiet"
+            height={viewSize}
+            width={viewSize}
+            x="0"
+            y="0"
+        />
+        {runs.map(run => (
+            <rect
+                fill="currentColor"
+                height="1"
+                width={run.length}
+                x={run.x + QUIET_ZONE}
+                y={run.y + QUIET_ZONE}
+            />
+        ))}
+    </svg>
+    {caption && (
+        <figcaption class="qr__caption label">{caption}</figcaption>
+    )}
+</figure>
+
+<style>
+    .qr {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+
+    .qr__caption {
+        text-align: center;
+        text-wrap: balance;
+    }
+
+    .qr__code {
+        aspect-ratio: 1;
+        display: block;
+        max-width: 100%;
+        width: clamp(240px, 26vw, 320px);
+    }
+
+    .qr__quiet {
+        fill: var(--color-surface-raised);
+    }
+
+    @media (forced-colors: active) {
+        .qr__code {
+            forced-color-adjust: none;
+        }
+
+        .qr__quiet {
+            fill: Canvas;
+        }
+    }
+</style>

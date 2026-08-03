@@ -2,15 +2,15 @@
 import { getCollection } from 'astro:content';
 
 import SectionHead from '@components/shared/SectionHead.astro';
-import { formatDate, formatTimeRange, getProgram } from '@lib/utils';
-
-const program = getProgram('assembly');
+import { formatCalendarDay, formatCalendarMonth, formatTimeRange, formatWeekday, getProgram } from '@lib/utils';
 
 const events = await getCollection('events');
 
 const [next] = events
     .filter(event => event.data.type === 'assembly' && event.data.status === 'upcoming')
     .sort((a, b) => +a.data.date - +b.data.date);
+
+const program = getProgram('assembly');
 ---
 
 <section
@@ -19,71 +19,67 @@ const [next] = events
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-5xl tracking-tight"
+            class="font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-7xl"
             eyebrow={`${program.shortName} / ${program.cadence}`}
             headingId="landing-assembly-title"
         >
             Next {program.name}.
             <a
-                class="action-text hover:text-accent-deep hidden items-center min-h-[50px] transition-colors md:inline-flex"
+                class="action-text hover:text-accent-deep hidden items-center min-h-[50px] transition-colors whitespace-nowrap md:inline-flex"
                 href="/events"
                 slot="cta"
             >
                 All events &rarr;
             </a>
         </SectionHead>
-        <p class="max-w-2xl mb-10 leading-relaxed text-base text-ink-muted">
+        <p class="max-w-2xl leading-relaxed text-md text-ink-muted">
             {program.summary}
         </p>
-        {next
-            ? (
-                    <article
-                        class="mark slab slab--cut slab--lift grid grid-cols-12 items-start gap-x-2 gap-y-6 md:gap-x-8"
-                        data-motion="unfold"
+    </div>
+    {next
+        ? (
+                <article
+                    class="assembly-sheet mark slab slab--bare slab--lift stage__item--runoff"
+                    data-motion="unfold"
+                >
+                    <p
+                        class="assembly-sheet__plate"
+                        data-placeholder
                     >
-                        <div class="col-span-12 md:col-span-4">
-                            <p class="label mb-2 text-accent-deep">{program.shortName}</p>
-                            <p
-                                class="font-extrabold font-sans text-3xl"
-                                data-placeholder
-                            >
-                                <time datetime={next.data.date.toISOString()}>{formatDate(next.data.date)}</time>
-                            </p>
-                            <p
-                                class="mt-1 font-mono text-xs uppercase text-ink-muted"
-                                data-placeholder
-                            >
-                                {formatTimeRange(next.data.date, next.data.end)}
-                            </p>
-                        </div>
-                        <div class="col-span-12 md:col-span-8">
-                            <h3 class="font-extrabold font-sans text-2xl tracking-tight">{next.data.title}</h3>
-                            <address class="mt-2 font-mono not-italic text-xs uppercase text-ink-muted">
-                                {next.data.location}
-                            </address>
-                            <p class="max-w-2xl mt-4 leading-relaxed text-ink-muted">{next.data.excerpt}</p>
-                            <div class="flex flex-wrap gap-3 mt-8">
-                                <a
-                                    class="btn btn--primary"
-                                    href="/assembly"
-                                >
-                                    {program.shortName} details
-                                </a>
-                                <a
-                                    class="btn"
-                                    href="/events"
-                                >
-                                    All events
-                                </a>
-                            </div>
-                        </div>
-                    </article>
-                )
-            : (
-                    <div data-motion="rise">
-                        <p class="text-ink-muted">
-                            No {program.name} on the calendar right now &mdash; the next date goes up as soon as the room is booked.
+                        <span
+                            class="assembly-sheet__tag label px-3 py-2 bg-accent text-ink"
+                            data-motion="stamp"
+                        >
+                            Next {program.shortName}
+                        </span>
+                        <time
+                            class="assembly-sheet__stamp"
+                            datetime={next.data.date.toISOString()}
+                        >
+                            <span class="assembly-sheet__day">{formatCalendarDay(next.data.date)}</span>
+                            <span class="assembly-sheet__month">{formatCalendarMonth(next.data.date)}</span>
+                        </time>
+                        <span class="assembly-sheet__weekday">{formatWeekday(next.data.date)}</span>
+                        <span
+                            class="assembly-sheet__texture halftone--accent"
+                            aria-hidden="true"
+                        />
+                    </p>
+                    <div
+                        class="assembly-sheet__body"
+                        data-motion="rise"
+                    >
+                        <h3 class="font-extrabold font-sans text-3xl tracking-tight md:text-4xl">{next.data.title}</h3>
+                        <p
+                            class="mt-4 font-mono text-xs uppercase text-ink-muted"
+                            data-placeholder
+                        >
+                            {formatTimeRange(next.data.date, next.data.end)}
                         </p>
+                        <address class="mt-1 font-mono not-italic text-xs uppercase text-ink-muted">
+                            {next.data.location}
+                        </address>
+                        <p class="max-w-2xl mt-5 leading-relaxed text-md text-ink-muted">{next.data.excerpt}</p>
                         <div class="flex flex-wrap gap-3 mt-8">
                             <a
                                 class="btn btn--primary"
@@ -99,6 +95,132 @@ const [next] = events
                             </a>
                         </div>
                     </div>
-                )}
-    </div>
+                </article>
+            )
+        : (
+                <div data-motion="rise">
+                    <p class="text-ink-muted">
+                        No {program.name} on the calendar right now &mdash; the next date goes up as soon as the room is booked.
+                    </p>
+                    <div class="flex flex-wrap gap-3 mt-8">
+                        <a
+                            class="btn btn--primary"
+                            href="/assembly"
+                        >
+                            {program.shortName} details
+                        </a>
+                        <a
+                            class="btn"
+                            href="/events"
+                        >
+                            All events
+                        </a>
+                    </div>
+                </div>
+            )}
 </section>
+
+<style>
+    .assembly-sheet {
+        --assembly-bleed: max(var(--shell-pad), calc(100% - var(--shell-inner)));
+        --assembly-plate: 34%;
+        display: grid;
+        grid-template-columns: minmax(min-content, calc(var(--assembly-bleed) + var(--assembly-plate))) minmax(0, 1fr);
+    }
+
+    .assembly-sheet__body {
+        padding-block: calc(var(--space-2xl) * 1.75);
+        padding-inline: calc(var(--space-2xl) * 1.5);
+    }
+
+    .assembly-sheet__day {
+        font-family: var(--font-sans);
+        font-size: clamp(80px, calc(46.667px + 10.4167vw), 180px);
+        font-weight: 800;
+        letter-spacing: -0.05em;
+        line-height: 0.78;
+    }
+
+    .assembly-sheet__month {
+        font-family: var(--font-mono);
+        font-size: var(--text-md);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .assembly-sheet__plate {
+        align-content: center;
+        background: var(--color-surface-inverse);
+        color: var(--color-ink-inverse);
+        display: grid;
+        gap: var(--space-xs);
+        justify-items: start;
+        overflow: clip;
+        padding-block: calc(var(--space-2xl) * 2.25);
+        padding-inline: var(--shell-pad) var(--space-2xl);
+        position: relative;
+    }
+
+    .assembly-sheet__stamp {
+        display: contents;
+    }
+
+    .assembly-sheet__texture {
+        height: calc(var(--drift-unit) * 2);
+        inset: auto 0 0;
+        position: absolute;
+    }
+
+    .assembly-sheet__weekday {
+        color: var(--color-ink-inverse-muted);
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    @media (max-width: 1024px) {
+        .assembly-sheet__body {
+            padding-block: calc(var(--space-2xl) * 1.75);
+            padding-inline: var(--space-lg);
+        }
+
+        .assembly-sheet__plate {
+            padding-block: calc(var(--space-2xl) * 2);
+            padding-inline: var(--shell-pad) var(--space-lg);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .assembly-sheet {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .assembly-sheet__body {
+            padding-block: var(--space-lg);
+            padding-inline: var(--shell-pad) var(--space-md);
+        }
+
+        .assembly-sheet__day {
+            grid-row: span 2;
+        }
+
+        .assembly-sheet__month {
+            font-size: var(--text-sm);
+        }
+
+        .assembly-sheet__plate {
+            align-content: start;
+            align-items: center;
+            column-gap: var(--space-sm);
+            grid-template-columns: auto minmax(0, 1fr);
+            padding-block: var(--space-lg);
+            padding-inline: var(--shell-pad) var(--space-md);
+        }
+
+        .assembly-sheet__tag {
+            grid-column: 1 / -1;
+        }
+    }
+</style>

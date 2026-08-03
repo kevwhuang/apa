@@ -43,6 +43,10 @@ export function clear(): void {
     cart.set([]);
 }
 
+function compareItems(left: CartItem, right: CartItem): number {
+    return left.title.localeCompare(right.title) || (left.color ?? '').localeCompare(right.color ?? '') || (left.size ?? '').localeCompare(right.size ?? '');
+}
+
 export function count(items = getItems()): number {
     return items.reduce((total, item) => total + item.quantity, 0);
 }
@@ -62,7 +66,8 @@ function normalizeItems(items: CartItem[]): CartItem[] {
         ...item,
         priceCents: Number(item.priceCents) || 0,
         quantity: Math.max(1, Math.trunc(Number(item.quantity)) || 1),
-    }));
+        title: String(item.title ?? ''),
+    })).sort(compareItems);
 }
 
 export function onChange(callback: (items: CartItem[]) => void): () => void {

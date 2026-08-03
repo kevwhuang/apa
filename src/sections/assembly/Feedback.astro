@@ -20,7 +20,7 @@ import { formatBytes } from '@lib/utils';
         <div class="grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
             <div class="flex flex-col gap-4">
                 <p class="text-base text-ink-muted">
-                    Every assembly holds space for work in progress. Put a track on the list and
+                    Every Assembly holds space for work in progress. Put a track on the list and
                     it gets played out loud at the next one, then talked through in the room while
                     it is still ringing.
                 </p>
@@ -137,7 +137,7 @@ import { formatBytes } from '@lib/utils';
                 </div>
                 <ol
                     class="feedback__list list-none"
-                    aria-label="Queued for the next assembly"
+                    aria-label="Queued for the next Assembly"
                     data-feedback-list
                 />
                 <p
@@ -312,9 +312,10 @@ import { formatBytes } from '@lib/utils';
 
 <script>
     import { UPLOAD } from '@lib/constants';
-    import { createDropzone, nextFocusTarget } from '@lib/dropzone';
-    import { parseTrackLink } from '@lib/assembly-feedback';
+    import { createDropzone, nextFocusTarget } from '@lib/audio/dropzone';
+    import { parseTrackLink } from '@lib/programs/assembly-feedback';
     import { registerPageScript, rovingFocus, setMessage, setText } from '@lib/utils';
+    import { toast } from '@lib/ui/toasts';
 
     type FeedbackMode = 'file' | 'link';
 
@@ -323,7 +324,7 @@ import { formatBytes } from '@lib/utils';
         row: HTMLElement;
     }
 
-    const LIST_FULL_MESSAGE = `The list is full \u2014 ${UPLOAD.maxFiles} tracks per assembly.`;
+    const LIST_FULL_MESSAGE = `The list is full \u2014 ${UPLOAD.maxFiles} tracks per Assembly.`;
 
     let linkQueue: QueuedLink[] = [];
     let queuedFiles = 0;
@@ -346,7 +347,7 @@ import { formatBytes } from '@lib/utils';
 
         return skipped > 0
             ? `${accepted} ${noun} queued \u2014 ${skipped} skipped, the list holds ${UPLOAD.maxFiles}.`
-            : `${accepted} ${noun} queued for the next assembly.`;
+            : `${accepted} ${noun} queued for the next Assembly.`;
     }
 
     function handleLinkRemove(link: TrackLink, row: HTMLElement) {
@@ -389,7 +390,7 @@ import { formatBytes } from '@lib/utils';
         clearLinkError(input);
         form.reset();
         input.focus();
-        announce(`${parsed.link.host} link queued for the next assembly.`);
+        announce(`${parsed.link.host} link queued for the next Assembly.`);
     }
 
     function initAssemblyFeedback(signal: AbortSignal) {
@@ -407,8 +408,8 @@ import { formatBytes } from '@lib/utils';
         createDropzone({
             capacity,
             messages: {
-                added: describeIntake,
-                full: () => LIST_FULL_MESSAGE,
+                added: reportIntake,
+                full: reportListFull,
             },
             onQueueChange: (entries) => {
                 queuedFiles = entries.length;
@@ -456,6 +457,20 @@ import { formatBytes } from '@lib/utils';
         list.append(fragment);
 
         return row;
+    }
+
+    function reportIntake(accepted: number, skipped: number) {
+        const message = describeIntake(accepted, skipped);
+
+        if (skipped > 0) toast(message, 'error');
+
+        return message;
+    }
+
+    function reportListFull() {
+        toast(LIST_FULL_MESSAGE, 'error');
+
+        return LIST_FULL_MESSAGE;
     }
 
     function setLinkError(input: HTMLInputElement, message: string) {

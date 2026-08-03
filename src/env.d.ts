@@ -22,11 +22,12 @@ type OrderResult = { code: PaymentErrorCode; message: string; ok: false } | { ok
 type PaymentErrorCode = 'card-declined' | 'cart-changed' | 'empty-cart';
 type ProductCategory = (typeof import('@lib/constants').PRODUCT_CATEGORIES)[number];
 type ProgramState = 'active' | 'planned';
-type SandboxKind = 'chorus' | 'compressor' | 'delay' | 'eq' | 'filter' | 'gate' | 'highpass' | 'limiter' | 'meter' | 'pan' | 'reverb' | 'saturator' | 'tremolo' | 'trim' | 'tuner';
-type SandboxLoadResult = { buffer: AudioBuffer; ok: true } | { message: string; ok: false };
+type RackKind = 'chorus' | 'compressor' | 'delay' | 'distortion' | 'eq' | 'filter' | 'gate' | 'highpass' | 'limiter' | 'meter' | 'pan' | 'reverb' | 'saturator' | 'tremolo' | 'trim' | 'tuner';
+type RackLoadResult = { buffer: AudioBuffer; ok: true } | { message: string; ok: false };
 type SessionErrorCode = 'already-registered' | 'invalid-credentials' | 'invalid-email' | 'weak-password';
 type SessionResult = { code: SessionErrorCode; message: string; ok: false } | { ok: true; session: Session };
 type StorageScope = 'local' | 'memory' | 'session';
+type Theme = 'dark' | 'light';
 type Timer = ReturnType<typeof setInterval>;
 type ToastTone = 'error' | 'info' | 'success';
 type TrackLinkResult = { link: TrackLink; ok: true } | { message: string; ok: false };
@@ -186,7 +187,7 @@ interface MotionTokens {
 
 interface OnboardingDraft {
     answers: Record<string, string[]>;
-    displayName: string;
+    artistName: string;
     email: string;
     genres: string[];
     location: string;
@@ -242,14 +243,15 @@ interface ProducerRecord extends Omit<import('astro:content').CollectionEntry<'p
     joined: string;
 }
 
-interface RackState {
-    activeKinds: SandboxKind[];
-    durationSeconds: number;
-    fileName: string | null;
-    playing: boolean;
+interface Profile {
+    artistName: string;
+    createdAt: number;
+    onboarded: boolean;
+    prods: number;
+    username: string;
 }
 
-interface SandboxBlock {
+interface RackBlock {
     analyser?: AnalyserNode;
     dispose(): void;
     input: AudioNode;
@@ -259,9 +261,16 @@ interface SandboxBlock {
     tick?(): void;
 }
 
+interface RackState {
+    activeKinds: RackKind[];
+    durationSeconds: number;
+    fileName: string | null;
+    playing: boolean;
+}
+
 interface Session {
+    artistName: string;
     createdAt: number;
-    displayName: string;
     email: string;
     expiresAt: number;
     onboarded: boolean;
@@ -270,7 +279,7 @@ interface Session {
 }
 
 interface SessionDraft {
-    displayName?: string;
+    artistName?: string;
     email: string;
     password?: string;
     username?: string;
@@ -329,6 +338,7 @@ interface Window {
 }
 
 interface WindowEventMap {
+    'apa:theme-changed': Event;
     'apa:toast': CustomEvent<ToastDetail>;
     'apa:track-play': CustomEvent<{ track: PlayerTrack }>;
     'apa:track-state': CustomEvent<TrackState>;

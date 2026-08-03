@@ -329,11 +329,11 @@ const program = getProgram('bash');
 </style>
 
 <script>
-    import { BASH_SUBMISSIONS } from '@lib/bash-submissions';
+    import { BASH_SUBMISSIONS } from '@lib/programs/bash-submissions';
     import { MOCK_LATENCY_MS, STORAGE } from '@lib/constants';
-    import { createDropzone } from '@lib/dropzone';
+    import { createDropzone } from '@lib/audio/dropzone';
     import { createStore } from '@lib/state';
-    import { delay, formatTime, registerPageScript, rovingFocus, setHidden, setText } from '@lib/utils';
+    import { delay, formatDateStamp, formatTime, registerPageScript, rovingFocus, setHidden, setText } from '@lib/utils';
 
     interface BoardElements {
         body: HTMLElement;
@@ -361,14 +361,8 @@ const program = getProgram('bash');
 
     function formatStamp(iso: string) {
         const date = new Date(iso);
-        const day = date.toLocaleDateString('en-US', {
-            day: 'numeric',
-            month: 'short',
-            timeZone: 'America/Chicago',
-            year: 'numeric',
-        });
 
-        return `${day} \u00b7 ${formatTime(date)}`;
+        return `${formatDateStamp(date)} \u00b7 ${formatTime(date)}`;
     }
 
     function initBashSubmissions(signal: AbortSignal) {

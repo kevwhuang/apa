@@ -1,44 +1,46 @@
-import { buildBlock } from '@lib/audio/sandbox/blocks';
+import { buildBlock } from '@lib/audio/rack/blocks';
 import { createStore } from '@lib/state';
-import { ensureSandboxAudio, suspendSandboxAudio } from '@lib/audio/sandbox/context';
+import { decodeRackFile } from '@lib/audio/rack/loader';
+import { ensureRackAudio, suspendRackAudio } from '@lib/audio/rack/context';
 import { getPlayerState, onPlayerChange, togglePlayback } from '@lib/audio';
-import { loadSandboxFile } from '@lib/audio/sandbox/loader';
 
 const CROSSFADE_SECONDS = 0.015;
 
-export const MODULE_NAMES: Record<SandboxKind, string> = {
-    chorus: 'Swell',
+export const MODULE_NAMES: Record<RackKind, string> = {
+    chorus: 'Weave',
     compressor: 'Clamp',
-    delay: 'Offset',
+    delay: 'Relay',
+    distortion: 'Scorch',
     eq: 'Ledger',
     filter: 'Sieve',
     gate: 'Latch',
-    highpass: 'Ridge',
+    highpass: 'Sill',
     limiter: 'Ceiling',
     meter: 'Needle',
     pan: 'Bearing',
     reverb: 'Chamber',
     saturator: 'Grit',
-    tremolo: 'Flutter',
+    tremolo: 'Pulse',
     trim: 'Tare',
     tuner: 'Pitchfork',
 };
 
 const RACK_KEY = 'apa.rack';
 
-const RACK_ORDER: SandboxKind[] = [
+export const RACK_ORDER: RackKind[] = [
     'trim',
-    'highpass',
     'filter',
+    'highpass',
     'eq',
     'gate',
     'compressor',
+    'distortion',
     'saturator',
     'chorus',
     'tremolo',
-    'pan',
     'delay',
     'reverb',
+    'pan',
     'limiter',
     'meter',
     'tuner',
@@ -50,7 +52,7 @@ const REBUILD_DELAY_MS = 20;
 
 const SETTLE_DELAY_MS = 60;
 
-const blocks = new Map<SandboxKind, SandboxBlock>();
+const blocks = new Map<RackKind, RackBlock>();
 
 const params = new Map<string, number>();
 
@@ -64,9 +66,11 @@ const store = createStore<RackState>({
 let buffer: AudioBuffer | undefined;
 let frame = 0;
 let input: GainNode | undefined;
+let pausedPosition = 0;
 let rebuild: Timer | undefined;
 let settle: Timer | undefined;
 let source: AudioBufferSourceNode | undefined;
+let startedAt = 0;
 
 function applyRebuild() {
     rebuild = undefined;
@@ -78,7 +82,8 @@ function applyRebuild() {
 }
 
 function connectChain() {
-    const { context, master } = ensureSandboxAudio();
+    const { context, master } = ensureRackAudio();
+    const chain = [...store.get().activeKinds].sort((left, right) => RACK_ORDER.indexOf(left) - RACK_ORDER.indexOf(right));
     const head = ensureInput(context);
 
     head.disconnect();
@@ -86,7 +91,7 @@ function connectChain() {
 
     let tail: AudioNode = head;
 
-    for (const kind of store.get().activeKinds) {
+    for (const kind of chain) {
         const block = ensureBlock(kind, context);
 
         tail.connect(block.input);
@@ -96,7 +101,7 @@ function connectChain() {
     tail.connect(master);
 }
 
-function ensureBlock(kind: SandboxKind, context: AudioContext) {
+function ensureBlock(kind: RackKind, context: AudioContext) {
     const known = blocks.get(kind);
 
     if (known) return known;
@@ -129,11 +134,19 @@ function fadeInput(target: number) {
     input.gain.linearRampToValueAtTime(target, now + CROSSFADE_SECONDS);
 }
 
-export function getRackAnalyser(kind: SandboxKind): AnalyserNode | undefined {
+export function getRackAnalyser(kind: RackKind): AnalyserNode | undefined {
     return blocks.get(kind)?.analyser;
 }
 
-export function getRackReadout(kind: SandboxKind): string | undefined {
+export function getRackPosition(): number {
+    const { durationSeconds, playing } = store.get();
+
+    if (!playing || !input || durationSeconds === 0) return pausedPosition;
+
+    return (input.context.currentTime - startedAt) % durationSeconds;
+}
+
+export function getRackReadout(kind: RackKind): string | undefined {
     return blocks.get(kind)?.state?.();
 }
 
@@ -145,20 +158,21 @@ function handlePlayerChange(state: PlayerState) {
     if (state.playing) pauseRack();
 }
 
-export function isModuleActive(kind: SandboxKind): boolean {
+export function isModuleActive(kind: RackKind): boolean {
     return store.get().activeKinds.includes(kind);
 }
 
-export async function loadRackFile(file: File): Promise<SandboxLoadResult> {
-    const result = await loadSandboxFile(file);
+export async function loadRackFile(file: File): Promise<RackLoadResult> {
+    const result = await decodeRackFile(file);
 
     if (!result.ok) return result;
 
     buffer = result.buffer;
+    pausedPosition = 0;
 
     const state = store.set({ ...store.get(), durationSeconds: result.buffer.duration, fileName: file.name });
 
-    if (state.playing) startSource();
+    if (state.playing) startSource(0);
 
     return result;
 }
@@ -172,11 +186,12 @@ export function pauseRack(): void {
 
     if (!state.playing) return;
 
+    pausedPosition = getRackPosition();
     stopSource(CROSSFADE_SECONDS);
     clearTimeout(rebuild);
     clearTimeout(settle);
     rebuild = undefined;
-    settle = setTimeout(suspendSandboxAudio, SETTLE_DELAY_MS);
+    settle = setTimeout(suspendRackAudio, SETTLE_DELAY_MS);
     store.set({ ...state, playing: false });
 }
 
@@ -189,7 +204,7 @@ export function playRack(): void {
 
     clearTimeout(settle);
     settle = undefined;
-    startSource();
+    startSource(pausedPosition);
     store.set({ ...state, playing: true });
 }
 
@@ -216,26 +231,42 @@ function scheduleRebuild() {
     rebuild = setTimeout(applyRebuild, REBUILD_DELAY_MS);
 }
 
-export function setModuleActive(kind: SandboxKind, active: boolean): void {
+export function seekRack(seconds: number): void {
+    const state = store.get();
+
+    if (!buffer) return;
+
+    pausedPosition = Math.min(Math.max(0, seconds), state.durationSeconds);
+
+    if (state.playing) {
+        startSource(pausedPosition);
+
+        return;
+    }
+
+    store.set({ ...state });
+}
+
+export function setModuleActive(kind: RackKind, active: boolean): void {
     const state = store.get();
 
     if (state.activeKinds.includes(kind) === active) return;
 
-    const activeKinds = RACK_ORDER.filter(entry => (entry === kind ? active : state.activeKinds.includes(entry)));
+    const activeKinds = active ? [...state.activeKinds, kind] : state.activeKinds.filter(entry => entry !== kind);
 
     store.set({ ...state, activeKinds });
     scheduleRebuild();
 }
 
-export function setRackParam(kind: SandboxKind, name: string, value: number): void {
+export function setRackParam(kind: RackKind, name: string, value: number): void {
     params.set(`${kind}:${name}`, value);
     blocks.get(kind)?.setParam(name, value);
 }
 
-function startSource() {
+function startSource(offset: number) {
     if (!buffer) return;
 
-    const { context } = ensureSandboxAudio();
+    const { context } = ensureRackAudio();
     const head = ensureInput(context);
 
     stopSource(0);
@@ -249,8 +280,9 @@ function startSource() {
     next.buffer = buffer;
     next.loop = true;
     next.connect(head);
-    next.start();
+    next.start(0, offset % buffer.duration);
     source = next;
+    startedAt = now - offset;
     head.gain.cancelScheduledValues(now);
     head.gain.setValueAtTime(0, now);
     head.gain.linearRampToValueAtTime(1, now + CROSSFADE_SECONDS);

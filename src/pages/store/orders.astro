@@ -1,0 +1,13 @@
+---
+import Layout from '@/Layout.astro';
+import OrderHistory from '@sections/store/OrderHistory.astro';
+import { brandTitle } from '@lib/brand';
+---
+
+<Layout
+    description={'Your Austin Producer Alliance store orders \u2014 order numbers, every item you bought, shipping and tax, and where each receipt was sent.'}
+    noindex
+    title={brandTitle('Orders')}
+>
+    <OrderHistory />
+</Layout>

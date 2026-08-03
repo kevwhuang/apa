@@ -17,17 +17,39 @@ export interface FilterGroupOptions {
     statusElement?: HTMLElement | null;
 }
 
+export interface PanelResizeOptions {
+    handle: HTMLElement;
+    label: string;
+    minWidth: number;
+    panel: HTMLElement;
+    property: string;
+    reservedRight: number;
+    signal: AbortSignal;
+}
+
 export interface SearchFieldOptions {
     clearElements: NodeListOf<HTMLButtonElement>;
     searchElement: HTMLInputElement | null;
     signal: AbortSignal;
 }
 
+const FLOAT_WINDOW_BASE_Z = 70;
+
 const ISO_DATE_LENGTH = 10;
 
 const MAX_INITIALS = 2;
 
+const PANEL_NARROW_VIEWPORT = 480;
+
+const PANEL_RESIZE_STEP = 16;
+
+const PANEL_WIDE_DIVISOR = 2;
+
+const PANEL_WIDE_VIEWPORT = 1_024;
+
 const SECONDS_PER_MINUTE = 60;
+
+const panelWidths = new Map<string, number>();
 
 export function delay(milliseconds: number): Promise<void> {
     return new Promise((resolve) => {
@@ -43,6 +65,10 @@ export function describeCartIssue(issue: CartIssue): string {
     return `${issue.title} is no longer in the store and was removed.`;
 }
 
+function floatWindowBase(): number {
+    return toLevel(getComputedStyle(document.documentElement).getPropertyValue('--z-drawer'), FLOAT_WINDOW_BASE_Z);
+}
+
 export function formatBytes(bytes: number): string {
     const size = Math.max(0, bytes);
 
@@ -50,6 +76,21 @@ export function formatBytes(bytes: number): string {
     if (size < BYTES_PER_MEGABYTE) return `${Math.round(size / BYTES_PER_KILOBYTE)} KB`;
 
     return `${Number((size / BYTES_PER_MEGABYTE).toFixed(1))} MB`;
+}
+
+export function formatCalendarDay(date: Date): string {
+    return date.toLocaleDateString('en-US', {
+        day: '2-digit',
+        timeZone: 'America/Chicago',
+    });
+}
+
+export function formatCalendarMonth(date: Date): string {
+    return date.toLocaleDateString('en-US', {
+        month: 'short',
+        timeZone: 'America/Chicago',
+        year: 'numeric',
+    });
 }
 
 export function formatDate(date: Date): string {
@@ -100,6 +141,12 @@ export function formatPrice(cents: number): string {
     return `$${(cents / CENTS_PER_DOLLAR).toFixed(2)}`;
 }
 
+export function formatProds(prods: number): string {
+    const count = Math.max(0, Math.trunc(prods) || 0);
+
+    return count === 1 ? '1 Prod' : `${count} Prods`;
+}
+
 export function formatTime(date: Date): string {
     return date.toLocaleTimeString('en-US', {
         hour: 'numeric',
@@ -114,6 +161,13 @@ export function formatTimeRange(start: Date, end: Date): string {
 
 export function formatVariant(item: CartItem): string {
     return [item.color, item.size].filter(Boolean).join(' / ');
+}
+
+export function formatWeekday(date: Date): string {
+    return date.toLocaleDateString('en-US', {
+        timeZone: 'America/Chicago',
+        weekday: 'long',
+    });
 }
 
 export function getInitials(name: string): string {
@@ -195,6 +249,96 @@ export function initFilterGroup(options: FilterGroupOptions): void {
     searchElement?.addEventListener('input', apply, { signal });
 }
 
+export function initPanelResize(options: PanelResizeOptions): void {
+    const { handle, label, minWidth, panel, property, reservedRight, signal } = options;
+
+    let pointer: number | undefined;
+
+    function apply(width: number) {
+        const { max, min } = bounds();
+        const next = Math.round(Math.min(Math.max(width, min), max));
+
+        panelWidths.set(property, next);
+        panel.style.setProperty(property, `${next}px`);
+        handle.setAttribute('aria-valuemax', String(Math.round(max)));
+        handle.setAttribute('aria-valuemin', String(Math.round(min)));
+        handle.setAttribute('aria-valuenow', String(next));
+    }
+
+    function bounds() {
+        const max = maxPanelWidth(window.innerWidth, reservedRight);
+
+        return { max, min: Math.min(minWidth, max) };
+    }
+
+    function current() {
+        const stored = panelWidths.get(property);
+
+        if (stored !== undefined) return stored;
+
+        const measured = panel.getBoundingClientRect().width;
+
+        return measured > 0 ? measured : minWidth;
+    }
+
+    function handleKeydown(event: KeyboardEvent) {
+        const next = keyWidth(event.key);
+
+        if (next === undefined) return;
+
+        event.preventDefault();
+        apply(next);
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+        event.preventDefault();
+        handle.setPointerCapture(event.pointerId);
+        pointer = event.pointerId;
+    }
+
+    function handlePointerMove(event: PointerEvent) {
+        if (pointer !== event.pointerId) return;
+
+        apply(panel.getBoundingClientRect().right - event.clientX);
+    }
+
+    function handlePointerUp(event: PointerEvent) {
+        if (pointer !== event.pointerId) return;
+
+        if (handle.hasPointerCapture(event.pointerId)) handle.releasePointerCapture(event.pointerId);
+
+        pointer = undefined;
+    }
+
+    function handleResize() {
+        apply(current());
+    }
+
+    function keyWidth(key: string) {
+        const { max, min } = bounds();
+
+        if (key === 'ArrowLeft') return current() + PANEL_RESIZE_STEP;
+        if (key === 'ArrowRight') return current() - PANEL_RESIZE_STEP;
+        if (key === 'End') return max;
+        if (key === 'Home') return min;
+
+        return undefined;
+    }
+
+    handle.setAttribute('aria-label', label);
+    handle.setAttribute('aria-orientation', 'vertical');
+    handle.setAttribute('role', 'separator');
+    handle.tabIndex = 0;
+    apply(current());
+
+    handle.addEventListener('keydown', handleKeydown, { signal });
+    handle.addEventListener('pointercancel', handlePointerUp, { signal });
+    handle.addEventListener('pointerdown', handlePointerDown, { signal });
+    handle.addEventListener('pointermove', handlePointerMove, { signal });
+    handle.addEventListener('pointerup', handlePointerUp, { signal });
+    window.addEventListener('resize', handleResize, { signal });
+}
+
 export function initSearchField(options: SearchFieldOptions): void {
     const { clearElements, searchElement, signal } = options;
 
@@ -222,6 +366,26 @@ export function initSearchField(options: SearchFieldOptions): void {
     });
 }
 
+export function isTopFloatWindow(target: HTMLElement): boolean {
+    const base = floatWindowBase();
+    const visible = Array.from(document.querySelectorAll<HTMLElement>('[data-float-window]')).filter(element => element.checkVisibility());
+    const top = visible.reduce<HTMLElement | undefined>((best, element) => (best && toLevel(best.style.zIndex, base) > toLevel(element.style.zIndex, base) ? best : element), undefined);
+
+    return top === target;
+}
+
+function maxPanelWidth(viewportWidth: number, reservedRight: number): number {
+    const narrowMax = PANEL_NARROW_VIEWPORT - reservedRight;
+    const wideMax = PANEL_WIDE_VIEWPORT / PANEL_WIDE_DIVISOR;
+
+    if (viewportWidth <= PANEL_NARROW_VIEWPORT) return viewportWidth - reservedRight;
+    if (viewportWidth >= PANEL_WIDE_VIEWPORT) return viewportWidth / PANEL_WIDE_DIVISOR;
+
+    const ratio = (viewportWidth - PANEL_NARROW_VIEWPORT) / (PANEL_WIDE_VIEWPORT - PANEL_NARROW_VIEWPORT);
+
+    return narrowMax + (wideMax - narrowMax) * ratio;
+}
+
 export function mergeAssets(downloads: CollectionEntry<'downloads'>[], docs: CollectionEntry<'docs'>[]): CollectionEntry<'downloads'>[] {
     return downloads
         .map(entry => toAsset(entry, docs))
@@ -245,6 +409,17 @@ export function parseCatalog(raw: string | undefined): CatalogEntry[] {
     } catch {
         return [];
     }
+}
+
+export function raiseWindow(target: HTMLElement): void {
+    const base = floatWindowBase();
+    const ordered = Array.from(document.querySelectorAll<HTMLElement>('[data-float-window]'))
+        .filter(element => element !== target)
+        .toSorted((a, b) => toLevel(a.style.zIndex, base) - toLevel(b.style.zIndex, base));
+
+    [...ordered, target].forEach((element, position) => {
+        element.style.zIndex = String(base + position + 1);
+    });
 }
 
 export function registerPageScript(init: (signal: AbortSignal) => void): void {
@@ -350,6 +525,12 @@ export function toCatalog(products: CollectionEntry<'products'>[]): CatalogEntry
 
 export function toIsoDate(date: Date): string {
     return date.toISOString().slice(0, ISO_DATE_LENGTH);
+}
+
+function toLevel(value: string, fallback: number): number {
+    const parsed = Number.parseInt(value, 10);
+
+    return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 export function toProducerRecord(producer: CollectionEntry<'producers'>): ProducerRecord {

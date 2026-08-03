@@ -12,9 +12,19 @@
     <template data-toast-item>
         <li class="toast">
             <span
-                class="toast__message"
-                data-toast-message
+                class="toast__badge"
+                aria-hidden="true"
             />
+            <span class="toast__body">
+                <span
+                    class="toast__label"
+                    data-toast-label
+                />
+                <span
+                    class="toast__message"
+                    data-toast-message
+                />
+            </span>
             <button
                 class="toast__close"
                 data-toast-close
@@ -30,50 +40,83 @@
 <style>
     .toast {
         --focus-ring: var(--color-accent-light);
-        --toast-accent: var(--color-ink-inverse);
-        align-items: center;
+        --toast-glyph: '\0069';
+        --toast-tone: var(--color-ink-inverse);
+        align-items: stretch;
         animation: var(--duration-slow) var(--motion-ease-entrance) both toast__rise;
         background: var(--color-surface-inverse);
         border: 2px solid var(--color-ink);
-        border-inline-start: 4px solid var(--toast-accent);
         box-shadow: var(--lift) var(--lift) 0 0 var(--color-ink-20);
         color: var(--color-ink-inverse);
         display: flex;
-        font-family: var(--font-mono);
-        font-size: var(--text-xs);
-        gap: var(--space-xs);
-        max-width: min(92vw, 480px);
-        padding: var(--space-2xs) var(--space-sm);
+        min-height: 64px;
         pointer-events: auto;
+        width: min(92vw, 520px);
     }
 
     .toast--error {
-        --toast-accent: var(--color-accent);
+        --toast-glyph: '\0021';
+        --toast-tone: var(--color-accent);
     }
 
     .toast--info {
-        --toast-accent: var(--color-ink-inverse);
+        --toast-glyph: '\0069';
+        --toast-tone: var(--color-ink-inverse);
     }
 
     .toast--success {
-        --toast-accent: var(--color-pulse);
+        --toast-glyph: '\2713';
+        --toast-tone: var(--color-pulse);
+    }
+
+    .toast__badge {
+        align-items: center;
+        background: var(--toast-tone);
+        color: var(--color-ink);
+        display: flex;
+        flex-shrink: 0;
+        font-family: var(--font-mono);
+        font-size: var(--text-xl);
+        font-weight: 700;
+        justify-content: center;
+        line-height: 1;
+        width: 56px;
+    }
+
+    .toast__badge::before {
+        content: var(--toast-glyph);
+    }
+
+    .toast__body {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: var(--space-3xs);
+        justify-content: center;
+        min-width: 0;
+        padding-block: var(--space-sm);
+        padding-inline: var(--space-md) var(--space-xs);
     }
 
     .toast__close {
         align-items: center;
+        align-self: center;
         color: inherit;
         display: inline-flex;
         flex-shrink: 0;
-        height: 16px;
+        font-size: var(--text-xl);
+        height: 24px;
         justify-content: center;
+        line-height: 1;
+        margin-inline-end: var(--space-sm);
         position: relative;
         transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
-        width: 16px;
+        width: 24px;
     }
 
     .toast__close::after {
         content: '';
-        inset: -16px;
+        inset: -12px;
         position: absolute;
     }
 
@@ -85,7 +128,20 @@
         color: var(--color-accent-light);
     }
 
+    .toast__label {
+        color: var(--toast-tone);
+        font-family: var(--font-mono);
+        font-size: var(--text-2xs);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        line-height: 1.2;
+        text-transform: uppercase;
+    }
+
     .toast__message {
+        font-family: var(--font-sans);
+        font-size: var(--text-smd);
+        line-height: 1.45;
         min-width: 0;
     }
 
@@ -118,16 +174,22 @@
     @keyframes toast__rise {
         from {
             opacity: 0;
-            transform: translateY(8px);
+            transform: translateY(12px);
         }
     }
 </style>
 
 <script>
-    import { TOAST_TOPIC } from '@lib/toasts';
+    import { TOAST_TOPIC } from '@lib/ui/toasts';
     import { setText } from '@lib/utils';
 
-    const TOAST_DISMISS_MS = 3_500;
+    const TOAST_DISMISS_MS = 5_000;
+
+    const TOAST_LABELS: Record<ToastTone, string> = {
+        error: 'Error',
+        info: 'Notice',
+        success: 'Success',
+    };
 
     const TOAST_LIMIT = 3;
 
@@ -157,6 +219,7 @@
 
         raiseToaster(aside);
         item.classList.add(`toast--${tone}`);
+        setText(fragment.querySelector('[data-toast-label]'), TOAST_LABELS[tone]);
         setText(fragment.querySelector('[data-toast-message]'), message);
         fragment.querySelector('[data-toast-close]')?.addEventListener('click', () => dismissToast(item));
         list.append(fragment);

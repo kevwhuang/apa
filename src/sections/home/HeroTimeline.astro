@@ -3,19 +3,19 @@ import WaveformBars from '@components/shared/WaveformBars.astro';
 import { STEP_COUNT, stepEnergy } from '@lib/motion/pattern';
 import { getProgram } from '@lib/utils';
 
+const BAR_CONTRAST = 1.6;
 const BAR_MAX = 92;
-const BAR_MIN = 18;
+const BAR_MIN = 8;
 
 const assembly = getProgram('assembly');
+const barPeak = Math.max(...Array.from({ length: STEP_COUNT }, (_, step) => stepEnergy(step)));
+const bars = Array.from({ length: STEP_COUNT }, (_, step) => BAR_MIN + (BAR_MAX - BAR_MIN) * (stepEnergy(step) / barPeak) ** BAR_CONTRAST);
 const bash = getProgram('bash');
 const hangout = getProgram('hangout');
-
-const barPeak = Math.max(...Array.from({ length: STEP_COUNT }, (_, step) => stepEnergy(step)));
-const bars = Array.from({ length: STEP_COUNT }, (_, step) => BAR_MIN + (BAR_MAX - BAR_MIN) * (stepEnergy(step) / barPeak));
 ---
 
 <section
-    class="hero stage stage--hero stage--wide overflow-hidden relative border-b-2 border-ink bg-surface"
+    class="hero stage stage--hero overflow-hidden relative border-b-2 border-ink bg-surface"
     aria-labelledby="hero-title"
 >
     <div
@@ -23,15 +23,15 @@ const bars = Array.from({ length: STEP_COUNT }, (_, step) => BAR_MIN + (BAR_MAX 
         aria-hidden="true"
         data-scrub="drift"
     />
-    <div class="hero__field stage__item--full absolute inset-0 pointer-events-none" aria-hidden="true" />
+    <div class="hero__field stage__item--full absolute pointer-events-none" aria-hidden="true" />
     <div class="relative">
         <div
             class="hero__meta label flex flex-wrap items-center justify-center gap-3 mb-6 text-ink-muted"
             data-motion="stamp"
         >
             <span class="inline-block h-2.5 w-2.5 bg-accent animate-pulse" aria-hidden="true" />
-            <span>Austin TX</span>
-            <span class="hidden md:inline">/ Est <time datetime="2022-05">2022</time> / More than 1,000 welcomed</span>
+            <span>Austin, TX</span>
+            <span class="hidden md:inline">/ Est <time datetime="2022-05">2022</time> / More than 500 welcomed</span>
         </div>
         <h1
             id="hero-title"
@@ -59,22 +59,22 @@ const bars = Array.from({ length: STEP_COUNT }, (_, step) => BAR_MIN + (BAR_MAX 
                     class="leading-relaxed text-md"
                     data-motion="blur"
                 >
-                    A working community for music producers in Austin, Texas. At {assembly.name}, {hangout.name},
-                    and the {bash.cadence} {bash.name}, producers of every genre and experience
-                    level find their people.
+                    A working community for music producers in Austin, Texas. At {assembly.name},
+                    the {bash.cadence} {bash.name}, and the {hangout.name}, producers of every genre
+                    and experience level find their people.
                 </p>
                 <div class="hero__actions flex flex-col items-center self-center gap-3">
                     <a
                         class="btn btn--primary max-w-[240px] w-full"
                         href="/events"
                     >
-                        All events
+                        Browse events
                     </a>
                     <a
                         class="btn max-w-[240px] w-full"
                         href="/store"
                     >
-                        Store
+                        Shop the store
                     </a>
                 </div>
             </div>
@@ -91,9 +91,10 @@ const bars = Array.from({ length: STEP_COUNT }, (_, step) => BAR_MIN + (BAR_MAX 
     }
 
     .hero__canvas {
+        --hero-dim: color-mix(in srgb, currentColor 38%, transparent);
         height: 100%;
         inset: 0;
-        mask-image: linear-gradient(to right, currentColor 0%, transparent 22%, transparent 62%, currentColor 88%);
+        mask-image: linear-gradient(to right, currentColor, var(--hero-dim) 32%, var(--hero-dim) 68%, currentColor);
         pointer-events: none;
         position: absolute;
         transition: opacity var(--duration-cinematic) var(--motion-ease-entrance);
@@ -101,7 +102,11 @@ const bars = Array.from({ length: STEP_COUNT }, (_, step) => BAR_MIN + (BAR_MAX 
     }
 
     .hero__drift {
-        inset: -8% 0;
+        inset: -8% calc(-1 * var(--launcher-rail)) -8% 0;
+    }
+
+    .hero__field {
+        inset: 0 calc(-1 * var(--launcher-rail)) 0 0;
     }
 
     .hero__foot {

@@ -29,7 +29,7 @@ import { SPONSORS, SPONSOR_LOGO_WIDTH } from '@lib/constants';
             {SPONSORS.map(sponsor => (
                 <li class="flex items-center justify-center h-24 p-5 bg-surface md:h-32 md:p-8">
                     <Image
-                        class="object-contain max-h-full max-w-full"
+                        class="sponsor-logo object-contain max-h-full max-w-full"
                         alt={sponsor.name}
                         densities={[1, 2]}
                         src={sponsor.logo}
@@ -52,3 +52,9 @@ import { SPONSORS, SPONSOR_LOGO_WIDTH } from '@lib/constants';
         </p>
     </div>
 </section>
+
+<style>
+    :global(html[data-theme='dark']) .sponsor-logo {
+        filter: invert(1);
+    }
+</style>

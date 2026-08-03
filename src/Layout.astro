@@ -1,9 +1,14 @@
 ---
+import '@fontsource-variable/bricolage-grotesque/index.css';
+import '@fontsource/space-mono/400.css';
+import '@fontsource/space-mono/700.css';
 import { ClientRouter } from 'astro:transitions';
 
 import '@/global.css';
 import '@/styles.css';
-import AudioSidebar from '@sections/shared/AudioSidebar.astro';
+import bootstrap from '@lib/bootstrap.js?raw';
+import AiWindow from '@sections/shared/AiWindow.astro';
+import AudioDock from '@sections/shared/AudioDock.astro';
 import ChatWindow from '@sections/shared/ChatWindow.astro';
 import Footer from '@sections/shared/Footer.astro';
 import Navbar from '@sections/shared/Navbar.astro';
@@ -18,98 +23,11 @@ interface Props {
     title: string;
 }
 
+const bootstrapScript = bootstrap.replace('__THEME_KEY__', STORAGE.theme.key).replace('__SESSION_KEY__', STORAGE.session.key);
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 const { description, hasHero, noindex, title } = Astro.props;
 const logoUrl = new URL(BRAND_ICONS.logo, Astro.site).href;
 const ogImageUrl = new URL(BRAND_ICONS.og, Astro.site).href;
-const bootstrap = `(function () {
-    let state = 'out';
-
-    try {
-        const raw = localStorage.getItem('${STORAGE.session.key}');
-        const session = raw ? JSON.parse(raw) : null;
-
-        if (session && session.expiresAt > Date.now()) state = 'in';
-    } catch {
-        state = 'out';
-    }
-
-    document.documentElement.dataset.session = state;
-})();
-
-(function () {
-    if (window.__apaMotion) return;
-
-    const ARMED_CLASS = 'is-motion-armed';
-    const REDUCE = '(prefers-reduced-motion: reduce)';
-    const WATCHDOG_MS = 2_500;
-    const root = document.documentElement;
-    const state = { arm, armedClass: ARMED_CLASS, disarm, expired: false, live };
-
-    let watchdog;
-
-    function arm() {
-        if (state.expired) return;
-        if (window.matchMedia(REDUCE).matches) return disarm();
-
-        root.classList.add(ARMED_CLASS);
-        clearTimeout(watchdog);
-        watchdog = setTimeout(expire, WATCHDOG_MS);
-    }
-
-    function disarm() {
-        clearTimeout(watchdog);
-        root.classList.remove(ARMED_CLASS);
-    }
-
-    function expire() {
-        state.expired = true;
-        disarm();
-    }
-
-    function live() {
-        clearTimeout(watchdog);
-
-        return !state.expired;
-    }
-
-    function preArm(event) {
-        if (state.expired || window.matchMedia(REDUCE).matches) return;
-
-        event.newDocument.documentElement.classList.add(ARMED_CLASS);
-    }
-
-    window.__apaMotion = state;
-    arm();
-    document.addEventListener('astro:after-swap', arm);
-    document.addEventListener('astro:before-swap', preArm);
-    window.addEventListener('beforeprint', disarm);
-})();
-
-(function () {
-    let navigation = 'push';
-
-    function anchor() {
-        const target = document.getElementById(window.location.hash.slice(1));
-
-        if (target) target.scrollIntoView({ behavior: 'instant', block: 'start' });
-    }
-
-    function settle() {
-        const state = window.history.state;
-
-        if (navigation !== 'traverse') return anchor();
-        if (state && typeof state.scrollY === 'number') window.scrollTo({ behavior: 'instant', left: state.scrollX, top: state.scrollY });
-    }
-
-    function track(event) {
-        navigation = event.navigationType;
-    }
-
-    document.addEventListener('DOMContentLoaded', settle, { once: true });
-    document.addEventListener('astro:before-preparation', track);
-    document.addEventListener('astro:page-load', settle);
-})();`;
 ---
 
 <!doctype html>
@@ -153,7 +71,7 @@ const bootstrap = `(function () {
         />
         <script
             is:inline
-            set:html={bootstrap}
+            set:html={bootstrapScript}
         />
         <ClientRouter />
     </head>
@@ -176,7 +94,8 @@ const bootstrap = `(function () {
             </main>
             <Footer />
         </div>
-        <AudioSidebar />
+        <AiWindow />
+        <AudioDock />
         <ChatWindow />
         <Toaster />
     </body>
@@ -184,8 +103,11 @@ const bootstrap = `(function () {
 
 <script>
     import { initMotion } from '@lib/motion';
-    import { syncSessionAttribute } from '@lib/session';
+    import { syncSessionAttribute } from '@lib/account/session';
+    import { syncThemeAttribute } from '@lib/ui/theme';
 
     document.addEventListener('astro:after-swap', syncSessionAttribute);
+    document.addEventListener('astro:after-swap', syncThemeAttribute);
     initMotion();
+    syncThemeAttribute();
 </script>

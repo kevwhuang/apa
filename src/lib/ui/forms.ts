@@ -1,5 +1,7 @@
-import { PASSWORD_MIN_LENGTH } from '@lib/constants';
+import { PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@lib/constants';
 import { describeCartIssue, setText } from '@lib/utils';
+
+const USERNAME_REGEX = new RegExp(`^${USERNAME_PATTERN}$`, 'i');
 
 export function clearFieldErrors(form: HTMLFormElement): void {
     form.querySelectorAll('[aria-invalid]').forEach((control) => {
@@ -113,6 +115,10 @@ export function setFieldErrors(form: HTMLFormElement, errors: FieldErrors): void
         element.textContent = message;
         element.removeAttribute('hidden');
     });
+}
+
+export function usernameRule(): FieldRule {
+    return { message: 'Use 3 to 20 letters, numbers, or underscores.', pattern: USERNAME_REGEX, required: true };
 }
 
 export function validateFields(form: HTMLFormElement, rules: Record<string, FieldRule>): FieldErrors {

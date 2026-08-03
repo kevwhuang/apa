@@ -18,6 +18,14 @@ const MESSAGES: Record<SessionErrorCode, string> = {
     'weak-password': `Use at least ${PASSWORD_MIN_LENGTH} characters.`,
 };
 
+const profiles = createStore<Record<string, Profile>>({
+    fallback: {},
+    key: STORAGE.profiles.key,
+    normalize: normalizeProfiles,
+    scope: STORAGE.profiles.scope,
+    topic: STORAGE.profiles.topic,
+});
+
 const store = createStore<Session | null>({
     fallback: null,
     key: STORAGE.session.key,
@@ -30,6 +38,10 @@ export async function endSession(): Promise<void> {
     await delay(MOCK_LATENCY_MS);
 
     store.remove();
+}
+
+function getProfile(email: string): Profile | null {
+    return profiles.get()[email] ?? null;
 }
 
 export function getSession(): Session | null {
@@ -56,13 +68,31 @@ function isSignedIn(): boolean {
     return getSession() !== null;
 }
 
+function normalizeProfile(value: Profile): Profile {
+    return {
+        artistName: String(value.artistName ?? ''),
+        createdAt: Number(value.createdAt) || 0,
+        onboarded: value.onboarded === true,
+        prods: Math.max(0, Math.trunc(Number(value.prods)) || 0),
+        username: String(value.username ?? ''),
+    };
+}
+
+function normalizeProfiles(value: Record<string, Profile>): Record<string, Profile> {
+    if (typeof value !== 'object' || value === null) return {};
+
+    const entries = Object.entries(value).filter(([email, profile]) => email.length > 0 && typeof profile === 'object' && profile !== null);
+
+    return Object.fromEntries(entries.map(([email, profile]) => [email, normalizeProfile(profile)]));
+}
+
 function normalizeSession(value: Session | null): Session | null {
     if (typeof value !== 'object' || value === null) return null;
     if (typeof value.email !== 'string' || value.email.length === 0) return null;
 
     return {
+        artistName: String(value.artistName ?? ''),
         createdAt: Number(value.createdAt) || 0,
-        displayName: String(value.displayName ?? ''),
         email: value.email,
         expiresAt: Number(value.expiresAt) || 0,
         onboarded: value.onboarded === true,
@@ -90,6 +120,18 @@ function reject(code: SessionErrorCode): SessionResult {
     return { code, message: MESSAGES[code], ok: false };
 }
 
+function saveProfile(session: Session): void {
+    const profile: Profile = {
+        artistName: session.artistName,
+        createdAt: session.createdAt,
+        onboarded: session.onboarded,
+        prods: session.prods,
+        username: session.username,
+    };
+
+    profiles.update(current => ({ ...current, [session.email.toLowerCase()]: profile }));
+}
+
 export async function startSession(draft: SessionDraft): Promise<SessionResult> {
     const email = draft.email.trim().toLowerCase();
     const password = draft.password ?? '';
@@ -103,18 +145,20 @@ export async function startSession(draft: SessionDraft): Promise<SessionResult> 
 
     const existing = getSession();
     const now = Date.now();
+    const profile: Profile | null = existing?.email === email ? existing : getProfile(email);
 
     const session: Session = {
-        createdAt: existing?.email === email ? existing.createdAt : now,
-        displayName: draft.displayName ?? (existing?.email === email ? existing.displayName : ''),
+        artistName: draft.artistName || profile?.artistName || '',
+        createdAt: profile?.createdAt || now,
         email,
         expiresAt: now + SESSION_TTL_DAYS * MILLISECONDS_PER_DAY,
-        onboarded: existing?.email === email ? existing.onboarded : false,
-        prods: existing?.email === email ? existing.prods : WELCOME_PRODS,
-        username: draft.username ?? (existing?.email === email ? existing.username : ''),
+        onboarded: profile?.onboarded ?? false,
+        prods: profile?.prods ?? WELCOME_PRODS,
+        username: draft.username || profile?.username || '',
     };
 
     store.set(session);
+    saveProfile(session);
 
     return { ok: true, session };
 }
@@ -132,5 +176,9 @@ export async function updateSession(patch: Partial<Session>): Promise<Session | 
 
     if (!session) return null;
 
-    return store.set({ ...session, ...patch });
+    const next = store.set({ ...session, ...patch });
+
+    if (next) saveProfile(next);
+
+    return next;
 }

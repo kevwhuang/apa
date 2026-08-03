@@ -38,9 +38,19 @@ export const DELAY_TIME_DEFAULT = 0.35;
 
 const DELAY_WET_LEVEL = 0.7;
 
+export const DISTORTION_DRIVE_DEFAULT = 8;
+
+export const DISTORTION_TONE_DEFAULT = 6_000;
+
+export const EQ_HIGH_GAIN_DEFAULT = 3;
+
 const EQ_HIGH_HERTZ = 4_000;
 
+export const EQ_LOW_GAIN_DEFAULT = 4;
+
 const EQ_LOW_HERTZ = 200;
+
+export const EQ_MID_GAIN_DEFAULT = 0;
 
 const EQ_MID_HERTZ = 1_000;
 
@@ -104,11 +114,12 @@ const TREMOLO_SWING = 0.5;
 
 export const TRIM_GAIN_DEFAULT = 0;
 
-export function buildBlock(kind: SandboxKind, context: AudioContext): SandboxBlock {
+export function buildBlock(kind: RackKind, context: AudioContext): RackBlock {
     switch (kind) {
         case 'chorus': return buildChorus(context);
         case 'compressor': return buildCompressor(context);
         case 'delay': return buildDelay(context);
+        case 'distortion': return buildDistortion(context);
         case 'eq': return buildEq(context);
         case 'filter': return buildFilter(context);
         case 'gate': return buildGate(context);
@@ -216,6 +227,52 @@ function buildDelay(context: AudioContext) {
     };
 }
 
+function buildDistortion(context: AudioContext) {
+    const makeup = context.createGain();
+    const shaper = context.createWaveShaper();
+    const tone = context.createBiquadFilter();
+
+    let built = DISTORTION_DRIVE_DEFAULT;
+    let pending = DISTORTION_DRIVE_DEFAULT;
+    let reshape = 0;
+
+    makeup.gain.value = distortionMakeupFor(built);
+    shaper.curve = distortionCurve(built);
+    shaper.oversample = '4x';
+    tone.type = 'lowpass';
+    tone.frequency.value = DISTORTION_TONE_DEFAULT;
+    shaper.connect(tone).connect(makeup);
+
+    function rebuildCurve() {
+        reshape = 0;
+
+        if (pending === built) return;
+
+        built = pending;
+        shaper.curve = distortionCurve(built);
+    }
+
+    return {
+        dispose(): void {
+            cancelAnimationFrame(reshape);
+            [makeup, shaper, tone].forEach(node => node.disconnect());
+        },
+        input: shaper,
+        output: makeup,
+        setParam(name: string, value: number): void {
+            if (name === 'tone') smooth(context, tone.frequency, value);
+
+            if (name === 'drive') {
+                pending = value;
+
+                if (pending !== built && reshape === 0) reshape = requestAnimationFrame(rebuildCurve);
+
+                smooth(context, makeup.gain, distortionMakeupFor(value));
+            }
+        },
+    };
+}
+
 function buildEq(context: AudioContext) {
     const high = context.createBiquadFilter();
     const low = context.createBiquadFilter();
@@ -223,11 +280,13 @@ function buildEq(context: AudioContext) {
 
     high.type = 'highshelf';
     high.frequency.value = EQ_HIGH_HERTZ;
+    high.gain.value = EQ_HIGH_GAIN_DEFAULT;
     low.type = 'lowshelf';
     low.frequency.value = EQ_LOW_HERTZ;
+    low.gain.value = EQ_LOW_GAIN_DEFAULT;
     mid.type = 'peaking';
     mid.frequency.value = EQ_MID_HERTZ;
-    mid.gain.value = 0;
+    mid.gain.value = EQ_MID_GAIN_DEFAULT;
     low.connect(mid).connect(high);
 
     return {
@@ -235,8 +294,9 @@ function buildEq(context: AudioContext) {
         input: low,
         output: high,
         setParam(name: string, value: number): void {
-            if (name === 'low') smooth(context, low.gain, value);
             if (name === 'high') smooth(context, high.gain, value);
+            if (name === 'low') smooth(context, low.gain, value);
+            if (name === 'mid') smooth(context, mid.gain, value);
         },
     };
 }
@@ -562,6 +622,22 @@ function detectPitch(data: Float32Array, sampleRate: number) {
     return bestCorrelation > PITCH_MIN_CORRELATION && bestLag > 0 ? sampleRate / bestLag : 0;
 }
 
+function distortionCurve(drive: number) {
+    const samples = new Float32Array(CURVE_LENGTH);
+
+    for (let index = 0; index < CURVE_LENGTH; index += 1) {
+        const x = (index / (CURVE_LENGTH - 1)) * 2 - 1;
+
+        samples[index] = Math.max(-1, Math.min(1, drive * x));
+    }
+
+    return samples;
+}
+
+function distortionMakeupFor(drive: number) {
+    return Math.min(1, 1 / Math.sqrt(drive));
+}
+
 function formatPitch(hertz: number) {
     const midi = Math.round(MIDI_A4 + SEMITONES_PER_OCTAVE * Math.log2(hertz / TUNING_HERTZ));
     const target = noteHertz(midi);
@@ -587,7 +663,7 @@ function impulse(context: AudioContext, seconds: number) {
 }
 
 function makeupFor(drive: number) {
-    return Math.min(1, 1 / Math.sqrt(drive));
+    return Math.tanh(drive) / drive;
 }
 
 function rootMeanSquare(data: Float32Array) {

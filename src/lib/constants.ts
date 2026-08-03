@@ -1,6 +1,8 @@
 import austinCommunityCollege from '@images/logos/austin_community_college.png';
 import stationAustin from '@images/logos/station_austin.svg';
 
+export const ARTIST_NAME_MAX_LENGTH = 50;
+
 export const ASSET_KINDS = ['brochure', 'document', 'media-kit', 'photo-pack', 'press-kit', 'sample-pack', 'slides', 'stems', 'video'] as const;
 
 export const ASSET_KIND_LABELS: Record<AssetKind, string> = {
@@ -22,7 +24,7 @@ export const BYTES_PER_KILOBYTE = 1_024;
 export const BYTES_PER_MEGABYTE = 1_048_576;
 
 export const CANONICAL = {
-    history: 'Austin Producer Alliance was founded in May 2022 by Kevin Huang and Kyle Henderson to build the city\'s foremost community for music producers. What began as a Discord server grew into a recurring meetup at the Austin Central Library, then into a collective in partnership with longtime sponsor Station Austin (formerly Capital Factory). To date, APA has welcomed more than 1,000 producers and creatives to its events.',
+    history: 'Austin Producer Alliance was founded in May 2022 by Kevin Huang and Kyle Henderson to build the city\'s foremost community for music producers. What began as a Discord server grew into a recurring meetup at the Austin Central Library, then into a collective in partnership with longtime sponsor Station Austin (formerly Capital Factory). To date, APA has welcomed more than 500 producers and creatives to its events.',
     mission: 'We bring Austin\'s music producers together. Through meetups, workshops, and collaborations, producers of every genre and experience level find their people, sharpen their craft, and support one another. Our goal is a lasting community for those behind the city\'s sound.',
 } as const;
 
@@ -84,7 +86,7 @@ export const EVENT_PROGRAMS: Record<EventType, EventProgram> = {
         name: 'Hangout',
         shortName: 'Hangout',
         state: 'active',
-        summary: 'A pop-up social for connecting beyond the music, landing midway between assemblies.',
+        summary: 'A pop-up social for connecting beyond the music, landing midway between Assemblies.',
     },
     'bash': {
         cadence: 'bimonthly',
@@ -207,9 +209,9 @@ export const NAV_GROUPS = [
         label: 'Store',
     },
     {
-        href: '/sandbox',
-        id: 'sandbox',
-        label: 'Sandbox',
+        href: '/rack',
+        id: 'rack',
+        label: 'Rack',
     },
 ] as const;
 
@@ -307,11 +309,11 @@ export const QUESTIONNAIRE = [
 
 export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
-export const RESERVED_USERNAMES = ['admin', 'aephonics', 'apa', 'austin', 'help', 'root', 'signin', 'staff', 'support', 'system'] as const;
+export const RESERVED_USERNAMES = ['admin', 'aephonics', 'apa', 'austin', 'help', 'root', 'signin', 'signout', 'staff', 'support', 'system'] as const;
 
 export const SESSION_TTL_DAYS = 14;
 
-export const SITE_UPDATED = '2026-07-31';
+export const SITE_UPDATED = '2026-08-03';
 
 export const SPONSORS = [
     { logo: stationAustin, name: 'Station Austin' },
@@ -325,10 +327,13 @@ export const STORAGE = {
     bashBoard: { key: 'apa.bash-board', scope: 'session', topic: 'apa:bash-board-changed' },
     cart: { key: 'apa.cart', scope: 'local', topic: 'apa:cart-changed' },
     chat: { key: 'apa.chat', scope: 'session', topic: 'apa:chat-changed' },
+    newsletter: { key: 'apa.newsletter', scope: 'local', topic: 'apa:newsletter-changed' },
     onboardingDraft: { key: 'apa.onboarding', scope: 'session', topic: 'apa:onboarding-changed' },
     order: { key: 'apa.order', scope: 'session', topic: 'apa:order-changed' },
     player: { key: 'apa.player', scope: 'memory', topic: 'apa:player-changed' },
+    profiles: { key: 'apa.profiles', scope: 'local', topic: 'apa:profiles-changed' },
     session: { key: 'apa.session', scope: 'local', topic: 'apa:session-changed' },
+    theme: { key: 'apa.theme', scope: 'local', topic: 'apa:theme-changed' },
 } as const;
 
 export const TRACK_PLAY_TOPIC = 'apa:track-play';
@@ -346,6 +351,10 @@ export const UPLOAD = {
 } as const;
 
 export const UPLOAD_EXTENSIONS_LABEL = UPLOAD.extensions.map(extension => extension.toUpperCase()).join(', ');
+
+export const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
+
+export const USERNAME_TAKEN_MESSAGE = 'That username is taken. Pick another.';
 
 export const US_STATES = [
     { code: 'AL', name: 'Alabama' },

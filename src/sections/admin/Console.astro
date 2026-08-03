@@ -25,10 +25,10 @@ const ACTIONS = [
 
 const SWITCHES = [
     {
-        blurb: 'Controls whether check-in and the site accept new member signups.',
+        blurb: 'Controls whether members can queue a track for live feedback at the next Assembly.',
         checked: true,
-        id: 'signups',
-        name: 'Signups',
+        id: 'assembly-feedback',
+        name: 'Assembly track feedback intake',
         off: 'Closed',
         on: 'Open',
     },
@@ -41,10 +41,10 @@ const SWITCHES = [
         on: 'Open',
     },
     {
-        blurb: 'Controls whether members can queue a track for live feedback at the next Assembly.',
+        blurb: 'Controls whether check-in and the site accept new member signups.',
         checked: true,
-        id: 'assembly-feedback',
-        name: 'Assembly track feedback intake',
+        id: 'signups',
+        name: 'Signups',
         off: 'Closed',
         on: 'Open',
     },
@@ -52,7 +52,7 @@ const SWITCHES = [
 ---
 
 <section
-    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-ink"
     aria-labelledby="admin-title"
 >
     <div>
@@ -72,7 +72,7 @@ const SWITCHES = [
 </section>
 
 <section
-    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-ink"
     aria-labelledby="admin-switches-title"
 >
     <div>
@@ -124,7 +124,7 @@ const SWITCHES = [
 </section>
 
 <section
-    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-ink"
     aria-labelledby="admin-actions-title"
 >
     <div>
@@ -286,7 +286,7 @@ const SWITCHES = [
 <script>
     import { MOCK_LATENCY_MS } from '@lib/constants';
     import { delay, registerPageScript } from '@lib/utils';
-    import { toast } from '@lib/toasts';
+    import { toast } from '@lib/ui/toasts';
 
     const pending = new Set<string>();
 

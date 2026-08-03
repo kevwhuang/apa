@@ -1,0 +1,13 @@
+---
+import CheckInForm from '@sections/here/Form.astro';
+import Layout from '@/Layout.astro';
+import { brandTitle } from '@lib/brand';
+---
+
+<Layout
+    description="Scan the door code at an Austin Producer Alliance event or open austinproduceralliance.com/here to check in and open your account with a first Prod on it."
+    noindex
+    title={brandTitle('Check in')}
+>
+    <CheckInForm />
+</Layout>

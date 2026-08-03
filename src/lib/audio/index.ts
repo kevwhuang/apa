@@ -1,5 +1,6 @@
 import { STORAGE, TRACK_STATE_TOPIC } from '@lib/constants';
 import { createStore } from '@lib/state';
+import { setRackMuted, setRackVolume } from '@lib/audio/rack/context';
 
 const ATTACK_DIVISOR = 8;
 
@@ -86,6 +87,7 @@ let startedAt = 0;
 let stepCursor = 0;
 let stepTime = 0;
 let voices: AudioScheduledSourceNode[] = [];
+let volume = 1;
 
 export function announceTrackState(): void {
     if (typeof window === 'undefined') return;
@@ -110,7 +112,7 @@ function ensureContext(): AudioContext | undefined {
 
     context = new AudioContext();
     master = context.createGain();
-    master.gain.value = muted ? 0 : MASTER_LEVEL;
+    master.gain.value = muted ? 0 : MASTER_LEVEL * volume;
     master.connect(context.destination);
     noise = context.createBuffer(1, context.sampleRate * NOISE_SECONDS, context.sampleRate);
 
@@ -137,6 +139,10 @@ export function getPosition(): number {
 
 export function getTrack(): PlayerTrack | undefined {
     return current;
+}
+
+export function getVolume(): number {
+    return volume;
 }
 
 function hash(value: string): number {
@@ -259,8 +265,16 @@ export function seekTo(seconds: number): void {
 
 export function setMuted(next: boolean): void {
     muted = next;
+    setRackMuted(next);
 
-    if (context && master) master.gain.setTargetAtTime(next ? 0 : MASTER_LEVEL, context.currentTime, MUTE_RAMP);
+    if (context && master) master.gain.setTargetAtTime(next ? 0 : MASTER_LEVEL * volume, context.currentTime, MUTE_RAMP);
+}
+
+export function setVolume(fraction: number): void {
+    volume = Math.min(Math.max(0, fraction), 1);
+    setRackVolume(volume);
+
+    if (context && master) master.gain.setTargetAtTime(muted ? 0 : MASTER_LEVEL * volume, context.currentTime, MUTE_RAMP);
 }
 
 function stepSeconds(track: PlayerTrack): number {

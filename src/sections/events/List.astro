@@ -5,14 +5,14 @@ import PageHead from '@components/shared/PageHead.astro';
 import ProgramFlyer from '@components/program/Flyer.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { EVENT_PROGRAMS, LINKS } from '@lib/constants';
-import { formatDate, formatTimeRange, getProgram, mergeCalendar } from '@lib/utils';
+import { formatCalendarDay, formatCalendarMonth, formatDate, formatTimeRange, formatWeekday, getProgram, mergeCalendar } from '@lib/utils';
 
 type CalendarItem = ReturnType<typeof mergeCalendar>['upcoming'][number];
 
 const PAGE_INDEX = [
     { href: '#assembly-title', label: 'Assembly' },
-    { href: '#hangout-title', label: 'Hangout' },
     { href: '#bash-title', label: 'Bash' },
+    { href: '#hangout-title', label: 'Hangout' },
     { href: '#past-title', label: 'Archive' },
     { href: '#planned-title', label: 'Planned' },
 ] as const;
@@ -45,20 +45,8 @@ const upcomingBashes = bashEditions
     .filter(edition => edition.data.status === 'upcoming')
     .sort((a, b) => +a.data.date - +b.data.date);
 
-function entryNo(value: number) {
+function entryNumber(value: number) {
     return String(value).padStart(2, '0');
-}
-
-function stampDay(date: Date) {
-    return date.toLocaleDateString('en-US', { day: '2-digit', timeZone: 'America/Chicago' });
-}
-
-function stampMonth(date: Date) {
-    return date.toLocaleDateString('en-US', { month: 'short', timeZone: 'America/Chicago', year: 'numeric' });
-}
-
-function weekday(date: Date) {
-    return date.toLocaleDateString('en-US', { timeZone: 'America/Chicago', weekday: 'long' });
 }
 
 function withEnd(list: CalendarItem[]) {
@@ -161,17 +149,17 @@ function withEnd(list: CalendarItem[]) {
                                         class="sheet__stamp"
                                         datetime={nextAssembly.date.toISOString()}
                                     >
-                                        <span class="sheet__day">{stampDay(nextAssembly.date)}</span>
-                                        <span class="sheet__month">{stampMonth(nextAssembly.date)}</span>
+                                        <span class="sheet__day">{formatCalendarDay(nextAssembly.date)}</span>
+                                        <span class="sheet__month">{formatCalendarMonth(nextAssembly.date)}</span>
                                     </time>
-                                    <span class="sheet__weekday">{weekday(nextAssembly.date)}</span>
+                                    <span class="sheet__weekday">{formatWeekday(nextAssembly.date)}</span>
                                 </p>
                                 <div
                                     class="sheet__body"
                                     data-motion="rise"
                                 >
                                     <p class="label mb-4 text-ink-subtle">
-                                        Entry {entryNo(1)} / {entryNo(assemblies.length)}
+                                        Entry {entryNumber(1)} / {entryNumber(assemblies.length)}
                                     </p>
                                     <h3 class="font-extrabold font-sans text-2xl tracking-tight">{nextAssembly.title}</h3>
                                     <p
@@ -212,7 +200,7 @@ function withEnd(list: CalendarItem[]) {
                                             id={event.id}
                                             class="docket__row"
                                         >
-                                            <p class="docket__no">{entryNo(index + 2)}</p>
+                                            <p class="docket__no">{entryNumber(index + 2)}</p>
                                             <p
                                                 class="docket__date"
                                                 data-placeholder
@@ -249,16 +237,8 @@ function withEnd(list: CalendarItem[]) {
     </div>
 </section>
 
-<ProgramFlyer
-    class="border-b-2 border-ink"
-    detailed
-    events={hangouts}
-    headingId="hangout-title"
-    tight
-/>
-
 <section
-    class="stage stage--bash stage--overhang stage--tight border-b-2 border-ink"
+    class="stage stage--bash stage--tight border-b-2 border-ink"
     aria-labelledby="bash-title"
 >
     <div
@@ -351,6 +331,14 @@ function withEnd(list: CalendarItem[]) {
             )}
 </section>
 
+<ProgramFlyer
+    class="border-b-2 border-ink"
+    detailed
+    events={hangouts}
+    headingId="hangout-title"
+    tight
+/>
+
 <section
     class="slab--sunk stage stage--tight border-b-2 border-ink"
     aria-labelledby="past-title"
@@ -379,8 +367,8 @@ function withEnd(list: CalendarItem[]) {
                             data-placeholder
                         >
                             <time datetime={event.date.toISOString()}>
-                                <span class="archive-card__day">{stampDay(event.date)}</span>
-                                <span class="archive-card__month">{stampMonth(event.date)}</span>
+                                <span class="archive-card__day">{formatCalendarDay(event.date)}</span>
+                                <span class="archive-card__month">{formatCalendarMonth(event.date)}</span>
                             </time>
                         </p>
                         <div class="archive-card__body">

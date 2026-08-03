@@ -116,8 +116,8 @@ import IconUser from '@components/icons/User.astro';
         transform: translateY(1px);
     }
 
-    .account__item:hover,
-    .account__item:focus-visible {
+    .account__item:focus-visible,
+    .account__item:hover {
         background: var(--color-surface-sunken);
         color: var(--color-accent-deep);
     }
@@ -156,14 +156,21 @@ import IconUser from '@components/icons/User.astro';
 
     .account__out {
         align-items: center;
+        background: var(--color-accent);
+        border: 2px solid var(--color-accent);
+        color: var(--color-ink);
         display: inline-flex;
         font-family: var(--font-mono);
         font-size: var(--text-sm);
         letter-spacing: 0.04em;
         min-height: 50px;
-        padding-inline: var(--nav-pad);
+        padding-inline: var(--space-sm);
         text-transform: uppercase;
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            background var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
         white-space: nowrap;
     }
 
@@ -172,7 +179,9 @@ import IconUser from '@components/icons/User.astro';
     }
 
     .account__out:hover {
-        color: var(--color-accent-deep);
+        background: var(--color-accent-deep);
+        border-color: var(--color-accent-deep);
+        color: var(--color-ink-inverse);
     }
 
     .account__toggle {
@@ -222,15 +231,20 @@ import IconUser from '@components/icons/User.astro';
             inset: calc(100% + 6px) var(--shell-pad) auto auto;
             min-width: 0;
         }
+
+        .account__out {
+            padding-inline: var(--space-3xs);
+        }
     }
 </style>
 
 <script>
     import { navigate } from 'astro:transitions/client';
 
-    import { endSession, getSession, onSessionChange } from '@lib/session';
-    import { getOnboardingHref } from '@lib/onboarding';
-    import { registerPageScript, setPending } from '@lib/utils';
+    import { endSession, getSession, onSessionChange } from '@lib/account/session';
+    import { formatProds, registerPageScript, setPending } from '@lib/utils';
+    import { getOnboardingHref } from '@lib/account/onboarding';
+    import { toast } from '@lib/ui/toasts';
 
     let unsubscribe: (() => void) | undefined;
 
@@ -238,6 +252,7 @@ import IconUser from '@components/icons/User.astro';
         setPending(button, true);
 
         await endSession();
+        toast('Signed out.', 'info');
         await navigate('/');
     }
 
@@ -263,9 +278,9 @@ import IconUser from '@components/icons/User.astro';
 
         if (!balance || !link || !name || !onboarding) return;
 
-        const label = session?.displayName || session?.username || session?.email || 'Account';
+        const label = session?.artistName || session?.username || session?.email || 'Account';
 
-        balance.textContent = `${session?.prods ?? 0} Prods`;
+        balance.textContent = formatProds(session?.prods ?? 0);
         name.textContent = `Account, signed in as ${label}`;
         onboarding.hidden = !session || session.onboarded;
 

@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 
+import IconTrash from '@components/icons/Trash.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import { toCatalog } from '@lib/utils';
 
@@ -8,7 +9,7 @@ const catalog = toCatalog(await getCollection('products'));
 ---
 
 <section
-    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    class="stage stage--focus stage--tight border-b-2 border-ink"
     aria-labelledby="cart-title"
 >
     <div>
@@ -23,7 +24,7 @@ const catalog = toCatalog(await getCollection('products'));
 </section>
 
 <section
-    class="stage stage--narrow stage--tight"
+    class="stage stage--focus stage--tight"
     aria-label="Cart contents"
     data-catalog={JSON.stringify(catalog)}
 >
@@ -64,7 +65,7 @@ const catalog = toCatalog(await getCollection('products'));
                 </a>
             </div>
             <ul
-                class="cart-items flex flex-col gap-4 list-none"
+                class="cart-items flex flex-col list-none"
                 data-cart-list
             />
             <p
@@ -74,7 +75,7 @@ const catalog = toCatalog(await getCollection('products'));
             />
         </div>
         <aside
-            class="slab slab--sunk self-start"
+            class="cart__summary slab slab--sunk self-start"
             aria-label="Order summary"
             data-cart-summary
         >
@@ -117,7 +118,7 @@ const catalog = toCatalog(await getCollection('products'));
         </aside>
     </div>
     <template data-cart-row>
-        <li class="slab slab--card flex gap-5">
+        <li class="cart-items__row slab slab--card flex flex-wrap">
             <div
                 class="flex items-center justify-center overflow-hidden relative shrink-0 h-14 w-14 md:h-28 md:w-28"
                 aria-hidden="true"
@@ -129,7 +130,7 @@ const catalog = toCatalog(await getCollection('products'));
                     data-row-initial
                 />
             </div>
-            <div class="flex flex-1 flex-col min-w-0 gap-2">
+            <div class="cart-items__body flex flex-1 flex-col">
                 <p
                     class="font-extrabold font-sans"
                     data-row-title
@@ -139,11 +140,15 @@ const catalog = toCatalog(await getCollection('products'));
                     data-row-variant
                 />
                 <p
+                    class="font-mono text-2xs text-ink-subtle"
+                    data-row-sku
+                />
+                <p
                     class="label self-start px-2 py-1 bg-accent text-ink"
                     data-row-stock
                     hidden
                 />
-                <div class="flex flex-wrap items-center gap-4 mt-2">
+                <div class="cart-items__controls flex flex-wrap items-center">
                     <div class="inline-flex items-center border-2 border-ink">
                         <button
                             class="active:bg-ink active:text-ink-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-ink aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-[50px] w-[50px] font-bold transition-colors"
@@ -165,11 +170,11 @@ const catalog = toCatalog(await getCollection('products'));
                         </button>
                     </div>
                     <button
-                        class="action-text hover:text-accent-deep flex items-center min-h-[50px] px-1 text-ink-muted transition-colors"
+                        class="cart-items__remove"
                         data-row-remove
                         type="button"
                     >
-                        Remove
+                        <IconTrash />
                     </button>
                     <span
                         class="ml-auto font-bold font-mono"
@@ -215,8 +220,50 @@ const catalog = toCatalog(await getCollection('products'));
         color: var(--color-ink-subtle);
     }
 
+    .cart-items {
+        gap: var(--space-md);
+    }
+
     .cart-items:empty {
         display: none;
+    }
+
+    .cart-items__body {
+        gap: var(--space-xs);
+        min-width: min(100%, 160px);
+    }
+
+    .cart-items__controls {
+        gap: var(--space-sm);
+        margin-top: var(--space-2xs);
+    }
+
+    .cart-items__remove {
+        align-items: center;
+        color: var(--color-ink-muted);
+        display: inline-flex;
+        flex-shrink: 0;
+        height: 50px;
+        justify-content: center;
+        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        width: 50px;
+    }
+
+    .cart-items__remove:active {
+        transform: translateY(1px);
+    }
+
+    .cart-items__remove:focus-visible {
+        outline-offset: -2px;
+    }
+
+    .cart-items__remove:hover {
+        color: var(--color-accent-deep);
+    }
+
+    .cart-items__row {
+        gap: var(--space-md);
+        padding: var(--space-lg);
     }
 
     .cart__grid:has([data-cart-summary][hidden]) > .cart__main {
@@ -232,14 +279,19 @@ const catalog = toCatalog(await getCollection('products'));
     .cart__notice {
         border-left: 2px solid var(--color-accent-deep);
     }
+
+    .cart__summary {
+        position: sticky;
+        top: calc(var(--header-height) + var(--space-md));
+    }
 </style>
 
 <script>
     import { CARD_COLORS, COMMERCE } from '@lib/constants';
     import { formatPrice, formatVariant, getStockLabel, parseCatalog, registerPageScript, setText } from '@lib/utils';
-    import { getItems, onChange, reconcile, remove, setQuantity, totals } from '@lib/store';
-    import { renderIssueList } from '@lib/forms';
-    import { toast } from '@lib/toasts';
+    import { getItems, onChange, reconcile, remove, setQuantity, totals } from '@lib/commerce/cart';
+    import { renderIssueList } from '@lib/ui/forms';
+    import { toast } from '@lib/ui/toasts';
 
     interface FocusMark {
         control: string;
@@ -350,6 +402,7 @@ const catalog = toCatalog(await getCollection('products'));
         setText(fragment.querySelector('[data-row-initial]'), item.title.split(' ')[0]);
         setText(fragment.querySelector('[data-row-price]'), formatPrice(item.priceCents * item.quantity));
         setText(fragment.querySelector('[data-row-quantity]'), String(item.quantity));
+        setText(fragment.querySelector('[data-row-sku]'), `SKU ${skuFor(item)}`);
         setText(fragment.querySelector('[data-row-title]'), item.title);
         setText(fragment.querySelector('[data-row-variant]'), variant.length > 0 ? variant : 'One option');
 
@@ -384,6 +437,7 @@ const catalog = toCatalog(await getCollection('products'));
         const hint = document.querySelector<HTMLElement>('[data-cart-shipping-hint]');
         const summary = totals(items);
         const remaining = COMMERCE.freeShippingThresholdCents - summary.subtotalCents;
+        const hideHint = summary.subtotalCents === 0 || remaining <= 0;
 
         setText(document.querySelector('[data-shipping]'), summary.subtotalCents === 0 ? '\u2014' : formatPrice(summary.shippingCents));
         setText(document.querySelector('[data-subtotal]'), formatPrice(summary.subtotalCents));
@@ -392,8 +446,8 @@ const catalog = toCatalog(await getCollection('products'));
 
         if (!hint) return;
 
-        hint.textContent = remaining > 0 ? `${formatPrice(remaining)} more for free shipping.` : 'Shipping is on us.';
-        hint.toggleAttribute('hidden', summary.subtotalCents === 0);
+        hint.textContent = hideHint ? '' : `${formatPrice(remaining)} more for free shipping.`;
+        hint.toggleAttribute('hidden', hideHint);
     }
 
     function restoreFocus(list: HTMLElement, mark: FocusMark | null) {
@@ -414,6 +468,10 @@ const catalog = toCatalog(await getCollection('products'));
         }
 
         (rows[mark.index] ?? rows[rows.length - 1]).querySelector<HTMLElement>('[data-row-remove]')?.focus();
+    }
+
+    function skuFor(item: CartItem) {
+        return [item.productSlug, item.color, item.size].filter(Boolean).join('-').replace(/\s+/g, '-').toUpperCase();
     }
 
     registerPageScript(initCartView);

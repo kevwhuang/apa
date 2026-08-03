@@ -8,13 +8,13 @@ import {
     STORAGE,
 } from '@lib/constants';
 import { createStore } from '@lib/state';
-import { getSession } from '@lib/session';
+import { getSession } from '@lib/account/session';
 
 const BASE64_GROUP = 4;
 
 const DEFAULT_DRAFT: OnboardingDraft = {
     answers: {},
-    displayName: '',
+    artistName: '',
     email: '',
     genres: [],
     location: 'Austin, TX',
@@ -95,7 +95,7 @@ function normalizeDraft(value: OnboardingDraft): OnboardingDraft {
 
     return {
         answers: normalizeAnswers(value.answers),
-        displayName: String(value.displayName ?? ''),
+        artistName: String(value.artistName ?? ''),
         email: String(value.email ?? ''),
         genres: Array.isArray(value.genres) ? value.genres.map(String) : [],
         location: String(value.location ?? DEFAULT_DRAFT.location),

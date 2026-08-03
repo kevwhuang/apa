@@ -271,9 +271,9 @@ const lowStock = inStock && product.stock <= COMMERCE.lowStockThreshold;
 
 <script>
     import { COMMERCE } from '@lib/constants';
-    import { add, getItems } from '@lib/store';
+    import { add, getItems } from '@lib/commerce/cart';
     import { registerPageScript } from '@lib/utils';
-    import { toast } from '@lib/toasts';
+    import { toast } from '@lib/ui/toasts';
 
     let maxQuantity = 1;
     let quantity = 1;

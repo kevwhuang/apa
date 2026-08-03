@@ -2,48 +2,14 @@
 import { getCollection } from 'astro:content';
 
 import PageHead from '@components/shared/PageHead.astro';
-import { PASSWORD_MIN_LENGTH, QUESTIONNAIRE } from '@lib/constants';
-
-const DISPLAY_NAME_MAX_LENGTH = 50;
-
-const REJECTIONS = [
-    {
-        action: 'Check in',
-        body: 'Onboarding opens from the welcome email composed when you check in at an event. Open the link in that message, or check in again to get a fresh one.',
-        heading: 'This page opens from your welcome email.',
-        href: '/check-in',
-        reason: 'missing',
-    },
-    {
-        action: 'Check in again',
-        body: 'The address in that link could not be read. Links get mangled by copying and pasting more often than you would think.',
-        heading: 'That link does not look right.',
-        href: '/check-in',
-        reason: 'malformed',
-    },
-    {
-        action: 'Check in again',
-        body: 'Onboarding links last 24 hours. Check in again and the Alliance will compose a new one.',
-        heading: 'This link expired.',
-        href: '/check-in',
-        reason: 'expired',
-    },
-    {
-        action: 'Open your account',
-        body: 'This account has already been through onboarding, so there is nothing left to fill in.',
-        heading: 'You are already set up.',
-        href: '/sign-in',
-        reason: 'completed',
-    },
-];
+import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
+import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, QUESTIONNAIRE, USERNAME_PATTERN } from '@lib/constants';
 
 const STEPS = [
     { blurb: 'A handle and a password.', name: 'Account' },
     { blurb: 'What the roster shows.', name: 'Profile' },
     { blurb: 'Four quick questions.', name: 'Questionnaire' },
 ];
-
-const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
 
 const producers = await getCollection('producers');
 
@@ -52,7 +18,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
 ---
 
 <section
-    class="stage stage--narrow stage--tight border-b-2 border-ink"
+    class="stage stage--focus stage--tight border-b-2 border-ink"
     aria-labelledby="onboarding-title"
 >
     <div>
@@ -68,78 +34,138 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
             data-motion="blur"
         >
             Three short steps: pick a name and a password, say what you make, and answer four
-            questions. Nothing is sent anywhere and nothing outlives this browser.
+            questions. Your roster card builds itself alongside you, and nothing outlives this
+            browser.
         </p>
     </div>
 </section>
 
 <section
-    class="stage stage--narrow stage--tight"
+    class="stage stage--focus stage--tight"
     aria-label="Onboarding"
 >
-    {REJECTIONS.map(rejection => (
-        <div
-            class="onboarding__reject slab slab--card flex flex-col items-start gap-4"
-            data-onboarding-reject={rejection.reason}
-            hidden={rejection.reason !== 'missing'}
+    <div
+        class="onboarding-demo slab slab--sunk flex flex-wrap items-center gap-x-4 gap-y-2"
+        data-onboarding-demo
+        hidden
+    >
+        <p class="label px-2 py-1.5 border-2 border-ink bg-accent text-ink">Demo run</p>
+        <p class="onboarding-demo__copy text-sm text-ink-muted">
+            No welcome link on this URL, so this run uses a stand-in address &mdash; the real one
+            arrives by email when you <a class="hover:text-accent-deep underline underline-offset-4 transition-colors" href="/here">check in</a>.
+        </p>
+    </div>
+    <div
+        class="onboarding__reject slab slab--card flex flex-col items-start gap-4"
+        data-onboarding-complete
+        hidden
+    >
+        <p class="label text-accent-deep">Account / Complete</p>
+        <h2 class="font-extrabold font-sans text-3xl tracking-tight">
+            You are already set up.
+        </h2>
+        <p class="max-w-2xl text-md text-ink-muted">
+            This account has already been through onboarding, so there is nothing left to fill in.
+        </p>
+        <a
+            class="btn btn--primary"
+            href="/sign-in"
         >
-            <p class="label text-accent-deep">Link {rejection.reason}</p>
-            <h2 class="font-extrabold font-sans text-3xl tracking-tight">
-                {rejection.heading}
-            </h2>
-            <p class="max-w-2xl text-md text-ink-muted">
-                {rejection.body}
-            </p>
-            <a
-                class="btn btn--primary"
-                href={rejection.href}
-            >
-                {rejection.action} &rarr;
-            </a>
-        </div>
-    ))}
+            Open your account &rarr;
+        </a>
+    </div>
     <div
         class="onboarding__flow"
         data-onboarding-flow
-        hidden
     >
         <div class="onboarding__aside">
-            <p
-                id="onboarding-progress-label"
-                class="label mb-4 text-ink-muted"
-            >
-                Progress
-            </p>
-            <ol
-                class="onboarding-rail list-none"
-                aria-labelledby="onboarding-progress-label"
-                data-motion="rise"
-            >
-                {STEPS.map((step, index) => (
-                    <li
-                        class="onboarding-rail__step"
-                        aria-current={index === 0 ? 'step' : undefined}
-                        data-onboarding-step={index}
-                    >
-                        <span
-                            class="onboarding-rail__node"
-                            aria-hidden="true"
+            <div class="onboarding__rail-block">
+                <p
+                    id="onboarding-progress-label"
+                    class="label mb-4 text-ink-muted"
+                >
+                    Progress
+                </p>
+                <ol
+                    class="onboarding-rail list-none"
+                    aria-labelledby="onboarding-progress-label"
+                    data-motion="rise"
+                >
+                    {STEPS.map((step, index) => (
+                        <li
+                            class="onboarding-rail__step"
+                            aria-current={index === 0 ? 'step' : undefined}
+                            data-onboarding-step={index}
                         >
-                            <span class="onboarding-rail__index">0{index + 1}</span>
-                            <span class="onboarding-rail__check">&check;</span>
-                        </span>
-                        <span class="onboarding-rail__body">
-                            <span class="label onboarding-rail__name">{step.name}</span>
-                            <span class="onboarding-rail__blurb">{step.blurb}</span>
-                        </span>
-                    </li>
-                ))}
-            </ol>
-            <p
-                class="sr-only"
-                aria-live="polite"
-                data-onboarding-announce
-            />
+                            <span
+                                class="onboarding-rail__node"
+                                aria-hidden="true"
+                            >
+                                <span class="onboarding-rail__index">0{index + 1}</span>
+                                <span class="onboarding-rail__check">&check;</span>
+                            </span>
+                            <span class="onboarding-rail__body">
+                                <span class="label onboarding-rail__name">{step.name}</span>
+                                <span class="onboarding-rail__blurb">{step.blurb}</span>
+                            </span>
+                        </li>
+                    ))}
+                </ol>
+                <p
+                    class="sr-only"
+                    aria-live="polite"
+                    data-onboarding-announce
+                />
+            </div>
+            <div
+                class="onboarding-preview"
+                data-onboarding-preview
+            >
+                <p class="label mb-3 text-ink-muted">Roster preview</p>
+                <article class="onboarding-preview__card slab slab--bare slab--card">
+                    <PlaceholderTile
+                        class="onboarding-preview__tile aspect-[5/3] border-b-2 border-ink"
+                        color="var(--color-ink-subtle)"
+                        label="??"
+                        labelClass="onboarding-preview__initials leading-none text-[20cqw] text-surface-raised/80 [text-shadow:2px_2px_0_var(--color-ink-20)]"
+                    />
+                    <div class="onboarding-preview__body p-4">
+                        <p
+                            class="label mb-1 text-accent-deep wrap-break-word"
+                            data-empty
+                            data-preview-handle
+                        >
+                            @yourhandle
+                        </p>
+                        <h3
+                            class="mb-2 font-extrabold font-sans text-lg tracking-tight wrap-break-word"
+                            data-empty
+                            data-preview-name
+                        >
+                            Your artist name
+                        </h3>
+                        <p
+                            class="mb-3 font-mono text-2xs uppercase text-ink-muted wrap-break-word"
+                            data-preview-meta
+                        >
+                            Austin, TX
+                        </p>
+                        <ul
+                            class="flex flex-wrap gap-1.5 list-none"
+                            data-preview-genres
+                        />
+                        <p
+                            class="font-mono text-2xs uppercase text-ink-subtle"
+                            data-preview-genres-empty
+                        >
+                            Genre tags land here
+                        </p>
+                    </div>
+                </article>
+                <p class="mt-3 text-sm text-ink-subtle">
+                    A live sketch of your card. It joins the roster once you finish.
+                </p>
+            </div>
         </div>
         <form
             class="onboarding-form slab slab--card flex flex-col gap-6"
@@ -162,7 +188,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
                 <p class="text-smd text-ink-muted">
                     Your handle and a password for this browser-only demo.
                 </p>
-                <p class="slab slab--sunk flex flex-wrap items-center gap-x-3 gap-y-1 p-3">
+                <p class="onboarding__account slab slab--sunk flex flex-wrap items-center gap-x-3 gap-y-1">
                     <span class="label text-ink-subtle">Setting up</span>
                     <span
                         class="font-mono text-sm wrap-break-word"
@@ -268,25 +294,25 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
                     Profile
                 </legend>
                 <p class="text-smd text-ink-muted">
-                    What the roster shows about you.
+                    What the roster shows about you. Watch the preview card fill in as you type.
                 </p>
                 <div class="flex flex-col gap-2">
                     <label class="block">
-                        <span class="label block mb-2 text-ink-muted">Display name</span>
+                        <span class="label block mb-2 text-ink-muted">Artist name</span>
                         <input
-                            id="onboarding-display-name"
+                            id="onboarding-artist-name"
                             class="onboarding-field__control font-sans"
-                            aria-describedby="onboarding-display-name-error"
+                            aria-describedby="onboarding-artist-name-error"
                             aria-invalid="false"
                             autocomplete="nickname"
-                            maxlength={DISPLAY_NAME_MAX_LENGTH}
-                            name="displayName"
+                            maxlength={ARTIST_NAME_MAX_LENGTH}
+                            name="artistName"
                             required
                             type="text"
                         />
                     </label>
                     <p
-                        id="onboarding-display-name-error"
+                        id="onboarding-artist-name-error"
                         class="action-text text-accent-deep"
                         data-field-error
                         hidden
@@ -382,7 +408,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
                             <div class="flex flex-col gap-2">
                                 <label class="block">
                                     <span class="label block mb-2 text-ink-muted">{question.label}</span>
-                                    <span class="onboarding-field__select">
+                                    <span class="select">
                                         <select
                                             id={`onboarding-${question.id}`}
                                             class="onboarding-field__control onboarding-field__control--select font-sans"
@@ -462,6 +488,12 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
                     aria-live="polite"
                     data-onboarding-status
                 />
+                <p
+                    class="label onboarding-form__count text-ink-subtle"
+                    data-onboarding-count
+                >
+                    Step 01 / 03
+                </p>
             </div>
         </form>
     </div>
@@ -496,6 +528,10 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
                 <span class="label text-ink-inverse-muted">Profile</span>
                 <span class="font-bold font-mono text-md">Complete</span>
             </li>
+            <li class="onboarding__stat">
+                <span class="label text-ink-inverse-muted">Roster card</span>
+                <span class="font-bold font-mono text-md">Live</span>
+            </li>
         </ul>
         <p class="max-w-2xl text-md text-ink-inverse-muted">
             Your welcome Prod is on your account. Prods spend like cash in the store, and they add
@@ -520,9 +556,24 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
             </a>
         </div>
     </div>
+    <template data-preview-chip>
+        <li
+            class="inline-flex items-center h-6 px-2 border-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase"
+            data-preview-genre
+        />
+    </template>
 </section>
 
 <style>
+    .onboarding-demo {
+        margin-bottom: var(--space-lg);
+        padding: var(--space-xs) var(--space-sm);
+    }
+
+    .onboarding-demo__copy {
+        max-width: 60ch;
+    }
+
     .onboarding-field__control {
         background-color: var(--color-surface);
         border: 2px solid var(--color-ink);
@@ -551,31 +602,15 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
     }
 
     .onboarding-field__control--select {
-        appearance: none;
-        padding-right: calc(2 * var(--space-sm) + 12px);
-    }
-
-    .onboarding-field__select {
-        display: block;
-        position: relative;
-    }
-
-    .onboarding-field__select::after {
-        background-color: var(--color-ink);
-        content: '';
-        height: 8px;
-        mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' fill='none' stroke='currentColor' stroke-width='2'/></svg>");
-        mask-repeat: no-repeat;
-        mask-size: 12px 8px;
-        pointer-events: none;
-        position: absolute;
-        right: var(--space-sm);
-        top: calc(50% - 4px);
-        width: 12px;
+        padding-right: var(--select-pad);
     }
 
     .onboarding-form {
         padding: var(--space-lg);
+    }
+
+    .onboarding-form__count {
+        margin-inline-start: auto;
     }
 
     .onboarding-form__foot {
@@ -585,6 +620,14 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         flex-wrap: wrap;
         gap: var(--space-sm);
         padding-top: var(--space-md);
+    }
+
+    .onboarding-preview {
+        margin-top: var(--space-lg);
+    }
+
+    .onboarding-preview__body [data-empty] {
+        color: var(--color-ink-subtle);
     }
 
     .onboarding-rail {
@@ -678,6 +721,10 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         background-color: var(--color-accent-deep);
         border-color: var(--color-accent-deep);
         color: var(--color-ink-inverse);
+    }
+
+    .onboarding__account {
+        padding: var(--space-xs);
     }
 
     .onboarding__aside {
@@ -796,6 +843,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         background-color: var(--color-ink-20);
         flex: 1;
         height: 6px;
+        transition: background-color var(--duration-fast) var(--motion-ease-ui);
     }
 
     .strength__bar[data-strength-on] {
@@ -803,6 +851,15 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
     }
 
     @media (max-width: 768px) {
+        .onboarding-form {
+            order: 2;
+        }
+
+        .onboarding-preview {
+            margin-top: 0;
+            order: 3;
+        }
+
         .onboarding-rail {
             --rail-node: 28px;
             border: 2px solid var(--color-ink);
@@ -829,7 +886,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         }
 
         .onboarding__aside {
-            position: static;
+            display: contents;
         }
 
         .onboarding__flow {
@@ -864,23 +921,29 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
 </style>
 
 <script>
-    import { ONBOARDING_TOKEN_PARAM, QUESTIONNAIRE } from '@lib/constants';
-    import { clearFieldErrors, confirmRule, focusFirstError, passwordRule, setFieldErrors, validateFields } from '@lib/forms';
-    import { clearOnboardingDraft, getOnboardingDraft, isReservedUsername, saveOnboardingDraft, scorePassword, verifyOnboardingToken } from '@lib/onboarding';
-    import { registerPageScript, setMessage, setPending, setText } from '@lib/utils';
-    import { startSession, updateSession } from '@lib/session';
-    import { toast } from '@lib/toasts';
+    import { ONBOARDING_TOKEN_PARAM, PALETTE, QUESTIONNAIRE, USERNAME_TAKEN_MESSAGE } from '@lib/constants';
+    import { clearFieldErrors, confirmRule, focusFirstError, passwordRule, setFieldErrors, usernameRule, validateFields } from '@lib/ui/forms';
+    import { clearOnboardingDraft, getOnboardingDraft, isReservedUsername, saveOnboardingDraft, scorePassword, verifyOnboardingToken } from '@lib/account/onboarding';
+    import { formatProds, getInitials, registerPageScript, setMessage, setPending, setText } from '@lib/utils';
+    import { getSession, startSession, updateSession } from '@lib/account/session';
+    import { toast } from '@lib/ui/toasts';
 
     const ACCOUNT_RULES: Record<string, FieldRule> = {
         confirm: confirmRule(),
         password: passwordRule(),
-        username: { message: 'Use 3 to 20 letters, numbers, or underscores.', pattern: /^[a-z0-9_]{3,20}$/i, required: true },
+        username: usernameRule(),
     };
+
+    const DEFAULT_LOCATION = 'Austin, TX';
+
+    const DEMO_EMAIL = 'demo@austinproduceralliance.com';
+
+    const EMPTY_TILE_COLOR = 'var(--color-ink-subtle)';
 
     const LAST_STEP = 2;
 
     const PROFILE_RULES: Record<string, FieldRule> = {
-        displayName: { message: 'Enter the name the roster should show.', required: true },
+        artistName: { message: 'Enter the name the roster should show.', required: true },
         genres: { message: 'Choose at least one.', required: true },
     };
 
@@ -902,7 +965,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
 
         return {
             answers: Object.fromEntries(QUESTIONNAIRE.map(question => [question.id, values.getAll(question.id).map(String)])),
-            displayName: String(values.get('displayName') ?? ''),
+            artistName: String(values.get('artistName') ?? ''),
             email: accountEmail,
             genres: values.getAll('genres').map(String),
             location: String(values.get('location') ?? ''),
@@ -916,13 +979,13 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         const summary = form.querySelector<HTMLElement>('[data-form-error]');
         const values = new FormData(form);
 
-        const displayName = String(values.get('displayName') ?? '');
+        const artistName = String(values.get('artistName') ?? '');
         const username = String(values.get('username') ?? '').toLowerCase();
 
         setPending(button, true);
         setText(status, 'Saving your profile\u2026');
 
-        const result = await startSession({ displayName, email: accountEmail, username });
+        const result = await startSession({ artistName, email: accountEmail, username });
 
         if (!result.ok) {
             setPending(button, false);
@@ -943,7 +1006,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         const flow = document.querySelector<HTMLElement>('[data-onboarding-flow]');
 
         setText(document.querySelector<HTMLElement>('[data-onboarding-handle]'), `@${username}`);
-        setText(document.querySelector<HTMLElement>('[data-onboarding-prods]'), result.session.prods === 1 ? '1 Prod' : `${result.session.prods} Prods`);
+        setText(document.querySelector<HTMLElement>('[data-onboarding-prods]'), formatProds(result.session.prods));
         flow?.setAttribute('hidden', '');
         done?.removeAttribute('hidden');
         document.querySelector<HTMLElement>('[data-onboarding-heading]')?.focus();
@@ -998,31 +1061,74 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
     }
 
     function initOnboardingFlow(signal: AbortSignal) {
+        const banner = document.querySelector<HTMLElement>('[data-onboarding-demo]');
         const flow = document.querySelector<HTMLElement>('[data-onboarding-flow]');
         const form = document.querySelector<HTMLFormElement>('[data-onboarding-form]');
         const gate = verifyOnboardingToken(new URLSearchParams(window.location.search).get(ONBOARDING_TOKEN_PARAM));
 
         if (!flow || !form) return;
 
-        if (gate.state === 'rejected') {
-            showRejection(gate.reason);
+        if (getSession()?.onboarded === true) {
+            showCompleted(true);
 
             return;
         }
 
-        accountEmail = gate.email;
+        accountEmail = gate.state === 'granted' ? gate.email : DEMO_EMAIL;
         step = 0;
         form.noValidate = true;
 
-        showRejection(null);
+        banner?.toggleAttribute('hidden', gate.state === 'granted');
+        showCompleted(false);
         setText(document.querySelector<HTMLElement>('[data-onboarding-email]'), accountEmail);
         restore(form);
-        flow.removeAttribute('hidden');
+        renderPreview(form);
         showStep(form, false);
 
-        form.addEventListener('submit', event => handleSubmit(event, form), { signal });
+        form.addEventListener('input', () => renderPreview(form), { signal });
+        form.addEventListener('submit', event => void handleSubmit(event, form), { signal });
         form.querySelector<HTMLInputElement>('#onboarding-password')?.addEventListener('input', event => handlePasswordInput(event.currentTarget as HTMLInputElement), { signal });
         form.querySelector<HTMLButtonElement>('[data-onboarding-back]')?.addEventListener('click', () => handleBack(form), { signal });
+    }
+
+    function pickTileColor(seed: string) {
+        if (seed.length === 0) return EMPTY_TILE_COLOR;
+
+        const total = Array.from(seed).reduce((sum, character) => sum + character.charCodeAt(0), 0);
+
+        return PALETTE[total % PALETTE.length];
+    }
+
+    function renderPreview(form: HTMLFormElement) {
+        const list = document.querySelector<HTMLElement>('[data-preview-genres]');
+        const template = document.querySelector<HTMLTemplateElement>('[data-preview-chip]');
+        const tile = document.querySelector<HTMLElement>('.onboarding-preview__tile');
+        const values = new FormData(form);
+
+        const artistName = String(values.get('artistName') ?? '').trim();
+        const genres = values.getAll('genres').map(String);
+        const location = String(values.get('location') ?? '').trim() || DEFAULT_LOCATION;
+        const roles = values.getAll('roles').map(String);
+        const username = String(values.get('username') ?? '').trim();
+
+        if (tile) tile.style.background = pickTileColor(artistName || username);
+
+        setText(document.querySelector<HTMLElement>('.onboarding-preview__initials'), getInitials(artistName) || '??');
+        setText(document.querySelector<HTMLElement>('[data-preview-meta]'), roles.length > 0 ? `${roles.join(' \u00b7 ')} \u2014 ${location}` : location);
+        setPreviewText(document.querySelector<HTMLElement>('[data-preview-handle]'), username ? `@${username}` : '', '@yourhandle');
+        setPreviewText(document.querySelector<HTMLElement>('[data-preview-name]'), artistName, 'Your artist name');
+        document.querySelector<HTMLElement>('[data-preview-genres-empty]')?.toggleAttribute('hidden', genres.length > 0);
+
+        if (!list || !template) return;
+
+        list.replaceChildren();
+
+        genres.forEach((genre) => {
+            const fragment = template.content.cloneNode(true) as DocumentFragment;
+
+            setText(fragment.querySelector('[data-preview-genre]'), genre);
+            list.append(fragment);
+        });
     }
 
     function restore(form: HTMLFormElement) {
@@ -1030,7 +1136,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
 
         if (draft.email !== accountEmail) return;
 
-        setValue(form, 'displayName', draft.displayName);
+        setValue(form, 'artistName', draft.artistName);
         setValue(form, 'location', draft.location);
         setValue(form, 'username', draft.username);
         setChecked(form, 'genres', draft.genres);
@@ -1051,16 +1157,22 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         });
     }
 
+    function setPreviewText(element: HTMLElement | null, value: string, fallback: string) {
+        if (!element) return;
+
+        element.toggleAttribute('data-empty', value.length === 0);
+        setText(element, value || fallback);
+    }
+
     function setValue(form: HTMLFormElement, name: string, value: string) {
         const control = form.querySelector<HTMLInputElement | HTMLSelectElement>(`[name="${name}"]`);
 
         if (control && value) control.value = value;
     }
 
-    function showRejection(reason: OnboardingRejection | null) {
-        document.querySelectorAll<HTMLElement>('[data-onboarding-reject]').forEach((panel) => {
-            panel.toggleAttribute('hidden', panel.dataset.onboardingReject !== reason);
-        });
+    function showCompleted(completed: boolean) {
+        document.querySelector<HTMLElement>('[data-onboarding-complete]')?.toggleAttribute('hidden', !completed);
+        document.querySelector<HTMLElement>('[data-onboarding-flow]')?.toggleAttribute('hidden', completed);
     }
 
     function showStep(form: HTMLFormElement, moveFocus: boolean) {
@@ -1081,6 +1193,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         if (next) next.textContent = step === LAST_STEP ? 'Finish \u2192' : 'Continue \u2192';
 
         setText(document.querySelector<HTMLElement>('[data-onboarding-announce]'), `Step ${step + 1} of ${STEP_NAMES.length}, ${STEP_NAMES[step]}`);
+        setText(document.querySelector<HTMLElement>('[data-onboarding-count]'), `Step 0${step + 1} / 0${STEP_NAMES.length}`);
 
         if (moveFocus) form.querySelector<HTMLElement>(`[data-onboarding-pane="${step}"] input, [data-onboarding-pane="${step}"] select`)?.focus();
     }
@@ -1094,7 +1207,7 @@ const roles = Array.from(new Set(producers.flatMap(producer => producer.data.rol
         const password = String(values.get('password') ?? '');
         const username = String(values.get('username') ?? '');
 
-        if (!errors.username && isReservedUsername(username)) errors.username = 'That username is taken. Pick another.';
+        if (!errors.username && isReservedUsername(username)) errors.username = USERNAME_TAKEN_MESSAGE;
         if (!errors.password && wouldEcho(password, username)) errors.password = 'Your password cannot repeat your username or your email.';
 
         return errors;
