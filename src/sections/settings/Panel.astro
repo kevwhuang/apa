@@ -1,6 +1,69 @@
 ---
+import { getCollection } from 'astro:content';
+
 import PageHead from '@components/shared/PageHead.astro';
-import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@lib/constants';
+import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, UPLOAD, UPLOAD_EXTENSIONS_LABEL, USERNAME_PATTERN, US_STATES } from '@lib/constants';
+import { formatBytes, formatDateStamp, formatProds } from '@lib/utils';
+
+const ATTENDANCE = [
+    { date: '2026-07-22T19:00:00-05:00', event: 'Hangout \u00b7 July' },
+    { date: '2026-06-11T18:00:00-05:00', event: 'Assembly \u00b7 June' },
+    { date: '2026-03-21T13:30:00-05:00', event: 'Bash \u00b7 March' },
+    { date: '2025-11-15T13:30:00-06:00', event: 'Bash \u00b7 November' },
+    { date: '2024-03-14T18:00:00-05:00', event: 'Assembly \u00b7 March' },
+];
+
+const BIO_MAX_LENGTH = 280;
+
+const DEMO_PROFILE = {
+    artistName: 'Ampersand',
+    bio: 'I write patient, low-slung house in a converted garage on the east side and mix it loud enough to rattle the door.',
+    city: 'Austin',
+    email: 'demo@austinproduceralliance.com',
+    genres: ['house', 'techno'],
+    joined: new Date('2024-03-12T18:00:00Z'),
+    links: {
+        bandcamp: 'https://ampersand.bandcamp.com',
+        instagram: 'https://instagram.com/ampersand.wav',
+        soundcloud: 'https://soundcloud.com/ampersand',
+        spotify: 'https://open.spotify.com/artist/4kZ1ampersand',
+        youtube: 'https://youtube.com/@ampersand',
+    },
+    prods: 7,
+    role: 'producer',
+    state: 'TX',
+    track: { bytes: 8_642_048, name: 'Untitled Sketch 09.wav' },
+    username: 'ampersand',
+};
+
+const LINK_FIELDS = [
+    { label: 'Spotify', name: 'spotify', placeholder: 'https://open.spotify.com/artist/\u2026', value: DEMO_PROFILE.links.spotify },
+    { label: 'SoundCloud', name: 'soundcloud', placeholder: 'https://soundcloud.com/\u2026', value: DEMO_PROFILE.links.soundcloud },
+    { label: 'Instagram', name: 'instagram', placeholder: 'https://instagram.com/\u2026', value: DEMO_PROFILE.links.instagram },
+    { label: 'Bandcamp', name: 'bandcamp', placeholder: 'https://yourname.bandcamp.com', value: DEMO_PROFILE.links.bandcamp },
+    { label: 'YouTube', name: 'youtube', placeholder: 'https://youtube.com/@\u2026', value: DEMO_PROFILE.links.youtube },
+];
+
+const PRODS_LEDGER = [
+    { amount: 1, date: '2024-03-12T13:00:00-05:00', reason: 'Welcome Prod' },
+    { amount: 1, date: '2024-03-14T18:00:00-05:00', reason: 'Attended the March Assembly' },
+    { amount: 1, date: '2025-11-15T13:30:00-06:00', reason: 'Attended the November Bash' },
+    { amount: 1, date: '2026-03-21T13:30:00-05:00', reason: 'Attended the March Bash' },
+    { amount: 2, date: '2026-03-28T11:00:00-05:00', reason: 'Finished a Bash track' },
+    { amount: -1, date: '2026-04-02T09:00:00-05:00', reason: 'Redeemed \u2014 Store credit' },
+    { amount: 1, date: '2026-06-11T18:00:00-05:00', reason: 'Attended the June Assembly' },
+    { amount: 1, date: '2026-07-22T19:00:00-05:00', reason: 'Attended the July Hangout' },
+];
+
+const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
+    ...entry,
+    balance: PRODS_LEDGER.slice(0, index + 1).reduce((total, item) => total + item.amount, 0),
+    change: entry.amount > 0 ? `+${entry.amount}` : `\u2212${Math.abs(entry.amount)}`,
+})).toReversed();
+
+const producers = await getCollection('producers');
+
+const genres = Array.from(new Set(producers.flatMap(producer => producer.data.genres))).sort((a, b) => a.localeCompare(b));
 ---
 
 <section
@@ -19,9 +82,11 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
             class="max-w-2xl mt-6 text-lmd text-ink-muted"
             data-motion="rise"
         >
-            Your name on the roster, the handle that points at you, and a password field that
-            reads what you type and forgets it. Everything on this page is written to this
-            browser, so read it as a working model of the account screen rather than the account.
+            Everything your roster card carries: the name people read, the handle that points at
+            you, a short bio, the genres you work in, where you are based, where else you live
+            online, and the track that plays on the card. Everything on this page is written to
+            this browser, so read it as a working model of the account screen rather than the
+            account.
         </p>
     </div>
 </section>
@@ -31,7 +96,7 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
     aria-label="Account and profile"
 >
     <div
-        class="flex flex-col gap-8"
+        class="settings__stack"
         data-motion-stagger="rise"
     >
         <dl class="settings__summary slab slab--sunk">
@@ -40,21 +105,33 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
                 <dd
                     class="font-mono text-sm wrap-break-word"
                     data-settings-email
-                />
+                >
+                    {DEMO_PROFILE.email}
+                </dd>
+            </div>
+            <div class="settings__row">
+                <dt class="label text-ink-muted">Role</dt>
+                <dd>
+                    <span class="chip settings__role">{DEMO_PROFILE.role}</span>
+                </dd>
             </div>
             <div class="settings__row">
                 <dt class="label text-ink-muted">Prods balance</dt>
                 <dd
                     class="font-mono text-sm"
                     data-settings-prods
-                />
+                >
+                    {formatProds(DEMO_PROFILE.prods)}
+                </dd>
             </div>
             <div class="settings__row">
                 <dt class="label text-ink-muted">Member since</dt>
                 <dd
                     class="font-mono text-sm"
                     data-settings-since
-                />
+                >
+                    {formatDateStamp(DEMO_PROFILE.joined)}
+                </dd>
             </div>
             <div class="settings__row">
                 <dt class="label text-ink-muted">Profile status</dt>
@@ -62,7 +139,9 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
                     <span
                         class="font-mono text-sm"
                         data-settings-profile
-                    />
+                    >
+                        Complete
+                    </span>
                     <a
                         class="action-text settings__link transition-colors"
                         data-settings-onboarding
@@ -74,8 +153,120 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
                 </dd>
             </div>
         </dl>
+        <section
+            class="settings__panel slab slab--card"
+            aria-labelledby="settings-attendance-title"
+        >
+            <h2
+                id="settings-attendance-title"
+                class="font-extrabold font-sans text-2xl tracking-tight"
+            >
+                Attendance
+            </h2>
+            <p class="max-w-2xl text-sm text-ink-subtle">
+                Every event you have checked in to since you joined, newest first.
+            </p>
+            <div class="settings__scroller">
+                <table class="settings__table border-2 border-ink">
+                    <caption class="sr-only">Events you checked in to, with the date of each check-in</caption>
+                    <thead>
+                        <tr class="border-b-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
+                            <th
+                                class="px-4 py-3 text-left"
+                                scope="col"
+                            >
+                                Event
+                            </th>
+                            <th
+                                class="px-4 py-3 text-right"
+                                scope="col"
+                            >
+                                Date
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-ink">
+                        {ATTENDANCE.map(entry => (
+                            <tr>
+                                <th
+                                    class="px-4 py-4 font-bold font-sans text-left whitespace-nowrap"
+                                    scope="row"
+                                >
+                                    {entry.event}
+                                </th>
+                                <td class="px-4 py-4 font-mono text-right text-xs whitespace-nowrap text-ink-muted">
+                                    <time datetime={entry.date}>{formatDateStamp(new Date(entry.date))}</time>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section
+            class="settings__panel slab slab--card"
+            aria-labelledby="settings-ledger-title"
+        >
+            <h2
+                id="settings-ledger-title"
+                class="font-extrabold font-sans text-2xl tracking-tight"
+            >
+                Prods ledger
+            </h2>
+            <p class="max-w-2xl text-sm text-ink-subtle">
+                Every Prod earned or spent since you joined, newest first, with the balance that
+                stood after each entry.
+            </p>
+            <div class="settings__scroller">
+                <table class="settings__table settings__table--wide border-2 border-ink">
+                    <caption class="sr-only">Dated ledger entries with reason, change, and running balance</caption>
+                    <thead>
+                        <tr class="border-b-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
+                            <th
+                                class="px-4 py-3 text-left"
+                                scope="col"
+                            >
+                                Date
+                            </th>
+                            <th
+                                class="px-4 py-3 text-left"
+                                scope="col"
+                            >
+                                Reason
+                            </th>
+                            <th
+                                class="px-4 py-3 text-right"
+                                scope="col"
+                            >
+                                Change
+                            </th>
+                            <th
+                                class="px-4 py-3 text-right"
+                                scope="col"
+                            >
+                                Balance
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-ink">
+                        {PRODS_ROWS.map(row => (
+                            <tr>
+                                <td class="px-4 py-4 font-mono text-xs whitespace-nowrap text-ink-muted">
+                                    <time datetime={row.date}>{formatDateStamp(new Date(row.date))}</time>
+                                </td>
+                                <td class="px-4 py-4 text-sm">{row.reason}</td>
+                                <td class:list={['px-4 py-4 font-mono text-right text-xs', row.amount < 0 && 'text-accent-deep']}>
+                                    {row.change}
+                                </td>
+                                <td class="px-4 py-4 font-mono text-right text-xs">{row.balance}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </section>
         <form
-            class="slab slab--card flex flex-col gap-5"
+            class="settings__form slab slab--card"
             data-settings-form
         >
             <h2 class="font-extrabold font-sans text-2xl tracking-tight">
@@ -86,7 +277,7 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
                     <span class="label block mb-2 text-ink-muted">Artist name</span>
                     <input
                         id="settings-name"
-                        class="aria-invalid:border-accent-deep aria-invalid:shadow-[3px_3px_0_0_var(--color-accent-20)] focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-[background-color,border-color,box-shadow]"
+                        class="settings__control font-sans"
                         aria-describedby="settings-name-error"
                         aria-invalid="false"
                         autocomplete="nickname"
@@ -94,6 +285,7 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
                         name="artistName"
                         required
                         type="text"
+                        value={DEMO_PROFILE.artistName}
                     />
                 </label>
                 <p
@@ -112,7 +304,7 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
                     <span class="label block mb-2 text-ink-muted">Username</span>
                     <input
                         id="settings-username"
-                        class="aria-invalid:border-accent-deep aria-invalid:shadow-[3px_3px_0_0_var(--color-accent-20)] focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-mono text-sm bg-transparent transition-[background-color,border-color,box-shadow]"
+                        class="settings__control font-mono text-sm"
                         aria-describedby="settings-username-error"
                         aria-invalid="false"
                         autocomplete="username"
@@ -120,6 +312,7 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
                         pattern={USERNAME_PATTERN}
                         required
                         type="text"
+                        value={DEMO_PROFILE.username}
                     />
                 </label>
                 <p
@@ -131,6 +324,116 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
                 <p class="text-sm text-ink-subtle">
                     Three to twenty letters, numbers, or underscores. It is stored in lower case.
                 </p>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="block">
+                    <span class="label block mb-2 text-ink-muted">Bio</span>
+                    <textarea
+                        id="settings-bio"
+                        class="settings__control settings__control--area font-sans"
+                        aria-describedby="settings-bio-error settings-bio-help"
+                        aria-invalid="false"
+                        maxlength={BIO_MAX_LENGTH}
+                        name="bio"
+                        rows="4"
+                        set:text={DEMO_PROFILE.bio}
+                    />
+                </label>
+                <p
+                    id="settings-bio-error"
+                    class="action-text text-accent-deep"
+                    data-field-error
+                    hidden
+                />
+                <p
+                    id="settings-bio-help"
+                    class="text-sm text-ink-subtle"
+                >
+                    <span data-bio-count>{DEMO_PROFILE.bio.length}</span> of {BIO_MAX_LENGTH} characters.
+                    A line or two on what you make and how you make it.
+                </p>
+            </div>
+            <fieldset class="settings__group flex flex-col gap-3">
+                <legend class="label settings__legend mb-1 text-ink-muted">
+                    What do you make? <span class="settings__hint">{genres.length} tags &middot; pick at least one</span>
+                </legend>
+                <div class="flex flex-wrap gap-2">
+                    {genres.map(genre => (
+                        <label class="settings__chip">
+                            <input
+                                class="settings__box"
+                                aria-describedby="settings-genres-error"
+                                aria-invalid="false"
+                                checked={DEMO_PROFILE.genres.includes(genre)}
+                                name="genres"
+                                type="checkbox"
+                                value={genre}
+                            />
+                            {genre}
+                        </label>
+                    ))}
+                </div>
+                <p
+                    id="settings-genres-error"
+                    class="action-text text-accent-deep"
+                    data-field-error
+                    hidden
+                />
+            </fieldset>
+            <div class="settings__pair">
+                <div class="flex flex-col gap-2">
+                    <label class="block">
+                        <span class="label block mb-2 text-ink-muted">City</span>
+                        <input
+                            id="settings-city"
+                            class="settings__control font-sans"
+                            aria-describedby="settings-city-error"
+                            aria-invalid="false"
+                            autocomplete="address-level2"
+                            name="city"
+                            required
+                            type="text"
+                            value={DEMO_PROFILE.city}
+                        />
+                    </label>
+                    <p
+                        id="settings-city-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="block">
+                        <span class="label block mb-2 text-ink-muted">State</span>
+                        <span class="select">
+                            <select
+                                id="settings-state"
+                                class="settings__control settings__control--select font-sans"
+                                aria-describedby="settings-state-error"
+                                aria-invalid="false"
+                                autocomplete="address-level1"
+                                name="state"
+                                required
+                            >
+                                {US_STATES.map(state => (
+                                    <option
+                                        selected={state.code === DEMO_PROFILE.state}
+                                        value={state.code}
+                                    >
+                                        {state.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </span>
+                    </label>
+                    <p
+                        id="settings-state-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </div>
             </div>
             <div class="flex flex-wrap items-center gap-4">
                 <button
@@ -147,7 +450,140 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
             </div>
         </form>
         <form
-            class="slab slab--card flex flex-col gap-5"
+            class="settings__form slab slab--card"
+            data-links-form
+        >
+            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
+                Links
+            </h2>
+            <p class="max-w-2xl text-sm text-ink-subtle">
+                Where else you live online. Every field is optional, and whatever you fill in shows
+                up on your roster card.
+            </p>
+            {LINK_FIELDS.map(field => (
+                <div class="flex flex-col gap-2">
+                    <label class="block">
+                        <span class="label block mb-2 text-ink-muted">{field.label}</span>
+                        <input
+                            id={`settings-${field.name}`}
+                            class="settings__control font-mono text-sm"
+                            aria-describedby={`settings-${field.name}-error`}
+                            aria-invalid="false"
+                            inputmode="url"
+                            name={field.name}
+                            placeholder={field.placeholder}
+                            spellcheck="false"
+                            type="url"
+                            value={field.value}
+                        />
+                    </label>
+                    <p
+                        id={`settings-${field.name}-error`}
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </div>
+            ))}
+            <div class="flex flex-wrap items-center gap-4">
+                <button
+                    class="btn btn--primary"
+                    type="submit"
+                >
+                    Save links
+                </button>
+                <p
+                    class="action-text text-ink-subtle"
+                    aria-live="polite"
+                    data-links-status
+                />
+            </div>
+        </form>
+        <form
+            class="settings__form slab slab--card"
+            data-track-form
+        >
+            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
+                Main track
+            </h2>
+            <p class="max-w-2xl text-sm text-ink-subtle">
+                One file, and it is the one that plays on your roster card. Swap it whenever the
+                better take arrives.
+            </p>
+            <div class="settings__track">
+                <label class="settings__pick">
+                    <span class="label">Choose an audio file</span>
+                    <input
+                        id="settings-track"
+                        class="settings__file sr-only"
+                        accept={UPLOAD.acceptAttribute}
+                        aria-describedby="settings-track-error settings-track-help"
+                        data-track-input
+                        name="track"
+                        type="file"
+                    />
+                </label>
+                <p
+                    class="settings__empty text-sm text-ink-subtle"
+                    data-track-empty
+                    hidden
+                >
+                    Nothing staged yet.
+                </p>
+                <div
+                    class="settings__staged slab slab--sunk"
+                    data-track-staged
+                >
+                    <p
+                        class="font-bold font-sans wrap-break-word"
+                        data-track-name
+                    >
+                        {DEMO_PROFILE.track.name}
+                    </p>
+                    <p
+                        class="label text-ink-muted"
+                        data-track-meta
+                    >
+                        {formatBytes(DEMO_PROFILE.track.bytes)}
+                    </p>
+                    <button
+                        class="action-text hover:text-accent-deep flex items-center min-h-[50px] px-1 text-ink-muted transition-colors"
+                        data-track-remove
+                        type="button"
+                    >
+                        Remove
+                    </button>
+                </div>
+            </div>
+            <p
+                id="settings-track-error"
+                class="action-text text-accent-deep"
+                data-field-error
+                hidden
+            />
+            <p
+                id="settings-track-help"
+                class="text-sm text-ink-subtle"
+            >
+                {UPLOAD_EXTENSIONS_LABEL}. Up to {formatBytes(UPLOAD.maxFileBytes)}. The file is
+                read for its name and size and never leaves this browser.
+            </p>
+            <div class="flex flex-wrap items-center gap-4">
+                <button
+                    class="btn btn--primary"
+                    type="submit"
+                >
+                    Save track
+                </button>
+                <p
+                    class="action-text text-ink-subtle"
+                    aria-live="polite"
+                    data-track-status
+                />
+            </div>
+        </form>
+        <form
+            class="settings__form slab slab--card"
             data-password-form
         >
             <h2 class="font-extrabold font-sans text-2xl tracking-tight">
@@ -158,7 +594,7 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
                     <span class="label block mb-2 text-ink-muted">New password</span>
                     <input
                         id="settings-password"
-                        class="aria-invalid:border-accent-deep aria-invalid:shadow-[3px_3px_0_0_var(--color-accent-20)] focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-[background-color,border-color,box-shadow]"
+                        class="settings__control font-sans"
                         aria-describedby="settings-password-error"
                         aria-invalid="false"
                         autocomplete="new-password"
@@ -184,7 +620,7 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
                     <span class="label block mb-2 text-ink-muted">Confirm new password</span>
                     <input
                         id="settings-confirm"
-                        class="aria-invalid:border-accent-deep aria-invalid:shadow-[3px_3px_0_0_var(--color-accent-20)] focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-[background-color,border-color,box-shadow]"
+                        class="settings__control font-sans"
                         aria-describedby="settings-confirm-error"
                         aria-invalid="false"
                         autocomplete="new-password"
@@ -214,19 +650,188 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
                 />
             </div>
         </form>
-        <p class="max-w-2xl text-sm text-ink-subtle">
-            Changes save to this browser. Clear your site data and the account goes with it.
-        </p>
     </div>
 </section>
 
 <style>
+    .settings__box {
+        appearance: none;
+        background-color: transparent;
+        border: 2px solid currentcolor;
+        flex-shrink: 0;
+        height: 24px;
+        margin: 0;
+        transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            box-shadow var(--duration-fast) var(--motion-ease-ui);
+        width: 24px;
+    }
+
+    .settings__box:checked {
+        background-color: var(--color-accent-deep);
+        border-color: var(--color-accent-deep);
+        box-shadow: inset 0 0 0 4px var(--color-surface-raised);
+    }
+
+    .settings__box:checked:focus-visible {
+        box-shadow:
+            inset 0 0 0 4px var(--color-surface-raised),
+            0 0 0 2px var(--color-surface),
+            0 0 0 4px var(--color-accent-deep);
+    }
+
+    .settings__chip {
+        align-items: center;
+        border: 2px solid var(--color-ink);
+        display: flex;
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        gap: var(--space-2xs);
+        letter-spacing: 0.025em;
+        min-height: var(--control-size);
+        padding: var(--space-2xs) var(--space-sm);
+        text-transform: uppercase;
+        transition: background-color var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .settings__chip:active {
+        background-color: var(--color-surface-sunken);
+    }
+
+    .settings__chip:has(.settings__box:checked) {
+        background-color: var(--color-surface-sunken);
+    }
+
+    .settings__chip:hover {
+        background-color: var(--color-surface-sunken);
+    }
+
+    .settings__control {
+        background-color: var(--color-surface);
+        border: 2px solid var(--color-ink);
+        color: var(--color-ink);
+        min-height: var(--control-size);
+        padding: var(--space-2xs) var(--space-sm);
+        transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            box-shadow var(--duration-fast) var(--motion-ease-ui);
+        width: 100%;
+    }
+
+    .settings__control:focus-visible {
+        background-color: var(--color-surface-raised);
+        border-color: var(--color-accent-deep);
+    }
+
+    .settings__control:hover {
+        background-color: var(--color-surface-raised);
+    }
+
+    .settings__control[aria-invalid='true'] {
+        border-color: var(--color-accent-deep);
+        box-shadow: 3px 3px 0 0 var(--color-accent-20);
+    }
+
+    .settings__control--area {
+        line-height: 1.6;
+        padding-block: var(--space-2xs);
+        resize: vertical;
+    }
+
+    .settings__control--select {
+        padding-right: var(--select-pad);
+    }
+
+    .settings__empty {
+        flex: 1 1 200px;
+    }
+
+    .settings__file {
+        clip-path: inset(50%);
+        height: 100%;
+        inset: 0;
+        margin: 0;
+        width: 100%;
+    }
+
+    .settings__form,
+    .settings__panel {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .settings__group {
+        border: 0;
+        padding: 0;
+    }
+
+    .settings__hint {
+        color: var(--color-ink-subtle);
+        text-transform: none;
+    }
+
+    .settings__legend {
+        line-height: 1.5;
+    }
+
     .settings__link {
         align-items: center;
         display: inline-flex;
         min-height: var(--control-size);
         padding-inline: var(--space-3xs);
         text-decoration: underline;
+    }
+
+    .settings__pair {
+        display: grid;
+        gap: var(--space-md);
+        grid-template-columns: minmax(0, 1fr) minmax(0, 220px);
+    }
+
+    .settings__pick {
+        align-items: center;
+        background-color: var(--color-surface);
+        background-image: repeating-linear-gradient(135deg, var(--color-ink-10) 0 6px, transparent 6px 12px);
+        border: 2px dashed var(--color-ink);
+        display: flex;
+        flex: 1 1 220px;
+        justify-content: center;
+        min-height: var(--control-size);
+        padding: var(--space-2xs) var(--space-sm);
+        position: relative;
+        text-align: center;
+        transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            box-shadow var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .settings__pick:active {
+        background-color: var(--color-surface-raised);
+        border-color: var(--color-accent-deep);
+    }
+
+    .settings__pick:has(.settings__file:focus) {
+        border-color: var(--color-accent-deep);
+        border-style: solid;
+    }
+
+    .settings__pick:has(.settings__file[aria-invalid='true']) {
+        border-color: var(--color-accent-deep);
+        box-shadow: 3px 3px 0 0 var(--color-accent-20);
+    }
+
+    .settings__pick:hover {
+        background-color: var(--color-surface-raised);
+        border-color: var(--color-accent-deep);
+    }
+
+    .settings__role {
+        min-height: var(--space-lg);
+        text-transform: capitalize;
     }
 
     .settings__row {
@@ -244,38 +849,142 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
         padding-bottom: 0;
     }
 
+    .settings__scroller {
+        overflow-x: auto;
+    }
+
+    .settings__stack {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2xl);
+    }
+
+    .settings__staged {
+        align-items: center;
+        column-gap: var(--space-sm);
+        display: flex;
+        flex: 1 1 260px;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        padding: 0 var(--space-sm);
+        row-gap: var(--space-3xs);
+    }
+
     .settings__summary {
         display: flex;
         flex-direction: column;
         gap: var(--space-2xs);
     }
+
+    .settings__table {
+        display: table;
+        overflow-x: visible;
+        width: 100%;
+    }
+
+    .settings__table--wide {
+        min-width: 520px;
+    }
+
+    .settings__track {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-md);
+    }
+
+    @media (max-width: 640px) {
+        .settings__pair {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    @media (forced-colors: active) {
+        .settings__box {
+            background-color: Canvas;
+            border-color: CanvasText;
+            forced-color-adjust: none;
+        }
+
+        .settings__box:checked {
+            background-color: SelectedItem;
+            border-color: CanvasText;
+            box-shadow: inset 0 0 0 4px Canvas;
+        }
+    }
 </style>
 
 <script>
-    import { MOCK_LATENCY_MS, USERNAME_TAKEN_MESSAGE } from '@lib/constants';
+    import { MOCK_LATENCY_MS, UPLOAD, USERNAME_TAKEN_MESSAGE } from '@lib/constants';
+    import { UPLOAD_EXTENSIONS_OR_LIST, getExtension, getSizeError } from '@lib/audio/uploads';
     import { clearFieldErrors, confirmRule, focusFirstError, passwordRule, setFieldErrors, usernameRule, validateFields } from '@lib/ui/forms';
-    import { delay, formatDateStamp, formatProds, registerPageScript, setPending, setText } from '@lib/utils';
+    import { delay, formatBytes, formatDateStamp, formatProds, registerPageScript, setPending, setText } from '@lib/utils';
     import { getOnboardingHref, isReservedUsername } from '@lib/account/onboarding';
     import { getSession, onSessionChange, updateSession } from '@lib/account/session';
     import { toast } from '@lib/ui/toasts';
 
     const INVALID_MESSAGE = 'Nothing saved yet. Check the fields.';
 
+    const LINK_MESSAGE = 'Use a full address that starts with https://.';
+
+    const LINK_NAMES = ['bandcamp', 'instagram', 'soundcloud', 'spotify', 'youtube'];
+
+    const LINK_PATTERN = /^https?:\/\/\S+\.\S+$/i;
+
+    const LINK_RULES: Record<string, FieldRule> = Object.fromEntries(
+        LINK_NAMES.map(name => [name, { message: LINK_MESSAGE, pattern: LINK_PATTERN }]),
+    );
+
     const PASSWORD_RULES: Record<string, FieldRule> = {
         confirm: confirmRule(),
         password: passwordRule(),
     };
 
-    const PLACEHOLDER = '\u2014';
-
     const PROFILE_RULES: Record<string, FieldRule> = {
         artistName: { message: 'Enter the name the roster should show.', required: true },
+        city: { message: 'Name the city you work out of.', required: true },
+        genres: { message: 'Choose at least one.', required: true },
         username: usernameRule(),
     };
 
     const SIGNED_OUT_MESSAGE = 'Sign in to save changes.';
 
+    const TRACK_MISSING_MESSAGE = 'Stage an audio file before you save.';
+
+    let demoSummary = { email: '', prods: '', profile: '', since: '' };
     let unsubscribe: (() => void) | undefined;
+
+    function handleBioInput(field: HTMLTextAreaElement) {
+        setText(document.querySelector('[data-bio-count]'), String(field.value.length));
+    }
+
+    async function handleLinksSubmit(event: SubmitEvent, form: HTMLFormElement) {
+        event.preventDefault();
+
+        const errors = validateFields(form, LINK_RULES);
+
+        clearFieldErrors(form);
+
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(form, errors);
+            focusFirstError(form, errors);
+            toast(INVALID_MESSAGE, 'error');
+
+            return;
+        }
+
+        const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        const status = form.querySelector<HTMLElement>('[data-links-status]');
+
+        setPending(button, true);
+        setText(status, 'Saving\u2026');
+
+        await delay(MOCK_LATENCY_MS);
+
+        setPending(button, false);
+        setText(status, '');
+        toast('Links saved.', 'success');
+    }
 
     async function handlePasswordSubmit(event: SubmitEvent, form: HTMLFormElement) {
         event.preventDefault();
@@ -352,21 +1061,90 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
         toast('Profile saved.', 'success');
     }
 
+    function handleTrackChange(form: HTMLFormElement, input: HTMLInputElement) {
+        const file = input.files?.item(0);
+
+        input.value = '';
+
+        if (!file) return;
+
+        const error = validateTrack(file);
+
+        clearFieldErrors(form);
+
+        if (error) {
+            setFieldErrors(form, { track: error });
+            input.focus();
+            toast(error, 'error');
+
+            return;
+        }
+
+        stageTrack(form, file.name, formatBytes(file.size));
+        toast('Track staged.', 'success');
+    }
+
+    async function handleTrackSubmit(event: SubmitEvent, form: HTMLFormElement) {
+        event.preventDefault();
+        clearFieldErrors(form);
+
+        const staged = form.querySelector<HTMLElement>('[data-track-staged]');
+
+        if (staged?.hasAttribute('hidden') !== false) {
+            setFieldErrors(form, { track: TRACK_MISSING_MESSAGE });
+            form.querySelector<HTMLInputElement>('[data-track-input]')?.focus();
+            toast(INVALID_MESSAGE, 'error');
+
+            return;
+        }
+
+        const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        const status = form.querySelector<HTMLElement>('[data-track-status]');
+
+        setPending(button, true);
+        setText(status, 'Saving\u2026');
+
+        await delay(MOCK_LATENCY_MS);
+
+        setPending(button, false);
+        setText(status, '');
+        toast('Track saved.', 'success');
+    }
+
     function initSettings(signal: AbortSignal) {
+        const links = document.querySelector<HTMLFormElement>('[data-links-form]');
         const password = document.querySelector<HTMLFormElement>('[data-password-form]');
         const profile = document.querySelector<HTMLFormElement>('[data-settings-form]');
+        const track = document.querySelector<HTMLFormElement>('[data-track-form]');
 
-        if (!password || !profile) return;
+        if (!links || !password || !profile || !track) return;
 
+        const bio = profile.querySelector<HTMLTextAreaElement>('[name="bio"]');
+        const file = track.querySelector<HTMLInputElement>('[data-track-input]');
+
+        demoSummary = {
+            email: readText('[data-settings-email]'),
+            prods: readText('[data-settings-prods]'),
+            profile: readText('[data-settings-profile]'),
+            since: readText('[data-settings-since]'),
+        };
+
+        links.noValidate = true;
         password.noValidate = true;
         profile.noValidate = true;
+        track.noValidate = true;
 
         unsubscribe?.();
         unsubscribe = onSessionChange(renderSession);
         signal.addEventListener('abort', () => unsubscribe?.(), { once: true });
 
+        bio?.addEventListener('input', () => handleBioInput(bio), { signal });
+        file?.addEventListener('change', () => handleTrackChange(track, file), { signal });
+        links.addEventListener('submit', event => void handleLinksSubmit(event, links), { signal });
         password.addEventListener('submit', event => void handlePasswordSubmit(event, password), { signal });
         profile.addEventListener('submit', event => void handleProfileSubmit(event, profile), { signal });
+        track.addEventListener('submit', event => void handleTrackSubmit(event, track), { signal });
+        track.querySelector<HTMLButtonElement>('[data-track-remove]')?.addEventListener('click', () => removeTrack(track), { signal });
 
         prefillProfile(profile);
         renderSession();
@@ -383,15 +1161,32 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
         if (username) username.value = session.username;
     }
 
+    function readText(selector: string) {
+        return document.querySelector<HTMLElement>(selector)?.textContent?.trim() ?? '';
+    }
+
+    function removeTrack(form: HTMLFormElement) {
+        const empty = form.querySelector<HTMLElement>('[data-track-empty]');
+        const staged = form.querySelector<HTMLElement>('[data-track-staged]');
+
+        clearFieldErrors(form);
+        setText(form.querySelector('[data-track-meta]'), '');
+        setText(form.querySelector('[data-track-name]'), '');
+        empty?.removeAttribute('hidden');
+        staged?.setAttribute('hidden', '');
+        form.querySelector<HTMLInputElement>('[data-track-input]')?.focus();
+        toast('Track removed.', 'info');
+    }
+
     function renderSession() {
         const link = document.querySelector<HTMLAnchorElement>('[data-settings-onboarding]');
         const session = getSession();
         const profile = session?.onboarded ? 'Complete' : 'Not finished';
 
-        setText(document.querySelector('[data-settings-email]'), session?.email ?? PLACEHOLDER);
-        setText(document.querySelector('[data-settings-prods]'), session ? formatProds(session.prods) : PLACEHOLDER);
-        setText(document.querySelector('[data-settings-profile]'), session ? profile : PLACEHOLDER);
-        setText(document.querySelector('[data-settings-since]'), session?.createdAt ? formatDateStamp(new Date(session.createdAt)) : PLACEHOLDER);
+        setText(document.querySelector('[data-settings-email]'), session?.email ?? demoSummary.email);
+        setText(document.querySelector('[data-settings-prods]'), session ? formatProds(session.prods) : demoSummary.prods);
+        setText(document.querySelector('[data-settings-profile]'), session ? profile : demoSummary.profile);
+        setText(document.querySelector('[data-settings-since]'), session?.createdAt ? formatDateStamp(new Date(session.createdAt)) : demoSummary.since);
 
         if (!link) return;
 
@@ -400,6 +1195,26 @@ import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@
         if (!session) return;
 
         link.href = getOnboardingHref(session.email);
+    }
+
+    function stageTrack(form: HTMLFormElement, name: string, meta: string) {
+        const empty = form.querySelector<HTMLElement>('[data-track-empty]');
+        const staged = form.querySelector<HTMLElement>('[data-track-staged]');
+
+        setText(form.querySelector('[data-track-meta]'), meta);
+        setText(form.querySelector('[data-track-name]'), name);
+        empty?.setAttribute('hidden', '');
+        staged?.removeAttribute('hidden');
+    }
+
+    function validateTrack(file: File) {
+        const extension = getExtension(file.name);
+
+        if (!UPLOAD.extensions.some(allowed => allowed === extension)) {
+            return `That is a .${extension || 'file'} \u2014 we take ${UPLOAD_EXTENSIONS_OR_LIST}.`;
+        }
+
+        return getSizeError(file, UPLOAD.maxFileBytes);
     }
 
     registerPageScript(initSettings);

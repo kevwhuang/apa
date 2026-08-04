@@ -18,11 +18,11 @@ interface SceneOptions {
     still: boolean;
 }
 
-const ALPHA_ENERGY = 0.3;
+const ALPHA_ENERGY = 1;
 
-const ALPHA_FLOOR = 0.44;
+const ALPHA_FLOOR = 0.24;
 
-const ALPHA_PULSE = 0.5;
+const ALPHA_PULSE = 0.56;
 
 const AXIS_HEIGHT = 1;
 
@@ -58,11 +58,19 @@ const CAMERA_HEIGHT = 2.5;
 
 const CAMERA_NEAR = 0.1;
 
-const FOG_FAR = 110;
+const DEPTH_FADE_CURVE = 1.45;
 
-const FOG_NEAR = 46;
+const DEPTH_FADE_FLOOR = 0.42;
 
-const GROUND_AMPLITUDE = 3.6;
+const FOG_FAR = 106;
+
+const FOG_NEAR = 44;
+
+const GROUND_AMPLITUDE = 1.8;
+
+const GROUND_AXIS_OPACITY = 0.26;
+
+const GROUND_BED = 0.5;
 
 const GROUND_COLUMNS = 26;
 
@@ -72,13 +80,23 @@ const GROUND_DEPTH = 96;
 
 const GROUND_DROP = -10;
 
-const GROUND_FLOOR = 0.5;
+const GROUND_FLOOR = 0.74;
 
 const GROUND_LEAD = 8;
 
-const GROUND_OPACITY = 0.3;
+const GROUND_MAJOR_OPACITY = 0.5;
 
-const GROUND_RIPPLE = 1.5;
+const GROUND_MAJOR_ROW = 6;
+
+const GROUND_MAJOR_STRIDE = 3;
+
+const GROUND_OPACITY = 0.17;
+
+const GROUND_PITCH = 0.3;
+
+const GROUND_RIPPLE = 2;
+
+const GROUND_ROLL = 0.05;
 
 const GROUND_ROWS = 30;
 
@@ -90,9 +108,11 @@ const GROUND_STRIDE = 3;
 
 const GROUND_WIDTH = 46;
 
+const GROUND_YAW = -0.18;
+
 const HOLDER_SELECTOR = '.rack__scene';
 
-const HOOP_OPACITY = 0.72;
+const HOOP_OPACITY = 0.88;
 
 const MAX_PIXEL_RATIO = 2;
 
@@ -100,9 +120,9 @@ const MILLISECONDS_PER_SECOND = 1_000;
 
 const MOBILE_WIDTH = 768;
 
-const MOTE_ALPHA_FLOOR = 0.18;
+const MOTE_ALPHA_FLOOR = 0.14;
 
-const MOTE_ALPHA_RANGE = 0.52;
+const MOTE_ALPHA_RANGE = 0.9;
 
 const MOTE_COUNT = 240;
 
@@ -112,19 +132,21 @@ const MOTE_DEPTH_STEP = 0.754_877_666_25;
 
 const MOTE_DRIFT = 2.6;
 
+const MOTE_LANES = 12;
+
+const MOTE_LANE_SKEW = 0.013;
+
 const MOTE_LEAD = 6;
 
-const MOTE_RADIUS_INNER = 5.4;
+const MOTE_RADIUS_INNER = 5.6;
 
-const MOTE_RADIUS_RANGE = 4.4;
+const MOTE_RADIUS_RANGE = 2.8;
 
-const MOTE_RADIUS_STEP = 0.381_966_011_25;
+const MOTE_SHELLS = 3;
 
 const MOTE_SIZE = 0.16;
 
 const MOTE_SPAN = 104;
-
-const MOTE_SPREAD_STEP = 0.618_033_988_75;
 
 const ORBIT_LIFT = 0.5;
 
@@ -136,39 +158,33 @@ const ORBIT_SWAY = 1.4;
 
 const PULSE_LEAD = 3;
 
-const PULSE_LIFT = 0.55;
+const PULSE_LIFT = 0.16;
 
 const PULSE_WIDTH = 2.6;
 
 const QUALITY_FPS = [30, 20, 12];
 
-const RADIUS_BASE = 5;
+const RADIUS_BASE = 6.2;
 
-const RADIUS_RANGE = 2.46;
+const RADIUS_RANGE = 0.62;
 
-const READ_OPACITY_FLOOR = 0.7;
+const READ_INNER = 0.93;
 
-const READ_OPACITY_RANGE = 0.3;
+const READ_OPACITY_FLOOR = 0.6;
+
+const READ_OPACITY_RANGE = 0.5;
 
 const READ_PULSE_GAIN = 0.3;
 
 const READ_RING = 6;
 
-const RIB_DEPTH = 0.075;
+const RIB_DEPTH = 0.005;
 
-const RIB_FLOOR = 0.36;
+const RIB_FINE_RATIO = 12;
 
-const RIB_LIFE_GAIN = 0.1;
-
-const RIB_LIFE_RATIO = 7;
-
-const RIB_PRIME_RATIO = 6;
-
-const RIB_SHIMMER_GAIN = 0.34;
+const RIB_FLOOR = 0.5;
 
 const RIB_SHIMMER_RATE = 0.03;
-
-const RIB_SHIMMER_RATIO = 12;
 
 const RING_COUNT = 26;
 
@@ -178,21 +194,21 @@ const RING_NEAR = 8;
 
 const RING_SPAN = 78;
 
-const RING_TWIST = 0.0015;
+const RING_TWIST = 0.0006;
 
-const SCAN_HEIGHT = 22;
+const SCAN_HEIGHT = 15;
 
-const SCAN_OPACITY = 0.16;
+const SCAN_OPACITY = 0.22;
 
 const SCAN_PERIOD = 9.5;
 
 const SCAN_SWEEP = 6.6;
 
-const SCAN_TEXTURE_CORE = 0.42;
+const SCAN_TEXTURE_CORE = 0.46;
 
 const SCAN_TEXTURE_SIZE = 64;
 
-const SCAN_WIDTH = 0.55;
+const SCAN_WIDTH = 0.32;
 
 const SCROLL_SLOWDOWN = 9;
 
@@ -204,15 +220,19 @@ const SLOW_CORE_COUNT = 4;
 
 const SPIN_RATE = 0.01;
 
-const SPOKE_OPACITY = 0.24;
+const SPOKE_OPACITY = 0.16;
 
 const SPOKE_STRIDE = 7;
 
-const STILL_ELAPSED = 4;
+const STILL_ELAPSED = 42.9;
+
+const STILL_SETTLE = 120;
 
 const SWELL_PERIOD = 23;
 
 const SWELL_RANGE = 0.2;
+
+const TAPER_DROP = 0.48;
 
 const TARGET_BIAS = 0.67;
 
@@ -222,24 +242,31 @@ const TARGET_HEIGHT = 0.5;
 
 const TAU = Math.PI * 2;
 
-const WAVE_SCALE = RIB_DEPTH / (1 + RIB_LIFE_GAIN + RIB_SHIMMER_GAIN);
+const TICK_STRIDE = 6;
 
 function buildGroundIndices(columns: number, rows: number) {
-    const lines: number[] = [];
+    const axis: number[] = [];
+    const major: number[] = [];
+    const minor: number[] = [];
+    const middle = Math.round((columns - 1) / 2 / GROUND_STRIDE) * GROUND_STRIDE;
 
     for (let row = 0; row < rows; row += 1) {
+        const target = row % GROUND_MAJOR_ROW === 0 ? major : minor;
+
         for (let column = 0; column < columns - 1; column += 1) {
-            lines.push(row * columns + column, row * columns + column + 1);
+            target.push(row * columns + column, row * columns + column + 1);
         }
     }
 
     for (let column = 0; column < columns; column += GROUND_STRIDE) {
+        const target = column === middle ? axis : column % (GROUND_STRIDE * GROUND_MAJOR_STRIDE) === 0 ? major : minor;
+
         for (let row = 0; row < rows - 1; row += 1) {
-            lines.push(row * columns + column, (row + 1) * columns + column);
+            target.push(row * columns + column, (row + 1) * columns + column);
         }
     }
 
-    return lines;
+    return { axis, major, minor };
 }
 
 function buildIndices(rings: number, segments: number) {
@@ -253,6 +280,14 @@ function buildIndices(rings: number, segments: number) {
         for (let segment = 0; segment < segments; segment += 1) {
             target.push(ring * segments + segment, ring * segments + (segment + 1) % segments);
         }
+    }
+
+    for (let segment = 0; segment < segments; segment += 1) {
+        read.push(rings * segments + segment, rings * segments + (segment + 1) % segments);
+    }
+
+    for (let segment = 0; segment < segments; segment += TICK_STRIDE) {
+        read.push(READ_RING * segments + segment, rings * segments + segment);
     }
 
     for (let segment = 0; segment < segments; segment += SPOKE_STRIDE) {
@@ -285,7 +320,7 @@ function buildScanTexture() {
     return new CanvasTexture(surface);
 }
 
-export function initRackHero(signal: AbortSignal): void {
+export function initRig(signal: AbortSignal): void {
     const holder = document.querySelector<HTMLElement>(HOLDER_SELECTOR);
     const palette = readPalette();
 
@@ -315,23 +350,30 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     const segments = mobile ? SEGMENT_COUNT_MOBILE : SEGMENT_COUNT;
     const shift = mobile ? AXIS_SHIFT_MOBILE : AXIS_SHIFT;
 
+    const { axis, major, minor } = buildGroundIndices(columns, rows);
     const { hoop, read, spoke } = buildIndices(rings, segments);
     const cosine = new Float32Array(segments);
+    const fades = new Float32Array(rings);
     const grades = new Float32Array(columns);
-    const groundLines = buildGroundIndices(columns, rows);
     const groundPlaces = new Float32Array(columns * rows * 3);
+    const moteCosine = new Float32Array(motes);
     const motePlaces = new Float32Array(motes * 3);
     const moteSeeds = new Float32Array(motes);
+    const moteSine = new Float32Array(motes);
+    const moteSpans = new Float32Array(motes);
     const moteTints = new Float32Array(motes * 4);
-    const positions = new Float32Array(rings * segments * 3);
+    const positions = new Float32Array((rings + 1) * segments * 3);
     const sine = new Float32Array(segments);
-    const tints = new Float32Array(rings * segments * 4);
+    const tapers = new Float32Array(rings);
+    const tints = new Float32Array((rings + 1) * segments * 4);
 
     const accentColor = new Color(palette.accent);
     const camera = new PerspectiveCamera(CAMERA_FOV, 1, CAMERA_NEAR, CAMERA_FAR);
     const fog = new Fog(palette.surface, FOG_NEAR, FOG_FAR);
     const geometry = new BufferGeometry();
+    const groundAxisMaterial = new LineBasicMaterial({ color: palette.accent, opacity: GROUND_AXIS_OPACITY, transparent: true });
     const groundGeometry = new BufferGeometry();
+    const groundMajorMaterial = new LineBasicMaterial({ color: palette.ink, opacity: GROUND_MAJOR_OPACITY, transparent: true });
     const groundMaterial = new LineBasicMaterial({ color: palette.ink, opacity: GROUND_OPACITY, transparent: true });
     const groundPlace = new BufferAttribute(groundPlaces, 3);
     const hoopMaterial = new LineBasicMaterial({ opacity: HOOP_OPACITY, transparent: true, vertexColors: true });
@@ -351,7 +393,7 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     const spokeMaterial = new LineBasicMaterial({ color: palette.muted, opacity: SPOKE_OPACITY, transparent: true });
     const tint = new BufferAttribute(tints, 4);
 
-    const ground = new LineSegments(groundGeometry, groundMaterial);
+    const ground = new LineSegments(groundGeometry, [groundMaterial, groundMajorMaterial, groundAxisMaterial]);
     const mist = new Points(moteGeometry, moteMaterial);
     const scan = new Mesh(scanGeometry, scanMaterial);
     const tunnel = new LineSegments(geometry, [hoopMaterial, readMaterial, spokeMaterial]);
@@ -398,7 +440,9 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     function dispose() {
         stop();
         geometry.dispose();
+        groundAxisMaterial.dispose();
         groundGeometry.dispose();
+        groundMajorMaterial.dispose();
         groundMaterial.dispose();
         hoopMaterial.dispose();
         moteGeometry.dispose();
@@ -452,6 +496,8 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
 
         accentColor.set(next.accent);
         fog.color.set(next.surface);
+        groundAxisMaterial.color.set(next.accent);
+        groundMajorMaterial.color.set(next.ink);
         groundMaterial.color.set(next.ink);
         inkColor.set(next.ink);
         moteMaterial.color.set(next.muted);
@@ -491,20 +537,17 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
         for (let ring = 0; ring < rings; ring += 1) {
             const energy = smoothEnergy(ring + scroll);
             const flare = pulseFlare(ring, head);
-            const alpha = Math.min(1, ALPHA_FLOOR + ALPHA_ENERGY * energy + ALPHA_PULSE * flare);
+            const alpha = fades[ring] * Math.min(1, ALPHA_FLOOR + ALPHA_ENERGY * energy + ALPHA_PULSE * flare);
             const blue = inkBlue + (accentBlue - inkBlue) * flare;
             const green = inkGreen + (accentGreen - inkGreen) * flare;
             const red = inkRed + (accentRed - inkRed) * flare;
-            const rib = WAVE_SCALE * (RIB_FLOOR + (1 - RIB_FLOOR) * energy);
-            const span = RADIUS_BASE + RADIUS_RANGE * (BASE_RELIEF + energy) * swell * (1 + PULSE_LIFT * flare);
+            const rib = RIB_DEPTH * (RIB_FLOOR + (1 - RIB_FLOOR) * energy);
+            const span = tapers[ring] * (RADIUS_BASE + RADIUS_RANGE * (BASE_RELIEF + energy) * swell * (1 + PULSE_LIFT * flare));
             const spin = ring * RING_TWIST + elapsed * SPIN_RATE;
 
             for (let segment = 0; segment < segments; segment += 1) {
                 const sweep = segment / segments + spin;
-                const wave = Math.sin(TAU * RIB_PRIME_RATIO * sweep)
-                    + RIB_SHIMMER_GAIN * Math.sin(TAU * (RIB_SHIMMER_RATIO * sweep + shimmer))
-                    + RIB_LIFE_GAIN * Math.sin(TAU * (RIB_LIFE_RATIO * sweep - shimmer));
-                const radius = span * (1 + rib * wave);
+                const radius = span * (1 + rib * Math.sin(TAU * (RIB_FINE_RATIO * sweep + shimmer)));
                 const vertex = ring * segments + segment;
                 const offset = vertex * 3;
                 const slot = vertex * 4;
@@ -515,6 +558,17 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
                 tints[slot + 1] = green;
                 tints[slot + 2] = blue;
                 tints[slot + 3] = alpha;
+            }
+
+            if (ring !== READ_RING) continue;
+
+            const inner = span * READ_INNER;
+
+            for (let segment = 0; segment < segments; segment += 1) {
+                const offset = (rings * segments + segment) * 3;
+
+                positions[offset] = shift + inner * cosine[segment];
+                positions[offset + 1] = AXIS_HEIGHT + inner * sine[segment];
             }
         }
 
@@ -531,10 +585,10 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
         const scroll = (elapsed / (stepDuration() * GROUND_SLOWDOWN)) % STEP_COUNT;
 
         for (let row = 0; row < rows; row += 1) {
-            const relief = GROUND_AMPLITUDE * smoothEnergy(row + scroll);
+            const relief = GROUND_AMPLITUDE * (GROUND_BED + (1 - GROUND_BED) * smoothEnergy(row + scroll));
 
             for (let column = 0; column < columns; column += 1) {
-                groundPlaces[(row * columns + column) * 3 + 1] = GROUND_DROP + relief * grades[column];
+                groundPlaces[(row * columns + column) * 3 + 1] = relief * grades[column];
             }
         }
 
@@ -546,9 +600,14 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
 
         for (let mote = 0; mote < motes; mote += 1) {
             const depth = RING_NEAR + MOTE_LEAD - MOTE_SPAN + (moteSeeds[mote] + travel) % MOTE_SPAN;
+            const lane = (RING_NEAR - depth) * ringPitch;
+            const radius = moteSpans[mote] * taperScale(lane / (rings - 1));
+            const offset = mote * 3;
 
-            motePlaces[mote * 3 + 2] = depth;
-            moteTints[mote * 4 + 3] = MOTE_ALPHA_FLOOR + MOTE_ALPHA_RANGE * smoothEnergy(scroll + STEP_COUNT + (RING_NEAR - depth) * ringPitch);
+            motePlaces[offset] = shift + radius * moteCosine[mote];
+            motePlaces[offset + 1] = AXIS_HEIGHT + radius * moteSine[mote];
+            motePlaces[offset + 2] = depth;
+            moteTints[mote * 4 + 3] = MOTE_ALPHA_FLOOR + MOTE_ALPHA_RANGE * smoothEnergy(scroll + STEP_COUNT + lane);
         }
 
         motePlace.needsUpdate = true;
@@ -594,39 +653,44 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
 
         cosine[segment] = Math.cos(turn);
         sine[segment] = Math.sin(turn);
+        positions[(rings * segments + segment) * 3 + 2] = readDepth;
     }
 
     for (let ring = 0; ring < rings; ring += 1) {
+        const turn = ring / (rings - 1);
+
+        fades[ring] = DEPTH_FADE_FLOOR + (1 - DEPTH_FADE_FLOOR) * (1 - turn) ** DEPTH_FADE_CURVE;
+        tapers[ring] = taperScale(turn);
+
         for (let segment = 0; segment < segments; segment += 1) {
-            positions[(ring * segments + segment) * 3 + 2] = RING_NEAR - (ring / (rings - 1)) * RING_SPAN;
+            positions[(ring * segments + segment) * 3 + 2] = RING_NEAR - turn * RING_SPAN;
         }
     }
 
     for (let column = 0; column < columns; column += 1) {
         const turn = column / (columns - 1);
 
-        grades[column] = Math.sin(Math.PI * turn) * (GROUND_FLOOR + (1 - GROUND_FLOOR) * (0.5 + 0.5 * Math.sin(TAU * turn * GROUND_RIPPLE)));
+        grades[column] = Math.sin(Math.PI * turn) * (GROUND_FLOOR + (1 - GROUND_FLOOR) * (0.5 + 0.5 * Math.cos(TAU * turn * GROUND_RIPPLE)));
     }
 
     for (let row = 0; row < rows; row += 1) {
         for (let column = 0; column < columns; column += 1) {
             const offset = (row * columns + column) * 3;
 
-            groundPlaces[offset] = shift + (column / (columns - 1) - 0.5) * GROUND_WIDTH;
-            groundPlaces[offset + 1] = GROUND_DROP;
-            groundPlaces[offset + 2] = RING_NEAR + GROUND_LEAD - (row / (rows - 1)) * GROUND_DEPTH;
+            groundPlaces[offset] = (column / (columns - 1) - 0.5) * GROUND_WIDTH;
+            groundPlaces[offset + 2] = (0.5 - row / (rows - 1)) * GROUND_DEPTH;
         }
     }
 
     for (let mote = 0; mote < motes; mote += 1) {
-        const angle = TAU * ((mote * MOTE_SPREAD_STEP) % 1);
-        const radius = MOTE_RADIUS_INNER + MOTE_RADIUS_RANGE * ((mote * MOTE_RADIUS_STEP) % 1);
-        const offset = mote * 3;
+        const shell = Math.floor(mote / MOTE_LANES) % MOTE_SHELLS;
+        const angle = TAU * ((mote % MOTE_LANES) / MOTE_LANES + shell * MOTE_LANE_SKEW);
         const slot = mote * 4;
 
-        motePlaces[offset] = shift + radius * Math.cos(angle);
-        motePlaces[offset + 1] = AXIS_HEIGHT + radius * Math.sin(angle);
+        moteCosine[mote] = Math.cos(angle);
         moteSeeds[mote] = ((mote * MOTE_DEPTH_STEP) % 1) * MOTE_SPAN;
+        moteSine[mote] = Math.sin(angle);
+        moteSpans[mote] = MOTE_RADIUS_INNER + MOTE_RADIUS_RANGE * (shell / (MOTE_SHELLS - 1));
         moteTints[slot] = 1;
         moteTints[slot + 1] = 1;
         moteTints[slot + 2] = 1;
@@ -642,7 +706,10 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     geometry.addGroup(hoop.length + read.length, spoke.length, 2);
     groundPlace.setUsage(DynamicDrawUsage);
     groundGeometry.setAttribute('position', groundPlace);
-    groundGeometry.setIndex(new BufferAttribute(new Uint16Array(groundLines), 1));
+    groundGeometry.setIndex(new BufferAttribute(new Uint16Array([...minor, ...major, ...axis]), 1));
+    groundGeometry.addGroup(0, minor.length, 0);
+    groundGeometry.addGroup(minor.length, major.length, 1);
+    groundGeometry.addGroup(minor.length + major.length, axis.length, 2);
     motePlace.setUsage(DynamicDrawUsage);
     moteTint.setUsage(DynamicDrawUsage);
     moteGeometry.setAttribute('color', moteTint);
@@ -651,6 +718,8 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     camera.lookAt(shift * TARGET_BIAS, TARGET_HEIGHT, TARGET_DEPTH);
     renderer.setClearAlpha(0);
     renderer.setPixelRatio(ratio);
+    ground.position.set(shift, GROUND_DROP, RING_NEAR + GROUND_LEAD - GROUND_DEPTH / 2);
+    ground.rotation.set(GROUND_PITCH, GROUND_YAW, GROUND_ROLL);
     scan.position.set(shift, AXIS_HEIGHT, readDepth);
     scene.fog = fog;
     ground.frustumCulled = false;
@@ -667,6 +736,9 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     resize();
     shape(STILL_ELAPSED);
     drift(STILL_ELAPSED);
+
+    if (still) for (let settle = 1; settle < STILL_SETTLE; settle += 1) drift(STILL_ELAPSED);
+
     render();
     requestAnimationFrame(() => (canvas.style.opacity = '1'));
 
@@ -731,6 +803,10 @@ function smoothEnergy(position: number): number {
     const blend = fraction * fraction * (3 - 2 * fraction);
 
     return stepEnergy(index) * (1 - blend) + stepEnergy(index + 1) * blend;
+}
+
+function taperScale(ratio: number): number {
+    return 1 - TAPER_DROP * ratio * ratio;
 }
 
 function validPalette(palette: Palette): boolean {

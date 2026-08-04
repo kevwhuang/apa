@@ -9,9 +9,10 @@ import { BRAND } from '@lib/brand';
 import { LINKS, NAV_GROUPS, SITE_UPDATED } from '@lib/constants';
 import { formatDateOnly } from '@lib/utils';
 
-const SITE_LINKS = [
-    { href: '/privacy', label: 'Privacy' },
-    { href: '/terms', label: 'Terms' },
+const ACCOUNT_LINKS = [
+    { href: '/here', label: 'Check in' },
+    { href: '/settings', label: 'Settings' },
+    { href: '/store/cart', label: 'Cart' },
     { href: '/admin', label: 'Admin' },
 ] as const;
 
@@ -25,11 +26,15 @@ const columns = [
     ...NAV_GROUPS.flatMap(group => ('items' in group ? [{ head: group.label, items: [...group.items] }] : [])),
     {
         head: 'Browse',
-        items: NAV_GROUPS.flatMap(group => ('href' in group ? [{ href: group.href, label: group.label }] : [])),
+        items: [
+            ...NAV_GROUPS.flatMap(group => ('href' in group ? [{ href: group.href, label: group.label }] : [])),
+            { href: '/privacy', label: 'Privacy' },
+            { href: '/terms', label: 'Terms' },
+        ],
     },
     {
-        head: 'Site',
-        items: [...SITE_LINKS],
+        head: 'Account',
+        items: [...ACCOUNT_LINKS],
     },
 ];
 
@@ -129,6 +134,7 @@ const year = new Date().getFullYear();
         gap: var(--space-sm);
         justify-content: space-between;
         padding-block: var(--space-2xs);
+        padding-inline-end: calc(var(--launcher-size) - var(--launcher-rail));
     }
 
     .footer__credit {
@@ -160,9 +166,10 @@ const year = new Date().getFullYear();
     }
 
     .footer__grid {
+        column-gap: var(--space-lg);
         display: grid;
-        gap: var(--space-2xl);
-        grid-template-columns: minmax(0, 1.4fr) repeat(var(--footer-cols), minmax(0, 1fr));
+        grid-template-columns: minmax(0, 1.6fr) repeat(var(--footer-cols), minmax(0, 1fr));
+        row-gap: var(--space-2xl);
     }
 
     .footer__head {

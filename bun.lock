@@ -34,7 +34,7 @@
         "eslint-plugin-astro": "^3.1.0",
         "eslint-plugin-jsx-a11y": "^6.10.2",
         "typescript": "^6.0.3",
-        "typescript-eslint": "^8.65.0",
+        "typescript-eslint": "^8.66.0",
         "vitest": "^4.1.10",
       },
     },
@@ -344,7 +344,7 @@
 
     "@netlify/binary-info": ["@netlify/binary-info@1.0.0", "", {}, "sha512-4wMPu9iN3/HL97QblBsBay3E1etIciR84izI3U+4iALY+JHCrI+a2jO0qbAZ/nxKoegypYEaiiqWXylm+/zfrw=="],
 
-    "@netlify/blobs": ["@netlify/blobs@10.7.11", "", { "dependencies": { "@netlify/dev-utils": "4.4.7", "@netlify/otel": "^6.0.5", "@netlify/runtime-utils": "2.3.0" } }, "sha512-jnP4KAWP10GEynBk1GOaHBBnL1pF03sL3sQM5h9q+zJdedvCMV8zS3iTHzhm3B1zG4h8pDqDgOnUP8GqRDAXnA=="],
+    "@netlify/blobs": ["@netlify/blobs@10.7.12", "", { "dependencies": { "@netlify/dev-utils": "4.4.7", "@netlify/otel": "^6.0.5", "@netlify/runtime-utils": "2.3.0" } }, "sha512-4YL/MKu0t+gPeIL+GkqBxYVkqh1612Cgw4J5OaF3XIa3HRH/EMsZ7+cssLOE9i4e2pEAI48+BiehoV30b9xPfg=="],
 
     "@netlify/cache": ["@netlify/cache@3.4.9", "", { "dependencies": { "@netlify/runtime-utils": "2.3.0" } }, "sha512-tuvkgL4jqdZl8Fh0KntyDAUP/cxvoSuCnKIqYpT8kpiyRiNsP+LqRLPIZ12JYQh5rZzqYhLLEueZjXKczgLCHw=="],
 
@@ -2012,6 +2012,8 @@
 
     "zwitch": ["zwitch@2.0.4", "", {}, "sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A=="],
 
+    "@astrojs/netlify/@netlify/blobs": ["@netlify/blobs@10.7.11", "", { "dependencies": { "@netlify/dev-utils": "4.4.7", "@netlify/otel": "^6.0.5", "@netlify/runtime-utils": "2.3.0" } }, "sha512-jnP4KAWP10GEynBk1GOaHBBnL1pF03sL3sQM5h9q+zJdedvCMV8zS3iTHzhm3B1zG4h8pDqDgOnUP8GqRDAXnA=="],
+
     "@babel/core/semver": ["semver@6.3.1", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA=="],
 
     "@babel/helper-compilation-targets/lru-cache": ["lru-cache@5.1.1", "", { "dependencies": { "yallist": "^3.0.2" } }, "sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w=="],
@@ -2036,6 +2038,8 @@
 
     "@netlify/config/yargs": ["yargs@17.7.3", "", { "dependencies": { "cliui": "^8.0.1", "escalade": "^3.1.1", "get-caller-file": "^2.0.5", "require-directory": "^2.1.1", "string-width": "^4.2.3", "y18n": "^5.0.5", "yargs-parser": "^21.1.1" } }, "sha512-GZtjxm/J/4TSxuL3FNYjCmLktBTnIw/rVmKSIyKeYAZpmJB2ig9VauCC5xsa82GNKVKDAqpOn3KVzNt0zmrU0g=="],
 
+    "@netlify/dev/@netlify/blobs": ["@netlify/blobs@10.7.11", "", { "dependencies": { "@netlify/dev-utils": "4.4.7", "@netlify/otel": "^6.0.5", "@netlify/runtime-utils": "2.3.0" } }, "sha512-jnP4KAWP10GEynBk1GOaHBBnL1pF03sL3sQM5h9q+zJdedvCMV8zS3iTHzhm3B1zG4h8pDqDgOnUP8GqRDAXnA=="],
+
     "@netlify/edge-bundler/ajv": ["ajv@8.20.0", "", { "dependencies": { "fast-deep-equal": "^3.1.3", "fast-uri": "^3.0.1", "json-schema-traverse": "^1.0.0", "require-from-string": "^2.0.2" } }, "sha512-Thbli+OlOj+iMPYFBVBfJ3OmCAnaSyNn4M1vz9T6Gka5Jt9ba/HIR56joy65tY6kx/FCF5VXNB819Y7/GUrBGA=="],
 
     "@netlify/edge-bundler/find-up": ["find-up@7.0.0", "", { "dependencies": { "locate-path": "^7.2.0", "path-exists": "^5.0.0", "unicorn-magic": "^0.1.0" } }, "sha512-YyZM99iHrqLKjmt4LJDj58KI+fYyufRLBSYcqycxf//KpBk9FoewoGX0450m9nB44qrZnovzC2oeP5hUibxc/g=="],
@@ -2044,6 +2048,8 @@
 
     "@netlify/edge-bundler/urlpattern-polyfill": ["urlpattern-polyfill@8.0.2", "", {}, "sha512-Qp95D4TPJl1kC9SKigDcqgyM2VDVO4RiJc2d4qe5GrYm+zbIQCWWKAFaJNQ4BhdFeDGwBmAxqJBwWSJDb9T3BQ=="],
 
+    "@netlify/functions-dev/@netlify/blobs": ["@netlify/blobs@10.7.11", "", { "dependencies": { "@netlify/dev-utils": "4.4.7", "@netlify/otel": "^6.0.5", "@netlify/runtime-utils": "2.3.0" } }, "sha512-jnP4KAWP10GEynBk1GOaHBBnL1pF03sL3sQM5h9q+zJdedvCMV8zS3iTHzhm3B1zG4h8pDqDgOnUP8GqRDAXnA=="],
+
     "@netlify/headers-parser/escape-string-regexp": ["escape-string-regexp@5.0.0", "", {}, "sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw=="],
 
     "@netlify/headers-parser/path-exists": ["path-exists@5.0.0", "", {}, "sha512-RjhtfwJOxzcFmNOi6ltcbcu4Iu+FL3zEj83dk4kAS+fVpTxXLO1b38RvJgT/0QwvV/L3aY9TAnyv0EOqW4GoMQ=="],
@@ -2051,6 +2057,8 @@
     "@netlify/redirect-parser/path-exists": ["path-exists@5.0.0", "", {}, "sha512-RjhtfwJOxzcFmNOi6ltcbcu4Iu+FL3zEj83dk4kAS+fVpTxXLO1b38RvJgT/0QwvV/L3aY9TAnyv0EOqW4GoMQ=="],
 
     "@netlify/redirects/cookie": ["cookie@1.1.1", "", {}, "sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ=="],
+
+    "@netlify/runtime/@netlify/blobs": ["@netlify/blobs@10.7.11", "", { "dependencies": { "@netlify/dev-utils": "4.4.7", "@netlify/otel": "^6.0.5", "@netlify/runtime-utils": "2.3.0" } }, "sha512-jnP4KAWP10GEynBk1GOaHBBnL1pF03sL3sQM5h9q+zJdedvCMV8zS3iTHzhm3B1zG4h8pDqDgOnUP8GqRDAXnA=="],
 
     "@netlify/zip-it-and-ship-it/@opentelemetry/api": ["@opentelemetry/api@1.8.0", "", {}, "sha512-I/s6F7yKUDdtMsoBWXJe8Qz40Tui5vsuKCWJEWVL+5q9sSWRzzx6v2KeNsOBEwd94j0eWkpWCH4yB6rZg9Mf0w=="],
 
