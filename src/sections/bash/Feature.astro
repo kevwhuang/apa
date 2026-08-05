@@ -14,7 +14,7 @@ const program = getProgram('bash');
         aria-hidden="true"
         data-scrub="drift"
     />
-    <div class="relative">
+    <div class="flex flex-col gap-6 relative">
         <PageHead
             class="font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
             eyebrow={`${program.shortName} / ${program.cadence}`}
@@ -26,7 +26,7 @@ const program = getProgram('bash');
             One showdown.
         </PageHead>
         <p
-            class="max-w-2xl mt-6 leading-relaxed text-lmd text-ink-inverse-muted"
+            class="max-w-2xl leading-relaxed text-lmd text-ink-inverse-muted"
             data-motion="blur"
         >
             {program.summary}

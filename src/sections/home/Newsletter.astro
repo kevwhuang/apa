@@ -30,7 +30,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
                         Email
                     </span>
                     <input
-                        class="disabled:hover:bg-surface disabled:opacity-55 focus-visible:bg-surface-raised hover:bg-surface-raised placeholder:text-ink-muted min-h-[50px] w-full px-4 border-2 border-ink font-mono text-sm bg-surface transition-colors"
+                        class="input font-mono text-sm"
                         autocomplete="email"
                         name="email"
                         placeholder="you@studio.fm"
@@ -48,7 +48,6 @@ import SectionHead from '@components/shared/SectionHead.astro';
             <p
                 class="action-text hidden p-3 bg-accent text-ink"
                 data-output
-                role="status"
             />
         </form>
     </div>
@@ -57,6 +56,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
 <script>
     import { EMAIL_PATTERN, STORAGE } from '@lib/constants';
     import { createStore } from '@lib/state';
+    import { isValidationBypassed } from '@lib/ui/forms';
     import { toast } from '@lib/ui/toasts';
     import { registerPageScript } from '@lib/utils';
 
@@ -94,7 +94,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
             return;
         }
 
-        const email = normalizeEmail(elements.input.value);
+        const email = readEmail(elements.input);
 
         if (email === null) {
             toast(INVALID_MESSAGE, 'error');
@@ -118,6 +118,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
         const elements = { button, input, output };
         const subscribed = subscription.get();
 
+        form.noValidate = true;
         form.addEventListener('submit', event => handleNewsletterSubmit(event, elements), { signal });
 
         if (subscribed !== null) showConfirmation(elements, subscribed, true);
@@ -127,6 +128,14 @@ import SectionHead from '@components/shared/SectionHead.astro';
         const email = typeof value === 'string' ? value.trim().toLowerCase() : '';
 
         return EMAIL_PATTERN.test(email) ? email : null;
+    }
+
+    function readEmail(input: HTMLInputElement) {
+        const email = normalizeEmail(input.value);
+
+        if (email !== null || !isValidationBypassed()) return email;
+
+        return input.value.trim().toLowerCase() || input.placeholder;
     }
 
     function showConfirmation(elements: NewsletterElements, email: string, returning: boolean) {

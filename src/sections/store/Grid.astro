@@ -18,14 +18,14 @@ const products = await getCollection('products');
 >
     <div>
         <PageHead
-            class="font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="mb-6 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
             eyebrow={`Store / ${products.length} items`}
             headingId="store-title"
         >
             Wear the alliance.
         </PageHead>
         <p
-            class="max-w-2xl mt-6 text-lmd text-ink-muted"
+            class="max-w-2xl mb-10 text-lmd text-ink-muted"
             data-motion="blur"
         >
             Every order goes back into the calendar &mdash; room hire, gear for the Bash, and
@@ -33,7 +33,7 @@ const products = await getCollection('products');
             the next Assembly or have it shipped.
         </p>
         <div
-            class="flex flex-wrap gap-2 mt-10"
+            class="flex flex-wrap gap-2 mb-6"
             aria-label="Filter by category"
             data-motion="rise"
             role="group"
@@ -53,7 +53,7 @@ const products = await getCollection('products');
             ))}
         </div>
         <p
-            class="label mt-6 text-ink-subtle"
+            class="label text-ink-subtle"
             aria-live="polite"
             data-store-status
         >
@@ -84,27 +84,24 @@ const products = await getCollection('products');
             >
                 <a href={`/store/${product.id}`}>
                     <PlaceholderTile
-                        class="slab slab--bare slab--card slab--hover aspect-square"
+                        class="slab slab--bare slab--card slab--hover aspect-square mb-4"
                         color={cardColors[index % cardColors.length]}
                         label={product.data.title.split(' ')[0]}
                         labelClass="text-lg tracking-tight uppercase text-surface-raised/80 md:text-2xl"
                     >
                         {getStockLabel(product.data.stock) && (
                             <p
-                                class:list={[
-                                    'label store__flag absolute px-2 py-1',
-                                    product.data.stock === 0 ? 'bg-ink text-ink-inverse' : 'bg-accent text-ink',
-                                ]}
+                                class="label store__flag absolute px-2 py-1 bg-ink text-ink-inverse"
                                 data-placeholder
                             >
                                 {getStockLabel(product.data.stock)}
                             </p>
                         )}
                     </PlaceholderTile>
-                    <p class="label mt-4 text-ink-muted">
+                    <p class="label mb-1 text-ink-muted">
                         {product.data.category}
                     </p>
-                    <div class="flex flex-wrap items-baseline justify-between gap-x-3 mt-1">
+                    <div class="flex flex-wrap items-baseline justify-between gap-x-3">
                         <h3 class="min-w-0 font-bold font-sans tracking-tight">
                             {product.data.title}
                         </h3>
@@ -130,12 +127,16 @@ const products = await getCollection('products');
         grid-template-rows: subgrid;
     }
 
+    .product-card:not(.hidden) {
+        padding-bottom: var(--space-lg);
+    }
+
     .product-card > a:focus-visible :global(.slab) {
         box-shadow: none;
     }
 
     .store__chip {
-        height: 50px;
+        height: var(--control-size);
     }
 
     .store__flag {
@@ -145,6 +146,8 @@ const products = await getCollection('products');
 
     .store__grid {
         grid-auto-rows: auto;
+        margin-bottom: calc(-1 * var(--space-lg));
+        row-gap: 0;
     }
 
     @media (max-width: 1024px) {

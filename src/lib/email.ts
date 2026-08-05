@@ -3,7 +3,7 @@ import { formatProds } from '@lib/utils';
 
 const SENDER_NAME = 'Austin Producer Alliance';
 
-export function composeContactEmail(input: ContactEmailInput): MockEmail {
+function composeContactEmail(input: ContactEmailInput): MockEmail {
     const { email, message, name, topic } = input;
 
     const subject = `${topic} \u2014 ${name}`;
@@ -20,7 +20,7 @@ export function composeContactEmail(input: ContactEmailInput): MockEmail {
     };
 }
 
-export function composeOnboardingEmail(input: OnboardingEmailInput): MockEmail {
+function composeOnboardingEmail(input: OnboardingEmailInput): MockEmail {
     const { email, eventName, prods, token } = input;
 
     const greeting = eventName
@@ -33,7 +33,7 @@ export function composeOnboardingEmail(input: OnboardingEmailInput): MockEmail {
         body: [
             greeting,
             `Your account is open with ${formatProds(prods)} on it. Prods are our credit for taking part \u2014 they add up as you show up, and they spend like cash in the store.`,
-            'Take a minute to finish your profile so the rest of the roster knows who you are and what you make. It is three short steps and the link below picks up where you left off.',
+            'The link below signs you in and drops you into the last few basics, so the rest of the roster knows who you are and what you make.',
             'The link works for the next 24 hours. If it expires, check in again and we will send a fresh one.',
         ],
         from: `${SENDER_NAME} <${LINKS.email}>`,
@@ -43,3 +43,5 @@ export function composeOnboardingEmail(input: OnboardingEmailInput): MockEmail {
         to: email,
     };
 }
+
+export { composeContactEmail, composeOnboardingEmail };

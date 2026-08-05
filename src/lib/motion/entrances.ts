@@ -4,27 +4,19 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ENTRANCE_PRESETS, FOLDED_PROPERTIES, GUARDED_PRESET, PRESET_NAMES, REST_PROPERTIES, VISIBLE_PRESETS, buildStagger, resolvePreset } from '@lib/motion/presets';
 import { getMotionTokens } from '@lib/motion/tokens';
 
-export const MOTION_SELECTOR = '[data-motion], [data-motion-stagger] > *';
-
 const BOOT_PRESETS: MotionPresetName[] = ['rule', 'strike', 'wipe'];
-
 const INTERACTIVE_SELECTOR = 'a[href], button, input, select, summary, textarea, [tabindex]';
-
+const MOTION_SELECTOR = '[data-motion], [data-motion-stagger] > *';
 const STAGGER_ORIGINS: MotionStaggerOrigin[] = ['center', 'end', 'start'];
-
 const STAGGER_SELECTOR = '[data-motion-stagger]';
-
 const TRIGGER_START = 'top 88%';
-
 const WILL_CHANGE = 'transform, filter';
 
 const effective = new WeakMap<Element, MotionPresetName>();
-
 const origins = new WeakMap<Element, MotionStaggerOrigin>();
-
 const revealed = new WeakSet<Element>();
 
-export function buildEntrances(): void {
+function buildEntrances(): void {
     const batches = new Map<MotionPresetName, Element[]>();
     const roots: MotionRoot[] = [];
     const stranded = new Set<Element>();
@@ -164,7 +156,7 @@ function restoreRevealed(targets: Element[]): void {
     gsap.set(pending, { opacity: 1 });
 }
 
-export function revealAll(): void {
+function revealAll(): void {
     const targets = motionTargets();
 
     if (!targets.length) return;
@@ -180,7 +172,7 @@ function revealElement(target: Element): void {
     gsap.set(target, { opacity: 1 });
 }
 
-export function revealTarget(target: Element): void {
+function revealTarget(target: Element): void {
     let node: Element | null = target;
 
     while (node) {
@@ -188,3 +180,5 @@ export function revealTarget(target: Element): void {
         node = node.parentElement?.closest(MOTION_SELECTOR) ?? null;
     }
 }
+
+export { MOTION_SELECTOR, buildEntrances, revealAll, revealTarget };

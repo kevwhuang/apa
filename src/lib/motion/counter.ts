@@ -5,15 +5,10 @@ import { buildStagger } from '@lib/motion/presets';
 import { getMotionTokens } from '@lib/motion/tokens';
 
 const COUNTER_SELECTOR = '[data-motion-count]';
-
 const CYCLE_PERCENT = 50;
-
 const DIGITS = '0123456789';
-
 const DIGIT_PATTERN = /\d/;
-
 const REEL_CYCLES = 2;
-
 const TRIGGER_START = 'top 88%';
 
 const rest = new WeakMap<Element, number>();
@@ -78,7 +73,7 @@ function createReel(): HTMLElement {
     return reel;
 }
 
-export function initCounters(): void {
+function initCounters(): void {
     const tokens = getMotionTokens();
 
     for (const host of document.querySelectorAll<HTMLElement>(COUNTER_SELECTOR)) {
@@ -115,3 +110,5 @@ function rollReels(reels: HTMLElement[], tokens: MotionTokens): void {
         yPercent: (_index: number, reel: Element) => restOf(reel) + CYCLE_PERCENT,
     });
 }
+
+export { initCounters };

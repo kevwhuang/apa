@@ -14,6 +14,48 @@
     color: var(--color-accent-deep);
 }
 
+.box {
+    --box-mark: 12px;
+    --box-size: 24px;
+    appearance: none;
+    background-color: transparent;
+    background-image: linear-gradient(var(--color-accent-deep), var(--color-accent-deep));
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 0 0;
+    border: 2px solid var(--color-ink);
+    cursor: pointer;
+    flex-shrink: 0;
+    height: var(--box-size);
+    margin: 0;
+    transition: background-color var(--duration-fast) var(--motion-ease-ui), background-size var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), box-shadow var(--duration-fast) var(--motion-ease-ui);
+    width: var(--box-size);
+}
+
+.box:checked {
+    background-size: var(--box-mark) var(--box-mark);
+    border-color: var(--color-accent-deep);
+}
+
+.box:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.box:hover:not(:disabled) {
+    background-color: var(--color-ink-10);
+}
+
+.box[aria-invalid='true'] {
+    border-color: var(--color-accent-deep);
+    box-shadow: 3px 3px 0 0 var(--color-accent-20);
+}
+
+.box[type='radio'] {
+    background-image: radial-gradient(circle closest-side, var(--color-accent-deep) 99%, transparent 100%);
+    border-radius: 9999px;
+}
+
 .btn {
     --btn-fill: var(--color-ink);
     --btn-text: var(--color-ink-inverse);
@@ -184,6 +226,62 @@
     background-image: radial-gradient(circle, var(--color-accent) 1px, transparent 1px);
     background-size: 8px 8px;
     opacity: 0.12;
+}
+
+@layer components {
+    .input {
+        background-color: var(--color-surface);
+        border: 2px solid var(--color-ink);
+        color: var(--color-ink);
+        min-height: var(--control-size);
+        padding: var(--space-2xs) var(--space-sm);
+        transition: background-color var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), box-shadow var(--duration-fast) var(--motion-ease-ui);
+        width: 100%;
+    }
+
+    .input::placeholder {
+        color: var(--color-ink-muted);
+    }
+
+    .input:disabled {
+        opacity: 0.55;
+    }
+
+    .input:disabled:hover {
+        background-color: var(--color-surface);
+    }
+
+    .input:focus-visible,
+    .input:hover {
+        background-color: var(--color-surface-raised);
+    }
+
+    .input[aria-invalid='true'] {
+        border-color: var(--color-accent-deep);
+        box-shadow: 3px 3px 0 0 var(--color-accent-20);
+    }
+
+    .input[type='number'] {
+        appearance: textfield;
+    }
+
+    .input[type='number']::-webkit-inner-spin-button,
+    .input[type='number']::-webkit-outer-spin-button {
+        appearance: none;
+    }
+
+    .input[type='search']::-webkit-search-cancel-button {
+        appearance: none;
+    }
+
+    .input--area {
+        line-height: 1.6;
+        resize: vertical;
+    }
+
+    .input--sunk {
+        background-color: var(--color-surface-sunken);
+    }
 }
 
 .is-active {
@@ -565,10 +663,6 @@
     --stage-pad: 0px;
 }
 
-.stage--focus {
-    --shell-inner: calc(var(--shell-max) * 3 / 4 - 2 * var(--shell-pad));
-}
-
 .stage--hangout {
     --drift-step: 2;
     --rake-amp: 1.25;
@@ -580,12 +674,8 @@
     --stage-pad-top: calc(var(--header-height) + var(--space-lg));
 }
 
-.stage--prose {
-    --shell-inner: calc(var(--shell-max) * 5 / 8 - 2 * var(--shell-pad));
-}
-
-.stage--slim {
-    --shell-inner: calc(var(--shell-max) / 2 - 2 * var(--shell-pad));
+.stage--strip {
+    --stage-pad: var(--space-lg);
 }
 
 .stage--tight {
@@ -607,6 +697,32 @@
 
 .tilt:nth-child(even) {
     --drift-x: -1;
+}
+
+@media (forced-colors: active) {
+    .box {
+        background-color: Canvas;
+        background-image: linear-gradient(SelectedItem, SelectedItem);
+        border-color: CanvasText;
+        forced-color-adjust: none;
+    }
+
+    .box:checked {
+        border-color: CanvasText;
+    }
+
+    .box:focus-visible {
+        outline-color: CanvasText;
+    }
+
+    .box:hover:not(:disabled) {
+        background-color: Canvas;
+        border-color: Highlight;
+    }
+
+    .box[type='radio'] {
+        background-image: radial-gradient(circle closest-side, SelectedItem 99%, transparent 100%);
+    }
 }
 
 @keyframes spinner__turn {

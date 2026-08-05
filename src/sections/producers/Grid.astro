@@ -5,6 +5,7 @@ import IconClose from '@components/icons/Close.astro';
 import IconSearch from '@components/icons/Search.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
+import ProducerLinks from '@components/producer/Links.astro';
 import ProducerTrack from '@components/producer/Track.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { JOIN_ROUTE, LINKS, PALETTE } from '@lib/constants';
@@ -17,7 +18,7 @@ const roster = [...producers]
     .sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || a.data.name.localeCompare(b.data.name))
     .map(producer => ({
         ...producer,
-        search: [producer.data.name, producer.data.handle, ...producer.data.genres, ...producer.data.roles, producer.data.location, producer.data.bio].join(' ').toLowerCase(),
+        search: [producer.data.name, ...producer.data.genres, ...producer.data.roles, producer.data.location, producer.data.bio].join(' ').toLowerCase(),
     }));
 ---
 
@@ -27,21 +28,22 @@ const roster = [...producers]
 >
     <div>
         <PageHead
-            class="max-w-3xl font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
+            class="max-w-3xl mb-6 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-8xl"
             eyebrow="Producers / Roster"
             headingId="roster-title"
         >
             The producers.
         </PageHead>
         <p
-            class="max-w-2xl mt-6 text-lmd text-ink-muted"
+            class="max-w-2xl mb-10 text-lmd text-ink-muted"
             data-motion="blur"
         >
-            Every card carries what a producer works in, what they answer to, and where they are
-            based &mdash; plus a track where there is one. Press it to play.
+            Every card carries what a producer makes, what they do, where they are based, and
+            where else to find them &mdash; plus a spotlight track where there is one. Press play
+            to hear it.
         </p>
         <label
-            class="block mt-10"
+            class="block mb-4"
             data-motion="rise"
         >
             <span class="sr-only">Search the roster</span>
@@ -53,7 +55,7 @@ const roster = [...producers]
                     <IconSearch />
                 </span>
                 <input
-                    class="roster__search focus-visible:bg-surface-raised hover:bg-surface-raised placeholder:text-ink-muted h-[50px] w-full pl-11 pr-[50px] border-2 border-ink font-mono text-sm bg-surface transition-colors"
+                    class="input input--sunk pl-11 pr-(--control-size) font-mono text-sm"
                     autocomplete="off"
                     data-producers-search
                     placeholder="Search producers&hellip;"
@@ -61,7 +63,7 @@ const roster = [...producers]
                     type="search"
                 />
                 <button
-                    class="active:translate-y-px hover:text-accent-deep absolute right-0 top-0 inline-flex items-center justify-center h-[50px] w-[50px] text-ink-muted transition-colors"
+                    class="active:translate-y-px hover:text-accent-deep absolute right-0 top-0 inline-flex items-center justify-center h-(--control-size) w-(--control-size) text-ink-muted transition-colors"
                     aria-label="Clear search"
                     data-producers-clear
                     hidden
@@ -72,7 +74,7 @@ const roster = [...producers]
             </span>
         </label>
         <div
-            class="flex flex-wrap gap-2 mt-4"
+            class="flex flex-wrap gap-2 mb-6"
             aria-label="Filter by genre"
             data-motion="rise"
             role="group"
@@ -97,7 +99,7 @@ const roster = [...producers]
             ))}
         </div>
         <p
-            class="label mt-6 text-ink-subtle"
+            class="label text-ink-subtle"
             aria-live="polite"
             data-producers-status
         >
@@ -129,24 +131,18 @@ const roster = [...producers]
                         labelClass="leading-none text-[80px] text-surface-raised/80 [text-shadow:2px_2px_0_var(--color-ink-20)]"
                     >
                         {producer.data.featured && (
-                            <p class="label absolute left-0 top-0 px-2 py-1.5 bg-accent text-ink">Featured</p>
+                            <p class="label absolute left-0 top-0 px-2 py-2 bg-accent text-ink">Featured</p>
                         )}
                     </PlaceholderTile>
-                    <div class="producer-card__body p-5">
-                        <p
-                            class="label mb-1 text-accent-deep"
-                            data-placeholder
-                        >
-                            {producer.data.handle}
-                        </p>
+                    <div class="producer-card__body p-(--space-md)">
                         <h2
-                            class="mb-2 font-extrabold font-sans text-xl tracking-tight"
+                            class="row-start-1 mb-2 font-extrabold font-sans text-xl tracking-tight"
                             data-placeholder
                         >
                             {producer.data.name}
                         </h2>
                         <p
-                            class="mb-3 font-mono text-2xs uppercase text-ink-muted"
+                            class="row-start-2 mb-3 font-mono text-2xs uppercase text-ink-muted"
                             data-placeholder
                         >
                             {producer.data.roles.length > 0
@@ -155,51 +151,35 @@ const roster = [...producers]
                         </p>
                         {producer.data.bio.length > 0 && (
                             <p
-                                class="producer-card__bio scroll-slot mb-4 leading-relaxed text-sm text-ink-muted"
+                                class="producer-card__bio scroll-slot row-start-3 mb-4 leading-relaxed text-sm text-ink-muted"
                                 data-placeholder
                             >
                                 {producer.data.bio}
                             </p>
                         )}
-                        <ul class="flex flex-wrap gap-1.5 mb-5 list-none">
+                        <ul class="flex flex-wrap row-start-4 gap-2 mb-5 list-none">
                             {producer.data.genres.map(genre => (
                                 <li class="inline-flex items-center h-6 px-2 border-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase">{genre}</li>
                             ))}
                         </ul>
                         {producer.data.tracks[0] && (
                             <ProducerTrack
-                                class="mb-4"
+                                class="row-start-5 mb-4"
                                 producerId={producer.id}
                                 track={producer.data.tracks[0]}
                             />
                         )}
-                        <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pt-4 border-t-2 border-ink">
+                        <div class="flex flex-wrap items-center justify-between row-start-6 gap-x-4 gap-y-2 pt-4 border-t-2 border-ink">
                             <p
                                 class="font-mono text-2xs uppercase text-ink-muted"
                                 data-placeholder
                             >
                                 Since <time datetime={toIsoDate(producer.data.joined)}>{formatMonthOnly(producer.data.joined)}</time>
                             </p>
-                            {producer.data.links.length > 0 && (
-                                <ul
-                                    class="flex flex-wrap gap-3 list-none"
-                                    data-placeholder
-                                >
-                                    {producer.data.links.map(link => (
-                                        <li>
-                                            <a
-                                                class="action-text hover:text-accent-deep inline-flex items-center min-h-[50px] underline underline-offset-4 transition-colors"
-                                                href={link.href}
-                                                rel="noopener noreferrer"
-                                                target="_blank"
-                                            >
-                                                {link.label}
-                                                <span class="sr-only"> (opens in a new tab)</span>
-                                            </a>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
+                            <ProducerLinks
+                                linkClass="hover:text-accent-deep"
+                                links={producer.data.links}
+                            />
                         </div>
                     </div>
                 </article>
@@ -213,7 +193,7 @@ const roster = [...producers]
     >
         <p class="font-extrabold font-sans text-xl tracking-tight">No matches.</p>
         <p class="text-sm text-ink-muted">
-            Nobody on the roster answers to &ldquo;<span class="font-mono" data-search-echo />&rdquo;.
+            Nobody on the roster answers to &ldquo;<span class="font-mono wrap-anywhere" data-search-echo />&rdquo;.
         </p>
         <button
             class="btn"
@@ -270,7 +250,7 @@ const roster = [...producers]
     .producer-card:not(.hidden) {
         align-content: start;
         display: grid;
-        grid-row: span 9;
+        grid-row: span 8;
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
     }
@@ -278,7 +258,7 @@ const roster = [...producers]
     .producer-card::after {
         content: '';
         display: block;
-        grid-row: 9;
+        grid-row: 8;
         height: var(--space-lg);
     }
 
@@ -289,7 +269,7 @@ const roster = [...producers]
     .producer-card__body {
         align-content: start;
         display: grid;
-        grid-row: 2 / span 7;
+        grid-row: 2 / span 6;
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
     }
@@ -297,7 +277,7 @@ const roster = [...producers]
     .producer-card__frame {
         align-content: start;
         display: grid;
-        grid-row: 1 / span 8;
+        grid-row: 1 / span 7;
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
     }
@@ -312,10 +292,6 @@ const roster = [...producers]
 
     .roster__grid > * {
         min-width: 0;
-    }
-
-    .roster__search::-webkit-search-cancel-button {
-        appearance: none;
     }
 
     @media (max-width: 1024px) {

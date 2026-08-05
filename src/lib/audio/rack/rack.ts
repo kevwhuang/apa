@@ -6,7 +6,7 @@ import { getPlayerState, onPlayerChange, togglePlayback } from '@lib/audio';
 
 const CROSSFADE_SECONDS = 0.015;
 
-export const MODULE_NAMES: Record<RackKind, string> = {
+const MODULE_NAMES: Record<RackKind, string> = {
     chorus: 'Weave',
     compressor: 'Clamp',
     delay: 'Relay',
@@ -27,7 +27,7 @@ export const MODULE_NAMES: Record<RackKind, string> = {
 
 const RACK_KEY = 'apa.rack';
 
-export const RACK_ORDER: RackKind[] = [
+const RACK_ORDER: RackKind[] = [
     'trim',
     'filter',
     'highpass',
@@ -47,13 +47,10 @@ export const RACK_ORDER: RackKind[] = [
 ];
 
 const RACK_TOPIC = 'apa:rack-changed';
-
 const REBUILD_DELAY_MS = 20;
-
 const SETTLE_DELAY_MS = 60;
 
 const blocks = new Map<RackKind, RackBlock>();
-
 const params = new Map<string, number>();
 
 const store = createStore<RackState>({
@@ -134,11 +131,11 @@ function fadeInput(target: number) {
     input.gain.linearRampToValueAtTime(target, now + CROSSFADE_SECONDS);
 }
 
-export function getRackAnalyser(kind: RackKind): AnalyserNode | undefined {
+function getRackAnalyser(kind: RackKind): AnalyserNode | undefined {
     return blocks.get(kind)?.analyser;
 }
 
-export function getRackPosition(): number {
+function getRackPosition(): number {
     const { durationSeconds, playing } = store.get();
 
     if (!playing || !input || durationSeconds === 0) return pausedPosition;
@@ -146,11 +143,11 @@ export function getRackPosition(): number {
     return (input.context.currentTime - startedAt) % durationSeconds;
 }
 
-export function getRackReadout(kind: RackKind): string | undefined {
+function getRackReadout(kind: RackKind): string | undefined {
     return blocks.get(kind)?.state?.();
 }
 
-export function getRackState(): RackState {
+function getRackState(): RackState {
     return store.get();
 }
 
@@ -158,11 +155,11 @@ function handlePlayerChange(state: PlayerState) {
     if (state.playing) pauseRack();
 }
 
-export function isModuleActive(kind: RackKind): boolean {
+function isModuleActive(kind: RackKind): boolean {
     return store.get().activeKinds.includes(kind);
 }
 
-export async function loadRackFile(file: File): Promise<RackLoadResult> {
+async function loadRackFile(file: File): Promise<RackLoadResult> {
     const result = await decodeRackFile(file);
 
     if (!result.ok) return result;
@@ -177,11 +174,11 @@ export async function loadRackFile(file: File): Promise<RackLoadResult> {
     return result;
 }
 
-export function onRackChange(callback: (state: RackState) => void): () => void {
+function onRackChange(callback: (state: RackState) => void): () => void {
     return store.onChange(callback);
 }
 
-export function pauseRack(): void {
+function pauseRack(): void {
     const state = store.get();
 
     if (!state.playing) return;
@@ -195,7 +192,7 @@ export function pauseRack(): void {
     store.set({ ...state, playing: false });
 }
 
-export function playRack(): void {
+function playRack(): void {
     const state = store.get();
 
     if (!buffer || state.playing) return;
@@ -231,7 +228,7 @@ function scheduleRebuild() {
     rebuild = setTimeout(applyRebuild, REBUILD_DELAY_MS);
 }
 
-export function seekRack(seconds: number): void {
+function seekRack(seconds: number): void {
     const state = store.get();
 
     if (!buffer) return;
@@ -247,7 +244,7 @@ export function seekRack(seconds: number): void {
     store.set({ ...state });
 }
 
-export function setModuleActive(kind: RackKind, active: boolean): void {
+function setModuleActive(kind: RackKind, active: boolean): void {
     const state = store.get();
 
     if (state.activeKinds.includes(kind) === active) return;
@@ -258,7 +255,7 @@ export function setModuleActive(kind: RackKind, active: boolean): void {
     scheduleRebuild();
 }
 
-export function setRackParam(kind: RackKind, name: string, value: number): void {
+function setRackParam(kind: RackKind, name: string, value: number): void {
     params.set(`${kind}:${name}`, value);
     blocks.get(kind)?.setParam(name, value);
 }
@@ -316,7 +313,7 @@ function tick() {
     frame = requestAnimationFrame(tick);
 }
 
-export function toggleRack(): void {
+function toggleRack(): void {
     if (store.get().playing) {
         pauseRack();
 
@@ -327,3 +324,21 @@ export function toggleRack(): void {
 }
 
 onPlayerChange(handlePlayerChange);
+
+export {
+    MODULE_NAMES,
+    RACK_ORDER,
+    getRackAnalyser,
+    getRackPosition,
+    getRackReadout,
+    getRackState,
+    isModuleActive,
+    loadRackFile,
+    onRackChange,
+    pauseRack,
+    playRack,
+    seekRack,
+    setModuleActive,
+    setRackParam,
+    toggleRack,
+};

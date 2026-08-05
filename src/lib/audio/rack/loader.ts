@@ -3,14 +3,12 @@ import { UPLOAD_EXTENSIONS_OR_LIST, getExtension, getSizeError } from '@lib/audi
 import { ensureRackAudio } from '@lib/audio/rack/context';
 
 const ABORTED_MESSAGE = 'The rack closed before that file finished.';
-
 const MAX_RACK_MEGABYTES = 100;
+const RACK_EXTENSION_LIST = UPLOAD_EXTENSIONS_OR_LIST;
 
-export const RACK_EXTENSION_LIST = UPLOAD_EXTENSIONS_OR_LIST;
+const RACK_MAX_BYTES = MAX_RACK_MEGABYTES * BYTES_PER_MEGABYTE;
 
-export const RACK_MAX_BYTES = MAX_RACK_MEGABYTES * BYTES_PER_MEGABYTE;
-
-export async function decodeRackFile(file: File, signal?: AbortSignal): Promise<RackLoadResult> {
+async function decodeRackFile(file: File, signal?: AbortSignal): Promise<RackLoadResult> {
     const invalid = validateRackFile(file);
 
     if (invalid) return { message: invalid, ok: false };
@@ -31,7 +29,7 @@ export async function decodeRackFile(file: File, signal?: AbortSignal): Promise<
     }
 }
 
-export function validateRackFile(file: File): string | undefined {
+function validateRackFile(file: File): string | undefined {
     const extension = getExtension(file.name);
 
     if (!UPLOAD.extensions.some(allowed => allowed === extension)) {
@@ -40,3 +38,5 @@ export function validateRackFile(file: File): string | undefined {
 
     return getSizeError(file, RACK_MAX_BYTES);
 }
+
+export { RACK_EXTENSION_LIST, RACK_MAX_BYTES, decodeRackFile, validateRackFile };

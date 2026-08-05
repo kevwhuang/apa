@@ -4,17 +4,11 @@ import { REDUCED_MOTION_QUERY } from '@lib/constants';
 import { getMotionTokens } from '@lib/motion/tokens';
 
 const DRIFT_SCRUB = 0.6;
-
 const DRIFT_SHIFT = 6;
-
 const FLOAT_SCRUB = 1.2;
-
 const FLOAT_SHIFT = 24;
-
 const HERO_SELECTOR = '.hero__field';
-
 const MOBILE_WIDTH = 768;
-
 const SCRUB_END = 'bottom top';
 
 const SCRUB_PRESETS: Record<MotionScrubName, MotionScrubPreset> = {
@@ -31,14 +25,12 @@ const SCRUB_PRESETS: Record<MotionScrubName, MotionScrubPreset> = {
 };
 
 const SCRUB_SELECTOR = '[data-scrub]';
-
 const SCRUB_START = 'top bottom';
-
 const SCRUB_VARIANTS = Object.keys(SCRUB_PRESETS) as MotionScrubName[];
 
 const tweens: gsap.core.Tween[] = [];
 
-export function clearScrub(): void {
+function clearScrub(): void {
     for (const tween of tweens) {
         tween.scrollTrigger?.kill();
         tween.revert();
@@ -47,7 +39,7 @@ export function clearScrub(): void {
     tweens.length = 0;
 }
 
-export function initScrub(): void {
+function initScrub(): void {
     if (window.matchMedia(REDUCED_MOTION_QUERY).matches || window.innerWidth <= MOBILE_WIDTH) return;
 
     const tokens = getMotionTokens();
@@ -76,3 +68,5 @@ export function initScrub(): void {
 function resolveScrub(name: string | undefined): MotionScrubName | undefined {
     return SCRUB_VARIANTS.find(variant => variant === name);
 }
+
+export { clearScrub, initScrub };

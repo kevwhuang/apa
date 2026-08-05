@@ -60,14 +60,14 @@ function withEnd(list: CalendarItem[]) {
 >
     <div>
         <PageHead
-            class="max-w-4xl font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
+            class="max-w-4xl mb-6 font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
             eyebrow="Events"
             headingId="programs-title"
         >
             What we run.
         </PageHead>
         <p
-            class="max-w-2xl mt-6 text-lmd text-ink-muted"
+            class="max-w-2xl mb-10 text-lmd text-ink-muted"
             data-motion="blur"
         >
             Three programs run on a fixed cadence, each with its own shape and its own room.
@@ -75,7 +75,7 @@ function withEnd(list: CalendarItem[]) {
             still on paper, and the archive of every date already run.
         </p>
         <nav
-            class="flex flex-wrap gap-3 mt-10"
+            class="flex flex-wrap gap-3"
             aria-label="On this page"
             data-motion="rise"
         >
@@ -104,13 +104,13 @@ function withEnd(list: CalendarItem[]) {
             {assemblyProgram.name}.
         </SectionHead>
         <p
-            class="max-w-2xl leading-relaxed text-md text-ink-muted"
+            class="max-w-2xl mb-10 leading-relaxed text-md text-ink-muted"
             data-motion="rise"
         >
             {assemblyProgram.summary}
         </p>
         <div
-            class="flex flex-wrap items-center gap-x-8 gap-y-3 mt-8"
+            class="flex flex-wrap items-center gap-x-8 gap-y-3 mb-(--space-2xl)"
             data-motion="rise"
         >
             <a
@@ -120,7 +120,7 @@ function withEnd(list: CalendarItem[]) {
                 About the {assemblyProgram.name}
             </a>
             <a
-                class="action-text hover:text-accent-deep inline-flex items-center min-h-[50px] underline underline-offset-4 transition-colors"
+                class="action-text hover:text-accent-deep inline-flex items-center min-h-(--control-size) underline underline-offset-4 transition-colors"
                 href={LINKS.meetup}
                 rel="noopener noreferrer"
                 target="_blank"
@@ -132,7 +132,7 @@ function withEnd(list: CalendarItem[]) {
         {nextAssembly
             ? (
                     <Fragment>
-                        <div class="mark mt-16">
+                        <div class:list={['mark', laterAssemblies.length > 0 && 'mb-(--space-2xl)']}>
                             <article
                                 id={nextAssembly.id}
                                 class="sheet slab slab--bare slab--card"
@@ -161,22 +161,22 @@ function withEnd(list: CalendarItem[]) {
                                     <p class="label mb-4 text-ink-subtle">
                                         Entry {entryNumber(1)} / {entryNumber(assemblies.length)}
                                     </p>
-                                    <h3 class="font-extrabold font-sans text-2xl tracking-tight">{nextAssembly.title}</h3>
+                                    <h3 class="mb-3 font-extrabold font-sans text-2xl tracking-tight">{nextAssembly.title}</h3>
                                     <p
-                                        class="mt-3 font-mono text-xs uppercase text-ink-muted"
+                                        class="mb-1 font-mono text-xs uppercase text-ink-muted"
                                         data-placeholder
                                     >
                                         {formatTimeRange(nextAssembly.date, nextAssembly.end)}
                                     </p>
-                                    <address class="mt-1 font-mono not-italic text-xs uppercase text-ink-muted">
+                                    <address class="mb-4 font-mono not-italic text-xs uppercase text-ink-muted">
                                         {nextAssembly.location}
                                     </address>
-                                    <p class="max-w-2xl mt-4 leading-relaxed text-ink-muted">{nextAssembly.excerpt}</p>
+                                    <p class="max-w-2xl leading-relaxed text-ink-muted">{nextAssembly.excerpt}</p>
                                 </div>
                             </article>
                         </div>
                         {laterAssemblies.length > 0 && (
-                            <div class="docket mt-16">
+                            <div class="docket">
                                 <div
                                     class="docket__heads"
                                     aria-hidden="true"
@@ -202,7 +202,7 @@ function withEnd(list: CalendarItem[]) {
                                         >
                                             <p class="docket__no">{entryNumber(index + 2)}</p>
                                             <p
-                                                class="docket__date"
+                                                class="docket__date flex flex-col gap-1"
                                                 data-placeholder
                                             >
                                                 <time
@@ -211,7 +211,7 @@ function withEnd(list: CalendarItem[]) {
                                                 >
                                                     {formatDate(event.date)}
                                                 </time>
-                                                <span class="block mt-1 font-mono text-xs uppercase text-ink-muted">
+                                                <span class="font-mono text-xs uppercase text-ink-muted">
                                                     {formatTimeRange(event.date, event.end)}
                                                 </span>
                                             </p>
@@ -228,7 +228,7 @@ function withEnd(list: CalendarItem[]) {
                 )
             : (
                     <p
-                        class="mark slab slab--card mt-16 leading-relaxed text-ink-muted"
+                        class="mark slab slab--card leading-relaxed text-ink-muted"
                         data-motion="rise"
                     >
                         No {assemblyProgram.name} on the calendar right now &mdash; the next date goes up here and on Meetup as soon as the room is booked.
@@ -264,13 +264,13 @@ function withEnd(list: CalendarItem[]) {
                 {bashProgram.name}.
             </SectionHead>
             <p
-                class="max-w-xl leading-relaxed text-md text-ink-inverse-muted"
+                class="max-w-xl mb-10 leading-relaxed text-md text-ink-inverse-muted"
                 data-motion="rise"
             >
                 {bashProgram.summary}
             </p>
             <div
-                class="flex flex-wrap items-center gap-6 mt-8"
+                class="flex flex-wrap items-center gap-6"
                 data-motion="rise"
             >
                 <a
@@ -280,7 +280,7 @@ function withEnd(list: CalendarItem[]) {
                     Everything about the {bashProgram.name} &rarr;
                 </a>
                 <a
-                    class="action-text hover:text-accent inline-flex items-center min-h-[50px] underline underline-offset-4 text-ink-inverse transition-colors"
+                    class="action-text hover:text-accent inline-flex items-center min-h-(--control-size) underline underline-offset-4 text-ink-inverse transition-colors"
                     href={LINKS.meetup}
                     rel="noopener noreferrer"
                     target="_blank"
@@ -302,20 +302,20 @@ function withEnd(list: CalendarItem[]) {
                             class="rank last:border-b-0 items-baseline py-4 border-b-2 border-ink"
                         >
                             <p
-                                class="font-extrabold font-sans text-xl"
+                                class="flex flex-col gap-1 font-extrabold font-sans text-xl"
                                 data-placeholder
                             >
                                 <time datetime={edition.data.date.toISOString()}>{formatDate(edition.data.date)}</time>
-                                <span class="block mt-1 font-mono text-xs uppercase text-ink-muted">
+                                <span class="font-mono text-xs uppercase text-ink-muted">
                                     {formatTimeRange(edition.data.date, edition.data.end)}
                                 </span>
                             </p>
                             <div>
-                                <h3 class="font-extrabold font-sans text-2xl tracking-tight">{edition.data.title}</h3>
-                                <address class="mt-2 font-mono not-italic text-xs uppercase text-ink-muted">
+                                <h3 class="mb-2 font-extrabold font-sans text-2xl tracking-tight">{edition.data.title}</h3>
+                                <address class="mb-3 font-mono not-italic text-xs uppercase text-ink-muted">
                                     {edition.data.location}
                                 </address>
-                                <p class="max-w-2xl mt-3 leading-relaxed text-ink-muted">{edition.data.recap}</p>
+                                <p class="max-w-2xl leading-relaxed text-ink-muted">{edition.data.recap}</p>
                             </div>
                         </li>
                     ))}
@@ -378,11 +378,11 @@ function withEnd(list: CalendarItem[]) {
                             >
                                 {getProgram(event.type).shortName} / {formatTimeRange(event.date, event.end)}
                             </p>
-                            <h3 class="font-extrabold font-sans text-lg tracking-tight">{event.title}</h3>
-                            <address class="mt-2 font-mono not-italic text-xs uppercase text-ink-muted">
+                            <h3 class="mb-2 font-extrabold font-sans text-lg tracking-tight">{event.title}</h3>
+                            <address class="mb-3 font-mono not-italic text-xs uppercase text-ink-muted">
                                 {event.location}
                             </address>
-                            <p class="mt-3 leading-relaxed text-sm text-ink-muted">{event.excerpt}</p>
+                            <p class="leading-relaxed text-sm text-ink-muted">{event.excerpt}</p>
                         </div>
                     </article>
                 </li>

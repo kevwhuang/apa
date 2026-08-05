@@ -30,8 +30,7 @@ import { formatBytes } from '@lib/utils';
                     conversation.
                 </p>
                 <p class="text-sm text-ink-subtle">
-                    The list lives in this browser, so bring the same link or bounce with you on
-                    the night.
+                    Bring the same link or bounce with you on the night.
                 </p>
             </div>
             <div class="flex flex-col gap-5">
@@ -62,14 +61,14 @@ import { formatBytes } from '@lib/utils';
                 </div>
                 <form
                     id="feedback-panel-link"
-                    class="flex flex-col gap-3"
+                    class="slab slab--card flex flex-col gap-3"
                     data-feedback-panel="link"
                 >
                     <label class="flex flex-col gap-2">
                         <span class="label text-ink-muted">Track link</span>
                         <input
                             id="feedback-link"
-                            class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-mono text-sm bg-transparent transition-colors"
+                            class="input font-mono text-sm"
                             aria-describedby="feedback-link-help feedback-link-error"
                             aria-invalid="false"
                             autocomplete="off"
@@ -83,8 +82,7 @@ import { formatBytes } from '@lib/utils';
                         id="feedback-link-help"
                         class="text-sm text-ink-muted"
                     >
-                        SoundCloud, Bandcamp, Dropbox, Drive &mdash; anywhere the room can press
-                        play.
+                        SoundCloud, Dropbox, Drive &mdash; anywhere the room can press play.
                     </p>
                     <p
                         id="feedback-link-error"
@@ -106,7 +104,7 @@ import { formatBytes } from '@lib/utils';
                     hidden
                 >
                     <label
-                        class="dropzone slab slab--card flex flex-col items-center justify-center gap-3 text-center"
+                        class="dropzone slab slab--card flex flex-col items-center justify-center gap-3 mb-3 text-center"
                         data-dropzone
                         for="feedback-input"
                     >
@@ -128,7 +126,7 @@ import { formatBytes } from '@lib/utils';
                     </label>
                     <p
                         id="feedback-file-help"
-                        class="mt-3 text-sm text-ink-muted"
+                        class="text-sm text-ink-muted"
                         data-placeholder
                     >
                         {UPLOAD_EXTENSIONS_LABEL}. Up to {formatBytes(UPLOAD.maxFileBytes)} each; the list
@@ -153,7 +151,7 @@ import { formatBytes } from '@lib/utils';
             <div class="flex flex-wrap items-baseline justify-between gap-3">
                 <p class="label px-2 py-1 bg-ink text-ink-inverse">Link</p>
                 <p
-                    class="label text-ink-muted"
+                    class="label min-w-0 wrap-anywhere text-ink-muted"
                     data-row-host
                 />
             </div>
@@ -169,7 +167,7 @@ import { formatBytes } from '@lib/utils';
             </a>
             <div class="flex justify-end">
                 <button
-                    class="action-text hover:text-accent-deep flex items-center min-h-[50px] px-1 text-ink-muted transition-colors"
+                    class="action-text hover:text-accent-deep flex items-center min-h-(--control-size) px-1 text-ink-muted transition-colors"
                     data-row-remove
                     type="button"
                 >
@@ -184,7 +182,7 @@ import { formatBytes } from '@lib/utils';
                 <div class="flex flex-wrap items-baseline gap-3">
                     <p class="label px-2 py-1 bg-ink text-ink-inverse">File</p>
                     <p
-                        class="font-bold font-sans wrap-break-word"
+                        class="font-bold font-sans wrap-anywhere"
                         data-row-name
                     />
                 </div>
@@ -218,7 +216,7 @@ import { formatBytes } from '@lib/utils';
                     data-row-percent
                 />
                 <button
-                    class="action-text hover:text-accent-deep flex items-center min-h-[50px] px-1 text-ink-muted transition-colors"
+                    class="action-text hover:text-accent-deep flex items-center min-h-(--control-size) px-1 text-ink-muted transition-colors"
                     data-row-cancel
                     type="button"
                 >
@@ -271,7 +269,7 @@ import { formatBytes } from '@lib/utils';
     .feedback__href {
         align-items: center;
         display: flex;
-        min-height: 50px;
+        min-height: var(--control-size);
         overflow-wrap: anywhere;
         transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
     }
@@ -291,7 +289,7 @@ import { formatBytes } from '@lib/utils';
     }
 
     .feedback__mode {
-        height: 50px;
+        height: var(--control-size);
     }
 
     .feedback__progress {
@@ -313,6 +311,7 @@ import { formatBytes } from '@lib/utils';
 <script>
     import { UPLOAD } from '@lib/constants';
     import { createDropzone, nextFocusTarget } from '@lib/audio/dropzone';
+    import { isValidationBypassed } from '@lib/ui/forms';
     import { parseTrackLink } from '@lib/programs/feedback';
     import { registerPageScript, rovingFocus, setMessage, setText } from '@lib/utils';
     import { toast } from '@lib/ui/toasts';
@@ -325,6 +324,7 @@ import { formatBytes } from '@lib/utils';
     }
 
     const LIST_FULL_MESSAGE = `The list is full \u2014 ${UPLOAD.maxFiles} tracks per Assembly.`;
+    const STUB_LINK = 'https://example.com/track';
 
     let linkQueue: QueuedLink[] = [];
     let queuedFiles = 0;
@@ -362,13 +362,13 @@ import { formatBytes } from '@lib/utils';
     function handleLinkSubmit(event: SubmitEvent, form: HTMLFormElement, input: HTMLInputElement, list: HTMLElement, signal: AbortSignal) {
         event.preventDefault();
 
-        if (capacity() <= 0) {
-            setLinkError(input, LIST_FULL_MESSAGE);
+        if (!isValidationBypassed() && capacity() <= 0) {
+            reportListFull();
 
             return;
         }
 
-        const parsed = parseTrackLink(input.value);
+        const parsed = resolveLink(input.value);
 
         if (!parsed.ok) {
             setLinkError(input, parsed.message);
@@ -471,6 +471,14 @@ import { formatBytes } from '@lib/utils';
         toast(LIST_FULL_MESSAGE, 'error');
 
         return LIST_FULL_MESSAGE;
+    }
+
+    function resolveLink(raw: string) {
+        const parsed = parseTrackLink(raw);
+
+        if (parsed.ok || !isValidationBypassed()) return parsed;
+
+        return parseTrackLink(STUB_LINK);
     }
 
     function setLinkError(input: HTMLInputElement, message: string) {

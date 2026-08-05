@@ -1,7 +1,5 @@
 const BAND_COUNT = 8;
-
 const BAND_WEIGHT = [1, 0.92, 0.84, 0.74, 0.64, 0.54, 0.44, 0.34];
-
 const BEATS_PER_MINUTE = 92;
 
 const PATTERN = [
@@ -16,16 +14,15 @@ const PATTERN = [
 ];
 
 const SECONDS_PER_MINUTE = 60;
-
 const STEPS_PER_BEAT = 4;
 
-export const STEP_COUNT = PATTERN.length;
+const STEP_COUNT = PATTERN.length;
 
-export function stepDuration(): number {
+function stepDuration(): number {
     return SECONDS_PER_MINUTE / (BEATS_PER_MINUTE * STEPS_PER_BEAT);
 }
 
-export function stepEnergy(step: number): number {
+function stepEnergy(step: number): number {
     const mask = PATTERN[step % STEP_COUNT];
 
     let energy = 0;
@@ -39,3 +36,5 @@ export function stepEnergy(step: number): number {
 
     return energy / total;
 }
+
+export { STEP_COUNT, stepDuration, stepEnergy };

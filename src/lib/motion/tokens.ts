@@ -1,7 +1,5 @@
 const BEZIER_EPSILON = 0.000_001;
-
 const BEZIER_ITERATIONS = 8;
-
 const CUBIC_BEZIER_PATTERN = /cubic-bezier\(([^)]+)\)/;
 
 const DURATION_FALLBACKS: Record<MotionDurationToken, number> = {
@@ -22,7 +20,6 @@ const EASE_FALLBACKS: Record<MotionEaseToken, MotionBezier> = {
 };
 
 const FALLBACK_DATA_KEY = 'motionTokenFallback';
-
 const MILLISECONDS_PER_SECOND = 1_000;
 
 const SCALAR_FALLBACKS = {
@@ -83,7 +80,7 @@ function cubicBezier(x1: number, y1: number, x2: number, y2: number): MotionEase
     };
 }
 
-export function getMotionTokens(): MotionTokens {
+function getMotionTokens(): MotionTokens {
     if (cache) return cache;
 
     fallbacks = [];
@@ -122,7 +119,7 @@ export function getMotionTokens(): MotionTokens {
     return cache;
 }
 
-export function readColorToken(styles: CSSStyleDeclaration, name: string): string {
+function readColorToken(styles: CSSStyleDeclaration, name: string): string {
     return styles.getPropertyValue(name).trim();
 }
 
@@ -151,7 +148,7 @@ function readNumber(styles: CSSStyleDeclaration, name: string, fallback: number)
     return raw.endsWith('ms') ? parsed / MILLISECONDS_PER_SECOND : parsed;
 }
 
-export function refreshMotionTokens(): void {
+function refreshMotionTokens(): void {
     cache = undefined;
 }
 
@@ -166,3 +163,5 @@ function surfaceFallbacks(): void {
 
     root.dataset[FALLBACK_DATA_KEY] = [...new Set(fallbacks)].join(' ');
 }
+
+export { getMotionTokens, readColorToken, refreshMotionTokens };

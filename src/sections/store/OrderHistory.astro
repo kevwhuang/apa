@@ -5,7 +5,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
 ---
 
 <section
-    class="stage stage--tight"
+    class="stage stage--tight border-b-2 border-ink"
     aria-labelledby="order-title"
 >
     <div class="text-center">
@@ -18,14 +18,14 @@ import SectionHead from '@components/shared/SectionHead.astro';
             <IconCheck />
         </div>
         <PageHead
-            class="font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="mb-6 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
             eyebrow="Store / Orders"
             headingId="order-title"
         >
             <span data-order-heading>Your orders.</span>
         </PageHead>
         <p
-            class="label mt-6 text-ink-muted"
+            class="label text-ink-muted"
             data-order-number
             data-placeholder
         />
@@ -35,21 +35,19 @@ import SectionHead from '@components/shared/SectionHead.astro';
         data-motion="rise"
         data-order-detail
     >
-        <p class="text-center text-lmd text-ink-muted">
-            Receipt sent to&#32;
-            <span
-                class="font-mono wrap-break-word text-smd"
-                data-order-email
-            />.
-        </p>
         <ul
             class="order__list scroll-slot border-2 border-ink list-none"
             data-order-list
         />
-        <dl class="slab slab--sunk space-y-1.5 font-mono text-sm">
+        <dl class="slab slab--sunk flex flex-col gap-2 font-mono text-sm">
             <div class="flex justify-between gap-3">
                 <dt>Subtotal</dt>
-                <dd data-order-subtotal>$0.00</dd>
+                <dd
+                    class="min-w-0 wrap-break-word"
+                    data-order-subtotal
+                >
+                    $0.00
+                </dd>
             </div>
             <div
                 class="flex justify-between gap-3"
@@ -57,19 +55,39 @@ import SectionHead from '@components/shared/SectionHead.astro';
                 hidden
             >
                 <dt>Prods credit</dt>
-                <dd data-order-discount>$0.00</dd>
+                <dd
+                    class="min-w-0 wrap-break-word"
+                    data-order-discount
+                >
+                    $0.00
+                </dd>
             </div>
             <div class="flex justify-between gap-3">
                 <dt>Shipping</dt>
-                <dd data-order-shipping>&mdash;</dd>
+                <dd
+                    class="min-w-0 wrap-break-word"
+                    data-order-shipping
+                >
+                    &mdash;
+                </dd>
             </div>
-            <div class="flex justify-between gap-3">
+            <div class="flex justify-between gap-3 mb-2">
                 <dt>Tax</dt>
-                <dd data-order-tax>$0.00</dd>
+                <dd
+                    class="min-w-0 wrap-break-word"
+                    data-order-tax
+                >
+                    $0.00
+                </dd>
             </div>
-            <div class="flex justify-between gap-3 mt-2 pt-2 border-t-2 border-ink font-extrabold font-sans text-lg">
+            <div class="flex justify-between gap-3 pt-2 border-t-2 border-ink font-extrabold font-sans text-lg">
                 <dt>Total</dt>
-                <dd data-order-total>$0.00</dd>
+                <dd
+                    class="min-w-0 wrap-break-word"
+                    data-order-total
+                >
+                    $0.00
+                </dd>
             </div>
         </dl>
         <div class="flex flex-wrap justify-center gap-3">
@@ -108,7 +126,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
 </section>
 
 <section
-    class="stage stage--tight border-t-2 border-ink"
+    class="stage stage--tight"
     aria-labelledby="order-ledger-title"
 >
     <div>
@@ -127,7 +145,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
                 No orders yet &mdash; receipts from the store land here.
             </p>
             <div
-                class="order__scroller"
+                class="order__scroller scroll-slot"
                 data-order-ledger
                 hidden
             >
@@ -256,6 +274,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
     }
 
     .order__scroller {
+        --scroll-slot-max: calc(52px + 5 * (33px + var(--space-md)));
         overflow-x: auto;
     }
 
@@ -278,9 +297,16 @@ import SectionHead from '@components/shared/SectionHead.astro';
             display: none;
         }
 
+        .order__pick {
+            margin-bottom: var(--space-3xs);
+        }
+
+        .order__scroller {
+            --scroll-slot-max: calc(52px + 5 * (53.5px + var(--space-md)));
+        }
+
         .order__stamp {
             display: block;
-            margin-top: var(--space-3xs);
             white-space: nowrap;
         }
     }
@@ -368,7 +394,6 @@ import SectionHead from '@components/shared/SectionHead.astro';
     function renderHeading(order: Order, fresh: boolean) {
         document.querySelector<HTMLElement>('[data-order-mark]')?.toggleAttribute('hidden', !fresh);
 
-        setText(document.querySelector('[data-order-email]'), order.email);
         setText(document.querySelector('[data-order-heading]'), fresh ? 'Order received.' : 'Your orders.');
         setText(document.querySelector('[data-order-number]'), `Order ${order.id} \u00b7 ${formatDateStamp(new Date(order.placedAt))}`);
     }

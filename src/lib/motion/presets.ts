@@ -1,52 +1,30 @@
 import { getMotionTokens } from '@lib/motion/tokens';
 
 const BLUR_CLEAR = 'blur(0px)';
-
 const BLUR_SCALE = 1.02;
-
 const BLUR_START = 'blur(14px)';
-
 const CLIP_OPEN = 'inset(0% 0% 0% 0%)';
-
 const FLIP_PERSPECTIVE = 900;
-
 const FLIP_ROTATION = -55;
-
 const ORIGIN_LEADING = '0% 50%';
-
 const ORIGIN_TOP = '50% 0%';
-
 const RISE_BLUR = 'blur(6px)';
-
 const RISE_SCALE = 0.985;
-
 const STAMP_BLUR = 'blur(4px)';
-
 const STAMP_SCALE = 1.18;
-
 const STRIKE_CLIP = 'inset(0% 0% 108% 0%)';
-
 const STRIKE_OFFSET = '0.18em';
-
 const STRIKE_SKEW = 2;
-
 const TILT_ROTATION = -4;
-
 const TILT_SCALE = 0.94;
-
 const UNFOLD_CLIP = 'inset(14% 0% 14% 0%)';
-
 const UNFOLD_PERSPECTIVE = 700;
-
 const UNFOLD_ROTATION = -8;
-
 const UNFOLD_SCALE = 0.92;
-
 const WIPE_CLIP = 'inset(0% 100% 0% 0%)';
-
 const WIPE_OFFSET = -28;
 
-export const ENTRANCE_PRESETS: Record<MotionPresetName, MotionPreset> = {
+const ENTRANCE_PRESETS: Record<MotionPresetName, MotionPreset> = {
     blur: {
         duration: 'cinematic',
         ease: 'entrance',
@@ -112,22 +90,31 @@ export const ENTRANCE_PRESETS: Record<MotionPresetName, MotionPreset> = {
     },
 };
 
-export const FOLDED_PROPERTIES = ['filter', 'rotate', 'scale', 'transform', 'translate'];
+const FOLDED_PROPERTIES = ['filter', 'rotate', 'scale', 'transform', 'translate'];
+const GUARDED_PRESET: MotionPresetName = 'rise';
 
-export const GUARDED_PRESET: MotionPresetName = 'rise';
+const PRESET_NAMES = Object.keys(ENTRANCE_PRESETS) as MotionPresetName[];
 
-export const PRESET_NAMES = Object.keys(ENTRANCE_PRESETS) as MotionPresetName[];
+const REST_PROPERTIES = 'clipPath,filter,rotate,scale,transform,transformOrigin,translate,willChange';
+const VISIBLE_PRESETS: MotionPresetName[] = ['rule', 'strike', 'wipe'];
 
-export const REST_PROPERTIES = 'clipPath,filter,rotate,scale,transform,transformOrigin,translate,willChange';
-
-export const VISIBLE_PRESETS: MotionPresetName[] = ['rule', 'strike', 'wipe'];
-
-export function buildStagger(count: number, token: MotionStaggerToken, from: MotionStaggerOrigin = 'start'): gsap.StaggerVars {
+function buildStagger(count: number, token: MotionStaggerToken, from: MotionStaggerOrigin = 'start'): gsap.StaggerVars {
     const tokens = getMotionTokens();
 
     return { amount: Math.min(count * tokens.stagger[token], tokens.staggerMaxTotal), from };
 }
 
-export function resolvePreset(name: string | undefined): MotionPresetName | undefined {
+function resolvePreset(name: string | undefined): MotionPresetName | undefined {
     return PRESET_NAMES.find(preset => preset === name);
 }
+
+export {
+    ENTRANCE_PRESETS,
+    FOLDED_PROPERTIES,
+    GUARDED_PRESET,
+    PRESET_NAMES,
+    REST_PROPERTIES,
+    VISIBLE_PRESETS,
+    buildStagger,
+    resolvePreset,
+};

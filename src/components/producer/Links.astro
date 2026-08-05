@@ -1,0 +1,51 @@
+---
+import IconInstagram from '@components/icons/Instagram.astro';
+import IconSoundCloud from '@components/icons/SoundCloud.astro';
+import IconSpotify from '@components/icons/Spotify.astro';
+import IconYouTube from '@components/icons/YouTube.astro';
+
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+    linkClass: string;
+    links: CollectionEntry<'producers'>['data']['links'];
+}
+
+const LINK_ICONS: Record<string, typeof IconInstagram | undefined> = {
+    Instagram: IconInstagram,
+    SoundCloud: IconSoundCloud,
+    Spotify: IconSpotify,
+    YouTube: IconYouTube,
+};
+
+const { linkClass, links } = Astro.props;
+---
+
+{links.length > 0 && (
+    <ul
+        class="flex flex-wrap list-none"
+        data-placeholder
+    >
+        {links.map((link) => {
+            const LinkIcon = LINK_ICONS[link.label];
+
+            return (
+                <li>
+                    <a
+                        class:list={[
+                            linkClass,
+                            'inline-flex items-center min-h-(--control-size) transition-colors',
+                            LinkIcon ? 'justify-center min-w-(--control-size)' : 'action-text px-3 underline underline-offset-4',
+                        ]}
+                        href={link.href}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                    >
+                        {LinkIcon ? <LinkIcon /> : link.label}
+                        <span class="sr-only">{LinkIcon && link.label} (opens in a new tab)</span>
+                    </a>
+                </li>
+            );
+        })}
+    </ul>
+)}

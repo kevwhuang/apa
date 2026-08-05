@@ -26,14 +26,14 @@ const program = getProgram('hangout');
         >
             Next {program.name}.
             <a
-                class="action-text hover:text-accent-deep hidden items-center min-h-[50px] transition-colors md:inline-flex"
+                class="action-text hover:text-accent-deep hidden items-center min-h-(--control-size) transition-colors md:inline-flex"
                 href="/events"
                 slot="cta"
             >
                 All events &rarr;
             </a>
         </SectionHead>
-        <p class="max-w-2xl mb-14 leading-relaxed text-base text-ink-muted">
+        <p class="max-w-2xl mb-(--space-2xl) leading-relaxed text-base text-ink-muted">
             {program.summary}
         </p>
         {next
@@ -63,18 +63,18 @@ const program = getProgram('hangout');
                                     <span class="hangout-flyer__weekday">{formatWeekday(next.data.date)}</span>
                                 </p>
                                 <div class="hangout-flyer__body">
-                                    <h3 class="font-extrabold font-sans leading-[0.95] text-4xl tracking-[-0.03em]">{next.data.title}</h3>
+                                    <h3 class="mb-5 font-extrabold font-sans leading-[0.95] text-4xl tracking-[-0.03em]">{next.data.title}</h3>
                                     <p
-                                        class="mt-5 font-mono text-xs uppercase text-ink-muted"
+                                        class="mb-1 font-mono text-xs uppercase text-ink-muted"
                                         data-placeholder
                                     >
                                         {formatTimeRange(next.data.date, next.data.end)}
                                     </p>
-                                    <address class="mt-1 font-mono not-italic text-xs uppercase text-ink-muted">
+                                    <address class="mb-5 font-mono not-italic text-xs uppercase text-ink-muted">
                                         {next.data.location}
                                     </address>
-                                    <p class="max-w-2xl mt-5 leading-relaxed text-md text-ink-muted">{next.data.excerpt}</p>
-                                    <div class="flex flex-wrap gap-3 mt-8">
+                                    <p class="max-w-2xl mb-8 leading-relaxed text-md text-ink-muted">{next.data.excerpt}</p>
+                                    <div class="flex flex-wrap gap-3">
                                         <a
                                             class="btn btn--accent"
                                             href={LINKS.meetup}
@@ -104,10 +104,10 @@ const program = getProgram('hangout');
                 )
             : (
                     <div data-motion="rise">
-                        <p class="text-ink-muted">
+                        <p class="mb-8 text-ink-muted">
                             No {program.name} on the calendar right now &mdash; the next date goes up as soon as the room is booked.
                         </p>
-                        <div class="flex flex-wrap gap-3 mt-8">
+                        <div class="flex flex-wrap gap-3">
                             <a
                                 class="btn btn--accent"
                                 href={LINKS.meetup}

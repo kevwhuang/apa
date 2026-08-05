@@ -1,4 +1,4 @@
-import { BufferAttribute, BufferGeometry, CanvasTexture, Color, DynamicDrawUsage, Fog, LineBasicMaterial, LineSegments, Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry, Points, PointsMaterial, Scene, WebGLRenderer } from 'three';
+import { BufferAttribute, BufferGeometry, CanvasTexture, Color, DynamicDrawUsage, Fog, LineBasicMaterial, LineSegments, LinearFilter, Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry, Points, PointsMaterial, Scene, WebGLRenderer } from 'three';
 
 import { REDUCED_MOTION_QUERY, STORAGE } from '@lib/constants';
 import { STEP_COUNT, stepDuration, stepEnergy } from '@lib/motion/pattern';
@@ -19,229 +19,122 @@ interface SceneOptions {
 }
 
 const ALPHA_ENERGY = 1;
-
 const ALPHA_FLOOR = 0.24;
-
 const ALPHA_PULSE = 0.56;
-
 const AXIS_HEIGHT = 1;
-
 const AXIS_SHIFT = 9;
-
 const AXIS_SHIFT_MOBILE = 4;
-
 const BAR_STEPS = 16;
-
 const BASE_RELIEF = 0.22;
-
 const BUDGET_BREACH_LIMIT = 12;
-
 const BUDGET_MILLISECONDS = 6;
-
 const BUDGET_WINDOW = 30;
-
 const CAMERA_DEPTH = 30;
-
 const CAMERA_DEPTH_MOBILE = 35;
-
 const CAMERA_DRIFT_X = 1.8;
-
 const CAMERA_DRIFT_Y = 1.1;
-
 const CAMERA_EASE = 0.045;
-
 const CAMERA_FAR = 140;
-
 const CAMERA_FOV = 40;
-
 const CAMERA_HEIGHT = 2.5;
-
 const CAMERA_NEAR = 0.1;
-
 const DEPTH_FADE_CURVE = 1.45;
-
 const DEPTH_FADE_FLOOR = 0.42;
-
 const FOG_FAR = 106;
-
 const FOG_NEAR = 44;
-
 const GROUND_AMPLITUDE = 1.8;
-
 const GROUND_AXIS_OPACITY = 0.26;
-
 const GROUND_BED = 0.5;
-
 const GROUND_COLUMNS = 26;
-
 const GROUND_COLUMNS_MOBILE = 16;
-
 const GROUND_DEPTH = 96;
-
 const GROUND_DROP = -10;
-
 const GROUND_FLOOR = 0.74;
-
 const GROUND_LEAD = 8;
-
 const GROUND_MAJOR_OPACITY = 0.5;
-
 const GROUND_MAJOR_ROW = 6;
-
 const GROUND_MAJOR_STRIDE = 3;
-
 const GROUND_OPACITY = 0.17;
-
 const GROUND_PITCH = 0.3;
-
 const GROUND_RIPPLE = 2;
-
 const GROUND_ROLL = 0.05;
-
 const GROUND_ROWS = 30;
-
 const GROUND_ROWS_MOBILE = 20;
-
 const GROUND_SLOWDOWN = 16;
-
 const GROUND_STRIDE = 3;
-
 const GROUND_WIDTH = 46;
-
 const GROUND_YAW = -0.18;
-
 const HOLDER_SELECTOR = '.rack__scene';
-
 const HOOP_OPACITY = 0.88;
-
 const MAX_PIXEL_RATIO = 2;
-
 const MILLISECONDS_PER_SECOND = 1_000;
-
 const MOBILE_WIDTH = 768;
-
 const MOTE_ALPHA_FLOOR = 0.14;
-
 const MOTE_ALPHA_RANGE = 0.9;
-
 const MOTE_COUNT = 240;
-
 const MOTE_COUNT_MOBILE = 90;
-
 const MOTE_DEPTH_STEP = 0.754_877_666_25;
-
 const MOTE_DRIFT = 2.6;
-
 const MOTE_LANES = 12;
-
 const MOTE_LANE_SKEW = 0.013;
-
 const MOTE_LEAD = 6;
-
+const MOTE_NEAR_CURVE = 1.6;
+const MOTE_NEAR_FADE = 18;
 const MOTE_RADIUS_INNER = 5.6;
-
 const MOTE_RADIUS_RANGE = 2.8;
-
 const MOTE_SHELLS = 3;
-
-const MOTE_SIZE = 0.16;
-
+const MOTE_SIZE = 0.44;
 const MOTE_SPAN = 104;
-
+const MOTE_TEXTURE_CORE = 0.55;
+const MOTE_TEXTURE_FALLOFF = 0.72;
+const MOTE_TEXTURE_SIZE = 64;
 const ORBIT_LIFT = 0.5;
-
 const ORBIT_PERIOD = 168;
-
 const ORBIT_PUSH = 1.2;
-
 const ORBIT_SWAY = 1.4;
-
 const PULSE_LEAD = 3;
-
 const PULSE_LIFT = 0.16;
-
 const PULSE_WIDTH = 2.6;
-
 const QUALITY_FPS = [30, 20, 12];
-
 const RADIUS_BASE = 6.2;
-
 const RADIUS_RANGE = 0.62;
-
 const READ_INNER = 0.93;
-
 const READ_OPACITY_FLOOR = 0.6;
-
 const READ_OPACITY_RANGE = 0.5;
-
 const READ_PULSE_GAIN = 0.3;
-
 const READ_RING = 6;
-
 const RIB_DEPTH = 0.005;
-
 const RIB_FINE_RATIO = 12;
-
 const RIB_FLOOR = 0.5;
-
 const RIB_SHIMMER_RATE = 0.03;
-
 const RING_COUNT = 26;
-
 const RING_COUNT_MOBILE = 18;
-
 const RING_NEAR = 8;
-
 const RING_SPAN = 78;
-
 const RING_TWIST = 0.0006;
-
 const SCAN_HEIGHT = 15;
-
 const SCAN_OPACITY = 0.22;
-
 const SCAN_PERIOD = 9.5;
-
 const SCAN_SWEEP = 6.6;
-
 const SCAN_TEXTURE_CORE = 0.46;
-
 const SCAN_TEXTURE_SIZE = 64;
-
 const SCAN_WIDTH = 0.32;
-
 const SCROLL_SLOWDOWN = 9;
-
 const SEGMENT_COUNT = 84;
-
 const SEGMENT_COUNT_MOBILE = 56;
-
 const SLOW_CORE_COUNT = 4;
-
 const SPIN_RATE = 0.01;
-
 const SPOKE_OPACITY = 0.16;
-
 const SPOKE_STRIDE = 7;
-
 const STILL_ELAPSED = 42.9;
-
 const STILL_SETTLE = 120;
-
 const SWELL_PERIOD = 23;
-
 const SWELL_RANGE = 0.2;
-
 const TAPER_DROP = 0.48;
-
 const TARGET_BIAS = 0.67;
-
 const TARGET_DEPTH = -20;
-
 const TARGET_HEIGHT = 0.5;
-
 const TAU = Math.PI * 2;
-
 const TICK_STRIDE = 6;
 
 function buildGroundIndices(columns: number, rows: number) {
@@ -299,6 +192,33 @@ function buildIndices(rings: number, segments: number) {
     return { hoop, read, spoke };
 }
 
+function buildMoteTexture() {
+    const surface = document.createElement('canvas');
+
+    surface.height = MOTE_TEXTURE_SIZE;
+    surface.width = MOTE_TEXTURE_SIZE;
+
+    const context = surface.getContext('2d');
+    const middle = MOTE_TEXTURE_SIZE / 2;
+
+    if (context) {
+        const gradient = context.createRadialGradient(middle, middle, 0, middle, middle, middle);
+
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        gradient.addColorStop(MOTE_TEXTURE_CORE, `rgba(255, 255, 255, ${MOTE_TEXTURE_FALLOFF})`);
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, MOTE_TEXTURE_SIZE, MOTE_TEXTURE_SIZE);
+    }
+
+    const texture = new CanvasTexture(surface);
+
+    texture.generateMipmaps = false;
+    texture.minFilter = LinearFilter;
+
+    return texture;
+}
+
 function buildScanTexture() {
     const surface = document.createElement('canvas');
 
@@ -320,7 +240,7 @@ function buildScanTexture() {
     return new CanvasTexture(surface);
 }
 
-export function initRig(signal: AbortSignal): void {
+function initRig(signal: AbortSignal): void {
     const holder = document.querySelector<HTMLElement>(HOLDER_SELECTOR);
     const palette = readPalette();
 
@@ -367,6 +287,9 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     const tapers = new Float32Array(rings);
     const tints = new Float32Array((rings + 1) * segments * 4);
 
+    const moteTexture = buildMoteTexture();
+    const scanTexture = buildScanTexture();
+
     const accentColor = new Color(palette.accent);
     const camera = new PerspectiveCamera(CAMERA_FOV, 1, CAMERA_NEAR, CAMERA_FAR);
     const fog = new Fog(palette.surface, FOG_NEAR, FOG_FAR);
@@ -379,7 +302,7 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     const hoopMaterial = new LineBasicMaterial({ opacity: HOOP_OPACITY, transparent: true, vertexColors: true });
     const inkColor = new Color(palette.ink);
     const moteGeometry = new BufferGeometry();
-    const moteMaterial = new PointsMaterial({ color: palette.muted, depthWrite: false, size: MOTE_SIZE, transparent: true, vertexColors: true });
+    const moteMaterial = new PointsMaterial({ color: palette.muted, depthWrite: false, map: moteTexture, size: MOTE_SIZE, transparent: true, vertexColors: true });
     const motePlace = new BufferAttribute(motePlaces, 3);
     const moteTint = new BufferAttribute(moteTints, 4);
     const place = new BufferAttribute(positions, 3);
@@ -387,7 +310,6 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     const readMaterial = new LineBasicMaterial({ color: palette.accent, opacity: READ_OPACITY_FLOOR, transparent: true });
     const ringPitch = (rings - 1) / RING_SPAN;
     const scanGeometry = new PlaneGeometry(SCAN_WIDTH, SCAN_HEIGHT);
-    const scanTexture = buildScanTexture();
     const scanMaterial = new MeshBasicMaterial({ color: palette.accent, depthWrite: false, map: scanTexture, opacity: SCAN_OPACITY, transparent: true });
     const scene = new Scene();
     const spokeMaterial = new LineBasicMaterial({ color: palette.muted, opacity: SPOKE_OPACITY, transparent: true });
@@ -447,6 +369,7 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
         hoopMaterial.dispose();
         moteGeometry.dispose();
         moteMaterial.dispose();
+        moteTexture.dispose();
         readMaterial.dispose();
         renderer.dispose();
         renderer.forceContextLoss();
@@ -599,7 +522,9 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
         const travel = elapsed * MOTE_DRIFT;
 
         for (let mote = 0; mote < motes; mote += 1) {
-            const depth = RING_NEAR + MOTE_LEAD - MOTE_SPAN + (moteSeeds[mote] + travel) % MOTE_SPAN;
+            const advance = (moteSeeds[mote] + travel) % MOTE_SPAN;
+            const approach = Math.min(1, (MOTE_SPAN - advance) / MOTE_NEAR_FADE) ** MOTE_NEAR_CURVE;
+            const depth = RING_NEAR + MOTE_LEAD - MOTE_SPAN + advance;
             const lane = (RING_NEAR - depth) * ringPitch;
             const radius = moteSpans[mote] * taperScale(lane / (rings - 1));
             const offset = mote * 3;
@@ -607,7 +532,7 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
             motePlaces[offset] = shift + radius * moteCosine[mote];
             motePlaces[offset + 1] = AXIS_HEIGHT + radius * moteSine[mote];
             motePlaces[offset + 2] = depth;
-            moteTints[mote * 4 + 3] = MOTE_ALPHA_FLOOR + MOTE_ALPHA_RANGE * smoothEnergy(scroll + STEP_COUNT + lane);
+            moteTints[mote * 4 + 3] = approach * (MOTE_ALPHA_FLOOR + MOTE_ALPHA_RANGE * smoothEnergy(scroll + STEP_COUNT + lane));
         }
 
         motePlace.needsUpdate = true;
@@ -721,11 +646,11 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     ground.position.set(shift, GROUND_DROP, RING_NEAR + GROUND_LEAD - GROUND_DEPTH / 2);
     ground.rotation.set(GROUND_PITCH, GROUND_YAW, GROUND_ROLL);
     scan.position.set(shift, AXIS_HEIGHT, readDepth);
-    scene.fog = fog;
     ground.frustumCulled = false;
     mist.frustumCulled = false;
     scan.frustumCulled = false;
     tunnel.frustumCulled = false;
+    scene.fog = fog;
     scene.add(ground);
     scene.add(mist);
     scene.add(scan);
@@ -812,3 +737,5 @@ function taperScale(ratio: number): number {
 function validPalette(palette: Palette): boolean {
     return Boolean(palette.accent && palette.ink && palette.muted && palette.surface);
 }
+
+export { initRig };

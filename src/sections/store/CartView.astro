@@ -9,22 +9,28 @@ const catalog = toCatalog(await getCollection('products'));
 ---
 
 <section
-    class="stage stage--focus stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-ink"
     aria-labelledby="cart-title"
 >
     <div>
         <PageHead
-            class="font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="mb-6 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
             eyebrow="Your cart"
             headingId="cart-title"
         >
             Cart
         </PageHead>
+        <p
+            class="max-w-2xl text-lmd text-ink-muted"
+            data-motion="rise"
+        >
+            Every line updates as you change it. Head to checkout when it reads right.
+        </p>
     </div>
 </section>
 
 <section
-    class="stage stage--focus stage--tight"
+    class="stage stage--tight"
     aria-label="Cart contents"
     data-catalog={JSON.stringify(catalog)}
 >
@@ -75,12 +81,12 @@ const catalog = toCatalog(await getCollection('products'));
             />
         </div>
         <aside
-            class="cart__summary slab slab--sunk self-start"
+            class="cart__summary slab slab--sunk"
             aria-label="Order summary"
             data-cart-summary
         >
             <h2 class="label mb-4 text-ink-muted">Summary</h2>
-            <dl class="space-y-2 font-mono text-sm">
+            <dl class="flex flex-col gap-2 mb-4 font-mono text-sm">
                 <div class="flex justify-between gap-3">
                     <dt>Subtotal</dt>
                     <dd data-subtotal>$0.00</dd>
@@ -93,7 +99,7 @@ const catalog = toCatalog(await getCollection('products'));
                     <dt>Estimated tax</dt>
                     <dd data-tax>$0.00</dd>
                 </div>
-                <div class="flex justify-between gap-3 mt-3 pt-3 border-t-2 border-ink font-extrabold font-sans text-lg">
+                <div class="flex justify-between gap-3 pt-3 border-t-2 border-ink font-extrabold font-sans text-lg">
                     <dt>Total</dt>
                     <dd
                         aria-live="polite"
@@ -104,12 +110,12 @@ const catalog = toCatalog(await getCollection('products'));
                 </div>
             </dl>
             <p
-                class="action-text mt-4 text-ink-subtle"
+                class="action-text mb-6 text-ink-subtle"
                 data-cart-shipping-hint
                 hidden
             />
             <a
-                class="btn btn--primary cart-checkout w-full mt-6"
+                class="btn btn--primary cart-checkout w-full"
                 aria-disabled="true"
                 href="/store/checkout"
             >
@@ -118,51 +124,50 @@ const catalog = toCatalog(await getCollection('products'));
         </aside>
     </div>
     <template data-cart-row>
-        <li class="cart-items__row slab slab--card flex flex-wrap">
+        <li class="cart-items__row slab slab--bare slab--card">
             <div
-                class="flex items-center justify-center overflow-hidden relative shrink-0 h-14 w-14 md:h-28 md:w-28"
+                class="cart-items__tile aspect-square flex items-center justify-center overflow-hidden relative"
                 aria-hidden="true"
                 data-row-tile
             >
                 <div class="halftone absolute inset-0" />
                 <span
-                    class="font-extrabold font-sans text-xl uppercase text-surface-raised/80 select-none"
+                    class="font-extrabold font-sans text-[length:14cqi] uppercase text-surface-raised/80 select-none"
                     data-row-initial
                 />
             </div>
-            <div class="cart-items__body flex flex-1 flex-col">
-                <p
-                    class="font-extrabold font-sans"
-                    data-row-title
-                />
-                <p
-                    class="label text-ink-muted"
-                    data-row-variant
-                />
-                <p
-                    class="font-mono text-2xs text-ink-subtle"
-                    data-row-sku
-                />
-                <p
-                    class="label self-start px-2 py-1 bg-accent text-ink"
-                    data-row-stock
-                    hidden
-                />
+            <div class="cart-items__body flex flex-col">
+                <div class="flex flex-col gap-1 mb-3">
+                    <div class="cart-items__heading flex items-start gap-3">
+                        <p
+                            class="min-w-0 font-extrabold font-sans"
+                            data-row-title
+                        />
+                        <p
+                            class="shrink-0 ml-auto font-mono text-2xs text-ink-subtle"
+                            data-row-sku
+                        />
+                    </div>
+                    <p
+                        class="label text-ink-muted"
+                        data-row-variant
+                    />
+                </div>
                 <div class="cart-items__controls flex flex-wrap items-center">
                     <div class="inline-flex items-center border-2 border-ink">
                         <button
-                            class="active:bg-ink active:text-ink-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-ink aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-[50px] w-[50px] font-bold transition-colors"
+                            class="active:bg-ink active:text-ink-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-ink aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-(--control-size) w-(--control-size) font-bold transition-colors"
                             data-row-decrease
                             type="button"
                         >
                             &minus;
                         </button>
                         <span
-                            class="w-12 font-bold font-mono text-center"
+                            class="w-10 font-bold font-mono text-center"
                             data-row-quantity
                         />
                         <button
-                            class="active:bg-ink active:text-ink-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-ink aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-[50px] w-[50px] font-bold transition-colors"
+                            class="active:bg-ink active:text-ink-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-ink aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-(--control-size) w-(--control-size) font-bold transition-colors"
                             data-row-increase
                             type="button"
                         >
@@ -176,8 +181,8 @@ const catalog = toCatalog(await getCollection('products'));
                     >
                         <IconTrash />
                     </button>
-                    <span
-                        class="ml-auto font-bold font-mono"
+                    <p
+                        class="ml-auto font-bold font-mono text-base md:text-lg"
                         data-row-price
                     />
                 </div>
@@ -192,7 +197,10 @@ const catalog = toCatalog(await getCollection('products'));
             >
                 &middot;
             </span>
-            <span data-issue-text />
+            <span
+                class="min-w-0"
+                data-issue-text
+            />
         </li>
     </template>
 </section>
@@ -221,7 +229,7 @@ const catalog = toCatalog(await getCollection('products'));
     }
 
     .cart-items {
-        gap: var(--space-md);
+        gap: var(--space-lg);
     }
 
     .cart-items:empty {
@@ -229,13 +237,14 @@ const catalog = toCatalog(await getCollection('products'));
     }
 
     .cart-items__body {
-        gap: var(--space-xs);
-        min-width: min(100%, 160px);
+        align-self: start;
+        gap: var(--space-sm);
+        padding: var(--space-lg);
     }
 
     .cart-items__controls {
-        gap: var(--space-sm);
-        margin-top: var(--space-2xs);
+        column-gap: var(--space-md);
+        row-gap: var(--space-2xs);
     }
 
     .cart-items__remove {
@@ -243,10 +252,15 @@ const catalog = toCatalog(await getCollection('products'));
         color: var(--color-ink-muted);
         display: inline-flex;
         flex-shrink: 0;
-        height: 50px;
+        height: var(--control-size);
         justify-content: center;
         transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
-        width: 50px;
+        width: var(--control-size);
+    }
+
+    .cart-items__remove :global(svg) {
+        height: 24px;
+        width: 24px;
     }
 
     .cart-items__remove:active {
@@ -262,8 +276,14 @@ const catalog = toCatalog(await getCollection('products'));
     }
 
     .cart-items__row {
-        gap: var(--space-md);
-        padding: var(--space-lg);
+        --row-tile: clamp(72px, calc(32px + 10vw), 160px);
+        display: grid;
+        grid-template-columns: var(--row-square, var(--row-tile)) minmax(0, 1fr);
+    }
+
+    .cart-items__tile {
+        align-self: start;
+        container-type: inline-size;
     }
 
     .cart__grid:has([data-cart-summary][hidden]) > .cart__main {
@@ -281,16 +301,32 @@ const catalog = toCatalog(await getCollection('products'));
     }
 
     .cart__summary {
+        align-self: start;
         position: sticky;
         top: calc(var(--header-height) + var(--space-md));
+    }
+
+    @media (max-width: 768px) {
+        .cart-items__body {
+            padding: var(--space-sm);
+        }
+
+        .cart-items__heading {
+            align-items: flex-end;
+            flex-wrap: wrap-reverse;
+        }
+
+        .cart-items__row {
+            grid-template-columns: var(--row-tile) minmax(0, 1fr);
+        }
     }
 </style>
 
 <script>
     import { CARD_COLORS, COMMERCE } from '@lib/constants';
-    import { formatPrice, formatVariant, getStockLabel, parseCatalog, registerPageScript, setText } from '@lib/utils';
+    import { formatPrice, formatVariant, parseCatalog, registerPageScript, setText } from '@lib/utils';
     import { getItems, onChange, reconcile, remove, setQuantity, totals } from '@lib/commerce/cart';
-    import { renderIssueList } from '@lib/ui/forms';
+    import { isValidationBypassed, renderIssueList } from '@lib/ui/forms';
     import { toast } from '@lib/ui/toasts';
 
     interface FocusMark {
@@ -299,12 +335,22 @@ const catalog = toCatalog(await getCollection('products'));
         index: number;
     }
 
+    const MOBILE_WIDTH = 768;
     const ROW_CONTROLS = ['[data-row-decrease]', '[data-row-increase]', '[data-row-remove]'];
+    const SKU_DIGITS = 4;
+    const SQUARE_PASSES = 6;
+    const SQUARE_RATIO = 0.6;
+    const SQUARE_TOLERANCE = 0.5;
 
     let catalog: CatalogEntry[] = [];
+    let squareFrame = 0;
 
     function announce(message: string) {
         setText(document.querySelector('[data-cart-status]'), message);
+    }
+
+    function bodyHeight(row: HTMLElement) {
+        return row.querySelector<HTMLElement>('.cart-items__body')?.getBoundingClientRect().height ?? 0;
     }
 
     function captureFocus(list: HTMLElement) {
@@ -327,6 +373,8 @@ const catalog = toCatalog(await getCollection('products'));
     }
 
     function handleCheckoutClick(event: Event, checkout: HTMLElement) {
+        if (isValidationBypassed()) return;
+
         if (checkout.getAttribute('aria-disabled') === 'true') event.preventDefault();
     }
 
@@ -361,11 +409,36 @@ const catalog = toCatalog(await getCollection('products'));
         renderIssueList(reconcile(catalog), notice, issueList, issueTemplate);
         renderCart(checkout, list, signal);
 
+        const observer = new ResizeObserver(() => scheduleSquares(list));
         const unsubscribe = onChange(() => renderCart(checkout, list, signal));
 
+        observer.observe(list);
         signal.addEventListener('abort', unsubscribe, { once: true });
+        signal.addEventListener('abort', () => stopSquares(observer), { once: true });
         checkout.addEventListener('click', event => handleCheckoutClick(event, checkout), { signal });
         dismiss?.addEventListener('click', () => notice?.setAttribute('hidden', ''), { signal });
+    }
+
+    function isSquareFilled(row: HTMLElement) {
+        return bodyHeight(row) <= squareOf(row) + SQUARE_TOLERANCE;
+    }
+
+    function measureSquares(list: HTMLElement) {
+        const rows = Array.from(list.querySelectorAll<HTMLElement>('.cart-items__row'));
+
+        resetSquares(rows);
+
+        if (window.innerWidth <= MOBILE_WIDTH) return;
+
+        for (let pass = 0; pass < SQUARE_PASSES; pass += 1) {
+            const sides = rows.map(squareFor);
+
+            if (sides.every((side, index) => Math.abs(side - squareOf(rows[index])) < SQUARE_TOLERANCE)) break;
+
+            rows.forEach((row, index) => row.style.setProperty('--row-square', `${sides[index]}px`));
+        }
+
+        if (!rows.every(isSquareFilled)) resetSquares(rows);
     }
 
     function renderCart(checkout: HTMLElement, list: HTMLElement, signal: AbortSignal) {
@@ -384,34 +457,26 @@ const catalog = toCatalog(await getCollection('products'));
 
         renderSummary(items);
         restoreFocus(list, mark);
+        measureSquares(list);
     }
 
     function renderRow(template: HTMLTemplateElement, item: CartItem, index: number, signal: AbortSignal) {
         const ceiling = ceilingFor(item.productSlug);
-        const entry = catalog.find(candidate => candidate.slug === item.productSlug);
         const fragment = template.content.cloneNode(true) as DocumentFragment;
-        const stockLabel = entry ? getStockLabel(entry.stock) : '';
-        const variant = formatVariant(item);
 
         const decrease = fragment.querySelector<HTMLButtonElement>('[data-row-decrease]');
         const increase = fragment.querySelector<HTMLButtonElement>('[data-row-increase]');
         const removeButton = fragment.querySelector<HTMLButtonElement>('[data-row-remove]');
-        const stock = fragment.querySelector<HTMLElement>('[data-row-stock]');
         const tile = fragment.querySelector<HTMLElement>('[data-row-tile]');
 
         setText(fragment.querySelector('[data-row-initial]'), item.title.split(' ')[0]);
         setText(fragment.querySelector('[data-row-price]'), formatPrice(item.priceCents * item.quantity));
         setText(fragment.querySelector('[data-row-quantity]'), String(item.quantity));
-        setText(fragment.querySelector('[data-row-sku]'), `SKU ${skuFor(item)}`);
+        setText(fragment.querySelector('[data-row-sku]'), skuFor(item));
         setText(fragment.querySelector('[data-row-title]'), item.title);
-        setText(fragment.querySelector('[data-row-variant]'), variant.length > 0 ? variant : 'One option');
+        setText(fragment.querySelector('[data-row-variant]'), formatVariant(item));
 
         if (tile) tile.style.background = CARD_COLORS[index % CARD_COLORS.length];
-
-        if (stock && stockLabel.length > 0) {
-            stock.textContent = stockLabel;
-            stock.removeAttribute('hidden');
-        }
 
         if (decrease) {
             decrease.setAttribute('aria-disabled', String(item.quantity <= 1));
@@ -450,6 +515,10 @@ const catalog = toCatalog(await getCollection('products'));
         hint.toggleAttribute('hidden', hideHint);
     }
 
+    function resetSquares(rows: HTMLElement[]) {
+        rows.forEach(row => row.style.removeProperty('--row-square'));
+    }
+
     function restoreFocus(list: HTMLElement, mark: FocusMark | null) {
         if (!mark) return;
 
@@ -470,8 +539,28 @@ const catalog = toCatalog(await getCollection('products'));
         (rows[mark.index] ?? rows[rows.length - 1]).querySelector<HTMLElement>('[data-row-remove]')?.focus();
     }
 
+    function scheduleSquares(list: HTMLElement) {
+        cancelAnimationFrame(squareFrame);
+        squareFrame = requestAnimationFrame(() => measureSquares(list));
+    }
+
     function skuFor(item: CartItem) {
-        return [item.productSlug, item.color, item.size].filter(Boolean).join('-').replace(/\s+/g, '-').toUpperCase();
+        const position = catalog.findIndex(entry => entry.slug === item.productSlug) + 1;
+
+        return `sku-${String(position).padStart(SKU_DIGITS, '0')}`;
+    }
+
+    function squareFor(row: HTMLElement) {
+        return Math.min(bodyHeight(row), row.getBoundingClientRect().width * SQUARE_RATIO);
+    }
+
+    function squareOf(row: HTMLElement) {
+        return Number.parseFloat(row.style.getPropertyValue('--row-square')) || 0;
+    }
+
+    function stopSquares(observer: ResizeObserver) {
+        cancelAnimationFrame(squareFrame);
+        observer.disconnect();
     }
 
     registerPageScript(initCartView);

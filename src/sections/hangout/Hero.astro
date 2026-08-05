@@ -16,7 +16,7 @@ const program = getProgram('hangout');
     class="stage stage--hangout stage--tight border-b-2 border-ink"
     aria-labelledby="hangout-title"
 >
-    <div>
+    <div class="flex flex-col gap-6">
         <PageHead
             class="max-w-4xl font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
             eyebrow={`${program.shortName} / ${program.cadence}`}
@@ -25,7 +25,7 @@ const program = getProgram('hangout');
             No laptops.<br />
             <span class="text-accent-deep">No agenda.</span>
         </PageHead>
-        <div class="grid grid-cols-1 gap-12 mt-6 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+        <div class="grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
             <div class="flex flex-col gap-5">
                 <p
                     class="max-w-2xl leading-relaxed text-lmd text-ink-muted"

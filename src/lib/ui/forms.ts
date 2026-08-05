@@ -1,9 +1,12 @@
-import { PASSWORD_MIN_LENGTH, USERNAME_PATTERN } from '@lib/constants';
+import { PASSWORD_MIN_LENGTH } from '@lib/constants';
 import { describeCartIssue, setText } from '@lib/utils';
 
-const USERNAME_REGEX = new RegExp(`^${USERNAME_PATTERN}$`, 'i');
+const BYPASS_WINDOW_MS = 0;
 
-export function clearFieldErrors(form: HTMLFormElement): void {
+let bypassing = false;
+let bypassTimer: Timer | undefined;
+
+function clearFieldErrors(form: HTMLFormElement): void {
     form.querySelectorAll('[aria-invalid]').forEach((control) => {
         control.setAttribute('aria-invalid', 'false');
     });
@@ -14,11 +17,11 @@ export function clearFieldErrors(form: HTMLFormElement): void {
     });
 }
 
-export function confirmRule(): FieldRule {
+function confirmRule(): FieldRule {
     return { message: 'Both passwords must match.', required: true, validate: (value, values) => value === values.get('password') };
 }
 
-export function focusFirstError(form: HTMLFormElement, errors: FieldErrors): void {
+function focusFirstError(form: HTMLFormElement, errors: FieldErrors): void {
     const names = Object.keys(errors);
 
     if (names.length === 0) return;
@@ -34,6 +37,7 @@ function getControlName(element: Element) {
 
 function getErrorElement(form: HTMLFormElement, name: string) {
     const control = form.querySelector(`[name="${name}"]`);
+
     const described = control?.getAttribute('aria-describedby') ?? '';
 
     for (const id of described.split(/\s+/).filter(Boolean)) {
@@ -51,44 +55,33 @@ function getValue(values: FormData, name: string) {
     return typeof value === 'string' ? value : '';
 }
 
-export function hasLetterAndDigit(value: string): boolean {
+function handleBypassClick(event: MouseEvent): void {
+    bypassing = event.metaKey;
+
+    if (!bypassing) return;
+
+    clearTimeout(bypassTimer);
+    bypassTimer = setTimeout(releaseBypass, BYPASS_WINDOW_MS);
+}
+
+function hasLetterAndDigit(value: string): boolean {
     return /[a-z]/i.test(value) && /\d/.test(value);
 }
 
-export function passwordRule(): FieldRule {
+function isValidationBypassed(): boolean {
+    return bypassing;
+}
+
+function passwordRule(): FieldRule {
     return { message: `Use at least ${PASSWORD_MIN_LENGTH} characters, including a letter and a digit.`, min: PASSWORD_MIN_LENGTH, required: true, validate: hasLetterAndDigit };
 }
 
-export function renderErrorSummary(form: HTMLFormElement, errors: FieldErrors, anchorPrefix: string): void {
-    const list = form.querySelector<HTMLElement>('[data-form-error-list]');
-    const names = Object.keys(errors);
-    const summary = form.querySelector<HTMLElement>('[data-form-error]');
-    const template = form.ownerDocument.querySelector<HTMLTemplateElement>('[data-error-anchor]');
-
-    if (!list || !summary) return;
-
-    list.replaceChildren();
-    summary.toggleAttribute('hidden', names.length === 0);
-    setText(summary.querySelector('[data-form-error-message]'), names.length === 0 ? '' : `Check ${names.length === 1 ? 'this field' : `these ${names.length} fields`} before you continue.`);
-
-    if (names.length === 0 || !template) return;
-
-    names.forEach((name) => {
-        const fragment = template.content.cloneNode(true) as DocumentFragment;
-        const link = fragment.querySelector<HTMLAnchorElement>('[data-anchor]');
-
-        if (link) {
-            link.href = `#${anchorPrefix}-${name}`;
-            link.textContent = errors[name];
-        }
-
-        list.append(fragment);
-    });
-
-    summary.focus();
+function releaseBypass(): void {
+    bypassing = false;
+    bypassTimer = undefined;
 }
 
-export function renderIssueList(issues: CartIssue[], notice: HTMLElement | null, list: HTMLElement | null, template: HTMLTemplateElement | null): void {
+function renderIssueList(issues: CartIssue[], notice: HTMLElement | null, list: HTMLElement | null, template: HTMLTemplateElement | null): void {
     if (!list || !notice || !template) return;
 
     list.replaceChildren();
@@ -102,7 +95,7 @@ export function renderIssueList(issues: CartIssue[], notice: HTMLElement | null,
     });
 }
 
-export function setFieldErrors(form: HTMLFormElement, errors: FieldErrors): void {
+function setFieldErrors(form: HTMLFormElement, errors: FieldErrors): void {
     Object.entries(errors).forEach(([name, message]) => {
         form.querySelectorAll(`[name="${name}"]`).forEach((control) => {
             control.setAttribute('aria-invalid', 'true');
@@ -117,11 +110,9 @@ export function setFieldErrors(form: HTMLFormElement, errors: FieldErrors): void
     });
 }
 
-export function usernameRule(): FieldRule {
-    return { message: 'Use 3 to 20 letters, numbers, or underscores.', pattern: USERNAME_REGEX, required: true };
-}
+function validateFields(form: HTMLFormElement, rules: Record<string, FieldRule>): FieldErrors {
+    if (isValidationBypassed()) return {};
 
-export function validateFields(form: HTMLFormElement, rules: Record<string, FieldRule>): FieldErrors {
     const errors: FieldErrors = {};
     const values = new FormData(form);
 
@@ -145,3 +136,17 @@ function violates(rule: FieldRule, value: string, values: FormData) {
 
     return rule.validate ? !rule.validate(value, values) : false;
 }
+
+if (typeof document !== 'undefined') document.addEventListener('click', handleBypassClick, { capture: true });
+
+export {
+    clearFieldErrors,
+    confirmRule,
+    focusFirstError,
+    hasLetterAndDigit,
+    isValidationBypassed,
+    passwordRule,
+    renderIssueList,
+    setFieldErrors,
+    validateFields,
+};

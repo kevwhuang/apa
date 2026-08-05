@@ -12,45 +12,25 @@ interface FieldOptions {
 }
 
 const ACCENT_OFFSET = 1.5;
-
 const ACCENT_THRESHOLD = 0.55;
-
 const BED_LEVEL = 0.12;
-
 const BUDGET_BREACH_LIMIT = 12;
-
 const BUDGET_MILLISECONDS = 6;
-
 const BUDGET_WINDOW = 30;
-
 const DOT_RATIO = 0.42;
-
 const DRIFT_PERIOD = 21;
-
 const FIELD_SELECTOR = '.hero__field';
-
 const GLOW_FLOOR = 0.55;
-
 const GLOW_WIDTH = 0.02;
-
 const HASH_COLUMN = 12.9898;
-
 const HASH_ROW = 78.233;
-
 const HASH_SCALE = 43_758.5453;
-
 const MAX_PIXEL_RATIO = 2;
-
 const MILLISECONDS_PER_SECOND = 1_000;
-
 const MOBILE_PITCH_SCALE = 1.5;
-
 const MOBILE_WIDTH = 768;
-
 const PLAYHEAD_END = 100;
-
 const PLAYHEAD_SELECTOR = '.hero__playhead';
-
 const PLAYHEAD_START = 0;
 
 const QUALITY_STEPS = [
@@ -60,27 +40,16 @@ const QUALITY_STEPS = [
 ];
 
 const RIPPLE_CYCLES = 0.7;
-
 const RIPPLE_PERIOD = 17;
-
 const SLOW_CORE_COUNT = 4;
-
 const SPRITE_LEVELS = 10;
-
 const SWEEP_SLOWDOWN = 2;
-
 const SWELL_CYCLES = 1.2;
-
 const SWELL_FLOOR = 0.3;
-
 const SWELL_PERIOD = 26;
-
 const SWELL_RANGE = 0.48;
-
 const SWELL_WEIGHT = 0.6;
-
 const TAU = Math.PI * 2;
-
 const VERTICAL_FLOOR = 0.2;
 
 function buildSprites(color: string, pitch: number, ratio: number): HTMLCanvasElement | undefined {
@@ -107,7 +76,7 @@ function buildSprites(color: string, pitch: number, ratio: number): HTMLCanvasEl
     return sheet;
 }
 
-export function initHeroField(signal: AbortSignal, still: boolean): void {
+function initHeroField(signal: AbortSignal, still: boolean): void {
     initPlayhead(signal, still);
 
     const holder = document.querySelector<HTMLElement>(FIELD_SELECTOR);
@@ -318,3 +287,5 @@ function slowDevice(): boolean {
 
     return connection?.saveData === true || (navigator.hardwareConcurrency ?? 0) <= SLOW_CORE_COUNT;
 }
+
+export { initHeroField };

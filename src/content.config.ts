@@ -7,6 +7,7 @@ import {
     CONTENT_DIR,
     EVENT_STATUSES,
     EVENT_TYPES,
+    GENRES,
     PRODUCT_CATEGORIES,
 } from '@lib/constants';
 
@@ -68,8 +69,7 @@ const producers = defineCollection({
         avatar: z.string().optional(),
         bio: z.string(),
         featured: z.boolean().default(false),
-        genres: z.array(z.string()).min(1),
-        handle: z.string(),
+        genres: z.array(z.enum(GENRES)).max(5).default([]),
         joined: z.coerce.date(),
         links: z.array(z.object({
             href: z.string(),

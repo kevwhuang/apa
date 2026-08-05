@@ -1,120 +1,64 @@
 import { MIDI_A4, SEMITONES_PER_OCTAVE, TUNING_HERTZ, noteHertz } from '@lib/audio';
 
-export const ANALYSER_FFT = 2_048;
-
+const ANALYSER_FFT = 2_048;
 const CENTS_PER_OCTAVE = 1_200;
-
 const CHORUS_BASE_A = 0.016;
-
 const CHORUS_BASE_B = 0.023;
-
-export const CHORUS_DEPTH_DEFAULT = 0.5;
-
+const CHORUS_DEPTH_DEFAULT = 0.5;
 const CHORUS_DEPTH_MAX = 0.006;
-
-export const CHORUS_RATE_DEFAULT = 1.2;
-
+const CHORUS_RATE_DEFAULT = 1.2;
 const CHORUS_VOICE_LEVEL = 0.4;
-
 const COMPRESSOR_ATTACK = 0.01;
-
 const COMPRESSOR_KNEE = 12;
-
-export const COMPRESSOR_RATIO_DEFAULT = 4;
-
+const COMPRESSOR_RATIO_DEFAULT = 4;
 const COMPRESSOR_RELEASE = 0.18;
-
-export const COMPRESSOR_THRESHOLD_DEFAULT = -28;
-
+const COMPRESSOR_THRESHOLD_DEFAULT = -28;
 const CURVE_LENGTH = 1_024;
-
 const DECIBEL_SCALE = 20;
-
-export const DELAY_FEEDBACK_DEFAULT = 0.45;
-
+const DELAY_FEEDBACK_DEFAULT = 0.45;
 const DELAY_MAX_SECONDS = 2;
-
-export const DELAY_TIME_DEFAULT = 0.35;
-
+const DELAY_TIME_DEFAULT = 0.35;
 const DELAY_WET_LEVEL = 0.7;
-
-export const DISTORTION_DRIVE_DEFAULT = 8;
-
-export const DISTORTION_TONE_DEFAULT = 6_000;
-
-export const EQ_HIGH_GAIN_DEFAULT = 3;
-
+const DISTORTION_DRIVE_DEFAULT = 8;
+const DISTORTION_TONE_DEFAULT = 6_000;
+const EQ_HIGH_GAIN_DEFAULT = 3;
 const EQ_HIGH_HERTZ = 4_000;
-
-export const EQ_LOW_GAIN_DEFAULT = 4;
-
+const EQ_LOW_GAIN_DEFAULT = 4;
 const EQ_LOW_HERTZ = 200;
-
-export const EQ_MID_GAIN_DEFAULT = 0;
-
+const EQ_MID_GAIN_DEFAULT = 0;
 const EQ_MID_HERTZ = 1_000;
-
 const FEEDBACK_CAP = 0.85;
-
 const FILTER_CUTOFF_DEFAULT = 1_150;
-
-export const FILTER_RESONANCE_DEFAULT = 4;
-
+const FILTER_RESONANCE_DEFAULT = 4;
 const GATE_ATTACK = 0.004;
-
 const GATE_FLOOR = 0.000_001;
-
 const GATE_RELEASE = 0.08;
-
-export const GATE_THRESHOLD_DEFAULT = -45;
-
+const GATE_THRESHOLD_DEFAULT = -45;
 const HIGHPASS_CUTOFF_DEFAULT = 120;
-
-export const HIGHPASS_RESONANCE_DEFAULT = 1;
-
+const HIGHPASS_RESONANCE_DEFAULT = 1;
 const IMPULSE_SHAPE = 3;
-
 const LIMITER_ATTACK = 0.001;
-
 const LIMITER_RATIO = 20;
-
 const LIMITER_RELEASE = 0.1;
-
-export const LIMITER_THRESHOLD_DEFAULT = -12;
-
+const LIMITER_THRESHOLD_DEFAULT = -12;
 const MIDI_OCTAVE_OFFSET = 1;
-
 const MIN_RMS = 0.008;
-
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-
-export const PAN_POSITION_DEFAULT = 0;
-
+const PAN_POSITION_DEFAULT = 0;
 const PITCH_MAX_HERTZ = 1_000;
-
 const PITCH_MIN_CORRELATION = 0.5;
-
 const PITCH_MIN_HERTZ = 60;
-
-export const REVERB_DECAY_DEFAULT = 2.4;
-
-export const REVERB_WET_DEFAULT = 0.4;
-
-export const SATURATOR_DRIVE_DEFAULT = 3;
-
+const REVERB_DECAY_DEFAULT = 2.4;
+const REVERB_WET_DEFAULT = 0.4;
+const SATURATOR_DRIVE_DEFAULT = 3;
 const SMOOTHING = 0.02;
-
 const TICK_INTERVAL = 4;
-
-export const TREMOLO_DEPTH_DEFAULT = 0.6;
-
-export const TREMOLO_RATE_DEFAULT = 4.5;
-
+const TREMOLO_DEPTH_DEFAULT = 0.6;
+const TREMOLO_RATE_DEFAULT = 4.5;
 const TREMOLO_SWING = 0.5;
+const TRIM_GAIN_DEFAULT = 0;
 
-export const TRIM_GAIN_DEFAULT = 0;
-
-export function buildBlock(kind: RackKind, context: AudioContext): RackBlock {
+function buildBlock(kind: RackKind, context: AudioContext): RackBlock {
     switch (kind) {
         case 'chorus': return buildChorus(context);
         case 'compressor': return buildCompressor(context);
@@ -690,3 +634,30 @@ function saturationCurve(drive: number) {
 function smooth(context: AudioContext, param: AudioParam, value: number) {
     param.setTargetAtTime(value, context.currentTime, SMOOTHING);
 }
+
+export {
+    ANALYSER_FFT,
+    CHORUS_DEPTH_DEFAULT,
+    CHORUS_RATE_DEFAULT,
+    COMPRESSOR_RATIO_DEFAULT,
+    COMPRESSOR_THRESHOLD_DEFAULT,
+    DELAY_FEEDBACK_DEFAULT,
+    DELAY_TIME_DEFAULT,
+    DISTORTION_DRIVE_DEFAULT,
+    DISTORTION_TONE_DEFAULT,
+    EQ_HIGH_GAIN_DEFAULT,
+    EQ_LOW_GAIN_DEFAULT,
+    EQ_MID_GAIN_DEFAULT,
+    FILTER_RESONANCE_DEFAULT,
+    GATE_THRESHOLD_DEFAULT,
+    HIGHPASS_RESONANCE_DEFAULT,
+    LIMITER_THRESHOLD_DEFAULT,
+    PAN_POSITION_DEFAULT,
+    REVERB_DECAY_DEFAULT,
+    REVERB_WET_DEFAULT,
+    SATURATOR_DRIVE_DEFAULT,
+    TREMOLO_DEPTH_DEFAULT,
+    TREMOLO_RATE_DEFAULT,
+    TRIM_GAIN_DEFAULT,
+    buildBlock,
+};

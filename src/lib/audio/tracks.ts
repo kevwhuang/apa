@@ -24,7 +24,7 @@ function handleTrackState(event: CustomEvent<TrackState>, buttons: NodeListOf<HT
     });
 }
 
-export function initTracks(): void {
+function initTracks(): void {
     if (registered) return;
 
     registered = true;
@@ -49,3 +49,5 @@ function start(signal: AbortSignal) {
     window.addEventListener(TRACK_STATE_TOPIC, event => handleTrackState(event, buttons), { signal });
     announceTrackState();
 }
+
+export { initTracks };

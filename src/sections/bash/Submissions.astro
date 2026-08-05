@@ -19,11 +19,10 @@ const program = getProgram('bash');
         >
             Submit your track
         </SectionHead>
-        <div class="grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+        <div class="grid grid-cols-1 gap-12 mb-(--space-2xl) md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
             <div class="flex flex-col gap-4">
                 <p class="text-base text-ink-muted">
-                    Bounce what you made on the clock and drop it here. Nothing leaves this browser
-                    &mdash; the file is read from disk to draw its waveform and then discarded.
+                    Bounce what you made on the clock and drop it here.
                 </p>
                 <p
                     class="text-smd text-ink-muted"
@@ -78,8 +77,8 @@ const program = getProgram('bash');
                 />
             </div>
         </div>
-        <div class="mt-16">
-            <div class="flex flex-wrap items-baseline justify-between gap-3">
+        <div>
+            <div class="flex flex-wrap items-baseline justify-between gap-3 mb-3">
                 <h3
                     class="font-extrabold font-sans text-2xl tracking-tight"
                     data-motion="rise"
@@ -96,14 +95,14 @@ const program = getProgram('bash');
                 </p>
             </div>
             <p
-                class="max-w-2xl mt-3 text-smd text-ink-muted"
+                class="max-w-2xl mb-6 text-smd text-ink-muted"
                 data-motion="rise"
             >
                 Every track turned in across past editions, oldest first &mdash; the running
                 record of afternoons spent on the clock.
             </p>
             <div
-                class="board__scroller mt-6"
+                class="board__scroller mb-5"
                 data-motion="rise"
             >
                 <table
@@ -164,12 +163,12 @@ const program = getProgram('bash');
                 </table>
             </div>
             <nav
-                class="flex flex-wrap gap-2 mt-5"
+                class="flex flex-wrap gap-2 mb-4"
                 aria-label="Submission board pages"
                 data-board-pager
             />
             <p
-                class="label mt-4 text-ink-subtle"
+                class="label text-ink-subtle"
                 aria-live="polite"
                 data-board-status
             />
@@ -179,7 +178,7 @@ const program = getProgram('bash');
         <li class="slab slab--card flex flex-col gap-3">
             <div class="flex flex-wrap items-baseline justify-between gap-3">
                 <p
-                    class="font-bold font-sans wrap-break-word"
+                    class="font-bold font-sans wrap-anywhere"
                     data-row-name
                 />
                 <p
@@ -212,7 +211,7 @@ const program = getProgram('bash');
                     data-row-percent
                 />
                 <button
-                    class="action-text hover:text-accent-deep flex items-center min-h-[50px] px-1 text-ink-muted transition-colors"
+                    class="action-text hover:text-accent-deep flex items-center min-h-(--control-size) px-1 text-ink-muted transition-colors"
                     data-row-cancel
                     type="button"
                 >
@@ -228,7 +227,7 @@ const program = getProgram('bash');
                 data-cell-index
             />
             <td
-                class="px-4 py-3 font-bold font-sans whitespace-nowrap"
+                class="px-4 py-3 font-bold font-sans"
                 data-cell-producer
             />
             <td
@@ -247,7 +246,7 @@ const program = getProgram('bash');
     </template>
     <template data-board-page>
         <button
-            class="chip active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse min-w-[50px]"
+            class="chip active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse min-w-(--control-size)"
             type="button"
         />
     </template>
@@ -331,9 +330,11 @@ const program = getProgram('bash');
 <script>
     import { BASH_SUBMISSIONS } from '@lib/programs/submissions';
     import { MOCK_LATENCY_MS, STORAGE } from '@lib/constants';
+    import { QUEUE_FULL_MESSAGE } from '@lib/audio/uploads';
     import { createDropzone } from '@lib/audio/dropzone';
     import { createStore } from '@lib/state';
     import { delay, formatDateStamp, formatTime, registerPageScript, rovingFocus, setHidden, setText } from '@lib/utils';
+    import { toast } from '@lib/ui/toasts';
 
     interface BoardElements {
         body: HTMLElement;
@@ -355,6 +356,8 @@ const program = getProgram('bash');
         topic: STORAGE.bashBoard.topic,
     });
 
+    let overflowToasted = false;
+
     function bySubmittedAt(a: BashSubmission, b: BashSubmission) {
         return +new Date(a.submittedAt) - +new Date(b.submittedAt);
     }
@@ -366,7 +369,9 @@ const program = getProgram('bash');
     }
 
     function initBashSubmissions(signal: AbortSignal) {
-        createDropzone({ signal });
+        overflowToasted = false;
+
+        createDropzone({ messages: { rejected: reportRejection }, signal });
     }
 
     function initSubmissionBoard(signal: AbortSignal) {
@@ -381,6 +386,20 @@ const program = getProgram('bash');
         if (!body || !chipTemplate || !pager || !refresh || !refreshText || !rowTemplate || !status) return;
 
         startBoard({ body, chipTemplate, pager, refresh, refreshText, rowTemplate, status }, signal);
+    }
+
+    function releaseOverflowToast() {
+        overflowToasted = false;
+    }
+
+    function reportRejection(name: string, reason: string) {
+        if (reason === QUEUE_FULL_MESSAGE && !overflowToasted) {
+            overflowToasted = true;
+            queueMicrotask(releaseOverflowToast);
+            toast(QUEUE_FULL_MESSAGE, 'error');
+        }
+
+        return `${name} rejected: ${reason}`;
     }
 
     function startBoard(elements: BoardElements, signal: AbortSignal) {

@@ -4,16 +4,13 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { getMotionTokens } from '@lib/motion/tokens';
 
 const VELOCITY_LIMIT = 1;
-
 const VELOCITY_PRECISION = 4;
-
 const VELOCITY_PROPERTY = '--scroll-velocity';
 
 let decay: gsap.core.Tween | undefined;
-
 let trigger: ScrollTrigger | undefined;
 
-export function clearTransport(): void {
+function clearTransport(): void {
     decay?.kill();
     trigger?.kill();
     decay = undefined;
@@ -21,7 +18,7 @@ export function clearTransport(): void {
     document.documentElement.style.removeProperty(VELOCITY_PROPERTY);
 }
 
-export function initTransport(): void {
+function initTransport(): void {
     const root = document.documentElement;
     const tokens = getMotionTokens();
     const velocity = { value: 0 };
@@ -47,3 +44,5 @@ export function initTransport(): void {
         trigger: document.body,
     });
 }
+
+export { clearTransport, initTransport };

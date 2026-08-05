@@ -11,6 +11,8 @@ import {
 import { createStore } from '@lib/state';
 import { delay } from '@lib/utils';
 
+const DEFAULT_ROLE = 'fan';
+
 const MESSAGES: Record<SessionErrorCode, string> = {
     'already-registered': 'That address is already registered. Sign in instead.',
     'invalid-credentials': 'That email and password do not match.',
@@ -34,7 +36,7 @@ const store = createStore<Session | null>({
     topic: STORAGE.session.topic,
 });
 
-export async function endSession(): Promise<void> {
+async function endSession(): Promise<void> {
     await delay(MOCK_LATENCY_MS);
 
     store.remove();
@@ -44,7 +46,7 @@ function getProfile(email: string): Profile | null {
     return profiles.get()[email] ?? null;
 }
 
-export function getSession(): Session | null {
+function getSession(): Session | null {
     const session = store.get();
 
     if (!session) return null;
@@ -74,7 +76,7 @@ function normalizeProfile(value: Profile): Profile {
         createdAt: Number(value.createdAt) || 0,
         onboarded: value.onboarded === true,
         prods: Math.max(0, Math.trunc(Number(value.prods)) || 0),
-        username: String(value.username ?? ''),
+        role: String(value.role ?? '') || DEFAULT_ROLE,
     };
 }
 
@@ -97,11 +99,11 @@ function normalizeSession(value: Session | null): Session | null {
         expiresAt: Number(value.expiresAt) || 0,
         onboarded: value.onboarded === true,
         prods: Math.max(0, Math.trunc(Number(value.prods)) || 0),
-        username: String(value.username ?? ''),
+        role: String(value.role ?? '') || DEFAULT_ROLE,
     };
 }
 
-export function onSessionChange(callback: (session: Session | null) => void): () => void {
+function onSessionChange(callback: (session: Session | null) => void): () => void {
     const unsubscribe = store.onChange(() => callback(getSession()));
 
     if (typeof window === 'undefined') return unsubscribe;
@@ -126,13 +128,13 @@ function saveProfile(session: Session): void {
         createdAt: session.createdAt,
         onboarded: session.onboarded,
         prods: session.prods,
-        username: session.username,
+        role: session.role || DEFAULT_ROLE,
     };
 
     profiles.update(current => ({ ...current, [session.email.toLowerCase()]: profile }));
 }
 
-export async function startSession(draft: SessionDraft): Promise<SessionResult> {
+async function startSession(draft: SessionDraft): Promise<SessionResult> {
     const email = draft.email.trim().toLowerCase();
     const password = draft.password ?? '';
 
@@ -145,6 +147,7 @@ export async function startSession(draft: SessionDraft): Promise<SessionResult> 
 
     const existing = getSession();
     const now = Date.now();
+
     const profile: Profile | null = existing?.email === email ? existing : getProfile(email);
 
     const session: Session = {
@@ -154,7 +157,7 @@ export async function startSession(draft: SessionDraft): Promise<SessionResult> 
         expiresAt: now + SESSION_TTL_DAYS * MILLISECONDS_PER_DAY,
         onboarded: profile?.onboarded ?? false,
         prods: profile?.prods ?? WELCOME_PRODS,
-        username: draft.username || profile?.username || '',
+        role: profile?.role || DEFAULT_ROLE,
     };
 
     store.set(session);
@@ -163,13 +166,13 @@ export async function startSession(draft: SessionDraft): Promise<SessionResult> 
     return { ok: true, session };
 }
 
-export function syncSessionAttribute(): void {
+function syncSessionAttribute(): void {
     if (typeof document === 'undefined') return;
 
     document.documentElement.dataset.session = isSignedIn() ? 'in' : 'out';
 }
 
-export async function updateSession(patch: Partial<Session>): Promise<Session | null> {
+async function updateSession(patch: Partial<Session>): Promise<Session | null> {
     await delay(MOCK_LATENCY_MS);
 
     const session = getSession();
@@ -182,3 +185,5 @@ export async function updateSession(patch: Partial<Session>): Promise<Session | 
 
     return next;
 }
+
+export { endSession, getSession, onSessionChange, startSession, syncSessionAttribute, updateSession };

@@ -2,15 +2,12 @@ import { STORAGE } from '@lib/constants';
 import { createStore } from '@lib/state';
 
 const DARK_QUERY = '(prefers-color-scheme: dark)';
-
 const META_SELECTOR = 'meta[name="theme-color"]';
 
 const THEME_COLORS: Record<Theme, string> = {
     dark: '#141019',
     light: '#f6f1e4',
 };
-
-let darkQuery: MediaQueryList | null = null;
 
 const store = createStore<Theme | null>({
     fallback: null,
@@ -19,6 +16,8 @@ const store = createStore<Theme | null>({
     scope: STORAGE.theme.scope,
     topic: STORAGE.theme.topic,
 });
+
+let darkQuery: MediaQueryList | null = null;
 
 function getDarkQuery(): MediaQueryList | null {
     if (typeof window === 'undefined') return null;
@@ -31,7 +30,7 @@ function getDarkQuery(): MediaQueryList | null {
     return darkQuery;
 }
 
-export function getTheme(): Theme {
+function getTheme(): Theme {
     return store.get() ?? systemTheme();
 }
 
@@ -45,7 +44,7 @@ function normalizeTheme(value: Theme | null): Theme | null {
     return value === 'dark' || value === 'light' ? value : null;
 }
 
-export function setTheme(theme: Theme): void {
+function setTheme(theme: Theme): void {
     stampTheme(theme);
     store.set(theme);
 }
@@ -58,7 +57,7 @@ function stampTheme(theme: Theme): void {
     if (meta) meta.content = THEME_COLORS[theme];
 }
 
-export function syncThemeAttribute(): void {
+function syncThemeAttribute(): void {
     if (typeof document === 'undefined') return;
 
     getDarkQuery();
@@ -69,10 +68,12 @@ function systemTheme(): Theme {
     return getDarkQuery()?.matches === true ? 'dark' : 'light';
 }
 
-export function toggleTheme(): Theme {
+function toggleTheme(): Theme {
     const next = getTheme() === 'dark' ? 'light' : 'dark';
 
     setTheme(next);
 
     return next;
 }
+
+export { getTheme, setTheme, syncThemeAttribute, toggleTheme };

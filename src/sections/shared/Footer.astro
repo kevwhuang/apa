@@ -1,5 +1,5 @@
 ---
-import BrandLockup from '@components/brand/Lockup.astro';
+import BrandMark from '@components/brand/Mark.astro';
 import IconDiscord from '@components/icons/Discord.astro';
 import IconInstagram from '@components/icons/Instagram.astro';
 import IconMeetup from '@components/icons/Meetup.astro';
@@ -10,7 +10,7 @@ import { LINKS, NAV_GROUPS, SITE_UPDATED } from '@lib/constants';
 import { formatDateOnly } from '@lib/utils';
 
 const ACCOUNT_LINKS = [
-    { href: '/here', label: 'Check in' },
+    { href: '/here', label: 'Here' },
     { href: '/settings', label: 'Settings' },
     { href: '/store/cart', label: 'Cart' },
     { href: '/admin', label: 'Admin' },
@@ -52,13 +52,14 @@ const year = new Date().getFullYear();
             style={`--footer-cols: ${columns.length}`}
         >
             <div>
-                <BrandLockup
-                    class="footer__lockup"
+                <BrandMark
+                    class="footer__mark"
                     label={BRAND.name}
                 />
                 <p class="footer__lede">
-                    A collective of music producers in Austin, Texas, open to anyone in the creative
-                    industry who wants to collaborate alongside them.
+                    A collective of music producers in Austin, Texas. Assemblies for the craft, Bashes on the clock,
+                    Hangouts in between &mdash; every genre, every experience level, in person since 2022. Open to
+                    anyone in the creative industry who wants to find their people.
                 </p>
                 <p class="footer__updated">
                     Last updated <time datetime={SITE_UPDATED}>{formatDateOnly(updated)}</time>
@@ -201,10 +202,12 @@ const year = new Date().getFullYear();
         color: var(--color-accent-deep);
     }
 
-    :global(.footer__lockup) {
+    :global(.footer__mark) {
         color: var(--color-ink);
         display: block;
+        height: auto;
         margin-bottom: var(--space-md);
+        width: 100%;
     }
 
     .footer__social {
@@ -235,6 +238,7 @@ const year = new Date().getFullYear();
         font-family: var(--font-mono);
         font-size: var(--text-2xs);
         letter-spacing: 0.04em;
+        margin-bottom: var(--space-xs);
         text-transform: uppercase;
     }
 
@@ -245,7 +249,6 @@ const year = new Date().getFullYear();
         color: var(--color-ink-subtle);
         display: inline-flex;
         justify-content: center;
-        margin-top: var(--space-xs);
         min-height: 36px;
         min-width: 36px;
         transition:
@@ -286,6 +289,10 @@ const year = new Date().getFullYear();
 
         .footer__grid > :first-child {
             grid-column: 1 / -1;
+        }
+
+        :global(.footer__mark) {
+            max-width: 300px;
         }
     }
 </style>

@@ -55,7 +55,7 @@ const SWITCHES = [
     class="stage stage--tight border-b-2 border-ink"
     aria-labelledby="admin-title"
 >
-    <div>
+    <div class="flex flex-col gap-6">
         <PageHead
             class="max-w-3xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
             eyebrow="Internal / Admin"
@@ -63,10 +63,8 @@ const SWITCHES = [
         >
             Operations.
         </PageHead>
-        <p class="max-w-2xl mt-6 text-lmd text-ink-muted">
+        <p class="max-w-2xl text-lmd text-ink-muted">
             Open and close Alliance programs, run cleanup actions, and manage member Prods.
-            Access is not yet restricted &mdash; this console is linked from the site footer and
-            open to anyone who opens it.
         </p>
     </div>
 </section>
@@ -93,11 +91,11 @@ const SWITCHES = [
                         <div class="admin__body flex-1">
                             <h3
                                 id={`${control.id}-name`}
-                                class="font-extrabold font-sans text-lg tracking-tight"
+                                class="mb-1 font-extrabold font-sans text-lg tracking-tight"
                             >
                                 {control.name}
                             </h3>
-                            <p class="max-w-xl mt-1 text-sm text-ink-muted">
+                            <p class="max-w-xl text-sm text-ink-muted">
                                 {control.blurb}
                             </p>
                         </div>
@@ -231,6 +229,7 @@ const SWITCHES = [
         background-repeat: no-repeat;
         background-size: 30px 30px;
         border: 2px solid var(--color-ink);
+        cursor: pointer;
         flex-shrink: 0;
         height: 50px;
         transition: background-color var(--duration-fast) var(--motion-ease-ui), background-position var(--duration-fast) var(--motion-ease-ui), box-shadow var(--duration-fast) var(--motion-ease-ui);
@@ -289,7 +288,6 @@ const SWITCHES = [
     import { toast } from '@lib/ui/toasts';
 
     const pending = new Set<string>();
-
     const timers = new Map<string, number>();
 
     function clearTimers() {

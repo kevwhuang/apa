@@ -16,27 +16,29 @@ const nextEvent = upcoming.at(0);
 ---
 
 <section
-    class="stage stage--focus stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-ink"
     aria-labelledby="checkin-title"
 >
-    <PageHead
-        class="max-w-3xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
-        eyebrow="Events / Check-in"
-        headingId="checkin-title"
-    >
-        You made it.
-    </PageHead>
-    <p
-        class="max-w-2xl mt-6 text-lmd text-ink-muted"
-        data-motion="blur"
-    >
-        This is where the welcome code at the door sends you. Leave an address and the
-        Alliance opens your account with your first Prod already on it.
-    </p>
+    <div class="flex flex-col gap-6">
+        <PageHead
+            class="max-w-3xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            eyebrow="Events / Check-in"
+            headingId="checkin-title"
+        >
+            You made it.
+        </PageHead>
+        <p
+            class="max-w-2xl text-lmd text-ink-muted"
+            data-motion="blur"
+        >
+            This is where the welcome code at the door sends you. Leave an address and the
+            Alliance opens your account with your first Prod already on it.
+        </p>
+    </div>
 </section>
 
 <section
-    class="stage stage--focus stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-ink"
     aria-label="Door pass"
 >
     <div class="rank rank--2 items-stretch">
@@ -46,43 +48,45 @@ const nextEvent = upcoming.at(0);
             data-motion="wipe"
         >
             <div class="door-pass__panel slab slab--well flex flex-col gap-6 h-full">
-                <p class="label text-accent-light">Door pass</p>
-                <p class="door-pass__url font-mono md:text-lmd text-sm wrap-break-word">
-                    {DOOR_URL}
-                </p>
-                {nextEvent && (
-                    <dl class="door-pass__rows">
-                        <div class="door-pass__row">
-                            <dt class="label text-ink-inverse-muted">Event</dt>
-                            <dd
-                                class="text-smd"
-                                data-placeholder
-                            >
-                                {nextEvent.title}
-                            </dd>
-                        </div>
-                        <div class="door-pass__row">
-                            <dt class="label text-ink-inverse-muted">When</dt>
-                            <dd
-                                class="text-smd"
-                                data-placeholder
-                            >
-                                <time datetime={nextEvent.date.toISOString()}>
-                                    {formatDate(nextEvent.date)}, {formatTime(nextEvent.date)}
-                                </time>
-                            </dd>
-                        </div>
-                        <div class="door-pass__row">
-                            <dt class="label text-ink-inverse-muted">Where</dt>
-                            <dd
-                                class="text-smd"
-                                data-placeholder
-                            >
-                                {nextEvent.location}
-                            </dd>
-                        </div>
-                    </dl>
-                )}
+                <div class="flex flex-col gap-6 mb-auto">
+                    <p class="label text-accent-light">Door pass</p>
+                    <p class="door-pass__url font-mono md:text-lmd text-sm wrap-break-word">
+                        {DOOR_URL}
+                    </p>
+                    {nextEvent && (
+                        <dl class="door-pass__rows">
+                            <div class="door-pass__row">
+                                <dt class="label text-ink-inverse-muted">Event</dt>
+                                <dd
+                                    class="text-smd"
+                                    data-placeholder
+                                >
+                                    {nextEvent.title}
+                                </dd>
+                            </div>
+                            <div class="door-pass__row">
+                                <dt class="label text-ink-inverse-muted">When</dt>
+                                <dd
+                                    class="text-smd"
+                                    data-placeholder
+                                >
+                                    <time datetime={nextEvent.date.toISOString()}>
+                                        {formatDate(nextEvent.date)}, {formatTime(nextEvent.date)}
+                                    </time>
+                                </dd>
+                            </div>
+                            <div class="door-pass__row">
+                                <dt class="label text-ink-inverse-muted">Where</dt>
+                                <dd
+                                    class="text-smd"
+                                    data-placeholder
+                                >
+                                    {nextEvent.location}
+                                </dd>
+                            </div>
+                        </dl>
+                    )}
+                </div>
                 <div class="door-pass__foot">
                     <p class="action-text door-pass__stamp">Checked</p>
                     <p class="label text-ink-inverse-muted">1 Prod on arrival</p>
@@ -103,7 +107,7 @@ const nextEvent = upcoming.at(0);
 </section>
 
 <section
-    class="stage stage--focus stage--tight"
+    class="stage stage--tight"
     aria-label="Check in"
 >
     <form
@@ -118,18 +122,12 @@ const nextEvent = upcoming.at(0);
         <h2 class="font-extrabold font-sans text-2xl tracking-tight">
             Check in
         </h2>
-        <p
-            class="action-text px-3 py-3 bg-accent text-ink"
-            data-form-error
-            hidden
-            role="alert"
-        />
         <div class="flex flex-col gap-2">
             <label class="flex flex-col gap-2">
                 <span class="checkin-field__head label text-ink"><span class="checkin-field__index">01</span>Email</span>
                 <input
                     id="checkin-email"
-                    class="checkin-field__control font-mono text-sm"
+                    class="input font-mono text-sm"
                     aria-describedby="checkin-email-error"
                     aria-invalid="false"
                     autocomplete="email"
@@ -152,7 +150,7 @@ const nextEvent = upcoming.at(0);
                 <label class="checkin__check">
                     <input
                         id="checkin-terms"
-                        class="checkin__box"
+                        class="box"
                         aria-describedby="checkin-terms-error"
                         aria-invalid="false"
                         name="terms"
@@ -180,7 +178,7 @@ const nextEvent = upcoming.at(0);
             <label class="checkin__check">
                 <input
                     id="checkin-newsletter"
-                    class="checkin__box"
+                    class="box"
                     checked
                     name="newsletter"
                     type="checkbox"
@@ -195,11 +193,6 @@ const nextEvent = upcoming.at(0);
             >
                 Check in &rarr;
             </button>
-            <p
-                class="action-text text-ink-subtle"
-                aria-live="polite"
-                data-checkin-status
-            />
         </div>
     </form>
     <div
@@ -222,7 +215,7 @@ const nextEvent = upcoming.at(0);
             <p class="text-md text-ink-muted">
                 An account is open for&#32;
                 <span
-                    class="font-mono text-sm wrap-break-word"
+                    class="font-mono text-sm wrap-anywhere"
                     data-checkin-email
                 />&#32;
                 with&#32;
@@ -258,21 +251,21 @@ const nextEvent = upcoming.at(0);
                 <div class="mail__row">
                     <dt class="label text-ink-subtle">From</dt>
                     <dd
-                        class="font-mono text-sm wrap-break-word"
+                        class="font-mono text-sm wrap-anywhere"
                         data-mail-from
                     />
                 </div>
                 <div class="mail__row">
                     <dt class="label text-ink-subtle">To</dt>
                     <dd
-                        class="font-mono text-sm wrap-break-word"
+                        class="font-mono text-sm wrap-anywhere"
                         data-mail-to
                     />
                 </div>
                 <div class="mail__row">
                     <dt class="label text-ink-subtle">Reply to</dt>
                     <dd
-                        class="font-mono text-sm wrap-break-word"
+                        class="font-mono text-sm wrap-anywhere"
                         data-mail-reply
                     />
                 </div>
@@ -310,29 +303,6 @@ const nextEvent = upcoming.at(0);
 </section>
 
 <style>
-    .checkin-field__control {
-        background-color: var(--color-surface);
-        border: 2px solid var(--color-ink);
-        color: var(--color-ink);
-        min-height: var(--control-size);
-        padding: 0 var(--space-sm);
-        transition:
-            background-color var(--duration-fast) var(--motion-ease-ui),
-            border-color var(--duration-fast) var(--motion-ease-ui),
-            box-shadow var(--duration-fast) var(--motion-ease-ui);
-        width: 100%;
-    }
-
-    .checkin-field__control:focus-visible,
-    .checkin-field__control:hover {
-        background-color: var(--color-surface-raised);
-    }
-
-    .checkin-field__control[aria-invalid='true'] {
-        border-color: var(--color-accent-deep);
-        box-shadow: 3px 3px 0 0 var(--color-accent-20);
-    }
-
     .checkin-field__head {
         align-items: baseline;
         display: flex;
@@ -342,6 +312,13 @@ const nextEvent = upcoming.at(0);
     .checkin-field__index {
         color: var(--color-accent-deep);
         padding-right: var(--space-2xs);
+    }
+
+    .checkin-form,
+    .checkin__done {
+        margin-inline: auto;
+        max-width: var(--measure-form);
+        width: 100%;
     }
 
     .checkin-form,
@@ -372,44 +349,13 @@ const nextEvent = upcoming.at(0);
         padding-bottom: var(--space-xs);
     }
 
-    .checkin__box {
-        appearance: none;
-        background-color: transparent;
-        border: 2px solid var(--color-ink);
-        flex-shrink: 0;
-        height: 24px;
-        margin: 0;
-        transition:
-            background-color var(--duration-fast) var(--motion-ease-ui),
-            border-color var(--duration-fast) var(--motion-ease-ui),
-            box-shadow var(--duration-fast) var(--motion-ease-ui);
-        width: 24px;
-    }
-
-    .checkin__box:checked {
-        background-color: var(--color-accent-deep);
-        border-color: var(--color-accent-deep);
-        box-shadow: inset 0 0 0 4px var(--color-surface-raised);
-    }
-
-    .checkin__box:checked:focus-visible {
-        box-shadow:
-            inset 0 0 0 4px var(--color-surface-raised),
-            0 0 0 2px var(--color-surface),
-            0 0 0 4px var(--color-accent-deep);
-    }
-
-    .checkin__box[aria-invalid='true'] {
-        border-color: var(--color-accent-deep);
-    }
-
     .checkin__check {
         align-items: center;
         align-self: flex-start;
         display: flex;
         font-size: var(--text-smd);
         gap: var(--space-xs);
-        min-height: 50px;
+        min-height: var(--control-size);
         padding: var(--space-2xs) var(--space-sm);
         transition: background-color var(--duration-fast) var(--motion-ease-ui);
     }
@@ -422,7 +368,7 @@ const nextEvent = upcoming.at(0);
     .checkin__link {
         align-items: center;
         display: inline-flex;
-        min-height: 50px;
+        min-height: var(--control-size);
         padding-inline: var(--space-3xs);
         transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
     }
@@ -446,7 +392,6 @@ const nextEvent = upcoming.at(0);
         flex-wrap: wrap;
         gap: var(--space-xs);
         justify-content: space-between;
-        margin-top: auto;
     }
 
     .door-pass__row {
@@ -519,18 +464,6 @@ const nextEvent = upcoming.at(0);
     }
 
     @media (forced-colors: active) {
-        .checkin__box {
-            background-color: Canvas;
-            border-color: CanvasText;
-            forced-color-adjust: none;
-        }
-
-        .checkin__box:checked {
-            background-color: SelectedItem;
-            border-color: CanvasText;
-            box-shadow: inset 0 0 0 4px Canvas;
-        }
-
         .door-pass__stamp,
         .mail__stamp {
             border-color: CanvasText;
@@ -540,12 +473,14 @@ const nextEvent = upcoming.at(0);
 </style>
 
 <script>
-    import { clearFieldErrors, focusFirstError, setFieldErrors, validateFields } from '@lib/ui/forms';
+    import { clearFieldErrors, focusFirstError, isValidationBypassed, setFieldErrors, validateFields } from '@lib/ui/forms';
     import { composeOnboardingEmail } from '@lib/email';
     import { createOnboardingToken } from '@lib/account/onboarding';
-    import { formatProds, registerPageScript, setMessage, setPending, setText } from '@lib/utils';
+    import { formatProds, registerPageScript, setPending, setText } from '@lib/utils';
     import { startSession } from '@lib/account/session';
     import { toast } from '@lib/ui/toasts';
+
+    const PLACEHOLDER_EMAIL = 'you@studio.fm';
 
     const RULES: Record<string, FieldRule> = {
         email: { message: 'Enter your email address.', required: true },
@@ -561,36 +496,30 @@ const nextEvent = upcoming.at(0);
     async function handleCheckInSubmit(event: SubmitEvent, form: HTMLFormElement) {
         event.preventDefault();
 
-        const summary = form.querySelector<HTMLElement>('[data-form-error]');
         const values = new FormData(form);
         const errors = validateFields(form, RULES);
 
         clearFieldErrors(form);
-        setMessage(summary, '');
 
         if (Object.keys(errors).length > 0) {
             setFieldErrors(form, errors);
             focusFirstError(form, errors);
-            setMessage(summary, 'You are not checked in yet. Fix the fields below.');
+            toast('Check the fields.', 'error');
 
             return;
         }
 
         const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-        const status = form.querySelector<HTMLElement>('[data-checkin-status]');
 
         setPending(button, true);
-        setText(status, 'Checking you in\u2026');
 
-        const result = await startSession({ email: String(values.get('email') ?? '') });
+        const result = await startSession({ email: readEmail(values) });
 
         setPending(button, false);
-        setText(status, '');
 
         if (!result.ok) {
             setFieldErrors(form, { email: result.message });
             focusFirstError(form, { email: result.message });
-            setMessage(summary, result.message);
 
             return;
         }
@@ -608,6 +537,14 @@ const nextEvent = upcoming.at(0);
         form.noValidate = true;
         form.addEventListener('submit', event => handleCheckInSubmit(event, form), { signal });
         again?.addEventListener('click', () => handleCheckInAgain(form, done), { signal });
+    }
+
+    function readEmail(values: FormData) {
+        const email = String(values.get('email') ?? '').trim();
+
+        if (email.length > 0 || !isValidationBypassed()) return email;
+
+        return PLACEHOLDER_EMAIL;
     }
 
     function renderBody(container: HTMLElement, template: HTMLTemplateElement, paragraphs: string[]) {

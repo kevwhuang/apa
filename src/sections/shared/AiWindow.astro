@@ -56,7 +56,7 @@ import IconSpark from '@components/icons/Spark.astro';
         >
             <input
                 id="ai-question"
-                class="ai__field"
+                class="input flex-1 min-w-0 text-sm"
                 aria-label="Question"
                 autocomplete="off"
                 data-ai-field
@@ -167,22 +167,6 @@ import IconSpark from '@components/icons/Spark.astro';
 
     .ai__eyebrow {
         color: var(--color-accent-deep);
-    }
-
-    .ai__field {
-        background-color: var(--color-surface);
-        border: 2px solid var(--color-ink);
-        flex: 1;
-        font-size: var(--text-sm);
-        min-height: 50px;
-        min-width: 0;
-        padding-inline: var(--space-2xs);
-        transition: background-color var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .ai__field:focus-visible,
-    .ai__field:hover {
-        background-color: var(--color-surface-raised);
     }
 
     .ai__form {
@@ -364,11 +348,11 @@ import IconSpark from '@components/icons/Spark.astro';
         label: 'Ask a person instead',
     };
 
+    const GENERIC_KEYWORDS = new Set(['calendar', 'date', 'event', 'meeting', 'next', 'schedule', 'when']);
     const LAUNCHER_SIZE = 50;
-
     const RESIZE_LABEL = 'Resize the AI assistant';
-
     const THINKING_FACTOR = 2;
+    const TOPIC_WEIGHT = 10;
 
     const WELCOME_ANSWER: AiAnswer = {
         body: 'Hey \u2014 I\u2019m the Alliance assistant. Ask me about Assembly, the Bash, the Hangout, Prods, or the store.',
@@ -537,11 +521,11 @@ import IconSpark from '@components/icons/Spark.astro';
         let score = 0;
 
         for (const answer of ANSWERS) {
-            const hits = answer.keywords.filter(keyword => text.includes(keyword)).length;
+            const weight = answer.keywords.reduce((total, keyword) => total + (text.includes(keyword) ? weighKeyword(keyword) : 0), 0);
 
-            if (hits > score) {
+            if (weight > score) {
                 best = answer;
-                score = hits;
+                score = weight;
             }
         }
 
@@ -581,6 +565,10 @@ import IconSpark from '@components/icons/Spark.astro';
         }
 
         log.scrollTop = log.scrollHeight;
+    }
+
+    function weighKeyword(keyword: string) {
+        return GENERIC_KEYWORDS.has(keyword) ? 1 : TOPIC_WEIGHT;
     }
 
     registerPageScript(initAi);

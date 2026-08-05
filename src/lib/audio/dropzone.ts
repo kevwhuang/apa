@@ -2,13 +2,19 @@ import { QUEUE_FULL_MESSAGE, acceptFiles, releaseAudioContext, uploadSubmission 
 import { STORAGE } from '@lib/constants';
 import { formatBytes, formatDuration, setText } from '@lib/utils';
 
-export interface Dropzone {
+interface Dropzone {
     clear: () => void;
     entries: () => UploadEntry[];
     size: () => number;
 }
 
-export interface DropzoneMessages {
+interface DropzoneElements {
+    input: HTMLInputElement;
+    list: HTMLElement;
+    zone: HTMLElement;
+}
+
+interface DropzoneMessages {
     added: (accepted: number, skipped: number) => string;
     failed: (name: string, reason: string) => string;
     full: () => string;
@@ -17,7 +23,7 @@ export interface DropzoneMessages {
     removed: (name: string) => string;
 }
 
-export interface DropzoneOptions {
+interface DropzoneOptions {
     accept?: string;
     capacity?: () => number;
     drawWaveform?: (canvas: HTMLCanvasElement, peaks: Float32Array) => void;
@@ -27,18 +33,12 @@ export interface DropzoneOptions {
     signal: AbortSignal;
 }
 
-export interface DropzoneSelectors {
+interface DropzoneSelectors {
     input: string;
     list: string;
     row: string;
     status: string;
     zone: string;
-}
-
-interface DropzoneElements {
-    input: HTMLInputElement;
-    list: HTMLElement;
-    zone: HTMLElement;
 }
 
 interface QueuedUpload {
@@ -65,10 +65,10 @@ const DEFAULT_SELECTORS: DropzoneSelectors = {
 };
 
 const PERCENT = 100;
-
+const PERCENT_SLOT = '5ch';
 const ROW_CONTROL_SELECTOR = '[data-row-cancel], [data-row-remove]';
 
-export function createDropzone(options: DropzoneOptions): Dropzone | null {
+function createDropzone(options: DropzoneOptions): Dropzone | null {
     const selectors = { ...DEFAULT_SELECTORS, ...options.selectors };
 
     const input = document.querySelector<HTMLInputElement>(selectors.input);
@@ -86,7 +86,7 @@ function describeEntry(entry: UploadEntry) {
         .join(' \u00b7 ');
 }
 
-export function drawWaveform(canvas: HTMLCanvasElement, peaks: Float32Array): void {
+function drawWaveform(canvas: HTMLCanvasElement, peaks: Float32Array): void {
     const context = canvas.getContext('2d');
 
     if (!context) return;
@@ -106,7 +106,7 @@ export function drawWaveform(canvas: HTMLCanvasElement, peaks: Float32Array): vo
     canvas.removeAttribute('hidden');
 }
 
-export function nextFocusTarget(row: HTMLElement, fallback: string): HTMLElement | null {
+function nextFocusTarget(row: HTMLElement, fallback: string): HTMLElement | null {
     const after = row.nextElementSibling?.querySelector<HTMLElement>(ROW_CONTROL_SELECTOR);
     const before = row.previousElementSibling?.querySelector<HTMLElement>(ROW_CONTROL_SELECTOR);
 
@@ -305,6 +305,7 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
 
         setText(row.querySelector('[data-row-meta]'), describeEntry(entry));
         setText(row.querySelector('[data-row-name]'), entry.file.name);
+        row.querySelector<HTMLElement>('[data-row-percent]')?.style.setProperty('min-width', PERCENT_SLOT);
         progress?.setAttribute('aria-label', `Read progress for ${entry.file.name}`);
 
         if (entry.status === 'rejected') {
@@ -352,3 +353,6 @@ function updateProgress(row: HTMLElement, entry: UploadEntry, loadedBytes: numbe
 
     setText(row.querySelector('[data-row-percent]'), `${percent}%`);
 }
+
+export { createDropzone, drawWaveform, nextFocusTarget };
+export type { Dropzone, DropzoneMessages, DropzoneOptions, DropzoneSelectors };

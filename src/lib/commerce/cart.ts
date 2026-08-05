@@ -16,9 +16,10 @@ const cart = createStore<CartItem[]>({
     topic: STORAGE.cart.topic,
 });
 
-export function add(item: CartItem, maxQuantity: number = COMMERCE.maxQuantityPerItem): void {
+function add(item: CartItem, maxQuantity: number = COMMERCE.maxQuantityPerItem): void {
     cart.update((items) => {
         const next = [...items];
+
         const index = next.findIndex(existing => variantKey(existing) === variantKey(item));
 
         if (index < 0) {
@@ -33,13 +34,13 @@ export function add(item: CartItem, maxQuantity: number = COMMERCE.maxQuantityPe
     });
 }
 
-function clampQuantity(quantity: number, maxQuantity: number): number {
+function clampQuantity(quantity: number, maxQuantity: number = COMMERCE.maxQuantityPerItem): number {
     const ceiling = Math.max(1, Math.trunc(maxQuantity) || 1);
 
     return Math.min(ceiling, Math.max(1, Math.trunc(quantity) || 1));
 }
 
-export function clear(): void {
+function clear(): void {
     cart.set([]);
 }
 
@@ -47,11 +48,11 @@ function compareItems(left: CartItem, right: CartItem): number {
     return left.title.localeCompare(right.title) || (left.color ?? '').localeCompare(right.color ?? '') || (left.size ?? '').localeCompare(right.size ?? '');
 }
 
-export function count(items = getItems()): number {
+function count(items = getItems()): number {
     return items.reduce((total, item) => total + item.quantity, 0);
 }
 
-export function getItems(): CartItem[] {
+function getItems(): CartItem[] {
     return cart.get();
 }
 
@@ -65,16 +66,24 @@ function normalizeItems(items: CartItem[]): CartItem[] {
     return items.filter(isCartItem).map(item => ({
         ...item,
         priceCents: Number(item.priceCents) || 0,
-        quantity: Math.max(1, Math.trunc(Number(item.quantity)) || 1),
+        quantity: clampQuantity(Number(item.quantity), COMMERCE.maxQuantityPerItem),
         title: String(item.title ?? ''),
     })).sort(compareItems);
 }
 
-export function onChange(callback: (items: CartItem[]) => void): () => void {
+function onChange(callback: (items: CartItem[]) => void): () => void {
     return cart.onChange(callback);
 }
 
-export function reconcile(catalog: CatalogEntry[], items = getItems()): CartIssue[] {
+function prodsForCents(cents: number): number {
+    return Math.ceil(Math.max(0, Math.trunc(Number(cents)) || 0) / CENTS_PER_DOLLAR);
+}
+
+function prodsToCents(prods: number): number {
+    return Math.max(0, Math.trunc(Number(prods)) || 0) * CENTS_PER_DOLLAR;
+}
+
+function reconcile(catalog: CatalogEntry[], items = getItems()): CartIssue[] {
     const entries = new Map(catalog.map(entry => [entry.slug, entry]));
     const issues: CartIssue[] = [];
     const next: CartItem[] = [];
@@ -115,7 +124,7 @@ export function reconcile(catalog: CatalogEntry[], items = getItems()): CartIssu
     return issues;
 }
 
-export function remove(index: number): void {
+function remove(index: number): void {
     cart.update((items) => {
         const next = [...items];
 
@@ -125,7 +134,7 @@ export function remove(index: number): void {
     });
 }
 
-export function seedCart(): void {
+function seedCart(): void {
     if (typeof localStorage === 'undefined') return;
 
     try {
@@ -141,7 +150,7 @@ export function seedCart(): void {
     cart.set(SEED_ITEMS.map(item => ({ ...item })));
 }
 
-export function setQuantity(index: number, quantity: number, maxQuantity: number = COMMERCE.maxQuantityPerItem): void {
+function setQuantity(index: number, quantity: number, maxQuantity: number = COMMERCE.maxQuantityPerItem): void {
     const items = getItems();
 
     if (!items[index]) return;
@@ -149,30 +158,48 @@ export function setQuantity(index: number, quantity: number, maxQuantity: number
     const next = [...items];
 
     next[index] = { ...next[index], quantity: clampQuantity(quantity, maxQuantity) };
-
     cart.set(next);
 }
 
-export function subtotalCents(items = getItems()): number {
+function subtotalCents(items = getItems()): number {
     return items.reduce((total, item) => total + item.priceCents * item.quantity, 0);
 }
 
-export function totals(items = getItems(), prodsApplied = 0): CartTotals {
+function totals(items = getItems(), prodsApplied = 0): CartTotals {
     const subtotal = subtotalCents(items);
-    const credit = Math.max(0, Math.trunc(prodsApplied) || 0) * CENTS_PER_DOLLAR;
-    const discountCents = Math.min(credit, subtotal);
-    const taxCents = Math.round((subtotal - discountCents) * COMMERCE.taxBasisPoints / BASIS_POINTS_DIVISOR);
+
     const shippingCents = subtotal === 0 || subtotal >= COMMERCE.freeShippingThresholdCents ? 0 : COMMERCE.shippingFlatCents;
+    const taxCents = Math.round(subtotal * COMMERCE.taxBasisPoints / BASIS_POINTS_DIVISOR);
+
+    const dueCents = subtotal + taxCents + shippingCents;
+    const discountCents = Math.min(prodsToCents(prodsApplied), dueCents);
 
     return {
         discountCents,
         shippingCents,
         subtotalCents: subtotal,
         taxCents,
-        totalCents: subtotal - discountCents + taxCents + shippingCents,
+        totalCents: dueCents - discountCents,
     };
 }
 
 function variantKey(item: CartItem): string {
     return `${item.productSlug}|${item.size ?? ''}|${item.color ?? ''}`;
 }
+
+export {
+    add,
+    clampQuantity,
+    clear,
+    count,
+    getItems,
+    onChange,
+    prodsForCents,
+    prodsToCents,
+    reconcile,
+    remove,
+    seedCart,
+    setQuantity,
+    subtotalCents,
+    totals,
+};

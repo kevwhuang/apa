@@ -1,4 +1,4 @@
-export function createStore<T>(options: StoreOptions<T>): Store<T> {
+function createStore<T>(options: StoreOptions<T>): Store<T> {
     const { fallback, key, normalize, scope, topic } = options;
 
     let memoryValue: T | undefined;
@@ -118,3 +118,5 @@ function writeRaw(key: string, scope: StorageScope, raw: string): void {
         return;
     }
 }
+
+export { createStore };

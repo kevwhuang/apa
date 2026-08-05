@@ -18,6 +18,8 @@ interface Props {
 
 const { class: stageClass, ctaHref, ctaLabel, detailed = false, events, headingId, straight = false, tight = false } = Astro.props;
 
+const ctaBreak = Boolean(ctaHref && ctaLabel) && 'mb-10 md:mb-0';
+
 const program = getProgram('hangout');
 ---
 
@@ -34,7 +36,7 @@ const program = getProgram('hangout');
             {program.name}.
             {ctaHref && ctaLabel && (
                 <a
-                    class="action-text hover:text-accent-deep hidden items-center min-h-[50px] transition-colors md:inline-flex"
+                    class="action-text hover:text-accent-deep hidden items-center min-h-(--control-size) transition-colors md:inline-flex"
                     href={ctaHref}
                     slot="cta"
                 >
@@ -42,13 +44,13 @@ const program = getProgram('hangout');
                 </a>
             )}
         </SectionHead>
-        <p class="max-w-2xl leading-relaxed text-base text-ink-muted">
+        <p class:list={['max-w-2xl leading-relaxed text-base text-ink-muted', !detailed && ctaBreak]}>
             {program.summary}
         </p>
         {detailed && (
-            <p>
+            <p class:list={[ctaBreak]}>
                 <a
-                    class="action-text hover:text-accent-deep inline-flex items-center min-h-[50px] underline underline-offset-4 transition-colors"
+                    class="action-text hover:text-accent-deep inline-flex items-center min-h-(--control-size) underline underline-offset-4 transition-colors"
                     href={LINKS.meetup}
                     rel="noopener noreferrer"
                     target="_blank"
@@ -60,7 +62,7 @@ const program = getProgram('hangout');
         {ctaHref && ctaLabel && (
             <div class="md:hidden">
                 <a
-                    class="btn mt-10"
+                    class="btn"
                     href={ctaHref}
                 >
                     {ctaLabel}
@@ -80,12 +82,12 @@ const program = getProgram('hangout');
                 >
                     <div>
                         <p class="label mb-3 text-accent-deep">{program.shortName}</p>
-                        <h3 class="font-extrabold font-sans text-3xl tracking-tight">
+                        <h3 class:list={['font-extrabold font-sans text-3xl tracking-tight', detailed && 'mb-3']}>
                             {detailed
                                 ? event.title
                                 : (
                                         <a
-                                            class="active:translate-y-px hover:text-accent-deep inline-flex items-center min-h-[50px] transition-colors"
+                                            class="active:translate-y-px hover:text-accent-deep inline-flex items-center min-h-(--control-size) transition-colors"
                                             href={`/events#${event.id}`}
                                         >
                                             {event.title}
@@ -93,19 +95,19 @@ const program = getProgram('hangout');
                                     )}
                         </h3>
                         {detailed && (
-                            <p class="mt-3 leading-relaxed text-smd text-ink-muted">{event.excerpt}</p>
+                            <p class="leading-relaxed text-smd text-ink-muted">{event.excerpt}</p>
                         )}
                     </div>
                     <div>
                         <p class="label mb-3 text-ink-muted">When</p>
                         <p
-                            class="font-extrabold font-sans text-xl"
+                            class="mb-1 font-extrabold font-sans text-xl"
                             data-placeholder
                         >
                             <time datetime={event.date.toISOString()}>{formatDate(event.date)}</time>
                         </p>
                         <p
-                            class="mt-1 font-mono text-xs uppercase text-ink-muted"
+                            class="font-mono text-xs uppercase text-ink-muted"
                             data-placeholder
                         >
                             {event.end

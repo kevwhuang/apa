@@ -1,7 +1,6 @@
 ---
 name: June Castillo
-handle: junecastillo
-genres: [noise]
+genres: [experimental]
 location: Austin, TX
 joined: 2024-02-08
 featured: false

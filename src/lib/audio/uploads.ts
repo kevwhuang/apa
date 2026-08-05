@@ -2,14 +2,12 @@ import { UPLOAD } from '@lib/constants';
 import { formatBytes } from '@lib/utils';
 
 const PEAK_COUNT = 200;
-
-export const QUEUE_FULL_MESSAGE = `You can queue ${UPLOAD.maxFiles} files at a time.`;
-
-export const UPLOAD_EXTENSIONS_OR_LIST = formatExtensions(UPLOAD.extensions);
+const QUEUE_FULL_MESSAGE = `You can queue ${UPLOAD.maxFiles} files at a time.`;
+const UPLOAD_EXTENSIONS_OR_LIST = formatExtensions(UPLOAD.extensions);
 
 let audioContext: AudioContext | undefined;
 
-export function acceptFiles(files: FileList | File[], queued: UploadEntry[]): UploadEntry[] {
+function acceptFiles(files: FileList | File[], queued: UploadEntry[]): UploadEntry[] {
     const accepted = [...queued];
     const created: UploadEntry[] = [];
 
@@ -78,13 +76,13 @@ function formatExtensions(extensions: readonly string[]) {
     return names.length > 0 ? `${names.join(', ')} or ${last}` : last;
 }
 
-export function getExtension(name: string): string {
+function getExtension(name: string): string {
     const index = name.lastIndexOf('.');
 
     return index < 0 ? '' : name.slice(index + 1).toLowerCase();
 }
 
-export function getSizeError(file: File, limit: number): string | undefined {
+function getSizeError(file: File, limit: number): string | undefined {
     if (file.size === 0) return 'That file is empty.';
 
     if (file.size > limit) return `That file is ${formatBytes(file.size)} \u2014 the limit is ${formatBytes(limit)}.`;
@@ -136,7 +134,7 @@ function rejectionReason(file: File, queued: UploadEntry[]) {
     return isDuplicate(file, queued) ? 'That file is already in the queue.' : '';
 }
 
-export function releaseAudioContext(): void {
+function releaseAudioContext(): void {
     if (!audioContext) return;
 
     const context = audioContext;
@@ -153,7 +151,7 @@ function totalBytes(queued: UploadEntry[]) {
     return queued.reduce((total, entry) => total + entry.totalBytes, 0);
 }
 
-export async function uploadSubmission(file: File, options: UploadOptions): Promise<UploadResult> {
+async function uploadSubmission(file: File, options: UploadOptions): Promise<UploadResult> {
     const entry: UploadEntry = {
         file,
         id: crypto.randomUUID(),
@@ -171,7 +169,7 @@ export async function uploadSubmission(file: File, options: UploadOptions): Prom
     }
 
     if (file.name.toLowerCase().includes(UPLOAD.failureTrigger)) {
-        return { message: 'Simulated transfer failure (filename contains "fail").', ok: false };
+        return { message: 'Transfer failed. Remove the file and try again.', ok: false };
     }
 
     entry.loadedBytes = file.size;
@@ -190,3 +188,13 @@ export async function uploadSubmission(file: File, options: UploadOptions): Prom
 
     return { entry, ok: true };
 }
+
+export {
+    QUEUE_FULL_MESSAGE,
+    UPLOAD_EXTENSIONS_OR_LIST,
+    acceptFiles,
+    getExtension,
+    getSizeError,
+    releaseAudioContext,
+    uploadSubmission,
+};

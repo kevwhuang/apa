@@ -469,6 +469,7 @@ const { hasHero = false } = Astro.props;
     import { count, getItems, onChange, seedCart } from '@lib/commerce/cart';
     import { registerPageScript } from '@lib/utils';
 
+    const CART_BADGE_MAX = 99;
     const HEADER_INSTANT_CLASS = 'is-instant';
     const HEADER_STATE_CLASSES = ['is-hidden', 'is-solid'] as const;
     const HOVER_CLICK_GRACE = 500;
@@ -780,7 +781,7 @@ const { hasHero = false } = Astro.props;
 
         const total = count(getItems());
 
-        badge.textContent = String(total);
+        badge.textContent = total > CART_BADGE_MAX ? `${CART_BADGE_MAX}+` : String(total);
         badge.hidden = total === 0;
         label.textContent = `Cart, ${total} ${total === 1 ? 'item' : 'items'}`;
     }

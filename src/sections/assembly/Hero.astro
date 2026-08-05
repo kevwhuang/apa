@@ -16,7 +16,7 @@ const program = getProgram('assembly');
     class="stage stage--assembly stage--tight border-b-2 border-ink"
     aria-labelledby="assembly-title"
 >
-    <div>
+    <div class="flex flex-col gap-6">
         <PageHead
             class="max-w-4xl font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
             eyebrow={`${program.shortName} / ${program.cadence}`}
@@ -25,7 +25,7 @@ const program = getProgram('assembly');
             The working<br />
             <span class="text-accent-deep">session.</span>
         </PageHead>
-        <div class="grid grid-cols-1 gap-12 mt-6 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+        <div class="grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
             <div class="flex flex-col gap-5">
                 <p
                     class="max-w-2xl leading-relaxed text-lmd text-ink-muted"
@@ -59,8 +59,8 @@ const program = getProgram('assembly');
                                 {item.time}
                             </span>
                             <div>
-                                <p class="font-bold font-sans">{item.name}</p>
-                                <p class="mt-1 text-sm text-ink-muted">{item.note}</p>
+                                <p class="mb-1 font-bold font-sans">{item.name}</p>
+                                <p class="text-sm text-ink-muted">{item.note}</p>
                             </div>
                         </li>
                     ))}

@@ -34,20 +34,19 @@ const program = getProgram('bash');
             <SectionHead
                 class="font-extrabold font-sans leading-[0.9] text-display tracking-[-0.04em]"
                 eyebrow={`${program.shortName} / ${program.cadence}`}
-                eyebrowClass="mb-5"
                 headingId="bash-title"
                 tone="dark"
             >
                 {program.name}.
             </SectionHead>
             <p
-                class="max-w-xl leading-relaxed text-md text-ink-inverse-muted"
+                class="max-w-xl mb-10 leading-relaxed text-md text-ink-inverse-muted"
                 data-motion="rise"
             >
                 {program.summary}
             </p>
             <div
-                class="flex flex-wrap items-center gap-6 mt-10"
+                class="flex flex-wrap items-center gap-6"
                 data-motion="rise"
             >
                 <a
@@ -57,7 +56,7 @@ const program = getProgram('bash');
                     {program.shortName} details
                 </a>
                 <a
-                    class="action-text hover:text-accent inline-flex items-center min-h-[50px] underline underline-offset-4 text-ink-inverse transition-colors"
+                    class="action-text hover:text-accent inline-flex items-center min-h-(--control-size) underline underline-offset-4 text-ink-inverse transition-colors"
                     href="/sponsor"
                 >
                     Sponsor it &rarr;
@@ -79,10 +78,10 @@ const program = getProgram('bash');
                 {next
                     ? (
                             <>
-                                <span class="block font-extrabold font-sans text-xl">
+                                <span class="block mb-1 font-extrabold font-sans text-xl">
                                     <time datetime={next.data.date.toISOString()}>{formatDate(next.data.date)}</time>
                                 </span>
-                                <span class="block mt-1 font-mono text-xs uppercase text-ink-muted">
+                                <span class="block font-mono text-xs uppercase text-ink-muted">
                                     {formatTimeRange(next.data.date, next.data.end)}
                                 </span>
                             </>

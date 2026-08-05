@@ -1,6 +1,5 @@
 const KNOWN_HOSTS = [
     { label: 'Audius', pattern: /(^|\.)audius\.co$/ },
-    { label: 'Bandcamp', pattern: /(^|\.)bandcamp\.com$/ },
     { label: 'Dropbox', pattern: /(^|\.)dropbox\.com$/ },
     { label: 'Google Drive', pattern: /(^|\.)(docs|drive)\.google\.com$/ },
     { label: 'OneDrive', pattern: /(^|\.)(1drv\.ms|onedrive\.live\.com)$/ },
@@ -11,12 +10,13 @@ const KNOWN_HOSTS = [
 
 function describeHost(hostname: string): string {
     const bare = hostname.replace(/^www\./, '');
+
     const known = KNOWN_HOSTS.find(host => host.pattern.test(bare));
 
     return known ? known.label : bare;
 }
 
-export function parseTrackLink(raw: string): TrackLinkResult {
+function parseTrackLink(raw: string): TrackLinkResult {
     const value = raw.trim();
 
     if (value.length === 0) return { message: 'Paste a link first.', ok: false };
@@ -47,3 +47,5 @@ function toUrl(value: string): URL | null {
         }
     }
 }
+
+export { parseTrackLink };

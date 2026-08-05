@@ -25,7 +25,7 @@ const program = getProgram('assembly');
         >
             Next {program.name}.
             <a
-                class="action-text hover:text-accent-deep hidden items-center min-h-[50px] transition-colors whitespace-nowrap md:inline-flex"
+                class="action-text hover:text-accent-deep hidden items-center min-h-(--control-size) transition-colors whitespace-nowrap md:inline-flex"
                 href="/events"
                 slot="cta"
             >
@@ -69,18 +69,18 @@ const program = getProgram('assembly');
                         class="assembly-sheet__body"
                         data-motion="rise"
                     >
-                        <h3 class="font-extrabold font-sans text-3xl tracking-tight md:text-4xl">{next.data.title}</h3>
+                        <h3 class="mb-4 font-extrabold font-sans text-3xl tracking-tight md:text-4xl">{next.data.title}</h3>
                         <p
-                            class="mt-4 font-mono text-xs uppercase text-ink-muted"
+                            class="mb-1 font-mono text-xs uppercase text-ink-muted"
                             data-placeholder
                         >
                             {formatTimeRange(next.data.date, next.data.end)}
                         </p>
-                        <address class="mt-1 font-mono not-italic text-xs uppercase text-ink-muted">
+                        <address class="mb-5 font-mono not-italic text-xs uppercase text-ink-muted">
                             {next.data.location}
                         </address>
-                        <p class="max-w-2xl mt-5 leading-relaxed text-md text-ink-muted">{next.data.excerpt}</p>
-                        <div class="flex flex-wrap gap-3 mt-8">
+                        <p class="max-w-2xl mb-8 leading-relaxed text-md text-ink-muted">{next.data.excerpt}</p>
+                        <div class="flex flex-wrap gap-3">
                             <a
                                 class="btn btn--primary"
                                 href="/assembly"
@@ -99,10 +99,10 @@ const program = getProgram('assembly');
             )
         : (
                 <div data-motion="rise">
-                    <p class="text-ink-muted">
+                    <p class="mb-8 text-ink-muted">
                         No {program.name} on the calendar right now &mdash; the next date goes up as soon as the room is booked.
                     </p>
-                    <div class="flex flex-wrap gap-3 mt-8">
+                    <div class="flex flex-wrap gap-3">
                         <a
                             class="btn btn--primary"
                             href="/assembly"

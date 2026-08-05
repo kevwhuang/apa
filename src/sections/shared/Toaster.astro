@@ -105,19 +105,12 @@
         display: inline-flex;
         flex-shrink: 0;
         font-size: var(--text-xl);
-        height: 24px;
+        height: 48px;
         justify-content: center;
         line-height: 1;
-        margin-inline-end: var(--space-sm);
-        position: relative;
+        margin-inline-end: var(--space-2xs);
         transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
-        width: 24px;
-    }
-
-    .toast__close::after {
-        content: '';
-        inset: -12px;
-        position: absolute;
+        width: 48px;
     }
 
     .toast__close:active {
@@ -135,6 +128,7 @@
         font-weight: 700;
         letter-spacing: 0.04em;
         line-height: 1.2;
+        overflow-wrap: anywhere;
         text-transform: uppercase;
     }
 
@@ -143,6 +137,7 @@
         font-size: var(--text-smd);
         line-height: 1.45;
         min-width: 0;
+        overflow-wrap: anywhere;
     }
 
     .toaster {

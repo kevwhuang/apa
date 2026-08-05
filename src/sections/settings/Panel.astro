@@ -1,9 +1,8 @@
 ---
-import { getCollection } from 'astro:content';
-
 import PageHead from '@components/shared/PageHead.astro';
-import { ARTIST_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, UPLOAD, UPLOAD_EXTENSIONS_LABEL, USERNAME_PATTERN, US_STATES } from '@lib/constants';
-import { formatBytes, formatDateStamp, formatProds } from '@lib/utils';
+import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
+import { ARTIST_NAME_MAX_LENGTH, GENRES, PASSWORD_MIN_LENGTH, ROLES, UPLOAD, UPLOAD_EXTENSIONS_LABEL, US_STATES } from '@lib/constants';
+import { formatBytes, formatDateStamp, formatProds, getInitials, getStanding, pickTileColor } from '@lib/utils';
 
 const ATTENDANCE = [
     { date: '2026-07-22T19:00:00-05:00', event: 'Hangout \u00b7 July' },
@@ -19,11 +18,10 @@ const DEMO_PROFILE = {
     artistName: 'Ampersand',
     bio: 'I write patient, low-slung house in a converted garage on the east side and mix it loud enough to rattle the door.',
     city: 'Austin',
-    email: 'demo@austinproduceralliance.com',
+    email: 'ampersand@austinproduceralliance.com',
     genres: ['house', 'techno'],
     joined: new Date('2024-03-12T18:00:00Z'),
     links: {
-        bandcamp: 'https://ampersand.bandcamp.com',
         instagram: 'https://instagram.com/ampersand.wav',
         soundcloud: 'https://soundcloud.com/ampersand',
         spotify: 'https://open.spotify.com/artist/4kZ1ampersand',
@@ -33,14 +31,12 @@ const DEMO_PROFILE = {
     role: 'producer',
     state: 'TX',
     track: { bytes: 8_642_048, name: 'Untitled Sketch 09.wav' },
-    username: 'ampersand',
 };
 
 const LINK_FIELDS = [
+    { label: 'Instagram', name: 'instagram', placeholder: 'https://instagram.com/\u2026', value: DEMO_PROFILE.links.instagram },
     { label: 'Spotify', name: 'spotify', placeholder: 'https://open.spotify.com/artist/\u2026', value: DEMO_PROFILE.links.spotify },
     { label: 'SoundCloud', name: 'soundcloud', placeholder: 'https://soundcloud.com/\u2026', value: DEMO_PROFILE.links.soundcloud },
-    { label: 'Instagram', name: 'instagram', placeholder: 'https://instagram.com/\u2026', value: DEMO_PROFILE.links.instagram },
-    { label: 'Bandcamp', name: 'bandcamp', placeholder: 'https://yourname.bandcamp.com', value: DEMO_PROFILE.links.bandcamp },
     { label: 'YouTube', name: 'youtube', placeholder: 'https://youtube.com/@\u2026', value: DEMO_PROFILE.links.youtube },
 ];
 
@@ -61,16 +57,16 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
     change: entry.amount > 0 ? `+${entry.amount}` : `\u2212${Math.abs(entry.amount)}`,
 })).toReversed();
 
-const producers = await getCollection('producers');
+const PROFILE_ROLES = ['producer', 'engineer', 'artist', 'fan'];
 
-const genres = Array.from(new Set(producers.flatMap(producer => producer.data.genres))).sort((a, b) => a.localeCompare(b));
+const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
 ---
 
 <section
-    class="stage stage--focus stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-ink"
     aria-labelledby="settings-title"
 >
-    <div>
+    <div class="flex flex-col gap-6">
         <PageHead
             class="max-w-3xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
             eyebrow="Account / Settings"
@@ -79,80 +75,466 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
             Your settings.
         </PageHead>
         <p
-            class="max-w-2xl mt-6 text-lmd text-ink-muted"
+            class="max-w-2xl text-lmd text-ink-muted"
             data-motion="rise"
         >
-            Everything your roster card carries: the name people read, the handle that points at
-            you, a short bio, the genres you work in, where you are based, where else you live
-            online, and the track that plays on the card. Everything on this page is written to
-            this browser, so read it as a working model of the account screen rather than the
-            account.
+            Everything your roster card carries: the name people read, a short bio, what you make,
+            where you are based, where else you live online, and the spotlight track that plays on
+            the card.
         </p>
     </div>
 </section>
 
 <section
-    class="stage stage--focus stage--tight"
+    class="stage stage--tight"
     aria-label="Account and profile"
 >
     <div
         class="settings__stack"
         data-motion-stagger="rise"
     >
-        <dl class="settings__summary slab slab--sunk">
-            <div class="settings__row">
-                <dt class="label text-ink-muted">Email</dt>
-                <dd
-                    class="font-mono text-sm wrap-break-word"
-                    data-settings-email
+        <div class="flex flex-col gap-5">
+            <div class="settings__overview slab slab--bare slab--card grid gap-px">
+                <div class="p-(--space-md) bg-surface-raised">
+                    <p class="label mb-4 text-ink-muted">Your card</p>
+                    <div class="flex flex-wrap gap-5">
+                        <PlaceholderTile
+                            class="settings__tile aspect-square shrink-0 w-[104px] border-2 border-ink"
+                            color={pickTileColor(DEMO_PROFILE.artistName)}
+                            label={getInitials(DEMO_PROFILE.artistName)}
+                            labelClass="settings__initials leading-none text-[38cqw] text-surface-raised/80 [text-shadow:2px_2px_0_var(--color-ink-20)]"
+                        />
+                        <div class="settings__facts">
+                            <p
+                                class="mb-2 font-extrabold font-sans text-xl tracking-tight wrap-break-word"
+                                data-settings-name
+                            >
+                                {DEMO_PROFILE.artistName}
+                            </p>
+                            <p class="mb-3">
+                                <span
+                                    class="chip settings__role"
+                                    data-settings-role
+                                >
+                                    {DEMO_PROFILE.role}
+                                </span>
+                            </p>
+                            <p class="mb-3 font-mono text-2xs uppercase text-ink-muted">
+                                <span data-settings-role>{DEMO_PROFILE.role}</span> &mdash; {DEMO_PROFILE.city}, {DEMO_PROFILE.state}
+                            </p>
+                            <ul class="flex flex-wrap gap-2 list-none">
+                                {DEMO_PROFILE.genres.map(genre => (
+                                    <li class="inline-flex items-center h-6 px-2 border-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase">{genre}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <dl
+                    class="settings__stats grid gap-px"
+                    aria-label="Account standing"
                 >
-                    {DEMO_PROFILE.email}
-                </dd>
+                    <div class="p-(--space-md) bg-surface-raised">
+                        <dt class="label mb-2 text-ink-muted">Prods balance</dt>
+                        <dd
+                            class="font-extrabold font-sans leading-[0.9] text-4xl tracking-tight"
+                            data-settings-prods
+                        >
+                            {formatProds(DEMO_PROFILE.prods)}
+                        </dd>
+                    </div>
+                    <div class="p-(--space-md) bg-surface-raised">
+                        <dt class="label mb-2 text-ink-muted">Events attended</dt>
+                        <dd class="font-extrabold font-sans text-3xl tracking-tight">{ATTENDANCE.length}</dd>
+                    </div>
+                    <div class="p-(--space-md) bg-surface-raised">
+                        <dt class="label mb-2 text-ink-muted">Standing</dt>
+                        <dd
+                            class="action-text"
+                            data-settings-standing
+                        >
+                            {getStanding(DEMO_PROFILE.prods)}
+                        </dd>
+                    </div>
+                    <div class="p-(--space-md) bg-surface-raised">
+                        <dt class="label mb-2 text-ink-muted">Member since</dt>
+                        <dd
+                            class="font-mono text-sm"
+                            data-settings-since
+                        >
+                            {formatDateStamp(DEMO_PROFILE.joined)}
+                        </dd>
+                    </div>
+                    <div class="settings__wide p-(--space-md) bg-surface-raised">
+                        <dt class="label mb-2 text-ink-muted">Email</dt>
+                        <dd
+                            class="font-mono text-sm wrap-break-word"
+                            data-settings-email
+                        >
+                            {DEMO_PROFILE.email}
+                        </dd>
+                    </div>
+                </dl>
             </div>
-            <div class="settings__row">
-                <dt class="label text-ink-muted">Role</dt>
-                <dd>
-                    <span class="chip settings__role">{DEMO_PROFILE.role}</span>
-                </dd>
+            <a
+                class="action-text settings__link hover:text-accent-deep self-start transition-colors"
+                data-settings-onboarding
+                hidden
+                href="/onboarding"
+            >
+                Finish your profile &rarr;
+            </a>
+        </div>
+        <form
+            class="settings__form slab slab--card"
+            data-settings-form
+        >
+            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
+                Profile
+            </h2>
+            <div class="flex flex-col gap-2">
+                <label class="block">
+                    <span class="label block mb-2 text-ink-muted">Artist name</span>
+                    <input
+                        id="settings-name"
+                        class="input font-sans"
+                        aria-describedby="settings-name-error"
+                        aria-invalid="false"
+                        autocomplete="nickname"
+                        maxlength={ARTIST_NAME_MAX_LENGTH}
+                        name="artistName"
+                        required
+                        type="text"
+                        value={DEMO_PROFILE.artistName}
+                    />
+                </label>
+                <p
+                    id="settings-name-error"
+                    class="action-text text-accent-deep"
+                    data-field-error
+                    hidden
+                />
+                <p class="text-sm text-ink-subtle">
+                    Up to {ARTIST_NAME_MAX_LENGTH} characters. This is what the roster shows
+                    &mdash; it cannot be used to sign in.
+                </p>
             </div>
-            <div class="settings__row">
-                <dt class="label text-ink-muted">Prods balance</dt>
-                <dd
-                    class="font-mono text-sm"
-                    data-settings-prods
+            <div class="flex flex-col gap-2">
+                <label class="block">
+                    <span class="label block mb-2 text-ink-muted">Bio</span>
+                    <textarea
+                        id="settings-bio"
+                        class="input input--area font-sans"
+                        aria-describedby="settings-bio-error settings-bio-help"
+                        aria-invalid="false"
+                        maxlength={BIO_MAX_LENGTH}
+                        name="bio"
+                        rows="4"
+                        set:text={DEMO_PROFILE.bio}
+                    />
+                </label>
+                <p
+                    id="settings-bio-error"
+                    class="action-text text-accent-deep"
+                    data-field-error
+                    hidden
+                />
+                <p
+                    id="settings-bio-help"
+                    class="text-sm text-ink-subtle"
                 >
-                    {formatProds(DEMO_PROFILE.prods)}
-                </dd>
+                    <span data-bio-count>{DEMO_PROFILE.bio.length}</span> of {BIO_MAX_LENGTH} characters.
+                    A line or two on what you make and how you make it.
+                </p>
             </div>
-            <div class="settings__row">
-                <dt class="label text-ink-muted">Member since</dt>
-                <dd
-                    class="font-mono text-sm"
-                    data-settings-since
-                >
-                    {formatDateStamp(DEMO_PROFILE.joined)}
-                </dd>
-            </div>
-            <div class="settings__row">
-                <dt class="label text-ink-muted">Profile status</dt>
-                <dd class="flex flex-wrap items-center justify-end gap-3">
-                    <span
-                        class="font-mono text-sm"
-                        data-settings-profile
-                    >
-                        Complete
-                    </span>
-                    <a
-                        class="action-text settings__link transition-colors"
-                        data-settings-onboarding
+            <fieldset class="settings__group flex flex-col gap-3">
+                <legend class="label mb-1 text-ink-muted">
+                    What you make
+                </legend>
+                <p class="text-sm text-ink-subtle">Pick up to five.</p>
+                <div class="flex flex-wrap gap-2">
+                    {GENRES.map(genre => (
+                        <label class="settings__chip">
+                            <input
+                                class="box"
+                                aria-describedby="settings-genres-error"
+                                aria-invalid="false"
+                                checked={DEMO_PROFILE.genres.includes(genre)}
+                                name="genres"
+                                type="checkbox"
+                                value={genre}
+                            />
+                            {genre}
+                        </label>
+                    ))}
+                </div>
+                <p
+                    id="settings-genres-error"
+                    class="action-text text-accent-deep"
+                    data-field-error
+                    hidden
+                />
+            </fieldset>
+            <fieldset class="settings__group flex flex-col gap-3">
+                <legend class="label mb-1 text-ink-muted">
+                    What do you do?
+                </legend>
+                <p class="text-sm text-ink-subtle">Pick one.</p>
+                <div class="flex flex-wrap gap-2">
+                    {roles.map(role => (
+                        <label class="settings__chip">
+                            <input
+                                class="box"
+                                checked={role.id === DEMO_PROFILE.role}
+                                name="role"
+                                type="radio"
+                                value={role.id}
+                            />
+                            {role.id}
+                        </label>
+                    ))}
+                </div>
+            </fieldset>
+            <div class="settings__pair">
+                <div class="flex flex-col gap-2">
+                    <label class="block">
+                        <span class="label block mb-2 text-ink-muted">City</span>
+                        <input
+                            id="settings-city"
+                            class="input font-sans"
+                            aria-describedby="settings-city-error"
+                            aria-invalid="false"
+                            autocomplete="address-level2"
+                            name="city"
+                            required
+                            type="text"
+                            value={DEMO_PROFILE.city}
+                        />
+                    </label>
+                    <p
+                        id="settings-city-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
                         hidden
-                        href="/onboarding"
-                    >
-                        Finish it &rarr;
-                    </a>
-                </dd>
+                    />
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="block">
+                        <span class="label block mb-2 text-ink-muted">State</span>
+                        <span class="select">
+                            <select
+                                id="settings-state"
+                                class="input font-sans"
+                                aria-describedby="settings-state-error"
+                                aria-invalid="false"
+                                autocomplete="address-level1"
+                                name="state"
+                                required
+                            >
+                                {US_STATES.map(state => (
+                                    <option
+                                        selected={state.code === DEMO_PROFILE.state}
+                                        value={state.code}
+                                    >
+                                        {state.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </span>
+                    </label>
+                    <p
+                        id="settings-state-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </div>
             </div>
-        </dl>
+            <button
+                class="btn btn--primary self-start"
+                type="submit"
+            >
+                Save profile
+            </button>
+        </form>
+        <form
+            class="settings__form slab slab--card"
+            data-links-form
+        >
+            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
+                Links
+            </h2>
+            <p class="max-w-2xl text-sm text-ink-subtle">
+                Where else you live online. Every field is optional, and whatever you fill in shows
+                up on your roster card.
+            </p>
+            {LINK_FIELDS.map(field => (
+                <div class="flex flex-col gap-2">
+                    <label class="block">
+                        <span class="label block mb-2 text-ink-muted">{field.label}</span>
+                        <input
+                            id={`settings-${field.name}`}
+                            class="input font-mono text-sm"
+                            aria-describedby={`settings-${field.name}-error`}
+                            aria-invalid="false"
+                            inputmode="url"
+                            name={field.name}
+                            placeholder={field.placeholder}
+                            spellcheck="false"
+                            type="url"
+                            value={field.value}
+                        />
+                    </label>
+                    <p
+                        id={`settings-${field.name}-error`}
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </div>
+            ))}
+            <button
+                class="btn btn--primary self-start"
+                type="submit"
+            >
+                Save links
+            </button>
+        </form>
+        <form
+            class="settings__form slab slab--card"
+            data-password-form
+        >
+            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
+                Password
+            </h2>
+            <div class="flex flex-col gap-2">
+                <label class="block">
+                    <span class="label block mb-2 text-ink-muted">New password</span>
+                    <input
+                        id="settings-password"
+                        class="input font-sans"
+                        aria-describedby="settings-password-error"
+                        aria-invalid="false"
+                        autocomplete="new-password"
+                        minlength={PASSWORD_MIN_LENGTH}
+                        name="password"
+                        required
+                        type="password"
+                    />
+                </label>
+                <p
+                    id="settings-password-error"
+                    class="action-text text-accent-deep"
+                    data-field-error
+                    hidden
+                />
+                <p class="text-sm text-ink-subtle">
+                    At least {PASSWORD_MIN_LENGTH} characters with a letter and a digit.
+                </p>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="block">
+                    <span class="label block mb-2 text-ink-muted">Confirm new password</span>
+                    <input
+                        id="settings-confirm"
+                        class="input font-sans"
+                        aria-describedby="settings-confirm-error"
+                        aria-invalid="false"
+                        autocomplete="new-password"
+                        name="confirm"
+                        required
+                        type="password"
+                    />
+                </label>
+                <p
+                    id="settings-confirm-error"
+                    class="action-text text-accent-deep"
+                    data-field-error
+                    hidden
+                />
+            </div>
+            <button
+                class="btn btn--primary self-start"
+                type="submit"
+            >
+                Update password
+            </button>
+        </form>
+        <form
+            class="settings__form settings__form--full slab slab--card"
+            data-track-form
+        >
+            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
+                Spotlight
+            </h2>
+            <p class="max-w-2xl text-sm text-ink-subtle">
+                One file, and it is the one that plays on your roster card. Swap it whenever the
+                better take arrives.
+            </p>
+            <div class="settings__track">
+                <label class="settings__pick">
+                    <span class="label">Choose an audio file</span>
+                    <input
+                        id="settings-track"
+                        class="settings__file sr-only"
+                        accept={UPLOAD.acceptAttribute}
+                        aria-describedby="settings-track-error settings-track-help"
+                        data-track-input
+                        name="track"
+                        type="file"
+                    />
+                </label>
+                <p
+                    class="settings__empty text-sm text-ink-subtle"
+                    data-track-empty
+                    hidden
+                >
+                    Nothing staged yet.
+                </p>
+                <div
+                    class="settings__staged slab slab--sunk"
+                    data-track-staged
+                >
+                    <p
+                        class="min-w-0 font-bold font-sans wrap-anywhere"
+                        data-track-name
+                    >
+                        {DEMO_PROFILE.track.name}
+                    </p>
+                    <p
+                        class="label text-ink-muted"
+                        data-track-meta
+                    >
+                        {formatBytes(DEMO_PROFILE.track.bytes)}
+                    </p>
+                    <button
+                        class="action-text hover:text-accent-deep flex items-center min-h-(--control-size) px-1 text-ink-muted transition-colors"
+                        data-track-remove
+                        type="button"
+                    >
+                        Remove
+                    </button>
+                </div>
+            </div>
+            <p
+                id="settings-track-error"
+                class="action-text text-accent-deep"
+                data-field-error
+                hidden
+            />
+            <p
+                id="settings-track-help"
+                class="text-sm text-ink-subtle"
+            >
+                {UPLOAD_EXTENSIONS_LABEL}. Up to {formatBytes(UPLOAD.maxFileBytes)}.
+            </p>
+            <button
+                class="btn btn--primary self-start"
+                type="submit"
+            >
+                Save track
+            </button>
+        </form>
         <section
             class="settings__panel slab slab--card"
             aria-labelledby="settings-attendance-title"
@@ -166,7 +548,7 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
             <p class="max-w-2xl text-sm text-ink-subtle">
                 Every event you have checked in to since you joined, newest first.
             </p>
-            <div class="settings__scroller">
+            <div class="settings__scroller settings__scroller--attendance scroll-slot">
                 <table class="settings__table border-2 border-ink">
                     <caption class="sr-only">Events you checked in to, with the date of each check-in</caption>
                     <thead>
@@ -217,7 +599,7 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
                 Every Prod earned or spent since you joined, newest first, with the balance that
                 stood after each entry.
             </p>
-            <div class="settings__scroller">
+            <div class="settings__scroller settings__scroller--ledger scroll-slot">
                 <table class="settings__table settings__table--wide border-2 border-ink">
                     <caption class="sr-only">Dated ledger entries with reason, change, and running balance</caption>
                     <thead>
@@ -265,422 +647,10 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
                 </table>
             </div>
         </section>
-        <form
-            class="settings__form slab slab--card"
-            data-settings-form
-        >
-            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
-                Profile
-            </h2>
-            <div class="flex flex-col gap-2">
-                <label class="block">
-                    <span class="label block mb-2 text-ink-muted">Artist name</span>
-                    <input
-                        id="settings-name"
-                        class="settings__control font-sans"
-                        aria-describedby="settings-name-error"
-                        aria-invalid="false"
-                        autocomplete="nickname"
-                        maxlength={ARTIST_NAME_MAX_LENGTH}
-                        name="artistName"
-                        required
-                        type="text"
-                        value={DEMO_PROFILE.artistName}
-                    />
-                </label>
-                <p
-                    id="settings-name-error"
-                    class="action-text text-accent-deep"
-                    data-field-error
-                    hidden
-                />
-                <p class="text-sm text-ink-subtle">
-                    Up to {ARTIST_NAME_MAX_LENGTH} characters. This is what the roster shows
-                    &mdash; it cannot be used to sign in.
-                </p>
-            </div>
-            <div class="flex flex-col gap-2">
-                <label class="block">
-                    <span class="label block mb-2 text-ink-muted">Username</span>
-                    <input
-                        id="settings-username"
-                        class="settings__control font-mono text-sm"
-                        aria-describedby="settings-username-error"
-                        aria-invalid="false"
-                        autocomplete="username"
-                        name="username"
-                        pattern={USERNAME_PATTERN}
-                        required
-                        type="text"
-                        value={DEMO_PROFILE.username}
-                    />
-                </label>
-                <p
-                    id="settings-username-error"
-                    class="action-text text-accent-deep"
-                    data-field-error
-                    hidden
-                />
-                <p class="text-sm text-ink-subtle">
-                    Three to twenty letters, numbers, or underscores. It is stored in lower case.
-                </p>
-            </div>
-            <div class="flex flex-col gap-2">
-                <label class="block">
-                    <span class="label block mb-2 text-ink-muted">Bio</span>
-                    <textarea
-                        id="settings-bio"
-                        class="settings__control settings__control--area font-sans"
-                        aria-describedby="settings-bio-error settings-bio-help"
-                        aria-invalid="false"
-                        maxlength={BIO_MAX_LENGTH}
-                        name="bio"
-                        rows="4"
-                        set:text={DEMO_PROFILE.bio}
-                    />
-                </label>
-                <p
-                    id="settings-bio-error"
-                    class="action-text text-accent-deep"
-                    data-field-error
-                    hidden
-                />
-                <p
-                    id="settings-bio-help"
-                    class="text-sm text-ink-subtle"
-                >
-                    <span data-bio-count>{DEMO_PROFILE.bio.length}</span> of {BIO_MAX_LENGTH} characters.
-                    A line or two on what you make and how you make it.
-                </p>
-            </div>
-            <fieldset class="settings__group flex flex-col gap-3">
-                <legend class="label settings__legend mb-1 text-ink-muted">
-                    What do you make? <span class="settings__hint">{genres.length} tags &middot; pick at least one</span>
-                </legend>
-                <div class="flex flex-wrap gap-2">
-                    {genres.map(genre => (
-                        <label class="settings__chip">
-                            <input
-                                class="settings__box"
-                                aria-describedby="settings-genres-error"
-                                aria-invalid="false"
-                                checked={DEMO_PROFILE.genres.includes(genre)}
-                                name="genres"
-                                type="checkbox"
-                                value={genre}
-                            />
-                            {genre}
-                        </label>
-                    ))}
-                </div>
-                <p
-                    id="settings-genres-error"
-                    class="action-text text-accent-deep"
-                    data-field-error
-                    hidden
-                />
-            </fieldset>
-            <div class="settings__pair">
-                <div class="flex flex-col gap-2">
-                    <label class="block">
-                        <span class="label block mb-2 text-ink-muted">City</span>
-                        <input
-                            id="settings-city"
-                            class="settings__control font-sans"
-                            aria-describedby="settings-city-error"
-                            aria-invalid="false"
-                            autocomplete="address-level2"
-                            name="city"
-                            required
-                            type="text"
-                            value={DEMO_PROFILE.city}
-                        />
-                    </label>
-                    <p
-                        id="settings-city-error"
-                        class="action-text text-accent-deep"
-                        data-field-error
-                        hidden
-                    />
-                </div>
-                <div class="flex flex-col gap-2">
-                    <label class="block">
-                        <span class="label block mb-2 text-ink-muted">State</span>
-                        <span class="select">
-                            <select
-                                id="settings-state"
-                                class="settings__control settings__control--select font-sans"
-                                aria-describedby="settings-state-error"
-                                aria-invalid="false"
-                                autocomplete="address-level1"
-                                name="state"
-                                required
-                            >
-                                {US_STATES.map(state => (
-                                    <option
-                                        selected={state.code === DEMO_PROFILE.state}
-                                        value={state.code}
-                                    >
-                                        {state.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </span>
-                    </label>
-                    <p
-                        id="settings-state-error"
-                        class="action-text text-accent-deep"
-                        data-field-error
-                        hidden
-                    />
-                </div>
-            </div>
-            <div class="flex flex-wrap items-center gap-4">
-                <button
-                    class="btn btn--primary"
-                    type="submit"
-                >
-                    Save profile
-                </button>
-                <p
-                    class="action-text text-ink-subtle"
-                    aria-live="polite"
-                    data-settings-status
-                />
-            </div>
-        </form>
-        <form
-            class="settings__form slab slab--card"
-            data-links-form
-        >
-            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
-                Links
-            </h2>
-            <p class="max-w-2xl text-sm text-ink-subtle">
-                Where else you live online. Every field is optional, and whatever you fill in shows
-                up on your roster card.
-            </p>
-            {LINK_FIELDS.map(field => (
-                <div class="flex flex-col gap-2">
-                    <label class="block">
-                        <span class="label block mb-2 text-ink-muted">{field.label}</span>
-                        <input
-                            id={`settings-${field.name}`}
-                            class="settings__control font-mono text-sm"
-                            aria-describedby={`settings-${field.name}-error`}
-                            aria-invalid="false"
-                            inputmode="url"
-                            name={field.name}
-                            placeholder={field.placeholder}
-                            spellcheck="false"
-                            type="url"
-                            value={field.value}
-                        />
-                    </label>
-                    <p
-                        id={`settings-${field.name}-error`}
-                        class="action-text text-accent-deep"
-                        data-field-error
-                        hidden
-                    />
-                </div>
-            ))}
-            <div class="flex flex-wrap items-center gap-4">
-                <button
-                    class="btn btn--primary"
-                    type="submit"
-                >
-                    Save links
-                </button>
-                <p
-                    class="action-text text-ink-subtle"
-                    aria-live="polite"
-                    data-links-status
-                />
-            </div>
-        </form>
-        <form
-            class="settings__form slab slab--card"
-            data-track-form
-        >
-            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
-                Main track
-            </h2>
-            <p class="max-w-2xl text-sm text-ink-subtle">
-                One file, and it is the one that plays on your roster card. Swap it whenever the
-                better take arrives.
-            </p>
-            <div class="settings__track">
-                <label class="settings__pick">
-                    <span class="label">Choose an audio file</span>
-                    <input
-                        id="settings-track"
-                        class="settings__file sr-only"
-                        accept={UPLOAD.acceptAttribute}
-                        aria-describedby="settings-track-error settings-track-help"
-                        data-track-input
-                        name="track"
-                        type="file"
-                    />
-                </label>
-                <p
-                    class="settings__empty text-sm text-ink-subtle"
-                    data-track-empty
-                    hidden
-                >
-                    Nothing staged yet.
-                </p>
-                <div
-                    class="settings__staged slab slab--sunk"
-                    data-track-staged
-                >
-                    <p
-                        class="font-bold font-sans wrap-break-word"
-                        data-track-name
-                    >
-                        {DEMO_PROFILE.track.name}
-                    </p>
-                    <p
-                        class="label text-ink-muted"
-                        data-track-meta
-                    >
-                        {formatBytes(DEMO_PROFILE.track.bytes)}
-                    </p>
-                    <button
-                        class="action-text hover:text-accent-deep flex items-center min-h-[50px] px-1 text-ink-muted transition-colors"
-                        data-track-remove
-                        type="button"
-                    >
-                        Remove
-                    </button>
-                </div>
-            </div>
-            <p
-                id="settings-track-error"
-                class="action-text text-accent-deep"
-                data-field-error
-                hidden
-            />
-            <p
-                id="settings-track-help"
-                class="text-sm text-ink-subtle"
-            >
-                {UPLOAD_EXTENSIONS_LABEL}. Up to {formatBytes(UPLOAD.maxFileBytes)}. The file is
-                read for its name and size and never leaves this browser.
-            </p>
-            <div class="flex flex-wrap items-center gap-4">
-                <button
-                    class="btn btn--primary"
-                    type="submit"
-                >
-                    Save track
-                </button>
-                <p
-                    class="action-text text-ink-subtle"
-                    aria-live="polite"
-                    data-track-status
-                />
-            </div>
-        </form>
-        <form
-            class="settings__form slab slab--card"
-            data-password-form
-        >
-            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
-                Password
-            </h2>
-            <div class="flex flex-col gap-2">
-                <label class="block">
-                    <span class="label block mb-2 text-ink-muted">New password</span>
-                    <input
-                        id="settings-password"
-                        class="settings__control font-sans"
-                        aria-describedby="settings-password-error"
-                        aria-invalid="false"
-                        autocomplete="new-password"
-                        minlength={PASSWORD_MIN_LENGTH}
-                        name="password"
-                        required
-                        type="password"
-                    />
-                </label>
-                <p
-                    id="settings-password-error"
-                    class="action-text text-accent-deep"
-                    data-field-error
-                    hidden
-                />
-                <p class="text-sm text-ink-subtle">
-                    At least {PASSWORD_MIN_LENGTH} characters with a letter and a digit. It is read
-                    to check its shape and then dropped &mdash; nothing here keeps a password.
-                </p>
-            </div>
-            <div class="flex flex-col gap-2">
-                <label class="block">
-                    <span class="label block mb-2 text-ink-muted">Confirm new password</span>
-                    <input
-                        id="settings-confirm"
-                        class="settings__control font-sans"
-                        aria-describedby="settings-confirm-error"
-                        aria-invalid="false"
-                        autocomplete="new-password"
-                        name="confirm"
-                        required
-                        type="password"
-                    />
-                </label>
-                <p
-                    id="settings-confirm-error"
-                    class="action-text text-accent-deep"
-                    data-field-error
-                    hidden
-                />
-            </div>
-            <div class="flex flex-wrap items-center gap-4">
-                <button
-                    class="btn btn--primary"
-                    type="submit"
-                >
-                    Update password
-                </button>
-                <p
-                    class="action-text text-ink-subtle"
-                    aria-live="polite"
-                    data-password-status
-                />
-            </div>
-        </form>
     </div>
 </section>
 
 <style>
-    .settings__box {
-        appearance: none;
-        background-color: transparent;
-        border: 2px solid currentcolor;
-        flex-shrink: 0;
-        height: 24px;
-        margin: 0;
-        transition:
-            background-color var(--duration-fast) var(--motion-ease-ui),
-            border-color var(--duration-fast) var(--motion-ease-ui),
-            box-shadow var(--duration-fast) var(--motion-ease-ui);
-        width: 24px;
-    }
-
-    .settings__box:checked {
-        background-color: var(--color-accent-deep);
-        border-color: var(--color-accent-deep);
-        box-shadow: inset 0 0 0 4px var(--color-surface-raised);
-    }
-
-    .settings__box:checked:focus-visible {
-        box-shadow:
-            inset 0 0 0 4px var(--color-surface-raised),
-            0 0 0 2px var(--color-surface),
-            0 0 0 4px var(--color-accent-deep);
-    }
-
     .settings__chip {
         align-items: center;
         border: 2px solid var(--color-ink);
@@ -695,56 +665,25 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
         transition: background-color var(--duration-fast) var(--motion-ease-ui);
     }
 
-    .settings__chip:active {
-        background-color: var(--color-surface-sunken);
-    }
-
-    .settings__chip:has(.settings__box:checked) {
-        background-color: var(--color-surface-sunken);
-    }
-
+    .settings__chip:active,
     .settings__chip:hover {
+        background-color: var(--color-surface);
+    }
+
+    .settings__chip:has(.box:checked) {
         background-color: var(--color-surface-sunken);
     }
 
-    .settings__control {
-        background-color: var(--color-surface);
-        border: 2px solid var(--color-ink);
-        color: var(--color-ink);
-        min-height: var(--control-size);
-        padding: var(--space-2xs) var(--space-sm);
-        transition:
-            background-color var(--duration-fast) var(--motion-ease-ui),
-            border-color var(--duration-fast) var(--motion-ease-ui),
-            box-shadow var(--duration-fast) var(--motion-ease-ui);
-        width: 100%;
-    }
-
-    .settings__control:focus-visible {
-        background-color: var(--color-surface-raised);
-        border-color: var(--color-accent-deep);
-    }
-
-    .settings__control:hover {
-        background-color: var(--color-surface-raised);
-    }
-
-    .settings__control[aria-invalid='true'] {
-        border-color: var(--color-accent-deep);
-        box-shadow: 3px 3px 0 0 var(--color-accent-20);
-    }
-
-    .settings__control--area {
-        line-height: 1.6;
-        padding-block: var(--space-2xs);
-        resize: vertical;
-    }
-
-    .settings__control--select {
-        padding-right: var(--select-pad);
+    .settings__chip:has(.box:checked):active,
+    .settings__chip:has(.box:checked):hover {
+        background-color: var(--color-accent-20);
     }
 
     .settings__empty {
+        flex: 1 1 200px;
+    }
+
+    .settings__facts {
         flex: 1 1 200px;
     }
 
@@ -754,6 +693,17 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
         inset: 0;
         margin: 0;
         width: 100%;
+    }
+
+    .settings__form {
+        margin-inline: auto;
+        max-width: var(--measure-form);
+        padding: var(--space-lg);
+        width: 100%;
+    }
+
+    .settings__form--full {
+        max-width: none;
     }
 
     .settings__form,
@@ -768,21 +718,17 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
         padding: 0;
     }
 
-    .settings__hint {
-        color: var(--color-ink-subtle);
-        text-transform: none;
-    }
-
-    .settings__legend {
-        line-height: 1.5;
-    }
-
     .settings__link {
         align-items: center;
         display: inline-flex;
         min-height: var(--control-size);
         padding-inline: var(--space-3xs);
         text-decoration: underline;
+    }
+
+    .settings__overview {
+        --slab-fill: var(--color-ink);
+        grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
     }
 
     .settings__pair {
@@ -834,23 +780,16 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
         text-transform: capitalize;
     }
 
-    .settings__row {
-        align-items: baseline;
-        border-bottom: 1px solid var(--color-ink-20);
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-md);
-        justify-content: space-between;
-        padding-bottom: var(--space-2xs);
-    }
-
-    .settings__row:last-child {
-        border-bottom: 0;
-        padding-bottom: 0;
-    }
-
     .settings__scroller {
         overflow-x: auto;
+    }
+
+    .settings__scroller--attendance {
+        --scroll-slot-max: 331px;
+    }
+
+    .settings__scroller--ledger {
+        --scroll-slot-max: calc(44px + 5 * (33px + 10 * var(--text-sm) / 7));
     }
 
     .settings__stack {
@@ -870,10 +809,8 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
         row-gap: var(--space-3xs);
     }
 
-    .settings__summary {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2xs);
+    .settings__stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .settings__table {
@@ -893,42 +830,42 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
         gap: var(--space-md);
     }
 
+    .settings__wide {
+        grid-column: 1 / -1;
+    }
+
+    @media (max-width: 1024px) {
+        .settings__overview {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .settings__stats {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
     @media (max-width: 640px) {
         .settings__pair {
             grid-template-columns: minmax(0, 1fr);
         }
     }
-
-    @media (forced-colors: active) {
-        .settings__box {
-            background-color: Canvas;
-            border-color: CanvasText;
-            forced-color-adjust: none;
-        }
-
-        .settings__box:checked {
-            background-color: SelectedItem;
-            border-color: CanvasText;
-            box-shadow: inset 0 0 0 4px Canvas;
-        }
-    }
 </style>
 
 <script>
-    import { MOCK_LATENCY_MS, UPLOAD, USERNAME_TAKEN_MESSAGE } from '@lib/constants';
+    import { MOCK_LATENCY_MS, UPLOAD } from '@lib/constants';
     import { UPLOAD_EXTENSIONS_OR_LIST, getExtension, getSizeError } from '@lib/audio/uploads';
-    import { clearFieldErrors, confirmRule, focusFirstError, passwordRule, setFieldErrors, usernameRule, validateFields } from '@lib/ui/forms';
-    import { delay, formatBytes, formatDateStamp, formatProds, registerPageScript, setPending, setText } from '@lib/utils';
-    import { getOnboardingHref, isReservedUsername } from '@lib/account/onboarding';
+    import { clearFieldErrors, confirmRule, focusFirstError, isValidationBypassed, passwordRule, setFieldErrors, validateFields } from '@lib/ui/forms';
+    import { delay, formatBytes, formatDateStamp, formatProds, getInitials, getStanding, pickTileColor, registerPageScript, setPending, setText } from '@lib/utils';
+    import { getOnboardingHref } from '@lib/account/onboarding';
     import { getSession, onSessionChange, updateSession } from '@lib/account/session';
     import { toast } from '@lib/ui/toasts';
 
-    const INVALID_MESSAGE = 'Nothing saved yet. Check the fields.';
-
+    const GENRE_MAX = 5;
+    const INVALID_MESSAGE = 'Check the fields.';
     const LINK_MESSAGE = 'Use a full address that starts with https://.';
-
-    const LINK_NAMES = ['bandcamp', 'instagram', 'soundcloud', 'spotify', 'youtube'];
-
+    const LINK_NAMES = ['instagram', 'spotify', 'soundcloud', 'youtube'];
     const LINK_PATTERN = /^https?:\/\/\S+\.\S+$/i;
 
     const LINK_RULES: Record<string, FieldRule> = Object.fromEntries(
@@ -943,15 +880,12 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
     const PROFILE_RULES: Record<string, FieldRule> = {
         artistName: { message: 'Enter the name the roster should show.', required: true },
         city: { message: 'Name the city you work out of.', required: true },
-        genres: { message: 'Choose at least one.', required: true },
-        username: usernameRule(),
     };
 
     const SIGNED_OUT_MESSAGE = 'Sign in to save changes.';
-
     const TRACK_MISSING_MESSAGE = 'Stage an audio file before you save.';
 
-    let demoSummary = { email: '', prods: '', profile: '', since: '' };
+    let demoSummary = { email: '', name: '', prods: '', role: '', since: '', standing: '' };
     let unsubscribe: (() => void) | undefined;
 
     function handleBioInput(field: HTMLTextAreaElement) {
@@ -974,15 +908,12 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
         }
 
         const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-        const status = form.querySelector<HTMLElement>('[data-links-status]');
 
         setPending(button, true);
-        setText(status, 'Saving\u2026');
 
         await delay(MOCK_LATENCY_MS);
 
         setPending(button, false);
-        setText(status, '');
         toast('Links saved.', 'success');
     }
 
@@ -1002,15 +933,12 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
         }
 
         const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-        const status = form.querySelector<HTMLElement>('[data-password-status]');
 
         setPending(button, true);
-        setText(status, 'Updating\u2026');
 
         await delay(MOCK_LATENCY_MS);
 
         setPending(button, false);
-        setText(status, '');
 
         if (!getSession()) {
             toast(SIGNED_OUT_MESSAGE, 'info');
@@ -1026,10 +954,9 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
         event.preventDefault();
 
         const values = new FormData(form);
-        const username = String(values.get('username') ?? '').trim();
         const errors = validateFields(form, PROFILE_RULES);
 
-        if (!errors.username && isReservedUsername(username)) errors.username = USERNAME_TAKEN_MESSAGE;
+        if (!isValidationBypassed() && values.getAll('genres').length > GENRE_MAX) errors.genres = 'Pick five at most.';
 
         clearFieldErrors(form);
 
@@ -1042,15 +969,15 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
         }
 
         const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-        const status = form.querySelector<HTMLElement>('[data-settings-status]');
 
         setPending(button, true);
-        setText(status, 'Saving\u2026');
 
-        const saved = await updateSession({ artistName: String(values.get('artistName') ?? '').trim(), username: username.toLowerCase() });
+        const saved = await updateSession({
+            artistName: String(values.get('artistName') ?? '').trim(),
+            role: String(values.get('role') ?? ''),
+        });
 
         setPending(button, false);
-        setText(status, '');
 
         if (!saved) {
             toast(SIGNED_OUT_MESSAGE, 'info');
@@ -1090,7 +1017,7 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
 
         const staged = form.querySelector<HTMLElement>('[data-track-staged]');
 
-        if (staged?.hasAttribute('hidden') !== false) {
+        if (!isValidationBypassed() && staged?.hasAttribute('hidden') !== false) {
             setFieldErrors(form, { track: TRACK_MISSING_MESSAGE });
             form.querySelector<HTMLInputElement>('[data-track-input]')?.focus();
             toast(INVALID_MESSAGE, 'error');
@@ -1099,15 +1026,12 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
         }
 
         const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-        const status = form.querySelector<HTMLElement>('[data-track-status]');
 
         setPending(button, true);
-        setText(status, 'Saving\u2026');
 
         await delay(MOCK_LATENCY_MS);
 
         setPending(button, false);
-        setText(status, '');
         toast('Track saved.', 'success');
     }
 
@@ -1124,9 +1048,11 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
 
         demoSummary = {
             email: readText('[data-settings-email]'),
+            name: readText('[data-settings-name]'),
             prods: readText('[data-settings-prods]'),
-            profile: readText('[data-settings-profile]'),
+            role: readText('[data-settings-role]'),
             since: readText('[data-settings-since]'),
+            standing: readText('[data-settings-standing]'),
         };
 
         links.noValidate = true;
@@ -1153,12 +1079,12 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
     function prefillProfile(form: HTMLFormElement) {
         const name = form.querySelector<HTMLInputElement>('[name="artistName"]');
         const session = getSession();
-        const username = form.querySelector<HTMLInputElement>('[name="username"]');
 
         if (!session) return;
 
         if (name) name.value = session.artistName;
-        if (username) username.value = session.username;
+
+        setRole(form, session.role);
     }
 
     function readText(selector: string) {
@@ -1181,12 +1107,20 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
     function renderSession() {
         const link = document.querySelector<HTMLAnchorElement>('[data-settings-onboarding]');
         const session = getSession();
-        const profile = session?.onboarded ? 'Complete' : 'Not finished';
+        const tile = document.querySelector<HTMLElement>('.settings__tile');
 
+        const name = session ? session.artistName || session.email : demoSummary.name;
+        const role = session ? session.role : demoSummary.role;
+
+        if (tile) tile.style.background = pickTileColor(name);
+
+        document.querySelectorAll<HTMLElement>('[data-settings-role]').forEach(element => setText(element, role));
+        setText(document.querySelector('.settings__initials'), getInitials(name));
         setText(document.querySelector('[data-settings-email]'), session?.email ?? demoSummary.email);
+        setText(document.querySelector('[data-settings-name]'), name);
         setText(document.querySelector('[data-settings-prods]'), session ? formatProds(session.prods) : demoSummary.prods);
-        setText(document.querySelector('[data-settings-profile]'), session ? profile : demoSummary.profile);
         setText(document.querySelector('[data-settings-since]'), session?.createdAt ? formatDateStamp(new Date(session.createdAt)) : demoSummary.since);
+        setText(document.querySelector('[data-settings-standing]'), session ? getStanding(session.prods) : demoSummary.standing);
 
         if (!link) return;
 
@@ -1195,6 +1129,12 @@ const genres = Array.from(new Set(producers.flatMap(producer => producer.data.ge
         if (!session) return;
 
         link.href = getOnboardingHref(session.email);
+    }
+
+    function setRole(form: HTMLFormElement, value: string) {
+        const match = Array.from(form.querySelectorAll<HTMLInputElement>('[name="role"]')).find(radio => radio.value === value);
+
+        if (match) match.checked = true;
     }
 
     function stageTrack(form: HTMLFormElement, name: string, meta: string) {

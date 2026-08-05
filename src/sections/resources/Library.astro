@@ -25,14 +25,14 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
 >
     <div>
         <PageHead
-            class="max-w-3xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="max-w-3xl mb-6 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
             eyebrow="Downloads & press kit"
             headingId="resources-title"
         >
             Resources.
         </PageHead>
         <p
-            class="max-w-2xl mt-6 text-lmd text-ink-muted"
+            class="max-w-2xl text-lmd text-ink-muted"
             data-motion="blur"
         >
             Everything the Alliance hands out in one place &mdash; press material, brand assets,
@@ -54,7 +54,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             Asset library
         </SectionHead>
         <label
-            class="block"
+            class="block mb-4"
             data-motion="rise"
         >
             <span class="sr-only">Search the library</span>
@@ -66,7 +66,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                     <IconSearch />
                 </span>
                 <input
-                    class="resources__search focus-visible:bg-surface-raised hover:bg-surface-raised placeholder:text-ink-muted h-[50px] w-full pl-11 pr-[50px] border-2 border-ink font-mono text-sm bg-surface transition-colors"
+                    class="input input--sunk pl-11 pr-(--control-size) font-mono text-sm"
                     autocomplete="off"
                     data-resources-search
                     placeholder="Search assets&hellip;"
@@ -74,7 +74,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                     type="search"
                 />
                 <button
-                    class="active:translate-y-px hover:text-accent-deep absolute right-0 top-0 inline-flex items-center justify-center h-[50px] w-[50px] text-ink-muted transition-colors"
+                    class="active:translate-y-px hover:text-accent-deep absolute right-0 top-0 inline-flex items-center justify-center h-(--control-size) w-(--control-size) text-ink-muted transition-colors"
                     aria-label="Clear search"
                     data-resources-clear
                     hidden
@@ -85,7 +85,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             </span>
         </label>
         <div
-            class="flex flex-wrap gap-2 mt-4"
+            class="flex flex-wrap gap-2 mb-6"
             aria-label="Filter by asset kind"
             data-motion="rise"
             role="group"
@@ -115,14 +115,14 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             ))}
         </div>
         <p
-            class="label mt-6 text-ink-subtle"
+            class="label mb-10 text-ink-subtle"
             aria-live="polite"
             data-resources-status
         >
             Showing all {assets.length} assets.
         </p>
         <ul
-            class="resources__grid mt-10 list-none"
+            class="resources__grid list-none"
             data-motion-from="center"
             data-motion-stagger="flip"
         >
@@ -188,7 +188,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                                     </a>
                                 )
                             : (
-                                    <p class="action-text resources__blocked flex items-center min-h-[50px] px-4 text-ink-subtle">
+                                    <p class="action-text resources__blocked flex items-center min-h-(--control-size) px-4 text-ink-subtle">
                                         Not published yet
                                     </p>
                                 )}
@@ -197,13 +197,13 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             ))}
         </ul>
         <div
-            class="slab slab--sunk flex flex-col items-start gap-4 mt-10"
+            class="slab slab--sunk flex flex-col items-start gap-4"
             data-resources-empty
             hidden
         >
             <p class="font-extrabold font-sans text-xl tracking-tight">No matches.</p>
             <p class="text-sm text-ink-muted">
-                Nothing in the library answers to &ldquo;<span class="font-mono" data-search-echo />&rdquo;.
+                Nothing in the library answers to &ldquo;<span class="font-mono wrap-anywhere" data-search-echo />&rdquo;.
             </p>
             <button
                 class="btn"
@@ -264,10 +264,6 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
         display: flex;
         gap: var(--space-xs);
         justify-content: space-between;
-    }
-
-    .resources__search::-webkit-search-cancel-button {
-        appearance: none;
     }
 
     .resources__swatch {

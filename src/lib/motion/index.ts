@@ -11,7 +11,6 @@ import { refreshMotionTokens } from '@lib/motion/tokens';
 import { registerPageScript } from '@lib/utils';
 
 const GROWTH_DELAY_MS = 200;
-
 const GROWTH_THRESHOLD = 24;
 
 const reducedMotionQuery = window.matchMedia(REDUCED_MOTION_QUERY);
@@ -134,7 +133,7 @@ function hardDisarm(): void {
     revealAll();
 }
 
-export function initMotion(): void {
+function initMotion(): void {
     if (registered) return;
 
     registered = true;
@@ -191,3 +190,5 @@ function teardown(): void {
 }
 
 gsap.registerPlugin(ScrollTrigger);
+
+export { initMotion };

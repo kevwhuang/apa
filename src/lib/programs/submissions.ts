@@ -1,4 +1,4 @@
-export const BASH_SUBMISSIONS: BashSubmission[] = [
+const BASH_SUBMISSIONS: BashSubmission[] = [
     { edition: 'November 2025', producer: 'Devon Park', submittedAt: '2025-11-15T16:42:00-06:00', title: 'Split Custody' },
     { edition: 'November 2025', producer: 'Ramona Vex', submittedAt: '2025-11-15T16:58:00-06:00', title: 'Handshake Deal' },
     { edition: 'November 2025', producer: 'Sasha Lin', submittedAt: '2025-11-15T17:15:00-06:00', title: 'Two Chairs' },
@@ -32,3 +32,5 @@ export const BASH_SUBMISSIONS: BashSubmission[] = [
     { edition: 'July', producer: 'Yara Soto', submittedAt: '2026-07-25T17:50:00-05:00', title: 'Flip Ritual' },
     { edition: 'July', producer: 'Mia Solano', submittedAt: '2026-07-25T17:58:00-05:00', title: 'Last Pressing' },
 ];
+
+export { BASH_SUBMISSIONS };

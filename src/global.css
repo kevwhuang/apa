@@ -73,6 +73,8 @@
     --launcher-rail: var(--launcher-size);
     --launcher-size: 50px;
     --lift: max(2px, calc(var(--drift-unit) / 8));
+    --measure-form: calc(var(--shell-max) * 3 / 4 - 2 * var(--shell-pad));
+    --measure-prose: calc(var(--shell-max) * 5 / 8 - 2 * var(--shell-pad));
     --motion-ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
     --motion-ease-linear: cubic-bezier(0, 0, 1, 1);
     --motion-ease-mechanical: cubic-bezier(0.83, 0, 0.17, 1);
@@ -139,11 +141,22 @@ html[data-theme='dark'] {
     color-scheme: dark;
 }
 
-input:not([type='range']):focus-visible,
+input:not([type='checkbox'], [type='radio'], [type='range']):focus-visible,
 select:focus-visible,
 textarea:focus-visible {
     border-color: var(--color-accent-deep);
     outline: none;
+}
+
+label:has(> .box) {
+    align-items: center;
+    cursor: pointer;
+    display: inline-flex;
+    min-height: var(--control-size);
+}
+
+label:has(> .box:disabled) {
+    cursor: not-allowed;
 }
 
 pre {
@@ -249,7 +262,7 @@ table {
 }
 
 @media (forced-colors: active) {
-    input:not([type='range']):focus-visible,
+    input:not([type='checkbox'], [type='radio'], [type='range']):focus-visible,
     select:focus-visible,
     textarea:focus-visible {
         border-color: CanvasText;

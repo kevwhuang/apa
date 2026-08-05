@@ -1,11 +1,10 @@
 import austinCommunityCollege from '@images/logos/austin_community_college.png';
 import stationAustin from '@images/logos/station_austin.svg';
 
-export const ARTIST_NAME_MAX_LENGTH = 50;
+const ARTIST_NAME_MAX_LENGTH = 50;
+const ASSET_KINDS = ['brochure', 'document', 'media-kit', 'photo-pack', 'press-kit', 'sample-pack', 'slides', 'stems', 'video'] as const;
 
-export const ASSET_KINDS = ['brochure', 'document', 'media-kit', 'photo-pack', 'press-kit', 'sample-pack', 'slides', 'stems', 'video'] as const;
-
-export const ASSET_KIND_LABELS: Record<AssetKind, string> = {
+const ASSET_KIND_LABELS: Record<AssetKind, string> = {
     'brochure': 'Brochure',
     'document': 'Document',
     'media-kit': 'Media kit',
@@ -17,63 +16,48 @@ export const ASSET_KIND_LABELS: Record<AssetKind, string> = {
     'video': 'Video',
 };
 
-export const BASIS_POINTS_DIVISOR = 10_000;
+const BASIS_POINTS_DIVISOR = 10_000;
+const BYTES_PER_KILOBYTE = 1_024;
+const BYTES_PER_MEGABYTE = 1_048_576;
 
-export const BYTES_PER_KILOBYTE = 1_024;
-
-export const BYTES_PER_MEGABYTE = 1_048_576;
-
-export const CANONICAL = {
+const CANONICAL = {
     history: 'Austin Producer Alliance was founded in May 2022 by Kevin Huang and Kyle Henderson to build the city\'s foremost community for music producers. What began as a Discord server grew into a recurring meetup at the Austin Central Library, then into a collective in partnership with longtime sponsor Station Austin (formerly Capital Factory). To date, APA has welcomed more than 500 producers and creatives to its events.',
     mission: 'We bring Austin\'s music producers together. Through meetups, workshops, and collaborations, producers of every genre and experience level find their people, sharpen their craft, and support one another. Our goal is a lasting community for those behind the city\'s sound.',
 } as const;
 
-export const CENTS_PER_DOLLAR = 100;
+const CENTS_PER_DOLLAR = 100;
+const CHECKOUT_STEPS = ['01 Review', '02 Shipping', '03 Payment'] as const;
 
-export const CHECKOUT_STEPS = ['01 Shipping', '02 Payment', '03 Review'] as const;
-
-export const COMMERCE = {
+const COMMERCE = {
     freeShippingThresholdCents: 7_500,
-    lowStockThreshold: 10,
     maxQuantityPerItem: 10,
     shippingFlatCents: 800,
     taxBasisPoints: 825,
 } as const;
 
-export const EMAIL_MAX_LENGTH = 254;
+const EMAIL_MAX_LENGTH = 254;
 
-export const CONTACT_LIMITS = {
+const CONTACT_LIMITS = {
     email: EMAIL_MAX_LENGTH,
     message: 2_000,
     messageMin: 10,
     name: 50,
 } as const;
 
-export const SPONSOR_INQUIRY_TOPIC = 'Sponsor inquiry';
+const SPONSOR_INQUIRY_TOPIC = 'Sponsor inquiry';
 
-export const CONTACT_TOPICS = ['Booking', 'Membership', 'Press', SPONSOR_INQUIRY_TOPIC, 'Something else'] as const;
+const CONTACT_TOPICS = ['Booking', 'Membership', 'Press', SPONSOR_INQUIRY_TOPIC, 'Something else'] as const;
+const CONTENT_DIR = 'src/content';
 
-export const CONTENT_DIR = 'src/content';
-
-export const DEMO_CARDS = {
-    approved: '4242 4242 4242 4242',
-    declined: '4000 0000 0000 0002',
-} as const;
-
-export const DEMO_CREDENTIALS = {
+const DEMO_CREDENTIALS = {
     takenEmail: 'taken@austinproduceralliance.com',
     wrongPassword: 'wrongpassword',
 } as const;
 
-export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const EVENT_CADENCES = ['monthly', 'bimonthly', 'quarterly', 'yearly'] as const;
 
-export const EVENT_CADENCES = ['monthly', 'bimonthly', 'quarterly', 'yearly'] as const;
-
-export const EVENT_STATUSES = ['past', 'upcoming'] as const;
-
-export const EVENT_TYPES = ['assembly', 'hangout', 'bash', 'open-decks', 'studio-tour', 'producer-camp', 'producer-royale', 'the-annual'] as const;
-
-export const EVENT_PROGRAMS: Record<EventType, EventProgram> = {
+const EVENT_PROGRAMS: Record<EventType, EventProgram> = {
     'assembly': {
         cadence: 'monthly',
         name: 'Assembly',
@@ -132,7 +116,10 @@ export const EVENT_PROGRAMS: Record<EventType, EventProgram> = {
     },
 };
 
-export const FIELD_LIMITS = {
+const EVENT_STATUSES = ['past', 'upcoming'] as const;
+const EVENT_TYPES = ['assembly', 'hangout', 'bash', 'open-decks', 'studio-tour', 'producer-camp', 'producer-royale', 'the-annual'] as const;
+
+const FIELD_LIMITS = {
     address: 100,
     card: 19,
     csc: 4,
@@ -141,9 +128,10 @@ export const FIELD_LIMITS = {
     name: 50,
 } as const;
 
-export const JOIN_ROUTE = '/contact#contact-topic';
+const GENRES = ['afrobeats', 'ambient', 'disco', 'drum & bass', 'dubstep', 'experimental', 'folk', 'funk', 'hip-hop', 'house', 'indie', 'jazz', 'Latin', 'lo-fi', 'pop', 'R&B', 'reggaeton', 'rock', 'soul', 'techno', 'trap'] as const;
+const JOIN_ROUTE = '/contact#contact-topic';
 
-export const KIND_COLORS: Record<AssetKind, string> = {
+const KIND_COLORS: Record<AssetKind, string> = {
     'brochure': 'var(--color-signal)',
     'document': 'var(--color-ink-muted)',
     'media-kit': 'var(--color-bloom-deep)',
@@ -155,7 +143,7 @@ export const KIND_COLORS: Record<AssetKind, string> = {
     'video': 'var(--color-bloom)',
 };
 
-export const LINKS = {
+const LINKS = {
     aephonics: 'https://instagram.com/aephonics',
     discord: 'https://discord.gg/aVM3mbRRpU',
     email: 'hello@austinproduceralliance.com',
@@ -166,18 +154,13 @@ export const LINKS = {
 } as const;
 
 const MAX_DECODE_MEGABYTES = 25;
-
 const MAX_FILE_MEGABYTES = 50;
-
 const MAX_TOTAL_MEGABYTES = 150;
+const MILLISECONDS_PER_DAY = 86_400_000;
+const MILLISECONDS_PER_HOUR = 3_600_000;
+const MOCK_LATENCY_MS = 400;
 
-export const MILLISECONDS_PER_DAY = 86_400_000;
-
-export const MILLISECONDS_PER_HOUR = 3_600_000;
-
-export const MOCK_LATENCY_MS = 400;
-
-export const NAV_GROUPS = [
+const NAV_GROUPS = [
     {
         id: 'events',
         items: [
@@ -215,19 +198,17 @@ export const NAV_GROUPS = [
     },
 ] as const;
 
-export const ONBOARDING_ROUTE = '/onboarding';
+const ONBOARDING_ROUTE = '/onboarding';
+const ONBOARDING_TOKEN_PARAM = 't';
+const ONBOARDING_TOKEN_TTL_HOURS = 24;
 
-export const ONBOARDING_TOKEN_PARAM = 't';
-
-export const ONBOARDING_TOKEN_TTL_HOURS = 24;
-
-export const ORDER_ID = {
+const ORDER_ID = {
     digits: 5,
     prefix: 'APA-',
     range: 100_000,
 } as const;
 
-export const PALETTE = [
+const PALETTE = [
     'var(--color-accent)',
     'var(--color-signal)',
     'var(--color-pulse-deep)',
@@ -238,91 +219,38 @@ export const PALETTE = [
     'var(--color-accent-deep)',
 ] as const;
 
-export const CARD_COLORS = PALETTE.slice(0, 4);
+const CARD_COLORS = PALETTE.slice(0, 4);
+const PASSWORD_MIN_LENGTH = 12;
 
-export const PASSWORD_MIN_LENGTH = 12;
-
-export const PLATFORMS = [
+const PLATFORMS = [
     { blurb: 'Event listings and RSVPs for every meet on the calendar.', href: LINKS.meetup, label: 'Meetup' },
     { blurb: 'Recaps, announcements, and work from across the roster.', href: LINKS.instagram, label: 'Instagram' },
     { blurb: 'The day-to-day room where the community actually talks.', href: LINKS.discord, label: 'Discord' },
 ] as const;
 
-export const PRODUCT_CATEGORIES = ['accessory', 'apparel', 'music'] as const;
+const PRODUCT_CATEGORIES = ['accessory', 'apparel', 'music'] as const;
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
-export const QUESTIONNAIRE = [
-    {
-        id: 'experience',
-        kind: 'radio',
-        label: 'How long have you been producing?',
-        options: [
-            { label: 'Under a year', value: 'under-a-year' },
-            { label: 'One to three years', value: 'one-to-three-years' },
-            { label: 'Three to seven years', value: 'three-to-seven-years' },
-            { label: 'Over seven years', value: 'over-seven-years' },
-        ],
-    },
-    {
-        id: 'daw',
-        kind: 'select',
-        label: 'What do you produce in?',
-        options: [
-            { label: 'Ableton Live', value: 'ableton-live' },
-            { label: 'Bitwig Studio', value: 'bitwig-studio' },
-            { label: 'Cubase', value: 'cubase' },
-            { label: 'FL Studio', value: 'fl-studio' },
-            { label: 'Logic Pro', value: 'logic-pro' },
-            { label: 'Pro Tools', value: 'pro-tools' },
-            { label: 'Reaper', value: 'reaper' },
-            { label: 'Reason', value: 'reason' },
-            { label: 'Studio One', value: 'studio-one' },
-            { label: 'Something else', value: 'other' },
-        ],
-    },
-    {
-        id: 'intent',
-        kind: 'checkbox',
-        label: 'What are you here for?',
-        options: [
-            { label: 'Collaborating', value: 'collaborating' },
-            { label: 'Feedback on my tracks', value: 'feedback' },
-            { label: 'Learning and workshops', value: 'learning' },
-            { label: 'Meeting other producers', value: 'meeting' },
-            { label: 'Playing out', value: 'playing-out' },
-            { label: 'Releasing music', value: 'releasing' },
-        ],
-    },
-    {
-        id: 'referral',
-        kind: 'select',
-        label: 'How did you hear about the Alliance?',
-        options: [
-            { label: 'At an event', value: 'at-an-event' },
-            { label: 'Discord', value: 'discord' },
-            { label: 'Instagram', value: 'instagram' },
-            { label: 'Meetup', value: 'meetup' },
-            { label: 'Another producer', value: 'another-producer' },
-            { label: 'Somewhere else', value: 'other' },
-        ],
-    },
+const ROLES = [
+    { description: 'Runs the Alliance \u2014 programs, money, and this site.', id: 'admin' },
+    { description: 'Opens the room, runs check-in, and keeps events moving.', id: 'host' },
+    { description: 'Makes tracks.', id: 'producer' },
+    { description: 'Mixes, masters, and runs sound.', id: 'engineer' },
+    { description: 'Performs and releases under their own name.', id: 'artist' },
+    { description: 'Here for the music. Every account starts here.', id: 'fan' },
 ] as const;
 
-export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+const SESSION_TTL_DAYS = 14;
+const SITE_UPDATED = '2026-08-03';
 
-export const RESERVED_USERNAMES = ['admin', 'aephonics', 'apa', 'austin', 'help', 'root', 'signin', 'signout', 'staff', 'support', 'system'] as const;
-
-export const SESSION_TTL_DAYS = 14;
-
-export const SITE_UPDATED = '2026-08-03';
-
-export const SPONSORS = [
+const SPONSORS = [
     { logo: stationAustin, name: 'Station Austin' },
     { logo: austinCommunityCollege, name: 'Austin Community College' },
 ] as const;
 
-export const SPONSOR_LOGO_WIDTH = 640;
+const SPONSOR_LOGO_WIDTH = 640;
 
-export const STORAGE = {
+const STORAGE = {
     adminProds: { key: 'apa.admin-prods', scope: 'local', topic: 'apa:admin-prods-changed' },
     bashBoard: { key: 'apa.bash-board', scope: 'session', topic: 'apa:bash-board-changed' },
     cart: { key: 'apa.cart', scope: 'local', topic: 'apa:cart-changed' },
@@ -336,11 +264,10 @@ export const STORAGE = {
     theme: { key: 'apa.theme', scope: 'local', topic: 'apa:theme-changed' },
 } as const;
 
-export const TRACK_PLAY_TOPIC = 'apa:track-play';
+const TRACK_PLAY_TOPIC = 'apa:track-play';
+const TRACK_STATE_TOPIC = 'apa:track-state';
 
-export const TRACK_STATE_TOPIC = 'apa:track-state';
-
-export const UPLOAD = {
+const UPLOAD = {
     acceptAttribute: '.aif,.aiff,.flac,.m4a,.mp3,.wav,audio/aiff,audio/flac,audio/mp4,audio/mpeg,audio/wav,audio/x-aiff,audio/x-wav',
     extensions: ['aif', 'aiff', 'flac', 'm4a', 'mp3', 'wav'],
     failureTrigger: 'fail',
@@ -350,13 +277,9 @@ export const UPLOAD = {
     maxTotalBytes: MAX_TOTAL_MEGABYTES * BYTES_PER_MEGABYTE,
 } as const;
 
-export const UPLOAD_EXTENSIONS_LABEL = UPLOAD.extensions.map(extension => extension.toUpperCase()).join(', ');
+const UPLOAD_EXTENSIONS_LABEL = UPLOAD.extensions.map(extension => extension.toUpperCase()).join(', ');
 
-export const USERNAME_PATTERN = '[A-Za-z0-9_]{3,20}';
-
-export const USERNAME_TAKEN_MESSAGE = 'That username is taken. Pick another.';
-
-export const US_STATES = [
+const US_STATES = [
     { code: 'AL', name: 'Alabama' },
     { code: 'AK', name: 'Alaska' },
     { code: 'AZ', name: 'Arizona' },
@@ -410,4 +333,59 @@ export const US_STATES = [
     { code: 'WY', name: 'Wyoming' },
 ] as const;
 
-export const WELCOME_PRODS = 1;
+const WELCOME_PRODS = 1;
+
+export {
+    ARTIST_NAME_MAX_LENGTH,
+    ASSET_KINDS,
+    ASSET_KIND_LABELS,
+    BASIS_POINTS_DIVISOR,
+    BYTES_PER_KILOBYTE,
+    BYTES_PER_MEGABYTE,
+    CANONICAL,
+    CARD_COLORS,
+    CENTS_PER_DOLLAR,
+    CHECKOUT_STEPS,
+    COMMERCE,
+    CONTACT_LIMITS,
+    CONTACT_TOPICS,
+    CONTENT_DIR,
+    DEMO_CREDENTIALS,
+    EMAIL_MAX_LENGTH,
+    EMAIL_PATTERN,
+    EVENT_CADENCES,
+    EVENT_PROGRAMS,
+    EVENT_STATUSES,
+    EVENT_TYPES,
+    FIELD_LIMITS,
+    GENRES,
+    JOIN_ROUTE,
+    KIND_COLORS,
+    LINKS,
+    MILLISECONDS_PER_DAY,
+    MILLISECONDS_PER_HOUR,
+    MOCK_LATENCY_MS,
+    NAV_GROUPS,
+    ONBOARDING_ROUTE,
+    ONBOARDING_TOKEN_PARAM,
+    ONBOARDING_TOKEN_TTL_HOURS,
+    ORDER_ID,
+    PALETTE,
+    PASSWORD_MIN_LENGTH,
+    PLATFORMS,
+    PRODUCT_CATEGORIES,
+    REDUCED_MOTION_QUERY,
+    ROLES,
+    SESSION_TTL_DAYS,
+    SITE_UPDATED,
+    SPONSORS,
+    SPONSOR_INQUIRY_TOPIC,
+    SPONSOR_LOGO_WIDTH,
+    STORAGE,
+    TRACK_PLAY_TOPIC,
+    TRACK_STATE_TOPIC,
+    UPLOAD,
+    UPLOAD_EXTENSIONS_LABEL,
+    US_STATES,
+    WELCOME_PRODS,
+};

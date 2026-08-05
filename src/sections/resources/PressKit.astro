@@ -30,13 +30,13 @@ const press = downloads
             Brand assets
         </SectionHead>
         <p
-            class="max-w-2xl mb-8 text-smd text-ink-muted"
+            class="max-w-2xl mb-10 text-smd text-ink-muted"
             data-motion="rise"
         >
             The wordmark and lockup, in the formats a publication is likely to ask for.
         </p>
         <div
-            class="press-kit__marks slab slab--card slab--roomy"
+            class="press-kit__marks slab slab--card slab--roomy mb-8"
             data-motion="unfold"
         >
             <BrandLockup
@@ -50,7 +50,7 @@ const press = downloads
             />
         </div>
         <div
-            class="press-kit__scroller mt-8"
+            class="press-kit__scroller"
             data-motion="unfold"
         >
             <table class="press-kit__table border-2 border-ink">
@@ -112,7 +112,7 @@ const press = downloads
             Press material
         </SectionHead>
         <div
-            class="press-kit__scroller"
+            class="press-kit__scroller mb-8"
             data-motion="unfold"
         >
             <table class="press-kit__table border-2 border-ink">
@@ -207,7 +207,7 @@ const press = downloads
                 </tbody>
             </table>
         </div>
-        <p class="mt-8 text-smd text-ink-muted">
+        <p class="text-smd text-ink-muted">
             Each entry also has a card in the&#32;
             <a
                 class="press-kit__link hover:text-accent-deep underline underline-offset-4"
@@ -232,7 +232,6 @@ const press = downloads
             <SectionHead
                 class="font-extrabold font-sans leading-[1.05] text-3xl tracking-[-0.035em] md:text-5xl"
                 eyebrow="Requests"
-                eyebrowClass="mb-4"
                 headingId="resources-ask-title"
             >
                 Ask us.
@@ -263,7 +262,7 @@ const press = downloads
     .press-kit__download {
         align-items: center;
         display: inline-flex;
-        min-height: 50px;
+        min-height: var(--control-size);
         transition: color var(--duration-fast) var(--motion-ease-ui);
     }
 

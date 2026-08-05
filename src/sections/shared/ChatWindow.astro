@@ -61,7 +61,7 @@ import IconClose from '@components/icons/Close.astro';
         >
             <input
                 id="chat-message"
-                class="chat__field"
+                class="input flex-1 min-w-0 text-sm"
                 aria-label="Message"
                 autocomplete="off"
                 data-chat-field
@@ -116,6 +116,8 @@ import IconClose from '@components/icons/Close.astro';
         font-size: var(--text-sm);
         font-weight: 700;
         line-height: 1.2;
+        min-width: 0;
+        overflow-wrap: anywhere;
     }
 
     .chat__avatar {
@@ -132,6 +134,7 @@ import IconClose from '@components/icons/Close.astro';
         height: 30px;
         justify-content: center;
         line-height: 1;
+        overflow: hidden;
         text-transform: uppercase;
         user-select: none;
         width: 30px;
@@ -168,22 +171,6 @@ import IconClose from '@components/icons/Close.astro';
 
     .chat__eyebrow {
         color: var(--color-accent-deep);
-    }
-
-    .chat__field {
-        background-color: var(--color-surface);
-        border: 2px solid var(--color-ink);
-        flex: 1;
-        font-size: var(--text-sm);
-        min-height: 50px;
-        min-width: 0;
-        padding-inline: var(--space-2xs);
-        transition: background-color var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .chat__field:focus-visible,
-    .chat__field:hover {
-        background-color: var(--color-surface-raised);
     }
 
     .chat__form {
@@ -331,21 +318,13 @@ import IconClose from '@components/icons/Close.astro';
     import { formatTime, getInitials, initPanelResize, isTopFloatWindow, raiseWindow, registerPageScript, setText } from '@lib/utils';
 
     const CHAT_MIN_WIDTH = 340;
-
     const GROUP_WINDOW_MS = 300_000;
-
     const LAUNCHER_SIZE = 50;
-
     const LIVE_RESET_DELAY = 200;
-
     const MEMBER_COLORS = new Map<string, string>(ROOM_MEMBERS.map((member, index) => [member.name, PALETTE[(index + 1) % PALETTE.length]]));
-
     const RESIZE_LABEL = 'Resize member chat';
-
     const SELF_COLOR = PALETTE[PALETTE.length - 1];
-
     const TALLY_INTERVAL_MS = 60_000;
-
     const WINDOW_MARGINS = 48;
 
     let liveTimer: number | undefined;
@@ -367,7 +346,7 @@ import IconClose from '@components/icons/Close.astro';
 
         item.classList.toggle('chat__message--grouped', grouped);
         avatar.style.background = message.self ? SELF_COLOR : (MEMBER_COLORS.get(message.name) ?? SELF_COLOR);
-        setText(avatar, message.self ? message.name : getInitials(message.name));
+        setText(avatar, getInitials(message.name));
         setText(fragment.querySelector('[data-chat-author]'), message.name);
         setText(fragment.querySelector('[data-chat-time]'), formatTime(new Date(message.sentAt)));
         setText(fragment.querySelector('[data-chat-text]'), message.body);

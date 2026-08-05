@@ -5,6 +5,7 @@ import { formatDateOnly } from '@lib/utils';
 
 const MEMBERS = [
     {
+        artistName: 'Devon Park',
         email: 'devon.park@fastmail.com',
         id: 'devon-park',
         joined: '2023-11-04',
@@ -14,9 +15,9 @@ const MEMBERS = [
             { amount: 1, date: '2026-05-09', reason: 'Attended the May Assembly' },
             { amount: -8, date: '2026-06-27', reason: 'Redeemed \u2014 Sticker pack' },
         ],
-        username: 'devonpark',
     },
     {
+        artistName: 'Inez Rao',
         email: 'inez.rao@hey.com',
         id: 'inez-rao',
         joined: '2024-01-19',
@@ -25,9 +26,9 @@ const MEMBERS = [
             { amount: 10, date: '2026-04-11', reason: 'Won the Bash \u2014 spring edition' },
             { amount: 1, date: '2026-06-13', reason: 'Attended the June Hangout' },
         ],
-        username: 'inezrao',
     },
     {
+        artistName: 'June Castillo',
         email: 'june.castillo@gmail.com',
         id: 'june-castillo',
         joined: '2024-02-08',
@@ -36,9 +37,9 @@ const MEMBERS = [
             { amount: 1, date: '2026-02-21', reason: 'Submitted a track for feedback' },
             { amount: 3, date: '2026-05-09', reason: 'Gave a lightning talk' },
         ],
-        username: 'junecastillo',
     },
     {
+        artistName: 'Kojo Mensah',
         email: 'kojo.mensah@outlook.com',
         id: 'kojo-mensah',
         joined: '2024-03-27',
@@ -47,9 +48,9 @@ const MEMBERS = [
             { amount: 2, date: '2026-05-23', reason: 'Got a sample accepted' },
             { amount: 1, date: '2026-07-12', reason: 'Attended the July Bash' },
         ],
-        username: 'kojomensah',
     },
     {
+        artistName: 'Marcus Hale',
         email: 'marcus.hale@gmail.com',
         id: 'marcus-hale',
         joined: '2023-09-12',
@@ -58,18 +59,18 @@ const MEMBERS = [
             { amount: 10, date: '2026-01-17', reason: 'Organized a weekly meet' },
             { amount: -8, date: '2026-06-20', reason: 'Redeemed \u2014 Sticker pack' },
         ],
-        username: 'marcushale',
     },
     {
+        artistName: 'Otis Reed',
         email: 'otis.reed@gmail.com',
         id: 'otis-reed',
         joined: '2025-04-09',
         ledger: [
             { amount: 1, date: '2025-04-09', reason: 'Welcome Prod' },
         ],
-        username: 'otisreed',
     },
     {
+        artistName: 'Priya Nand',
         email: 'priya.nand@hey.com',
         id: 'priya-nand',
         joined: '2025-06-21',
@@ -77,9 +78,9 @@ const MEMBERS = [
             { amount: 1, date: '2025-06-21', reason: 'Welcome Prod' },
             { amount: 1, date: '2026-07-12', reason: 'Submitted a track for feedback' },
         ],
-        username: 'priyanand',
     },
     {
+        artistName: 'Sasha Lin',
         email: 'sasha.lin@proton.me',
         id: 'sasha-lin',
         joined: '2024-06-02',
@@ -88,9 +89,9 @@ const MEMBERS = [
             { amount: 1, date: '2026-03-14', reason: 'Brought a friend' },
             { amount: 2, date: '2026-07-12', reason: 'Finished a Bash track' },
         ],
-        username: 'sashalin',
     },
     {
+        artistName: 'Tana Wolfe',
         email: 'tana.wolfe@gmail.com',
         id: 'tana-wolfe',
         joined: '2024-08-15',
@@ -98,9 +99,9 @@ const MEMBERS = [
             { amount: 1, date: '2024-08-15', reason: 'Welcome Prod' },
             { amount: 1, date: '2026-04-11', reason: 'Attended the April Assembly' },
         ],
-        username: 'tanawolfe',
     },
     {
+        artistName: 'Yara Soto',
         email: 'yara.soto@icloud.com',
         id: 'yara-soto',
         joined: '2025-01-23',
@@ -109,7 +110,6 @@ const MEMBERS = [
             { amount: 1, date: '2026-05-23', reason: 'Tagged our social media' },
             { amount: 5, date: '2026-06-13', reason: 'Facilitated conversation' },
         ],
-        username: 'yarasoto',
     },
 ];
 
@@ -129,25 +129,25 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
             Prods management
         </SectionHead>
         <div data-motion="rise">
-            <label class="block">
+            <label class="block mb-3">
                 <span class="label block mb-2 text-ink-muted">Find a member</span>
                 <input
-                    class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-mono text-sm bg-transparent transition-colors"
+                    class="input input--sunk max-w-[360px] font-mono text-sm"
                     autocomplete="off"
                     data-prods-search
-                    placeholder="Username or email"
+                    placeholder="Name or email"
                     type="search"
                 />
             </label>
             <p
-                class="label mt-3 text-ink-subtle"
+                class="label mb-4 text-ink-subtle"
                 aria-live="polite"
                 data-prods-count
             >
                 {MEMBERS.length} members
             </p>
             <ul
-                class="prods__members scroll-slot mt-4 border-2 border-ink divide-y divide-ink list-none"
+                class="prods__members scroll-slot border-2 border-ink divide-y divide-ink list-none"
                 data-prods-seed={LEDGER_SEED}
             >
                 {MEMBERS.map(member => (
@@ -159,10 +159,10 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
                             data-member-email={member.email}
                             data-member-id={member.id}
                             data-member-joined={formatDateOnly(new Date(member.joined))}
-                            data-member-username={member.username}
+                            data-member-name={member.artistName}
                             type="button"
                         >
-                            <span class="font-bold font-sans leading-snug text-md tracking-tight">@{member.username}</span>
+                            <span class="font-bold font-sans leading-snug text-md tracking-tight">{member.artistName}</span>
                             <span class="font-mono text-xs text-ink-muted">{member.email}</span>
                             <span class="font-mono text-2xs text-ink-subtle">Joined {formatDateOnly(new Date(member.joined))}</span>
                         </button>
@@ -186,11 +186,11 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
                 <div>
                     <h3
                         id="prods-modal-title"
-                        class="font-extrabold font-sans text-2xl tracking-tight"
+                        class="mb-2 font-extrabold font-sans text-2xl tracking-tight"
                     >
                         <span data-prods-member>Member ledger</span>
                     </h3>
-                    <p class="prods__meta mt-2 font-mono text-xs text-ink-muted">
+                    <p class="prods__meta font-mono text-xs text-ink-muted">
                         <span data-prods-email />
                         <span
                             class="text-ink-subtle"
@@ -208,22 +208,22 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
                 </button>
             </div>
             <div class="prods__body">
-                <dl class="grid gap-px border-2 border-ink bg-ink md:grid-cols-3">
-                    <div class="p-5 bg-surface-raised">
+                <dl class="grid gap-px mb-8 border-2 border-ink bg-ink md:grid-cols-3">
+                    <div class="p-(--space-md) bg-surface-raised">
                         <dt class="label mb-2 text-ink-muted">Prod balance</dt>
                         <dd
                             class="font-extrabold font-sans text-3xl tracking-tight"
                             data-prods-balance
                         />
                     </div>
-                    <div class="p-5 bg-surface-raised">
+                    <div class="p-(--space-md) bg-surface-raised">
                         <dt class="label mb-2 text-ink-muted">Standing</dt>
                         <dd
                             class="action-text"
                             data-prods-standing
                         />
                     </div>
-                    <div class="p-5 bg-surface-raised">
+                    <div class="p-(--space-md) bg-surface-raised">
                         <dt class="label mb-2 text-ink-muted">Member since</dt>
                         <dd
                             class="font-mono text-sm"
@@ -231,8 +231,8 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
                         />
                     </div>
                 </dl>
-                <p class="label mt-8 text-ink-muted">Ledger history</p>
-                <div class="prods__scroller scroll-slot mt-3">
+                <p class="label mb-3 text-ink-muted">Ledger history</p>
+                <div class="prods__scroller scroll-slot mb-8">
                     <table class="prods__table border-2 border-ink">
                         <caption class="sr-only">Dated ledger entries with reason, change, and running balance</caption>
                         <thead>
@@ -276,7 +276,7 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
                             data-cell="date"
                         />
                         <td
-                            class="px-4 py-4 text-sm"
+                            class="px-4 py-4 text-sm wrap-anywhere"
                             data-cell="reason"
                         />
                         <td
@@ -290,15 +290,15 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
                     </tr>
                 </template>
                 <form
-                    class="slab slab--sunk mt-8"
+                    class="slab slab--sunk"
                     data-prods-form
                 >
                     <p class="label mb-4 text-ink-muted">Adjust balance</p>
-                    <div class="prods__fields">
+                    <div class="prods__fields mb-3">
                         <label class="block">
                             <span class="label block mb-2 text-ink-muted">Amount</span>
                             <input
-                                class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-bold font-mono text-smd bg-transparent transition-colors"
+                                class="input font-bold font-mono text-smd"
                                 aria-describedby="prods-amount-hint prods-amount-error"
                                 aria-invalid="false"
                                 autocomplete="off"
@@ -314,7 +314,7 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
                         <label class="block">
                             <span class="label block mb-2 text-ink-muted">Reason</span>
                             <input
-                                class="aria-invalid:border-accent-deep focus-visible:bg-surface-raised hover:bg-surface-raised h-[50px] w-full px-4 border-2 border-ink font-sans bg-transparent transition-colors"
+                                class="input font-sans"
                                 aria-describedby="prods-reason-error"
                                 aria-invalid="false"
                                 autocomplete="off"
@@ -324,26 +324,28 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
                             />
                         </label>
                     </div>
-                    <p
-                        id="prods-amount-hint"
-                        class="mt-3 font-mono text-2xs text-ink-subtle"
-                    >
-                        Whole amounts from &minus;100 to 100, excluding zero.
-                    </p>
-                    <p
-                        id="prods-amount-error"
-                        class="action-text mt-2 text-accent-deep"
-                        data-field-error
-                        hidden
-                    />
-                    <p
-                        id="prods-reason-error"
-                        class="action-text mt-2 text-accent-deep"
-                        data-field-error
-                        hidden
-                    />
+                    <div class="flex flex-col gap-2 mb-6">
+                        <p
+                            id="prods-amount-hint"
+                            class="font-mono text-2xs text-ink-subtle"
+                        >
+                            Whole amounts from &minus;100 to 100, excluding zero.
+                        </p>
+                        <p
+                            id="prods-amount-error"
+                            class="action-text text-accent-deep"
+                            data-field-error
+                            hidden
+                        />
+                        <p
+                            id="prods-reason-error"
+                            class="action-text text-accent-deep"
+                            data-field-error
+                            hidden
+                        />
+                    </div>
                     <button
-                        class="btn btn--primary mt-6"
+                        class="btn btn--primary"
                         data-prods-apply
                         type="submit"
                     >
@@ -417,7 +419,7 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
     }
 
     .prods__members {
-        --scroll-slot-max: 416px;
+        --scroll-slot-max: calc(4px + 5 * (73.5px + 11 * var(--text-md) / 8));
     }
 
     .prods__meta {
@@ -475,7 +477,7 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
     import { MOCK_LATENCY_MS, STORAGE } from '@lib/constants';
     import { clearFieldErrors, focusFirstError, setFieldErrors, validateFields } from '@lib/ui/forms';
     import { createStore } from '@lib/state';
-    import { delay, formatDateStamp, formatProds, registerPageScript, setPending, setText } from '@lib/utils';
+    import { delay, formatDateStamp, formatProds, getStanding, registerPageScript, setPending, setText } from '@lib/utils';
     import { toast } from '@lib/ui/toasts';
 
     type LedgerMap = Record<string, LedgerEntry[]>;
@@ -487,9 +489,7 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
     }
 
     const AMOUNT_LIMIT = 100;
-
     const DATE_ONLY_LENGTH = 10;
-
     const REASON_MAX = 80;
 
     const RULES: Record<string, FieldRule> = {
@@ -530,13 +530,6 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
         return [...(seed[id] ?? []), ...(adjustments.get()[id] ?? [])];
     }
 
-    function getStanding(balance: number) {
-        if (balance < 0) return 'In review';
-        if (balance === 0) return 'Settled';
-
-        return 'Good standing';
-    }
-
     async function handleAdjustSubmit(event: SubmitEvent, form: HTMLFormElement) {
         event.preventDefault();
 
@@ -549,13 +542,14 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
         if (Object.keys(errors).length > 0) {
             setFieldErrors(form, errors);
             focusFirstError(form, errors);
+            toast('Check the fields.', 'error');
 
             return;
         }
 
         const memberId = selectedId;
+        const name = selectedName();
         const submit = form.querySelector<HTMLButtonElement>('[data-prods-apply]');
-        const username = selectedUsername();
         const values = new FormData(form);
 
         const amount = Number(String(values.get('amount') ?? '').trim());
@@ -582,7 +576,7 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
         if (selectedId === memberId) renderDetail();
 
         submit?.focus();
-        toast(`${amount < 0 ? 'Removed' : 'Added'} ${formatProds(size)} ${amount < 0 ? 'from' : 'to'} @${username}.`, 'success');
+        toast(`${amount < 0 ? 'Removed' : 'Added'} ${formatProds(size)} ${amount < 0 ? 'from' : 'to'} ${name}.`, 'success');
     }
 
     function handleModalClick(event: MouseEvent, dialog: HTMLDialogElement) {
@@ -606,7 +600,7 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
         let shown = 0;
 
         buttons.forEach((button) => {
-            const haystack = `${button.dataset.memberUsername} ${button.dataset.memberEmail}`.toLowerCase();
+            const haystack = `${button.dataset.memberName} ${button.dataset.memberEmail}`.toLowerCase();
             const match = query.length === 0 || haystack.includes(query);
 
             button.closest('li')?.classList.toggle('hidden', !match);
@@ -708,14 +702,14 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
         setText(balance, String(total));
         setText(email, button.dataset.memberEmail ?? '');
         setText(joined, `Joined ${button.dataset.memberJoined ?? ''}`);
-        setText(member, `@${button.dataset.memberUsername}`);
+        setText(member, button.dataset.memberName ?? '');
         setText(since, button.dataset.memberJoined ?? '');
         setText(standing, getStanding(total));
         standing?.classList.toggle('text-accent-deep', total < 0);
     }
 
-    function selectedUsername() {
-        return document.querySelector<HTMLButtonElement>(`[data-member-id="${selectedId}"]`)?.dataset.memberUsername ?? '';
+    function selectedName() {
+        return document.querySelector<HTMLButtonElement>(`[data-member-id="${selectedId}"]`)?.dataset.memberName ?? '';
     }
 
     registerPageScript(initAdminProds);

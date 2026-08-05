@@ -186,14 +186,12 @@ interface MotionTokens {
 }
 
 interface OnboardingDraft {
-    answers: Record<string, string[]>;
     artistName: string;
     email: string;
     genres: string[];
     location: string;
-    passwordSet: boolean;
+    roles: string[];
     step: number;
-    username: string;
 }
 
 interface OnboardingEmailInput {
@@ -248,7 +246,7 @@ interface Profile {
     createdAt: number;
     onboarded: boolean;
     prods: number;
-    username: string;
+    role: string;
 }
 
 interface RackBlock {
@@ -275,14 +273,13 @@ interface Session {
     expiresAt: number;
     onboarded: boolean;
     prods: number;
-    username: string;
+    role: string;
 }
 
 interface SessionDraft {
     artistName?: string;
     email: string;
     password?: string;
-    username?: string;
 }
 
 interface Store<T> {

@@ -20,8 +20,8 @@ const SECTIONS: Record<Props['kind'], { body: string[]; heading: string }[]> = {
         {
             body: [
                 'A few features remember things between pages or visits. They do it with your browser\'s built-in storage, on your device, and none of it is ever transmitted to us or to anyone else. The whole inventory runs to eleven keys, listed below with what each one holds.',
-                `Longer-lived storage (localStorage) holds seven keys: <code>${STORAGE.adminProds.key}</code>, the Prods adjustments entered in the admin console on top of its sample roster, which never expire on their own; <code>${STORAGE.cart.key}</code>, the contents of your demonstration store cart; <code>apa.cart-seeded</code>, a one-time marker that the demonstration cart was pre-filled, which is what stops it refilling once you empty it; <code>${STORAGE.newsletter.key}</code>, the address you subscribed to the seasonal dispatch with, kept so the form does not ask twice; <code>${STORAGE.profiles.key}</code>, the roster profile (artist name, username, Prods balance) for each address that has signed in, so it survives signing out; <code>${STORAGE.session.key}</code>, the demo sign-in session \u2014 email, artist name, username, Prods balance, and an expiry stamp that retires it by itself after ${SESSION_TTL_DAYS} days; and <code>${STORAGE.theme.key}</code>, your light-or-dark theme choice.`,
-                `Per-tab storage (sessionStorage) empties as soon as the tab closes. It holds <code>${STORAGE.bashBoard.key}</code>, the Bash submission board, so its pager and its refresh have something to page through \u2014 those rows are sample entries from past editions, not anything you uploaded; <code>${STORAGE.chat.key}</code>, the demo member chat room, meaning its three seeded producers and whatever you have typed back; <code>${STORAGE.onboardingDraft.key}</code>, an in-progress draft of the onboarding questionnaire (artist name, username, location, genres, and answers, plus the flag that a password was set); and <code>${STORAGE.order.key}</code>, the receipt from your most recent demonstration checkout.`,
+                `Longer-lived storage (localStorage) holds seven keys: <code>${STORAGE.adminProds.key}</code>, the Prods adjustments entered in the admin console on top of its sample roster, which never expire on their own; <code>${STORAGE.cart.key}</code>, the contents of your demonstration store cart; <code>apa.cart-seeded</code>, a one-time marker that the demonstration cart was pre-filled, which is what stops it refilling once you empty it; <code>${STORAGE.newsletter.key}</code>, the address you subscribed to the seasonal dispatch with, kept so the form does not ask twice; <code>${STORAGE.profiles.key}</code>, the roster profile (artist name, join date, onboarding state, and Prods balance) for each address that has signed in, so it survives signing out; <code>${STORAGE.session.key}</code>, the demo sign-in session \u2014 email, artist name, a join stamp, onboarding state, Prods balance, and an expiry stamp that retires it by itself after ${SESSION_TTL_DAYS} days; and <code>${STORAGE.theme.key}</code>, your light-or-dark theme choice.`,
+                `Per-tab storage (sessionStorage) empties as soon as the tab closes. It holds <code>${STORAGE.bashBoard.key}</code>, the Bash submission board, so its pager and its refresh have something to page through \u2014 those rows are sample entries from past editions, not anything you uploaded; <code>${STORAGE.chat.key}</code>, the demo member chat room, meaning its three seeded producers and whatever you have typed back; <code>${STORAGE.onboardingDraft.key}</code>, an in-progress draft of the onboarding questionnaire (artist name, email address, genres, and roles, plus the step you reached and the flag that a password was set); and <code>${STORAGE.order.key}</code>, the receipt from your most recent demonstration checkout.`,
                 'Three surfaces write nothing at all. The rack holds your loaded file, which of its sixteen modules are switched on, where their sliders sit, and everything its meters are reading in page memory, so leaving the page ends that session and coming back starts a clean one. The track player keeps its volume, mute, and position the same way. So does the AI assistant conversation.',
             ],
             heading: 'Data stored in your browser',
@@ -220,10 +220,10 @@ function slugify(heading: string) {
 ---
 
 <section
-    class="stage stage--prose stage--tight"
+    class="stage stage--tight"
     aria-labelledby={`${kind}-title`}
 >
-    <div class="wrap-break-word">
+    <div class="legal wrap-break-word">
         <p
             class="label mb-4 text-accent-deep"
             data-motion="stamp"
@@ -266,6 +266,11 @@ function slugify(heading: string) {
 </section>
 
 <style>
+    .legal {
+        margin-inline: auto;
+        max-width: var(--measure-prose);
+    }
+
     .legal__body :global(a) {
         display: inline-block;
         max-width: 100%;

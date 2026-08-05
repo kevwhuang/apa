@@ -192,6 +192,10 @@ import IconWaveform from '@components/icons/Waveform.astro';
         color: var(--color-ink-muted);
         font-family: var(--font-mono);
         font-size: var(--text-2xs);
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .dock__close {
@@ -463,6 +467,10 @@ import IconWaveform from '@components/icons/Waveform.astro';
     .dock__title {
         font-size: var(--text-md);
         font-weight: 800;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 </style>
 
@@ -496,25 +504,15 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     const DOCK_MIN_WIDTH = 340;
-
     const EMPTY_ARTIST = 'Play a track to load it here';
-
     const EMPTY_TITLE = 'Nothing playing';
-
     const LAUNCHER_SIZE = 50;
-
     const RACK_ARTIST = 'Rack';
-
     const RACK_EMPTY = 'No file loaded';
-
     const RESIZE_LABEL = 'Resize track player';
-
     const SEEK_LABEL_RACK = 'Seek within the rack';
-
     const SEEK_LABEL_TRACK = 'Seek within the track';
-
     const VOLUME_SCALE = 100;
-
     const WINDOW_MARGINS = 48;
 
     let frame = 0;
@@ -658,14 +656,16 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     function render() {
+        const artist = document.querySelector<HTMLElement>('[data-dock-artist]');
         const launcher = document.querySelector<HTMLElement>('[data-dock-launcher]');
         const panel = document.querySelector<HTMLElement>('#dock-panel');
         const seek = document.querySelector<HTMLInputElement>('[data-dock-seek]');
         const source = getSource();
         const state = getPlayerState();
+        const title = document.querySelector<HTMLElement>('[data-dock-title]');
         const toggle = document.querySelector<HTMLElement>('[data-dock-toggle]');
 
-        if (!launcher || !panel || !seek || !toggle) return;
+        if (!artist || !launcher || !panel || !seek || !title || !toggle) return;
 
         const playing = source?.playing ?? false;
 
@@ -677,8 +677,10 @@ import IconWaveform from '@components/icons/Waveform.astro';
         toggle.setAttribute('aria-pressed', String(playing));
         toggle.toggleAttribute('disabled', !source);
         setText(document.querySelector('[data-dock-toggle-label]'), toggleLabel(source));
-        setText(document.querySelector('[data-dock-title]'), source?.title ?? EMPTY_TITLE);
-        setText(document.querySelector('[data-dock-artist]'), source?.artist ?? EMPTY_ARTIST);
+        setText(title, source?.title ?? EMPTY_TITLE);
+        setText(artist, source?.artist ?? EMPTY_ARTIST);
+        title.title = source?.title ?? '';
+        artist.title = source?.artist ?? '';
         setText(document.querySelector('[data-dock-duration]'), formatDuration(source?.durationSeconds ?? 0));
         setHidden(document.querySelector<HTMLElement>('.dock__icon--pause'), !playing);
         setHidden(document.querySelector<HTMLElement>('.dock__icon--play'), playing);

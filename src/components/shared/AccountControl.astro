@@ -35,18 +35,6 @@ import IconUser from '@components/icons/User.astro';
             data-nav-menu
             hidden
         >
-            <li
-                data-account-onboarding
-                hidden
-            >
-                <a
-                    class="account__item"
-                    data-account-onboarding-link
-                    href="/onboarding"
-                >
-                    Finish your profile
-                </a>
-            </li>
             <li>
                 <a
                     class="account__item"
@@ -54,14 +42,6 @@ import IconUser from '@components/icons/User.astro';
                 >
                     Settings
                 </a>
-            </li>
-            <li>
-                <span
-                    class="account__balance"
-                    data-account-prods
-                >
-                    Prods
-                </span>
             </li>
             <li>
                 <button
@@ -79,15 +59,6 @@ import IconUser from '@components/icons/User.astro';
 <style>
     .account {
         position: relative;
-    }
-
-    .account__balance {
-        color: var(--color-ink-muted);
-        display: block;
-        font-family: var(--font-mono);
-        font-size: var(--text-sm);
-        padding: var(--space-2xs) var(--space-sm);
-        text-transform: uppercase;
     }
 
     .account__in {
@@ -242,8 +213,7 @@ import IconUser from '@components/icons/User.astro';
     import { navigate } from 'astro:transitions/client';
 
     import { endSession, getSession, onSessionChange } from '@lib/account/session';
-    import { formatProds, registerPageScript, setPending } from '@lib/utils';
-    import { getOnboardingHref } from '@lib/account/onboarding';
+    import { registerPageScript, setPending } from '@lib/utils';
     import { toast } from '@lib/ui/toasts';
 
     let unsubscribe: (() => void) | undefined;
@@ -268,23 +238,14 @@ import IconUser from '@components/icons/User.astro';
     }
 
     function render() {
-        const balance = document.querySelector<HTMLElement>('[data-account-prods]');
-        const link = document.querySelector<HTMLAnchorElement>('[data-account-onboarding-link]');
         const name = document.querySelector<HTMLElement>('[data-account-name]');
-        const onboarding = document.querySelector<HTMLElement>('[data-account-onboarding]');
         const session = getSession();
 
         document.documentElement.dataset.session = session ? 'in' : 'out';
 
-        if (!balance || !link || !name || !onboarding) return;
+        if (!name) return;
 
-        const label = session?.artistName || session?.username || session?.email || 'Account';
-
-        balance.textContent = formatProds(session?.prods ?? 0);
-        name.textContent = `Account, signed in as ${label}`;
-        onboarding.hidden = !session || session.onboarded;
-
-        if (session) link.href = getOnboardingHref(session.email);
+        name.textContent = session ? `Account, signed in as ${session.artistName || session.email}` : 'Account';
     }
 
     registerPageScript(initAccount);

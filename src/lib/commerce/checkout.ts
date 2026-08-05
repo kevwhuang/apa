@@ -1,11 +1,13 @@
-import { DEMO_CARDS, MOCK_LATENCY_MS, ORDER_ID, STORAGE } from '@lib/constants';
-import { clear, getItems, totals } from '@lib/commerce/cart';
+import { MOCK_LATENCY_MS, ORDER_ID, STORAGE } from '@lib/constants';
+import { clampQuantity, clear, getItems, prodsForCents, totals } from '@lib/commerce/cart';
 import { createStore } from '@lib/state';
 import { delay } from '@lib/utils';
 import { getSession, updateSession } from '@lib/account/session';
 
+const MAX_ORDER_CENTS = 100_000_000;
+
 const MESSAGES: Record<PaymentErrorCode, string> = {
-    'card-declined': 'That card was declined. Try the approved demo number instead.',
+    'card-declined': 'That card was declined. Try a different card.',
     'cart-changed': 'Your cart changed while you were checking out. Review it and try again.',
     'empty-cart': 'There is nothing in your cart.',
 };
@@ -26,12 +28,8 @@ function createOrderId() {
     return `${ORDER_ID.prefix}${String(buffer[0] % ORDER_ID.range).padStart(ORDER_ID.digits, '0')}`;
 }
 
-export function getLastOrder(): Order | null {
+function getLastOrder(): Order | null {
     return store.get();
-}
-
-export function isDemoCardNumber(value: string): boolean {
-    return Object.values(DEMO_CARDS).some(card => normalizeCardNumber(card) === normalizeCardNumber(value));
 }
 
 function matchesCart(items: CartItem[]) {
@@ -46,8 +44,8 @@ function matchesCart(items: CartItem[]) {
         && item.size === items[index].size);
 }
 
-function normalizeCardNumber(value: string) {
-    return value.replace(/\D/g, '');
+function normalizeCents(value: number) {
+    return Math.min(MAX_ORDER_CENTS, Math.max(0, Math.trunc(Number(value)) || 0));
 }
 
 function normalizeOrder(value: Order | null) {
@@ -59,21 +57,29 @@ function normalizeOrder(value: Order | null) {
     return {
         email: String(value.email ?? ''),
         id: value.id,
-        items: value.items,
+        items: value.items.map(item => ({ ...item, priceCents: normalizeCents(item.priceCents), quantity: clampQuantity(Number(item.quantity)) })),
         placedAt: Number(value.placedAt) || 0,
-        totals: value.totals,
+        totals: {
+            discountCents: normalizeCents(value.totals.discountCents),
+            shippingCents: normalizeCents(value.totals.shippingCents),
+            subtotalCents: normalizeCents(value.totals.subtotalCents),
+            taxCents: normalizeCents(value.totals.taxCents),
+            totalCents: normalizeCents(value.totals.totalCents),
+        },
     };
 }
 
-export async function placeOrder(input: OrderInput): Promise<OrderResult> {
+async function placeOrder(input: OrderInput): Promise<OrderResult> {
     await delay(MOCK_LATENCY_MS);
 
     if (input.items.length === 0) return reject('empty-cart');
     if (!matchesCart(input.items)) return reject('cart-changed');
-    if (normalizeCardNumber(input.cardNumber) !== normalizeCardNumber(DEMO_CARDS.approved)) return reject('card-declined');
 
     const session = getSession();
-    const prodsApplied = Math.min(Math.max(0, Math.trunc(input.prodsApplied) || 0), session?.prods ?? 0);
+
+    const requested = Math.max(0, Math.trunc(input.prodsApplied) || 0);
+
+    const prodsApplied = Math.min(requested, session?.prods ?? 0, prodsForCents(totals(input.items).totalCents));
 
     const order: Order = {
         email: input.email,
@@ -94,3 +100,5 @@ export async function placeOrder(input: OrderInput): Promise<OrderResult> {
 function reject(code: PaymentErrorCode) {
     return { code, message: MESSAGES[code], ok: false as const };
 }
+
+export { getLastOrder, placeOrder };

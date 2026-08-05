@@ -15,11 +15,10 @@ const { slug = '' } = Astro.params;
 
 const ceiling = Math.min(product.stock, COMMERCE.maxQuantityPerItem);
 const inStock = product.stock > 0;
-const lowStock = inStock && product.stock <= COMMERCE.lowStockThreshold;
 ---
 
 <nav
-    class="product__crumbs stage stage--tight border-b-2 border-ink"
+    class="stage stage--strip border-b-2 border-ink"
     aria-label="Breadcrumb"
 >
     <div
@@ -73,9 +72,8 @@ const lowStock = inStock && product.stock <= COMMERCE.lowStockThreshold;
                 </p>
                 <p
                     class:list={[
-                        'label inline-block px-2 py-1.5',
-                        inStock && !lowStock && 'text-ink-muted',
-                        lowStock && 'bg-accent text-ink',
+                        'label inline-block px-2 py-2',
+                        inStock && 'text-ink-muted',
                         !inStock && 'product__sold text-accent-deep',
                     ]}
                     data-placeholder
@@ -127,7 +125,7 @@ const lowStock = inStock && product.stock <= COMMERCE.lowStockThreshold;
                             {product.sizes.map((size, index) => (
                                 <button
                                     class:list={[
-                                        'active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse h-[50px] min-w-[50px] px-3 border-2 border-ink font-bold font-mono text-xs uppercase transition-colors',
+                                        'active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse h-(--control-size) min-w-(--control-size) px-3 border-2 border-ink font-bold font-mono text-xs uppercase transition-colors',
                                         index === 0 && 'is-active',
                                     ]}
                                     aria-pressed={index === 0 ? 'true' : 'false'}
@@ -144,7 +142,7 @@ const lowStock = inStock && product.stock <= COMMERCE.lowStockThreshold;
                     <p class="label mb-3 text-ink-muted">Quantity</p>
                     <div class="inline-flex items-center border-2 border-ink">
                         <button
-                            class="active:bg-ink active:text-ink-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-ink aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-[50px] w-[50px] font-bold text-lg transition-colors"
+                            class="active:bg-ink active:text-ink-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-ink aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-(--control-size) w-(--control-size) font-bold text-lg transition-colors"
                             aria-disabled="true"
                             aria-label="Decrease quantity"
                             data-quantity="-1"
@@ -160,7 +158,7 @@ const lowStock = inStock && product.stock <= COMMERCE.lowStockThreshold;
                             1
                         </span>
                         <button
-                            class="active:bg-ink active:text-ink-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-ink aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-[50px] w-[50px] font-bold text-lg transition-colors"
+                            class="active:bg-ink active:text-ink-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-ink aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-(--control-size) w-(--control-size) font-bold text-lg transition-colors"
                             aria-disabled={!inStock || ceiling <= 1}
                             aria-label="Increase quantity"
                             data-quantity="+1"
@@ -169,11 +167,6 @@ const lowStock = inStock && product.stock <= COMMERCE.lowStockThreshold;
                             +
                         </button>
                     </div>
-                    <p
-                        class="action-text mt-3 text-ink-subtle"
-                        aria-live="polite"
-                        data-quantity-hint
-                    />
                 </div>
                 <button
                     class="btn btn--primary w-full"
@@ -184,8 +177,8 @@ const lowStock = inStock && product.stock <= COMMERCE.lowStockThreshold;
                 </button>
             </form>
             {product.details.length > 0 && (
-                <details class="product__details pt-4 border-t-2 border-ink">
-                    <summary class="label product__summary hover:text-accent-deep flex items-center min-h-[50px] cursor-pointer select-none">
+                <details class="product__details open:gap-3 flex flex-col pt-4 border-t-2 border-ink">
+                    <summary class="label product__summary hover:text-accent-deep flex items-center min-h-(--control-size) cursor-pointer select-none">
                         Details
                         <span
                             class="action-text product__sign ml-auto"
@@ -194,7 +187,7 @@ const lowStock = inStock && product.stock <= COMMERCE.lowStockThreshold;
                             +
                         </span>
                     </summary>
-                    <ul class="mt-3 space-y-1 text-sm text-ink-muted">
+                    <ul class="space-y-1 text-sm text-ink-muted">
                         {product.details.map(detail => (
                             <li class="flex gap-2">
                                 <span
@@ -217,16 +210,12 @@ const lowStock = inStock && product.stock <= COMMERCE.lowStockThreshold;
     .product__crumb {
         align-items: center;
         display: inline-flex;
-        min-height: 50px;
+        min-height: var(--control-size);
         transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .product__crumb:active {
         transform: translateY(1px);
-    }
-
-    .product__crumbs {
-        --stage-pad: var(--space-lg);
     }
 
     .product__details[open] .product__sign {
@@ -322,13 +311,15 @@ const lowStock = inStock && product.stock <= COMMERCE.lowStockThreshold;
         if (output) output.textContent = button.dataset.color ?? '';
     }
 
-    function handleQuantityClick(step: number, decrease: HTMLButtonElement, increase: HTMLButtonElement, output: HTMLElement, hint: HTMLElement | null) {
+    function handleQuantityClick(step: number, decrease: HTMLButtonElement, increase: HTMLButtonElement, output: HTMLElement) {
         const button = step < 0 ? decrease : increase;
 
         if (button.getAttribute('aria-disabled') === 'true') return;
 
         quantity = Math.min(maxQuantity, Math.max(1, quantity + step));
-        updateQuantity(decrease, increase, output, hint);
+        updateQuantity(decrease, increase, output);
+
+        if (step > 0 && quantity >= maxQuantity) toast(limitMessage(), 'info');
     }
 
     function handleSizeClick(button: HTMLButtonElement, sizeButtons: NodeListOf<HTMLButtonElement>) {
@@ -345,7 +336,6 @@ const lowStock = inStock && product.stock <= COMMERCE.lowStockThreshold;
 
         const colorOutput = form.querySelector<HTMLElement>('[data-color-output]');
         const decrease = form.querySelector<HTMLButtonElement>('[data-quantity="-1"]');
-        const hint = form.querySelector<HTMLElement>('[data-quantity-hint]');
         const increase = form.querySelector<HTMLButtonElement>('[data-quantity="+1"]');
         const quantityOutput = form.querySelector<HTMLElement>('[data-quantity-output]');
         const sizeButtons = form.querySelectorAll<HTMLButtonElement>('[data-size]');
@@ -356,9 +346,9 @@ const lowStock = inStock && product.stock <= COMMERCE.lowStockThreshold;
         stock = Number(form.dataset.stock) || 0;
 
         if (decrease && increase && quantityOutput) {
-            updateQuantity(decrease, increase, quantityOutput, hint);
-            decrease.addEventListener('click', () => handleQuantityClick(-1, decrease, increase, quantityOutput, hint), { signal });
-            increase.addEventListener('click', () => handleQuantityClick(1, decrease, increase, quantityOutput, hint), { signal });
+            updateQuantity(decrease, increase, quantityOutput);
+            decrease.addEventListener('click', () => handleQuantityClick(-1, decrease, increase, quantityOutput), { signal });
+            increase.addEventListener('click', () => handleQuantityClick(1, decrease, increase, quantityOutput), { signal });
         }
 
         form.addEventListener('submit', event => handleAddSubmit(event, form), { signal });
@@ -372,16 +362,14 @@ const lowStock = inStock && product.stock <= COMMERCE.lowStockThreshold;
         });
     }
 
-    function limitHint() {
+    function limitMessage() {
         return stock > COMMERCE.maxQuantityPerItem ? 'Ten per order is the limit.' : 'That\u2019s all we have.';
     }
 
-    function updateQuantity(decrease: HTMLButtonElement, increase: HTMLButtonElement, output: HTMLElement, hint: HTMLElement | null) {
+    function updateQuantity(decrease: HTMLButtonElement, increase: HTMLButtonElement, output: HTMLElement) {
         decrease.setAttribute('aria-disabled', String(quantity <= 1));
         increase.setAttribute('aria-disabled', String(quantity >= maxQuantity));
         output.textContent = String(quantity);
-
-        if (hint) hint.textContent = quantity >= maxQuantity ? limitHint() : '';
     }
 
     registerPageScript(initProductDetail);

@@ -55,9 +55,7 @@ interface ModuleSlider {
 }
 
 const DISTORTION_TONE_POSITION = 0.7819;
-
 const FILTER_CUTOFF_POSITION = 0.5498;
-
 const HIGHPASS_CUTOFF_POSITION = 0.389;
 
 const MODULES: Module[] = [
@@ -230,7 +228,7 @@ const PAD_LENGTH = 2;
 
 <section
     class="rack__hero stage stage--tight overflow-hidden relative border-b-2 border-ink"
-    aria-labelledby="rack-hero-title"
+    aria-labelledby="rig-title"
 >
     <div
         class="rack__scene stage__item--full absolute pointer-events-none"
@@ -240,16 +238,16 @@ const PAD_LENGTH = 2;
         class="rack__veil stage__item--full absolute pointer-events-none"
         aria-hidden="true"
     />
-    <div class="relative">
+    <div class="flex flex-col relative gap-6">
         <PageHead
             class="max-w-4xl font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
             eyebrow="Resources / Rack"
-            headingId="rack-hero-title"
+            headingId="rig-title"
         >
             One rack, live.
         </PageHead>
         <p
-            class="max-w-2xl mt-6 text-lmd text-ink-muted"
+            class="max-w-2xl text-lmd text-ink-muted"
             data-motion="blur"
         >
             Sixteen Web Audio processors wired as a single chain in your browser &mdash; no
@@ -292,104 +290,107 @@ const PAD_LENGTH = 2;
         data-motion="unfold"
         data-rack-master
     >
-        <div class="rack__head">
-            <p class="label rack__eyebrow">Master / One source</p>
-            <h2
-                id="rack-title"
-                class="font-extrabold font-sans text-2xl tracking-tight"
-            >
-                Load a file. Build the chain.
-            </h2>
-        </div>
-        <label
-            class="rack__drop"
-            data-rack-drop
-            for="rack-file"
+        <SectionHead
+            class="font-extrabold font-sans text-2xl tracking-tight"
+            eyebrow="Master / One source"
+            headingId="rack-title"
+            tone="dark"
         >
-            <IconUpload />
-            <span class="action-text">Drop audio or browse</span>
-            <span class="rack__hint font-mono text-xs">
-                {RACK_EXTENSION_LIST} up to {formatBytes(RACK_MAX_BYTES)}
-            </span>
-            <input
-                id="rack-file"
-                class="sr-only"
-                accept={UPLOAD.acceptAttribute}
-                aria-label="Load an audio file into the rack"
-                data-rack-input
-                type="file"
-            />
-        </label>
-        <div class="rack__deck">
-            <button
-                class="rack__play"
-                aria-pressed="false"
-                data-rack-toggle
-                disabled
-                type="button"
+            Load a file. Build the chain.
+        </SectionHead>
+        <div class="rack__body">
+            <label
+                class="rack__drop"
+                data-rack-drop
+                for="rack-file"
             >
-                <span data-rack-icon-play><IconPlay /></span>
-                <span
-                    data-rack-icon-pause
-                    hidden
-                >
-                    <IconPause />
+                <IconUpload />
+                <span class="action-text">Drop audio or browse</span>
+                <span class="rack__hint font-mono text-xs">
+                    {RACK_EXTENSION_LIST} up to {formatBytes(RACK_MAX_BYTES)}
                 </span>
-                <span
+                <input
+                    id="rack-file"
                     class="sr-only"
-                    data-rack-toggle-label
-                >
-                    Play the rack
-                </span>
-            </button>
-            <div class="rack__status">
-                <p
-                    class="rack__meta font-mono text-smd"
-                    aria-live="polite"
-                    data-rack-meta
-                >
-                    <span
-                        class="spinner"
-                        aria-hidden="true"
-                        data-rack-spinner
-                        hidden
-                    />
-                    <span
-                        class="rack__meta-text"
-                        data-rack-meta-text
-                    >
-                        No file loaded
-                    </span>
-                </p>
-                <p
-                    class="rack__error font-mono text-xs"
-                    aria-live="polite"
-                    data-rack-error
+                    accept={UPLOAD.acceptAttribute}
+                    aria-describedby="rack-error"
+                    aria-label="Load an audio file into the rack"
+                    data-rack-input
+                    type="file"
                 />
-            </div>
-        </div>
-        <div class="rack__signal">
-            <p class="label rack__signal-label">Signal path</p>
-            <ol
-                class="rack__path list-none"
-                data-rack-path
-            >
-                <li class="rack__node">In</li>
-                <li
-                    class="rack__node rack__node--idle"
-                    data-rack-idle
+            </label>
+            <div class="rack__deck">
+                <button
+                    class="rack__play"
+                    aria-pressed="false"
+                    data-rack-toggle
+                    disabled
+                    type="button"
                 >
-                    Straight through
-                </li>
-                <li class="rack__node">Out</li>
-            </ol>
+                    <span data-rack-icon-play><IconPlay /></span>
+                    <span
+                        data-rack-icon-pause
+                        hidden
+                    >
+                        <IconPause />
+                    </span>
+                    <span
+                        class="sr-only"
+                        data-rack-toggle-label
+                    >
+                        Play the rack
+                    </span>
+                </button>
+                <div class="rack__status">
+                    <p
+                        class="rack__meta font-mono text-smd"
+                        aria-live="polite"
+                        data-rack-meta
+                    >
+                        <span
+                            class="spinner"
+                            aria-hidden="true"
+                            data-rack-spinner
+                            hidden
+                        />
+                        <span
+                            class="rack__meta-text"
+                            data-rack-meta-text
+                        >
+                            No file loaded
+                        </span>
+                    </p>
+                    <p
+                        id="rack-error"
+                        class="rack__error font-mono text-xs"
+                        aria-live="polite"
+                        data-rack-error
+                    />
+                </div>
+            </div>
+            <div class="rack__signal">
+                <p class="label rack__signal-label">Signal path</p>
+                <ol
+                    class="rack__path list-none"
+                    data-rack-path
+                >
+                    <li class="rack__node">In</li>
+                    <li
+                        class="rack__node rack__node--idle"
+                        data-rack-idle
+                    >
+                        Straight through
+                    </li>
+                    <li class="rack__node">Out</li>
+                </ol>
+            </div>
+            <template data-rack-chip>
+                <li
+                    class="rack__node rack__node--plug"
+                    data-rack-plug
+                />
+            </template>
         </div>
-        <template data-rack-chip>
-            <li
-                class="rack__node rack__node--plug"
-                data-rack-plug
-            />
-        </template>
     </div>
 </section>
 
@@ -514,6 +515,10 @@ const PAD_LENGTH = 2;
 
     .module > * {
         margin-bottom: var(--space-xs);
+    }
+
+    .module > :last-child {
+        margin-bottom: 0;
     }
 
     .module--engaged::before {
@@ -691,13 +696,6 @@ const PAD_LENGTH = 2;
 
     .module__viz {
         grid-row: 5;
-        margin-bottom: 0;
-    }
-
-    .rack {
-        display: grid;
-        gap: var(--space-md);
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
     }
 
     .rack .action-text:hover {
@@ -706,6 +704,12 @@ const PAD_LENGTH = 2;
 
     .rack.is-decoding .rack__meta {
         color: var(--color-accent-light);
+    }
+
+    .rack__body {
+        display: grid;
+        gap: var(--space-md);
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
     }
 
     .rack__card {
@@ -784,20 +788,11 @@ const PAD_LENGTH = 2;
         display: none;
     }
 
-    .rack__eyebrow {
-        color: var(--color-accent-light);
-        margin-bottom: var(--space-2xs);
-    }
-
     .rack__grid {
         --rank-cols: repeat(2, minmax(0, 1fr));
         column-gap: var(--space-lg);
         grid-auto-rows: auto;
         row-gap: 0;
-    }
-
-    .rack__head {
-        grid-column: 1 / -1;
     }
 
     .rack__hero {
@@ -967,7 +962,7 @@ const PAD_LENGTH = 2;
     }
 
     @media (max-width: 768px) {
-        .rack {
+        .rack__body {
             grid-template-columns: minmax(0, 1fr);
         }
 
@@ -1027,27 +1022,16 @@ const PAD_LENGTH = 2;
     }
 
     const ACCENT_SEGMENTS = 4;
-
     const CUTOFF_MAX = 18_000;
-
     const CUTOFF_MIN = 40;
-
     const DISTORTION_TONE_MAX = 12_000;
-
     const DISTORTION_TONE_MIN = 500;
-
     const HERTZ_PER_KILOHERTZ = 1_000;
-
     const HIGHPASS_MAX = 2_000;
-
     const HIGHPASS_MIN = 20;
-
     const METER_SEGMENTS = 24;
-
     const PERCENT = 100;
-
     const PIXEL_RATIO_MAX = 2;
-
     const UNLIT_ALPHA = 0.15;
 
     const FORMAT: Record<string, (value: number) => string> = {

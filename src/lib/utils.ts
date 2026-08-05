@@ -1,10 +1,10 @@
-import { BYTES_PER_KILOBYTE, BYTES_PER_MEGABYTE, CENTS_PER_DOLLAR, COMMERCE, EVENT_PROGRAMS } from '@lib/constants';
+import { BYTES_PER_KILOBYTE, BYTES_PER_MEGABYTE, CENTS_PER_DOLLAR, EVENT_PROGRAMS, PALETTE } from '@lib/constants';
 
 import type { CollectionEntry } from 'astro:content';
 
-export type ProgramEvent = CalendarEvent & { end?: Date };
+type ProgramEvent = CalendarEvent & { end?: Date };
 
-export interface FilterGroupOptions {
+interface FilterGroupOptions {
     buttons: NodeListOf<HTMLButtonElement>;
     cards: NodeListOf<HTMLElement>;
     dataKey: string;
@@ -17,7 +17,7 @@ export interface FilterGroupOptions {
     statusElement?: HTMLElement | null;
 }
 
-export interface PanelResizeOptions {
+interface PanelResizeOptions {
     handle: HTMLElement;
     label: string;
     minWidth: number;
@@ -27,37 +27,31 @@ export interface PanelResizeOptions {
     signal: AbortSignal;
 }
 
-export interface SearchFieldOptions {
+interface SearchFieldOptions {
     clearElements: NodeListOf<HTMLButtonElement>;
     searchElement: HTMLInputElement | null;
     signal: AbortSignal;
 }
 
+const EMPTY_TILE_COLOR = 'var(--color-ink-subtle)';
 const FLOAT_WINDOW_BASE_Z = 70;
-
 const ISO_DATE_LENGTH = 10;
-
 const MAX_INITIALS = 2;
-
 const PANEL_NARROW_VIEWPORT = 480;
-
 const PANEL_RESIZE_STEP = 16;
-
 const PANEL_WIDE_DIVISOR = 2;
-
 const PANEL_WIDE_VIEWPORT = 1_024;
-
 const SECONDS_PER_MINUTE = 60;
 
 const panelWidths = new Map<string, number>();
 
-export function delay(milliseconds: number): Promise<void> {
+function delay(milliseconds: number): Promise<void> {
     return new Promise((resolve) => {
         setTimeout(resolve, milliseconds);
     });
 }
 
-export function describeCartIssue(issue: CartIssue): string {
+function describeCartIssue(issue: CartIssue): string {
     if (issue.kind === 'out-of-stock') return `${issue.title} sold out and was removed.`;
     if (issue.kind === 'price-changed') return `${issue.title} is now ${formatPrice(issue.to ?? 0)}, previously ${formatPrice(issue.from ?? 0)}.`;
     if (issue.kind === 'quantity-reduced') return `${issue.title} was reduced to ${issue.to ?? 0} \u2014 that is all we have left.`;
@@ -69,7 +63,7 @@ function floatWindowBase(): number {
     return toLevel(getComputedStyle(document.documentElement).getPropertyValue('--z-drawer'), FLOAT_WINDOW_BASE_Z);
 }
 
-export function formatBytes(bytes: number): string {
+function formatBytes(bytes: number): string {
     const size = Math.max(0, bytes);
 
     if (size < BYTES_PER_KILOBYTE) return `${Math.round(size)} B`;
@@ -78,14 +72,14 @@ export function formatBytes(bytes: number): string {
     return `${Number((size / BYTES_PER_MEGABYTE).toFixed(1))} MB`;
 }
 
-export function formatCalendarDay(date: Date): string {
+function formatCalendarDay(date: Date): string {
     return date.toLocaleDateString('en-US', {
         day: '2-digit',
         timeZone: 'America/Chicago',
     });
 }
 
-export function formatCalendarMonth(date: Date): string {
+function formatCalendarMonth(date: Date): string {
     return date.toLocaleDateString('en-US', {
         month: 'short',
         timeZone: 'America/Chicago',
@@ -93,7 +87,7 @@ export function formatCalendarMonth(date: Date): string {
     });
 }
 
-export function formatDate(date: Date): string {
+function formatDate(date: Date): string {
     return date.toLocaleDateString('en-US', {
         day: 'numeric',
         month: 'short',
@@ -103,7 +97,7 @@ export function formatDate(date: Date): string {
     });
 }
 
-export function formatDateOnly(date: Date): string {
+function formatDateOnly(date: Date): string {
     return date.toLocaleDateString('en-US', {
         day: 'numeric',
         month: 'short',
@@ -113,7 +107,7 @@ export function formatDateOnly(date: Date): string {
     });
 }
 
-export function formatDateStamp(date: Date): string {
+function formatDateStamp(date: Date): string {
     return date.toLocaleDateString('en-US', {
         day: 'numeric',
         month: 'short',
@@ -122,14 +116,14 @@ export function formatDateStamp(date: Date): string {
     });
 }
 
-export function formatDuration(seconds: number): string {
+function formatDuration(seconds: number): string {
     const minutes = Math.floor(seconds / SECONDS_PER_MINUTE);
     const remainder = Math.floor(seconds % SECONDS_PER_MINUTE);
 
     return `${minutes}:${String(remainder).padStart(2, '0')}`;
 }
 
-export function formatMonthOnly(date: Date): string {
+function formatMonthOnly(date: Date): string {
     return date.toLocaleDateString('en-US', {
         month: 'short',
         timeZone: 'UTC',
@@ -137,17 +131,17 @@ export function formatMonthOnly(date: Date): string {
     });
 }
 
-export function formatPrice(cents: number): string {
+function formatPrice(cents: number): string {
     return `$${(cents / CENTS_PER_DOLLAR).toFixed(2)}`;
 }
 
-export function formatProds(prods: number): string {
+function formatProds(prods: number): string {
     const count = Math.max(0, Math.trunc(prods) || 0);
 
     return count === 1 ? '1 Prod' : `${count} Prods`;
 }
 
-export function formatTime(date: Date): string {
+function formatTime(date: Date): string {
     return date.toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
@@ -155,34 +149,42 @@ export function formatTime(date: Date): string {
     });
 }
 
-export function formatTimeRange(start: Date, end: Date): string {
+function formatTimeRange(start: Date, end: Date): string {
     return `${formatTime(start)} \u2013 ${formatTime(end)}`;
 }
 
-export function formatVariant(item: CartItem): string {
-    return [item.color, item.size].filter(Boolean).join(' / ');
+function formatVariant(item: CartItem): string {
+    const parts = [item.color, item.size].filter(Boolean);
+
+    return parts.length > 0 ? parts.join(' / ') : 'Base';
 }
 
-export function formatWeekday(date: Date): string {
+function formatWeekday(date: Date): string {
     return date.toLocaleDateString('en-US', {
         timeZone: 'America/Chicago',
         weekday: 'long',
     });
 }
 
-export function getInitials(name: string): string {
+function getInitials(name: string): string {
     const words = name.trim().split(/\s+/).filter(Boolean);
 
     return words.slice(0, MAX_INITIALS).map(word => word.charAt(0).toUpperCase()).join('');
 }
 
-export function getProgram(type: EventType): EventProgram {
+function getProgram(type: EventType): EventProgram {
     return EVENT_PROGRAMS[type];
 }
 
-export function getStockLabel(stock: number, inStockLabel = ''): string {
+function getStanding(balance: number): string {
+    if (balance < 0) return 'In review';
+    if (balance === 0) return 'Settled';
+
+    return 'Good standing';
+}
+
+function getStockLabel(stock: number, inStockLabel = ''): string {
     if (stock === 0) return 'Sold out';
-    if (stock <= COMMERCE.lowStockThreshold) return `Only ${stock} left`;
 
     return inStockLabel;
 }
@@ -199,13 +201,14 @@ function handleRovingKeydown(event: KeyboardEvent, buttons: HTMLButtonElement[],
     buttons[next].focus();
 }
 
-export function initFilterGroup(options: FilterGroupOptions): void {
+function initFilterGroup(options: FilterGroupOptions): void {
     const { buttons, cards, dataKey, emptyElement, initial, matches, searchElement, signal, status, statusElement } = options;
 
     let active = initial;
 
     function apply() {
         const query = (searchElement?.value ?? '').trim();
+
         const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
 
         let shown = 0;
@@ -219,6 +222,7 @@ export function initFilterGroup(options: FilterGroupOptions): void {
 
         cards.forEach((card) => {
             const haystack = card.dataset.search ?? '';
+
             const on = matches(card, active) && tokens.every(token => haystack.includes(token));
 
             if (on) shown += 1;
@@ -249,13 +253,14 @@ export function initFilterGroup(options: FilterGroupOptions): void {
     searchElement?.addEventListener('input', apply, { signal });
 }
 
-export function initPanelResize(options: PanelResizeOptions): void {
+function initPanelResize(options: PanelResizeOptions): void {
     const { handle, label, minWidth, panel, property, reservedRight, signal } = options;
 
     let pointer: number | undefined;
 
     function apply(width: number) {
         const { max, min } = bounds();
+
         const next = Math.round(Math.min(Math.max(width, min), max));
 
         panelWidths.set(property, next);
@@ -330,7 +335,6 @@ export function initPanelResize(options: PanelResizeOptions): void {
     handle.setAttribute('role', 'separator');
     handle.tabIndex = 0;
     apply(current());
-
     handle.addEventListener('keydown', handleKeydown, { signal });
     handle.addEventListener('pointercancel', handlePointerUp, { signal });
     handle.addEventListener('pointerdown', handlePointerDown, { signal });
@@ -339,7 +343,7 @@ export function initPanelResize(options: PanelResizeOptions): void {
     window.addEventListener('resize', handleResize, { signal });
 }
 
-export function initSearchField(options: SearchFieldOptions): void {
+function initSearchField(options: SearchFieldOptions): void {
     const { clearElements, searchElement, signal } = options;
 
     if (!searchElement) return;
@@ -366,9 +370,10 @@ export function initSearchField(options: SearchFieldOptions): void {
     });
 }
 
-export function isTopFloatWindow(target: HTMLElement): boolean {
+function isTopFloatWindow(target: HTMLElement): boolean {
     const base = floatWindowBase();
     const visible = Array.from(document.querySelectorAll<HTMLElement>('[data-float-window]')).filter(element => element.checkVisibility());
+
     const top = visible.reduce<HTMLElement | undefined>((best, element) => (best && toLevel(best.style.zIndex, base) > toLevel(element.style.zIndex, base) ? best : element), undefined);
 
     return top === target;
@@ -386,13 +391,13 @@ function maxPanelWidth(viewportWidth: number, reservedRight: number): number {
     return narrowMax + (wideMax - narrowMax) * ratio;
 }
 
-export function mergeAssets(downloads: CollectionEntry<'downloads'>[], docs: CollectionEntry<'docs'>[]): CollectionEntry<'downloads'>[] {
+function mergeAssets(downloads: CollectionEntry<'downloads'>[], docs: CollectionEntry<'docs'>[]): CollectionEntry<'downloads'>[] {
     return downloads
         .map(entry => toAsset(entry, docs))
         .toSorted((a, b) => Number(b.data.available) - Number(a.data.available) || +b.data.date - +a.data.date);
 }
 
-export function mergeCalendar(events: CollectionEntry<'events'>[], bashEditions: CollectionEntry<'bash'>[]): Calendar {
+function mergeCalendar(events: CollectionEntry<'events'>[], bashEditions: CollectionEntry<'bash'>[]): Calendar {
     const merged = [...events.map(toCalendarEvent), ...bashEditions.map(toCalendarBashEvent)];
 
     return {
@@ -401,7 +406,7 @@ export function mergeCalendar(events: CollectionEntry<'events'>[], bashEditions:
     };
 }
 
-export function parseCatalog(raw: string | undefined): CatalogEntry[] {
+function parseCatalog(raw: string | undefined): CatalogEntry[] {
     if (!raw) return [];
 
     try {
@@ -411,7 +416,15 @@ export function parseCatalog(raw: string | undefined): CatalogEntry[] {
     }
 }
 
-export function raiseWindow(target: HTMLElement): void {
+function pickTileColor(seed: string): string {
+    if (seed.length === 0) return EMPTY_TILE_COLOR;
+
+    const total = Array.from(seed).reduce((sum, character) => sum + character.charCodeAt(0), 0);
+
+    return PALETTE[total % PALETTE.length];
+}
+
+function raiseWindow(target: HTMLElement): void {
     const base = floatWindowBase();
     const ordered = Array.from(document.querySelectorAll<HTMLElement>('[data-float-window]'))
         .filter(element => element !== target)
@@ -422,7 +435,7 @@ export function raiseWindow(target: HTMLElement): void {
     });
 }
 
-export function registerPageScript(init: (signal: AbortSignal) => void): void {
+function registerPageScript(init: (signal: AbortSignal) => void): void {
     let controller: AbortController | undefined;
 
     function handlePageLoad() {
@@ -439,7 +452,7 @@ export function registerPageScript(init: (signal: AbortSignal) => void): void {
     document.addEventListener('astro:page-load', handlePageLoad);
 }
 
-export function rovingFocus(buttons: NodeListOf<HTMLButtonElement>, signal?: AbortSignal): void {
+function rovingFocus(buttons: NodeListOf<HTMLButtonElement>, signal?: AbortSignal): void {
     const all = Array.from(buttons);
 
     all.forEach((button, index) => {
@@ -447,20 +460,20 @@ export function rovingFocus(buttons: NodeListOf<HTMLButtonElement>, signal?: Abo
     });
 }
 
-export function setHidden(element: HTMLElement | null, hidden: boolean): void {
+function setHidden(element: HTMLElement | null, hidden: boolean): void {
     if (!element) return;
 
     element.hidden = hidden;
 }
 
-export function setMessage(element: HTMLElement | null, message: string): void {
+function setMessage(element: HTMLElement | null, message: string): void {
     if (!element) return;
 
     element.textContent = message;
     element.toggleAttribute('hidden', message.length === 0);
 }
 
-export function setPending(control: HTMLButtonElement | null, pending: boolean): void {
+function setPending(control: HTMLButtonElement | null, pending: boolean): void {
     if (!control) return;
 
     control.disabled = pending;
@@ -469,7 +482,7 @@ export function setPending(control: HTMLButtonElement | null, pending: boolean):
     else control.removeAttribute('aria-busy');
 }
 
-export function setText(element: Element | null, value: string): void {
+function setText(element: Element | null, value: string): void {
     if (element) element.textContent = value;
 }
 
@@ -501,7 +514,7 @@ function toCalendarBashEvent(entry: CollectionEntry<'bash'>) {
     };
 }
 
-export function toCalendarEvent(entry: CollectionEntry<'events'>) {
+function toCalendarEvent(entry: CollectionEntry<'events'>) {
     return {
         date: entry.data.date,
         end: entry.data.end,
@@ -514,7 +527,7 @@ export function toCalendarEvent(entry: CollectionEntry<'events'>) {
     };
 }
 
-export function toCatalog(products: CollectionEntry<'products'>[]): CatalogEntry[] {
+function toCatalog(products: CollectionEntry<'products'>[]): CatalogEntry[] {
     return products.map(product => ({
         priceCents: product.data.priceCents,
         slug: product.id,
@@ -523,7 +536,7 @@ export function toCatalog(products: CollectionEntry<'products'>[]): CatalogEntry
     }));
 }
 
-export function toIsoDate(date: Date): string {
+function toIsoDate(date: Date): string {
     return date.toISOString().slice(0, ISO_DATE_LENGTH);
 }
 
@@ -533,13 +546,12 @@ function toLevel(value: string, fallback: number): number {
     return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-export function toProducerRecord(producer: CollectionEntry<'producers'>): ProducerRecord {
+function toProducerRecord(producer: CollectionEntry<'producers'>): ProducerRecord {
     return {
         avatar: producer.data.avatar ?? null,
         bio: producer.data.bio,
         featured: producer.data.featured,
         genres: producer.data.genres,
-        handle: producer.data.handle,
         id: producer.id,
         joined: toIsoDate(producer.data.joined),
         links: producer.data.links,
@@ -549,3 +561,47 @@ export function toProducerRecord(producer: CollectionEntry<'producers'>): Produc
         tracks: producer.data.tracks,
     };
 }
+
+export {
+    delay,
+    describeCartIssue,
+    formatBytes,
+    formatCalendarDay,
+    formatCalendarMonth,
+    formatDate,
+    formatDateOnly,
+    formatDateStamp,
+    formatDuration,
+    formatMonthOnly,
+    formatPrice,
+    formatProds,
+    formatTime,
+    formatTimeRange,
+    formatVariant,
+    formatWeekday,
+    getInitials,
+    getProgram,
+    getStanding,
+    getStockLabel,
+    initFilterGroup,
+    initPanelResize,
+    initSearchField,
+    isTopFloatWindow,
+    mergeAssets,
+    mergeCalendar,
+    parseCatalog,
+    pickTileColor,
+    raiseWindow,
+    registerPageScript,
+    rovingFocus,
+    setHidden,
+    setMessage,
+    setPending,
+    setText,
+    toCalendarEvent,
+    toCatalog,
+    toIsoDate,
+    toProducerRecord,
+};
+
+export type { FilterGroupOptions, PanelResizeOptions, ProgramEvent, SearchFieldOptions };

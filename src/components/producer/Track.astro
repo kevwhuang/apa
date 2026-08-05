@@ -14,15 +14,10 @@ interface Props {
 }
 
 const WAVE_BAR_COUNT = 14;
-
 const WAVE_HASH_MODULUS = 997;
-
 const WAVE_HASH_MULTIPLIER = 31;
-
 const WAVE_MAX_SPAN = 72;
-
 const WAVE_MIN_HEIGHT = 24;
-
 const WAVE_PHASE_STEP = 1.7;
 
 const { class: rowClass, producerId, track } = Astro.props;
@@ -36,7 +31,7 @@ const waveHeights = Array.from({ length: WAVE_BAR_COUNT }, (_, index) => Math.ro
 
 <button
     class:list={[
-        'producer-track group aria-pressed:bg-accent hover:bg-ink-10 flex items-center min-h-[50px] w-full gap-3 px-3 py-2 border-2 border-ink text-left transition-colors',
+        'producer-track group aria-pressed:bg-accent hover:bg-ink-10 flex items-center min-h-(--control-size) w-full gap-3 px-3 py-2 border-2 border-ink text-left transition-colors',
         rowClass,
     ]}
     aria-pressed="false"

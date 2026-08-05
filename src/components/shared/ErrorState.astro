@@ -22,7 +22,7 @@ const { code, eyebrow, headingId, lede } = Astro.props;
 ---
 
 <section
-    class="stage"
+    class="stage stage--tight"
     aria-labelledby={headingId}
 >
     <div class="mark rank rank--2 items-center">
@@ -30,7 +30,6 @@ const { code, eyebrow, headingId, lede } = Astro.props;
             <PageHead
                 class="font-extrabold font-sans leading-[0.82] text-mega tracking-[-0.05em]"
                 eyebrow={eyebrow}
-                eyebrowClass="mb-5"
                 eyebrowMotion="rule"
                 headingId={headingId}
             >

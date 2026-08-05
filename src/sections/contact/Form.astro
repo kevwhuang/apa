@@ -7,10 +7,10 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
 ---
 
 <section
-    class="stage stage--focus stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-ink"
     aria-labelledby="contact-title"
 >
-    <div>
+    <div class="flex flex-col gap-6">
         <PageHead
             class="font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
             eyebrow="Contact"
@@ -19,7 +19,7 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
             Send a signal.
         </PageHead>
         <p
-            class="max-w-2xl mt-6 text-lmd text-ink-muted"
+            class="max-w-2xl text-lmd text-ink-muted"
             data-motion="blur"
         >
             Membership, sponsorship, press, booking &mdash; whatever you're here for, this is the front door.
@@ -28,7 +28,7 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
 </section>
 
 <section
-    class="stage stage--focus stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-ink"
     aria-label="Contact form"
 >
     <div data-motion="unfold">
@@ -36,29 +36,13 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
             class="contact-form slab slab--card flex flex-col gap-6"
             data-contact-form
         >
-            <div
-                class="contact__alert slab slab--card flex flex-col gap-3"
-                data-form-error
-                hidden
-                role="alert"
-                tabindex="-1"
-            >
-                <p
-                    class="action-text text-accent-deep"
-                    data-form-error-message
-                />
-                <ul
-                    class="contact__alert-list list-none"
-                    data-form-error-list
-                />
-            </div>
             <div class="grid grid-cols-1 gap-6 md:gap-5 md:grid-cols-2">
                 <div class="flex flex-col gap-2">
                     <label class="flex flex-col gap-2">
                         <span class="label text-ink-muted">Name</span>
                         <input
                             id="contact-name"
-                            class="contact-field__control font-sans"
+                            class="input font-sans"
                             aria-describedby="contact-name-error"
                             aria-invalid="false"
                             autocomplete="name"
@@ -79,7 +63,7 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
                         <span class="label text-ink-muted">Email</span>
                         <input
                             id="contact-email"
-                            class="contact-field__control font-mono text-sm"
+                            class="input font-mono text-sm"
                             aria-describedby="contact-email-error"
                             aria-invalid="false"
                             autocomplete="email"
@@ -103,7 +87,7 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
                     <span class="select">
                         <select
                             id="contact-topic"
-                            class="contact-field__control contact-field__control--select font-sans"
+                            class="input font-sans"
                             aria-describedby="contact-topic-error"
                             aria-invalid="false"
                             name="topic"
@@ -123,7 +107,7 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
                     hidden
                 />
             </div>
-            <div class="flex flex-col gap-2 mb-2">
+            <div class="flex flex-col gap-2">
                 <label class="flex flex-col gap-2">
                     <span class="contact-field__head label text-ink-muted">
                         Message
@@ -131,7 +115,7 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
                     </span>
                     <textarea
                         id="contact-message"
-                        class="contact-field__control contact-field__control--area font-sans"
+                        class="input input--area font-sans"
                         aria-describedby="contact-message-error"
                         aria-invalid="false"
                         maxlength={CONTACT_LIMITS.message}
@@ -228,21 +212,10 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
             </div>
         </div>
     </div>
-    <template data-error-anchor>
-        <li>
-            <a
-                class="contact__anchor hover:text-accent-deep inline-flex items-center min-h-[50px] gap-2 text-sm underline"
-                data-anchor
-                href="#contact-name"
-            >
-                Fix this field
-            </a>
-        </li>
-    </template>
 </section>
 
 <section
-    class="stage stage--focus stage--tight"
+    class="stage stage--tight"
     aria-labelledby="direct-lines-title"
 >
     <div>
@@ -302,43 +275,6 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
 </section>
 
 <style>
-    .contact-field__control {
-        background-color: var(--color-surface);
-        border: 2px solid var(--color-ink);
-        color: var(--color-ink);
-        min-height: var(--control-size);
-        padding: 0 var(--space-sm);
-        transition:
-            background-color var(--duration-fast) var(--motion-ease-ui),
-            border-color var(--duration-fast) var(--motion-ease-ui),
-            box-shadow var(--duration-fast) var(--motion-ease-ui);
-        width: 100%;
-    }
-
-    .contact-field__control:focus-visible {
-        background-color: var(--color-surface-raised);
-        border-color: var(--color-accent-deep);
-    }
-
-    .contact-field__control:hover {
-        background-color: var(--color-surface-raised);
-    }
-
-    .contact-field__control[aria-invalid='true'] {
-        border-color: var(--color-accent-deep);
-        box-shadow: 3px 3px 0 0 var(--color-accent-20);
-    }
-
-    .contact-field__control--area {
-        min-height: 190px;
-        padding: var(--space-sm);
-        resize: vertical;
-    }
-
-    .contact-field__control--select {
-        padding-right: var(--select-pad);
-    }
-
     .contact-field__head {
         align-items: baseline;
         display: flex;
@@ -354,6 +290,8 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
 
     .contact-form,
     .contact__done {
+        margin-inline: auto;
+        max-width: var(--measure-form);
         padding: var(--space-lg);
     }
 
@@ -457,33 +395,6 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
         text-transform: uppercase;
     }
 
-    .contact__alert {
-        --slab-shadow: var(--color-accent-deep);
-        border-left: 2px solid var(--color-accent-deep);
-    }
-
-    .contact__alert-list {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-3xs);
-    }
-
-    .contact__anchor {
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .contact__anchor:active {
-        transform: translateY(1px);
-    }
-
-    .contact__anchor::before {
-        background-color: var(--color-accent-deep);
-        content: '';
-        flex-shrink: 0;
-        height: 2px;
-        width: 10px;
-    }
-
     .contact__done-actions {
         border-top: 2px solid var(--color-ink);
         padding-top: var(--space-md);
@@ -518,7 +429,7 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
 
 <script>
     import { CONTACT_LIMITS, EMAIL_PATTERN } from '@lib/constants';
-    import { clearFieldErrors, renderErrorSummary, setFieldErrors, validateFields } from '@lib/ui/forms';
+    import { clearFieldErrors, focusFirstError, setFieldErrors, validateFields } from '@lib/ui/forms';
     import { composeContactEmail } from '@lib/email';
     import { registerPageScript, setText } from '@lib/utils';
     import { toast } from '@lib/ui/toasts';
@@ -557,10 +468,11 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
         const errors = validateFields(form, RULES);
 
         clearFieldErrors(form);
-        renderErrorSummary(form, errors, 'contact');
 
         if (Object.keys(errors).length > 0) {
             setFieldErrors(form, errors);
+            focusFirstError(form, errors);
+            toast('Check the fields.', 'error');
 
             return;
         }

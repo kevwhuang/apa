@@ -3,72 +3,39 @@ import { createStore } from '@lib/state';
 import { setRackMuted, setRackVolume } from '@lib/audio/rack/context';
 
 const ATTACK_DIVISOR = 8;
-
 const BASS_LEVEL = 0.5;
-
 const BASS_RELEASE = 0.9;
-
 const BASS_STEPS = [0, 10];
-
 const BEATS_PER_BAR = 4;
-
 const HASH_MULTIPLIER = 31;
-
 const HAT_CUTOFF_HERTZ = 7_000;
-
 const HAT_LEVEL = 0.06;
-
 const HAT_RELEASE = 0.055;
-
 const LEAD_LEVEL = 0.16;
-
 const LEAD_RELEASE = 0.34;
-
 const LEAD_THRESHOLD = 0.55;
-
 const LOOKAHEAD_MS = 25;
-
 const MASTER_LEVEL = 0.55;
-
-export const MIDI_A4 = 69;
-
+const MIDI_A4 = 69;
 const MINIMUM_GAIN = 0.0001;
-
 const MUTE_RAMP = 0.01;
-
 const NOISE_SECONDS = 1;
-
 const OCTAVE_THRESHOLD = 0.85;
-
 const PENTATONIC = [0, 3, 5, 7, 10];
-
 const RANDOM_ADDEND = 12_345;
-
 const RANDOM_MODULUS = 2_147_483_648;
-
 const RANDOM_MULTIPLIER = 1_103_515_245;
-
 const ROOT_MIDI = 36;
-
 const SCALE_SALT = 7;
-
 const SCHEDULE_AHEAD = 0.15;
-
 const SECONDS_PER_MINUTE = 60;
-
-export const SEMITONES_PER_OCTAVE = 12;
-
+const SEMITONES_PER_OCTAVE = 12;
 const START_PADDING = 0.06;
-
 const STEPS_PER_BEAT = 4;
-
 const TEMPO_BASE = 84;
-
 const TEMPO_SPREAD = 5;
-
 const TEMPO_STEP = 8;
-
-export const TUNING_HERTZ = 440;
+const TUNING_HERTZ = 440;
 
 const store = createStore<PlayerState>({
     fallback: { open: false, playing: false, position: 0 },
@@ -89,7 +56,7 @@ let stepTime = 0;
 let voices: AudioScheduledSourceNode[] = [];
 let volume = 1;
 
-export function announceTrackState(): void {
+function announceTrackState(): void {
     if (typeof window === 'undefined') return;
 
     const state = store.get();
@@ -102,7 +69,7 @@ function beatSeconds(track: PlayerTrack): number {
     return SECONDS_PER_MINUTE / tempo(track);
 }
 
-export function closePlayer(): void {
+function closePlayer(): void {
     store.set({ ...store.get(), open: false });
 }
 
@@ -123,11 +90,11 @@ function ensureContext(): AudioContext | undefined {
     return context;
 }
 
-export function getPlayerState(): PlayerState {
+function getPlayerState(): PlayerState {
     return store.get();
 }
 
-export function getPosition(): number {
+function getPosition(): number {
     const state = store.get();
     const track = current;
 
@@ -137,11 +104,11 @@ export function getPosition(): number {
     return Math.min(context.currentTime - startedAt, track.durationSeconds);
 }
 
-export function getTrack(): PlayerTrack | undefined {
+function getTrack(): PlayerTrack | undefined {
     return current;
 }
 
-export function getVolume(): number {
+function getVolume(): number {
     return volume;
 }
 
@@ -155,19 +122,19 @@ function hash(value: string): number {
     return total;
 }
 
-export function isMuted(): boolean {
+function isMuted(): boolean {
     return muted;
 }
 
-export function noteHertz(midi: number): number {
+function noteHertz(midi: number): number {
     return TUNING_HERTZ * 2 ** ((midi - MIDI_A4) / SEMITONES_PER_OCTAVE);
 }
 
-export function onPlayerChange(callback: (state: PlayerState) => void): () => void {
+function onPlayerChange(callback: (state: PlayerState) => void): () => void {
     return store.onChange(callback);
 }
 
-export function openPlayer(): void {
+function openPlayer(): void {
     store.set({ ...store.get(), open: true });
 }
 
@@ -179,7 +146,7 @@ function pausePlayback(): void {
     announceTrackState();
 }
 
-export function playTrack(track: PlayerTrack): void {
+function playTrack(track: PlayerTrack): void {
     stopVoices();
     current = track;
     store.set({ ...store.get(), open: true, playing: false, position: 0 });
@@ -215,9 +182,9 @@ function registerVoice(voice: AudioScheduledSourceNode): void {
 }
 
 function resumePlayback(): void {
+    const audio = ensureContext();
     const state = store.get();
     const track = current;
-    const audio = ensureContext();
 
     if (!track || !audio) return;
 
@@ -250,7 +217,7 @@ function scheduleStep(track: PlayerTrack, step: number, at: number): void {
     pluck(track, at, root + degree + octave * SEMITONES_PER_OCTAVE, LEAD_LEVEL, LEAD_RELEASE, 'sawtooth');
 }
 
-export function seekTo(seconds: number): void {
+function seekTo(seconds: number): void {
     const state = store.get();
     const track = current;
 
@@ -263,14 +230,14 @@ export function seekTo(seconds: number): void {
     if (state.playing) resumePlayback();
 }
 
-export function setMuted(next: boolean): void {
+function setMuted(next: boolean): void {
     muted = next;
     setRackMuted(next);
 
     if (context && master) master.gain.setTargetAtTime(next ? 0 : MASTER_LEVEL * volume, context.currentTime, MUTE_RAMP);
 }
 
-export function setVolume(fraction: number): void {
+function setVolume(fraction: number): void {
     volume = Math.min(Math.max(0, fraction), 1);
     setRackVolume(volume);
 
@@ -322,7 +289,7 @@ function tick(): void {
     }
 }
 
-export function togglePlayback(): void {
+function togglePlayback(): void {
     if (store.get().playing) {
         pausePlayback();
 
@@ -349,3 +316,24 @@ function whisper(at: number): void {
     source.stop(at + HAT_RELEASE);
     registerVoice(source);
 }
+
+export {
+    MIDI_A4,
+    SEMITONES_PER_OCTAVE,
+    TUNING_HERTZ,
+    announceTrackState,
+    closePlayer,
+    getPlayerState,
+    getPosition,
+    getTrack,
+    getVolume,
+    isMuted,
+    noteHertz,
+    onPlayerChange,
+    openPlayer,
+    playTrack,
+    seekTo,
+    setMuted,
+    setVolume,
+    togglePlayback,
+};
