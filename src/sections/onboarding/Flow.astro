@@ -1,19 +1,30 @@
 ---
 import { getCollection } from 'astro:content';
 
+import IconArrow from '@components/icons/Arrow.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import { ARTIST_NAME_MAX_LENGTH, AVATAR, GENRES, ROLES, US_STATES } from '@lib/shared/constants';
+import { ARTIST_NAME_MAX_LENGTH, AVATAR, GENRES, MEMBER_ROLES, ROLES, US_STATES } from '@lib/shared/constants';
 import { AVATAR_EXTENSIONS_OR_LIST } from '@lib/account/images';
 import { formatBytes, formatDate } from '@lib/shared/utils';
+
+const ACCOUNT_BENEFITS = [
+    { blurb: 'The rewards currency \u2014 earned at events and on submissions, spent in the store.', label: 'Prods' },
+    { blurb: 'Member checkout, order history, and Prods redeemed at the register.', label: 'The store' },
+    { blurb: 'Member-only drops, unlockable resources, and packs you get early.', label: 'Exclusives' },
+    { blurb: 'Your producer card, tracks, and links on the member roster.', label: 'The directory' },
+    { blurb: 'Your event attendance and your order history, kept in one place.', label: 'Histories' },
+    { blurb: 'Member chat, the rack, and the floating player, synced to your session.', label: 'Interactive' },
+    { blurb: 'Event announcements and the newsletter, sent to the address on your account.', label: 'The dispatch' },
+];
 
 const DEFAULT_CITY = 'Austin';
 const DEFAULT_ROLE = 'fan';
 const DEFAULT_STATE = 'TX';
-const ONBOARDING_ROLES = ['producer', 'engineer', 'artist', 'fan'];
 
 const STEPS = [
     { blurb: 'Name, sound, and what you do.', name: 'Basics' },
+    { blurb: 'What the account carries.', name: 'Why an account' },
     { blurb: 'Where the room lives.', name: 'What\u2019s next' },
 ];
 
@@ -28,7 +39,7 @@ const [nextAssembly] = events
     .filter(event => event.data.type === 'assembly' && event.data.status === 'upcoming')
     .sort((a, b) => +a.data.date - +b.data.date);
 
-const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
+const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.id));
 ---
 
 <section
@@ -47,8 +58,8 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
             class="max-w-2xl text-lmd text-ink-muted"
             data-motion="blur"
         >
-            That link signed you in. Two short steps &mdash; the basics, then a look around &mdash;
-            and your card is on the roster.
+            That link signed you in. Three short steps &mdash; the basics, what the account is for,
+            then a look around &mdash; and your card is on the roster.
         </p>
     </div>
 </section>
@@ -73,7 +84,7 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
             class="btn btn--primary"
             href="/here"
         >
-            Check in again &rarr;
+            Check in again <IconArrow />
         </a>
     </div>
     <div
@@ -143,10 +154,11 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
                 </p>
                 <div class="onboarding-preview flex flex-col max-w-xs gap-3">
                     <p class="label text-ink-muted">Roster preview</p>
-                    <article class="onboarding-preview__card slab slab--bare slab--card">
+                    <article class="onboarding-preview__card slab slab--bare slab--card overflow-clip">
                         <PlaceholderTile
                             class="onboarding-preview__tile aspect-[5/3] border-b-2 border-ink"
                             color="var(--color-ink-subtle)"
+                            data-motion="wipe"
                             label="??"
                             labelClass="onboarding-preview__initials leading-none text-[20cqw] text-surface-raised/80 [text-shadow:2px_2px_0_var(--color-ink-20)]"
                         >
@@ -188,9 +200,7 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
                     </p>
                 </div>
                 <div class="flex flex-col gap-2">
-                    <p class="label mb-1 text-ink-muted">
-                        Portrait <span class="text-ink-subtle">/ Optional</span>
-                    </p>
+                    <p class="label mb-1 text-ink-muted">Portrait</p>
                     <div class="onboarding__portrait">
                         <label class="onboarding__pick">
                             <span class="label">Choose an image</span>
@@ -247,6 +257,51 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
                         hidden
                     />
                 </div>
+                <fieldset class="onboarding__group flex flex-col gap-3">
+                    <legend class="label mb-1 text-ink-muted">
+                        What you make <span class="text-ink-subtle">/ Pick up to five</span>
+                    </legend>
+                    <div class="flex flex-wrap gap-2">
+                        {GENRES.map(genre => (
+                            <label class="onboarding__chip">
+                                <input
+                                    class="box"
+                                    aria-describedby="onboarding-genres-error"
+                                    aria-invalid="false"
+                                    name="genres"
+                                    type="checkbox"
+                                    value={genre}
+                                />
+                                {genre}
+                            </label>
+                        ))}
+                    </div>
+                    <p
+                        id="onboarding-genres-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </fieldset>
+                <fieldset class="onboarding__group flex flex-col gap-3">
+                    <legend class="label mb-1 text-ink-muted">
+                        What do you do? <span class="text-ink-subtle">/ Pick one</span>
+                    </legend>
+                    <div class="flex flex-wrap gap-2">
+                        {roles.map(role => (
+                            <label class="onboarding__chip">
+                                <input
+                                    class="box"
+                                    checked={role.id === DEFAULT_ROLE}
+                                    name="role"
+                                    type="radio"
+                                    value={role.id}
+                                />
+                                {role.id}
+                            </label>
+                        ))}
+                    </div>
+                </fieldset>
                 <div class="onboarding__pair">
                     <div class="flex flex-col gap-2">
                         <label class="block">
@@ -302,55 +357,44 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
                         />
                     </div>
                 </div>
-                <fieldset class="onboarding__group flex flex-col gap-3">
-                    <legend class="label mb-1 text-ink-muted">
-                        What you make <span class="text-ink-subtle">/ Pick up to five</span>
-                    </legend>
-                    <div class="flex flex-wrap gap-2">
-                        {GENRES.map(genre => (
-                            <label class="onboarding__chip">
-                                <input
-                                    class="box"
-                                    aria-describedby="onboarding-genres-error"
-                                    aria-invalid="false"
-                                    name="genres"
-                                    type="checkbox"
-                                    value={genre}
-                                />
-                                {genre}
-                            </label>
-                        ))}
-                    </div>
-                    <p
-                        id="onboarding-genres-error"
-                        class="action-text text-accent-deep"
-                        data-field-error
-                        hidden
-                    />
-                </fieldset>
-                <fieldset class="onboarding__group flex flex-col gap-3">
-                    <legend class="label mb-1 text-ink-muted">
-                        What do you do? <span class="text-ink-subtle">/ Pick one</span>
-                    </legend>
-                    <div class="flex flex-wrap gap-2">
-                        {roles.map(role => (
-                            <label class="onboarding__chip">
-                                <input
-                                    class="box"
-                                    checked={role.id === DEFAULT_ROLE}
-                                    name="role"
-                                    type="radio"
-                                    value={role.id}
-                                />
-                                {role.id}
-                            </label>
-                        ))}
-                    </div>
-                </fieldset>
             </fieldset>
             <fieldset
                 class="onboarding__pane flex flex-col gap-6"
                 data-onboarding-pane="1"
+                hidden
+            >
+                <legend
+                    class="mb-6 font-extrabold font-sans text-2xl tracking-tight"
+                    tabindex="-1"
+                >
+                    Why an account
+                </legend>
+                <p class="text-smd text-ink-muted">
+                    Nothing to fill in. Here is what the account is for.
+                </p>
+                <ul
+                    class="onboarding-benefits list-none"
+                    data-motion-stagger="rise"
+                >
+                    {ACCOUNT_BENEFITS.map((benefit, index) => (
+                        <li class="onboarding-benefits__row slab slab--sunk">
+                            <span
+                                class="label onboarding-benefits__index"
+                                aria-hidden="true"
+                            >
+                                0{index + 1}
+                            </span>
+                            <span class="onboarding-benefits__body">
+                                <strong class="onboarding-benefits__lead">{benefit.label}</strong>
+                                <span class="onboarding-benefits__blurb">{benefit.blurb}</span>
+                            </span>
+                        </li>
+                    ))}
+                </ul>
+            </fieldset>
+            <fieldset
+                class="onboarding__pane flex flex-col gap-6"
+                data-onboarding-pane="2"
                 hidden
             >
                 <legend
@@ -375,7 +419,7 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
                                         class="onboarding-next__arrow"
                                         aria-hidden="true"
                                     >
-                                        &rarr;
+                                        <IconArrow />
                                     </span>
                                 </span>
                                 <span class="onboarding-next__blurb">
@@ -396,7 +440,7 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
                                         class="onboarding-next__arrow"
                                         aria-hidden="true"
                                     >
-                                        &rarr;
+                                        <IconArrow />
                                     </span>
                                 </span>
                                 <span class="onboarding-next__blurb">{link.blurb}</span>
@@ -404,6 +448,13 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
                         </li>
                     ))}
                 </ul>
+                <button
+                    class="btn self-start"
+                    data-onboarding-tour
+                    type="button"
+                >
+                    Take the site tour <IconArrow />
+                </button>
             </fieldset>
             <div class="onboarding-form__foot">
                 <button
@@ -412,14 +463,14 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
                     hidden
                     type="button"
                 >
-                    &larr; Back
+                    <IconArrow left /> Back
                 </button>
                 <button
                     class="btn btn--primary"
                     data-onboarding-next
                     type="submit"
                 >
-                    Continue &rarr;
+                    <span data-onboarding-next-label>Continue</span> <IconArrow />
                 </button>
             </div>
         </form>
@@ -433,6 +484,45 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
 </section>
 
 <style>
+    .onboarding-benefits {
+        display: grid;
+        gap: var(--space-sm);
+    }
+
+    .onboarding-benefits__blurb {
+        color: var(--color-ink-muted);
+        font-size: var(--text-sm);
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .onboarding-benefits__body {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3xs);
+        min-width: 0;
+    }
+
+    .onboarding-benefits__index {
+        color: var(--color-accent-deep);
+        line-height: 1.3;
+    }
+
+    .onboarding-benefits__lead {
+        font-family: var(--font-sans);
+        font-size: var(--text-smd);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+    }
+
+    .onboarding-benefits__row {
+        column-gap: var(--space-sm);
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        padding: var(--space-sm) var(--space-md);
+    }
+
     .onboarding-form {
         padding: var(--space-lg);
     }
@@ -567,6 +657,7 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
             background-color var(--duration-fast) var(--motion-ease-ui),
             border-color var(--duration-fast) var(--motion-ease-ui),
             color var(--duration-fast) var(--motion-ease-ui);
+        user-select: none;
         width: var(--rail-node);
     }
 
@@ -639,6 +730,7 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
         padding: var(--space-2xs) var(--space-sm);
         text-transform: uppercase;
         transition: background-color var(--duration-fast) var(--motion-ease-ui);
+        user-select: none;
     }
 
     .onboarding__chip:has(.box:checked) {
@@ -726,10 +818,11 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
     @media (max-width: 768px) {
         .onboarding-rail {
             --rail-node: 28px;
+            background-color: var(--color-ink);
             border: 2px solid var(--color-ink);
             flex-direction: row;
             flex-wrap: wrap;
-            gap: 0;
+            gap: 2px;
         }
 
         .onboarding-rail__blurb {
@@ -737,12 +830,9 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
         }
 
         .onboarding-rail__step {
+            background-color: var(--color-surface);
             flex: 1 1 150px;
             padding: var(--space-xs);
-        }
-
-        .onboarding-rail__step + .onboarding-rail__step {
-            border-left: 2px solid var(--color-ink);
         }
 
         .onboarding-rail__step:not(:last-child)::after {
@@ -777,6 +867,7 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
     import { navigate } from 'astro:transitions/client';
 
     import { ONBOARDING_TOKEN_PARAM } from '@lib/shared/constants';
+    import { armTour } from '@lib/tour/tour';
     import { clearFieldErrors, focusFirstError, isValidationBypassed, setFieldErrors, validateFields } from '@lib/ui/forms';
     import { clearOnboardingDraft, getOnboardingDraft, saveOnboardingDraft, verifyOnboardingToken } from '@lib/account/onboarding';
     import { getInitials, pickTileColor, registerPageScript, setAvatarImage, setHidden, setPending, setText } from '@lib/shared/utils';
@@ -792,9 +883,9 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
     const DEFAULT_LOCATION = 'Austin, TX';
     const DEMO_EMAIL = 'you@austinproduceralliance.com';
     const GENRE_MAX = 5;
-    const LAST_STEP = 1;
-    const STEP_NAMES = ['Basics', 'What\u2019s next'];
-    const STEP_RULES: Record<string, FieldRule>[] = [BASICS_RULES, {}];
+    const LAST_STEP = 2;
+    const STEP_NAMES = ['Basics', 'Why an account', 'What\u2019s next'];
+    const STEP_RULES: Record<string, FieldRule>[] = [BASICS_RULES, {}, {}];
 
     let accountEmail = '';
     let avatar = '';
@@ -948,6 +1039,12 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
         await updateSession({ artistName: draft.artistName });
     }
 
+    async function handleTour() {
+        armTour();
+
+        await navigate('/');
+    }
+
     function initOnboardingFlow(signal: AbortSignal) {
         const form = document.querySelector<HTMLFormElement>('[data-onboarding-form]');
         const gate = verifyOnboardingToken(new URLSearchParams(window.location.search).get(ONBOARDING_TOKEN_PARAM));
@@ -981,6 +1078,7 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
         form.addEventListener('input', () => renderPreview(form), { signal });
         form.addEventListener('submit', event => void handleSubmit(event, form), { signal });
         form.querySelector<HTMLButtonElement>('[data-onboarding-back]')?.addEventListener('click', () => handleBack(form), { signal });
+        form.querySelector<HTMLButtonElement>('[data-onboarding-tour]')?.addEventListener('click', () => void handleTour(), { signal });
         form.querySelector<HTMLButtonElement>('[data-portrait-remove]')?.addEventListener('click', () => handlePortraitRemove(form), { signal });
         picture?.addEventListener('change', () => void handlePortraitChange(form, picture), { signal });
     }
@@ -1084,7 +1182,7 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
 
         back?.toggleAttribute('hidden', step === 0);
 
-        if (next) next.textContent = step === LAST_STEP ? 'Finish \u2192' : 'Continue \u2192';
+        setText(next?.querySelector<HTMLElement>('[data-onboarding-next-label]') ?? null, step === LAST_STEP ? 'Finish' : 'Continue');
 
         setText(document.querySelector<HTMLElement>('[data-onboarding-announce]'), `Step ${step + 1} of ${STEP_NAMES.length}, ${STEP_NAMES[step]}`);
 

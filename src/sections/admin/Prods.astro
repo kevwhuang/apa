@@ -1,114 +1,115 @@
 ---
 import IconClose from '@components/icons/Close.astro';
+import SearchField from '@components/shared/SearchField.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { formatDateOnly } from '@lib/shared/utils';
+import { formatDate } from '@lib/shared/utils';
 
 const MEMBERS = [
     {
         artistName: 'Devon Park',
         email: 'devon.park@fastmail.com',
         id: 'devon-park',
-        joined: '2023-11-04',
+        joined: '2023-11-04T00:00:00-05:00',
         ledger: [
-            { amount: 1, date: '2023-11-04', reason: 'Welcome Prod' },
-            { amount: 20, date: '2026-03-14', reason: 'Led a workshop \u2014 synthesis basics' },
-            { amount: 1, date: '2026-05-09', reason: 'Attended the May Assembly' },
-            { amount: -8, date: '2026-06-27', reason: 'Redeemed \u2014 Sticker pack' },
+            { amount: 1, date: '2023-11-04T00:00:00-05:00', reason: 'Welcome Prod' },
+            { amount: 20, date: '2026-03-14T00:00:00-05:00', reason: 'Led a workshop \u2014 synthesis basics' },
+            { amount: 1, date: '2026-05-09T00:00:00-05:00', reason: 'Attended the May Assembly' },
+            { amount: -8, date: '2026-06-27T00:00:00-05:00', reason: 'Redeemed \u2014 Sticker pack' },
         ],
     },
     {
         artistName: 'Inez Rao',
         email: 'inez.rao@hey.com',
         id: 'inez-rao',
-        joined: '2024-01-19',
+        joined: '2024-01-19T00:00:00-06:00',
         ledger: [
-            { amount: 1, date: '2024-01-19', reason: 'Welcome Prod' },
-            { amount: 10, date: '2026-04-11', reason: 'Won the Bash \u2014 spring edition' },
-            { amount: 1, date: '2026-06-13', reason: 'Attended the June Hangout' },
+            { amount: 1, date: '2024-01-19T00:00:00-06:00', reason: 'Welcome Prod' },
+            { amount: 10, date: '2026-04-11T00:00:00-05:00', reason: 'Won the Bash \u2014 spring edition' },
+            { amount: 1, date: '2026-06-13T00:00:00-05:00', reason: 'Attended the June Hangout' },
         ],
     },
     {
         artistName: 'June Castillo',
         email: 'june.castillo@gmail.com',
         id: 'june-castillo',
-        joined: '2024-02-08',
+        joined: '2024-02-08T00:00:00-06:00',
         ledger: [
-            { amount: 1, date: '2024-02-08', reason: 'Welcome Prod' },
-            { amount: 1, date: '2026-02-21', reason: 'Submitted a track for feedback' },
-            { amount: 3, date: '2026-05-09', reason: 'Gave a lightning talk' },
+            { amount: 1, date: '2024-02-08T00:00:00-06:00', reason: 'Welcome Prod' },
+            { amount: 1, date: '2026-02-21T00:00:00-06:00', reason: 'Submitted a track for feedback' },
+            { amount: 3, date: '2026-05-09T00:00:00-05:00', reason: 'Gave a lightning talk' },
         ],
     },
     {
         artistName: 'Kojo Mensah',
         email: 'kojo.mensah@outlook.com',
         id: 'kojo-mensah',
-        joined: '2024-03-27',
+        joined: '2024-03-27T00:00:00-05:00',
         ledger: [
-            { amount: 1, date: '2024-03-27', reason: 'Welcome Prod' },
-            { amount: 2, date: '2026-05-23', reason: 'Got a sample accepted' },
-            { amount: 1, date: '2026-07-12', reason: 'Attended the July Bash' },
+            { amount: 1, date: '2024-03-27T00:00:00-05:00', reason: 'Welcome Prod' },
+            { amount: 2, date: '2026-05-23T00:00:00-05:00', reason: 'Got a sample accepted' },
+            { amount: 1, date: '2026-07-12T00:00:00-05:00', reason: 'Attended the July Bash' },
         ],
     },
     {
         artistName: 'Marcus Hale',
         email: 'marcus.hale@gmail.com',
         id: 'marcus-hale',
-        joined: '2023-09-12',
+        joined: '2023-09-12T00:00:00-05:00',
         ledger: [
-            { amount: 1, date: '2023-09-12', reason: 'Welcome Prod' },
-            { amount: 10, date: '2026-01-17', reason: 'Organized a weekly meet' },
-            { amount: -8, date: '2026-06-20', reason: 'Redeemed \u2014 Sticker pack' },
+            { amount: 1, date: '2023-09-12T00:00:00-05:00', reason: 'Welcome Prod' },
+            { amount: 10, date: '2026-01-17T00:00:00-06:00', reason: 'Organized a weekly meet' },
+            { amount: -8, date: '2026-06-20T00:00:00-05:00', reason: 'Redeemed \u2014 Sticker pack' },
         ],
     },
     {
         artistName: 'Otis Reed',
         email: 'otis.reed@gmail.com',
         id: 'otis-reed',
-        joined: '2025-04-09',
+        joined: '2025-04-09T00:00:00-05:00',
         ledger: [
-            { amount: 1, date: '2025-04-09', reason: 'Welcome Prod' },
+            { amount: 1, date: '2025-04-09T00:00:00-05:00', reason: 'Welcome Prod' },
         ],
     },
     {
         artistName: 'Priya Nand',
         email: 'priya.nand@hey.com',
         id: 'priya-nand',
-        joined: '2025-06-21',
+        joined: '2025-06-21T00:00:00-05:00',
         ledger: [
-            { amount: 1, date: '2025-06-21', reason: 'Welcome Prod' },
-            { amount: 1, date: '2026-07-12', reason: 'Submitted a track for feedback' },
+            { amount: 1, date: '2025-06-21T00:00:00-05:00', reason: 'Welcome Prod' },
+            { amount: 1, date: '2026-07-12T00:00:00-05:00', reason: 'Submitted a track for feedback' },
         ],
     },
     {
         artistName: 'Sasha Lin',
         email: 'sasha.lin@proton.me',
         id: 'sasha-lin',
-        joined: '2024-06-02',
+        joined: '2024-06-02T00:00:00-05:00',
         ledger: [
-            { amount: 1, date: '2024-06-02', reason: 'Welcome Prod' },
-            { amount: 1, date: '2026-03-14', reason: 'Brought a friend' },
-            { amount: 2, date: '2026-07-12', reason: 'Finished a Bash track' },
+            { amount: 1, date: '2024-06-02T00:00:00-05:00', reason: 'Welcome Prod' },
+            { amount: 1, date: '2026-03-14T00:00:00-05:00', reason: 'Brought a friend' },
+            { amount: 2, date: '2026-07-12T00:00:00-05:00', reason: 'Finished a Bash track' },
         ],
     },
     {
         artistName: 'Tana Wolfe',
         email: 'tana.wolfe@gmail.com',
         id: 'tana-wolfe',
-        joined: '2024-08-15',
+        joined: '2024-08-15T00:00:00-05:00',
         ledger: [
-            { amount: 1, date: '2024-08-15', reason: 'Welcome Prod' },
-            { amount: 1, date: '2026-04-11', reason: 'Attended the April Assembly' },
+            { amount: 1, date: '2024-08-15T00:00:00-05:00', reason: 'Welcome Prod' },
+            { amount: 1, date: '2026-04-11T00:00:00-05:00', reason: 'Attended the April Assembly' },
         ],
     },
     {
         artistName: 'Yara Soto',
         email: 'yara.soto@icloud.com',
         id: 'yara-soto',
-        joined: '2025-01-23',
+        joined: '2025-01-23T00:00:00-06:00',
         ledger: [
-            { amount: 1, date: '2025-01-23', reason: 'Welcome Prod' },
-            { amount: 1, date: '2026-05-23', reason: 'Tagged our social media' },
-            { amount: 5, date: '2026-06-13', reason: 'Facilitated conversation' },
+            { amount: 1, date: '2025-01-23T00:00:00-06:00', reason: 'Welcome Prod' },
+            { amount: 1, date: '2026-05-23T00:00:00-05:00', reason: 'Tagged our social media' },
+            { amount: 5, date: '2026-06-13T00:00:00-05:00', reason: 'Facilitated conversation' },
         ],
     },
 ];
@@ -129,16 +130,11 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
             Prods management
         </SectionHead>
         <div data-motion="rise">
-            <label class="block mb-3">
-                <span class="label block mb-2 text-ink-muted">Find a member</span>
-                <input
-                    class="input input--sunk max-w-xl font-mono text-sm"
-                    autocomplete="off"
-                    data-prods-search
-                    placeholder="Name or email"
-                    type="search"
-                />
-            </label>
+            <SearchField
+                class="mb-3"
+                label="Find a member"
+                placeholder={'Search members\u2026'}
+            />
             <p
                 class="label mb-4 text-ink-subtle"
                 aria-live="polite"
@@ -158,13 +154,13 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
                             aria-haspopup="dialog"
                             data-member-email={member.email}
                             data-member-id={member.id}
-                            data-member-joined={formatDateOnly(new Date(member.joined))}
+                            data-member-joined={formatDate(new Date(member.joined))}
                             data-member-name={member.artistName}
                             type="button"
                         >
                             <span class="font-bold font-sans leading-snug text-md tracking-tight">{member.artistName}</span>
                             <span class="font-mono text-xs text-ink-muted">{member.email}</span>
-                            <span class="font-mono text-2xs text-ink-subtle">Joined {formatDateOnly(new Date(member.joined))}</span>
+                            <span class="font-mono text-2xs text-ink-subtle">Joined {formatDate(new Date(member.joined))}</span>
                         </button>
                     </li>
                 ))}
@@ -219,7 +215,7 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
                     <div class="p-(--space-md) bg-surface-raised">
                         <dt class="label mb-2 text-ink-muted">Standing</dt>
                         <dd
-                            class="action-text"
+                            class="label"
                             data-prods-standing
                         />
                     </div>
@@ -233,10 +229,10 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
                 </dl>
                 <p class="label mb-3 text-ink-muted">Ledger history</p>
                 <div class="prods__scroller scroll-slot mb-8">
-                    <table class="prods__table border-2 border-ink">
+                    <table class="prods__table">
                         <caption class="sr-only">Dated ledger entries with reason, change, and running balance</caption>
                         <thead>
-                            <tr class="border-b-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
+                            <tr class="font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
                                 <th
                                     class="px-4 py-3 text-left"
                                     scope="col"
@@ -457,6 +453,7 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
 
     .prods__scroller {
         --scroll-slot-max: 280px;
+        border: 2px solid var(--color-ink);
         overflow-x: auto;
     }
 
@@ -464,6 +461,14 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
         display: table;
         overflow-x: visible;
         width: 100%;
+    }
+
+    .prods__table thead th {
+        background-color: var(--color-surface-raised);
+        box-shadow: inset 0 -2px 0 var(--color-ink);
+        position: sticky;
+        top: 0;
+        z-index: var(--z-page);
     }
 
     :global(html[data-theme='dark']) .prods__modal::backdrop {
@@ -482,7 +487,7 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
     import { MOCK_LATENCY_MS, STORAGE } from '@lib/shared/constants';
     import { clearFieldErrors, focusFirstError, setFieldErrors, validateFields } from '@lib/ui/forms';
     import { createStore } from '@lib/shared/state';
-    import { delay, formatDateStamp, formatProds, getStanding, registerPageScript, setPending, setText } from '@lib/shared/utils';
+    import { delay, formatDateStamp, formatProds, getStanding, initSearchField, registerPageScript, setPending, setText } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
 
     type LedgerMap = Record<string, LedgerEntry[]>;
@@ -494,7 +499,6 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
     }
 
     const AMOUNT_LIMIT = 100;
-    const DATE_ONLY_LENGTH = 10;
     const REASON_MAX = 80;
 
     const RULES: Record<string, FieldRule> = {
@@ -516,19 +520,6 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
 
     function formatChange(amount: number) {
         return amount > 0 ? `+${amount}` : String(amount);
-    }
-
-    function formatLedgerDate(value: string) {
-        const date = new Date(value);
-
-        if (value.length !== DATE_ONLY_LENGTH) return formatDateStamp(date);
-
-        return date.toLocaleDateString('en-US', {
-            day: 'numeric',
-            month: 'short',
-            timeZone: 'UTC',
-            year: 'numeric',
-        });
     }
 
     function getLedger(id: string) {
@@ -622,7 +613,7 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
     function initAdminProds(signal: AbortSignal) {
         const dialog = document.querySelector<HTMLDialogElement>('[data-prods-modal]');
         const form = document.querySelector<HTMLFormElement>('[data-prods-form]');
-        const search = document.querySelector<HTMLInputElement>('[data-prods-search]');
+        const search = document.querySelector<HTMLInputElement>('[data-search-input]');
 
         if (!dialog || !form || !search) return;
 
@@ -639,6 +630,12 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
         dialog.querySelector<HTMLButtonElement>('[data-prods-close]')?.addEventListener('click', () => dialog.close(), { signal });
         form.addEventListener('submit', event => void handleAdjustSubmit(event, form), { signal });
         search.addEventListener('input', () => handleSearch(search), { signal });
+
+        initSearchField({
+            clearElements: document.querySelectorAll<HTMLButtonElement>('[data-search-clear]'),
+            searchElement: search,
+            signal,
+        });
 
         document.querySelectorAll<HTMLButtonElement>('[data-member-id]').forEach((button) => {
             button.addEventListener('click', () => openModal(button, dialog, form), { signal });
@@ -702,7 +699,7 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
             change?.classList.toggle('text-accent-deep', row.amount < 0);
             setText(change, formatChange(row.amount));
             setText(fragment.querySelector<HTMLElement>('[data-cell="balance"]'), String(row.total));
-            setText(fragment.querySelector<HTMLElement>('[data-cell="date"]'), formatLedgerDate(row.date));
+            setText(fragment.querySelector<HTMLElement>('[data-cell="date"]'), formatDateStamp(new Date(row.date)));
             setText(fragment.querySelector<HTMLElement>('[data-cell="reason"]'), row.reason);
             body.append(fragment);
         });

@@ -2,11 +2,16 @@
 import IconCheck from '@components/icons/Check.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
+import { COMMERCE } from '@lib/shared/constants';
+import { toImageSources } from '@lib/commerce/products';
+
+const images = await toImageSources();
 ---
 
 <section
     class="stage stage--tight border-b-2 border-ink"
     aria-labelledby="order-title"
+    data-images={JSON.stringify(images)}
 >
     <div class="text-center">
         <div
@@ -26,6 +31,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
         </PageHead>
         <p
             class="label text-ink-muted"
+            data-motion="stamp"
             data-order-number
             data-placeholder
         />
@@ -45,6 +51,19 @@ import SectionHead from '@components/shared/SectionHead.astro';
                 <dd
                     class="min-w-0 wrap-break-word"
                     data-order-subtotal
+                >
+                    $0.00
+                </dd>
+            </div>
+            <div
+                class="flex justify-between gap-3"
+                data-order-promo-row
+                hidden
+            >
+                <dt>Discount ({COMMERCE.discountCode})</dt>
+                <dd
+                    class="whitespace-nowrap"
+                    data-order-promo
                 >
                     $0.00
                 </dd>
@@ -107,6 +126,13 @@ import SectionHead from '@components/shared/SectionHead.astro';
     </div>
     <template data-order-row>
         <li class="first:border-t-0 flex items-center gap-4 p-4 border-t-2 border-ink">
+            <img
+                class="object-cover shrink-0 h-14 w-14 border-2 border-ink"
+                alt=""
+                data-row-photo
+                hidden
+                loading="lazy"
+            />
             <div class="flex-1 min-w-0">
                 <p
                     class="font-bold font-sans"
@@ -149,10 +175,10 @@ import SectionHead from '@components/shared/SectionHead.astro';
                 data-order-ledger
                 hidden
             >
-                <table class="order__table border-2 border-ink">
+                <table class="order__table">
                     <caption class="sr-only">Orders with date, items, and total &mdash; pick a row to load its receipt</caption>
                     <thead>
-                        <tr class="border-b-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
+                        <tr class="font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
                             <th
                                 class="order__cell text-left"
                                 scope="col"
@@ -279,6 +305,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
 
     .order__scroller {
         --scroll-slot-max: calc(52px + 5 * (33px + var(--space-md)));
+        border: 2px solid var(--color-ink);
         overflow-x: auto;
     }
 
@@ -290,6 +317,14 @@ import SectionHead from '@components/shared/SectionHead.astro';
         display: table;
         overflow-x: visible;
         width: 100%;
+    }
+
+    .order__table thead th {
+        background-color: var(--color-surface);
+        box-shadow: inset 0 -2px 0 var(--color-ink);
+        position: sticky;
+        top: 0;
+        z-index: var(--z-page);
     }
 
     @media (max-width: 768px) {
@@ -318,30 +353,30 @@ import SectionHead from '@components/shared/SectionHead.astro';
 
 <script>
     import { MILLISECONDS_PER_DAY } from '@lib/shared/constants';
-    import { formatDateStamp, formatPrice, formatVariant, registerPageScript, setText, toIsoDate } from '@lib/shared/utils';
+    import { formatDateStamp, formatPrice, formatVariant, parseImageSources, registerPageScript, setProductImage, setText, toIsoDate } from '@lib/shared/utils';
     import { getLastOrder } from '@lib/commerce/checkout';
     import { totals } from '@lib/commerce/cart';
 
     const NEWEST_ORDER_AGE_DAYS = 9;
 
     const NEWEST_ORDER_ITEMS: CartItem[] = [
-        { color: 'Bone', image: 'tick-tee-1', priceCents: 3_500, productSlug: 'tick-tee', quantity: 1, size: 'M', title: 'Tick Tee' },
-        { image: 'stickers-1', priceCents: 800, productSlug: 'sticker-pack', quantity: 2, title: 'Sticker Pack' },
-        { color: 'Natural', image: 'tote-1', priceCents: 2_200, productSlug: 'tote-bag', quantity: 1, title: 'Tote Bag' },
+        { image: '725841936_bone', priceCents: 3_500, productSlug: 'tick-tee', quantity: 1, size: 'M', title: 'Tick Tee', variation: 'Bone' },
+        { image: '639158247_assorted', priceCents: 800, productSlug: 'sticker-pack', quantity: 2, title: 'Sticker Pack', variation: 'Assorted' },
+        { image: '843207156_natural', priceCents: 2_200, productSlug: 'tote-bag', quantity: 1, title: 'Tote Bag', variation: 'Natural' },
     ];
 
     const OLDER_ORDER_AGE_DAYS = 24;
 
     const OLDER_ORDER_ITEMS: CartItem[] = [
-        { image: 'stickers-1', priceCents: 800, productSlug: 'sticker-pack', quantity: 2, title: 'Sticker Pack' },
-        { color: 'Natural', image: 'tote-1', priceCents: 2_200, productSlug: 'tote-bag', quantity: 1, title: 'Tote Bag' },
+        { image: '639158247_assorted', priceCents: 800, productSlug: 'sticker-pack', quantity: 2, title: 'Sticker Pack', variation: 'Assorted' },
+        { image: '843207156_natural', priceCents: 2_200, productSlug: 'tote-bag', quantity: 1, title: 'Tote Bag', variation: 'Natural' },
     ];
 
     const OLDEST_ORDER_AGE_DAYS = 96;
 
     const OLDEST_ORDER_ITEMS: CartItem[] = [
-        { color: 'Charcoal', image: 'hoodie-1', priceCents: 7_800, productSlug: 'bash-hoodie', quantity: 1, size: 'L', title: 'Bash Hoodie' },
-        { image: 'stickers-1', priceCents: 800, productSlug: 'sticker-pack', quantity: 1, title: 'Sticker Pack' },
+        { image: '358214679_charcoal', priceCents: 7_800, productSlug: 'bash-hoodie', quantity: 1, size: 'L', title: 'Bash Hoodie', variation: 'Charcoal' },
+        { image: '639158247_assorted', priceCents: 800, productSlug: 'sticker-pack', quantity: 1, title: 'Sticker Pack', variation: 'Assorted' },
     ];
 
     const PAST_ORDERS: Order[] = [
@@ -370,6 +405,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
 
     const RECEIPT_FRESH_MS = 120_000;
 
+    let images: ImageSources = {};
     let orders: Order[] = [];
     let placedId: string | null = null;
 
@@ -390,7 +426,9 @@ import SectionHead from '@components/shared/SectionHead.astro';
         const detail = document.querySelector<HTMLElement>('[data-order-detail]');
         const heading = document.querySelector<HTMLElement>('#order-title');
         const placed = getLastOrder();
+        const source = document.querySelector<HTMLElement>('[data-images]');
 
+        images = parseImageSources(source?.dataset.images);
         orders = placed ? [placed, ...PAST_ORDERS] : [...PAST_ORDERS];
         placedId = placed?.id ?? null;
 
@@ -420,6 +458,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
             const fragment = template.content.cloneNode(true) as DocumentFragment;
             const variant = formatVariant(item);
 
+            setProductImage(fragment.querySelector<HTMLImageElement>('[data-row-photo]'), images, item);
             setText(fragment.querySelector('[data-row-price]'), formatPrice(item.priceCents * item.quantity));
             setText(fragment.querySelector('[data-row-title]'), item.title);
             setText(fragment.querySelector('[data-row-variant]'), [variant, `\u00d7 ${item.quantity}`].filter(Boolean).join(' / '));
@@ -464,10 +503,14 @@ import SectionHead from '@components/shared/SectionHead.astro';
     }
 
     function renderTotals(summary: CartTotals) {
-        const row = document.querySelector<HTMLElement>('[data-order-discount-row]');
+        const promoCents = summary.promoCents ?? 0;
 
-        row?.toggleAttribute('hidden', summary.discountCents === 0);
-        setText(document.querySelector('[data-order-discount]'), `\u2212${formatPrice(summary.discountCents)}`);
+        const prodsCents = summary.discountCents - promoCents;
+
+        document.querySelector<HTMLElement>('[data-order-discount-row]')?.toggleAttribute('hidden', prodsCents === 0);
+        document.querySelector<HTMLElement>('[data-order-promo-row]')?.toggleAttribute('hidden', promoCents === 0);
+        setText(document.querySelector('[data-order-discount]'), `\u2212${formatPrice(prodsCents)}`);
+        setText(document.querySelector('[data-order-promo]'), `\u2212${formatPrice(promoCents)}`);
         setText(document.querySelector('[data-order-shipping]'), formatPrice(summary.shippingCents));
         setText(document.querySelector('[data-order-subtotal]'), formatPrice(summary.subtotalCents));
         setText(document.querySelector('[data-order-tax]'), formatPrice(summary.taxCents));

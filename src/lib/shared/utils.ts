@@ -37,6 +37,8 @@ const EMPTY_TILE_COLOR = 'var(--color-ink-subtle)';
 const FLOAT_WINDOW_BASE_Z = 70;
 const ISO_DATE_LENGTH = 10;
 const MAX_INITIALS = 2;
+const MILLISECONDS_PER_MINUTE = 60_000;
+const MINUTES_PER_HOUR = 60;
 const PANEL_NARROW_VIEWPORT = 480;
 const PANEL_RESIZE_STEP = 16;
 const PANEL_WIDE_DIVISOR = 2;
@@ -97,16 +99,6 @@ function formatDate(date: Date): string {
     });
 }
 
-function formatDateOnly(date: Date): string {
-    return date.toLocaleDateString('en-US', {
-        day: 'numeric',
-        month: 'short',
-        timeZone: 'UTC',
-        weekday: 'short',
-        year: 'numeric',
-    });
-}
-
 function formatDateStamp(date: Date): string {
     return date.toLocaleDateString('en-US', {
         day: 'numeric',
@@ -121,14 +113,6 @@ function formatDuration(seconds: number): string {
     const remainder = Math.floor(seconds % SECONDS_PER_MINUTE);
 
     return `${minutes}:${String(remainder).padStart(2, '0')}`;
-}
-
-function formatMonthOnly(date: Date): string {
-    return date.toLocaleDateString('en-US', {
-        month: 'short',
-        timeZone: 'UTC',
-        year: 'numeric',
-    });
 }
 
 function formatPrice(cents: number): string {
@@ -154,7 +138,7 @@ function formatTimeRange(start: Date, end: Date): string {
 }
 
 function formatVariant(item: CartItem): string {
-    const parts = [item.color, item.size].filter(Boolean);
+    const parts = [item.variation, item.size].filter(Boolean);
 
     return parts.length > 0 ? parts.join(' / ') : 'Base';
 }
@@ -394,7 +378,7 @@ function maxPanelWidth(viewportWidth: number, reservedRight: number): number {
 function mergeAssets(downloads: CollectionEntry<'downloads'>[], docs: CollectionEntry<'docs'>[]): CollectionEntry<'downloads'>[] {
     return downloads
         .map(entry => toAsset(entry, docs))
-        .toSorted((a, b) => Number(b.data.available) - Number(a.data.available) || +b.data.date - +a.data.date);
+        .toSorted((a, b) => Number(b.data.available) - Number(a.data.available) || a.data.title.localeCompare(b.data.title));
 }
 
 function mergeCalendar(events: CollectionEntry<'events'>[], bashEditions: CollectionEntry<'bash'>[]): Calendar {
@@ -407,12 +391,20 @@ function mergeCalendar(events: CollectionEntry<'events'>[], bashEditions: Collec
 }
 
 function parseCatalog(raw: string | undefined): CatalogEntry[] {
-    if (!raw) return [];
+    return parseJson<CatalogEntry[]>(raw, []);
+}
+
+function parseImageSources(raw: string | undefined): ImageSources {
+    return parseJson<ImageSources>(raw, {});
+}
+
+function parseJson<T>(raw: string | undefined, fallback: T): T {
+    if (!raw) return fallback;
 
     try {
-        return JSON.parse(raw) as CatalogEntry[];
+        return JSON.parse(raw) as T;
     } catch {
-        return [];
+        return fallback;
     }
 }
 
@@ -492,6 +484,18 @@ function setPending(control: HTMLButtonElement | null, pending: boolean): void {
     else control.removeAttribute('aria-busy');
 }
 
+function setProductImage(image: HTMLImageElement | null, sources: ImageSources, item: CartItem): void {
+    if (!image) return;
+
+    const source = sources[item.image];
+
+    if (source) image.src = source;
+    else image.removeAttribute('src');
+
+    image.alt = source ? `${item.title} \u2014 ${formatVariant(item)}` : '';
+    image.hidden = !source;
+}
+
 function setText(element: Element | null, value: string): void {
     if (element) element.textContent = value;
 }
@@ -510,6 +514,33 @@ function toAsset(entry: CollectionEntry<'downloads'>, docs: CollectionEntry<'doc
             title: doc.data.title,
         },
     };
+}
+
+function toAustinIso(date: Date): string {
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+        day: '2-digit',
+        hour: '2-digit',
+        hourCycle: 'h23',
+        minute: '2-digit',
+        month: '2-digit',
+        second: '2-digit',
+        timeZone: 'America/Chicago',
+        year: 'numeric',
+    });
+
+    const parts = Object.fromEntries(formatter.formatToParts(date).map(part => [part.type, part.value]));
+
+    const local = Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day), Number(parts.hour), Number(parts.minute), Number(parts.second));
+
+    const offsetMinutes = Math.round((local - date.getTime()) / MILLISECONDS_PER_MINUTE);
+
+    const magnitude = Math.abs(offsetMinutes);
+    const sign = offsetMinutes < 0 ? '-' : '+';
+
+    const hours = String(Math.floor(magnitude / MINUTES_PER_HOUR)).padStart(2, '0');
+    const minutes = String(magnitude % MINUTES_PER_HOUR).padStart(2, '0');
+
+    return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}${sign}${hours}:${minutes}`;
 }
 
 function toCalendarBashEvent(entry: CollectionEntry<'bash'>) {
@@ -540,6 +571,7 @@ function toCalendarEvent(entry: CollectionEntry<'events'>) {
 function toCatalog(products: CollectionEntry<'products'>[]): CatalogEntry[] {
     return products.map(product => ({
         priceCents: product.data.priceCents,
+        sku: product.data.sku,
         slug: product.id,
         stock: product.data.stock,
         title: product.data.title,
@@ -579,10 +611,8 @@ export {
     formatCalendarDay,
     formatCalendarMonth,
     formatDate,
-    formatDateOnly,
     formatDateStamp,
     formatDuration,
-    formatMonthOnly,
     formatPrice,
     formatProds,
     formatTime,
@@ -600,6 +630,7 @@ export {
     mergeAssets,
     mergeCalendar,
     parseCatalog,
+    parseImageSources,
     pickTileColor,
     raiseWindow,
     registerPageScript,
@@ -608,8 +639,9 @@ export {
     setHidden,
     setMessage,
     setPending,
+    setProductImage,
     setText,
-    toCalendarEvent,
+    toAustinIso,
     toCatalog,
     toIsoDate,
     toProducerRecord,

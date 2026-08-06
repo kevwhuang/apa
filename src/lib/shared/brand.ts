@@ -56,7 +56,6 @@ const BRAND_OG = {
 const BRAND_SIZES = {
     lockupFooter: 64,
     markNav: 32,
-    markNavCompact: 26,
     markPreview: 40,
 } as const;
 

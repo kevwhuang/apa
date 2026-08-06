@@ -21,8 +21,9 @@ const UNFOLD_CLIP = 'inset(14% 0% 14% 0%)';
 const UNFOLD_PERSPECTIVE = 700;
 const UNFOLD_ROTATION = -8;
 const UNFOLD_SCALE = 0.92;
-const WIPE_CLIP = 'inset(0% 100% 0% 0%)';
+const WIPE_CLIP = 'inset(-50% 100% 0% 0%)';
 const WIPE_OFFSET = -28;
+const WIPE_OPEN = 'inset(-50% 0% 0% 0%)';
 
 const ENTRANCE_PRESETS: Record<MotionPresetName, MotionPreset> = {
     blur: {
@@ -86,7 +87,7 @@ const ENTRANCE_PRESETS: Record<MotionPresetName, MotionPreset> = {
         ease: 'mechanical',
         from: () => ({ clipPath: WIPE_CLIP, opacity: 1, x: WIPE_OFFSET }),
         stagger: 'base',
-        to: () => ({ clipPath: CLIP_OPEN, x: 0 }),
+        to: () => ({ clipPath: WIPE_OPEN, x: 0 }),
     },
 };
 

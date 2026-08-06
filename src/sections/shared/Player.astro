@@ -1,4 +1,5 @@
 ---
+import IconArrow from '@components/icons/Arrow.astro';
 import IconClose from '@components/icons/Close.astro';
 import IconPause from '@components/icons/Pause.astro';
 import IconPlay from '@components/icons/Play.astro';
@@ -73,7 +74,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
             class="action-text player__link"
             href="/rack"
         >
-            Open the rack &rarr;
+            Open the rack <IconArrow />
         </a>
         <div class="player__controls">
             <div class="player__meta">
@@ -276,6 +277,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
         font-family: var(--font-mono);
         font-size: var(--text-2xs);
         justify-content: space-between;
+        user-select: none;
         width: 100%;
     }
 
@@ -332,6 +334,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
         color: var(--color-ink);
         display: flex;
         flex: 0 0 auto;
+        gap: var(--space-2xs);
         min-height: 50px;
         padding: 0 var(--space-md);
         transition:
@@ -454,8 +457,11 @@ import IconWaveform from '@components/icons/Waveform.astro';
 
     .player__slider {
         accent-color: var(--color-accent);
+        cursor: pointer;
         height: 24px;
-        transition: accent-color var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            accent-color var(--duration-fast) var(--motion-ease-ui),
+            opacity var(--duration-fast) var(--motion-ease-ui);
         width: 100%;
     }
 
@@ -642,6 +648,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
         player.classList.add('is-ready');
         unsubscribe?.();
         unsubscribeRack?.();
+        volume.disabled = isMuted();
         volume.value = String(Math.round(getVolume() * VOLUME_SCALE));
         unsubscribe = onPlayerChange(render);
         unsubscribeRack = onRackChange(render);
@@ -767,6 +774,9 @@ import IconWaveform from '@components/icons/Waveform.astro';
     function toggleMute() {
         const button = document.querySelector<HTMLElement>('[data-player-mute]');
         const next = !isMuted();
+        const volume = document.querySelector<HTMLInputElement>('[data-player-volume]');
+
+        if (volume) volume.disabled = next;
 
         button?.setAttribute('aria-pressed', String(next));
         setHidden(document.querySelector<HTMLElement>('.player__icon--muted'), !next);

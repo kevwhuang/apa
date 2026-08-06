@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 
+import IconArrow from '@components/icons/Arrow.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { ASSET_KIND_LABELS } from '@lib/shared/constants';
 import { getProgram } from '@lib/shared/utils';
@@ -63,7 +64,7 @@ const assets = downloads.filter(asset => asset.data.title.includes(program.name)
                     class="btn btn--primary self-start"
                     href="/resources"
                 >
-                    Open the resource library &rarr;
+                    Open the resource library <IconArrow />
                 </a>
             </aside>
         </div>

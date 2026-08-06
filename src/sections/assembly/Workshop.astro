@@ -1,4 +1,5 @@
 ---
+import IconArrow from '@components/icons/Arrow.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import { PALETTE } from '@lib/shared/constants';
 
@@ -23,7 +24,9 @@ const SESSION_FILES = [
             class="mark slab slab--accent workshop__marker"
             data-motion="stamp"
         >
-            <p class="label workshop__flag">Next workshop</p>
+            <p class="label inline-block px-2 py-1 bg-ink text-ink-inverse">
+                Next workshop
+            </p>
             <p
                 class="label workshop__edition"
                 data-placeholder
@@ -43,19 +46,24 @@ const SESSION_FILES = [
         <div class="grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
             <div class="workshop__aside">
                 <div class="slab slab--card">
-                    <PlaceholderTile
-                        class="slab slab--bare slab--card aspect-[4/3] mb-6"
-                        color={PALETTE[1]}
-                        label="08"
-                        labelClass="leading-none text-[96px] text-surface-raised/80 [text-shadow:2px_2px_0_var(--color-ink-20)]"
+                    <div
+                        class="workshop__plate mb-6"
+                        data-motion="wipe"
                     >
-                        <div
-                            class="label absolute bottom-0 inset-x-0 p-3 bg-linear-to-t from-ink-70 text-ink-inverse to-transparent"
-                            data-placeholder
+                        <PlaceholderTile
+                            class="slab slab--bare slab--card aspect-[4/3]"
+                            color={PALETTE[1]}
+                            label="08"
+                            labelClass="leading-none text-[96px] text-surface-raised/80 [text-shadow:2px_2px_0_var(--color-ink-20)]"
                         >
-                            Workshop 08 / Low end
-                        </div>
-                    </PlaceholderTile>
+                            <div
+                                class="label absolute bottom-0 inset-x-0 p-3 bg-linear-to-t from-ink-70 text-ink-inverse to-transparent"
+                                data-placeholder
+                            >
+                                Workshop 08 / Low end
+                            </div>
+                        </PlaceholderTile>
+                    </div>
                     <p class="label mb-2 text-accent-deep">Presented by</p>
                     <p
                         class="mb-1 font-extrabold font-sans text-xl tracking-tight"
@@ -124,10 +132,10 @@ const SESSION_FILES = [
                         ))}
                     </ul>
                     <a
-                        class="action-text hover:text-accent-deep inline-flex items-center min-h-(--control-size) transition-colors"
+                        class="action-text hover:text-accent-deep inline-flex items-center gap-2 min-h-(--control-size) transition-colors"
                         href="/resources"
                     >
-                        Everything lands in the resource library &rarr;
+                        Everything lands in the resource library <IconArrow />
                     </a>
                 </div>
             </div>
@@ -152,13 +160,6 @@ const SESSION_FILES = [
 
     .workshop__edition {
         font-weight: 700;
-    }
-
-    .workshop__flag {
-        background-color: var(--color-ink);
-        color: var(--color-ink-inverse);
-        font-weight: 700;
-        padding: var(--space-2xs) var(--space-xs);
     }
 
     .workshop__index {
@@ -193,6 +194,12 @@ const SESSION_FILES = [
         gap: var(--space-sm) var(--space-md);
         justify-content: space-between;
         margin-bottom: var(--space-lg);
+    }
+
+    .workshop__plate {
+        --plate-drop: calc(var(--z-card) * var(--lift));
+        padding-block-end: var(--plate-drop);
+        padding-inline-end: var(--plate-drop);
     }
 
     .workshop__row {

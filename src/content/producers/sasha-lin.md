@@ -1,10 +1,10 @@
 ---
 name: Sasha Lin
-genres: [house, disco, funk]
+genres: [disco, funk, house]
 location: Austin, TX
-joined: 2023-01-12
+joined: 2023-01-12T00:00:00-06:00
 featured: false
-roles: [producer, artist]
+roles: [producer]
 bio: Edits and re-edits, mostly for sets rather than release. Keeps a running folder of loops nobody has heard.
 tracks:
   - { title: Untitled Sketch 05, durationSeconds: 302 }

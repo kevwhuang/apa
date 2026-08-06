@@ -12,6 +12,7 @@ import Footer from '@sections/shared/Footer.astro';
 import Navbar from '@sections/shared/Navbar.astro';
 import Player from '@sections/shared/Player.astro';
 import Toaster from '@sections/shared/Toaster.astro';
+import Tour from '@sections/shared/Tour.astro';
 import bootstrap from '@lib/raw/bootstrap.ts?raw';
 import { BRAND, BRAND_ICONS, BRAND_OG } from '@lib/shared/brand';
 import { LINKS, STORAGE } from '@lib/shared/constants';
@@ -76,20 +77,10 @@ const ogImageUrl = new URL(BRAND_ICONS.og, Astro.site).href;
         <ClientRouter />
     </head>
     <body class="antialiased font-sans bg-surface text-ink">
-        <a
-            class="skip-link"
-            href="#main"
-        >
-            Skip to content
-        </a>
         <div class="grain" aria-hidden="true" />
         <div class="page flex flex-col min-h-screen">
             <Navbar hasHero={hasHero} />
-            <main
-                id="main"
-                class="flex flex-1 flex-col"
-                tabindex="-1"
-            >
+            <main class="flex flex-1 flex-col">
                 <slot />
             </main>
             <Footer />
@@ -98,6 +89,7 @@ const ogImageUrl = new URL(BRAND_ICONS.og, Astro.site).href;
         <Chat />
         <Player />
         <Toaster />
+        <Tour />
     </body>
 </html>
 

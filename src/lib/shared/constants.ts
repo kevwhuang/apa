@@ -35,7 +35,7 @@ const AVATAR = {
 } as const;
 
 const CANONICAL = {
-    history: 'Austin Producer Alliance was founded in May 2022 by Kevin Huang and Kyle Henderson to build the city\'s foremost community for music producers. What began as a Discord server grew into a recurring meetup at the Austin Central Library, then into a collective in partnership with longtime sponsor Station Austin (formerly Capital Factory). To date, APA has welcomed more than 500 producers and creatives to its events.',
+    history: 'Austin Producer Alliance was founded in May 2022 by Kevin Huang and Kyle Henderson to build the city\'s foremost community for music producers. What began as a Discord server grew into a recurring meetup at the Austin Central Library, then into a collective in collaboration with longtime partner Station Austin (formerly Capital Factory). To date, APA has welcomed more than 500 producers and creatives to its events.',
     mission: 'We bring Austin\'s music producers together. Through meetups, workshops, and collaborations, producers of every genre and experience level find their people, sharpen their craft, and support one another. Our goal is a lasting community for those behind the city\'s sound.',
 } as const;
 
@@ -43,7 +43,9 @@ const CENTS_PER_DOLLAR = 100;
 const CHECKOUT_STEPS = ['01 Review', '02 Shipping', '03 Payment'] as const;
 
 const COMMERCE = {
-    maxQuantityPerItem: 10,
+    discountBasisPoints: 1_000,
+    discountCode: 'ALLIANCE10',
+    maxQuantityPerItem: 5,
     taxBasisPoints: 825,
 } as const;
 
@@ -56,9 +58,9 @@ const CONTACT_LIMITS = {
     name: 50,
 } as const;
 
-const SPONSOR_INQUIRY_TOPIC = 'Sponsor inquiry';
+const PARTNER_INQUIRY_TOPIC = 'Partnership inquiry';
 
-const CONTACT_TOPICS = ['Booking', 'Membership', 'Press', SPONSOR_INQUIRY_TOPIC, 'Something else'] as const;
+const CONTACT_TOPICS = ['Booking', 'Membership', PARTNER_INQUIRY_TOPIC, 'Press', 'Something else'] as const;
 const CONTENT_DIR = 'src/content';
 
 const DEMO_CREDENTIALS = {
@@ -134,6 +136,7 @@ const EVENT_TYPES = ['assembly', 'hangout', 'bash', 'open-decks', 'studio-tour',
 const FIELD_LIMITS = {
     address: 100,
     card: 19,
+    code: 20,
     csc: 4,
     email: EMAIL_MAX_LENGTH,
     expiry: 7,
@@ -168,6 +171,7 @@ const LINKS = {
 const MAX_DECODE_MEGABYTES = 25;
 const MAX_FILE_MEGABYTES = 50;
 const MAX_TOTAL_MEGABYTES = 150;
+const MEMBER_ROLES = ['artist', 'engineer', 'fan', 'producer'] as const;
 const MILLISECONDS_PER_DAY = 86_400_000;
 const MILLISECONDS_PER_HOUR = 3_600_000;
 const MOCK_LATENCY_MS = 400;
@@ -186,9 +190,10 @@ const NAV_GROUPS = [
     {
         id: 'community',
         items: [
-            { href: '/producers', label: 'Producers' },
+            { href: '/directory', label: 'Directory' },
+            { href: '/partners', label: 'Partners' },
+            { href: '/gallery', label: 'Gallery' },
             { href: '/about', label: 'About' },
-            { href: '/sponsor', label: 'Sponsor' },
             { href: '/contact', label: 'Contact' },
         ],
         label: 'Community',
@@ -232,6 +237,13 @@ const PALETTE = [
 ] as const;
 
 const CARD_COLORS = PALETTE.slice(0, 4);
+
+const PARTNERS = [
+    { logo: stationAustin, name: 'Station Austin' },
+    { logo: austinCommunityCollege, name: 'Austin Community College' },
+] as const;
+
+const PARTNER_LOGO_WIDTH = 640;
 const PASSWORD_MIN_LENGTH = 12;
 
 const PLATFORMS = [
@@ -241,6 +253,7 @@ const PLATFORMS = [
 ] as const;
 
 const PRODUCT_CATEGORIES = ['accessory', 'apparel', 'music'] as const;
+const PRODUCT_SIZES = ['S', 'M', 'L', 'XL'] as const;
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
 const ROLES = [
@@ -253,14 +266,7 @@ const ROLES = [
 ] as const;
 
 const SESSION_TTL_DAYS = 14;
-const SITE_UPDATED = '2026-08-05';
-
-const SPONSORS = [
-    { logo: stationAustin, name: 'Station Austin' },
-    { logo: austinCommunityCollege, name: 'Austin Community College' },
-] as const;
-
-const SPONSOR_LOGO_WIDTH = 640;
+const SITE_UPDATED = '2026-08-05T00:00:00-05:00';
 
 const STORAGE = {
     adminProds: { key: 'apa.admin-prods', scope: 'local', topic: 'apa:admin-prods-changed' },
@@ -275,6 +281,7 @@ const STORAGE = {
     rack: { key: 'apa.rack', scope: 'memory', topic: 'apa:rack-changed' },
     session: { key: 'apa.session', scope: 'local', topic: 'apa:session-changed' },
     theme: { key: 'apa.theme', scope: 'local', topic: 'apa:theme-changed' },
+    tour: { key: 'apa.tour', scope: 'local', topic: 'apa:tour-changed' },
 } as const;
 
 const TRACK_PLAY_TOPIC = 'apa:track-play';
@@ -376,6 +383,7 @@ export {
     JOIN_ROUTE,
     KIND_COLORS,
     LINKS,
+    MEMBER_ROLES,
     MILLISECONDS_PER_DAY,
     MILLISECONDS_PER_HOUR,
     MOCK_LATENCY_MS,
@@ -385,16 +393,17 @@ export {
     ONBOARDING_TOKEN_TTL_HOURS,
     ORDER_ID,
     PALETTE,
+    PARTNERS,
+    PARTNER_INQUIRY_TOPIC,
+    PARTNER_LOGO_WIDTH,
     PASSWORD_MIN_LENGTH,
     PLATFORMS,
     PRODUCT_CATEGORIES,
+    PRODUCT_SIZES,
     REDUCED_MOTION_QUERY,
     ROLES,
     SESSION_TTL_DAYS,
     SITE_UPDATED,
-    SPONSORS,
-    SPONSOR_INQUIRY_TOPIC,
-    SPONSOR_LOGO_WIDTH,
     STORAGE,
     TRACK_PLAY_TOPIC,
     TRACK_STATE_TOPIC,

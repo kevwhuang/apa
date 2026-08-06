@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 
+import IconArrow from '@components/icons/Arrow.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { formatDate } from '@lib/shared/utils';
 
@@ -54,12 +55,12 @@ const past = events
                 </li>
             ))}
         </ol>
-        <p>
+        <p data-motion="rise">
             <a
-                class="action-text hover:text-accent-deep inline-flex items-center min-h-(--control-size) transition-colors"
+                class="action-text hover:text-accent-deep inline-flex items-center gap-2 min-h-(--control-size) transition-colors"
                 href="/events#past-title"
             >
-                The full archive, every program &rarr;
+                The full archive, every program <IconArrow />
             </a>
         </p>
     </div>

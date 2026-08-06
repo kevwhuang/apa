@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 
+import IconArrow from '@components/icons/Arrow.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { formatCalendarDay, formatCalendarMonth, formatTimeRange, formatWeekday, getProgram } from '@lib/shared/utils';
 
@@ -25,29 +26,30 @@ const program = getProgram('assembly');
         >
             Next {program.name}.
             <a
-                class="action-text hover:text-accent-deep hidden items-center min-h-(--control-size) whitespace-nowrap transition-colors md:inline-flex"
+                class="action-text hover:text-accent-deep hidden items-center gap-2 min-h-(--control-size) whitespace-nowrap transition-colors md:inline-flex"
                 href="/events"
                 slot="cta"
             >
-                All events &rarr;
+                All events <IconArrow />
             </a>
         </SectionHead>
-        <p class="max-w-2xl leading-relaxed text-md text-ink-muted">
+        <p
+            class="max-w-2xl leading-relaxed text-md text-ink-muted"
+            data-motion="blur"
+        >
             {program.summary}
         </p>
     </div>
     {next
         ? (
-                <article
-                    class="assembly-sheet mark slab slab--bare slab--lift stage__item--runoff"
-                    data-motion="unfold"
-                >
+                <article class="assembly-sheet mark slab slab--bare slab--lift stage__item--runoff">
                     <p
                         class="assembly-sheet__plate"
+                        data-motion="wipe"
                         data-placeholder
                     >
                         <span
-                            class="assembly-sheet__tag label px-3 py-2 bg-accent text-ink"
+                            class="assembly-sheet__tag label px-2 py-1 bg-accent text-ink"
                             data-motion="stamp"
                         >
                             Next {program.shortName}
@@ -126,6 +128,7 @@ const program = getProgram('assembly');
 <style>
     .assembly-sheet {
         --assembly-bleed: max(var(--shell-pad), calc(100% - var(--shell-inner)));
+        --assembly-gutter: max(var(--shell-pad), calc((100vw - var(--shell-inner)) / 2));
         --assembly-plate: 34%;
         display: grid;
         grid-template-columns: minmax(min-content, calc(var(--assembly-bleed) + var(--assembly-plate))) minmax(0, 1fr);
@@ -161,7 +164,7 @@ const program = getProgram('assembly');
         justify-items: start;
         overflow: clip;
         padding-block: calc(var(--space-2xl) * 2.25);
-        padding-inline: var(--shell-pad) var(--space-2xl);
+        padding-inline: var(--assembly-gutter) var(--space-2xl);
         position: relative;
     }
 
@@ -191,7 +194,7 @@ const program = getProgram('assembly');
 
         .assembly-sheet__plate {
             padding-block: calc(var(--space-2xl) * 2);
-            padding-inline: var(--shell-pad) var(--space-lg);
+            padding-inline: var(--assembly-gutter) var(--space-lg);
         }
     }
 
@@ -219,7 +222,7 @@ const program = getProgram('assembly');
             column-gap: var(--space-sm);
             grid-template-columns: auto minmax(0, 1fr);
             padding-block: var(--space-lg);
-            padding-inline: var(--shell-pad) var(--space-md);
+            padding-inline: var(--assembly-gutter) var(--space-md);
         }
 
         .assembly-sheet__tag {

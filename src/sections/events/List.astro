@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 
+import IconArrow from '@components/icons/Arrow.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import ProgramFlyer from '@components/program/Flyer.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
@@ -120,12 +121,12 @@ function withEnd(list: CalendarItem[]) {
                 About the {assemblyProgram.name}
             </a>
             <a
-                class="action-text hover:text-accent-deep inline-flex items-center min-h-(--control-size) underline underline-offset-4 transition-colors"
+                class="action-text hover:text-accent-deep inline-flex items-center gap-2 min-h-(--control-size) underline underline-offset-4 transition-colors"
                 href={LINKS.meetup}
                 rel="noopener noreferrer"
                 target="_blank"
             >
-                RSVP for {assemblyProgram.shortName} on Meetup &rarr;
+                RSVP for {assemblyProgram.shortName} on Meetup <IconArrow />
                 <span class="sr-only"> (opens in a new tab)</span>
             </a>
         </div>
@@ -180,6 +181,7 @@ function withEnd(list: CalendarItem[]) {
                                 <div
                                     class="docket__heads"
                                     aria-hidden="true"
+                                    data-motion-stagger="stamp"
                                 >
                                     <p class="docket__head label text-ink-subtle">No.</p>
                                     <p class="docket__head label text-ink-subtle">Date</p>
@@ -277,15 +279,15 @@ function withEnd(list: CalendarItem[]) {
                     class="btn btn--accent"
                     href="/bash"
                 >
-                    Everything about the {bashProgram.name} &rarr;
+                    Everything about the {bashProgram.name} <IconArrow />
                 </a>
                 <a
-                    class="action-text hover:text-accent inline-flex items-center min-h-(--control-size) underline underline-offset-4 text-ink-inverse transition-colors"
+                    class="action-text hover:text-accent inline-flex items-center gap-2 min-h-(--control-size) underline underline-offset-4 text-ink-inverse transition-colors"
                     href={LINKS.meetup}
                     rel="noopener noreferrer"
                     target="_blank"
                 >
-                    RSVP on Meetup &rarr;
+                    RSVP on Meetup <IconArrow />
                 </a>
             </div>
         </div>

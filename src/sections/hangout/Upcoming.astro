@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 
+import IconArrow from '@components/icons/Arrow.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { LINKS } from '@lib/shared/constants';
 import { formatDate, formatTimeRange, getProgram } from '@lib/shared/utils';
@@ -73,7 +74,7 @@ const [next, ...later] = upcoming;
                                             rel="noopener noreferrer"
                                             target="_blank"
                                         >
-                                            RSVP on Meetup &rarr;
+                                            RSVP on Meetup <IconArrow />
                                             <span class="sr-only"> (opens in a new tab)</span>
                                         </a>
                                     </p>
@@ -82,7 +83,12 @@ const [next, ...later] = upcoming;
                         </div>
                         {later.length > 0 && (
                             <Fragment>
-                                <p class="label mb-4 text-ink-muted">And after that</p>
+                                <p
+                                    class="label mb-4 text-ink-muted"
+                                    data-motion="stamp"
+                                >
+                                    And after that
+                                </p>
                                 <ol
                                     class="mb-8 list-none"
                                     data-motion-stagger="rise"
@@ -128,12 +134,12 @@ const [next, ...later] = upcoming;
                         the room is booked.
                     </p>
                 )}
-        <p>
+        <p data-motion="rise">
             <a
-                class="action-text hover:text-accent-deep inline-flex items-center min-h-(--control-size) transition-colors"
+                class="action-text hover:text-accent-deep inline-flex items-center gap-2 min-h-(--control-size) transition-colors"
                 href="/events"
             >
-                See the full calendar &rarr;
+                See the full calendar <IconArrow />
             </a>
         </p>
     </div>
@@ -147,6 +153,7 @@ const [next, ...later] = upcoming;
     .hangout-next__rsvp {
         align-items: center;
         display: inline-flex;
+        gap: var(--space-2xs);
         min-height: var(--control-size);
     }
 

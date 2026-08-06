@@ -1,0 +1,12 @@
+---
+import DirectoryGrid from '@sections/directory/Grid.astro';
+import Layout from '@/Layout.astro';
+import { brandTitle } from '@lib/shared/brand';
+---
+
+<Layout
+    description={'Browse the Austin Producer Alliance directory \u2014 every member with their role, genres, location, links, and a spotlight track, filterable by role and genre.'}
+    title={brandTitle('Directory')}
+>
+    <DirectoryGrid />
+</Layout>

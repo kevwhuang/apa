@@ -1,9 +1,10 @@
 ---
+import IconArrow from '@components/icons/Arrow.astro';
 import IconEye from '@components/icons/Eye.astro';
 import IconEyeOff from '@components/icons/EyeOff.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import { ARTIST_NAME_MAX_LENGTH, AVATAR, GENRES, PASSWORD_MIN_LENGTH, ROLES, UPLOAD, UPLOAD_EXTENSIONS_LABEL, US_STATES } from '@lib/shared/constants';
+import { ARTIST_NAME_MAX_LENGTH, AVATAR, GENRES, MEMBER_ROLES, PASSWORD_MIN_LENGTH, ROLES, UPLOAD, UPLOAD_EXTENSIONS_LABEL, US_STATES } from '@lib/shared/constants';
 import { AVATAR_EXTENSIONS_OR_LIST } from '@lib/account/images';
 import { formatBytes, formatDateStamp, formatProds, getInitials, getStanding, pickTileColor } from '@lib/shared/utils';
 
@@ -18,17 +19,17 @@ const ATTENDANCE = [
 const BIO_MAX_LENGTH = 280;
 
 const DEMO_PROFILE = {
-    artistName: 'Ampersand',
+    artistName: 'Nightshift',
     bio: 'I write patient, low-slung house in a converted garage on the east side and mix it loud enough to rattle the door.',
     city: 'Austin',
-    email: 'ampersand@austinproduceralliance.com',
+    email: 'nightshift@austinproduceralliance.com',
     genres: ['house', 'techno'],
     joined: new Date('2024-03-12T18:00:00Z'),
     links: {
-        instagram: 'https://instagram.com/ampersand.wav',
-        soundcloud: 'https://soundcloud.com/ampersand',
-        spotify: 'https://open.spotify.com/artist/4kZ1ampersand',
-        youtube: 'https://youtube.com/@ampersand',
+        instagram: 'https://instagram.com/nightshift.wav',
+        soundcloud: 'https://soundcloud.com/nightshift',
+        spotify: 'https://open.spotify.com/artist/4kZ1nightshift',
+        youtube: 'https://youtube.com/@nightshift',
     },
     prods: 7,
     role: 'producer',
@@ -60,9 +61,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
     change: entry.amount > 0 ? `+${entry.amount}` : `\u2212${Math.abs(entry.amount)}`,
 })).toReversed();
 
-const PROFILE_ROLES = ['producer', 'engineer', 'artist', 'fan'];
-
-const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
+const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.id));
 ---
 
 <section
@@ -160,7 +159,7 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
                     <div class="p-(--space-md) bg-surface-raised">
                         <dt class="label mb-2 text-ink-muted">Standing</dt>
                         <dd
-                            class="action-text"
+                            class="label"
                             data-settings-standing
                         >
                             {getStanding(DEMO_PROFILE.prods)}
@@ -192,7 +191,7 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
                 hidden
                 href="/onboarding"
             >
-                Finish your profile &rarr;
+                Finish your profile <IconArrow />
             </a>
         </div>
         <form
@@ -635,10 +634,10 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
                 Every event you have checked in to since you joined, newest first.
             </p>
             <div class="scroll-slot settings__scroller settings__scroller--attendance">
-                <table class="settings__table border-2 border-ink">
+                <table class="settings__table">
                     <caption class="sr-only">Events you checked in to, with the date of each check-in</caption>
                     <thead>
-                        <tr class="border-b-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
+                        <tr class="font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
                             <th
                                 class="px-4 py-3 text-left"
                                 scope="col"
@@ -686,10 +685,10 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
                 stood after each entry.
             </p>
             <div class="scroll-slot settings__scroller settings__scroller--ledger">
-                <table class="settings__table settings__table--wide border-2 border-ink">
+                <table class="settings__table settings__table--wide">
                     <caption class="sr-only">Dated ledger entries with reason, change, and running balance</caption>
                     <thead>
-                        <tr class="border-b-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
+                        <tr class="font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
                             <th
                                 class="px-4 py-3 text-left"
                                 scope="col"
@@ -749,6 +748,7 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
         padding: var(--space-2xs) var(--space-sm);
         text-transform: uppercase;
         transition: background-color var(--duration-fast) var(--motion-ease-ui);
+        user-select: none;
     }
 
     .settings__chip:has(.box:checked) {
@@ -807,6 +807,7 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
     .settings__link {
         align-items: center;
         display: inline-flex;
+        gap: var(--space-2xs);
         min-height: var(--control-size);
         padding-inline: var(--space-3xs);
         text-decoration: underline;
@@ -910,6 +911,7 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
     }
 
     .settings__scroller {
+        border: 2px solid var(--color-ink);
         overflow-x: auto;
     }
 
@@ -950,6 +952,14 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
         display: table;
         overflow-x: visible;
         width: 100%;
+    }
+
+    .settings__table thead th {
+        background-color: var(--color-surface-raised);
+        box-shadow: inset 0 -2px 0 var(--color-ink);
+        position: sticky;
+        top: 0;
+        z-index: var(--z-page);
     }
 
     .settings__table--wide {

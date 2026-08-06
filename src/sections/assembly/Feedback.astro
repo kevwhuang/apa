@@ -18,7 +18,10 @@ import { formatBytes } from '@lib/shared/utils';
             Put a track on the list
         </SectionHead>
         <div class="grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-            <div class="flex flex-col gap-4">
+            <div
+                class="flex flex-col gap-4"
+                data-motion-stagger="blur"
+            >
                 <p class="text-base text-ink-muted">
                     Every Assembly holds space for work in progress. Put a track on the list and
                     it gets played out loud at the next one, then talked through in the room while
@@ -63,6 +66,7 @@ import { formatBytes } from '@lib/shared/utils';
                     id="feedback-panel-link"
                     class="slab slab--card flex flex-col gap-3"
                     data-feedback-panel="link"
+                    data-motion="unfold"
                 >
                     <label class="flex flex-col gap-2">
                         <span class="label text-ink-muted">Track link</span>

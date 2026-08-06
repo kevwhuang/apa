@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 
+import IconArrow from '@components/icons/Arrow.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { LINKS } from '@lib/shared/constants';
 import { formatDate, formatTimeRange, getProgram } from '@lib/shared/utils';
@@ -51,7 +52,7 @@ const upcoming = editions.filter(edition => edition.data.status === 'upcoming').
                                         </p>
                                     </div>
                                     <div class="col-span-12 md:col-span-9">
-                                        <span class="label inline-block mb-2 px-2 py-1 bg-accent text-ink">
+                                        <span class="label inline-block mb-3 px-2 py-1 bg-accent text-ink">
                                             {program.shortName} / {edition.data.edition}
                                         </span>
                                         <h3 class="mb-2 font-extrabold font-sans text-3xl tracking-tight">
@@ -70,7 +71,7 @@ const upcoming = editions.filter(edition => edition.data.status === 'upcoming').
                                                 rel="noopener noreferrer"
                                                 target="_blank"
                                             >
-                                                RSVP for the {edition.data.edition} edition on Meetup &rarr;
+                                                RSVP for the {edition.data.edition} edition on Meetup <IconArrow />
                                             </a>
                                         </p>
                                     </div>
@@ -92,7 +93,7 @@ const upcoming = editions.filter(edition => edition.data.status === 'upcoming').
                 class="action-text bash__rsvp hover:text-accent-deep underline underline-offset-4 transition-colors"
                 href="/events"
             >
-                See the full calendar &rarr;
+                See the full calendar <IconArrow />
             </a>
         </p>
     </div>
@@ -102,6 +103,7 @@ const upcoming = editions.filter(edition => edition.data.status === 'upcoming').
     .bash__rsvp {
         align-items: center;
         display: inline-flex;
+        gap: var(--space-2xs);
         min-height: var(--control-size);
     }
 </style>

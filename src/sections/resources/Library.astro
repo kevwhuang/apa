@@ -1,16 +1,18 @@
 ---
 import { getCollection } from 'astro:content';
 
-import IconClose from '@components/icons/Close.astro';
-import IconSearch from '@components/icons/Search.astro';
+import IconArrow from '@components/icons/Arrow.astro';
 import PageHead from '@components/shared/PageHead.astro';
+import SearchField from '@components/shared/SearchField.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { ASSET_KIND_LABELS, KIND_COLORS } from '@lib/shared/constants';
-import { formatDateOnly, mergeAssets, toIsoDate } from '@lib/shared/utils';
+import { formatDate, formatTime, mergeAssets, toIsoDate } from '@lib/shared/utils';
+import { toAvailability } from '@lib/resources/unlocks';
 
 const assets = mergeAssets(await getCollection('downloads'), await getCollection('docs'))
     .map(asset => ({
         ...asset,
+        availability: toAvailability(asset.data),
         search: [asset.data.title, asset.data.description, ASSET_KIND_LABELS[asset.data.kind], asset.data.format].join(' ').toLowerCase(),
     }));
 
@@ -53,37 +55,12 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
         >
             Asset library
         </SectionHead>
-        <label
-            class="block mb-4"
+        <SearchField
+            class="mb-4"
             data-motion="rise"
-        >
-            <span class="sr-only">Search the library</span>
-            <span class="block relative max-w-[360px] w-full">
-                <span
-                    class="absolute bottom-0 flex items-center left-4 top-0 text-ink-muted pointer-events-none"
-                    aria-hidden="true"
-                >
-                    <IconSearch />
-                </span>
-                <input
-                    class="input input--sunk pl-11 pr-(--control-size) font-mono text-sm"
-                    autocomplete="off"
-                    data-resources-search
-                    placeholder="Search assets&hellip;"
-                    spellcheck="false"
-                    type="search"
-                />
-                <button
-                    class="active:translate-y-px hover:text-accent-deep absolute inline-flex items-center justify-center right-0 top-0 h-(--control-size) w-(--control-size) text-ink-muted transition-colors"
-                    aria-label="Clear search"
-                    data-resources-clear
-                    hidden
-                    type="button"
-                >
-                    <IconClose />
-                </button>
-            </span>
-        </label>
+            label="Search the library"
+            placeholder={'Search assets\u2026'}
+        />
         <div
             class="flex flex-wrap gap-2 mb-6"
             aria-label="Filter by asset kind"
@@ -117,6 +94,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
         <p
             class="label mb-10 text-ink-subtle"
             aria-live="polite"
+            data-motion="stamp"
             data-resources-status
         >
             Showing all {assets.length} assets.
@@ -174,24 +152,55 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                             <div class="resources__meta-row">
                                 <dt class="label text-ink-subtle">Updated</dt>
                                 <dd class="font-mono text-xs">
-                                    <time datetime={toIsoDate(asset.data.date)}>{formatDateOnly(asset.data.date)}</time>
+                                    <time datetime={toIsoDate(asset.data.date)}>{formatDate(asset.data.date)}</time>
                                 </dd>
                             </div>
+                            {asset.data.unlocksAt && (
+                                <div class="resources__meta-row">
+                                    <dt class="label text-ink-subtle">Unlocks</dt>
+                                    <dd class="font-mono text-xs">
+                                        <time datetime={asset.data.unlocksAt.toISOString()}>{formatDate(asset.data.unlocksAt)} &middot; {formatTime(asset.data.unlocksAt)}</time>
+                                    </dd>
+                                </div>
+                            )}
                         </dl>
-                        {asset.data.available && asset.data.href
-                            ? (
+                        {asset.availability === 'open' && (
+                            <a
+                                class="btn btn--primary"
+                                href={asset.data.href}
+                            >
+                                Open {asset.data.title} <IconArrow />
+                            </a>
+                        )}
+                        {asset.availability === 'scheduled' && (
+                            <div
+                                data-unlock
+                                data-unlocks-at={asset.data.unlocksAt?.toISOString()}
+                            >
+                                <p
+                                    class="label resources__countdown flex items-center gap-2 min-h-(--control-size) px-4"
+                                    data-unlock-locked
+                                >
+                                    <span>Unlocks in</span>
+                                    <span data-unlock-remaining>&hellip;</span>
+                                </p>
+                                {asset.data.href && (
                                     <a
                                         class="btn btn--primary"
+                                        data-unlock-ready
+                                        hidden
                                         href={asset.data.href}
                                     >
-                                        Open {asset.data.title} &rarr;
+                                        Open {asset.data.title} <IconArrow />
                                     </a>
-                                )
-                            : (
-                                    <p class="action-text resources__blocked flex items-center min-h-(--control-size) px-4 text-ink-subtle">
-                                        Not published yet
-                                    </p>
                                 )}
+                            </div>
+                        )}
+                        {asset.availability === 'pending' && (
+                            <p class="label resources__blocked flex items-center min-h-(--control-size) px-4 text-ink-subtle">
+                                Not published yet
+                            </p>
+                        )}
                     </article>
                 </li>
             ))}
@@ -207,7 +216,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             </p>
             <button
                 class="btn"
-                data-resources-clear
+                data-search-clear
                 type="button"
             >
                 Clear search
@@ -239,6 +248,12 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
 
     .resources__chip {
         gap: var(--space-3xs);
+    }
+
+    .resources__countdown {
+        background-image: repeating-linear-gradient(135deg, var(--color-ink-10) 0 6px, transparent 6px 12px);
+        border: 2px dashed var(--color-accent-deep);
+        color: var(--color-accent-deep);
     }
 
     .resources__grid {
@@ -283,7 +298,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
         color: var(--color-ink);
         display: inline-flex;
         gap: var(--space-3xs);
-        padding: 2px var(--space-2xs);
+        padding: var(--space-3xs) var(--space-2xs);
     }
 
     @media (max-width: 1024px) {
@@ -301,6 +316,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
 
 <script>
     import { initFilterGroup, initSearchField, registerPageScript } from '@lib/shared/utils';
+    import { initUnlocks } from '@lib/resources/unlocks';
 
     function describeAssets(shown: number, total: number, kind: string, query: string) {
         if (query) return `Showing ${shown} of ${total} assets for \u201c${query}\u201d.`;
@@ -314,7 +330,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
 
         if (!buttons.length || !cards.length) return;
 
-        const searchElement = document.querySelector<HTMLInputElement>('[data-resources-search]');
+        const searchElement = document.querySelector<HTMLInputElement>('[data-search-input]');
 
         initFilterGroup({
             buttons,
@@ -330,11 +346,12 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
         });
 
         initSearchField({
-            clearElements: document.querySelectorAll<HTMLButtonElement>('[data-resources-clear]'),
+            clearElements: document.querySelectorAll<HTMLButtonElement>('[data-search-clear]'),
             searchElement,
             signal,
         });
     }
 
+    initUnlocks();
     registerPageScript(initResourcesLibrary);
 </script>

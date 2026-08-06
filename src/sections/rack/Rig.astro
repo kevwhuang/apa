@@ -262,7 +262,10 @@ const PAD_LENGTH = 2;
     >
         <div class="rack__cell rack__cell--flag">
             <dt class="label rack__key">Modules</dt>
-            <dd class="font-extrabold font-sans leading-[0.9] text-4xl tracking-tight">
+            <dd
+                class="font-extrabold font-sans leading-[0.9] text-4xl tracking-tight"
+                data-motion-count={String(MODULES.length)}
+            >
                 {MODULES.length}
             </dd>
         </div>
@@ -628,6 +631,7 @@ const PAD_LENGTH = 2;
     .module__range {
         appearance: none;
         background: transparent;
+        cursor: pointer;
         height: var(--control-size);
         min-width: 0;
         width: 100%;
@@ -696,6 +700,10 @@ const PAD_LENGTH = 2;
         flex-wrap: wrap;
         gap: var(--space-2xs);
         grid-row: 1;
+    }
+
+    .module__value {
+        user-select: none;
     }
 
     .module__viz {

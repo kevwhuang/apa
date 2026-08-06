@@ -1,4 +1,5 @@
 ---
+import IconArrow from '@components/icons/Arrow.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import { CANONICAL, JOIN_ROUTE, LINKS, PALETTE } from '@lib/shared/constants';
@@ -110,6 +111,7 @@ const openingColors = PALETTE.slice(0, 3);
         <aside
             class="self-start md:sticky md:top-28"
             aria-label="On this page"
+            data-motion="rise"
         >
             <p class="label mb-3 text-ink-muted">Sections</p>
             <nav aria-label="Sections">
@@ -160,7 +162,7 @@ const openingColors = PALETTE.slice(0, 3);
                 >
                     History
                 </h2>
-                <p>{CANONICAL.history}</p>
+                <p data-motion="blur">{CANONICAL.history}</p>
             </section>
             <section
                 id="commitments"
@@ -173,7 +175,10 @@ const openingColors = PALETTE.slice(0, 3);
                 >
                     Commitments
                 </h2>
-                <p class="mb-5 text-ink-muted">
+                <p
+                    class="mb-5 text-ink-muted"
+                    data-motion="blur"
+                >
                     Everyone who organizes for the Alliance holds to the same six.
                 </p>
                 <ul
@@ -201,7 +206,10 @@ const openingColors = PALETTE.slice(0, 3);
                 >
                     Openings
                 </h2>
-                <p class="mb-6 text-ink-muted">
+                <p
+                    class="mb-6 text-ink-muted"
+                    data-motion="blur"
+                >
                     The Alliance is run by its organizers. These are the seats we are looking to fill.
                 </p>
                 <ul
@@ -226,12 +234,12 @@ const openingColors = PALETTE.slice(0, 3);
                         </li>
                     ))}
                 </ul>
-                <p>
+                <p data-motion="rise">
                     <a
                         class="about__apply action-text hover:text-accent-deep underline underline-offset-4 transition-colors"
                         href={JOIN_ROUTE}
                     >
-                        Ask about an opening &rarr;
+                        Ask about an opening <IconArrow />
                     </a>
                 </p>
             </section>
@@ -246,7 +254,10 @@ const openingColors = PALETTE.slice(0, 3);
                 >
                     Roadmap
                 </h2>
-                <p class="mb-6 text-ink-muted">
+                <p
+                    class="mb-6 text-ink-muted"
+                    data-motion="blur"
+                >
                     The order of operations. Each milestone sets up the one after it.
                 </p>
                 <ol
@@ -275,7 +286,12 @@ const openingColors = PALETTE.slice(0, 3);
                         </li>
                     ))}
                 </ol>
-                <p class="label mb-4 text-ink-muted">Active workstreams</p>
+                <p
+                    class="label mb-4 text-ink-muted"
+                    data-motion="stamp"
+                >
+                    Active workstreams
+                </p>
                 <div
                     class="grid grid-cols-1 gap-5 md:grid-cols-2"
                     data-motion-stagger="flip"
@@ -319,12 +335,18 @@ const openingColors = PALETTE.slice(0, 3);
                 >
                     Join
                 </h2>
-                <p class="mb-6 text-ink-muted">
+                <p
+                    class="mb-6 text-ink-muted"
+                    data-motion="blur"
+                >
                     Organizing is one way in. Showing up is the other. The contact form carries a
                     Membership topic, and the Discord is the room where the day-to-day conversation
                     happens.
                 </p>
-                <div class="flex flex-wrap gap-3">
+                <div
+                    class="flex flex-wrap gap-3"
+                    data-motion="rise"
+                >
                     <a
                         class="btn btn--primary"
                         href={JOIN_ROUTE}
@@ -349,6 +371,7 @@ const openingColors = PALETTE.slice(0, 3);
     .about__apply {
         align-items: center;
         display: inline-flex;
+        gap: var(--space-2xs);
         min-height: 50px;
     }
 

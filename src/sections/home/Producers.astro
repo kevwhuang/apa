@@ -1,12 +1,13 @@
 ---
 import { getCollection } from 'astro:content';
 
+import IconArrow from '@components/icons/Arrow.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import ProducerLinks from '@components/producer/Links.astro';
 import ProducerTrack from '@components/producer/Track.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { PALETTE } from '@lib/shared/constants';
-import { formatMonthOnly, getInitials, toIsoDate } from '@lib/shared/utils';
+import { formatCalendarMonth, getInitials, toIsoDate } from '@lib/shared/utils';
 
 const STRIP_LIMIT = 4;
 
@@ -14,7 +15,7 @@ const producers = await getCollection('producers');
 
 const featured = producers.find(producer => producer.data.featured);
 
-const roster = producers.filter(producer => producer.id !== featured?.id).slice(0, STRIP_LIMIT);
+const roster = producers.filter(producer => producer.id !== featured?.id);
 const track = featured?.data.tracks[0];
 ---
 
@@ -31,7 +32,7 @@ const track = featured?.data.tracks[0];
         <div class="relative">
             <SectionHead
                 class="font-extrabold font-sans leading-[0.9] text-display tracking-[-0.04em]"
-                eyebrow="Featured producer"
+                eyebrow="Spotlight producer"
                 headingId="featured-producer-title"
                 tone="dark"
             >
@@ -41,7 +42,7 @@ const track = featured?.data.tracks[0];
                 <div>
                     <div
                         class="producer-feature__portrait mb-6"
-                        data-motion="unfold"
+                        data-motion="wipe"
                     >
                         <PlaceholderTile
                             class="slab slab--bare slab--card aspect-square"
@@ -54,7 +55,7 @@ const track = featured?.data.tracks[0];
                         class:list={['label text-ink-inverse-muted', featured.data.links.length > 0 && 'mb-4']}
                         data-placeholder
                     >
-                        On the roster since <time datetime={toIsoDate(featured.data.joined)}>{formatMonthOnly(featured.data.joined)}</time>
+                        On the roster since <time datetime={toIsoDate(featured.data.joined)}>{formatCalendarMonth(featured.data.joined)}</time>
                     </p>
                     <ProducerLinks
                         linkClass="hover:text-accent"
@@ -78,7 +79,7 @@ const track = featured?.data.tracks[0];
                     </p>
                     <ul class:list={['flex flex-wrap gap-2 list-none', track && 'mb-8']}>
                         {featured.data.genres.map(genre => (
-                            <li class="label inline-flex items-center h-8 px-3 border-2 border-ink-inverse">{genre}</li>
+                            <li class="inline-flex items-center h-6 px-2 border-2 border-ink-inverse font-bold font-mono text-2xs tracking-wide uppercase">{genre}</li>
                         ))}
                     </ul>
                     {track && (
@@ -108,23 +109,24 @@ const track = featured?.data.tracks[0];
         >
             Every genre. One scene.
             <a
-                class="action-text hover:text-accent-deep hidden items-center min-h-(--control-size) transition-colors md:inline-flex"
-                href="/producers"
+                class="action-text hover:text-accent-deep hidden items-center gap-2 min-h-(--control-size) transition-colors md:inline-flex"
+                href="/directory"
                 slot="cta"
             >
-                Full roster &rarr;
+                Full roster <IconArrow />
             </a>
         </SectionHead>
         <ul
             class="producer-strip grid grid-cols-1 gap-6 mb-10 list-none lg:gap-8 lg:grid-cols-4 md:grid-cols-2 md:mb-0"
             data-motion-from="center"
             data-motion-stagger="flip"
+            data-producer-strip
         >
             {roster.map((producer, index) => (
-                <li>
+                <li class:list={[index >= STRIP_LIMIT && 'hidden']}>
                     <a
                         class="slab slab--bare slab--card slab--hover"
-                        href={`/producers#${producer.id}`}
+                        href={`/directory#${producer.id}`}
                     >
                         <PlaceholderTile
                             class="aspect-square border-b-2 border-ink"
@@ -143,10 +145,13 @@ const track = featured?.data.tracks[0];
                 </li>
             ))}
         </ul>
-        <div class="md:hidden">
+        <div
+            class="md:hidden"
+            data-motion="rise"
+        >
             <a
                 class="btn"
-                href="/producers"
+                href="/directory"
             >
                 Full roster
             </a>
@@ -154,18 +159,15 @@ const track = featured?.data.tracks[0];
     </div>
 </section>
 
-<script>
-    import { initTracks } from '@lib/audio/tracks';
-
-    initTracks();
-</script>
-
 <style>
     .producer-feature__drift {
         inset: -8% calc(-1 * var(--launcher-rail)) -8% 0;
     }
 
     .producer-feature__portrait {
+        --plate-drop: calc(var(--z-card) * var(--lift));
+        padding-block-end: var(--plate-drop);
+        padding-inline-end: var(--plate-drop);
         rotate: calc(var(--tilt-unit) * -2 * var(--drift-gate));
     }
 
@@ -173,7 +175,7 @@ const track = featured?.data.tracks[0];
         grid-auto-rows: auto;
     }
 
-    .producer-strip > li,
+    .producer-strip > li:not(.hidden),
     .producer-strip > li > a {
         align-content: start;
         display: grid;
@@ -183,3 +185,124 @@ const track = featured?.data.tracks[0];
         row-gap: 0;
     }
 </style>
+
+<script>
+    import gsap from 'gsap';
+
+    import { REDUCED_MOTION_QUERY } from '@lib/shared/constants';
+    import { getMotionTokens } from '@lib/motion/tokens';
+    import { initTracks } from '@lib/audio/tracks';
+    import { registerPageScript } from '@lib/shared/utils';
+
+    const HIDDEN_CLASS = 'hidden';
+    const ROTATE_INTERVAL_MS = 10_000;
+    const ROTATE_TRAVEL_FACTOR = 2;
+    const STRIP_LIMIT = 4;
+
+    let rotateTimer: Timer | undefined;
+    let rotating = false;
+    let visible = true;
+
+    function enterCards(leaving: HTMLElement[], entering: HTMLElement[], tokens: MotionTokens) {
+        swapCards(leaving, entering);
+
+        gsap.fromTo(entering, { opacity: 0, x: tokens.travelLarge * ROTATE_TRAVEL_FACTOR, y: 0 }, {
+            duration: tokens.duration.slower,
+            ease: tokens.ease.entrance,
+            onComplete: () => {
+                rotating = false;
+                gsap.set(entering, { clearProps: 'transform' });
+            },
+            opacity: 1,
+            overwrite: 'auto',
+            stagger: tokens.stagger.base,
+            x: 0,
+        });
+    }
+
+    function initRosterRotation(signal: AbortSignal) {
+        const strip = document.querySelector<HTMLElement>('[data-producer-strip]');
+
+        if (!strip) return;
+
+        const cards = Array.from(strip.querySelectorAll<HTMLElement>(':scope > li'));
+
+        if (cards.length <= STRIP_LIMIT) return;
+
+        rotating = false;
+        visible = true;
+
+        const observer = new IntersectionObserver((entries) => {
+            visible = entries[0]?.isIntersecting ?? false;
+        });
+
+        clearInterval(rotateTimer);
+        observer.observe(strip);
+        rotateTimer = setInterval(() => rotateStrip(strip, cards), ROTATE_INTERVAL_MS);
+
+        signal.addEventListener('abort', () => {
+            clearInterval(rotateTimer);
+            gsap.killTweensOf(cards);
+            observer.disconnect();
+            rotateTimer = undefined;
+        }, { once: true });
+    }
+
+    function rotateStrip(strip: HTMLElement, cards: HTMLElement[]) {
+        if (document.hidden || rotating || !visible) return;
+        if (strip.contains(document.activeElement) || strip.matches(':hover')) return;
+
+        const entering = sampleCards(cards);
+        const leaving = cards.filter(card => !card.classList.contains(HIDDEN_CLASS));
+
+        if (window.matchMedia(REDUCED_MOTION_QUERY).matches) {
+            swapCards(leaving, entering);
+
+            return;
+        }
+
+        const tokens = getMotionTokens();
+
+        rotating = true;
+
+        gsap.to(leaving, {
+            duration: tokens.duration.slower,
+            ease: tokens.ease.mechanical,
+            onComplete: () => enterCards(leaving, entering, tokens),
+            opacity: 0,
+            overwrite: 'auto',
+            stagger: tokens.stagger.base,
+            y: tokens.travelLarge * ROTATE_TRAVEL_FACTOR,
+        });
+    }
+
+    function sampleCards(cards: HTMLElement[]) {
+        const pool = [...cards];
+
+        for (let index = pool.length - 1; index > 0; index -= 1) {
+            const swap = Math.floor(Math.random() * (index + 1));
+
+            [pool[index], pool[swap]] = [pool[swap], pool[index]];
+        }
+
+        const draw = pool.slice(0, STRIP_LIMIT);
+
+        if (draw.every(card => !card.classList.contains(HIDDEN_CLASS))) {
+            const fresh = pool.slice(STRIP_LIMIT).find(card => card.classList.contains(HIDDEN_CLASS));
+
+            if (fresh) draw[draw.length - 1] = fresh;
+        }
+
+        return draw.toSorted((a, b) => cards.indexOf(a) - cards.indexOf(b));
+    }
+
+    function swapCards(leaving: HTMLElement[], entering: HTMLElement[]) {
+        leaving.forEach(card => card.classList.add(HIDDEN_CLASS));
+        gsap.set(leaving, { clearProps: 'transform' });
+        entering.forEach(card => card.classList.remove(HIDDEN_CLASS));
+        gsap.set(entering, { opacity: 1 });
+    }
+
+    initTracks();
+    registerPageScript(initRosterRotation);
+</script>

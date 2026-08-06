@@ -2,8 +2,8 @@ import { BASIS_POINTS_DIVISOR, CENTS_PER_DOLLAR, COMMERCE, STORAGE } from '@lib/
 import { createStore } from '@lib/shared/state';
 
 const SEED_ITEMS: CartItem[] = [
-    { color: 'Bone', image: 'tick-tee-1', priceCents: 3_500, productSlug: 'tick-tee', quantity: 1, size: 'M', title: 'Tick Tee' },
-    { image: 'stickers-1', priceCents: 800, productSlug: 'sticker-pack', quantity: 2, title: 'Sticker Pack' },
+    { image: '725841936_bone', priceCents: 3_500, productSlug: 'tick-tee', quantity: 1, size: 'M', title: 'Tick Tee', variation: 'Bone' },
+    { image: '639158247_assorted', priceCents: 800, productSlug: 'sticker-pack', quantity: 2, title: 'Sticker Pack', variation: 'Assorted' },
 ];
 
 const SEED_MARKER_KEY = 'apa.cart-seeded';
@@ -45,7 +45,7 @@ function clear(): void {
 }
 
 function compareItems(left: CartItem, right: CartItem): number {
-    return left.title.localeCompare(right.title) || (left.color ?? '').localeCompare(right.color ?? '') || (left.size ?? '').localeCompare(right.size ?? '');
+    return left.title.localeCompare(right.title) || (left.variation ?? '').localeCompare(right.variation ?? '') || (left.size ?? '').localeCompare(right.size ?? '');
 }
 
 function count(items = getItems()): number {
@@ -58,6 +58,10 @@ function getItems(): CartItem[] {
 
 function isCartItem(item: unknown): item is CartItem {
     return typeof item === 'object' && item !== null && 'productSlug' in item && typeof item.productSlug === 'string';
+}
+
+function isPromoCode(code: string): boolean {
+    return code.trim().toUpperCase() === COMMERCE.discountCode;
 }
 
 function normalizeItems(items: CartItem[]): CartItem[] {
@@ -73,6 +77,10 @@ function normalizeItems(items: CartItem[]): CartItem[] {
 
 function onChange(callback: (items: CartItem[]) => void): () => void {
     return cart.onChange(callback);
+}
+
+function photoKey(productSlug: string, variation = ''): string {
+    return `${productSlug}|${variation}`;
 }
 
 function prodsForCents(cents: number): number {
@@ -165,26 +173,29 @@ function subtotalCents(items = getItems()): number {
     return items.reduce((total, item) => total + item.priceCents * item.quantity, 0);
 }
 
-function totals(items = getItems(), prodsApplied = 0): CartTotals {
+function totals(items = getItems(), prodsApplied = 0, promoCode = ''): CartTotals {
     const subtotal = subtotalCents(items);
 
-    const taxCents = Math.round(subtotal * COMMERCE.taxBasisPoints / BASIS_POINTS_DIVISOR);
+    const promoCents = isPromoCode(promoCode) ? Math.round(subtotal * COMMERCE.discountBasisPoints / BASIS_POINTS_DIVISOR) : 0;
 
-    const dueCents = subtotal + taxCents;
+    const taxCents = Math.round((subtotal - promoCents) * COMMERCE.taxBasisPoints / BASIS_POINTS_DIVISOR);
 
-    const discountCents = Math.min(prodsToCents(prodsApplied), dueCents);
+    const dueCents = subtotal - promoCents + taxCents;
+
+    const prodsCents = Math.min(prodsToCents(prodsApplied), dueCents);
 
     return {
-        discountCents,
+        discountCents: promoCents + prodsCents,
+        promoCents,
         shippingCents: 0,
         subtotalCents: subtotal,
         taxCents,
-        totalCents: dueCents - discountCents,
+        totalCents: dueCents - prodsCents,
     };
 }
 
 function variantKey(item: CartItem): string {
-    return `${item.productSlug}|${item.size ?? ''}|${item.color ?? ''}`;
+    return `${item.productSlug}|${item.size ?? ''}|${item.variation ?? ''}`;
 }
 
 export {
@@ -193,7 +204,9 @@ export {
     clear,
     count,
     getItems,
+    isPromoCode,
     onChange,
+    photoKey,
     prodsForCents,
     prodsToCents,
     reconcile,

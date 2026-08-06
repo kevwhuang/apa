@@ -1,6 +1,6 @@
 ---
 import { LINKS, SESSION_TTL_DAYS, SITE_UPDATED, STORAGE } from '@lib/shared/constants';
-import { formatDateOnly } from '@lib/shared/utils';
+import { formatDate } from '@lib/shared/utils';
 
 interface Props {
     kind: 'privacy' | 'terms';
@@ -148,7 +148,7 @@ function slugify(heading: string) {
             class="label mb-4 text-accent-deep"
             data-motion="stamp"
         >
-            Last updated / <time datetime={SITE_UPDATED}>{formatDateOnly(updated)}</time>
+            Last updated / <time datetime={SITE_UPDATED}>{formatDate(updated)}</time>
         </p>
         <h1
             id={`${kind}-title`}

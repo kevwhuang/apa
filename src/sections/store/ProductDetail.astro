@@ -1,37 +1,42 @@
 ---
-import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import { COMMERCE, PALETTE } from '@lib/shared/constants';
-import { formatPrice, getStockLabel } from '@lib/shared/utils';
+import { Image } from 'astro:assets';
+
+import IconArrow from '@components/icons/Arrow.astro';
+import { COMMERCE } from '@lib/shared/constants';
+import { formatPrice } from '@lib/shared/utils';
+import { getVariationImage, toVariationSlug, toVariations } from '@lib/commerce/products';
 
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
     product: CollectionEntry<'products'>['data'];
+    slug: string;
 }
 
-const imageColors = PALETTE.slice(0, 3);
-const { product } = Astro.props;
+const FRAME_IMAGE_WIDTH = 620;
+const THUMB_IMAGE_WIDTH = 140;
+
+const { product, slug } = Astro.props;
 
 const ceiling = Math.min(product.stock, COMMERCE.maxQuantityPerItem);
 const inStock = product.stock > 0;
-const { slug = '' } = Astro.params;
+const swatches = [...product.variations].toSorted((a, b) => a.name.localeCompare(b.name));
+const variations = toVariations(product);
+
+const gallery = variations.map(variation => ({ image: getVariationImage(product.sku, variation), variation }));
 ---
 
 <nav
     class="stage stage--strip border-b-2 border-ink"
     aria-label="Breadcrumb"
 >
-    <div
-        class="label text-ink-muted"
-        data-motion="stamp"
-    >
+    <div data-motion="stamp">
         <a
-            class="product__crumb hover:text-accent-deep"
+            class="product__crumb hover:text-accent-deep font-bold font-mono text-sm tracking-wide uppercase text-ink-muted"
             href="/store"
         >
-            &larr; All products
-        </a>&#32;
-        / {product.category}
+            <IconArrow left /> All products
+        </a>
     </div>
 </nav>
 
@@ -40,24 +45,62 @@ const { slug = '' } = Astro.params;
     aria-labelledby="product-title"
 >
     <div class="grid grid-cols-1 gap-12 md:grid-cols-2">
-        <ul
-            class="grid grid-cols-2 gap-8 list-none"
-            data-motion-stagger="unfold"
+        <div
+            class="flex flex-col gap-5"
+            data-motion="unfold"
         >
-            {product.images.map((_, index) => (
-                <li class:list={[index === 0 && 'col-span-2']}>
-                    <PlaceholderTile
-                        class="slab slab--bare slab--lift aspect-square"
-                        color={imageColors[index % imageColors.length]}
-                        label={product.title.split(' ')[0]}
-                        labelClass="text-[length:14cqi] uppercase text-surface-raised/80"
+            <div class="product-gallery__frame slab slab--bare slab--lift">
+                {gallery.map(({ image, variation }) => image && (
+                    <Image
+                        class:list={['product-gallery__photo', variation === product.base && 'is-current']}
+                        alt={`${product.title} \u2014 ${variation}`}
+                        data-gallery-photo={variation}
+                        densities={[1, 2]}
+                        draggable="false"
+                        src={image}
+                        width={FRAME_IMAGE_WIDTH}
                     />
-                </li>
-            ))}
-        </ul>
+                ))}
+            </div>
+            <ul
+                class="grid grid-cols-4 gap-4 list-none"
+                aria-label="Product views"
+                data-gallery-thumbs
+            >
+                {gallery.map(({ image, variation }) => (
+                    <li>
+                        <button
+                            class="product-gallery__thumb"
+                            aria-label={`Show the ${variation} view`}
+                            aria-pressed={variation === product.base ? 'true' : 'false'}
+                            data-gallery-thumb={variation}
+                            type="button"
+                        >
+                            {image && (
+                                <Image
+                                    alt=""
+                                    densities={[1, 2]}
+                                    draggable="false"
+                                    src={image}
+                                    width={THUMB_IMAGE_WIDTH}
+                                />
+                            )}
+                        </button>
+                    </li>
+                ))}
+            </ul>
+        </div>
         <div class="self-start space-y-8 md:sticky md:top-28">
             <div data-motion="rise">
-                <p class="label mb-2 text-accent-deep">{product.category}</p>
+                <div class="flex flex-wrap items-baseline justify-between gap-x-4 mb-2">
+                    <p class="label text-accent-deep">{product.category}</p>
+                    <p
+                        class="font-mono text-2xs text-ink-subtle"
+                        data-placeholder
+                    >
+                        SKU-{product.sku}
+                    </p>
+                </div>
                 <h1
                     id="product-title"
                     class="mb-3 font-extrabold font-sans leading-tight text-4xl tracking-[-0.03em] md:text-5xl"
@@ -65,55 +108,50 @@ const { slug = '' } = Astro.params;
                     {product.title}
                 </h1>
                 <p
-                    class="mb-4 font-bold font-mono text-2xl"
+                    class="font-bold font-mono text-2xl"
                     data-placeholder
                 >
                     {formatPrice(product.priceCents)}
                 </p>
-                <p
-                    class:list={[
-                        'label inline-block px-2 py-2',
-                        inStock && 'text-ink-muted',
-                        !inStock && 'product__sold text-accent-deep',
-                    ]}
-                    data-placeholder
-                >
-                    {getStockLabel(product.stock, 'In stock')}
-                </p>
             </div>
-            <p class="leading-relaxed text-base text-ink-muted">{product.description}</p>
+            <p
+                class="leading-relaxed text-base text-ink-muted"
+                data-motion="blur"
+            >
+                {product.description}
+            </p>
             <form
                 class="add-form space-y-6"
-                data-image={product.images[0]}
+                data-image={`${product.sku}_${toVariationSlug(product.base)}`}
                 data-max={ceiling}
+                data-motion="rise"
                 data-price-cents={product.priceCents}
                 data-slug={slug}
                 data-stock={product.stock}
                 data-title={product.title}
             >
-                {product.colors.length > 0 && (
-                    <div>
-                        <p class="label mb-3 text-ink-muted">
-                            Color / <span data-color-output>{product.colors[0].name}</span>
-                        </p>
-                        <div
-                            class="flex gap-4"
-                            aria-label="Color options"
-                            role="group"
-                        >
-                            {product.colors.map((color, index) => (
-                                <button
-                                    class="product__swatch active:border-ink aria-pressed:border-ink hover:border-ink h-10 w-10 border-2 border-ink-muted"
-                                    aria-label={color.name}
-                                    aria-pressed={index === 0 ? 'true' : 'false'}
-                                    data-color={color.name}
-                                    style={`background: ${color.hex};`}
-                                    type="button"
-                                />
-                            ))}
-                        </div>
+                <div>
+                    <p class="label mb-3 text-ink-muted">
+                        Variation / <span data-variation-output>{product.base}</span>
+                    </p>
+                    <div
+                        class="flex flex-wrap gap-4"
+                        aria-label="Variation options"
+                        role="group"
+                    >
+                        {swatches.map(variation => (
+                            <button
+                                class="product__swatch active:border-ink aria-pressed:border-ink hover:border-ink h-10 w-10 border-2 border-ink-muted"
+                                aria-label={variation.name}
+                                aria-pressed={variation.name === product.base ? 'true' : 'false'}
+                                data-image={`${product.sku}_${toVariationSlug(variation.name)}`}
+                                data-variation={variation.name}
+                                style={`background: ${variation.hex};`}
+                                type="button"
+                            />
+                        ))}
                     </div>
-                )}
+                </div>
                 {product.sizes.length > 0 && (
                     <div>
                         <p class="label mb-3 text-ink-muted">Size</p>
@@ -125,7 +163,7 @@ const { slug = '' } = Astro.params;
                             {product.sizes.map((size, index) => (
                                 <button
                                     class:list={[
-                                        'active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse h-(--control-size) min-w-(--control-size) px-3 border-2 border-ink font-bold font-mono text-xs uppercase transition-colors',
+                                        'active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse h-(--control-size) min-w-(--control-size) px-3 border-2 border-ink font-bold font-mono text-xs uppercase transition-colors select-none',
                                         index === 0 && 'is-active',
                                     ]}
                                     aria-pressed={index === 0 ? 'true' : 'false'}
@@ -139,8 +177,16 @@ const { slug = '' } = Astro.params;
                     </div>
                 )}
                 <div>
-                    <p class="label mb-3 text-ink-muted">Quantity</p>
-                    <div class="inline-flex items-center border-2 border-ink">
+                    <p class="label mb-3 text-ink-muted">
+                        {inStock && 'Quantity'}
+                        {!inStock && (
+                            <Fragment>
+                                <s>Quantity</s>
+                                <span class="text-accent-deep"> / Out of stock</span>
+                            </Fragment>
+                        )}
+                    </p>
+                    <div class:list={['inline-flex items-center border-2', inStock ? 'border-ink' : 'border-ink-20 opacity-55']}>
                         <button
                             class="active:bg-ink active:text-ink-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-ink aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-(--control-size) w-(--control-size) font-bold text-lg transition-colors"
                             aria-disabled="true"
@@ -151,7 +197,7 @@ const { slug = '' } = Astro.params;
                             &minus;
                         </button>
                         <span
-                            class="w-12 font-bold font-mono text-center"
+                            class:list={['w-12 font-bold font-mono text-center select-none', !inStock && 'line-through text-ink-subtle']}
                             aria-live="polite"
                             data-quantity-output
                         >
@@ -177,19 +223,14 @@ const { slug = '' } = Astro.params;
                 </button>
             </form>
             {product.details.length > 0 && (
-                <details class="product__details open:gap-3 flex flex-col pt-4 border-t-2 border-ink">
-                    <summary class="label product__summary hover:text-accent-deep flex items-center min-h-(--control-size) cursor-pointer select-none">
-                        Details
-                        <span
-                            class="action-text product__sign ml-auto"
-                            aria-hidden="true"
-                        >
-                            +
-                        </span>
-                    </summary>
-                    <ul class="space-y-1 text-sm text-ink-muted">
+                <div
+                    class="pt-5 border-t-2 border-ink"
+                    data-motion="unfold"
+                >
+                    <p class="label mb-4 text-ink-muted">Details</p>
+                    <ul class="space-y-2 list-none text-smd text-ink-muted">
                         {product.details.map(detail => (
-                            <li class="flex gap-2">
+                            <li class="flex gap-3">
                                 <span
                                     class="font-bold text-accent-deep"
                                     aria-hidden="true"
@@ -200,16 +241,74 @@ const { slug = '' } = Astro.params;
                             </li>
                         ))}
                     </ul>
-                </details>
+                </div>
             )}
         </div>
     </div>
 </section>
 
 <style>
+    .product-gallery__frame {
+        aspect-ratio: 1;
+        background-color: var(--color-surface-sunken);
+        margin-bottom: calc(var(--z-lift) * var(--lift));
+        overflow: hidden;
+        position: relative;
+    }
+
+    .product-gallery__photo {
+        height: 100%;
+        inset: 0;
+        object-fit: cover;
+        opacity: 0;
+        pointer-events: none;
+        position: absolute;
+        transition: opacity var(--duration-slow) var(--motion-ease-ui);
+        width: 100%;
+    }
+
+    .product-gallery__photo.is-current {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .product-gallery__thumb {
+        aspect-ratio: 1;
+        border: 2px solid var(--color-ink-20);
+        display: block;
+        overflow: hidden;
+        padding: 0;
+        transition:
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            box-shadow var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
+        width: 100%;
+    }
+
+    .product-gallery__thumb :global(img) {
+        display: block;
+        height: 100%;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    .product-gallery__thumb:active {
+        transform: translateY(1px);
+    }
+
+    .product-gallery__thumb:hover {
+        border-color: var(--color-accent-deep);
+    }
+
+    .product-gallery__thumb[aria-pressed='true'] {
+        border-color: var(--color-ink);
+        box-shadow: var(--lift) var(--lift) 0 0 var(--color-ink);
+    }
+
     .product__crumb {
         align-items: center;
         display: inline-flex;
+        gap: var(--space-2xs);
         min-height: var(--control-size);
         transition:
             color var(--duration-fast) var(--motion-ease-ui),
@@ -217,29 +316,6 @@ const { slug = '' } = Astro.params;
     }
 
     .product__crumb:active {
-        transform: translateY(1px);
-    }
-
-    .product__details[open] .product__sign {
-        rotate: 45deg;
-    }
-
-    .product__sold {
-        background-image: repeating-linear-gradient(135deg, var(--color-ink-10) 0 4px, transparent 4px 8px);
-    }
-
-    .product__summary {
-        list-style: none;
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .product__summary::marker {
-        content: none;
-    }
-
-    .product__summary:active {
         transform: translateY(1px);
     }
 
@@ -255,11 +331,11 @@ const { slug = '' } = Astro.params;
             0 0 0 5px var(--color-ink);
     }
 
-    [data-color] {
+    [data-variation] {
         position: relative;
     }
 
-    [data-color]::after {
+    [data-variation]::after {
         content: '';
         inset: -8px;
         position: absolute;
@@ -276,10 +352,10 @@ const { slug = '' } = Astro.params;
     let quantity = 1;
     let stock = 0;
 
-    function countInCart(slug: string, color: string | undefined, size: string | undefined) {
+    function countInCart(slug: string, variation: string | undefined, size: string | undefined) {
         const line = getItems().find(item => item.productSlug === slug
-            && (item.color ?? '') === (color ?? '')
-            && (item.size ?? '') === (size ?? ''));
+            && (item.size ?? '') === (size ?? '')
+            && (item.variation ?? '') === (variation ?? ''));
 
         return line?.quantity ?? 0;
     }
@@ -287,36 +363,31 @@ const { slug = '' } = Astro.params;
     function handleAddSubmit(event: SubmitEvent, form: HTMLFormElement) {
         event.preventDefault();
 
-        const color = form.querySelector<HTMLButtonElement>('[data-color][aria-pressed="true"]')?.dataset.color;
+        const pressed = form.querySelector<HTMLButtonElement>('[data-variation][aria-pressed="true"]');
+
+        const image = pressed?.dataset.image ?? form.dataset.image ?? '';
         const size = form.querySelector<HTMLButtonElement>('[data-size][aria-pressed="true"]')?.dataset.size;
         const slug = form.dataset.slug ?? '';
         const title = form.dataset.title ?? '';
+        const variation = pressed?.dataset.variation;
 
-        if (countInCart(slug, color, size) >= maxQuantity) {
+        if (countInCart(slug, variation, size) >= maxQuantity) {
             toast(`Already at the maximum \u2014 ${maxQuantity} \u00d7 ${title} is all we can hold for you.`, 'error');
 
             return;
         }
 
         add({
-            color,
-            image: form.dataset.image ?? '',
+            image,
             priceCents: Number(form.dataset.priceCents),
             productSlug: slug,
             quantity,
             size,
             title,
+            variation,
         }, maxQuantity);
 
-        toast(`${countInCart(slug, color, size)} \u00d7 ${title} in your cart.`, 'success');
-    }
-
-    function handleColorClick(button: HTMLButtonElement, swatches: NodeListOf<HTMLButtonElement>, output: HTMLElement | null) {
-        swatches.forEach((swatch) => {
-            swatch.setAttribute('aria-pressed', String(swatch === button));
-        });
-
-        if (output) output.textContent = button.dataset.color ?? '';
+        toast(`${countInCart(slug, variation, size)} \u00d7 ${title} in your cart.`, 'success');
     }
 
     function handleQuantityClick(step: number, decrease: HTMLButtonElement, increase: HTMLButtonElement, output: HTMLElement) {
@@ -342,12 +413,12 @@ const { slug = '' } = Astro.params;
 
         if (!form) return;
 
-        const colorOutput = form.querySelector<HTMLElement>('[data-color-output]');
         const decrease = form.querySelector<HTMLButtonElement>('[data-quantity="-1"]');
         const increase = form.querySelector<HTMLButtonElement>('[data-quantity="+1"]');
         const quantityOutput = form.querySelector<HTMLElement>('[data-quantity-output]');
         const sizeButtons = form.querySelectorAll<HTMLButtonElement>('[data-size]');
-        const swatches = form.querySelectorAll<HTMLButtonElement>('[data-color]');
+        const swatches = form.querySelectorAll<HTMLButtonElement>('[data-variation]');
+        const thumbs = document.querySelectorAll<HTMLButtonElement>('[data-gallery-thumb]');
 
         maxQuantity = Math.max(1, Math.min(Number(form.dataset.max) || 1, COMMERCE.maxQuantityPerItem));
         quantity = 1;
@@ -366,12 +437,36 @@ const { slug = '' } = Astro.params;
         });
 
         swatches.forEach((button) => {
-            button.addEventListener('click', () => handleColorClick(button, swatches, colorOutput), { signal });
+            button.addEventListener('click', () => selectVariation(button.dataset.variation ?? ''), { signal });
+        });
+
+        thumbs.forEach((button) => {
+            button.addEventListener('click', () => selectVariation(button.dataset.galleryThumb ?? ''), { signal });
         });
     }
 
     function limitMessage() {
-        return stock > COMMERCE.maxQuantityPerItem ? 'Ten per order is the limit.' : 'That\u2019s all we have.';
+        return stock > COMMERCE.maxQuantityPerItem ? 'Five per order is the limit.' : 'That\u2019s all we have.';
+    }
+
+    function selectVariation(variation: string) {
+        if (!variation) return;
+
+        const output = document.querySelector<HTMLElement>('[data-variation-output]');
+
+        document.querySelectorAll<HTMLElement>('[data-gallery-photo]').forEach((photo) => {
+            photo.classList.toggle('is-current', photo.dataset.galleryPhoto === variation);
+        });
+
+        document.querySelectorAll<HTMLButtonElement>('[data-gallery-thumb]').forEach((thumb) => {
+            thumb.setAttribute('aria-pressed', String(thumb.dataset.galleryThumb === variation));
+        });
+
+        document.querySelectorAll<HTMLButtonElement>('[data-variation]').forEach((swatch) => {
+            swatch.setAttribute('aria-pressed', String(swatch.dataset.variation === variation));
+        });
+
+        if (output) output.textContent = variation;
     }
 
     function updateQuantity(decrease: HTMLButtonElement, increase: HTMLButtonElement, output: HTMLElement) {

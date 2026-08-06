@@ -1,0 +1,482 @@
+---
+import IconArrow from '@components/icons/Arrow.astro';
+---
+
+<div
+    class="tour"
+    aria-labelledby="tour-eyebrow"
+    aria-modal="true"
+    data-tour
+    hidden
+    role="dialog"
+>
+    <div
+        class="tour__pane tour__pane--top"
+        aria-hidden="true"
+    />
+    <div
+        class="tour__pane tour__pane--bottom"
+        aria-hidden="true"
+    />
+    <div
+        class="tour__pane tour__pane--left"
+        aria-hidden="true"
+    />
+    <div
+        class="tour__pane tour__pane--right"
+        aria-hidden="true"
+    />
+    <div
+        class="tour__ring"
+        aria-hidden="true"
+    />
+    <div
+        class="tour__card slab slab--card"
+        data-tour-card
+    >
+        <p
+            id="tour-eyebrow"
+            class="label tour__eyebrow"
+            data-tour-eyebrow
+        />
+        <p
+            class="tour__body"
+            data-tour-body
+        />
+        <p
+            class="sr-only"
+            aria-live="polite"
+            data-tour-announce
+        />
+        <div class="tour__foot">
+            <button
+                class="btn"
+                data-tour-back
+                hidden
+                type="button"
+            >
+                <IconArrow left /> Back
+            </button>
+            <button
+                class="btn btn--primary"
+                data-tour-next
+                type="button"
+            >
+                <span data-tour-next-label>Next</span> <IconArrow />
+            </button>
+            <button
+                class="action-text tour__skip"
+                data-tour-skip
+                type="button"
+            >
+                Skip the tour
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .tour {
+        --tour-card-x: 0px;
+        --tour-card-y: 0px;
+        --tour-height: 0px;
+        --tour-left: 0px;
+        --tour-top: 0px;
+        --tour-width: 0px;
+        inset: 0;
+        pointer-events: none;
+        position: fixed;
+        z-index: calc(var(--z-toast) + 1);
+    }
+
+    .tour__body {
+        font-size: var(--text-smd);
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .tour__card {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+        left: var(--tour-card-x);
+        opacity: 1;
+        pointer-events: auto;
+        position: fixed;
+        top: var(--tour-card-y);
+        transition:
+            opacity var(--duration-base) var(--motion-ease-entrance),
+            translate var(--duration-base) var(--motion-ease-entrance);
+        translate: 0 0;
+        width: min(380px, calc(100vw - 2 * var(--space-md)));
+    }
+
+    @starting-style {
+        .tour__card {
+            opacity: 0;
+            translate: 0 6px;
+        }
+    }
+
+    .tour__eyebrow {
+        color: var(--color-accent-deep);
+    }
+
+    .tour__foot {
+        align-items: center;
+        border-top: 2px solid var(--color-ink);
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2xs);
+        padding-top: var(--space-sm);
+    }
+
+    .tour__pane {
+        background: var(--color-ink-70);
+        pointer-events: auto;
+        position: fixed;
+    }
+
+    .tour__pane--bottom {
+        inset: calc(var(--tour-top) + var(--tour-height)) 0 0 0;
+    }
+
+    .tour__pane--left {
+        height: var(--tour-height);
+        inset: var(--tour-top) auto auto 0;
+        width: var(--tour-left);
+    }
+
+    .tour__pane--right {
+        height: var(--tour-height);
+        inset: var(--tour-top) 0 auto calc(var(--tour-left) + var(--tour-width));
+    }
+
+    .tour__pane--top {
+        height: var(--tour-top);
+        inset: 0 0 auto 0;
+    }
+
+    .tour__ring {
+        height: var(--tour-height);
+        inset: var(--tour-top) auto auto var(--tour-left);
+        outline: 2px solid var(--color-accent);
+        pointer-events: auto;
+        position: fixed;
+        width: var(--tour-width);
+    }
+
+    .tour__skip {
+        align-items: center;
+        color: var(--color-ink-muted);
+        display: inline-flex;
+        margin-inline-start: auto;
+        min-height: var(--control-size);
+        padding-inline: var(--space-3xs);
+        transition: color var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .tour__card {
+            transition: none;
+            translate: none;
+        }
+    }
+</style>
+
+<script>
+    import { REDUCED_MOTION_QUERY } from '@lib/shared/constants';
+    import { disarmTour, isTourArmed } from '@lib/tour/tour';
+    import { registerPageScript, setHidden, setText } from '@lib/shared/utils';
+
+    type TourSide = (typeof TOUR_SIDES)[number];
+
+    interface TourBox {
+        height: number;
+        left: number;
+        top: number;
+        width: number;
+    }
+
+    interface TourStop {
+        body: string;
+        target: HTMLElement;
+    }
+
+    const FOCUS_SELECTOR = 'a[href], button, input, select, textarea';
+    const TOUR_EDGE = 16;
+    const TOUR_GAP = 12;
+    const TOUR_PAD = 6;
+    const TOUR_ROUTE = '/';
+    const TOUR_SIDES = ['bottom', 'top', 'right', 'left'] as const;
+
+    const TOUR_STOPS = [
+        { body: 'Everything lives here \u2014 events, the directory, the gallery, the store.', selectors: ['.site-nav', '.nav-toggle'] },
+        { body: 'Your account, orders, and settings.', selectors: ['.account'] },
+        { body: 'The member room \u2014 talk to the Alliance.', selectors: ['[data-chat-launcher]'] },
+        { body: 'Ask the assistant anything about programs or Prods.', selectors: ['[data-ai-launcher]'] },
+        { body: 'The floating player follows you around the site.', selectors: ['[data-player-launcher]'] },
+    ] as const;
+
+    let frame: number | undefined;
+    let running = false;
+    let step = 0;
+    let stops: TourStop[] = [];
+
+    function clamp(value: number, min: number, max: number): number {
+        return Math.max(min, Math.min(value, max));
+    }
+
+    function closeTour() {
+        if (!running) return;
+
+        const target = stops[step]?.target;
+
+        running = false;
+        stopFrame();
+        document.documentElement.style.overflow = '';
+        setHidden(document.querySelector<HTMLElement>('[data-tour]'), true);
+        (findFocusable(target) ?? document.querySelector<HTMLElement>('.site-header__brand'))?.focus({ preventScroll: true });
+    }
+
+    function currentPath() {
+        return window.location.pathname.replace(/\/$/, '') || TOUR_ROUTE;
+    }
+
+    function findFocusable(target: HTMLElement | undefined) {
+        if (!target) return null;
+
+        const nested = Array.from(target.querySelectorAll<HTMLElement>(FOCUS_SELECTOR));
+
+        const candidates = target.matches(FOCUS_SELECTOR) ? [target, ...nested] : nested;
+
+        return candidates.find(candidate => candidate.checkVisibility()) ?? null;
+    }
+
+    function findTarget(selectors: readonly string[]) {
+        for (const selector of selectors) {
+            const element = document.querySelector<HTMLElement>(selector);
+
+            if (element?.checkVisibility()) return element;
+        }
+
+        return null;
+    }
+
+    function handleKeydown(event: KeyboardEvent) {
+        if (!running) return;
+
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            closeTour();
+        } else if (event.key === 'ArrowLeft') {
+            event.preventDefault();
+            showStep(step - 1);
+        } else if (event.key === 'ArrowRight') {
+            event.preventDefault();
+            showStep(step + 1);
+        } else if (event.key === 'Tab') {
+            handleTab(event);
+        }
+    }
+
+    function handleNext() {
+        if (step === stops.length - 1) {
+            closeTour();
+
+            return;
+        }
+
+        showStep(step + 1);
+    }
+
+    function handleTab(event: KeyboardEvent) {
+        const buttons = listControls();
+
+        if (!buttons.length) return;
+
+        const offset = event.shiftKey ? -1 : 1;
+        const outside = event.shiftKey ? buttons.length : -1;
+
+        const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+
+        const anchor = index < 0 ? outside : index;
+
+        event.preventDefault();
+        buttons[(anchor + offset + buttons.length) % buttons.length].focus();
+    }
+
+    function initTour(signal: AbortSignal) {
+        const root = document.querySelector<HTMLElement>('[data-tour]');
+
+        running = false;
+        step = 0;
+        stops = [];
+        stopFrame();
+        signal.addEventListener('abort', teardown, { once: true });
+
+        if (!root || !isTourArmed() || currentPath() !== TOUR_ROUTE) return;
+
+        disarmTour();
+        stops = resolveStops();
+
+        if (stops.length !== TOUR_STOPS.length) return;
+
+        startTour(root, signal);
+    }
+
+    function listControls() {
+        return Array.from(document.querySelectorAll<HTMLButtonElement>('[data-tour-back], [data-tour-next], [data-tour-skip]')).filter(button => !button.hidden);
+    }
+
+    function measure(target: HTMLElement): TourBox {
+        const rect = target.getBoundingClientRect();
+
+        const left = clamp(rect.left - TOUR_PAD, 0, window.innerWidth);
+        const top = clamp(rect.top - TOUR_PAD, 0, window.innerHeight);
+
+        return {
+            height: clamp(rect.bottom + TOUR_PAD, 0, window.innerHeight) - top,
+            left,
+            top,
+            width: clamp(rect.right + TOUR_PAD, 0, window.innerWidth) - left,
+        };
+    }
+
+    function place(cutout: TourBox, card: HTMLElement) {
+        const height = card.offsetHeight;
+        const width = card.offsetWidth;
+        const viewHeight = window.innerHeight;
+        const viewWidth = window.innerWidth;
+
+        const room = {
+            bottom: viewHeight - (cutout.top + cutout.height) - TOUR_GAP - TOUR_EDGE,
+            left: cutout.left - TOUR_GAP - TOUR_EDGE,
+            right: viewWidth - (cutout.left + cutout.width) - TOUR_GAP - TOUR_EDGE,
+            top: cutout.top - TOUR_GAP - TOUR_EDGE,
+        };
+
+        const need = { bottom: height, left: width, right: width, top: height };
+
+        const side = TOUR_SIDES.find(name => room[name] >= need[name]) ?? widestSide(room);
+
+        if (side === 'bottom' || side === 'top') {
+            const above = cutout.top - TOUR_GAP - height;
+            const below = cutout.top + cutout.height + TOUR_GAP;
+
+            return {
+                x: clamp(cutout.left + cutout.width / 2 - width / 2, TOUR_EDGE, viewWidth - width - TOUR_EDGE),
+                y: clamp(side === 'bottom' ? below : above, TOUR_EDGE, viewHeight - height - TOUR_EDGE),
+            };
+        }
+
+        const after = cutout.left + cutout.width + TOUR_GAP;
+        const before = cutout.left - TOUR_GAP - width;
+
+        return {
+            x: clamp(side === 'right' ? after : before, TOUR_EDGE, viewWidth - width - TOUR_EDGE),
+            y: clamp(cutout.top + cutout.height / 2 - height / 2, TOUR_EDGE, viewHeight - height - TOUR_EDGE),
+        };
+    }
+
+    function render() {
+        const card = document.querySelector<HTMLElement>('[data-tour-card]');
+        const root = document.querySelector<HTMLElement>('[data-tour]');
+        const stop = stops[step];
+
+        if (!card || !root || !stop) return;
+
+        const cutout = measure(stop.target);
+
+        root.style.setProperty('--tour-height', `${cutout.height}px`);
+        root.style.setProperty('--tour-left', `${cutout.left}px`);
+        root.style.setProperty('--tour-top', `${cutout.top}px`);
+        root.style.setProperty('--tour-width', `${cutout.width}px`);
+
+        const spot = place(cutout, card);
+
+        root.style.setProperty('--tour-card-x', `${spot.x}px`);
+        root.style.setProperty('--tour-card-y', `${spot.y}px`);
+    }
+
+    function resolveStops() {
+        const resolved: TourStop[] = [];
+
+        TOUR_STOPS.forEach((stop) => {
+            const target = findTarget(stop.selectors);
+
+            if (target) resolved.push({ body: stop.body, target });
+        });
+
+        return resolved;
+    }
+
+    function revealTarget(target: HTMLElement) {
+        const rect = target.getBoundingClientRect();
+
+        if (rect.top >= TOUR_EDGE && rect.bottom <= window.innerHeight - TOUR_EDGE) return;
+
+        target.scrollIntoView({ behavior: window.matchMedia(REDUCED_MOTION_QUERY).matches ? 'auto' : 'smooth', block: 'center' });
+    }
+
+    function schedule() {
+        if (!running || frame !== undefined) return;
+
+        frame = requestAnimationFrame(() => {
+            frame = undefined;
+            render();
+        });
+    }
+
+    function showStep(next: number) {
+        if (!running) return;
+
+        const last = stops.length - 1;
+
+        step = clamp(next, 0, last);
+
+        const stop = stops[step];
+
+        setHidden(document.querySelector<HTMLElement>('[data-tour-back]'), step === 0);
+        setHidden(document.querySelector<HTMLElement>('[data-tour-skip]'), step === last);
+        setText(document.querySelector('[data-tour-announce]'), `Step ${step + 1} of ${stops.length}. ${stop.body}`);
+        setText(document.querySelector('[data-tour-body]'), stop.body);
+        setText(document.querySelector('[data-tour-eyebrow]'), `Tour / ${step + 1} of ${stops.length}`);
+        setText(document.querySelector('[data-tour-next-label]'), step === last ? 'Done' : 'Next');
+        revealTarget(stop.target);
+        render();
+        document.querySelector<HTMLElement>('[data-tour-next]')?.focus({ preventScroll: true });
+    }
+
+    function startTour(root: HTMLElement, signal: AbortSignal) {
+        running = true;
+        document.documentElement.style.overflow = 'hidden';
+        setHidden(root, false);
+        showStep(0);
+
+        document.addEventListener('keydown', handleKeydown, { signal });
+        document.querySelector<HTMLElement>('[data-tour-back]')?.addEventListener('click', () => showStep(step - 1), { signal });
+        document.querySelector<HTMLElement>('[data-tour-next]')?.addEventListener('click', handleNext, { signal });
+        document.querySelector<HTMLElement>('[data-tour-skip]')?.addEventListener('click', closeTour, { signal });
+        window.addEventListener('resize', schedule, { signal });
+        window.addEventListener('scroll', schedule, { capture: true, passive: true, signal });
+    }
+
+    function stopFrame() {
+        if (frame !== undefined) cancelAnimationFrame(frame);
+
+        frame = undefined;
+    }
+
+    function teardown() {
+        running = false;
+        stopFrame();
+        document.documentElement.style.overflow = '';
+    }
+
+    function widestSide(room: Record<TourSide, number>): TourSide {
+        return TOUR_SIDES.reduce<TourSide>((best, name) => (room[name] > room[best] ? name : best), TOUR_SIDES[0]);
+    }
+
+    registerPageScript(initTour);
+</script>

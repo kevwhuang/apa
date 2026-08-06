@@ -6,7 +6,8 @@ import BrandMark from '@components/brand/Mark.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { ASSET_KIND_LABELS, KIND_COLORS, LINKS } from '@lib/shared/constants';
 import { BRAND, BRAND_DOWNLOADS, BRAND_SIZES } from '@lib/shared/brand';
-import { formatDateOnly, toIsoDate } from '@lib/shared/utils';
+import { formatDate, toIsoDate } from '@lib/shared/utils';
+import { toAvailability } from '@lib/resources/unlocks';
 
 const PRESS_KINDS = ['brochure', 'media-kit', 'photo-pack', 'press-kit'] as const;
 
@@ -14,7 +15,8 @@ const downloads = await getCollection('downloads');
 
 const press = downloads
     .filter(asset => PRESS_KINDS.some(kind => kind === asset.data.kind))
-    .toSorted((a, b) => Number(b.data.available) - Number(a.data.available) || a.data.title.localeCompare(b.data.title));
+    .toSorted((a, b) => Number(b.data.available) - Number(a.data.available) || a.data.title.localeCompare(b.data.title))
+    .map(asset => ({ ...asset, availability: toAvailability(asset.data) }));
 ---
 
 <section
@@ -186,28 +188,40 @@ const press = downloads
                                 {asset.data.size}
                             </td>
                             <td class="px-4 py-4 font-mono text-xs text-ink-muted">
-                                <time datetime={toIsoDate(asset.data.date)}>{formatDateOnly(asset.data.date)}</time>
+                                <time datetime={toIsoDate(asset.data.date)}>{formatDate(asset.data.date)}</time>
                             </td>
                             <td class="px-4 py-4 text-right">
-                                {asset.data.available && asset.data.href
-                                    ? (
-                                            <a
-                                                class="action-text press-kit__download"
-                                                href={asset.data.href}
-                                            >
-                                                Open
-                                            </a>
-                                        )
-                                    : (
-                                            <span class="font-mono text-xs text-ink-subtle">In preparation</span>
-                                        )}
+                                {asset.availability === 'open' && (
+                                    <a
+                                        class="action-text press-kit__download"
+                                        href={asset.data.href}
+                                    >
+                                        Open
+                                    </a>
+                                )}
+                                {asset.availability === 'scheduled' && (
+                                    <span
+                                        class="label press-kit__countdown"
+                                        data-unlock
+                                        data-unlocks-at={asset.data.unlocksAt?.toISOString()}
+                                    >
+                                        Unlocks in&#32;
+                                        <span data-unlock-remaining>&hellip;</span>
+                                    </span>
+                                )}
+                                {asset.availability === 'pending' && (
+                                    <span class="label text-ink-subtle">In preparation</span>
+                                )}
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
         </div>
-        <p class="text-smd text-ink-muted">
+        <p
+            class="text-smd text-ink-muted"
+            data-motion="blur"
+        >
             Each entry also has a card in the&#32;
             <a
                 class="press-kit__link hover:text-accent-deep underline underline-offset-4"
@@ -259,6 +273,10 @@ const press = downloads
 </section>
 
 <style>
+    .press-kit__countdown {
+        color: var(--color-accent-deep);
+    }
+
     .press-kit__download {
         align-items: center;
         display: inline-flex;
@@ -316,3 +334,9 @@ const press = downloads
         width: 100%;
     }
 </style>
+
+<script>
+    import { initUnlocks } from '@lib/resources/unlocks';
+
+    initUnlocks();
+</script>

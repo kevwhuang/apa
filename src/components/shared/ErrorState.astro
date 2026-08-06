@@ -14,7 +14,7 @@ const MARK_HEIGHT = 140;
 const ROUTES = [
     { href: '/', label: 'Home', primary: true },
     { href: '/events', label: 'Events', primary: false },
-    { href: '/producers', label: 'Producers', primary: false },
+    { href: '/directory', label: 'Directory', primary: false },
     { href: '/resources', label: 'Resources', primary: false },
 ];
 
@@ -39,11 +39,17 @@ const { code, eyebrow, headingId, lede } = Astro.props;
                 class="border-0 border-t-2 border-ink"
                 data-motion="rule"
             />
-            <p class="max-w-md leading-relaxed text-md text-ink-muted">
+            <p
+                class="max-w-md leading-relaxed text-md text-ink-muted"
+                data-motion="blur"
+            >
                 {lede}
             </p>
             <nav aria-label="Suggested pages">
-                <ul class="flex flex-wrap gap-3 list-none">
+                <ul
+                    class="flex flex-wrap gap-3 list-none"
+                    data-motion-stagger="rise"
+                >
                     {ROUTES.map(route => (
                         <li>
                             <a
@@ -58,22 +64,30 @@ const { code, eyebrow, headingId, lede } = Astro.props;
             </nav>
         </div>
         <div
-            class="error__plate slab slab--bare slab--lift tilt flex items-center justify-center overflow-hidden relative"
-            data-motion="unfold"
+            class="error__frame tilt"
+            data-motion="wipe"
         >
-            <div
-                class="halftone absolute inset-0"
-                aria-hidden="true"
-            />
-            <BrandMark
-                class="error__mark relative text-ink-inverse"
-                height={MARK_HEIGHT}
-            />
+            <div class="error__plate slab slab--bare slab--lift flex items-center justify-center overflow-hidden relative">
+                <div
+                    class="halftone absolute inset-0"
+                    aria-hidden="true"
+                />
+                <BrandMark
+                    class="error__mark relative text-ink-inverse"
+                    height={MARK_HEIGHT}
+                />
+            </div>
         </div>
     </div>
 </section>
 
 <style>
+    .error__frame {
+        --plate-drop: calc(var(--z-lift) * var(--lift));
+        padding-block-end: var(--plate-drop);
+        padding-inline-end: var(--plate-drop);
+    }
+
     .error__plate {
         --slab-fill: var(--color-accent);
         aspect-ratio: 1;

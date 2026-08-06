@@ -9,6 +9,7 @@ type EventCadence = (typeof import('@lib/shared/constants').EVENT_CADENCES)[numb
 type EventStatus = (typeof import('@lib/shared/constants').EVENT_STATUSES)[number];
 type EventType = (typeof import('@lib/shared/constants').EVENT_TYPES)[number];
 type FieldErrors = Record<string, string>;
+type ImageSources = Record<string, string>;
 type MotionBezier = [number, number, number, number];
 type MotionDurationToken = 'base' | 'cinematic' | 'fast' | 'slow' | 'slower' | 'slowest';
 type MotionEase = (progress: number) => number;
@@ -20,7 +21,7 @@ type MotionStaggerToken = 'base' | 'tight';
 type OnboardingGate = { email: string; state: 'granted'; token: OnboardingToken } | { reason: OnboardingRejection; state: 'rejected' };
 type OnboardingRejection = 'expired' | 'malformed' | 'missing';
 type OrderResult = { code: PaymentErrorCode; message: string; ok: false } | { ok: true; order: Order };
-type PaymentErrorCode = 'card-declined' | 'cart-changed' | 'empty-cart';
+type PaymentErrorCode = 'cart-changed' | 'empty-cart';
 type ProductCategory = (typeof import('@lib/shared/constants').PRODUCT_CATEGORIES)[number];
 type ProgramState = 'active' | 'planned';
 type RackKind = 'chorus' | 'compressor' | 'delay' | 'distortion' | 'eq' | 'filter' | 'gate' | 'highpass' | 'limiter' | 'meter' | 'pan' | 'reverb' | 'saturator' | 'tremolo' | 'trim' | 'tuner';
@@ -65,17 +66,18 @@ interface CartIssue {
 }
 
 interface CartItem {
-    color?: string;
     image: string;
     priceCents: number;
     productSlug: string;
     quantity: number;
     size?: string;
     title: string;
+    variation?: string;
 }
 
 interface CartTotals {
     discountCents: number;
+    promoCents: number;
     shippingCents: number;
     subtotalCents: number;
     taxCents: number;
@@ -84,6 +86,7 @@ interface CartTotals {
 
 interface CatalogEntry {
     priceCents: number;
+    sku: number;
     slug: string;
     stock: number;
     title: string;
@@ -222,6 +225,7 @@ interface OrderInput {
     email: string;
     items: CartItem[];
     prodsApplied: number;
+    promoCode: string;
 }
 
 interface PlayerState {

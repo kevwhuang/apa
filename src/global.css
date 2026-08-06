@@ -81,6 +81,7 @@
     --lift: max(2px, calc(var(--drift-unit) / 8));
     --measure-form: calc(var(--shell-max) * 3 / 4 - 2 * var(--shell-pad));
     --measure-prose: calc(var(--shell-max) * 5 / 8 - 2 * var(--shell-pad));
+    --measure-search: 360px;
     --motion-ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
     --motion-ease-linear: cubic-bezier(0, 0, 1, 1);
     --motion-ease-mechanical: cubic-bezier(0.83, 0, 0.17, 1);
@@ -264,6 +265,12 @@ table {
         --rank-cols-2: minmax(0, 1fr);
         --rank-cols-4: repeat(2, minmax(0, 1fr));
         --rank-cols-split: minmax(0, 1fr);
+    }
+
+    input:not([type='checkbox'], [type='radio'], [type='range']),
+    select,
+    textarea {
+        font-size: max(16px, 1em);
     }
 }
 

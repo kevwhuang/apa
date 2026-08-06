@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 
+import IconArrow from '@components/icons/Arrow.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { LINKS } from '@lib/shared/constants';
 import { formatDate, formatTimeRange, getProgram } from '@lib/shared/utils';
@@ -28,13 +29,13 @@ const [next, ...later] = upcoming;
         >
             Next up
             <a
-                class="action-text hover:text-accent-deep hidden items-center min-h-(--control-size) transition-colors md:inline-flex"
+                class="action-text hover:text-accent-deep hidden items-center gap-2 min-h-(--control-size) transition-colors md:inline-flex"
                 href={LINKS.meetup}
                 rel="noopener noreferrer"
                 slot="cta"
                 target="_blank"
             >
-                RSVP on Meetup &rarr;
+                RSVP on Meetup <IconArrow />
             </a>
         </SectionHead>
         {next
@@ -82,7 +83,7 @@ const [next, ...later] = upcoming;
                                             rel="noopener noreferrer"
                                             target="_blank"
                                         >
-                                            RSVP on Meetup &rarr;
+                                            RSVP on Meetup <IconArrow />
                                             <span class="sr-only"> (opens in a new tab)</span>
                                         </a>
                                     </p>
@@ -145,12 +146,12 @@ const [next, ...later] = upcoming;
             data-motion="rise"
         >
             <a
-                class="action-text hover:text-accent-deep inline-flex items-center min-h-(--control-size) underline underline-offset-4 transition-colors"
+                class="action-text hover:text-accent-deep inline-flex items-center gap-2 min-h-(--control-size) underline underline-offset-4 transition-colors"
                 href={LINKS.meetup}
                 rel="noopener noreferrer"
                 target="_blank"
             >
-                RSVP on Meetup &rarr;
+                RSVP on Meetup <IconArrow />
             </a>
         </p>
     </div>
@@ -168,6 +169,7 @@ const [next, ...later] = upcoming;
     .assembly-next__rsvp {
         align-items: center;
         display: inline-flex;
+        gap: var(--space-2xs);
         min-height: var(--control-size);
     }
 

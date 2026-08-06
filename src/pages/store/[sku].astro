@@ -8,14 +8,14 @@ import { brandTitle } from '@lib/shared/brand';
 const DESCRIPTION_MAX = 160;
 const DESCRIPTION_SUFFIX = ' From the official Austin Producer Alliance store.';
 
-const { product } = Astro.props;
+const { product, slug } = Astro.props;
 
 export async function getStaticPaths() {
     const products = await getCollection('products');
 
     return products.map(product => ({
-        params: { slug: product.id },
-        props: { product: product.data },
+        params: { sku: String(product.data.sku) },
+        props: { product: product.data, slug: product.id },
     }));
 }
 
@@ -42,5 +42,8 @@ function toDescription(text: string) {
     description={toDescription(product.description)}
     title={brandTitle(product.title)}
 >
-    <ProductDetail product={product} />
+    <ProductDetail
+        product={product}
+        slug={slug}
+    />
 </Layout>

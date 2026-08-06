@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 
+import IconArrow from '@components/icons/Arrow.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { LINKS } from '@lib/shared/constants';
 import { formatCalendarDay, formatCalendarMonth, formatTimeRange, formatWeekday, getProgram } from '@lib/shared/utils';
@@ -26,14 +27,17 @@ const program = getProgram('hangout');
         >
             Next {program.name}.
             <a
-                class="action-text hover:text-accent-deep hidden items-center min-h-(--control-size) transition-colors md:inline-flex"
+                class="action-text hover:text-accent-deep hidden items-center gap-2 min-h-(--control-size) transition-colors md:inline-flex"
                 href="/events"
                 slot="cta"
             >
-                All events &rarr;
+                All events <IconArrow />
             </a>
         </SectionHead>
-        <p class="max-w-2xl mb-(--space-2xl) leading-relaxed text-base text-ink-muted">
+        <p
+            class="max-w-2xl mb-(--space-2xl) leading-relaxed text-base text-ink-muted"
+            data-motion="blur"
+        >
             {program.summary}
         </p>
         {next

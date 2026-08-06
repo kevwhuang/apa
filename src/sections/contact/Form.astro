@@ -1,4 +1,5 @@
 ---
+import IconArrow from '@components/icons/Arrow.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/constants';
@@ -22,7 +23,7 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
             class="max-w-2xl text-lmd text-ink-muted"
             data-motion="blur"
         >
-            Membership, sponsorship, press, booking &mdash; whatever you're here for, this is the front door.
+            Membership, partnerships, press, booking &mdash; whatever you're here for, this is the front door.
         </p>
     </div>
 </section>
@@ -141,7 +142,7 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
                         class="contact-form__arrow"
                         aria-hidden="true"
                     >
-                        &rarr;
+                        <IconArrow />
                     </span>
                 </button>
                 <p class="text-sm text-ink-muted">
@@ -242,7 +243,7 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
                             class="contact-line__arrow"
                             aria-hidden="true"
                         >
-                            &rarr;
+                            <IconArrow />
                         </span>
                     </span>
                     <span class="contact-line__blurb font-mono">{LINKS.email}</span>
@@ -262,7 +263,7 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
                                 class="contact-line__arrow"
                                 aria-hidden="true"
                             >
-                                &rarr;
+                                <IconArrow />
                             </span>
                         </span>
                         <span class="contact-line__blurb">{platform.blurb}</span>

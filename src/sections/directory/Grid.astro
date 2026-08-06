@@ -1,19 +1,19 @@
 ---
 import { getCollection } from 'astro:content';
 
-import IconClose from '@components/icons/Close.astro';
-import IconSearch from '@components/icons/Search.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import ProducerLinks from '@components/producer/Links.astro';
 import ProducerTrack from '@components/producer/Track.astro';
+import SearchField from '@components/shared/SearchField.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { JOIN_ROUTE, LINKS, PALETTE } from '@lib/shared/constants';
-import { formatMonthOnly, getInitials, toIsoDate } from '@lib/shared/utils';
+import { formatCalendarMonth, getInitials, toIsoDate } from '@lib/shared/utils';
 
 const producers = await getCollection('producers');
 
 const allGenres = Array.from(new Set(producers.flatMap(producer => producer.data.genres))).sort((a, b) => a.localeCompare(b));
+const allRoles = Array.from(new Set(producers.flatMap(producer => producer.data.roles))).sort((a, b) => a.localeCompare(b));
 
 const roster = [...producers]
     .sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || a.data.name.localeCompare(b.data.name))
@@ -25,93 +25,103 @@ const roster = [...producers]
 
 <section
     class="stage stage--tight border-b-2 border-ink"
-    aria-labelledby="roster-title"
+    aria-labelledby="directory-title"
 >
     <div>
         <PageHead
             class="max-w-3xl mb-6 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-8xl"
-            eyebrow="Producers / Roster"
-            headingId="roster-title"
+            eyebrow="Directory / Roster"
+            headingId="directory-title"
         >
-            The producers.
+            The directory.
         </PageHead>
         <p
             class="max-w-2xl mb-10 text-lmd text-ink-muted"
             data-motion="blur"
         >
-            Every card carries what a producer makes, what they do, where they are based, and
-            where else to find them &mdash; plus a spotlight track where there is one. Press play
-            to hear it.
+            Every member card carries what they make, what they do, where they are based, and
+            where else to find them &mdash; plus a spotlight track where there is one. Filter by
+            role or genre, or press play and just listen.
         </p>
-        <label
-            class="block mb-4"
+        <SearchField
+            class="mb-4"
             data-motion="rise"
-        >
-            <span class="sr-only">Search the roster</span>
-            <span class="block relative max-w-[360px] w-full">
-                <span
-                    class="absolute bottom-0 flex items-center left-4 top-0 text-ink-muted pointer-events-none"
-                    aria-hidden="true"
-                >
-                    <IconSearch />
-                </span>
-                <input
-                    class="input input--sunk pl-11 pr-(--control-size) font-mono text-sm"
-                    autocomplete="off"
-                    data-producers-search
-                    placeholder="Search producers&hellip;"
-                    spellcheck="false"
-                    type="search"
-                />
-                <button
-                    class="active:translate-y-px hover:text-accent-deep absolute inline-flex items-center justify-center right-0 top-0 h-(--control-size) w-(--control-size) text-ink-muted transition-colors"
-                    aria-label="Clear search"
-                    data-producers-clear
-                    hidden
-                    type="button"
-                >
-                    <IconClose />
-                </button>
-            </span>
-        </label>
+            label="Search the directory"
+            placeholder={'Search members\u2026'}
+        />
         <div
-            class="flex flex-wrap gap-2 mb-6"
-            aria-label="Filter by genre"
+            class="flex flex-col gap-5 mb-6"
             data-motion="rise"
-            role="group"
         >
-            <button
-                class="chip genre-btn is-active active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
-                aria-pressed="true"
-                data-genre=""
-                type="button"
-            >
-                All
-            </button>
-            {allGenres.map(genre => (
-                <button
-                    class="chip genre-btn active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
-                    aria-pressed="false"
-                    data-genre={genre}
-                    type="button"
+            <div>
+                <p class="label mb-3 text-ink-muted">Role</p>
+                <div
+                    class="flex flex-wrap gap-2"
+                    aria-label="Filter by role"
+                    role="group"
                 >
-                    {genre}
-                </button>
-            ))}
+                    <button
+                        class="chip is-active role-btn active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
+                        aria-pressed="true"
+                        data-role=""
+                        type="button"
+                    >
+                        All
+                    </button>
+                    {allRoles.map(role => (
+                        <button
+                            class="chip role-btn active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
+                            aria-pressed="false"
+                            data-role={role}
+                            type="button"
+                        >
+                            {role}
+                        </button>
+                    ))}
+                </div>
+            </div>
+            <div>
+                <p class="label mb-3 text-ink-muted">Genre</p>
+                <div
+                    class="flex flex-wrap gap-2"
+                    aria-label="Filter by genre"
+                    role="group"
+                >
+                    <button
+                        class="chip genre-btn is-active active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
+                        aria-pressed="true"
+                        data-genre=""
+                        type="button"
+                    >
+                        All
+                    </button>
+                    {allGenres.map(genre => (
+                        <button
+                            class="chip genre-btn active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
+                            aria-pressed="false"
+                            data-genre={genre}
+                            type="button"
+                        >
+                            {genre}
+                        </button>
+                    ))}
+                </div>
+            </div>
         </div>
         <p
             class="label text-ink-subtle"
             aria-live="polite"
-            data-producers-status
+            data-directory-status
+            data-motion="stamp"
         >
-            Showing all {roster.length} producers.
+            Showing all {roster.length} members.
         </p>
     </div>
 </section>
 
 <section
     class="stage stage--tight border-b-2 border-ink"
-    aria-label="Roster"
+    aria-label="Directory"
 >
     <ul
         class="roster__grid list-none"
@@ -122,17 +132,18 @@ const roster = [...producers]
                 id={producer.id}
                 class="producer-card"
                 data-genres={producer.data.genres.join(',')}
+                data-role={producer.data.roles[0]}
                 data-search={producer.search}
             >
                 <article class="producer-card__frame slab slab--bare slab--card">
                     <PlaceholderTile
                         class="aspect-[5/3] border-b-2 border-ink"
-                        color={PALETTE[index % PALETTE.length]}
+                        color={PALETTE[(index + 1) % PALETTE.length]}
                         label={getInitials(producer.data.name)}
                         labelClass="leading-none text-[80px] text-surface-raised/80 [text-shadow:2px_2px_0_var(--color-ink-20)]"
                     >
                         {producer.data.featured && (
-                            <p class="label absolute left-0 top-0 px-2 py-2 bg-accent text-ink">Featured</p>
+                            <p class="label absolute left-0 top-0 px-2 py-2 border-b-2 border-r-2 border-ink bg-surface text-ink">Spotlight</p>
                         )}
                     </PlaceholderTile>
                     <div class="producer-card__body p-(--space-md)">
@@ -175,7 +186,7 @@ const roster = [...producers]
                                 class="font-mono text-2xs uppercase text-ink-muted"
                                 data-placeholder
                             >
-                                Since <time datetime={toIsoDate(producer.data.joined)}>{formatMonthOnly(producer.data.joined)}</time>
+                                Since <time datetime={toIsoDate(producer.data.joined)}>{formatCalendarMonth(producer.data.joined)}</time>
                             </p>
                             <ProducerLinks
                                 linkClass="hover:text-accent-deep"
@@ -189,16 +200,16 @@ const roster = [...producers]
     </ul>
     <div
         class="slab slab--sunk flex flex-col items-start max-w-(--measure-form) w-full gap-4 mx-auto"
-        data-producers-empty
+        data-directory-empty
         hidden
     >
         <p class="font-extrabold font-sans text-xl tracking-tight">No matches.</p>
         <p class="text-sm text-ink-muted">
-            Nobody on the roster answers to &ldquo;<span class="font-mono wrap-anywhere" data-search-echo />&rdquo;.
+            Nobody in the directory answers to &ldquo;<span class="font-mono wrap-anywhere" data-search-echo />&rdquo;.
         </p>
         <button
             class="btn"
-            data-producers-clear
+            data-search-clear
             type="button"
         >
             Clear search
@@ -309,43 +320,103 @@ const roster = [...producers]
 </style>
 
 <script>
-    import { initFilterGroup, initSearchField, registerPageScript } from '@lib/shared/utils';
+    import { initSearchField, registerPageScript, rovingFocus, setHidden, setText } from '@lib/shared/utils';
     import { initTracks } from '@lib/audio/tracks';
 
-    function describeProducers(shown: number, total: number, genre: string, query: string) {
-        if (query) return `Showing ${shown} of ${total} producers for \u201c${query}\u201d.`;
+    let activeGenre = '';
+    let activeRole = '';
 
-        return genre ? `Showing ${shown} of ${total} producers.` : `Showing all ${total} producers.`;
+    function describeMembers(shown: number, total: number, query: string) {
+        if (query) return `Showing ${shown} of ${total} members for \u201c${query}\u201d.`;
+
+        return activeGenre || activeRole ? `Showing ${shown} of ${total} members.` : `Showing all ${total} members.`;
     }
 
-    function initProducersGrid(signal: AbortSignal) {
-        const buttons = document.querySelectorAll<HTMLButtonElement>('.genre-btn');
+    function initDirectoryGrid(signal: AbortSignal) {
         const cards = document.querySelectorAll<HTMLElement>('.producer-card');
+        const genreButtons = document.querySelectorAll<HTMLButtonElement>('.genre-btn');
+        const roleButtons = document.querySelectorAll<HTMLButtonElement>('.role-btn');
 
-        if (!buttons.length || !cards.length) return;
+        if (!cards.length || !genreButtons.length || !roleButtons.length) return;
 
-        const searchElement = document.querySelector<HTMLInputElement>('[data-producers-search]');
+        const emptyElement = document.querySelector<HTMLElement>('[data-directory-empty]');
+        const searchElement = document.querySelector<HTMLInputElement>('[data-search-input]');
+        const statusElement = document.querySelector<HTMLElement>('[data-directory-status]');
 
-        initFilterGroup({
-            buttons,
-            cards,
-            dataKey: 'genre',
-            emptyElement: document.querySelector<HTMLElement>('[data-producers-empty]'),
-            initial: '',
-            matches: (card, genre) => !genre || (card.dataset.genres ?? '').split(',').includes(genre),
-            searchElement,
-            signal,
-            status: describeProducers,
-            statusElement: document.querySelector<HTMLElement>('[data-producers-status]'),
+        activeGenre = '';
+        activeRole = '';
+
+        function apply() {
+            const query = (searchElement?.value ?? '').trim();
+
+            const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+
+            let shown = 0;
+
+            paintButtons(genreButtons, 'genre', activeGenre);
+            paintButtons(roleButtons, 'role', activeRole);
+
+            cards.forEach((card) => {
+                const haystack = card.dataset.search ?? '';
+
+                const matchesGenre = !activeGenre || (card.dataset.genres ?? '').split(',').includes(activeGenre);
+                const matchesRole = !activeRole || card.dataset.role === activeRole;
+
+                const on = matchesGenre && matchesRole && tokens.every(token => haystack.includes(token));
+
+                if (on) shown += 1;
+
+                card.classList.toggle('hidden', !on);
+            });
+
+            if (emptyElement) {
+                setText(emptyElement.querySelector('[data-search-echo]'), query);
+                setHidden(emptyElement, shown > 0);
+            }
+
+            if (statusElement) statusElement.textContent = describeMembers(shown, cards.length, query);
+        }
+
+        function handleGenreClick(button: HTMLButtonElement) {
+            activeGenre = button.dataset.genre ?? '';
+            apply();
+        }
+
+        function handleRoleClick(button: HTMLButtonElement) {
+            activeRole = button.dataset.role ?? '';
+            apply();
+        }
+
+        apply();
+        rovingFocus(genreButtons, signal);
+        rovingFocus(roleButtons, signal);
+
+        genreButtons.forEach((button) => {
+            button.addEventListener('click', () => handleGenreClick(button), { signal });
         });
 
+        roleButtons.forEach((button) => {
+            button.addEventListener('click', () => handleRoleClick(button), { signal });
+        });
+
+        searchElement?.addEventListener('input', apply, { signal });
+
         initSearchField({
-            clearElements: document.querySelectorAll<HTMLButtonElement>('[data-producers-clear]'),
+            clearElements: document.querySelectorAll<HTMLButtonElement>('[data-search-clear]'),
             searchElement,
             signal,
+        });
+    }
+
+    function paintButtons(buttons: NodeListOf<HTMLButtonElement>, key: string, active: string) {
+        buttons.forEach((button) => {
+            const on = (button.dataset[key] ?? '') === active;
+
+            button.classList.toggle('is-active', on);
+            button.setAttribute('aria-pressed', String(on));
         });
     }
 
     initTracks();
-    registerPageScript(initProducersGrid);
+    registerPageScript(initDirectoryGrid);
 </script>

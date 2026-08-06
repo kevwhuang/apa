@@ -1,4 +1,5 @@
 ---
+import IconArrow from '@components/icons/Arrow.astro';
 import IconEye from '@components/icons/Eye.astro';
 import IconEyeOff from '@components/icons/EyeOff.astro';
 import PageHead from '@components/shared/PageHead.astro';
@@ -121,7 +122,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                     class="btn btn--primary self-start"
                     type="submit"
                 >
-                    Come in &rarr;
+                    Come in <IconArrow />
                 </button>
             </form>
             <form
@@ -231,7 +232,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                     class="btn btn--primary self-start"
                     type="submit"
                 >
-                    Open your account &rarr;
+                    Open your account <IconArrow />
                 </button>
             </form>
         </div>
@@ -342,6 +343,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
         transition:
             background-color var(--duration-fast) var(--motion-ease-ui),
             color var(--duration-fast) var(--motion-ease-ui);
+        user-select: none;
     }
 
     .signin__tab + .signin__tab {

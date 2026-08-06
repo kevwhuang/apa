@@ -1,0 +1,45 @@
+---
+import IconClose from '@components/icons/Close.astro';
+import IconSearch from '@components/icons/Search.astro';
+
+interface Props {
+    'class'?: string;
+    'data-motion'?: string;
+    'label': string;
+    'placeholder': string;
+}
+
+const { class: fieldClass, 'data-motion': motion, label, placeholder } = Astro.props;
+---
+
+<label
+    class:list={['block', fieldClass]}
+    data-motion={motion}
+>
+    <span class="sr-only">{label}</span>
+    <span class="block relative max-w-(--measure-search) w-full">
+        <span
+            class="absolute bottom-0 flex items-center left-4 top-0 text-ink-muted pointer-events-none"
+            aria-hidden="true"
+        >
+            <IconSearch />
+        </span>
+        <input
+            class="input input--sunk pl-11 pr-(--control-size) font-mono text-sm"
+            autocomplete="off"
+            data-search-input
+            placeholder={placeholder}
+            spellcheck="false"
+            type="search"
+        />
+        <button
+            class="active:translate-y-px hover:text-accent-deep absolute inline-flex items-center justify-center right-0 top-0 h-(--control-size) w-(--control-size) text-ink-muted transition-colors"
+            aria-label="Clear search"
+            data-search-clear
+            hidden
+            type="button"
+        >
+            <IconClose />
+        </button>
+    </span>
+</label>

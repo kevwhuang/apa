@@ -4,8 +4,10 @@ import { getCollection } from 'astro:content';
 import IconTrash from '@components/icons/Trash.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import { toCatalog } from '@lib/shared/utils';
+import { toImageSources } from '@lib/commerce/products';
 
 const catalog = toCatalog(await getCollection('products'));
+const images = await toImageSources();
 ---
 
 <section
@@ -33,6 +35,7 @@ const catalog = toCatalog(await getCollection('products'));
     class="stage stage--tight"
     aria-label="Cart contents"
     data-catalog={JSON.stringify(catalog)}
+    data-images={JSON.stringify(images)}
 >
     <div class="cart__grid grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <div class="cart__main flex flex-col gap-6">
@@ -59,6 +62,7 @@ const catalog = toCatalog(await getCollection('products'));
             <div
                 class="slab slab--card flex flex-col items-start max-w-(--measure-form) w-full gap-4 mx-auto"
                 data-cart-empty
+                data-motion="rise"
                 tabindex="-1"
             >
                 <p class="label text-ink-muted">Empty</p>
@@ -84,6 +88,7 @@ const catalog = toCatalog(await getCollection('products'));
             class="cart__summary slab slab--sunk"
             aria-label="Order summary"
             data-cart-summary
+            data-motion="wipe"
         >
             <h2 class="label mb-4 text-ink-muted">Summary</h2>
             <dl class="flex flex-col gap-2 mb-4 font-mono text-sm">
@@ -122,13 +127,23 @@ const catalog = toCatalog(await getCollection('products'));
         <li class="cart-items__row slab slab--bare slab--card">
             <div
                 class="cart-items__tile flex items-center justify-center overflow-hidden relative aspect-square"
-                aria-hidden="true"
                 data-row-tile
             >
-                <div class="halftone absolute inset-0" />
+                <div
+                    class="halftone absolute inset-0"
+                    aria-hidden="true"
+                />
                 <span
                     class="font-extrabold font-sans text-[length:14cqi] uppercase text-surface-raised/80 select-none"
+                    aria-hidden="true"
                     data-row-initial
+                />
+                <img
+                    class="absolute inset-0 object-cover h-full w-full"
+                    alt=""
+                    data-row-photo
+                    hidden
+                    loading="lazy"
                 />
             </div>
             <div class="cart-items__body flex flex-col">
@@ -158,7 +173,7 @@ const catalog = toCatalog(await getCollection('products'));
                             &minus;
                         </button>
                         <span
-                            class="w-10 font-bold font-mono text-center"
+                            class="w-10 font-bold font-mono text-center select-none"
                             data-row-quantity
                         />
                         <button
@@ -325,7 +340,7 @@ const catalog = toCatalog(await getCollection('products'));
 
 <script>
     import { CARD_COLORS, COMMERCE } from '@lib/shared/constants';
-    import { formatPrice, formatVariant, parseCatalog, registerPageScript, setText } from '@lib/shared/utils';
+    import { formatPrice, formatVariant, parseCatalog, parseImageSources, registerPageScript, setProductImage, setText } from '@lib/shared/utils';
     import { getItems, onChange, reconcile, remove, setQuantity, totals } from '@lib/commerce/cart';
     import { isValidationBypassed, renderIssueList } from '@lib/ui/forms';
     import { toast } from '@lib/ui/toasts';
@@ -338,12 +353,12 @@ const catalog = toCatalog(await getCollection('products'));
 
     const MOBILE_WIDTH = 768;
     const ROW_CONTROLS = ['[data-row-decrease]', '[data-row-increase]', '[data-row-remove]'];
-    const SKU_DIGITS = 4;
     const SQUARE_PASSES = 6;
     const SQUARE_RATIO = 0.6;
     const SQUARE_TOLERANCE = 0.5;
 
     let catalog: CatalogEntry[] = [];
+    let images: ImageSources = {};
     let squareFrame = 0;
 
     function announce(message: string) {
@@ -406,6 +421,7 @@ const catalog = toCatalog(await getCollection('products'));
         if (!checkout || !list) return;
 
         catalog = parseCatalog(source?.dataset.catalog);
+        images = parseImageSources(source?.dataset.images);
         renderIssueList(reconcile(catalog), notice, issueList, issueTemplate);
         renderCart(checkout, list, signal);
 
@@ -466,9 +482,11 @@ const catalog = toCatalog(await getCollection('products'));
 
         const decrease = fragment.querySelector<HTMLButtonElement>('[data-row-decrease]');
         const increase = fragment.querySelector<HTMLButtonElement>('[data-row-increase]');
+        const photo = fragment.querySelector<HTMLImageElement>('[data-row-photo]');
         const removeButton = fragment.querySelector<HTMLButtonElement>('[data-row-remove]');
         const tile = fragment.querySelector<HTMLElement>('[data-row-tile]');
 
+        setProductImage(photo, images, item);
         setText(fragment.querySelector('[data-row-initial]'), item.title.split(' ')[0]);
         setText(fragment.querySelector('[data-row-price]'), formatPrice(item.priceCents * item.quantity));
         setText(fragment.querySelector('[data-row-quantity]'), String(item.quantity));
@@ -537,9 +555,9 @@ const catalog = toCatalog(await getCollection('products'));
     }
 
     function skuFor(item: CartItem) {
-        const position = catalog.findIndex(entry => entry.slug === item.productSlug) + 1;
+        const sku = catalog.find(entry => entry.slug === item.productSlug)?.sku;
 
-        return `SKU-${String(position).padStart(SKU_DIGITS, '0')}`;
+        return sku ? `SKU-${sku}` : '';
     }
 
     function squareFor(row: HTMLElement) {

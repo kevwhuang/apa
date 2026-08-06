@@ -7,7 +7,7 @@ import IconMoon from '@components/icons/Moon.astro';
 import IconSun from '@components/icons/Sun.astro';
 import { BRAND } from '@lib/shared/brand';
 import { LINKS, NAV_GROUPS, SITE_UPDATED } from '@lib/shared/constants';
-import { formatDateOnly } from '@lib/shared/utils';
+import { formatDate } from '@lib/shared/utils';
 
 const ACCOUNT_LINKS = [
     { href: '/here', label: 'Here' },
@@ -29,6 +29,7 @@ const columns = [
         head: 'Browse',
         items: [
             ...NAV_GROUPS.flatMap(group => ('href' in group ? [{ href: group.href, label: group.label }] : [])),
+            { href: '/api', label: 'API' },
             { href: '/privacy', label: 'Privacy' },
             { href: '/terms', label: 'Terms' },
         ],
@@ -53,17 +54,20 @@ const year = new Date().getFullYear();
             style={`--footer-cols: ${columns.length}`}
         >
             <div>
-                <BrandMark
-                    class="footer__mark"
-                    label={BRAND.name}
-                />
+                <a
+                    class="footer__brand"
+                    aria-label={`${BRAND.name} \u2014 home`}
+                    href="/"
+                >
+                    <BrandMark class="footer__mark" />
+                </a>
                 <p class="footer__lede">
                     A collective of music producers in Austin, Texas. Assemblies for the craft, Bashes on the clock,
                     Hangouts in between &mdash; every genre, every experience level, in person since 2022. Open to
                     anyone in the creative industry who wants to find their people.
                 </p>
                 <p class="footer__updated">
-                    Last updated <time datetime={SITE_UPDATED}>{formatDateOnly(updated)}</time>
+                    Last updated <time datetime={SITE_UPDATED}>{formatDate(updated)}</time>
                 </p>
                 <button
                     class="theme-toggle"
@@ -139,6 +143,22 @@ const year = new Date().getFullYear();
         padding-inline-end: calc(var(--launcher-size) - var(--launcher-rail));
     }
 
+    .footer__brand {
+        color: var(--color-ink);
+        display: block;
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .footer__brand:active {
+        transform: translateY(1px);
+    }
+
+    .footer__brand:hover {
+        color: var(--color-accent-deep);
+    }
+
     .footer__credit {
         align-items: center;
         display: flex;
@@ -206,7 +226,6 @@ const year = new Date().getFullYear();
     }
 
     :global(.footer__mark) {
-        color: var(--color-ink);
         display: block;
         height: auto;
         margin-bottom: var(--space-md);

@@ -1,15 +1,26 @@
 ---
+import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 
 import PageHead from '@components/shared/PageHead.astro';
-import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import { PALETTE, PRODUCT_CATEGORIES } from '@lib/shared/constants';
+import { PRODUCT_CATEGORIES } from '@lib/shared/constants';
 import { formatPrice, getStockLabel } from '@lib/shared/utils';
+import { getVariationImage, toVariations } from '@lib/commerce/products';
 
+const CARD_IMAGE_WIDTH = 420;
 const CATEGORIES = ['all', ...PRODUCT_CATEGORIES] as const;
 
-const cardColors = PALETTE.slice(0, 6);
 const products = await getCollection('products');
+
+const cards = products.map((product) => {
+    const variations = [product.data.base, ...toVariations(product.data).filter(variation => variation !== product.data.base)];
+
+    return {
+        inStock: product.data.stock > 0,
+        photos: variations.map(variation => getVariationImage(product.data.sku, variation)),
+        product,
+    };
+});
 ---
 
 <section
@@ -55,6 +66,7 @@ const products = await getCollection('products');
         <p
             class="label text-ink-subtle"
             aria-live="polite"
+            data-motion="stamp"
             data-store-status
         >
             Showing all {products.length} products.
@@ -73,45 +85,57 @@ const products = await getCollection('products');
         Products
     </h2>
     <ul
-        class="rank rank--4 store__grid list-none"
+        class="store__grid list-none"
         data-motion-from="center"
         data-motion-stagger="flip"
     >
-        {products.map((product, index) => (
+        {cards.map(({ inStock, photos, product }) => (
             <li
                 class="product-card"
                 data-category={product.data.category}
             >
-                <a href={`/store/${product.id}`}>
-                    <PlaceholderTile
-                        class="slab slab--bare slab--card slab--hover aspect-square mb-4"
-                        color={cardColors[index % cardColors.length]}
-                        label={product.data.title.split(' ')[0]}
-                        labelClass="text-lg tracking-tight uppercase text-surface-raised/80 md:text-2xl"
+                <a
+                    class:list={['product-card__link slab slab--bare slab--card', inStock && 'slab--hover']}
+                    aria-disabled={inStock ? undefined : 'true'}
+                    data-product-link
+                    href={`/store/${product.data.sku}`}
+                >
+                    <span
+                        class="product-card__frame block overflow-hidden relative aspect-square border-b-2 border-ink bg-surface-sunken"
+                        data-product-frame={inStock && photos.length > 1 ? 'loop' : undefined}
                     >
+                        {photos.map((photo, index) => photo && (
+                            <Image
+                                class:list={['product-card__photo', index === 0 && 'is-current']}
+                                alt=""
+                                densities={[1, 2]}
+                                src={photo}
+                                width={CARD_IMAGE_WIDTH}
+                            />
+                        ))}
                         {getStockLabel(product.data.stock) && (
-                            <p
-                                class="label store__flag absolute px-2 py-1 bg-ink text-ink-inverse"
+                            <span
+                                class="label absolute left-0 top-0 px-2 py-2 border-b-2 border-r-2 border-ink bg-ink text-ink-inverse"
                                 data-placeholder
                             >
                                 {getStockLabel(product.data.stock)}
-                            </p>
+                            </span>
                         )}
-                    </PlaceholderTile>
-                    <p class="label mb-1 text-ink-muted">
-                        {product.data.category}
-                    </p>
-                    <div class="flex flex-wrap items-baseline justify-between gap-x-3">
-                        <h3 class="min-w-0 font-bold font-sans tracking-tight">
+                    </span>
+                    <span class="product-card__body block">
+                        <span class="label block mb-2 text-ink-muted">
+                            {product.data.category}
+                        </span>
+                        <span class="block font-extrabold font-sans text-xl tracking-tight">
                             {product.data.title}
-                        </h3>
-                        <p
-                            class="shrink-0 font-bold font-mono text-sm whitespace-nowrap"
-                            data-placeholder
-                        >
-                            {formatPrice(product.data.priceCents)}
-                        </p>
-                    </div>
+                        </span>
+                    </span>
+                    <span
+                        class="product-card__price block font-bold font-mono text-lmd"
+                        data-placeholder
+                    >
+                        {formatPrice(product.data.priceCents)}
+                    </span>
                 </a>
             </li>
         ))}
@@ -120,7 +144,7 @@ const products = await getCollection('products');
 
 <style>
     .product-card:not(.hidden),
-    .product-card > a {
+    .product-card__link {
         display: grid;
         grid-row: span 3;
         grid-template-columns: minmax(0, 1fr);
@@ -128,37 +152,106 @@ const products = await getCollection('products');
     }
 
     .product-card:not(.hidden) {
-        padding-bottom: var(--space-lg);
+        padding-bottom: var(--space-2xl);
     }
 
-    .product-card > a:focus-visible :global(.slab) {
-        box-shadow: none;
+    .product-card__body {
+        padding: var(--space-md) var(--space-md) var(--space-2xs);
+    }
+
+    .product-card__link[aria-disabled='true'] .product-card__photo {
+        filter: grayscale(1);
+    }
+
+    .product-card__link[aria-disabled='true'] .product-card__photo.is-current {
+        opacity: 0.65;
+    }
+
+    .product-card__photo {
+        height: 100%;
+        inset: 0;
+        object-fit: cover;
+        opacity: 0;
+        position: absolute;
+        transition: opacity var(--duration-slow) var(--motion-ease-ui);
+        width: 100%;
+    }
+
+    .product-card__photo.is-current {
+        opacity: 1;
+    }
+
+    .product-card__price {
+        padding: 0 var(--space-md) var(--space-md);
     }
 
     .store__chip {
         height: var(--control-size);
     }
 
-    .store__flag {
-        left: 0;
-        top: 0;
+    .store__grid {
+        column-gap: var(--space-lg);
+        display: grid;
+        grid-auto-rows: auto;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-bottom: calc(-1 * var(--space-2xl));
+        row-gap: 0;
     }
 
-    .store__grid {
-        grid-auto-rows: auto;
-        margin-bottom: calc(-1 * var(--space-lg));
-        row-gap: 0;
+    .store__grid > * {
+        min-width: 0;
     }
 
     @media (max-width: 1024px) {
         .store__grid {
-            --rank-cols: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .store__grid {
+            grid-template-columns: minmax(0, 1fr);
         }
     }
 </style>
 
 <script>
+    import { REDUCED_MOTION_QUERY } from '@lib/shared/constants';
     import { initFilterGroup, registerPageScript } from '@lib/shared/utils';
+    import { isValidationBypassed } from '@lib/ui/forms';
+
+    const HOVER_QUERY = '(hover: hover)';
+    const SLIDESHOW_INTERVAL_MS = 1_000;
+
+    let slideshowTimer: Timer | undefined;
+
+    function advanceSlideshow(frame: HTMLElement) {
+        const photos = Array.from(frame.querySelectorAll<HTMLElement>('.product-card__photo'));
+
+        const current = Math.max(0, photos.findIndex(photo => photo.classList.contains('is-current')));
+
+        photos[current]?.classList.remove('is-current');
+        photos[(current + 1) % photos.length]?.classList.add('is-current');
+    }
+
+    function handleDisabledClick(event: Event) {
+        if (isValidationBypassed()) return;
+
+        event.preventDefault();
+    }
+
+    function handleLinkEnter(frame: HTMLElement) {
+        if (!window.matchMedia(HOVER_QUERY).matches || window.matchMedia(REDUCED_MOTION_QUERY).matches) return;
+
+        clearInterval(slideshowTimer);
+        slideshowTimer = setInterval(() => advanceSlideshow(frame), SLIDESHOW_INTERVAL_MS);
+    }
+
+    function handleLinkLeave(frame: HTMLElement) {
+        clearInterval(slideshowTimer);
+        resetSlideshow(frame);
+        slideshowTimer = undefined;
+    }
 
     function initStoreGrid(signal: AbortSignal) {
         const buttons = document.querySelectorAll<HTMLButtonElement>('.category-btn');
@@ -175,6 +268,25 @@ const products = await getCollection('products');
             signal,
             status: (shown, total, category) => (category === 'all' ? `Showing all ${total} products.` : `Showing ${shown} of ${total} products.`),
             statusElement: document.querySelector<HTMLElement>('[data-store-status]'),
+        });
+
+        signal.addEventListener('abort', () => clearInterval(slideshowTimer), { once: true });
+
+        document.querySelectorAll<HTMLAnchorElement>('[data-product-link]').forEach((link) => {
+            const frame = link.querySelector<HTMLElement>('[data-product-frame="loop"]');
+
+            if (link.getAttribute('aria-disabled') === 'true') link.addEventListener('click', handleDisabledClick, { signal });
+
+            if (!frame) return;
+
+            link.addEventListener('pointerenter', () => handleLinkEnter(frame), { signal });
+            link.addEventListener('pointerleave', () => handleLinkLeave(frame), { signal });
+        });
+    }
+
+    function resetSlideshow(frame: HTMLElement) {
+        frame.querySelectorAll<HTMLElement>('.product-card__photo').forEach((photo, index) => {
+            photo.classList.toggle('is-current', index === 0);
         });
     }
 

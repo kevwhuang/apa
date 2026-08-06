@@ -90,6 +90,7 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
         border-color var(--duration-fast) var(--motion-ease-ui),
         color var(--duration-fast) var(--motion-ease-ui),
         transform var(--duration-fast) var(--motion-ease-ui);
+    user-select: none;
 }
 
 .btn:active {
@@ -160,7 +161,7 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
     border: 2px solid var(--color-ink);
     display: inline-flex;
     font-family: var(--font-mono);
-    font-size: var(--text-2xs);
+    font-size: var(--text-xs);
     font-weight: 700;
     justify-content: center;
     letter-spacing: 0.025em;
@@ -171,6 +172,7 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
         background var(--duration-fast) var(--motion-ease-ui),
         border-color var(--duration-fast) var(--motion-ease-ui),
         color var(--duration-fast) var(--motion-ease-ui);
+    user-select: none;
 }
 
 .fold {
@@ -315,7 +317,7 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
 
 .label {
     font-family: var(--font-mono);
-    font-size: var(--text-2xs);
+    font-size: var(--text-xs);
     letter-spacing: 0.06em;
     line-height: 1;
     text-transform: uppercase;
@@ -367,6 +369,7 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
     display: inline-flex;
     font-variant-numeric: tabular-nums;
     line-height: 1.15;
+    user-select: none;
 }
 
 .odometer__digit,
@@ -386,6 +389,34 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
 
 .page {
     overflow-x: clip;
+}
+
+.partner-tile {
+    transition: background-color var(--duration-fast) var(--motion-ease-ui);
+}
+
+.partner-tile:active,
+.partner-tile:hover {
+    background-color: var(--color-surface-raised);
+}
+
+.partner-tile:active .partner-tile__logo,
+.partner-tile:hover .partner-tile__logo {
+    filter: invert(var(--partner-invert)) grayscale(0);
+    opacity: 1;
+}
+
+.partner-tile__logo {
+    --partner-invert: 0;
+    filter: invert(var(--partner-invert)) grayscale(1);
+    opacity: 0.72;
+    transition:
+        filter var(--duration-fast) var(--motion-ease-ui),
+        opacity var(--duration-fast) var(--motion-ease-ui);
+}
+
+html[data-theme='dark'] .partner-tile__logo {
+    --partner-invert: 1;
 }
 
 .rake {
@@ -487,37 +518,6 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
     right: var(--space-sm);
     top: calc(50% - 4px);
     width: 12px;
-}
-
-.skip-link {
-    align-items: center;
-    background: var(--color-ink);
-    color: var(--color-ink-inverse);
-    display: inline-flex;
-    font-family: var(--font-mono);
-    font-size: var(--text-2xs);
-    inset: auto auto 100% var(--space-sm);
-    letter-spacing: 0.04em;
-    min-height: var(--control-size);
-    padding-inline: var(--space-sm);
-    position: fixed;
-    text-transform: uppercase;
-    transition:
-        background var(--duration-fast) var(--motion-ease-ui),
-        transform var(--duration-fast) var(--motion-ease-ui);
-    z-index: calc(var(--z-drawer) + 1);
-}
-
-.skip-link:active {
-    transform: translateY(1px);
-}
-
-.skip-link:focus {
-    inset-block: var(--space-sm) auto;
-}
-
-.skip-link:hover {
-    background: var(--color-accent-deep);
 }
 
 .slab {
@@ -671,7 +671,6 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
         minmax(0, 1fr) [full-end];
     overflow-wrap: break-word;
     padding-block: var(--stage-pad-top) var(--stage-pad-bottom);
-    padding-inline-end: var(--launcher-rail);
     position: relative;
     row-gap: var(--space-2xl);
 }

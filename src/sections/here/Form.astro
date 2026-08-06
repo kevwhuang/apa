@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 
+import IconArrow from '@components/icons/Arrow.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import QrCode from '@components/shared/QrCode.astro';
 import { EMAIL_MAX_LENGTH } from '@lib/shared/constants';
@@ -192,7 +193,7 @@ const nextEvent = upcoming.at(0);
                 class="btn btn--primary checkin-form__submit"
                 type="submit"
             >
-                Check in &rarr;
+                Check in <IconArrow />
             </button>
         </div>
     </form>

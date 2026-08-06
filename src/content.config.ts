@@ -8,7 +8,9 @@ import {
     EVENT_STATUSES,
     EVENT_TYPES,
     GENRES,
+    MEMBER_ROLES,
     PRODUCT_CATEGORIES,
+    PRODUCT_SIZES,
 } from '@lib/shared/constants';
 
 const bash = defineCollection({
@@ -46,6 +48,7 @@ const downloads = defineCollection({
         kind: z.enum(ASSET_KINDS),
         size: z.string(),
         title: z.string(),
+        unlocksAt: z.coerce.date().optional(),
     }),
 });
 
@@ -77,7 +80,7 @@ const producers = defineCollection({
         })).default([]),
         location: z.string().default('Austin, TX'),
         name: z.string(),
-        roles: z.array(z.string()).default([]),
+        roles: z.array(z.enum(MEMBER_ROLES)).length(1),
         tracks: z.array(z.object({
             durationSeconds: z.number().int().positive(),
             title: z.string(),
@@ -88,19 +91,20 @@ const producers = defineCollection({
 const products = defineCollection({
     loader: glob({ base: `./${CONTENT_DIR}/products`, pattern: '**/*.md' }),
     schema: z.object({
+        base: z.string(),
         category: z.enum(PRODUCT_CATEGORIES),
-        colors: z.array(z.object({
-            hex: z.string(),
-            name: z.string(),
-        })).default([]),
         description: z.string(),
         details: z.array(z.string()).default([]),
-        images: z.array(z.string()).min(1),
         priceCents: z.number().int().positive(),
-        sizes: z.array(z.string()).default([]),
+        sizes: z.array(z.enum(PRODUCT_SIZES)).default([]),
+        sku: z.number().int().min(100_000_000).max(999_999_999),
         stock: z.number().int().nonnegative().default(0),
         title: z.string(),
-    }),
+        variations: z.array(z.object({
+            hex: z.string(),
+            name: z.string(),
+        })).min(1).max(8),
+    }).refine(data => data.variations.some(variation => variation.name === data.base), { message: 'base must name one of the variations' }),
 });
 
 export const collections = { bash, docs, downloads, events, producers, products };

@@ -1,7 +1,7 @@
 ---
 title: Prods
 description: A virtual currency that rewards members for showing up, contributing, and helping the community grow.
-updated: 2026-06-13
+updated: 2026-06-13T00:00:00-05:00
 ---
 
 ## Overview

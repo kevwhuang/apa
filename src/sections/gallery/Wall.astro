@@ -1,0 +1,374 @@
+---
+import { Image, getImage } from 'astro:assets';
+
+import IconClose from '@components/icons/Close.astro';
+import PageHead from '@components/shared/PageHead.astro';
+
+import type { ImageMetadata } from 'astro';
+
+const FIGURES = [
+    { alt: 'Hands resting on a mixing console during an Assembly demo', label: 'Assembly console close-up', slug: 'assembly_console' },
+    { alt: 'The Assembly room mid-session with every chair turned toward the screen', label: 'Assembly room, mid-session', slug: 'assembly_room' },
+    { alt: 'Confetti dropping over the room as the last Bash set lands', label: 'Bash confetti drop', slug: 'bash_confetti' },
+    { alt: 'The front row of the Bash crowd lit by the stage wash', label: 'Bash crowd, front row', slug: 'bash_crowd' },
+    { alt: 'The Bash main stage between sets with the gear still patched in', label: 'Bash main stage', slug: 'bash_stage' },
+    { alt: 'A listening circle at the Hangout with everyone facing the monitors', label: 'Hangout listening circle', slug: 'hangout_listening' },
+    { alt: 'The Hangout patio at golden hour with the speakers carried outside', label: 'Hangout patio, golden hour', slug: 'hangout_patio' },
+    { alt: 'A studio desk at load-in, notebooks and cables spread end to end', label: 'Studio desk at load-in', slug: 'studio_desk' },
+    { alt: 'Outboard racks patched and glowing in a member studio', label: 'Studio racks, patched in', slug: 'studio_racks' },
+    { alt: 'A full room at a studio takeover, everyone crowded around the desk', label: 'Studio takeover, full room', slug: 'studio_takeover' },
+    { alt: 'A stacked wall of cabinets and monitors built for a member showcase', label: 'Wall of sound', slug: 'wall_of_sound' },
+    { alt: 'Hands on a keyboard during a workshop while someone leans in to watch', label: 'Workshop hands on the keys', slug: 'workshop_hands' },
+] as const;
+
+const IMAGE_DENSITY = 2;
+
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/images/gallery/*.webp', { eager: true });
+
+const figures = await Promise.all(FIGURES.map(async (figure) => {
+    const asset = images[`/src/images/gallery/${figure.slug}.webp`];
+
+    if (!asset) throw new Error(`Missing gallery asset: ${figure.slug}.webp`);
+
+    const metadata = asset.default;
+
+    const full = await getImage({ src: metadata, width: metadata.width });
+
+    return {
+        alt: figure.alt,
+        columnWidth: Math.round(metadata.width / IMAGE_DENSITY),
+        image: metadata,
+        label: figure.label,
+        ratio: metadata.width / metadata.height,
+        source: full.src,
+    };
+}));
+---
+
+<section
+    class="stage stage--tight border-b-2 border-ink"
+    aria-labelledby="gallery-title"
+>
+    <div>
+        <PageHead
+            class="max-w-3xl mb-6 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            eyebrow={`Gallery / ${FIGURES.length} shots`}
+            headingId="gallery-title"
+        >
+            The wall.
+        </PageHead>
+        <p
+            class="max-w-2xl text-lmd text-ink-muted"
+            data-motion="blur"
+        >
+            Assembly nights, Bash sets, Hangout afternoons, and whatever the studio looked like
+            that week &mdash; shot by members, hung in no particular order. Open any frame to fill
+            the screen, then close it and keep walking the wall.
+        </p>
+    </div>
+</section>
+
+<section
+    class="stage stage--tight"
+    aria-label="Photo wall"
+>
+    <ul
+        class="wall__list list-none"
+        data-motion-stagger="rise"
+    >
+        {figures.map(figure => (
+            <li class="wall__item">
+                <figure class="flex flex-col gap-3">
+                    <button
+                        class="wall__frame slab slab--bare slab--card slab--hover block overflow-hidden w-full"
+                        aria-label={`View ${figure.label}`}
+                        data-wall-alt={figure.alt}
+                        data-wall-label={figure.label}
+                        data-wall-ratio={figure.ratio}
+                        data-wall-source={figure.source}
+                        type="button"
+                    >
+                        <Image
+                            class="wall__image block h-auto w-full select-none"
+                            alt={figure.alt}
+                            densities={[1, IMAGE_DENSITY]}
+                            draggable="false"
+                            loading="lazy"
+                            src={figure.image}
+                            width={figure.columnWidth}
+                        />
+                    </button>
+                    <figcaption class="label text-ink-muted">{figure.label}</figcaption>
+                </figure>
+            </li>
+        ))}
+    </ul>
+    <div
+        class="wall__viewer fixed grid inset-0 place-items-center cursor-zoom-out"
+        aria-hidden="true"
+        aria-labelledby="wall-viewer-title"
+        aria-modal="true"
+        role="dialog"
+    >
+        <h2
+            id="wall-viewer-title"
+            class="sr-only"
+            data-wall-title
+        >
+            Gallery viewer
+        </h2>
+        <button
+            class="wall__close"
+            aria-label="Close the viewer"
+            data-wall-close
+            type="button"
+        >
+            <IconClose />
+        </button>
+        <div
+            class="wall__stack flex flex-col relative"
+            data-wall-stack
+            tabindex="-1"
+        >
+            <img
+                class="wall__photo block object-contain h-auto min-h-0 w-full cursor-default select-none"
+                alt=""
+                data-wall-photo
+                draggable="false"
+            />
+            <p
+                class="label shrink-0"
+                data-wall-caption
+            />
+        </div>
+    </div>
+</section>
+
+<style>
+    .wall__close {
+        --close-border: 2px;
+        --close-hit: 48px;
+        --close-inset: calc((var(--wall-gutter) - var(--close-size)) / 2);
+        --close-size: 40px;
+        align-items: center;
+        background-color: var(--color-ink-inverse);
+        border: var(--close-border) solid var(--color-ink);
+        color: var(--color-ink);
+        display: flex;
+        height: var(--close-size);
+        inset: var(--close-inset) var(--close-inset) auto auto;
+        justify-content: center;
+        position: absolute;
+        transition:
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
+        width: var(--close-size);
+        z-index: var(--z-lift);
+    }
+
+    .wall__close::after {
+        content: '';
+        inset: calc((var(--close-size) - var(--close-hit)) / 2 - var(--close-border));
+        position: absolute;
+    }
+
+    .wall__close:active {
+        transform: translateY(1px);
+    }
+
+    .wall__close:focus-visible,
+    .wall__close:hover {
+        border-color: var(--color-accent-deep);
+        color: var(--color-accent-deep);
+    }
+
+    .wall__frame {
+        margin-bottom: calc(var(--z-card) * var(--lift));
+    }
+
+    .wall__frame:active .wall__image {
+        filter: none;
+        transform: scale(1);
+    }
+
+    .wall__frame:focus-visible:not(:active) .wall__image,
+    .wall__frame:hover:not(:active) .wall__image {
+        filter: contrast(1.06) saturate(1.06);
+        transform: scale(1.03);
+    }
+
+    .wall__image {
+        transition:
+            filter var(--duration-slow) var(--motion-ease-ui),
+            transform var(--duration-slower) var(--motion-ease-ui);
+    }
+
+    .wall__item {
+        break-inside: avoid;
+        margin-bottom: var(--space-md);
+    }
+
+    .wall__list {
+        column-gap: var(--space-md);
+        columns: 3;
+    }
+
+    .wall__photo {
+        aspect-ratio: var(--wall-ratio);
+        border: 2px solid var(--color-ink-inverse);
+        pointer-events: auto;
+    }
+
+    .wall__stack {
+        gap: var(--wall-gap);
+        max-height: 100%;
+        pointer-events: none;
+        transform: scale(0.97);
+        transition: transform var(--duration-fast) var(--motion-ease-ui);
+        width: min(100%, calc(var(--wall-frame) * var(--wall-ratio)));
+        z-index: var(--z-page);
+    }
+
+    .wall__viewer {
+        --focus-ring: var(--color-accent-light);
+        --wall-frame: calc(100dvh - 2 * var(--wall-gutter) - var(--wall-meta));
+        --wall-gap: var(--space-xs);
+        --wall-gutter: clamp(56px, 7vmin, 88px);
+        --wall-meta: calc(var(--wall-gap) + var(--text-xs));
+        --wall-ratio: 1;
+        background-color: var(--color-ink-70);
+        color: var(--color-ink-inverse);
+        opacity: 0;
+        padding: var(--wall-gutter);
+        transition:
+            opacity var(--duration-fast) var(--motion-ease-ui),
+            visibility 0s var(--duration-fast);
+        visibility: hidden;
+        z-index: calc(var(--z-toast) + 1);
+    }
+
+    .wall__viewer[data-open] {
+        opacity: 1;
+        transition: opacity var(--duration-fast) var(--motion-ease-ui);
+        visibility: visible;
+    }
+
+    .wall__viewer[data-open] .wall__stack {
+        transform: scale(1);
+    }
+
+    @media (max-width: 1024px) {
+        .wall__list {
+            columns: 2;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .wall__list {
+            columns: 1;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .wall__stack {
+            transform: none;
+        }
+    }
+</style>
+
+<script>
+    import { REDUCED_MOTION_QUERY } from '@lib/shared/constants';
+    import { registerPageScript } from '@lib/shared/utils';
+
+    let trigger: HTMLButtonElement | null = null;
+    let viewer: HTMLElement | null = null;
+    let viewerCaption: HTMLElement | null = null;
+    let viewerClose: HTMLButtonElement | null = null;
+    let viewerPhoto: HTMLImageElement | null = null;
+    let viewerTitle: HTMLElement | null = null;
+
+    function closeViewer() {
+        if (!viewer?.hasAttribute('data-open')) return;
+
+        document.documentElement.style.overflow = '';
+        viewer.removeAttribute('data-open');
+        viewer.setAttribute('aria-hidden', 'true');
+        trigger?.focus({ preventScroll: true });
+        trigger?.scrollIntoView({ behavior: window.matchMedia(REDUCED_MOTION_QUERY).matches ? 'auto' : 'smooth', block: 'center' });
+    }
+
+    function handleViewerKeydown(event: KeyboardEvent) {
+        if (!viewer?.hasAttribute('data-open')) return;
+
+        if (event.key === 'Escape') {
+            closeViewer();
+        } else if (event.key === 'Tab') {
+            event.preventDefault();
+            viewerClose?.focus();
+        }
+    }
+
+    function initWall(signal: AbortSignal) {
+        const frames = Array.from(document.querySelectorAll<HTMLButtonElement>('.wall__frame'));
+
+        trigger = null;
+        viewer = document.querySelector<HTMLElement>('.wall__viewer');
+        viewerCaption = null;
+        viewerClose = null;
+        viewerPhoto = null;
+        viewerTitle = null;
+
+        signal.addEventListener('abort', () => {
+            document.documentElement.style.overflow = '';
+        }, { once: true });
+
+        if (!frames.length || !viewer) return;
+
+        const stack = viewer.querySelector<HTMLElement>('[data-wall-stack]');
+
+        viewerCaption = viewer.querySelector<HTMLElement>('[data-wall-caption]');
+        viewerClose = viewer.querySelector<HTMLButtonElement>('[data-wall-close]');
+        viewerPhoto = viewer.querySelector<HTMLImageElement>('[data-wall-photo]');
+        viewerTitle = viewer.querySelector<HTMLElement>('[data-wall-title]');
+
+        if (!stack || !viewerCaption || !viewerClose || !viewerPhoto || !viewerTitle) return;
+
+        document.addEventListener('keydown', handleViewerKeydown, { signal });
+
+        frames.forEach((frame) => {
+            frame.addEventListener('click', () => openViewer(frame), { signal });
+        });
+
+        stack.addEventListener('click', event => event.stopPropagation(), { signal });
+        viewer.addEventListener('click', closeViewer, { signal });
+        viewerClose.addEventListener('click', closeViewer, { signal });
+        viewerPhoto.addEventListener('error', showViewerPhoto, { signal });
+        viewerPhoto.addEventListener('load', showViewerPhoto, { signal });
+    }
+
+    function openViewer(frame: HTMLButtonElement) {
+        if (!viewer || !viewerCaption || !viewerClose || !viewerPhoto || !viewerTitle) return;
+
+        const { wallAlt = '', wallLabel = '', wallRatio = '1', wallSource = '' } = frame.dataset;
+
+        if (viewerPhoto.getAttribute('src') !== wallSource) viewerPhoto.style.visibility = 'hidden';
+
+        document.documentElement.style.overflow = 'hidden';
+        trigger = frame;
+        viewer.removeAttribute('aria-hidden');
+        viewer.setAttribute('data-open', '');
+        viewer.style.setProperty('--wall-ratio', wallRatio);
+        viewerCaption.textContent = wallLabel;
+        viewerPhoto.alt = wallAlt;
+        viewerPhoto.src = wallSource;
+        viewerTitle.textContent = wallLabel;
+        viewerClose.focus();
+    }
+
+    function showViewerPhoto() {
+        viewerPhoto?.style.removeProperty('visibility');
+    }
+
+    registerPageScript(initWall);
+</script>

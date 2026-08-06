@@ -7,7 +7,6 @@ import { getSession, updateSession } from '@lib/account/session';
 const MAX_ORDER_CENTS = 100_000_000;
 
 const MESSAGES: Record<PaymentErrorCode, string> = {
-    'card-declined': 'That card was declined. Try a different card.',
     'cart-changed': 'Your cart changed while you were checking out. Review it and try again.',
     'empty-cart': 'There is nothing in your cart.',
 };
@@ -37,11 +36,11 @@ function matchesCart(items: CartItem[]) {
 
     if (live.length !== items.length) return false;
 
-    return live.every((item, index) => item.color === items[index].color
-        && item.priceCents === items[index].priceCents
+    return live.every((item, index) => item.priceCents === items[index].priceCents
         && item.productSlug === items[index].productSlug
         && item.quantity === items[index].quantity
-        && item.size === items[index].size);
+        && item.size === items[index].size
+        && item.variation === items[index].variation);
 }
 
 function normalizeCents(value: number) {
@@ -61,6 +60,7 @@ function normalizeOrder(value: Order | null) {
         placedAt: Number(value.placedAt) || 0,
         totals: {
             discountCents: normalizeCents(value.totals.discountCents),
+            promoCents: normalizeCents(value.totals.promoCents),
             shippingCents: normalizeCents(value.totals.shippingCents),
             subtotalCents: normalizeCents(value.totals.subtotalCents),
             taxCents: normalizeCents(value.totals.taxCents),
@@ -79,14 +79,14 @@ async function placeOrder(input: OrderInput): Promise<OrderResult> {
 
     const requested = Math.max(0, Math.trunc(input.prodsApplied) || 0);
 
-    const prodsApplied = Math.min(requested, session?.prods ?? 0, prodsForCents(totals(input.items).totalCents));
+    const prodsApplied = Math.min(requested, session?.prods ?? 0, prodsForCents(totals(input.items, 0, input.promoCode).totalCents));
 
     const order: Order = {
         email: input.email,
         id: createOrderId(),
         items: input.items,
         placedAt: Date.now(),
-        totals: totals(input.items, prodsApplied),
+        totals: totals(input.items, prodsApplied, input.promoCode),
     };
 
     clear();

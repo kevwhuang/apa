@@ -1,0 +1,40 @@
+---
+interface Props {
+    left?: boolean;
+}
+
+const { left = false } = Astro.props;
+---
+
+<svg
+    class:list={['icon-arrow', left && 'icon-arrow--left']}
+    aria-hidden="true"
+    fill="none"
+    height="0.5em"
+    stroke="currentColor"
+    stroke-width="8"
+    viewBox="0 0 59 50"
+    width="0.59em"
+>
+    <path
+        d="M6 25h44M34 6l19 19-19 19"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+    />
+</svg>
+
+<style>
+    .icon-arrow {
+        align-self: center;
+        display: inline-block;
+        flex-shrink: 0;
+        height: 0.5em;
+        margin-bottom: -0.02em;
+        vertical-align: 0.108em;
+        width: 0.59em;
+    }
+
+    .icon-arrow--left {
+        scale: -1 1;
+    }
+</style>

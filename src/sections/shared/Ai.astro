@@ -1,4 +1,5 @@
 ---
+import IconArrow from '@components/icons/Arrow.astro';
 import IconClose from '@components/icons/Close.astro';
 import IconSpark from '@components/icons/Spark.astro';
 ---
@@ -69,7 +70,11 @@ import IconSpark from '@components/icons/Spark.astro';
                 data-ai-send
                 type="submit"
             >
-                Ask
+                <span class="ai__send-label">Ask</span>
+                <span
+                    class="spinner"
+                    aria-hidden="true"
+                />
             </button>
         </form>
         <template data-ai-answer>
@@ -83,7 +88,7 @@ import IconSpark from '@components/icons/Spark.astro';
                     data-ai-source
                     href="/"
                 >
-                    Source
+                    <span data-ai-source-label>Source</span> <IconArrow />
                 </a>
             </li>
         </template>
@@ -236,12 +241,33 @@ import IconSpark from '@components/icons/Spark.astro';
 
     .ai__send {
         height: 50px;
+        position: relative;
+    }
+
+    .ai__send .spinner {
+        display: none;
+        inset: 50% auto auto 50%;
+        position: absolute;
+        translate: -50% -50%;
+    }
+
+    .ai__send[aria-busy='true'] .ai__send-label {
+        opacity: 0;
+    }
+
+    .ai__send[aria-busy='true'] .spinner {
+        display: inline-block;
+    }
+
+    .ai__send[aria-busy='true']::after {
+        display: none;
     }
 
     .ai__source {
         align-items: center;
         align-self: flex-start;
         display: inline-flex;
+        gap: var(--space-2xs);
         min-height: 24px;
         transition:
             color var(--duration-fast) var(--motion-ease-ui),
@@ -400,7 +426,7 @@ import IconSpark from '@components/icons/Spark.astro';
 
         source.href = answer.href;
         setText(item.querySelector('[data-ai-text]'), answer.body);
-        setText(source, `${answer.label} \u2192`);
+        setText(source.querySelector('[data-ai-source-label]'), answer.label);
 
         return item;
     }

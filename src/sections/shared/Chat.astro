@@ -100,6 +100,17 @@ import IconClose from '@components/icons/Close.astro';
             </li>
         </template>
     </dialog>
+    <div
+        class="sr-only"
+        aria-hidden="true"
+    >
+        <input
+            data-chat-haptic
+            switch
+            tabindex="-1"
+            type="checkbox"
+        />
+    </div>
 </aside>
 
 <style>
@@ -281,7 +292,9 @@ import IconClose from '@components/icons/Close.astro';
         flex-shrink: 0;
         font-family: var(--font-mono);
         font-size: var(--text-2xs);
+        letter-spacing: 0.06em;
         line-height: 1;
+        text-transform: uppercase;
     }
 
     .chat__time {
@@ -327,6 +340,8 @@ import IconClose from '@components/icons/Close.astro';
     const LAUNCHER_SIZE = 50;
     const LIVE_RESET_DELAY = 200;
     const MEMBER_COLORS = new Map<string, string>(ROOM_MEMBERS.map((member, index) => [member.name, PALETTE[(index + 1) % PALETTE.length]]));
+    const POINTER_COARSE_QUERY = '(pointer: coarse)';
+    const RECEIVE_HAPTICS_MS = [12, 60, 24];
     const RESIZE_LABEL = 'Resize member chat';
     const SELF_COLOR = PALETTE[PALETTE.length - 1];
     const TALLY_INTERVAL_MS = 60_000;
@@ -480,7 +495,9 @@ import IconClose from '@components/icons/Close.astro';
         raiseWindow(dialog);
 
         if (moveFocus) {
-            (field ?? dialog.querySelector<HTMLElement>('[data-chat-close]'))?.focus();
+            const close = dialog.querySelector<HTMLElement>('[data-chat-close]');
+
+            (window.matchMedia(POINTER_COARSE_QUERY).matches ? close : (field ?? close))?.focus();
 
             return;
         }
@@ -490,6 +507,18 @@ import IconClose from '@components/icons/Close.astro';
         } else if (document.activeElement instanceof HTMLElement) {
             document.activeElement.blur();
         }
+    }
+
+    function pulseReceive() {
+        if (!window.matchMedia(POINTER_COARSE_QUERY).matches) return;
+
+        if ('vibrate' in navigator) {
+            navigator.vibrate(RECEIVE_HAPTICS_MS);
+
+            return;
+        }
+
+        document.querySelector<HTMLInputElement>('[data-chat-haptic]')?.click();
     }
 
     function render() {
@@ -511,12 +540,15 @@ import IconClose from '@components/icons/Close.astro';
         }
 
         const start = log.children.length;
+        const fresh = messages.slice(start);
 
-        messages.slice(start).forEach((message, offset) => {
+        fresh.forEach((message, offset) => {
             const item = buildMessage(message, messages[start + offset - 1]);
 
             if (item) log.append(item);
         });
+
+        if (!stale && start > 0 && fresh.some(message => !message.self)) pulseReceive();
 
         log.scrollTop = log.scrollHeight;
     }

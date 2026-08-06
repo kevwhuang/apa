@@ -1,11 +1,12 @@
 ---
 title: Bash Hoodie
+sku: 358214679
+base: Charcoal
 category: apparel
 priceCents: 7800
-sizes: [S, M, L, XL, XXL]
-colors:
+sizes: [S, M, L, XL]
+variations:
   - { name: Charcoal, hex: '#2a2a2a' }
-images: [hoodie-1, hoodie-2, hoodie-3]
 description: Heavy fleece pullover, cut for the walk out of the room after an afternoon on the clock.
 details:
   - Heavyweight brushed fleece

@@ -1,0 +1,221 @@
+---
+import IconArrow from '@components/icons/Arrow.astro';
+import PageHead from '@components/shared/PageHead.astro';
+import SectionHead from '@components/shared/SectionHead.astro';
+
+interface Endpoint {
+    blurb: string;
+    path: string;
+}
+
+const ENDPOINTS: Endpoint[] = [
+    { blurb: 'Every Assembly, Hangout, and Bash date in one chronological list; Bash editions carry their edition, prompt, and recap.', path: '/api/events' },
+    { blurb: 'The full roster with genres, role, links, location, and spotlight tracks.', path: '/api/producers' },
+    { blurb: 'The asset library with formats, sizes, publication state, and unlock times.', path: '/api/resources' },
+    { blurb: 'The store catalog with numeric SKUs, variations, sizes, prices, and stock.', path: '/api/store' },
+];
+---
+
+<section
+    class="stage stage--tight border-b-2 border-ink"
+    aria-labelledby="api-title"
+>
+    <div class="flex flex-col gap-6">
+        <PageHead
+            class="max-w-4xl font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
+            eyebrow="Resources / API"
+            headingId="api-title"
+        >
+            Read the data.
+        </PageHead>
+        <p
+            class="max-w-2xl text-lmd text-ink-muted"
+            data-motion="blur"
+        >
+            Everything the site publishes &mdash; the calendar, the roster, the store catalog, and
+            the asset library &mdash; is readable as JSON. No keys, no writes: point a GET at an
+            endpoint and the current content comes back.
+        </p>
+    </div>
+    <dl
+        class="api__ledger"
+        aria-label="API contract"
+        data-motion-stagger="rise"
+    >
+        <div class="api__cell api__cell--flag">
+            <dt class="label api__key">Endpoints</dt>
+            <dd
+                class="font-extrabold font-sans leading-[0.9] text-4xl tracking-tight"
+                data-motion-count={String(ENDPOINTS.length)}
+            >
+                {ENDPOINTS.length}
+            </dd>
+        </div>
+        <div class="api__cell">
+            <dt class="label api__key">Methods</dt>
+            <dd class="font-mono text-smd">GET</dd>
+        </div>
+        <div class="api__cell">
+            <dt class="label api__key">Format</dt>
+            <dd class="font-mono text-smd">JSON</dd>
+        </div>
+        <div class="api__cell">
+            <dt class="label api__key">Caching</dt>
+            <dd class="font-mono text-smd">no-store</dd>
+        </div>
+    </dl>
+</section>
+
+<section
+    class="stage stage--tight"
+    aria-labelledby="endpoints-title"
+>
+    <div>
+        <SectionHead
+            class="font-extrabold font-sans text-3xl tracking-tight"
+            eyebrow="API / Reference"
+            headingId="endpoints-title"
+        >
+            Endpoints
+        </SectionHead>
+        <div
+            class="api__scroller"
+            data-motion="unfold"
+        >
+            <table class="api__table border-2 border-ink">
+                <caption class="sr-only">API endpoints, the payload each returns, and a link to open each one</caption>
+                <thead>
+                    <tr class="border-b-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
+                        <th
+                            class="px-4 py-3 text-left"
+                            scope="col"
+                        >
+                            Endpoint
+                        </th>
+                        <th
+                            class="px-4 py-3 text-left"
+                            scope="col"
+                        >
+                            Payload
+                        </th>
+                        <th
+                            class="px-4 py-3 text-right"
+                            scope="col"
+                        >
+                            <span class="sr-only">Open</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-ink">
+                    {ENDPOINTS.map(endpoint => (
+                        <tr class="hover:bg-surface-sunken transition-colors">
+                            <th
+                                class="px-4 py-4 text-left whitespace-nowrap"
+                                scope="row"
+                            >
+                                <span class="label mr-2 px-2 py-1 bg-ink text-ink-inverse">GET</span>
+                                <code class="api__path font-bold font-mono text-smd">{endpoint.path}</code>
+                            </th>
+                            <td class="api__blurb px-4 py-4 leading-relaxed text-sm text-ink-muted">{endpoint.blurb}</td>
+                            <td class="px-4 py-4 text-right">
+                                <a
+                                    class="action-text api__open"
+                                    href={endpoint.path}
+                                >
+                                    Open <IconArrow />
+                                </a>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<style>
+    .api__blurb {
+        min-width: 320px;
+    }
+
+    .api__cell {
+        align-content: center;
+        background-color: var(--color-surface);
+        display: grid;
+        padding: var(--space-xs) var(--space-sm);
+    }
+
+    .api__cell--flag {
+        background-color: var(--color-ink);
+        color: var(--color-ink-inverse);
+        padding: var(--space-md) var(--space-lg);
+    }
+
+    .api__cell--flag .api__key {
+        color: var(--color-ink-inverse-muted);
+        margin-bottom: var(--space-2xs);
+    }
+
+    .api__key {
+        color: var(--color-ink-muted);
+        margin-bottom: var(--space-3xs);
+    }
+
+    .api__ledger {
+        background-color: var(--color-ink);
+        border: 2px solid var(--color-ink);
+        display: grid;
+        gap: 2px;
+        grid-template-columns: minmax(200px, 0.62fr) repeat(3, minmax(0, 1fr));
+    }
+
+    .api__open {
+        align-items: center;
+        display: inline-flex;
+        gap: var(--space-2xs);
+        min-height: var(--control-size);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .api__open:active {
+        transform: translateY(1px);
+    }
+
+    .api__path {
+        letter-spacing: -0.01em;
+    }
+
+    .api__scroller {
+        overflow-x: auto;
+    }
+
+    .api__table {
+        display: table;
+        min-width: 560px;
+        overflow-x: visible;
+        width: 100%;
+    }
+
+    @media (max-width: 1024px) {
+        .api__cell--flag {
+            grid-row: span 3;
+        }
+
+        .api__ledger {
+            grid-template-columns: minmax(0, 0.38fr) minmax(0, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .api__cell--flag {
+            grid-row: auto;
+            padding: var(--space-sm) var(--space-md);
+        }
+
+        .api__ledger {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+</style>

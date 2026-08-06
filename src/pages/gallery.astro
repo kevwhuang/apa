@@ -1,0 +1,12 @@
+---
+import GalleryWall from '@sections/gallery/Wall.astro';
+import Layout from '@/Layout.astro';
+import { brandTitle } from '@lib/shared/brand';
+---
+
+<Layout
+    description={'A photo wall from the Austin Producer Alliance \u2014 Assembly workshops, Bash showcases, Hangout listening sessions, and studio life around Austin.'}
+    title={brandTitle('Gallery')}
+>
+    <GalleryWall />
+</Layout>

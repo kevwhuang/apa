@@ -30,7 +30,10 @@ import SectionHead from '@components/shared/SectionHead.astro';
                         Email
                     </span>
                     <input
+                        id="newsletter-email"
                         class="input font-mono text-sm"
+                        aria-describedby="newsletter-email-error"
+                        aria-invalid="false"
                         autocomplete="email"
                         name="email"
                         placeholder="you@studio.fm"
@@ -46,6 +49,12 @@ import SectionHead from '@components/shared/SectionHead.astro';
                 </button>
             </div>
             <p
+                id="newsletter-email-error"
+                class="action-text text-accent-deep"
+                data-field-error
+                hidden
+            />
+            <p
                 class="action-text hidden p-3 bg-accent text-ink"
                 data-output
             />
@@ -55,18 +64,25 @@ import SectionHead from '@components/shared/SectionHead.astro';
 
 <script>
     import { EMAIL_PATTERN, STORAGE } from '@lib/shared/constants';
+    import { clearFieldErrors, focusFirstError, isValidationBypassed, setFieldErrors, validateFields } from '@lib/ui/forms';
     import { createStore } from '@lib/shared/state';
-    import { isValidationBypassed } from '@lib/ui/forms';
+    import { getSession } from '@lib/account/session';
     import { registerPageScript } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
 
     interface NewsletterElements {
         button: HTMLButtonElement;
+        form: HTMLFormElement;
         input: HTMLInputElement;
         output: HTMLElement;
     }
 
     const INVALID_MESSAGE = 'Enter a valid email address.';
+    const SUBSCRIBED_MESSAGE = 'Your account is already on the list.';
+
+    const RULES: Record<string, FieldRule> = {
+        email: { message: INVALID_MESSAGE, pattern: EMAIL_PATTERN, required: true },
+    };
 
     const subscription = createStore<string | null>({
         fallback: null,
@@ -76,31 +92,36 @@ import SectionHead from '@components/shared/SectionHead.astro';
         topic: STORAGE.newsletter.topic,
     });
 
-    function confirmationMessage(email: string, returning: boolean) {
-        return returning
-            ? `You are already on the list \u2014 the next dispatch goes to ${email}.`
-            : 'You are on the list. The next dispatch lands in your inbox.';
+    function confirmationMessage(returning: boolean) {
+        return returning ? SUBSCRIBED_MESSAGE : 'You are on the list. The next dispatch lands in your inbox.';
     }
 
     function handleNewsletterSubmit(event: SubmitEvent, elements: NewsletterElements) {
         event.preventDefault();
 
-        const subscribed = subscription.get();
+        const subscribed = subscribedEmail();
 
         if (subscribed !== null) {
             showConfirmation(elements, subscribed, true);
-            toast('You are already on the list.', 'info');
+            toast(SUBSCRIBED_MESSAGE, 'info');
+
+            return;
+        }
+
+        const errors = validateFields(elements.form, RULES);
+
+        clearFieldErrors(elements.form);
+
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(elements.form, errors);
+            focusFirstError(elements.form, errors);
 
             return;
         }
 
         const email = readEmail(elements.input);
 
-        if (email === null) {
-            toast(INVALID_MESSAGE, 'error');
-
-            return;
-        }
+        if (email === null) return;
 
         showConfirmation(elements, email, false);
         subscription.set(email);
@@ -116,8 +137,8 @@ import SectionHead from '@components/shared/SectionHead.astro';
 
         if (!form || !button || !input || !output) return;
 
-        const elements = { button, input, output };
-        const subscribed = subscription.get();
+        const elements = { button, form, input, output };
+        const subscribed = subscribedEmail();
 
         form.noValidate = true;
         form.addEventListener('submit', event => handleNewsletterSubmit(event, elements), { signal });
@@ -145,13 +166,20 @@ import SectionHead from '@components/shared/SectionHead.astro';
         button.disabled = true;
         input.disabled = true;
         input.value = email;
-        output.textContent = confirmationMessage(email, returning);
+        output.textContent = confirmationMessage(returning);
         output.classList.remove('hidden');
 
         if (returning) return;
 
         output.tabIndex = -1;
         output.focus();
+    }
+
+    function subscribedEmail() {
+        const email = subscription.get();
+        const session = getSession();
+
+        return session !== null && email === session.email ? email : null;
     }
 
     registerPageScript(initNewsletter);

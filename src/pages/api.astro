@@ -1,0 +1,12 @@
+---
+import ApiReference from '@sections/api/Reference.astro';
+import Layout from '@/Layout.astro';
+import { brandTitle } from '@lib/shared/brand';
+---
+
+<Layout
+    description={'The Austin Producer Alliance content API \u2014 GET-only JSON endpoints for the events calendar, the producer roster, the store catalog, and the resource library.'}
+    title={brandTitle('API')}
+>
+    <ApiReference />
+</Layout>

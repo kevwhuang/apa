@@ -95,7 +95,7 @@ function normalizeSession(value: Session | null): Session | null {
     if (typeof value.email !== 'string' || value.email.length === 0) return null;
 
     return {
-        artistName: String(value.artistName ?? ''),
+        artistName: String(value.artistName ?? '') || toDisplayName(value.email),
         avatar: normalizeAvatar(String(value.avatar ?? '')),
         createdAt: Number(value.createdAt) || 0,
         email: value.email,
@@ -155,7 +155,7 @@ async function startSession(draft: SessionDraft): Promise<SessionResult> {
     const profile: Profile | null = existing?.email === email ? existing : getProfile(email);
 
     const session: Session = {
-        artistName: draft.artistName || profile?.artistName || '',
+        artistName: draft.artistName || profile?.artistName || toDisplayName(email),
         avatar: profile?.avatar ?? '',
         createdAt: profile?.createdAt || now,
         email,
@@ -175,6 +175,12 @@ function syncSessionAttribute(): void {
     if (typeof document === 'undefined') return;
 
     document.documentElement.dataset.session = isSignedIn() ? 'in' : 'out';
+}
+
+function toDisplayName(email: string): string {
+    const words = email.split('@')[0].split(/[+._-]+/).filter(Boolean);
+
+    return words.map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
 async function updateSession(patch: Partial<Session>): Promise<Session | null> {

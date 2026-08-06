@@ -2,9 +2,9 @@
 name: Devon Park
 genres: [house, techno]
 location: Austin, TX
-joined: 2022-05-01
+joined: 2022-05-01T00:00:00-05:00
 featured: false
-roles: [producer, artist]
+roles: [producer]
 bio: Works hardware-first and arranges last. Most tracks start as one loop left running long enough to get bored of it.
 tracks:
   - { title: Untitled Sketch 01, durationSeconds: 214 }

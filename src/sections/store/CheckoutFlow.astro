@@ -2,8 +2,10 @@
 import { getCollection } from 'astro:content';
 
 import PageHead from '@components/shared/PageHead.astro';
-import { CHECKOUT_STEPS, FIELD_LIMITS, US_STATES } from '@lib/shared/constants';
+import { CHECKOUT_STEPS, COMMERCE, FIELD_LIMITS, US_STATES } from '@lib/shared/constants';
+import { photoKey } from '@lib/commerce/cart';
 import { toCatalog } from '@lib/shared/utils';
+import { toImageSources, toVariationSlug, toVariations } from '@lib/commerce/products';
 
 type FieldInputMode = 'numeric';
 
@@ -41,7 +43,13 @@ const SHIPPING_FIELDS: CheckoutField[] = [
     { autocomplete: 'postal-code', column: 'lg:col-span-5 md:col-span-12', inputmode: 'numeric', label: 'ZIP code', name: 'zip', pattern: '[0-9]{5}(-[0-9]{4})?' },
 ];
 
-const catalog = toCatalog(await getCollection('products'));
+const products = await getCollection('products');
+const catalog = toCatalog(products);
+const images = await toImageSources();
+
+const variants = Object.fromEntries(products
+    .flatMap(product => toVariations(product.data).map(variation => [photoKey(product.id, variation), `${product.data.sku}_${toVariationSlug(variation)}`]))
+    .filter(([, key]) => key in images));
 ---
 
 <section
@@ -70,7 +78,7 @@ const catalog = toCatalog(await getCollection('products'));
             {CHECKOUT_STEPS.map((step, index) => (
                 <li
                     class:list={[
-                        'step flex-1 p-4 font-bold font-mono text-2xs tracking-wide uppercase',
+                        'step flex-1 p-4 font-bold font-mono text-xs tracking-wide uppercase',
                         index === 0 ? 'slab--well' : 'bg-surface',
                         index > 0 && 'border-l-2 border-ink',
                     ]}
@@ -87,6 +95,8 @@ const catalog = toCatalog(await getCollection('products'));
     class="stage stage--tight"
     aria-label="Checkout form"
     data-catalog={JSON.stringify(catalog)}
+    data-images={JSON.stringify(images)}
+    data-variants={JSON.stringify(variants)}
 >
     <div
         class="slab slab--card flex flex-col items-start max-w-(--measure-form) w-full gap-4 mx-auto"
@@ -109,6 +119,7 @@ const catalog = toCatalog(await getCollection('products'));
         <form
             class="checkout-form flex flex-col gap-6"
             data-checkout-form
+            data-motion="unfold"
         >
             <aside
                 class="checkout__notice slab slab--card flex flex-col gap-4"
@@ -139,10 +150,76 @@ const catalog = toCatalog(await getCollection('products'));
                     class="review-list mb-(--space-lg) border-2 border-ink list-none"
                     data-review-list
                 />
+                <div class="flex flex-col gap-2 mb-(--space-lg)">
+                    <div
+                        class="checkout__code-entry flex items-end gap-4"
+                        data-code-entry
+                    >
+                        <label class="flex flex-1 flex-col min-w-0 gap-2">
+                            <span class="label text-ink-muted">Discount code</span>
+                            <input
+                                id="checkout-code"
+                                class="input font-mono uppercase"
+                                aria-describedby="checkout-code-error"
+                                aria-invalid="false"
+                                autocomplete="off"
+                                maxlength={FIELD_LIMITS.code}
+                                name="code"
+                                placeholder="Enter a code"
+                                type="text"
+                            />
+                        </label>
+                        <button
+                            class="btn shrink-0"
+                            data-code-apply
+                            disabled
+                            type="button"
+                        >
+                            Apply
+                        </button>
+                    </div>
+                    <p
+                        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 border-2 border-ink"
+                        data-code-tag
+                        hidden
+                    >
+                        <span
+                            class="label"
+                            data-code-label
+                        />
+                        <button
+                            class="action-text checkout__code-remove text-ink-muted"
+                            aria-label="Remove the discount code"
+                            data-code-remove
+                            type="button"
+                        >
+                            Remove
+                        </button>
+                    </p>
+                    <p
+                        id="checkout-code-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                </div>
                 <dl class="review-totals">
                     <div class="review-totals__row">
                         <dt>Subtotal</dt>
                         <dd data-subtotal>$0.00</dd>
+                    </div>
+                    <div
+                        class="review-totals__row"
+                        data-promo-row
+                        hidden
+                    >
+                        <dt>Discount ({COMMERCE.discountCode})</dt>
+                        <dd
+                            class="whitespace-nowrap"
+                            data-promo
+                        >
+                            $0.00
+                        </dd>
                     </div>
                     <div
                         class="review-totals__row"
@@ -375,6 +452,19 @@ const catalog = toCatalog(await getCollection('products'));
                 </div>
                 <div
                     class="flex justify-between gap-3"
+                    data-promo-row
+                    hidden
+                >
+                    <dt>Discount ({COMMERCE.discountCode})</dt>
+                    <dd
+                        class="whitespace-nowrap"
+                        data-promo
+                    >
+                        $0.00
+                    </dd>
+                </div>
+                <div
+                    class="flex justify-between gap-3"
                     data-discount-row
                     hidden
                 >
@@ -417,6 +507,13 @@ const catalog = toCatalog(await getCollection('products'));
     </template>
     <template data-review-row>
         <li class="review-row first:border-t-0 border-t-2 border-ink">
+            <img
+                class="object-cover self-center shrink-0 h-16 w-16 border-2 border-ink"
+                alt=""
+                data-review-photo
+                hidden
+                loading="lazy"
+            />
             <div class="review-row__body">
                 <p
                     class="font-bold font-sans text-lmd"
@@ -440,11 +537,20 @@ const catalog = toCatalog(await getCollection('products'));
         </li>
     </template>
     <template data-summary-row>
-        <li class="flex justify-between gap-2 mb-3">
-            <span
-                class="min-w-0"
-                data-summary-title
-            />
+        <li class="flex items-center justify-between gap-2 mb-3">
+            <span class="flex items-center min-w-0 gap-2">
+                <img
+                    class="object-cover shrink-0 h-8 w-8 border-2 border-ink"
+                    alt=""
+                    data-summary-photo
+                    hidden
+                    loading="lazy"
+                />
+                <span
+                    class="min-w-0"
+                    data-summary-title
+                />
+            </span>
             <span
                 class="font-bold font-mono"
                 data-summary-price
@@ -492,6 +598,18 @@ const catalog = toCatalog(await getCollection('products'));
         gap: var(--space-3xs);
     }
 
+    .checkout__code-entry:has(.input[aria-invalid='true']) .btn {
+        border-color: var(--color-accent-deep);
+        color: var(--color-accent-deep);
+    }
+
+    .checkout__code-remove {
+        min-height: var(--control-size);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
     .checkout__fields {
         column-gap: var(--space-sm);
         row-gap: var(--space-md);
@@ -523,18 +641,18 @@ const catalog = toCatalog(await getCollection('products'));
         transition: background-color var(--duration-fast) var(--motion-ease-ui);
     }
 
-    .checkout__prods-meta {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-3xs);
-    }
-
     .checkout__prods:has(.box:checked) {
         background-color: var(--color-surface-sunken);
     }
 
     .checkout__prods:has(.box:disabled) {
         cursor: not-allowed;
+    }
+
+    .checkout__prods-meta {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3xs);
     }
 
     .checkout__summary {
@@ -544,6 +662,7 @@ const catalog = toCatalog(await getCollection('products'));
     .review-row {
         align-items: baseline;
         display: flex;
+        flex-wrap: wrap;
         gap: var(--space-sm);
         justify-content: space-between;
         padding: var(--space-md);
@@ -551,6 +670,7 @@ const catalog = toCatalog(await getCollection('products'));
 
     .review-row__body {
         display: flex;
+        flex: 1 1 88px;
         flex-direction: column;
         gap: var(--space-2xs);
         min-width: 0;
@@ -564,6 +684,7 @@ const catalog = toCatalog(await getCollection('products'));
     }
 
     .review-row__price {
+        margin-inline-start: auto;
         white-space: nowrap;
     }
 
@@ -621,10 +742,10 @@ const catalog = toCatalog(await getCollection('products'));
 <script>
     import { navigate } from 'astro:transitions/client';
 
-    import { CHECKOUT_STEPS, EMAIL_PATTERN, FIELD_LIMITS } from '@lib/shared/constants';
+    import { CHECKOUT_STEPS, COMMERCE, EMAIL_PATTERN, FIELD_LIMITS } from '@lib/shared/constants';
     import { clearFieldErrors, focusFirstError, isValidationBypassed, renderIssueList, setFieldErrors, validateFields } from '@lib/ui/forms';
-    import { formatPrice, formatProds, formatVariant, parseCatalog, registerPageScript, setPending, setText } from '@lib/shared/utils';
-    import { getItems, prodsForCents, prodsToCents, reconcile, totals } from '@lib/commerce/cart';
+    import { formatPrice, formatProds, formatVariant, parseCatalog, parseImageSources, registerPageScript, setPending, setProductImage, setText } from '@lib/shared/utils';
+    import { getItems, isPromoCode, photoKey, prodsForCents, prodsToCents, reconcile, totals } from '@lib/commerce/cart';
     import { getSession } from '@lib/account/session';
     import { placeOrder } from '@lib/commerce/checkout';
     import { toast } from '@lib/ui/toasts';
@@ -640,10 +761,12 @@ const catalog = toCatalog(await getCollection('products'));
     }
 
     const ADDRESS_MIN = 5;
+    const BASIS_POINTS_PER_PERCENT = 100;
     const CARD_FIELDS = ['cc-csc', 'cc-exp', 'cc-name', 'cc-number'];
     const CARD_PATTERN = /^\d{13,19}$/;
     const CENTURY = 2_000;
     const CITY_MIN = 2;
+    const CODE_MESSAGE = 'That code is not valid.';
     const CSC_PATTERN = /^\d{3,4}$/;
     const EXPIRY_PATTERN = /^(0[1-9]|1[0-2]) ?\/ ?(\d{2})$/;
     const LAST_STEP = 2;
@@ -676,8 +799,11 @@ const catalog = toCatalog(await getCollection('products'));
 
     let blocked = false;
     let catalog: CatalogEntry[] = [];
+    let images: ImageSources = {};
     let orderItems: CartItem[] = [];
+    let promoCode = '';
     let step = REVIEW_STEP;
+    let variants: ImageSources = {};
 
     function clearCardFields(form: HTMLFormElement) {
         CARD_FIELDS.forEach((name) => {
@@ -694,7 +820,12 @@ const catalog = toCatalog(await getCollection('products'));
         return `Applies ${formatPrice(prodsToCents(charge))} toward this order \u2014 your card covers the rest.`;
     }
 
+    function discountPercent() {
+        return COMMERCE.discountBasisPoints / BASIS_POINTS_PER_PERCENT;
+    }
+
     function fillReviewRow(fragment: DocumentFragment, item: CartItem) {
+        setProductImage(fragment.querySelector<HTMLImageElement>('[data-review-photo]'), images, item);
         setText(fragment.querySelector('[data-review-price]'), formatPrice(item.priceCents * item.quantity));
         setText(fragment.querySelector('[data-review-qty]'), `\u00d7 ${item.quantity}`);
         setText(fragment.querySelector('[data-review-title]'), item.title);
@@ -702,6 +833,7 @@ const catalog = toCatalog(await getCollection('products'));
     }
 
     function fillSummaryRow(fragment: DocumentFragment, item: CartItem) {
+        setProductImage(fragment.querySelector<HTMLImageElement>('[data-summary-photo]'), images, item);
         setText(fragment.querySelector('[data-summary-price]'), formatPrice(item.priceCents * item.quantity));
         setText(fragment.querySelector('[data-summary-title]'), `${item.quantity} \u00d7 ${item.title} \u2014 ${formatVariant(item)}`);
     }
@@ -725,7 +857,7 @@ const catalog = toCatalog(await getCollection('products'));
     }
 
     function getProdsCharge() {
-        return Math.min(getProdsBalance(), prodsForCents(totals(getItems()).totalCents));
+        return Math.min(getProdsBalance(), prodsForCents(totals(getItems(), 0, promoCode).totalCents));
     }
 
     function getStepRules(form: HTMLFormElement) {
@@ -746,6 +878,52 @@ const catalog = toCatalog(await getCollection('products'));
 
     function handleCardInput(input: HTMLInputElement) {
         input.value = input.value.replace(/[^\d ]/g, '');
+    }
+
+    function handleCodeApply(form: HTMLFormElement) {
+        const input = form.querySelector<HTMLInputElement>('[name="code"]');
+
+        if (!input || input.value.trim().length === 0) return;
+
+        if (!isPromoCode(input.value)) {
+            setFieldErrors(form, { code: CODE_MESSAGE });
+            input.focus();
+
+            return;
+        }
+
+        clearFieldErrors(form);
+        input.value = '';
+        promoCode = COMMERCE.discountCode;
+        renderOrder(form);
+        toast(`${COMMERCE.discountCode} applied \u2014 ${discountPercent()}% off your subtotal.`, 'success');
+        form.querySelector<HTMLButtonElement>('[data-code-remove]')?.focus();
+    }
+
+    function handleCodeInput(form: HTMLFormElement) {
+        const apply = form.querySelector<HTMLButtonElement>('[data-code-apply]');
+        const input = form.querySelector<HTMLInputElement>('[name="code"]');
+
+        if (!apply || !input) return;
+
+        apply.disabled = input.value.trim().length === 0;
+
+        if (input.getAttribute('aria-invalid') === 'true') clearFieldErrors(form);
+    }
+
+    function handleCodeKeydown(event: KeyboardEvent, form: HTMLFormElement) {
+        if (event.key !== 'Enter') return;
+
+        event.preventDefault();
+        handleCodeApply(form);
+    }
+
+    function handleCodeRemove(form: HTMLFormElement) {
+        promoCode = '';
+        clearFieldErrors(form);
+        renderOrder(form);
+        toast('Discount code removed.', 'info');
+        form.querySelector<HTMLInputElement>('[name="code"]')?.focus();
     }
 
     async function handleFormSubmit(event: SubmitEvent, controls: CheckoutControls) {
@@ -800,6 +978,8 @@ const catalog = toCatalog(await getCollection('products'));
 
         if (!aside || !backButton || !body || !form || !nextButton) return;
 
+        const codeInput = form.querySelector<HTMLInputElement>('[name="code"]');
+
         const controls: CheckoutControls = {
             aside,
             backButton,
@@ -812,7 +992,10 @@ const catalog = toCatalog(await getCollection('products'));
 
         blocked = false;
         catalog = parseCatalog(source?.dataset.catalog);
+        images = parseImageSources(source?.dataset.images);
+        promoCode = '';
         step = REVIEW_STEP;
+        variants = parseImageSources(source?.dataset.variants);
         form.noValidate = true;
 
         if (getItems().length === 0) {
@@ -831,6 +1014,10 @@ const catalog = toCatalog(await getCollection('products'));
             input.addEventListener('input', () => handleCardInput(input), { signal });
         });
 
+        codeInput?.addEventListener('input', () => handleCodeInput(form), { signal });
+        codeInput?.addEventListener('keydown', event => handleCodeKeydown(event, form), { signal });
+        form.querySelector<HTMLButtonElement>('[data-code-apply]')?.addEventListener('click', () => handleCodeApply(form), { signal });
+        form.querySelector<HTMLButtonElement>('[data-code-remove]')?.addEventListener('click', () => handleCodeRemove(form), { signal });
         form.querySelector<HTMLInputElement>('[name="prods"]')?.addEventListener('change', () => handleProdsToggle(form), { signal });
     }
 
@@ -845,7 +1032,7 @@ const catalog = toCatalog(await getCollection('products'));
     function isFullyCovered() {
         const charge = getProdsCharge();
 
-        return charge > 0 && totals(getItems(), charge).totalCents === 0;
+        return charge > 0 && totals(getItems(), charge, promoCode).totalCents === 0;
     }
 
     function isFutureExpiry(value: string) {
@@ -879,6 +1066,22 @@ const catalog = toCatalog(await getCollection('products'));
         if (!fields) return;
 
         fields.disabled = isCardWaived(form);
+    }
+
+    function renderCode(form: HTMLFormElement) {
+        const apply = form.querySelector<HTMLButtonElement>('[data-code-apply]');
+        const entry = form.querySelector<HTMLElement>('[data-code-entry]');
+        const input = form.querySelector<HTMLInputElement>('[name="code"]');
+        const tag = form.querySelector<HTMLElement>('[data-code-tag]');
+
+        if (!apply || !entry || !input || !tag) return;
+
+        const applied = promoCode.length > 0;
+
+        apply.disabled = input.value.trim().length === 0;
+        entry.toggleAttribute('hidden', applied);
+        tag.toggleAttribute('hidden', !applied);
+        setText(form.querySelector('[data-code-label]'), applied ? `${promoCode} \u00b7 ${discountPercent()}% off` : '');
     }
 
     function renderIssues(issues: CartIssue[]) {
@@ -917,7 +1120,8 @@ const catalog = toCatalog(await getCollection('products'));
     }
 
     function renderOrder(form: HTMLFormElement) {
-        orderItems = getItems();
+        orderItems = getItems().map(toPhotoItem);
+        renderCode(form);
         renderProds(form);
         renderCardFields(form);
         renderItems();
@@ -943,13 +1147,20 @@ const catalog = toCatalog(await getCollection('products'));
     }
 
     function renderTotals(form: HTMLFormElement) {
-        const summary = totals(getItems(), getProdsApplied(form));
+        const summary = totals(getItems(), getProdsApplied(form), promoCode);
+
+        const prodsCents = summary.discountCents - summary.promoCents;
 
         document.querySelectorAll('[data-discount-row]').forEach((row) => {
-            row.toggleAttribute('hidden', summary.discountCents === 0);
+            row.toggleAttribute('hidden', prodsCents === 0);
         });
 
-        setAll('[data-discount]', `\u2212${formatPrice(summary.discountCents)}`);
+        document.querySelectorAll('[data-promo-row]').forEach((row) => {
+            row.toggleAttribute('hidden', summary.promoCents === 0);
+        });
+
+        setAll('[data-discount]', `\u2212${formatPrice(prodsCents)}`);
+        setAll('[data-promo]', `\u2212${formatPrice(summary.promoCents)}`);
         setAll('[data-shipping]', formatPrice(summary.shippingCents));
         setAll('[data-subtotal]', formatPrice(summary.subtotalCents));
         setAll('[data-tax]', formatPrice(summary.taxCents));
@@ -979,6 +1190,7 @@ const catalog = toCatalog(await getCollection('products'));
             email: readValue(controls.form, 'email'),
             items: orderItems,
             prodsApplied: getProdsApplied(controls.form),
+            promoCode,
         });
 
         setPending(controls.nextButton, false);
@@ -994,6 +1206,12 @@ const catalog = toCatalog(await getCollection('products'));
         clearCardFields(controls.form);
 
         await navigate('/store/orders');
+    }
+
+    function toPhotoItem(item: CartItem): CartItem {
+        const image = variants[photoKey(item.productSlug, item.variation)];
+
+        return image ? { ...item, image } : item;
     }
 
     function updateSteps(controls: CheckoutControls, moveFocus: boolean) {
