@@ -1,7 +1,7 @@
 ---
 import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import { CANONICAL, JOIN_ROUTE, LINKS, PALETTE } from '@lib/constants';
+import { CANONICAL, JOIN_ROUTE, LINKS, PALETTE } from '@lib/shared/constants';
 
 type RoadmapStatus = 'done' | 'later' | 'next';
 
@@ -357,7 +357,9 @@ const openingColors = PALETTE.slice(0, 3);
         display: inline-flex;
         min-height: 50px;
         min-width: 50px;
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .about__link:active {

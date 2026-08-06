@@ -1,6 +1,6 @@
-import { BYTES_PER_MEGABYTE, UPLOAD } from '@lib/constants';
+import { BYTES_PER_MEGABYTE, UPLOAD } from '@lib/shared/constants';
 import { UPLOAD_EXTENSIONS_OR_LIST, getExtension, getSizeError } from '@lib/audio/uploads';
-import { ensureRackAudio } from '@lib/audio/rack/context';
+import { ensureRackAudio } from '@lib/rack/context';
 
 const ABORTED_MESSAGE = 'The rack closed before that file finished.';
 const MAX_RACK_MEGABYTES = 100;
@@ -19,6 +19,7 @@ async function decodeRackFile(file: File, signal?: AbortSignal): Promise<RackLoa
         if (signal?.aborted) return { message: ABORTED_MESSAGE, ok: false };
 
         const { context } = ensureRackAudio();
+
         const buffer = await context.decodeAudioData(bytes);
 
         if (signal?.aborted) return { message: ABORTED_MESSAGE, ok: false };

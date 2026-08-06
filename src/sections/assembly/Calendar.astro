@@ -2,12 +2,13 @@
 import { getCollection } from 'astro:content';
 
 import SectionHead from '@components/shared/SectionHead.astro';
-import { LINKS } from '@lib/constants';
-import { formatDate, formatTimeRange, getProgram } from '@lib/utils';
+import { LINKS } from '@lib/shared/constants';
+import { formatDate, formatTimeRange, getProgram } from '@lib/shared/utils';
+
+const events = await getCollection('events');
 
 const program = getProgram('assembly');
 
-const events = await getCollection('events');
 const upcoming = events
     .filter(event => event.data.type === 'assembly' && event.data.status === 'upcoming')
     .sort((a, b) => +a.data.date - +b.data.date);
@@ -132,7 +133,7 @@ const [next, ...later] = upcoming;
                 )
             : (
                     <p
-                        class="slab slab--cut slab--lift mb-6 leading-relaxed text-ink-muted md:mb-0"
+                        class="slab slab--cut slab--lift max-w-(--measure-form) w-full mb-6 mx-auto leading-relaxed text-ink-muted md:mb-0"
                         data-motion="rise"
                     >
                         Nothing on the calendar right now &mdash; the next date goes up as soon as

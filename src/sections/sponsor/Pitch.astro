@@ -3,8 +3,8 @@ import { Image } from 'astro:assets';
 
 import PageHead from '@components/shared/PageHead.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { EVENT_PROGRAMS, SPONSORS, SPONSOR_INQUIRY_TOPIC, SPONSOR_LOGO_WIDTH } from '@lib/constants';
-import { getProgram } from '@lib/utils';
+import { EVENT_PROGRAMS, SPONSORS, SPONSOR_INQUIRY_TOPIC, SPONSOR_LOGO_WIDTH } from '@lib/shared/constants';
+import { getProgram } from '@lib/shared/utils';
 
 interface Tier {
     featured?: boolean;

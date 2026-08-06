@@ -67,10 +67,7 @@ function createStore<T>(options: StoreOptions<T>): Store<T> {
 }
 
 function getStorage(scope: StorageScope): Storage | null {
-    if (scope === 'local') return typeof localStorage === 'undefined' ? null : localStorage;
-    if (scope === 'session') return typeof sessionStorage === 'undefined' ? null : sessionStorage;
-
-    return null;
+    return scope === 'local' && typeof localStorage !== 'undefined' ? localStorage : null;
 }
 
 function notify(topic: string): void {

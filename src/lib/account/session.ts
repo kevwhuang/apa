@@ -7,9 +7,10 @@ import {
     SESSION_TTL_DAYS,
     STORAGE,
     WELCOME_PRODS,
-} from '@lib/constants';
-import { createStore } from '@lib/state';
-import { delay } from '@lib/utils';
+} from '@lib/shared/constants';
+import { createStore } from '@lib/shared/state';
+import { delay } from '@lib/shared/utils';
+import { normalizeAvatar } from '@lib/account/images';
 
 const DEFAULT_ROLE = 'fan';
 
@@ -73,6 +74,7 @@ function isSignedIn(): boolean {
 function normalizeProfile(value: Profile): Profile {
     return {
         artistName: String(value.artistName ?? ''),
+        avatar: normalizeAvatar(String(value.avatar ?? '')),
         createdAt: Number(value.createdAt) || 0,
         onboarded: value.onboarded === true,
         prods: Math.max(0, Math.trunc(Number(value.prods)) || 0),
@@ -94,6 +96,7 @@ function normalizeSession(value: Session | null): Session | null {
 
     return {
         artistName: String(value.artistName ?? ''),
+        avatar: normalizeAvatar(String(value.avatar ?? '')),
         createdAt: Number(value.createdAt) || 0,
         email: value.email,
         expiresAt: Number(value.expiresAt) || 0,
@@ -125,6 +128,7 @@ function reject(code: SessionErrorCode): SessionResult {
 function saveProfile(session: Session): void {
     const profile: Profile = {
         artistName: session.artistName,
+        avatar: session.avatar,
         createdAt: session.createdAt,
         onboarded: session.onboarded,
         prods: session.prods,
@@ -152,6 +156,7 @@ async function startSession(draft: SessionDraft): Promise<SessionResult> {
 
     const session: Session = {
         artistName: draft.artistName || profile?.artistName || '',
+        avatar: profile?.avatar ?? '',
         createdAt: profile?.createdAt || now,
         email,
         expiresAt: now + SESSION_TTL_DAYS * MILLISECONDS_PER_DAY,
@@ -160,8 +165,8 @@ async function startSession(draft: SessionDraft): Promise<SessionResult> {
         role: profile?.role || DEFAULT_ROLE,
     };
 
-    store.set(session);
     saveProfile(session);
+    store.set(session);
 
     return { ok: true, session };
 }

@@ -1,7 +1,7 @@
-import { MOCK_LATENCY_MS, ORDER_ID, STORAGE } from '@lib/constants';
+import { MOCK_LATENCY_MS, ORDER_ID, STORAGE } from '@lib/shared/constants';
 import { clampQuantity, clear, getItems, prodsForCents, totals } from '@lib/commerce/cart';
-import { createStore } from '@lib/state';
-import { delay } from '@lib/utils';
+import { createStore } from '@lib/shared/state';
+import { delay } from '@lib/shared/utils';
 import { getSession, updateSession } from '@lib/account/session';
 
 const MAX_ORDER_CENTS = 100_000_000;
@@ -89,8 +89,8 @@ async function placeOrder(input: OrderInput): Promise<OrderResult> {
         totals: totals(input.items, prodsApplied),
     };
 
-    store.set(order);
     clear();
+    store.set(order);
 
     if (session && prodsApplied > 0) await updateSession({ prods: session.prods - prodsApplied });
 

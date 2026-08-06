@@ -1,7 +1,7 @@
 ---
 import PageHead from '@components/shared/PageHead.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/constants';
+import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/constants';
 
 const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
 ---
@@ -369,7 +369,9 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
         font-family: var(--font-mono);
         font-size: var(--text-xl);
         line-height: 1;
-        transition: color var(--duration-fast) var(--motion-ease-ui), translate var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            translate var(--duration-fast) var(--motion-ease-ui);
     }
 
     .contact-line__blurb {
@@ -428,10 +430,10 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
 </style>
 
 <script>
-    import { CONTACT_LIMITS, EMAIL_PATTERN } from '@lib/constants';
+    import { CONTACT_LIMITS, EMAIL_PATTERN } from '@lib/shared/constants';
     import { clearFieldErrors, focusFirstError, setFieldErrors, validateFields } from '@lib/ui/forms';
-    import { composeContactEmail } from '@lib/email';
-    import { registerPageScript, setText } from '@lib/utils';
+    import { composeContactEmail } from '@lib/shared/email';
+    import { registerPageScript, setText } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
 
     const RULES: Record<string, FieldRule> = {
@@ -488,8 +490,8 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
         if (!done || !form) return;
 
         form.noValidate = true;
-        form.addEventListener('submit', event => handleContactSubmit(event, form, done), { signal });
         again?.addEventListener('click', () => handleContactAgain(form, done), { signal });
+        form.addEventListener('submit', event => handleContactSubmit(event, form, done), { signal });
         applyTopicFromQuery(form);
     }
 
@@ -505,8 +507,8 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
 
         const send = document.querySelector<HTMLAnchorElement>('[data-contact-send]');
 
-        form.setAttribute('hidden', '');
         done.removeAttribute('hidden');
+        form.setAttribute('hidden', '');
 
         if (send) send.href = composed.actionHref;
 

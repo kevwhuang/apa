@@ -6,21 +6,22 @@ const THEME_KEY = '__THEME_KEY__';
 const WATCHDOG_MS = 2_500;
 
 const doc = globalThis.document;
+
 const root = doc.documentElement;
 
 function initMotionBridge() {
-    if (globalThis.__apaMotion) return;
+    if (globalThis.window.__apaMotion) return;
 
     const state = { arm, armedClass: ARMED_CLASS, disarm, expired: false, live };
 
-    let watchdog;
+    let watchdog = globalThis.setTimeout(expire, WATCHDOG_MS);
 
     function arm() {
         if (state.expired) return;
         if (globalThis.matchMedia(REDUCE).matches) return disarm();
 
-        root.classList.add(ARMED_CLASS);
         globalThis.clearTimeout(watchdog);
+        root.classList.add(ARMED_CLASS);
         watchdog = globalThis.setTimeout(expire, WATCHDOG_MS);
     }
 
@@ -40,16 +41,14 @@ function initMotionBridge() {
         return !state.expired;
     }
 
-    function preArm(event) {
+    globalThis.window.__apaMotion = state;
+    arm();
+    doc.addEventListener('astro:after-swap', arm);
+    doc.addEventListener('astro:before-swap', (event) => {
         if (state.expired || globalThis.matchMedia(REDUCE).matches) return;
 
         event.newDocument.documentElement.classList.add(ARMED_CLASS);
-    }
-
-    globalThis.__apaMotion = state;
-    arm();
-    doc.addEventListener('astro:after-swap', arm);
-    doc.addEventListener('astro:before-swap', preArm);
+    });
     globalThis.addEventListener('beforeprint', disarm);
 }
 
@@ -69,12 +68,10 @@ function initScrollRestore() {
         if (state && typeof state.scrollY === 'number') globalThis.scrollTo({ behavior: 'instant', left: state.scrollX, top: state.scrollY });
     }
 
-    function track(event) {
-        navigation = event.navigationType;
-    }
-
     doc.addEventListener('DOMContentLoaded', settle, { once: true });
-    doc.addEventListener('astro:before-preparation', track);
+    doc.addEventListener('astro:before-preparation', (event) => {
+        navigation = event.navigationType;
+    });
     doc.addEventListener('astro:page-load', settle);
 }
 
@@ -83,6 +80,7 @@ function initSessionState() {
 
     try {
         const raw = globalThis.localStorage.getItem(SESSION_KEY);
+
         const session = raw ? JSON.parse(raw) : null;
 
         if (session && session.expiresAt > Date.now()) state = 'in';
@@ -100,12 +98,9 @@ function initTheme() {
         return globalThis.matchMedia(DARK_QUERY).matches ? 'dark' : 'light';
     }
 
-    function preStamp(event) {
-        event.newDocument.documentElement.dataset.theme = root.dataset.theme;
-    }
-
     try {
         const raw = globalThis.localStorage.getItem(THEME_KEY);
+
         const stored = raw ? JSON.parse(raw) : null;
 
         theme = stored === 'dark' || stored === 'light' ? stored : preferred();
@@ -114,7 +109,9 @@ function initTheme() {
     }
 
     root.dataset.theme = theme;
-    doc.addEventListener('astro:before-swap', preStamp);
+    doc.addEventListener('astro:before-swap', (event) => {
+        event.newDocument.documentElement.dataset.theme = root.dataset.theme;
+    });
 }
 
 initTheme();

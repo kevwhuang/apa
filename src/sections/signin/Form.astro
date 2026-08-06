@@ -2,11 +2,11 @@
 import IconEye from '@components/icons/Eye.astro';
 import IconEyeOff from '@components/icons/EyeOff.astro';
 import PageHead from '@components/shared/PageHead.astro';
-import { PASSWORD_MIN_LENGTH } from '@lib/constants';
+import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
 ---
 
 <section
-    class="stage stage--tight"
+    class="signin-stage stage stage--tight"
     aria-labelledby="signin-title"
 >
     <div class="flex flex-col gap-8">
@@ -28,7 +28,6 @@ import { PASSWORD_MIN_LENGTH } from '@lib/constants';
         </div>
         <div
             class="signin slab slab--bare slab--card"
-            data-auth-gate
             data-motion="unfold"
         >
             <fieldset class="signin__modes">
@@ -236,66 +235,11 @@ import { PASSWORD_MIN_LENGTH } from '@lib/constants';
                 </button>
             </form>
         </div>
-        <div
-            class="signin__done slab slab--well flex flex-col gap-5"
-            data-auth-done
-            data-motion="rise"
-            hidden
-        >
-            <h2
-                class="font-extrabold font-sans text-3xl tracking-tight"
-                data-auth-heading
-                tabindex="-1"
-            >
-                You are signed in.
-            </h2>
-            <dl class="signin__summary">
-                <div class="signin__summary-row">
-                    <dt class="label text-ink-inverse-muted">Account</dt>
-                    <dd
-                        class="min-w-0 font-mono text-sm wrap-anywhere"
-                        data-auth-email
-                    />
-                </div>
-                <div class="signin__summary-row">
-                    <dt class="label text-ink-inverse-muted">Balance</dt>
-                    <dd
-                        class="font-mono text-sm"
-                        data-auth-prods
-                    />
-                </div>
-                <div class="signin__summary-row">
-                    <dt class="label text-ink-inverse-muted">Profile</dt>
-                    <dd
-                        class="font-mono text-sm"
-                        data-auth-profile
-                    />
-                </div>
-            </dl>
-            <div class="flex flex-wrap gap-3">
-                <a
-                    class="btn btn--accent"
-                    data-auth-onboarding
-                    hidden
-                    href="/onboarding"
-                >
-                    Onboarding
-                </a>
-                <button
-                    class="btn"
-                    data-auth-signout
-                    type="button"
-                >
-                    Sign out
-                </button>
-            </div>
-        </div>
     </div>
 </section>
 
 <style>
-    .signin,
-    .signin__done {
+    .signin {
         margin-inline: auto;
         max-width: var(--measure-form);
         width: 100%;
@@ -312,12 +256,6 @@ import { PASSWORD_MIN_LENGTH } from '@lib/constants';
     .signin__control {
         display: block;
         position: relative;
-    }
-
-    .signin__done .btn:not(.btn--accent):hover {
-        background-color: var(--color-ink-inverse);
-        border-color: var(--color-ink-inverse);
-        color: var(--color-ink);
     }
 
     .signin__glyph {
@@ -391,20 +329,6 @@ import { PASSWORD_MIN_LENGTH } from '@lib/constants';
         display: none;
     }
 
-    .signin__summary {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2xs);
-    }
-
-    .signin__summary-row {
-        border-bottom: 1px solid var(--color-ink-inverse-10);
-        display: flex;
-        gap: var(--space-md);
-        justify-content: space-between;
-        padding-bottom: var(--space-2xs);
-    }
-
     .signin__tab {
         align-items: center;
         background-color: var(--color-surface);
@@ -443,6 +367,10 @@ import { PASSWORD_MIN_LENGTH } from '@lib/constants';
         color: var(--color-ink);
     }
 
+    :global([data-session='in']) .signin-stage {
+        display: none;
+    }
+
     @media (forced-colors: active) {
         .signin__tab:has(.signin__radio:checked) {
             background-color: SelectedItem;
@@ -453,9 +381,11 @@ import { PASSWORD_MIN_LENGTH } from '@lib/constants';
 </style>
 
 <script>
+    import { navigate } from 'astro:transitions/client';
+
     import { clearFieldErrors, confirmRule, focusFirstError, isValidationBypassed, passwordRule, setFieldErrors, validateFields } from '@lib/ui/forms';
-    import { endSession, getSession, startSession } from '@lib/account/session';
-    import { formatProds, registerPageScript, setPending, setText } from '@lib/utils';
+    import { getSession, onSessionChange, startSession } from '@lib/account/session';
+    import { registerPageScript, setPending } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
 
     const ERROR_FIELDS: Record<SessionErrorCode, string> = {
@@ -478,6 +408,8 @@ import { PASSWORD_MIN_LENGTH } from '@lib/constants';
         password: passwordRule(),
     };
 
+    let unsubscribe: (() => void) | undefined;
+
     function handleReveal(button: HTMLButtonElement) {
         const input = document.getElementById(button.dataset.reveal ?? '');
         const shown = button.getAttribute('aria-pressed') === 'true';
@@ -489,23 +421,18 @@ import { PASSWORD_MIN_LENGTH } from '@lib/constants';
         input.type = shown ? 'password' : 'text';
     }
 
-    async function handleSignOut(button: HTMLButtonElement) {
-        setPending(button, true);
-
-        await endSession();
-
-        setPending(button, false);
-        renderSession();
-        toast('Signed out.', 'info');
-        document.querySelector<HTMLInputElement>('#signin-email')?.focus();
+    function handleSessionChange(session: Session | null) {
+        if (session) void navigate('/settings');
     }
 
     async function handleSubmit(event: SubmitEvent, form: HTMLFormElement) {
         event.preventDefault();
 
         const signup = form.dataset.authForm === 'signup';
+
         const rules = signup ? SIGNUP_RULES : SIGNIN_RULES;
         const values = new FormData(form);
+
         const errors = validateFields(form, rules);
 
         clearFieldErrors(form);
@@ -541,17 +468,26 @@ import { PASSWORD_MIN_LENGTH } from '@lib/constants';
         const message = signup ? 'Account created. You are signed in.' : `Signed in as ${sessionLabel(result.session)}.`;
 
         form.reset();
-        renderSession();
         toast(message, 'success');
-        document.querySelector<HTMLElement>('[data-auth-heading]')?.focus();
+
+        await navigate('/settings');
     }
 
     function initSignInForm(signal: AbortSignal) {
         const forms = document.querySelectorAll<HTMLFormElement>('[data-auth-form]');
         const reveals = document.querySelectorAll<HTMLButtonElement>('[data-reveal]');
-        const signOut = document.querySelector<HTMLButtonElement>('[data-auth-signout]');
 
         if (forms.length === 0) return;
+
+        if (getSession()) {
+            void navigate('/settings', { history: 'replace' });
+
+            return;
+        }
+
+        unsubscribe?.();
+        unsubscribe = onSessionChange(handleSessionChange);
+        signal.addEventListener('abort', () => unsubscribe?.(), { once: true });
 
         forms.forEach((form) => {
             form.noValidate = true;
@@ -561,9 +497,6 @@ import { PASSWORD_MIN_LENGTH } from '@lib/constants';
         reveals.forEach((button) => {
             button.addEventListener('click', () => handleReveal(button), { signal });
         });
-
-        signOut?.addEventListener('click', () => void handleSignOut(signOut), { signal });
-        renderSession();
     }
 
     function readEmail(values: FormData) {
@@ -572,24 +505,6 @@ import { PASSWORD_MIN_LENGTH } from '@lib/constants';
         if (email.length > 0 || !isValidationBypassed()) return email;
 
         return PLACEHOLDER_EMAIL;
-    }
-
-    function renderSession() {
-        const done = document.querySelector<HTMLElement>('[data-auth-done]');
-        const gate = document.querySelector<HTMLElement>('[data-auth-gate]');
-        const link = document.querySelector<HTMLAnchorElement>('[data-auth-onboarding]');
-        const session = getSession();
-
-        gate?.toggleAttribute('hidden', session !== null);
-        done?.toggleAttribute('hidden', session === null);
-
-        if (!session) return;
-
-        setText(document.querySelector<HTMLElement>('[data-auth-email]'), session.email);
-        setText(document.querySelector<HTMLElement>('[data-auth-prods]'), formatProds(session.prods));
-        setText(document.querySelector<HTMLElement>('[data-auth-profile]'), session.onboarded ? 'Complete' : 'Not finished');
-
-        link?.toggleAttribute('hidden', session.onboarded);
     }
 
     function sessionLabel(session: Session) {

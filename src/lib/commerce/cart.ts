@@ -1,5 +1,5 @@
-import { BASIS_POINTS_DIVISOR, CENTS_PER_DOLLAR, COMMERCE, STORAGE } from '@lib/constants';
-import { createStore } from '@lib/state';
+import { BASIS_POINTS_DIVISOR, CENTS_PER_DOLLAR, COMMERCE, STORAGE } from '@lib/shared/constants';
+import { createStore } from '@lib/shared/state';
 
 const SEED_ITEMS: CartItem[] = [
     { color: 'Bone', image: 'tick-tee-1', priceCents: 3_500, productSlug: 'tick-tee', quantity: 1, size: 'M', title: 'Tick Tee' },
@@ -168,15 +168,15 @@ function subtotalCents(items = getItems()): number {
 function totals(items = getItems(), prodsApplied = 0): CartTotals {
     const subtotal = subtotalCents(items);
 
-    const shippingCents = subtotal === 0 || subtotal >= COMMERCE.freeShippingThresholdCents ? 0 : COMMERCE.shippingFlatCents;
     const taxCents = Math.round(subtotal * COMMERCE.taxBasisPoints / BASIS_POINTS_DIVISOR);
 
-    const dueCents = subtotal + taxCents + shippingCents;
+    const dueCents = subtotal + taxCents;
+
     const discountCents = Math.min(prodsToCents(prodsApplied), dueCents);
 
     return {
         discountCents,
-        shippingCents,
+        shippingCents: 0,
         subtotalCents: subtotal,
         taxCents,
         totalCents: dueCents - discountCents,

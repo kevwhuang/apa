@@ -68,7 +68,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
                     class="min-w-0 wrap-break-word"
                     data-order-shipping
                 >
-                    &mdash;
+                    $0.00
                 </dd>
             </div>
             <div class="flex justify-between gap-3 mb-2">
@@ -139,7 +139,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
         </SectionHead>
         <div data-motion="unfold">
             <p
-                class="slab slab--card max-w-xl w-full mx-auto leading-relaxed text-center text-ink-muted"
+                class="slab slab--card max-w-(--measure-form) w-full mx-auto leading-relaxed text-ink-muted"
                 data-order-empty
             >
                 No orders yet &mdash; receipts from the store land here.
@@ -235,7 +235,9 @@ import SectionHead from '@components/shared/SectionHead.astro';
         align-items: center;
         display: flex;
         min-height: var(--space-md);
-        transition: color var(--duration-fast) var(--motion-ease-ui), font-weight var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            font-weight var(--duration-fast) var(--motion-ease-ui);
         width: 100%;
     }
 
@@ -258,7 +260,9 @@ import SectionHead from '@components/shared/SectionHead.astro';
 
     .order__row {
         cursor: pointer;
-        transition: background-color var(--duration-fast) var(--motion-ease-ui), translate var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
+            translate var(--duration-fast) var(--motion-ease-ui);
     }
 
     .order__row:active {
@@ -313,27 +317,33 @@ import SectionHead from '@components/shared/SectionHead.astro';
 </style>
 
 <script>
-    import { MILLISECONDS_PER_DAY } from '@lib/constants';
-    import { formatDateStamp, formatPrice, formatVariant, registerPageScript, setText, toIsoDate } from '@lib/utils';
+    import { MILLISECONDS_PER_DAY } from '@lib/shared/constants';
+    import { formatDateStamp, formatPrice, formatVariant, registerPageScript, setText, toIsoDate } from '@lib/shared/utils';
     import { getLastOrder } from '@lib/commerce/checkout';
     import { totals } from '@lib/commerce/cart';
 
     const NEWEST_ORDER_AGE_DAYS = 9;
+
     const NEWEST_ORDER_ITEMS: CartItem[] = [
         { color: 'Bone', image: 'tick-tee-1', priceCents: 3_500, productSlug: 'tick-tee', quantity: 1, size: 'M', title: 'Tick Tee' },
         { image: 'stickers-1', priceCents: 800, productSlug: 'sticker-pack', quantity: 2, title: 'Sticker Pack' },
         { color: 'Natural', image: 'tote-1', priceCents: 2_200, productSlug: 'tote-bag', quantity: 1, title: 'Tote Bag' },
     ];
+
     const OLDER_ORDER_AGE_DAYS = 24;
+
     const OLDER_ORDER_ITEMS: CartItem[] = [
         { image: 'stickers-1', priceCents: 800, productSlug: 'sticker-pack', quantity: 2, title: 'Sticker Pack' },
         { color: 'Natural', image: 'tote-1', priceCents: 2_200, productSlug: 'tote-bag', quantity: 1, title: 'Tote Bag' },
     ];
+
     const OLDEST_ORDER_AGE_DAYS = 96;
+
     const OLDEST_ORDER_ITEMS: CartItem[] = [
         { color: 'Charcoal', image: 'hoodie-1', priceCents: 7_800, productSlug: 'bash-hoodie', quantity: 1, size: 'L', title: 'Bash Hoodie' },
         { image: 'stickers-1', priceCents: 800, productSlug: 'sticker-pack', quantity: 1, title: 'Sticker Pack' },
     ];
+
     const PAST_ORDERS: Order[] = [
         {
             email: 'p\u2022\u2022\u2022\u2022\u2022\u2022@example.com',
@@ -357,6 +367,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
             totals: totals(OLDEST_ORDER_ITEMS),
         },
     ];
+
     const RECEIPT_FRESH_MS = 120_000;
 
     let orders: Order[] = [];
@@ -393,7 +404,6 @@ import SectionHead from '@components/shared/SectionHead.astro';
 
     function renderHeading(order: Order, fresh: boolean) {
         document.querySelector<HTMLElement>('[data-order-mark]')?.toggleAttribute('hidden', !fresh);
-
         setText(document.querySelector('[data-order-heading]'), fresh ? 'Order received.' : 'Your orders.');
         setText(document.querySelector('[data-order-number]'), `Order ${order.id} \u00b7 ${formatDateStamp(new Date(order.placedAt))}`);
     }
@@ -429,6 +439,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
 
         orders.forEach((order, index) => {
             const fragment = template.content.cloneNode(true) as DocumentFragment;
+
             const pick = fragment.querySelector('[data-cell="id"]');
             const placedDate = new Date(order.placedAt);
             const row = fragment.querySelector('[data-order-index]');
@@ -442,9 +453,9 @@ import SectionHead from '@components/shared/SectionHead.astro';
                 setText(stamp, formatDateStamp(placedDate));
             });
 
-            setText(pick, order.id);
             setText(fragment.querySelector('[data-cell="items"]'), formatItemsSummary(order.items));
             setText(fragment.querySelector('[data-cell="total"]'), formatPrice(order.totals.totalCents));
+            setText(pick, order.id);
             body.append(fragment);
         });
 
@@ -456,9 +467,8 @@ import SectionHead from '@components/shared/SectionHead.astro';
         const row = document.querySelector<HTMLElement>('[data-order-discount-row]');
 
         row?.toggleAttribute('hidden', summary.discountCents === 0);
-
         setText(document.querySelector('[data-order-discount]'), `\u2212${formatPrice(summary.discountCents)}`);
-        setText(document.querySelector('[data-order-shipping]'), summary.shippingCents === 0 ? 'Free' : formatPrice(summary.shippingCents));
+        setText(document.querySelector('[data-order-shipping]'), formatPrice(summary.shippingCents));
         setText(document.querySelector('[data-order-subtotal]'), formatPrice(summary.subtotalCents));
         setText(document.querySelector('[data-order-tax]'), formatPrice(summary.taxCents));
         setText(document.querySelector('[data-order-total]'), formatPrice(summary.totalCents));

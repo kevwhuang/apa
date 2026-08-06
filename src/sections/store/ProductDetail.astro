@@ -1,7 +1,7 @@
 ---
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import { COMMERCE, PALETTE } from '@lib/constants';
-import { formatPrice, getStockLabel } from '@lib/utils';
+import { COMMERCE, PALETTE } from '@lib/shared/constants';
+import { formatPrice, getStockLabel } from '@lib/shared/utils';
 
 import type { CollectionEntry } from 'astro:content';
 
@@ -11,10 +11,10 @@ interface Props {
 
 const imageColors = PALETTE.slice(0, 3);
 const { product } = Astro.props;
-const { slug = '' } = Astro.params;
 
 const ceiling = Math.min(product.stock, COMMERCE.maxQuantityPerItem);
 const inStock = product.stock > 0;
+const { slug = '' } = Astro.params;
 ---
 
 <nav
@@ -211,7 +211,9 @@ const inStock = product.stock > 0;
         align-items: center;
         display: inline-flex;
         min-height: var(--control-size);
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .product__crumb:active {
@@ -228,7 +230,9 @@ const inStock = product.stock > 0;
 
     .product__summary {
         list-style: none;
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .product__summary::marker {
@@ -240,11 +244,15 @@ const inStock = product.stock > 0;
     }
 
     .product__swatch {
-        transition: border-color var(--duration-fast) var(--motion-ease-ui), box-shadow var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            box-shadow var(--duration-fast) var(--motion-ease-ui);
     }
 
     .product__swatch[aria-pressed='true'] {
-        box-shadow: 0 0 0 3px var(--color-surface), 0 0 0 5px var(--color-ink);
+        box-shadow:
+            0 0 0 3px var(--color-surface),
+            0 0 0 5px var(--color-ink);
     }
 
     [data-color] {
@@ -259,9 +267,9 @@ const inStock = product.stock > 0;
 </style>
 
 <script>
-    import { COMMERCE } from '@lib/constants';
+    import { COMMERCE } from '@lib/shared/constants';
     import { add, getItems } from '@lib/commerce/cart';
-    import { registerPageScript } from '@lib/utils';
+    import { registerPageScript } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
 
     let maxQuantity = 1;

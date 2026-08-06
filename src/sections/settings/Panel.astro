@@ -1,8 +1,11 @@
 ---
+import IconEye from '@components/icons/Eye.astro';
+import IconEyeOff from '@components/icons/EyeOff.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import { ARTIST_NAME_MAX_LENGTH, GENRES, PASSWORD_MIN_LENGTH, ROLES, UPLOAD, UPLOAD_EXTENSIONS_LABEL, US_STATES } from '@lib/constants';
-import { formatBytes, formatDateStamp, formatProds, getInitials, getStanding, pickTileColor } from '@lib/utils';
+import { ARTIST_NAME_MAX_LENGTH, AVATAR, GENRES, PASSWORD_MIN_LENGTH, ROLES, UPLOAD, UPLOAD_EXTENSIONS_LABEL, US_STATES } from '@lib/shared/constants';
+import { AVATAR_EXTENSIONS_OR_LIST } from '@lib/account/images';
+import { formatBytes, formatDateStamp, formatProds, getInitials, getStanding, pickTileColor } from '@lib/shared/utils';
 
 const ATTENDANCE = [
     { date: '2026-07-22T19:00:00-05:00', event: 'Hangout \u00b7 July' },
@@ -78,9 +81,9 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
             class="max-w-2xl text-lmd text-ink-muted"
             data-motion="rise"
         >
-            Everything your roster card carries: the name people read, a short bio, what you make,
-            where you are based, where else you live online, and the spotlight track that plays on
-            the card.
+            Everything your roster card carries: the name people read, the portrait behind it, a
+            short bio, what you make, where you are based, where else you live online, and the
+            spotlight track that plays on the card.
         </p>
     </div>
 </section>
@@ -99,11 +102,18 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
                     <p class="label mb-4 text-ink-muted">Your card</p>
                     <div class="flex flex-wrap gap-5">
                         <PlaceholderTile
-                            class="settings__tile aspect-square shrink-0 w-[104px] border-2 border-ink"
+                            class="settings__tile self-start shrink-0 aspect-square w-[104px] border-2 border-ink"
                             color={pickTileColor(DEMO_PROFILE.artistName)}
                             label={getInitials(DEMO_PROFILE.artistName)}
                             labelClass="settings__initials leading-none text-[38cqw] text-surface-raised/80 [text-shadow:2px_2px_0_var(--color-ink-20)]"
-                        />
+                        >
+                            <img
+                                class="absolute inset-0 object-cover h-full w-full"
+                                alt=""
+                                data-settings-avatar
+                                hidden
+                            />
+                        </PlaceholderTile>
                         <div class="settings__facts">
                             <p
                                 class="mb-2 font-extrabold font-sans text-xl tracking-tight wrap-break-word"
@@ -193,6 +203,53 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
                 Profile
             </h2>
             <div class="flex flex-col gap-2">
+                <p class="label mb-1 text-ink-muted">Portrait</p>
+                <div class="settings__track">
+                    <label class="settings__pick">
+                        <span class="label">Choose an image</span>
+                        <input
+                            id="settings-portrait"
+                            class="settings__file sr-only"
+                            accept={AVATAR.acceptAttribute}
+                            aria-describedby="settings-portrait-error settings-portrait-help"
+                            data-portrait-input
+                            name="portrait"
+                            type="file"
+                        />
+                    </label>
+                    <div
+                        class="settings__staged settings__staged--portrait slab slab--sunk"
+                        data-portrait-staged
+                        hidden
+                    >
+                        <img
+                            class="object-cover h-16 w-16 border-2 border-ink"
+                            alt="Your staged portrait"
+                            data-portrait-preview
+                        />
+                        <button
+                            class="action-text hover:text-accent-deep flex items-center min-h-(--control-size) px-1 text-ink-muted transition-colors"
+                            data-portrait-remove
+                            type="button"
+                        >
+                            Remove
+                        </button>
+                    </div>
+                </div>
+                <p
+                    id="settings-portrait-error"
+                    class="action-text text-accent-deep"
+                    data-field-error
+                    hidden
+                />
+                <p
+                    id="settings-portrait-help"
+                    class="text-sm text-ink-subtle"
+                >
+                    {AVATAR_EXTENSIONS_OR_LIST}. Up to {formatBytes(AVATAR.maxFileBytes)}, at least {AVATAR.minEdgePixels}px on each side.
+                </p>
+            </div>
+            <div class="flex flex-col gap-2">
                 <label class="block">
                     <span class="label block mb-2 text-ink-muted">Artist name</span>
                     <input
@@ -203,7 +260,6 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
                         autocomplete="nickname"
                         maxlength={ARTIST_NAME_MAX_LENGTH}
                         name="artistName"
-                        required
                         type="text"
                         value={DEMO_PROFILE.artistName}
                     />
@@ -249,9 +305,8 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
             </div>
             <fieldset class="settings__group flex flex-col gap-3">
                 <legend class="label mb-1 text-ink-muted">
-                    What you make
+                    What you make <span class="text-ink-subtle">/ Pick up to five</span>
                 </legend>
-                <p class="text-sm text-ink-subtle">Pick up to five.</p>
                 <div class="flex flex-wrap gap-2">
                     {GENRES.map(genre => (
                         <label class="settings__chip">
@@ -277,9 +332,8 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
             </fieldset>
             <fieldset class="settings__group flex flex-col gap-3">
                 <legend class="label mb-1 text-ink-muted">
-                    What do you do?
+                    What do you do? <span class="text-ink-subtle">/ Pick one</span>
                 </legend>
-                <p class="text-sm text-ink-subtle">Pick one.</p>
                 <div class="flex flex-wrap gap-2">
                     {roles.map(role => (
                         <label class="settings__chip">
@@ -410,17 +464,33 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
             <div class="flex flex-col gap-2">
                 <label class="block">
                     <span class="label block mb-2 text-ink-muted">New password</span>
-                    <input
-                        id="settings-password"
-                        class="input font-sans"
-                        aria-describedby="settings-password-error"
-                        aria-invalid="false"
-                        autocomplete="new-password"
-                        minlength={PASSWORD_MIN_LENGTH}
-                        name="password"
-                        required
-                        type="password"
-                    />
+                    <span class="settings__control">
+                        <input
+                            id="settings-password"
+                            class="input pr-12 font-sans"
+                            aria-describedby="settings-password-error"
+                            aria-invalid="false"
+                            autocomplete="new-password"
+                            minlength={PASSWORD_MIN_LENGTH}
+                            name="password"
+                            required
+                            type="password"
+                        />
+                        <button
+                            class="settings__reveal"
+                            aria-label="Show password"
+                            aria-pressed="false"
+                            data-reveal="settings-password"
+                            type="button"
+                        >
+                            <span class="settings__glyph settings__glyph--show">
+                                <IconEye />
+                            </span>
+                            <span class="settings__glyph settings__glyph--hide">
+                                <IconEyeOff />
+                            </span>
+                        </button>
+                    </span>
                 </label>
                 <p
                     id="settings-password-error"
@@ -435,16 +505,32 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
             <div class="flex flex-col gap-2">
                 <label class="block">
                     <span class="label block mb-2 text-ink-muted">Confirm new password</span>
-                    <input
-                        id="settings-confirm"
-                        class="input font-sans"
-                        aria-describedby="settings-confirm-error"
-                        aria-invalid="false"
-                        autocomplete="new-password"
-                        name="confirm"
-                        required
-                        type="password"
-                    />
+                    <span class="settings__control">
+                        <input
+                            id="settings-confirm"
+                            class="input pr-12 font-sans"
+                            aria-describedby="settings-confirm-error"
+                            aria-invalid="false"
+                            autocomplete="new-password"
+                            name="confirm"
+                            required
+                            type="password"
+                        />
+                        <button
+                            class="settings__reveal"
+                            aria-label="Show password"
+                            aria-pressed="false"
+                            data-reveal="settings-confirm"
+                            type="button"
+                        >
+                            <span class="settings__glyph settings__glyph--show">
+                                <IconEye />
+                            </span>
+                            <span class="settings__glyph settings__glyph--hide">
+                                <IconEyeOff />
+                            </span>
+                        </button>
+                    </span>
                 </label>
                 <p
                     id="settings-confirm-error"
@@ -548,7 +634,7 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
             <p class="max-w-2xl text-sm text-ink-subtle">
                 Every event you have checked in to since you joined, newest first.
             </p>
-            <div class="settings__scroller settings__scroller--attendance scroll-slot">
+            <div class="scroll-slot settings__scroller settings__scroller--attendance">
                 <table class="settings__table border-2 border-ink">
                     <caption class="sr-only">Events you checked in to, with the date of each check-in</caption>
                     <thead>
@@ -599,7 +685,7 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
                 Every Prod earned or spent since you joined, newest first, with the balance that
                 stood after each entry.
             </p>
-            <div class="settings__scroller settings__scroller--ledger scroll-slot">
+            <div class="scroll-slot settings__scroller settings__scroller--ledger">
                 <table class="settings__table settings__table--wide border-2 border-ink">
                     <caption class="sr-only">Dated ledger entries with reason, change, and running balance</caption>
                     <thead>
@@ -665,18 +751,13 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
         transition: background-color var(--duration-fast) var(--motion-ease-ui);
     }
 
-    .settings__chip:active,
-    .settings__chip:hover {
-        background-color: var(--color-surface);
-    }
-
     .settings__chip:has(.box:checked) {
         background-color: var(--color-surface-sunken);
     }
 
-    .settings__chip:has(.box:checked):active,
-    .settings__chip:has(.box:checked):hover {
-        background-color: var(--color-accent-20);
+    .settings__control {
+        display: block;
+        position: relative;
     }
 
     .settings__empty {
@@ -711,6 +792,11 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
         display: flex;
         flex-direction: column;
         gap: var(--space-md);
+    }
+
+    .settings__glyph {
+        align-items: center;
+        display: flex;
     }
 
     .settings__group {
@@ -775,6 +861,49 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
         border-color: var(--color-accent-deep);
     }
 
+    .settings__reveal {
+        align-items: center;
+        bottom: 0;
+        color: var(--color-ink-muted);
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
+        width: 48px;
+    }
+
+    .settings__reveal::after {
+        content: '';
+        height: 48px;
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 48px;
+    }
+
+    .settings__reveal:active {
+        transform: translateY(1px);
+    }
+
+    .settings__reveal:focus-visible {
+        outline-offset: -4px;
+    }
+
+    .settings__reveal:hover {
+        color: var(--color-accent-deep);
+    }
+
+    .settings__reveal[aria-pressed='false'] .settings__glyph--hide,
+    .settings__reveal[aria-pressed='true'] .settings__glyph--show {
+        display: none;
+    }
+
     .settings__role {
         min-height: var(--space-lg);
         text-transform: capitalize;
@@ -809,6 +938,10 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
         row-gap: var(--space-3xs);
     }
 
+    .settings__staged--portrait {
+        padding-block: var(--space-2xs);
+    }
+
     .settings__stats {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -841,25 +974,21 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
     }
 
     @media (max-width: 768px) {
+        .settings__pair,
         .settings__stats {
-            grid-template-columns: minmax(0, 1fr);
-        }
-    }
-
-    @media (max-width: 640px) {
-        .settings__pair {
             grid-template-columns: minmax(0, 1fr);
         }
     }
 </style>
 
 <script>
-    import { MOCK_LATENCY_MS, UPLOAD } from '@lib/constants';
+    import { MOCK_LATENCY_MS, UPLOAD } from '@lib/shared/constants';
     import { UPLOAD_EXTENSIONS_OR_LIST, getExtension, getSizeError } from '@lib/audio/uploads';
     import { clearFieldErrors, confirmRule, focusFirstError, isValidationBypassed, passwordRule, setFieldErrors, validateFields } from '@lib/ui/forms';
-    import { delay, formatBytes, formatDateStamp, formatProds, getInitials, getStanding, pickTileColor, registerPageScript, setPending, setText } from '@lib/utils';
+    import { delay, formatBytes, formatDateStamp, formatProds, getInitials, getStanding, pickTileColor, registerPageScript, setAvatarImage, setPending, setText } from '@lib/shared/utils';
     import { getOnboardingHref } from '@lib/account/onboarding';
     import { getSession, onSessionChange, updateSession } from '@lib/account/session';
+    import { stageAvatar } from '@lib/account/images';
     import { toast } from '@lib/ui/toasts';
 
     const GENRE_MAX = 5;
@@ -878,7 +1007,6 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
     };
 
     const PROFILE_RULES: Record<string, FieldRule> = {
-        artistName: { message: 'Enter the name the roster should show.', required: true },
         city: { message: 'Name the city you work out of.', required: true },
     };
 
@@ -886,6 +1014,8 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
     const TRACK_MISSING_MESSAGE = 'Stage an audio file before you save.';
 
     let demoSummary = { email: '', name: '', prods: '', role: '', since: '', standing: '' };
+    let stagedAvatar = '';
+    let staging = false;
     let unsubscribe: (() => void) | undefined;
 
     function handleBioInput(field: HTMLTextAreaElement) {
@@ -946,12 +1076,45 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
             return;
         }
 
+        form.querySelectorAll<HTMLButtonElement>('[aria-pressed="true"][data-reveal]').forEach(button => handleReveal(button));
         form.reset();
         toast('Password updated.', 'success');
     }
 
+    async function handlePortraitChange(form: HTMLFormElement, input: HTMLInputElement) {
+        const file = input.files?.item(0);
+
+        input.value = '';
+
+        if (staging || !file) return;
+
+        staging = true;
+
+        try {
+            const staged = await stageAvatar(file);
+
+            clearFieldErrors(form);
+
+            if (!staged.ok) {
+                setFieldErrors(form, { portrait: staged.message });
+                input.focus();
+                toast(staged.message, 'error');
+
+                return;
+            }
+
+            stagedAvatar = staged.dataUrl;
+            renderPortrait(form);
+            toast('Portrait staged.', 'success');
+        } finally {
+            staging = false;
+        }
+    }
+
     async function handleProfileSubmit(event: SubmitEvent, form: HTMLFormElement) {
         event.preventDefault();
+
+        if (staging) return;
 
         const values = new FormData(form);
         const errors = validateFields(form, PROFILE_RULES);
@@ -974,6 +1137,7 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
 
         const saved = await updateSession({
             artistName: String(values.get('artistName') ?? '').trim(),
+            avatar: stagedAvatar,
             role: String(values.get('role') ?? ''),
         });
 
@@ -985,7 +1149,24 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
             return;
         }
 
+        if (stagedAvatar && getSession()?.avatar !== stagedAvatar) {
+            toast('That portrait could not be stored. Try a smaller image.', 'error');
+
+            return;
+        }
+
         toast('Profile saved.', 'success');
+    }
+
+    function handleReveal(button: HTMLButtonElement) {
+        const input = document.getElementById(button.dataset.reveal ?? '');
+        const shown = button.getAttribute('aria-pressed') === 'true';
+
+        if (!(input instanceof HTMLInputElement)) return;
+
+        button.setAttribute('aria-label', shown ? 'Show password' : 'Hide password');
+        button.setAttribute('aria-pressed', shown ? 'false' : 'true');
+        input.type = shown ? 'password' : 'text';
     }
 
     function handleTrackChange(form: HTMLFormElement, input: HTMLInputElement) {
@@ -1045,6 +1226,7 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
 
         const bio = profile.querySelector<HTMLTextAreaElement>('[name="bio"]');
         const file = track.querySelector<HTMLInputElement>('[data-track-input]');
+        const picture = profile.querySelector<HTMLInputElement>('[data-portrait-input]');
 
         demoSummary = {
             email: readText('[data-settings-email]'),
@@ -1059,20 +1241,26 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
         password.noValidate = true;
         profile.noValidate = true;
         track.noValidate = true;
-
         unsubscribe?.();
         unsubscribe = onSessionChange(renderSession);
-        signal.addEventListener('abort', () => unsubscribe?.(), { once: true });
-
         bio?.addEventListener('input', () => handleBioInput(bio), { signal });
         file?.addEventListener('change', () => handleTrackChange(track, file), { signal });
         links.addEventListener('submit', event => void handleLinksSubmit(event, links), { signal });
         password.addEventListener('submit', event => void handlePasswordSubmit(event, password), { signal });
+
+        password.querySelectorAll<HTMLButtonElement>('[data-reveal]').forEach((button) => {
+            button.addEventListener('click', () => handleReveal(button), { signal });
+        });
+
+        picture?.addEventListener('change', () => void handlePortraitChange(profile, picture), { signal });
         profile.addEventListener('submit', event => void handleProfileSubmit(event, profile), { signal });
+        profile.querySelector<HTMLButtonElement>('[data-portrait-remove]')?.addEventListener('click', () => removePortrait(profile), { signal });
+        signal.addEventListener('abort', () => unsubscribe?.(), { once: true });
         track.addEventListener('submit', event => void handleTrackSubmit(event, track), { signal });
         track.querySelector<HTMLButtonElement>('[data-track-remove]')?.addEventListener('click', () => removeTrack(track), { signal });
-
+        stagedAvatar = getSession()?.avatar ?? '';
         prefillProfile(profile);
+        renderPortrait(profile);
         renderSession();
     }
 
@@ -1091,6 +1279,14 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
         return document.querySelector<HTMLElement>(selector)?.textContent?.trim() ?? '';
     }
 
+    function removePortrait(form: HTMLFormElement) {
+        stagedAvatar = '';
+        clearFieldErrors(form);
+        renderPortrait(form);
+        form.querySelector<HTMLInputElement>('[data-portrait-input]')?.focus();
+        toast('Portrait removed.', 'info');
+    }
+
     function removeTrack(form: HTMLFormElement) {
         const empty = form.querySelector<HTMLElement>('[data-track-empty]');
         const staged = form.querySelector<HTMLElement>('[data-track-staged]');
@@ -1104,6 +1300,13 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
         toast('Track removed.', 'info');
     }
 
+    function renderPortrait(form: HTMLFormElement) {
+        const staged = form.querySelector<HTMLElement>('[data-portrait-staged]');
+
+        setAvatarImage(form.querySelector<HTMLImageElement>('[data-portrait-preview]'), stagedAvatar);
+        staged?.toggleAttribute('hidden', stagedAvatar.length === 0);
+    }
+
     function renderSession() {
         const link = document.querySelector<HTMLAnchorElement>('[data-settings-onboarding]');
         const session = getSession();
@@ -1115,6 +1318,7 @@ const roles = ROLES.filter(role => PROFILE_ROLES.includes(role.id));
         if (tile) tile.style.background = pickTileColor(name);
 
         document.querySelectorAll<HTMLElement>('[data-settings-role]').forEach(element => setText(element, role));
+        setAvatarImage(document.querySelector<HTMLImageElement>('[data-settings-avatar]'), session?.avatar ?? '');
         setText(document.querySelector('.settings__initials'), getInitials(name));
         setText(document.querySelector('[data-settings-email]'), session?.email ?? demoSummary.email);
         setText(document.querySelector('[data-settings-name]'), name);

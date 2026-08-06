@@ -4,14 +4,15 @@ import {
     ONBOARDING_TOKEN_PARAM,
     ONBOARDING_TOKEN_TTL_HOURS,
     STORAGE,
-} from '@lib/constants';
-import { createStore } from '@lib/state';
-import { getSession } from '@lib/account/session';
+} from '@lib/shared/constants';
+import { createStore } from '@lib/shared/state';
+import { normalizeAvatar } from '@lib/account/images';
 
 const BASE64_GROUP = 4;
 
 const DEFAULT_DRAFT: OnboardingDraft = {
     artistName: '',
+    avatar: '',
     email: '',
     genres: [],
     location: '',
@@ -77,6 +78,7 @@ function normalizeDraft(value: OnboardingDraft): OnboardingDraft {
 
     return {
         artistName: String(value.artistName ?? ''),
+        avatar: normalizeAvatar(String(value.avatar ?? '')),
         email: String(value.email ?? ''),
         genres: Array.isArray(value.genres) ? value.genres.map(String) : [],
         location: String(value.location ?? ''),
@@ -96,7 +98,6 @@ function verifyOnboardingToken(token: string | null): OnboardingGate {
 
     if (!decoded) return { reason: 'malformed', state: 'rejected' };
     if (Date.now() - decoded.issuedAt > ONBOARDING_TOKEN_TTL_HOURS * MILLISECONDS_PER_HOUR) return { reason: 'expired', state: 'rejected' };
-    if (getSession()?.onboarded === true) return { reason: 'completed', state: 'rejected' };
 
     return { email: decoded.email, state: 'granted', token: decoded };
 }

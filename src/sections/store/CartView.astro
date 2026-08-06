@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 
 import IconTrash from '@components/icons/Trash.astro';
 import PageHead from '@components/shared/PageHead.astro';
-import { toCatalog } from '@lib/utils';
+import { toCatalog } from '@lib/shared/utils';
 
 const catalog = toCatalog(await getCollection('products'));
 ---
@@ -37,7 +37,7 @@ const catalog = toCatalog(await getCollection('products'));
     <div class="cart__grid grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <div class="cart__main flex flex-col gap-6">
             <aside
-                class="cart__notice slab slab--card flex flex-col gap-4"
+                class="cart__notice slab slab--card flex flex-col max-w-(--measure-form) w-full gap-4 mx-auto"
                 aria-label="Cart changes"
                 data-cart-notice
                 hidden
@@ -57,12 +57,12 @@ const catalog = toCatalog(await getCollection('products'));
                 </button>
             </aside>
             <div
-                class="slab slab--card slab--roomy max-w-xl w-full mx-auto text-center"
+                class="slab slab--card flex flex-col items-start max-w-(--measure-form) w-full gap-4 mx-auto"
                 data-cart-empty
                 tabindex="-1"
             >
-                <p class="label mb-3 text-ink-muted">Empty</p>
-                <p class="mb-6 font-extrabold font-sans text-2xl">Nothing in the cart yet.</p>
+                <p class="label text-ink-muted">Empty</p>
+                <p class="font-extrabold font-sans text-2xl">Nothing in the cart yet.</p>
                 <a
                     class="btn btn--primary"
                     href="/store"
@@ -93,7 +93,7 @@ const catalog = toCatalog(await getCollection('products'));
                 </div>
                 <div class="flex justify-between gap-3">
                     <dt>Shipping</dt>
-                    <dd data-shipping>&mdash;</dd>
+                    <dd data-shipping>$0.00</dd>
                 </div>
                 <div class="flex justify-between gap-3">
                     <dt>Estimated tax</dt>
@@ -109,11 +109,6 @@ const catalog = toCatalog(await getCollection('products'));
                     </dd>
                 </div>
             </dl>
-            <p
-                class="action-text mb-6 text-ink-subtle"
-                data-cart-shipping-hint
-                hidden
-            />
             <a
                 class="btn btn--primary cart-checkout w-full"
                 aria-disabled="true"
@@ -126,7 +121,7 @@ const catalog = toCatalog(await getCollection('products'));
     <template data-cart-row>
         <li class="cart-items__row slab slab--bare slab--card">
             <div
-                class="cart-items__tile aspect-square flex items-center justify-center overflow-hidden relative"
+                class="cart-items__tile flex items-center justify-center overflow-hidden relative aspect-square"
                 aria-hidden="true"
                 data-row-tile
             >
@@ -207,7 +202,11 @@ const catalog = toCatalog(await getCollection('products'));
 
 <style>
     .cart-checkout {
-        transition: background var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            background var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .cart-checkout[aria-disabled='true'] {
@@ -254,7 +253,9 @@ const catalog = toCatalog(await getCollection('products'));
         flex-shrink: 0;
         height: var(--control-size);
         justify-content: center;
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
         width: var(--control-size);
     }
 
@@ -276,7 +277,7 @@ const catalog = toCatalog(await getCollection('products'));
     }
 
     .cart-items__row {
-        --row-tile: clamp(72px, calc(32px + 10vw), 160px);
+        --row-tile: clamp(72px, calc(42.667px + 9.1667vw), 160px);
         display: grid;
         grid-template-columns: var(--row-square, var(--row-tile)) minmax(0, 1fr);
     }
@@ -323,8 +324,8 @@ const catalog = toCatalog(await getCollection('products'));
 </style>
 
 <script>
-    import { CARD_COLORS, COMMERCE } from '@lib/constants';
-    import { formatPrice, formatVariant, parseCatalog, registerPageScript, setText } from '@lib/utils';
+    import { CARD_COLORS, COMMERCE } from '@lib/shared/constants';
+    import { formatPrice, formatVariant, parseCatalog, registerPageScript, setText } from '@lib/shared/utils';
     import { getItems, onChange, reconcile, remove, setQuantity, totals } from '@lib/commerce/cart';
     import { isValidationBypassed, renderIssueList } from '@lib/ui/forms';
     import { toast } from '@lib/ui/toasts';
@@ -405,7 +406,6 @@ const catalog = toCatalog(await getCollection('products'));
         if (!checkout || !list) return;
 
         catalog = parseCatalog(source?.dataset.catalog);
-
         renderIssueList(reconcile(catalog), notice, issueList, issueTemplate);
         renderCart(checkout, list, signal);
 
@@ -413,10 +413,10 @@ const catalog = toCatalog(await getCollection('products'));
         const unsubscribe = onChange(() => renderCart(checkout, list, signal));
 
         observer.observe(list);
-        signal.addEventListener('abort', unsubscribe, { once: true });
-        signal.addEventListener('abort', () => stopSquares(observer), { once: true });
         checkout.addEventListener('click', event => handleCheckoutClick(event, checkout), { signal });
         dismiss?.addEventListener('click', () => notice?.setAttribute('hidden', ''), { signal });
+        signal.addEventListener('abort', unsubscribe, { once: true });
+        signal.addEventListener('abort', () => stopSquares(observer), { once: true });
     }
 
     function isSquareFilled(row: HTMLElement) {
@@ -450,8 +450,8 @@ const catalog = toCatalog(await getCollection('products'));
 
         checkout.setAttribute('aria-disabled', String(items.length === 0));
         empty?.toggleAttribute('hidden', items.length > 0);
-        summary?.toggleAttribute('hidden', items.length === 0);
         list.replaceChildren();
+        summary?.toggleAttribute('hidden', items.length === 0);
 
         if (template) items.forEach((item, index) => list.append(renderRow(template, item, index, signal)));
 
@@ -499,20 +499,12 @@ const catalog = toCatalog(await getCollection('products'));
     }
 
     function renderSummary(items: CartItem[]) {
-        const hint = document.querySelector<HTMLElement>('[data-cart-shipping-hint]');
         const summary = totals(items);
-        const remaining = COMMERCE.freeShippingThresholdCents - summary.subtotalCents;
-        const hideHint = summary.subtotalCents === 0 || remaining <= 0;
 
-        setText(document.querySelector('[data-shipping]'), summary.subtotalCents === 0 ? '\u2014' : formatPrice(summary.shippingCents));
+        setText(document.querySelector('[data-shipping]'), formatPrice(summary.shippingCents));
         setText(document.querySelector('[data-subtotal]'), formatPrice(summary.subtotalCents));
         setText(document.querySelector('[data-tax]'), formatPrice(summary.taxCents));
         setText(document.querySelector('[data-total]'), formatPrice(summary.totalCents));
-
-        if (!hint) return;
-
-        hint.textContent = hideHint ? '' : `${formatPrice(remaining)} more for free shipping.`;
-        hint.toggleAttribute('hidden', hideHint);
     }
 
     function resetSquares(rows: HTMLElement[]) {
@@ -547,7 +539,7 @@ const catalog = toCatalog(await getCollection('products'));
     function skuFor(item: CartItem) {
         const position = catalog.findIndex(entry => entry.slug === item.productSlug) + 1;
 
-        return `sku-${String(position).padStart(SKU_DIGITS, '0')}`;
+        return `SKU-${String(position).padStart(SKU_DIGITS, '0')}`;
     }
 
     function squareFor(row: HTMLElement) {

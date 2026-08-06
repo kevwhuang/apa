@@ -3,8 +3,8 @@ import { getCollection } from 'astro:content';
 
 import PageHead from '@components/shared/PageHead.astro';
 import QrCode from '@components/shared/QrCode.astro';
-import { EMAIL_MAX_LENGTH } from '@lib/constants';
-import { formatDate, formatTime, mergeCalendar } from '@lib/utils';
+import { EMAIL_MAX_LENGTH } from '@lib/shared/constants';
+import { formatDate, formatTime, mergeCalendar } from '@lib/shared/utils';
 
 const DOOR_URL = 'austinproduceralliance.com/here';
 
@@ -12,6 +12,7 @@ const bashEditions = await getCollection('bash');
 const events = await getCollection('events');
 
 const { upcoming } = mergeCalendar(events, bashEditions);
+
 const nextEvent = upcoming.at(0);
 ---
 
@@ -47,10 +48,10 @@ const nextEvent = upcoming.at(0);
             aria-label="What you scanned"
             data-motion="wipe"
         >
-            <div class="door-pass__panel slab slab--well flex flex-col gap-6 h-full">
+            <div class="door-pass__panel slab slab--well flex flex-col h-full gap-6">
                 <div class="flex flex-col gap-6 mb-auto">
                     <p class="label text-accent-light">Door pass</p>
-                    <p class="door-pass__url font-mono md:text-lmd text-sm wrap-break-word">
+                    <p class="door-pass__url font-mono text-sm wrap-break-word md:text-lmd">
                         {DOOR_URL}
                     </p>
                     {nextEvent && (
@@ -356,13 +357,7 @@ const nextEvent = upcoming.at(0);
         font-size: var(--text-smd);
         gap: var(--space-xs);
         min-height: var(--control-size);
-        padding: var(--space-2xs) var(--space-sm);
-        transition: background-color var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .checkin__check:active,
-    .checkin__check:hover {
-        background-color: var(--color-surface-sunken);
+        padding-block: var(--space-2xs);
     }
 
     .checkin__link {
@@ -370,7 +365,9 @@ const nextEvent = upcoming.at(0);
         display: inline-flex;
         min-height: var(--control-size);
         padding-inline: var(--space-3xs);
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .checkin__link:active {
@@ -474,9 +471,9 @@ const nextEvent = upcoming.at(0);
 
 <script>
     import { clearFieldErrors, focusFirstError, isValidationBypassed, setFieldErrors, validateFields } from '@lib/ui/forms';
-    import { composeOnboardingEmail } from '@lib/email';
+    import { composeOnboardingEmail } from '@lib/shared/email';
     import { createOnboardingToken } from '@lib/account/onboarding';
-    import { formatProds, registerPageScript, setPending, setText } from '@lib/utils';
+    import { formatProds, registerPageScript, setPending, setText } from '@lib/shared/utils';
     import { startSession } from '@lib/account/session';
     import { toast } from '@lib/ui/toasts';
 
@@ -535,8 +532,8 @@ const nextEvent = upcoming.at(0);
         if (!done || !form) return;
 
         form.noValidate = true;
-        form.addEventListener('submit', event => handleCheckInSubmit(event, form), { signal });
         again?.addEventListener('click', () => handleCheckInAgain(form, done), { signal });
+        form.addEventListener('submit', event => handleCheckInSubmit(event, form), { signal });
     }
 
     function readEmail(values: FormData) {
@@ -552,6 +549,7 @@ const nextEvent = upcoming.at(0);
 
         paragraphs.forEach((text) => {
             const fragment = template.content.cloneNode(true) as DocumentFragment;
+
             const paragraph = fragment.querySelector('p');
 
             if (paragraph) paragraph.textContent = text;
@@ -579,10 +577,9 @@ const nextEvent = upcoming.at(0);
 
         form.setAttribute('hidden', '');
         done.removeAttribute('hidden');
-
         setText(document.querySelector<HTMLElement>('[data-checkin-email]'), session.email);
-        setText(document.querySelector<HTMLElement>('[data-checkin-prods]'), formatProds(session.prods));
         setText(document.querySelector<HTMLElement>('[data-checkin-newsletter]'), newsletter ? 'You are on the seasonal newsletter too.' : 'You are not on the newsletter.');
+        setText(document.querySelector<HTMLElement>('[data-checkin-prods]'), formatProds(session.prods));
         setText(document.querySelector<HTMLElement>('[data-mail-from]'), message.from);
         setText(document.querySelector<HTMLElement>('[data-mail-preheader]'), message.preheader);
         setText(document.querySelector<HTMLElement>('[data-mail-reply]'), message.replyTo);

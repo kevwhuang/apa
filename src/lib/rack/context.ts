@@ -13,6 +13,7 @@ let volume = 1;
 function ensureRackAudio(): RackAudio {
     if (!audio) {
         const context = new AudioContext();
+
         const master = context.createGain();
 
         master.gain.value = muted ? 0 : MASTER_LEVEL * volume;

@@ -81,6 +81,7 @@ function initHeroField(signal: AbortSignal, still: boolean): void {
 
     const holder = document.querySelector<HTMLElement>(FIELD_SELECTOR);
     const styles = getComputedStyle(document.documentElement);
+
     const accentColor = readColorToken(styles, '--hero-field-accent');
     const inkColor = readColorToken(styles, '--hero-field-ink');
 
@@ -112,6 +113,7 @@ function initPlayhead(signal: AbortSignal, still: boolean): void {
 
 function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptions): void {
     const canvas = document.createElement('canvas');
+
     const context = canvas.getContext('2d');
 
     if (!context) return;
@@ -137,25 +139,31 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
         if (!context || !inkSheet) return;
 
         const pitch = QUALITY_STEPS[quality].pitch * (mobile ? MOBILE_PITCH_SCALE : 1);
-        const cell = Math.ceil(pitch * ratio);
         const drift = 0.5 + 0.5 * Math.sin(TAU * (elapsed / DRIFT_PERIOD));
         const ripplePhase = elapsed / RIPPLE_PERIOD;
         const swellPhase = elapsed / SWELL_PERIOD;
+
+        const cell = Math.ceil(pitch * ratio);
 
         context.clearRect(0, 0, canvas.width, canvas.height);
         context.globalAlpha = tokens.alphaMax;
 
         for (let row = 0; row < rows; row += 1) {
             const depth = (row + 0.5) / rows;
+
             const ripple = Math.sin(TAU * (ripplePhase + depth * RIPPLE_CYCLES));
             const vertical = VERTICAL_FLOOR + (1 - VERTICAL_FLOOR) * (1 - Math.abs(depth * 2 - 1));
 
             for (let column = 0; column < columns; column += 1) {
                 const fraction = (column + 0.5) / columns;
+
                 const glow = GLOW_FLOOR + (1 - GLOW_FLOOR) * Math.exp(-((fraction - drift) ** 2) / GLOW_WIDTH);
                 const swell = Math.sin(TAU * (swellPhase - fraction * SWELL_CYCLES));
+
                 const wave = SWELL_FLOOR + SWELL_RANGE * (0.5 + 0.5 * (SWELL_WEIGHT * swell + (1 - SWELL_WEIGHT) * ripple));
+
                 const energy = wave * vertical * glow + bed[row * columns + column];
+
                 const level = Math.min(Math.floor(energy * SPRITE_LEVELS), SPRITE_LEVELS - 1);
 
                 if (level < 1) continue;
@@ -221,9 +229,9 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
     function start() {
         if (running || still) return;
 
-        running = true;
-        last = performance.now() / MILLISECONDS_PER_SECOND;
         handle = requestAnimationFrame(frame);
+        last = performance.now() / MILLISECONDS_PER_SECOND;
+        running = true;
     }
 
     function stop() {
@@ -258,14 +266,13 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
     canvas.className = 'hero__canvas';
     canvas.style.opacity = '0';
     holder.append(canvas);
-    resize();
     requestAnimationFrame(() => (canvas.style.opacity = '1'));
+    resize();
 
     if (still) {
         draw(0);
-
-        window.addEventListener('resize', redraw, { signal });
         signal.addEventListener('abort', () => canvas.remove());
+        window.addEventListener('resize', redraw, { signal });
 
         return;
     }
@@ -274,12 +281,12 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
 
     observer.observe(holder);
     document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()), { signal });
-    window.addEventListener('resize', resize, { signal });
     signal.addEventListener('abort', () => {
         stop();
         observer.disconnect();
         canvas.remove();
     });
+    window.addEventListener('resize', resize, { signal });
 }
 
 function slowDevice(): boolean {

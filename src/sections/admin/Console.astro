@@ -6,6 +6,7 @@ const ACTIONS = [
     {
         blurb: 'Removes every track queued for live feedback at the next Assembly, along with the notes attached to each one.',
         confirm: 'Clear all 12 feedback entries? This cannot be undone.',
+        confirmLabel: 'clear track feedback',
         count: '12 entries',
         id: 'feedback-entries',
         label: 'Clear track feedback',
@@ -14,11 +15,12 @@ const ACTIONS = [
     },
     {
         blurb: 'Removes every track submitted for the current Bash prompt, along with its uploaded stems.',
-        confirm: 'Clear all 24 intake entries and their uploads? This cannot be undone.',
+        confirm: 'Clear all 24 submission entries and their uploads? This cannot be undone.',
+        confirmLabel: 'clear Bash submissions',
         count: '24 entries',
         id: 'bash-entries',
-        label: 'Clear Bash intake',
-        name: 'Bash intake',
+        label: 'Clear Bash submissions',
+        name: 'Bash submissions',
         result: 'Cleared 24 entries.',
     },
 ];
@@ -167,7 +169,7 @@ const SWITCHES = [
                                     data-admin-result={action.result}
                                     type="button"
                                 >
-                                    Yes, {action.label.toLowerCase()}
+                                    Yes, {action.confirmLabel}
                                 </button>
                                 <button
                                     class="btn"
@@ -232,7 +234,12 @@ const SWITCHES = [
         cursor: pointer;
         flex-shrink: 0;
         height: 50px;
-        transition: background-color var(--duration-fast) var(--motion-ease-ui), background-position var(--duration-fast) var(--motion-ease-ui), box-shadow var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
+            background-position var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            box-shadow var(--duration-fast) var(--motion-ease-ui),
+            opacity var(--duration-fast) var(--motion-ease-ui);
         width: 80px;
     }
 
@@ -246,7 +253,9 @@ const SWITCHES = [
     }
 
     .admin__switch:focus-visible {
-        box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-accent-deep);
+        box-shadow:
+            0 0 0 2px var(--color-surface),
+            0 0 0 4px var(--color-accent-deep);
     }
 
     .admin__switch:hover {
@@ -277,14 +286,16 @@ const SWITCHES = [
         }
 
         .admin__switch:focus-visible {
-            box-shadow: 0 0 0 2px Canvas, 0 0 0 4px CanvasText;
+            box-shadow:
+                0 0 0 2px Canvas,
+                0 0 0 4px CanvasText;
         }
     }
 </style>
 
 <script>
-    import { MOCK_LATENCY_MS } from '@lib/constants';
-    import { delay, registerPageScript } from '@lib/utils';
+    import { MOCK_LATENCY_MS } from '@lib/shared/constants';
+    import { delay, registerPageScript } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
 
     const pending = new Set<string>();
@@ -306,6 +317,7 @@ const SWITCHES = [
 
     async function handleActionClick(button: HTMLButtonElement) {
         const id = button.dataset.adminAction ?? '';
+
         const panel = document.querySelector<HTMLElement>(`[data-admin-confirm="${id}"]`);
 
         if (panel) {
@@ -320,6 +332,7 @@ const SWITCHES = [
 
     function handleToggleChange(input: HTMLInputElement) {
         const id = input.dataset.adminToggle ?? '';
+
         const queued = timers.get(id);
 
         if (queued !== undefined) window.clearTimeout(queued);
@@ -364,8 +377,8 @@ const SWITCHES = [
 
         const commit = document.querySelector<HTMLButtonElement>(`[data-admin-commit="${id}"]`);
 
-        pending.add(id);
         control?.setAttribute('aria-busy', 'true');
+        pending.add(id);
 
         await delay(MOCK_LATENCY_MS);
 

@@ -1,6 +1,6 @@
-import { STORAGE, TRACK_STATE_TOPIC } from '@lib/constants';
-import { createStore } from '@lib/state';
-import { setRackMuted, setRackVolume } from '@lib/audio/rack/context';
+import { STORAGE, TRACK_STATE_TOPIC } from '@lib/shared/constants';
+import { createStore } from '@lib/shared/state';
+import { setRackMuted, setRackVolume } from '@lib/rack/context';
 
 const ATTACK_DIVISOR = 8;
 const BASS_LEVEL = 0.5;
@@ -60,6 +60,7 @@ function announceTrackState(): void {
     if (typeof window === 'undefined') return;
 
     const state = store.get();
+
     const detail: TrackState = { playing: state.playing, trackId: current?.id ?? '' };
 
     window.dispatchEvent(new CustomEvent(TRACK_STATE_TOPIC, { detail }));
@@ -79,9 +80,9 @@ function ensureContext(): AudioContext | undefined {
 
     context = new AudioContext();
     master = context.createGain();
+    noise = context.createBuffer(1, context.sampleRate * NOISE_SECONDS, context.sampleRate);
     master.gain.value = muted ? 0 : MASTER_LEVEL * volume;
     master.connect(context.destination);
-    noise = context.createBuffer(1, context.sampleRate * NOISE_SECONDS, context.sampleRate);
 
     const samples = noise.getChannelData(0);
 
@@ -147,8 +148,8 @@ function pausePlayback(): void {
 }
 
 function playTrack(track: PlayerTrack): void {
-    stopVoices();
     current = track;
+    stopVoices();
     store.set({ ...store.get(), open: true, playing: false, position: 0 });
     resumePlayback();
 }
@@ -160,11 +161,11 @@ function pluck(track: PlayerTrack, at: number, midi: number, level: number, rele
     const oscillator = context.createOscillator();
 
     oscillator.type = kind;
-    oscillator.frequency.setValueAtTime(noteHertz(midi), at);
     gain.gain.setValueAtTime(MINIMUM_GAIN, at);
     gain.gain.exponentialRampToValueAtTime(level, at + stepSeconds(track) / ATTACK_DIVISOR);
     gain.gain.exponentialRampToValueAtTime(MINIMUM_GAIN, at + release);
     oscillator.connect(gain).connect(master);
+    oscillator.frequency.setValueAtTime(noteHertz(midi), at);
     oscillator.start(at);
     oscillator.stop(at + release);
     registerVoice(oscillator);
@@ -193,16 +194,17 @@ function resumePlayback(): void {
 
     const from = state.position >= track.durationSeconds ? 0 : state.position;
 
+    scheduler = setInterval(tick, LOOKAHEAD_MS);
     stepCursor = Math.floor(from / stepSeconds(track));
     stepTime = audio.currentTime + START_PADDING;
     startedAt = stepTime - stepCursor * stepSeconds(track);
-    scheduler = setInterval(tick, LOOKAHEAD_MS);
     store.set({ ...state, open: true, playing: true, position: from });
     announceTrackState();
 }
 
 function scheduleStep(track: PlayerTrack, step: number, at: number): void {
     const seed = hash(track.id);
+
     const root = ROOT_MIDI + (seed % SEMITONES_PER_OCTAVE);
     const beat = step % (STEPS_PER_BEAT * BEATS_PER_BAR);
     const roll = random(seed + step);
@@ -256,7 +258,7 @@ function stopPlayback(): void {
 
 function stopVoices(): void {
     clearInterval(scheduler);
-    scheduler = undefined;
+
     voices.forEach((voice) => {
         try {
             voice.stop();
@@ -264,6 +266,8 @@ function stopVoices(): void {
             voice.disconnect();
         }
     });
+
+    scheduler = undefined;
     voices = [];
 }
 
@@ -311,10 +315,10 @@ function whisper(at: number): void {
     source.buffer = noise;
     gain.gain.setValueAtTime(HAT_LEVEL, at);
     gain.gain.exponentialRampToValueAtTime(MINIMUM_GAIN, at + HAT_RELEASE);
+    registerVoice(source);
     source.connect(filter).connect(gain).connect(master);
     source.start(at);
     source.stop(at + HAT_RELEASE);
-    registerVoice(source);
 }
 
 export {

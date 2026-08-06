@@ -6,7 +6,7 @@ import IconUser from '@components/icons/User.astro';
 <div class="account">
     <a
         class="account__out"
-        href="/sign-in"
+        href="/signin"
     >
         Sign in
     </a>
@@ -106,7 +106,9 @@ import IconUser from '@components/icons/User.astro';
         opacity: 1;
         padding: var(--space-2xs);
         position: absolute;
-        transition: opacity var(--duration-fast) var(--motion-ease-ui), translate var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            opacity var(--duration-fast) var(--motion-ease-ui),
+            translate var(--duration-fast) var(--motion-ease-ui);
         translate: 0 0;
         z-index: var(--z-header);
     }
@@ -161,7 +163,9 @@ import IconUser from '@components/icons/User.astro';
         gap: 2px;
         height: 50px;
         justify-content: center;
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
         width: 50px;
     }
 
@@ -213,7 +217,7 @@ import IconUser from '@components/icons/User.astro';
     import { navigate } from 'astro:transitions/client';
 
     import { endSession, getSession, onSessionChange } from '@lib/account/session';
-    import { registerPageScript, setPending } from '@lib/utils';
+    import { registerPageScript, setPending } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
 
     let unsubscribe: (() => void) | undefined;
@@ -222,15 +226,17 @@ import IconUser from '@components/icons/User.astro';
         setPending(button, true);
 
         await endSession();
+
         toast('Signed out.', 'info');
+
         await navigate('/');
     }
 
     function initAccount(signal: AbortSignal) {
+        render();
         unsubscribe?.();
         unsubscribe = onSessionChange(render);
         signal.addEventListener('abort', () => unsubscribe?.(), { once: true });
-        render();
 
         const signOut = document.querySelector<HTMLButtonElement>('[data-account-signout]');
 

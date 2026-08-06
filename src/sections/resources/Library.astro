@@ -5,8 +5,8 @@ import IconClose from '@components/icons/Close.astro';
 import IconSearch from '@components/icons/Search.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { ASSET_KIND_LABELS, KIND_COLORS } from '@lib/constants';
-import { formatDateOnly, mergeAssets, toIsoDate } from '@lib/utils';
+import { ASSET_KIND_LABELS, KIND_COLORS } from '@lib/shared/constants';
+import { formatDateOnly, mergeAssets, toIsoDate } from '@lib/shared/utils';
 
 const assets = mergeAssets(await getCollection('downloads'), await getCollection('docs'))
     .map(asset => ({
@@ -58,9 +58,9 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             data-motion="rise"
         >
             <span class="sr-only">Search the library</span>
-            <span class="relative block max-w-[360px] w-full">
+            <span class="block relative max-w-[360px] w-full">
                 <span
-                    class="absolute bottom-0 left-4 top-0 flex items-center text-ink-muted pointer-events-none"
+                    class="absolute bottom-0 flex items-center left-4 top-0 text-ink-muted pointer-events-none"
                     aria-hidden="true"
                 >
                     <IconSearch />
@@ -74,7 +74,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                     type="search"
                 />
                 <button
-                    class="active:translate-y-px hover:text-accent-deep absolute right-0 top-0 inline-flex items-center justify-center h-(--control-size) w-(--control-size) text-ink-muted transition-colors"
+                    class="active:translate-y-px hover:text-accent-deep absolute inline-flex items-center justify-center right-0 top-0 h-(--control-size) w-(--control-size) text-ink-muted transition-colors"
                     aria-label="Clear search"
                     data-resources-clear
                     hidden
@@ -197,7 +197,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             ))}
         </ul>
         <div
-            class="slab slab--sunk flex flex-col items-start gap-4"
+            class="slab slab--sunk flex flex-col items-start max-w-(--measure-form) w-full gap-4 mx-auto"
             data-resources-empty
             hidden
         >
@@ -300,7 +300,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
 </style>
 
 <script>
-    import { initFilterGroup, initSearchField, registerPageScript } from '@lib/utils';
+    import { initFilterGroup, initSearchField, registerPageScript } from '@lib/shared/utils';
 
     function describeAssets(shown: number, total: number, kind: string, query: string) {
         if (query) return `Showing ${shown} of ${total} assets for \u201c${query}\u201d.`;

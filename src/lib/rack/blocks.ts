@@ -1,4 +1,4 @@
-import { MIDI_A4, SEMITONES_PER_OCTAVE, TUNING_HERTZ, noteHertz } from '@lib/audio';
+import { MIDI_A4, SEMITONES_PER_OCTAVE, TUNING_HERTZ, noteHertz } from '@lib/audio/player';
 
 const ANALYSER_FFT = 2_048;
 const CENTS_PER_OCTAVE = 1_200;
@@ -291,6 +291,7 @@ function buildGate(context: AudioContext) {
             analyser.getFloatTimeDomainData(data);
 
             const decibels = DECIBEL_SCALE * Math.log10(Math.max(rootMeanSquare(data), GATE_FLOOR));
+
             const next = decibels > threshold;
 
             if (next === open) return;
@@ -584,7 +585,9 @@ function distortionMakeupFor(drive: number) {
 
 function formatPitch(hertz: number) {
     const midi = Math.round(MIDI_A4 + SEMITONES_PER_OCTAVE * Math.log2(hertz / TUNING_HERTZ));
+
     const target = noteHertz(midi);
+
     const cents = Math.round(CENTS_PER_OCTAVE * Math.log2(hertz / target));
     const note = `${NOTE_NAMES[((midi % SEMITONES_PER_OCTAVE) + SEMITONES_PER_OCTAVE) % SEMITONES_PER_OCTAVE]}${Math.floor(midi / SEMITONES_PER_OCTAVE) - MIDI_OCTAVE_OFFSET}`;
 
@@ -593,6 +596,7 @@ function formatPitch(hertz: number) {
 
 function impulse(context: AudioContext, seconds: number) {
     const length = Math.max(1, Math.floor(context.sampleRate * seconds));
+
     const buffer = context.createBuffer(2, length, context.sampleRate);
 
     for (let channel = 0; channel < buffer.numberOfChannels; channel += 1) {

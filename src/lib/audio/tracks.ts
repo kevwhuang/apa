@@ -1,6 +1,6 @@
-import { TRACK_PLAY_TOPIC, TRACK_STATE_TOPIC } from '@lib/constants';
-import { announceTrackState, getTrack, togglePlayback } from '@lib/audio';
-import { registerPageScript } from '@lib/utils';
+import { TRACK_PLAY_TOPIC, TRACK_STATE_TOPIC } from '@lib/shared/constants';
+import { announceTrackState, getTrack, togglePlayback } from '@lib/audio/player';
+import { registerPageScript } from '@lib/shared/utils';
 
 const TRACK_BUTTON_SELECTOR = 'button[data-track-id]';
 

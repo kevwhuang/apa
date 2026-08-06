@@ -54,11 +54,11 @@ import SectionHead from '@components/shared/SectionHead.astro';
 </section>
 
 <script>
-    import { EMAIL_PATTERN, STORAGE } from '@lib/constants';
-    import { createStore } from '@lib/state';
+    import { EMAIL_PATTERN, STORAGE } from '@lib/shared/constants';
+    import { createStore } from '@lib/shared/state';
     import { isValidationBypassed } from '@lib/ui/forms';
+    import { registerPageScript } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
-    import { registerPageScript } from '@lib/utils';
 
     interface NewsletterElements {
         button: HTMLButtonElement;
@@ -102,13 +102,14 @@ import SectionHead from '@components/shared/SectionHead.astro';
             return;
         }
 
-        subscription.set(email);
         showConfirmation(elements, email, false);
+        subscription.set(email);
         toast('You are on the list \u2014 the next dispatch lands in your inbox.', 'success');
     }
 
     function initNewsletter(signal: AbortSignal) {
         const form = document.querySelector<HTMLFormElement>('.newsletter-form');
+
         const button = form?.querySelector<HTMLButtonElement>('button');
         const input = form?.querySelector<HTMLInputElement>('input');
         const output = form?.querySelector<HTMLElement>('[data-output]');

@@ -4,8 +4,8 @@ import { getCollection } from 'astro:content';
 import PageHead from '@components/shared/PageHead.astro';
 import ProgramFlyer from '@components/program/Flyer.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { EVENT_PROGRAMS, LINKS } from '@lib/constants';
-import { formatCalendarDay, formatCalendarMonth, formatDate, formatTimeRange, formatWeekday, getProgram, mergeCalendar } from '@lib/utils';
+import { EVENT_PROGRAMS, LINKS } from '@lib/shared/constants';
+import { formatCalendarDay, formatCalendarMonth, formatDate, formatTimeRange, formatWeekday, getProgram, mergeCalendar } from '@lib/shared/utils';
 
 type CalendarItem = ReturnType<typeof mergeCalendar>['upcoming'][number];
 
@@ -17,15 +17,10 @@ const PAGE_INDEX = [
     { href: '#planned-title', label: 'Planned' },
 ] as const;
 
-const programs = Object.values(EVENT_PROGRAMS);
-
-const planned = programs.filter(program => program.state === 'planned');
-
-const bashEditions = await getCollection('bash');
-const events = await getCollection('events');
-
 const assemblyProgram = getProgram('assembly');
+const bashEditions = await getCollection('bash');
 const bashProgram = getProgram('bash');
+const events = await getCollection('events');
 
 const endById = new Map<string, Date>(
     [...events, ...bashEditions].map(entry => [entry.id, entry.data.end] as const),
@@ -34,16 +29,21 @@ const endById = new Map<string, Date>(
 const { past, upcoming } = mergeCalendar(events, bashEditions);
 
 const pastEvents = withEnd(past);
+
+const programs = Object.values(EVENT_PROGRAMS);
+
+const planned = programs.filter(program => program.state === 'planned');
+
+const upcomingBashes = bashEditions
+    .filter(edition => edition.data.status === 'upcoming')
+    .sort((a, b) => +a.data.date - +b.data.date);
+
 const upcomingEvents = withEnd(upcoming);
 
 const assemblies = upcomingEvents.filter(event => event.type === 'assembly');
 const hangouts = upcomingEvents.filter(event => event.type === 'hangout');
 
 const [nextAssembly, ...laterAssemblies] = assemblies;
-
-const upcomingBashes = bashEditions
-    .filter(edition => edition.data.status === 'upcoming')
-    .sort((a, b) => +a.data.date - +b.data.date);
 
 function entryNumber(value: number) {
     return String(value).padStart(2, '0');
@@ -228,7 +228,7 @@ function withEnd(list: CalendarItem[]) {
                 )
             : (
                     <p
-                        class="mark slab slab--card leading-relaxed text-ink-muted"
+                        class="mark slab slab--card max-w-(--measure-form) w-full mx-auto leading-relaxed text-ink-muted"
                         data-motion="rise"
                     >
                         No {assemblyProgram.name} on the calendar right now &mdash; the next date goes up here and on Meetup as soon as the room is booked.
@@ -323,7 +323,7 @@ function withEnd(list: CalendarItem[]) {
             )
         : (
                 <p
-                    class="slab slab--cut slab--lift leading-relaxed text-ink-muted"
+                    class="slab slab--cut slab--lift max-w-(--measure-form) w-full mx-auto leading-relaxed text-ink-muted"
                     data-motion="rise"
                 >
                     No edition on the calendar right now &mdash; the next date goes up here and on Meetup as soon as the room is booked.

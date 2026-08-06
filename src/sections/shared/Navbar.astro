@@ -4,8 +4,8 @@ import BrandMark from '@components/brand/Mark.astro';
 import IconCart from '@components/icons/Cart.astro';
 import IconChevron from '@components/icons/Chevron.astro';
 import IconMenu from '@components/icons/Menu.astro';
-import { BRAND, BRAND_SIZES } from '@lib/brand';
-import { NAV_GROUPS } from '@lib/constants';
+import { BRAND, BRAND_SIZES } from '@lib/shared/brand';
+import { NAV_GROUPS } from '@lib/shared/constants';
 
 interface Props {
     hasHero?: boolean;
@@ -15,7 +15,7 @@ const { hasHero = false } = Astro.props;
 ---
 
 <header
-    class:list={['site-header', hasHero && 'site-header--overlay', 'is-instant']}
+    class:list={['is-instant', 'site-header', hasHero && 'site-header--overlay']}
     data-has-hero={hasHero ? 'true' : undefined}
     style={`--mark-compact: ${BRAND_SIZES.markNavCompact}px`}
     transition:animate="none"
@@ -145,7 +145,9 @@ const { hasHero = false } = Astro.props;
         height: var(--control-size);
         justify-content: center;
         position: relative;
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
         width: var(--control-size);
     }
 
@@ -162,7 +164,9 @@ const { hasHero = false } = Astro.props;
         display: none;
         height: var(--control-size);
         justify-content: center;
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
         width: var(--control-size);
     }
 
@@ -224,7 +228,9 @@ const { hasHero = false } = Astro.props;
         flex-shrink: 0;
         gap: var(--space-2xs);
         height: var(--control-size);
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
         user-select: none;
     }
 
@@ -304,7 +310,9 @@ const { hasHero = false } = Astro.props;
         min-height: var(--control-size);
         padding-inline: var(--nav-pad);
         text-transform: uppercase;
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .site-nav__link:active {
@@ -337,7 +345,9 @@ const { hasHero = false } = Astro.props;
         opacity: 1;
         padding: var(--space-2xs);
         position: absolute;
-        transition: opacity var(--duration-fast) var(--motion-ease-ui), translate var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            opacity var(--duration-fast) var(--motion-ease-ui),
+            translate var(--duration-fast) var(--motion-ease-ui);
         translate: 0 0;
         z-index: var(--z-header);
     }
@@ -366,7 +376,9 @@ const { hasHero = false } = Astro.props;
         min-height: var(--control-size);
         padding-inline: var(--nav-pad);
         text-transform: uppercase;
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .site-nav__trigger :global(svg) {
@@ -467,7 +479,7 @@ const { hasHero = false } = Astro.props;
 
 <script>
     import { count, getItems, onChange, seedCart } from '@lib/commerce/cart';
-    import { registerPageScript } from '@lib/utils';
+    import { registerPageScript } from '@lib/shared/utils';
 
     const CART_BADGE_MAX = 99;
     const HEADER_INSTANT_CLASS = 'is-instant';
@@ -528,9 +540,9 @@ const { hasHero = false } = Astro.props;
 
         if (!header) return;
 
-        header.classList.remove('is-hidden');
         lastScrollY = window.scrollY;
         scrollTicking = false;
+        header.classList.remove('is-hidden');
         updateHeader(header);
         settleHeader(header);
     }
@@ -541,8 +553,8 @@ const { hasHero = false } = Astro.props;
 
         if (!current || !next) return;
 
-        next.classList.add(HEADER_INSTANT_CLASS);
         HEADER_STATE_CLASSES.forEach(name => next.classList.toggle(name, current.classList.contains(name)));
+        next.classList.add(HEADER_INSTANT_CLASS);
     }
 
     function handleDocumentClick(event: MouseEvent, menu: HTMLElement, toggle: HTMLElement) {
@@ -642,8 +654,8 @@ const { hasHero = false } = Astro.props;
         const hoverOpenedAt = Number(trigger.dataset.hoverOpened ?? '0');
 
         clearHoverTimer();
-        delete trigger.dataset.hoverOpened;
         closeAll(trigger);
+        delete trigger.dataset.hoverOpened;
 
         if (expanded && hoverOpenedAt && Date.now() - hoverOpenedAt < HOVER_CLICK_GRACE) return;
 
@@ -674,14 +686,13 @@ const { hasHero = false } = Astro.props;
 
         if (!header || !menu || !toggle) return;
 
-        header.classList.remove('is-hidden');
         lastScrollY = window.scrollY;
         scrollTicking = false;
+        header.classList.remove('is-hidden');
         seedCart();
         updateActiveLink();
         updateCart();
         updateHeader(header);
-
         settleHeader(header);
 
         document.addEventListener('click', event => handleDocumentClick(event, menu, toggle), { signal });
@@ -759,7 +770,9 @@ const { hasHero = false } = Astro.props;
 
         document.querySelectorAll<HTMLAnchorElement>('.site-nav a').forEach((link) => {
             const target = link.getAttribute('href') ?? '';
+
             const [path] = target.split('#');
+
             const hash = target.slice(path.length);
             const href = path.replace(/\/$/, '') || '/';
 

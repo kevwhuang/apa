@@ -2,12 +2,13 @@
 import { getCollection } from 'astro:content';
 
 import SectionHead from '@components/shared/SectionHead.astro';
-import { LINKS } from '@lib/constants';
-import { formatDate, formatTimeRange, getProgram } from '@lib/utils';
+import { LINKS } from '@lib/shared/constants';
+import { formatDate, formatTimeRange, getProgram } from '@lib/shared/utils';
+
+const editions = await getCollection('bash');
 
 const program = getProgram('bash');
 
-const editions = await getCollection('bash');
 const upcoming = editions.filter(edition => edition.data.status === 'upcoming').sort((a, b) => +a.data.date - +b.data.date);
 ---
 
@@ -80,7 +81,7 @@ const upcoming = editions.filter(edition => edition.data.status === 'upcoming').
                 )
             : (
                     <p
-                        class="mb-8 text-ink-muted"
+                        class="max-w-(--measure-form) mb-8 text-ink-muted"
                         data-motion="rise"
                     >
                         No edition on the calendar right now &mdash; the next one goes up as soon as the room is booked.

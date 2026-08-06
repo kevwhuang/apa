@@ -15,6 +15,7 @@
 }
 
 .box {
+    --box-lift: 3px;
     --box-mark: 12px;
     --box-size: 24px;
     appearance: none;
@@ -28,8 +29,18 @@
     flex-shrink: 0;
     height: var(--box-size);
     margin: 0;
-    transition: background-color var(--duration-fast) var(--motion-ease-ui), background-size var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), box-shadow var(--duration-fast) var(--motion-ease-ui);
+    transition:
+        background-size var(--duration-fast) var(--motion-ease-ui),
+        border-color var(--duration-fast) var(--motion-ease-ui),
+        box-shadow var(--duration-fast) var(--motion-ease-ui),
+        transform var(--duration-fast) var(--motion-ease-ui);
     width: var(--box-size);
+}
+
+.box:active:not(:disabled, [aria-invalid='true'], label:has(a:active) .box),
+label:active:not(:has(a:active)) > .box:not(:disabled, [aria-invalid='true']) {
+    box-shadow: none;
+    transform: translate(var(--box-lift), var(--box-lift));
 }
 
 .box:checked {
@@ -42,8 +53,10 @@
     opacity: 0.55;
 }
 
-.box:hover:not(:disabled) {
-    background-color: var(--color-ink-10);
+.box:hover:not(:active, :disabled, [aria-invalid='true'], label:has(a:hover) .box),
+label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='true']) {
+    border-color: var(--color-accent-deep);
+    box-shadow: var(--box-lift) var(--box-lift) 0 0 var(--color-ink);
 }
 
 .box[aria-invalid='true'] {
@@ -72,7 +85,11 @@
     min-height: var(--control-size);
     padding: 0 24px;
     text-transform: uppercase;
-    transition: background var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    transition:
+        background var(--duration-fast) var(--motion-ease-ui),
+        border-color var(--duration-fast) var(--motion-ease-ui),
+        color var(--duration-fast) var(--motion-ease-ui),
+        transform var(--duration-fast) var(--motion-ease-ui);
 }
 
 .btn:active {
@@ -150,7 +167,10 @@
     min-height: var(--control-size);
     padding: 0 var(--space-sm);
     text-transform: uppercase;
-    transition: background var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui);
+    transition:
+        background var(--duration-fast) var(--motion-ease-ui),
+        border-color var(--duration-fast) var(--motion-ease-ui),
+        color var(--duration-fast) var(--motion-ease-ui);
 }
 
 .fold {
@@ -235,7 +255,10 @@
         color: var(--color-ink);
         min-height: var(--control-size);
         padding: var(--space-2xs) var(--space-sm);
-        transition: background-color var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), box-shadow var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            box-shadow var(--duration-fast) var(--motion-ease-ui);
         width: 100%;
     }
 
@@ -314,7 +337,15 @@
         linear-gradient(var(--color-ink-subtle), var(--color-ink-subtle)),
         linear-gradient(var(--color-ink-subtle), var(--color-ink-subtle)),
         linear-gradient(var(--color-ink-subtle), var(--color-ink-subtle));
-    background-position: left top, left top, right top, right top, left bottom, left bottom, right bottom, right bottom;
+    background-position:
+        left top,
+        left top,
+        right top,
+        right top,
+        left bottom,
+        left bottom,
+        right bottom,
+        right bottom;
     background-repeat: no-repeat;
     background-size:
         var(--mark-arm) 1px,
@@ -471,7 +502,9 @@
     padding-inline: var(--space-sm);
     position: fixed;
     text-transform: uppercase;
-    transition: background var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+    transition:
+        background var(--duration-fast) var(--motion-ease-ui),
+        transform var(--duration-fast) var(--motion-ease-ui);
     z-index: calc(var(--z-drawer) + 1);
 }
 
@@ -554,7 +587,9 @@
 }
 
 .slab--hover {
-    transition: box-shadow var(--duration-base) var(--motion-ease-entrance), translate var(--duration-base) var(--motion-ease-entrance);
+    transition:
+        box-shadow var(--duration-base) var(--motion-ease-entrance),
+        translate var(--duration-base) var(--motion-ease-entrance);
 }
 
 .slab--hover:active {
@@ -715,9 +750,10 @@
         outline-color: CanvasText;
     }
 
-    .box:hover:not(:disabled) {
-        background-color: Canvas;
+    .box:hover:not(:active, :disabled, [aria-invalid='true'], label:has(a:hover) .box),
+    label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='true']) {
         border-color: Highlight;
+        box-shadow: var(--box-lift) var(--box-lift) 0 0 CanvasText;
     }
 
     .box[type='radio'] {

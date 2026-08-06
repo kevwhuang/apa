@@ -109,7 +109,9 @@
         justify-content: center;
         line-height: 1;
         margin-inline-end: var(--space-2xs);
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
         width: 48px;
     }
 
@@ -176,7 +178,7 @@
 
 <script>
     import { TOAST_TOPIC } from '@lib/ui/toasts';
-    import { setText } from '@lib/utils';
+    import { setText } from '@lib/shared/utils';
 
     const TOAST_DISMISS_MS = 5_000;
 
@@ -195,8 +197,8 @@
 
         if (timer !== undefined) window.clearTimeout(timer);
 
-        timers.delete(item);
         item.remove();
+        timers.delete(item);
     }
 
     function handleToast(event: WindowEventMap['apa:toast']) {
@@ -208,16 +210,17 @@
         if (!aside || !list || !template) return;
 
         const fragment = template.content.cloneNode(true) as DocumentFragment;
+
         const item = fragment.querySelector<HTMLElement>('.toast');
 
         if (!item) return;
 
-        raiseToaster(aside);
         item.classList.add(`toast--${tone}`);
         setText(fragment.querySelector('[data-toast-label]'), TOAST_LABELS[tone]);
         setText(fragment.querySelector('[data-toast-message]'), message);
         fragment.querySelector('[data-toast-close]')?.addEventListener('click', () => dismissToast(item));
         list.append(fragment);
+        raiseToaster(aside);
         timers.set(item, window.setTimeout(() => dismissToast(item), TOAST_DISMISS_MS));
         trimToasts(list);
     }

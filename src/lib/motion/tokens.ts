@@ -40,10 +40,12 @@ let fallbacks: string[] = [];
 
 function cubicBezier(x1: number, y1: number, x2: number, y2: number): MotionEase {
     const cx = 3 * x1;
-    const bx = 3 * (x2 - x1) - cx;
-    const ax = 1 - cx - bx;
     const cy = 3 * y1;
+
+    const bx = 3 * (x2 - x1) - cx;
     const by = 3 * (y2 - y1) - cy;
+
+    const ax = 1 - cx - bx;
     const ay = 1 - cy - by;
 
     function sampleX(t: number) {
@@ -125,7 +127,9 @@ function readColorToken(styles: CSSStyleDeclaration, name: string): string {
 
 function readEase(styles: CSSStyleDeclaration, name: string, fallback: MotionBezier): MotionEase {
     const match = CUBIC_BEZIER_PATTERN.exec(styles.getPropertyValue(name));
+
     const points = match ? match[1].split(',').map(Number) : [];
+
     const valid = points.length === fallback.length && points.every(Number.isFinite);
 
     if (!valid) fallbacks.push(name);
@@ -137,6 +141,7 @@ function readEase(styles: CSSStyleDeclaration, name: string, fallback: MotionBez
 
 function readNumber(styles: CSSStyleDeclaration, name: string, fallback: number): number {
     const raw = styles.getPropertyValue(name).trim();
+
     const parsed = Number.parseFloat(raw);
 
     if (!Number.isFinite(parsed)) {

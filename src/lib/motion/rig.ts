@@ -1,6 +1,6 @@
 import { BufferAttribute, BufferGeometry, CanvasTexture, Color, DynamicDrawUsage, Fog, LineBasicMaterial, LineSegments, LinearFilter, Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry, Points, PointsMaterial, Scene, WebGLRenderer } from 'three';
 
-import { REDUCED_MOTION_QUERY, STORAGE } from '@lib/constants';
+import { REDUCED_MOTION_QUERY, STORAGE } from '@lib/shared/constants';
 import { STEP_COUNT, stepDuration, stepEnergy } from '@lib/motion/pattern';
 import { readColorToken } from '@lib/motion/tokens';
 
@@ -262,6 +262,7 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     }
 
     const mobile = window.innerWidth <= MOBILE_WIDTH;
+
     const columns = mobile ? GROUND_COLUMNS_MOBILE : GROUND_COLUMNS;
     const dolly = mobile ? CAMERA_DEPTH_MOBILE : CAMERA_DEPTH;
     const motes = mobile ? MOTE_COUNT_MOBILE : MOTE_COUNT;
@@ -361,6 +362,7 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
 
     function dispose() {
         stop();
+        canvas.remove();
         geometry.dispose();
         groundAxisMaterial.dispose();
         groundGeometry.dispose();
@@ -377,11 +379,11 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
         scanMaterial.dispose();
         scanTexture.dispose();
         spokeMaterial.dispose();
-        canvas.remove();
     }
 
     function drift(elapsed: number) {
         const angle = TAU * (elapsed / ORBIT_PERIOD);
+
         const orbit = Math.sin(angle);
 
         driftX += (pointerX * CAMERA_DRIFT_X + orbit * ORBIT_SWAY - driftX) * CAMERA_EASE;
@@ -402,8 +404,8 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
 
         const started = performance.now();
 
-        shape(elapsed);
         drift(elapsed);
+        shape(elapsed);
         render();
         watch(performance.now() - started);
     }
@@ -460,19 +462,21 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
         for (let ring = 0; ring < rings; ring += 1) {
             const energy = smoothEnergy(ring + scroll);
             const flare = pulseFlare(ring, head);
+            const spin = ring * RING_TWIST + elapsed * SPIN_RATE;
+
             const alpha = fades[ring] * Math.min(1, ALPHA_FLOOR + ALPHA_ENERGY * energy + ALPHA_PULSE * flare);
             const blue = inkBlue + (accentBlue - inkBlue) * flare;
             const green = inkGreen + (accentGreen - inkGreen) * flare;
             const red = inkRed + (accentRed - inkRed) * flare;
             const rib = RIB_DEPTH * (RIB_FLOOR + (1 - RIB_FLOOR) * energy);
             const span = tapers[ring] * (RADIUS_BASE + RADIUS_RANGE * (BASE_RELIEF + energy) * swell * (1 + PULSE_LIFT * flare));
-            const spin = ring * RING_TWIST + elapsed * SPIN_RATE;
 
             for (let segment = 0; segment < segments; segment += 1) {
                 const sweep = segment / segments + spin;
-                const radius = span * (1 + rib * Math.sin(TAU * (RIB_FINE_RATIO * sweep + shimmer)));
                 const vertex = ring * segments + segment;
+
                 const offset = vertex * 3;
+                const radius = span * (1 + rib * Math.sin(TAU * (RIB_FINE_RATIO * sweep + shimmer)));
                 const slot = vertex * 4;
 
                 positions[offset] = shift + radius * cosine[segment];
@@ -496,9 +500,9 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
         }
 
         place.needsUpdate = true;
-        tint.needsUpdate = true;
         readMaterial.opacity = Math.min(1, READ_OPACITY_FLOOR + READ_OPACITY_RANGE * smoothEnergy(READ_RING + scroll) + READ_PULSE_GAIN * pulseFlare(READ_RING, head));
         scan.position.x = shift + SCAN_SWEEP * Math.sin(TAU * (elapsed / SCAN_PERIOD));
+        tint.needsUpdate = true;
 
         if (showGround) shapeGround(elapsed);
         if (showMotes) shapeMotes(elapsed, scroll);
@@ -523,11 +527,14 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
 
         for (let mote = 0; mote < motes; mote += 1) {
             const advance = (moteSeeds[mote] + travel) % MOTE_SPAN;
+            const offset = mote * 3;
+
             const approach = Math.min(1, (MOTE_SPAN - advance) / MOTE_NEAR_FADE) ** MOTE_NEAR_CURVE;
             const depth = RING_NEAR + MOTE_LEAD - MOTE_SPAN + advance;
+
             const lane = (RING_NEAR - depth) * ringPitch;
+
             const radius = moteSpans[mote] * taperScale(lane / (rings - 1));
-            const offset = mote * 3;
 
             motePlaces[offset] = shift + radius * moteCosine[mote];
             motePlaces[offset + 1] = AXIS_HEIGHT + radius * moteSine[mote];
@@ -542,9 +549,9 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     function start() {
         if (running || still) return;
 
-        running = true;
-        last = performance.now() / MILLISECONDS_PER_SECOND;
         handle = requestAnimationFrame(frame);
+        last = performance.now() / MILLISECONDS_PER_SECOND;
+        running = true;
     }
 
     function steer(event: PointerEvent) {
@@ -609,8 +616,9 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
 
     for (let mote = 0; mote < motes; mote += 1) {
         const shell = Math.floor(mote / MOTE_LANES) % MOTE_SHELLS;
-        const angle = TAU * ((mote % MOTE_LANES) / MOTE_LANES + shell * MOTE_LANE_SKEW);
         const slot = mote * 4;
+
+        const angle = TAU * ((mote % MOTE_LANES) / MOTE_LANES + shell * MOTE_LANE_SKEW);
 
         moteCosine[mote] = Math.cos(angle);
         moteSeeds[mote] = ((mote * MOTE_DEPTH_STEP) % 1) * MOTE_SPAN;
@@ -668,9 +676,9 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     requestAnimationFrame(() => (canvas.style.opacity = '1'));
 
     if (still) {
+        signal.addEventListener('abort', dispose);
         window.addEventListener(STORAGE.theme.topic, repaint, { signal });
         window.addEventListener('resize', resize, { signal });
-        signal.addEventListener('abort', dispose);
 
         return;
     }
@@ -679,13 +687,13 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
 
     observer.observe(holder);
     document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()), { signal });
-    window.addEventListener(STORAGE.theme.topic, repaint, { signal });
-    window.addEventListener('pointermove', steer, { signal });
-    window.addEventListener('resize', resize, { signal });
     signal.addEventListener('abort', () => {
         observer.disconnect();
         dispose();
     });
+    window.addEventListener(STORAGE.theme.topic, repaint, { signal });
+    window.addEventListener('pointermove', steer, { signal });
+    window.addEventListener('resize', resize, { signal });
 }
 
 function pulseFlare(ring: number, head: number): number {
@@ -700,6 +708,7 @@ function pulseFlare(ring: number, head: number): number {
 
 function pulseHead(elapsed: number, rings: number): number {
     const bar = stepDuration() * BAR_STEPS;
+
     const progress = (elapsed % bar) / bar;
 
     return rings + PULSE_LEAD - progress * (rings + PULSE_LEAD * 2);
@@ -724,7 +733,9 @@ function slowDevice(): boolean {
 
 function smoothEnergy(position: number): number {
     const index = Math.floor(position);
+
     const fraction = position - index;
+
     const blend = fraction * fraction * (3 - 2 * fraction);
 
     return stepEnergy(index) * (1 - blend) + stepEnergy(index + 1) * blend;

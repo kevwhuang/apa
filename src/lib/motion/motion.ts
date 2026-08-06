@@ -2,13 +2,13 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { MOTION_SELECTOR, buildEntrances, revealAll, revealTarget } from '@lib/motion/entrances';
-import { REDUCED_MOTION_QUERY, STORAGE } from '@lib/constants';
+import { REDUCED_MOTION_QUERY, STORAGE } from '@lib/shared/constants';
 import { clearScrub, initScrub } from '@lib/motion/scrub';
 import { clearTransport, initTransport } from '@lib/motion/transport';
 import { initCounters } from '@lib/motion/counter';
 import { initHeroField } from '@lib/motion/hero';
 import { refreshMotionTokens } from '@lib/motion/tokens';
-import { registerPageScript } from '@lib/utils';
+import { registerPageScript } from '@lib/shared/utils';
 
 const GROWTH_DELAY_MS = 200;
 const GROWTH_THRESHOLD = 24;
@@ -28,8 +28,8 @@ function boot(): void {
     refreshMotionTokens();
 
     if (reducedMotionQuery.matches) {
-        hardDisarm();
         bootHeroField();
+        hardDisarm();
 
         return;
     }
@@ -61,17 +61,17 @@ function bootHeroField(): void {
     const controller = new AbortController();
 
     clearHeroField();
-    heroController = controller;
     heroContext = gsap.context(() => initHeroField(controller.signal, reducedMotionQuery.matches));
+    heroController = controller;
 }
 
 function clearHeroField(): void {
     const previous = heroController;
 
-    heroController = undefined;
-    previous?.abort();
     heroContext?.revert();
+    previous?.abort();
     heroContext = undefined;
+    heroController = undefined;
 }
 
 function documentHeight(): number {
@@ -92,7 +92,6 @@ function handleDocumentResize(): void {
     if (Math.abs(documentHeight() - lastDocumentHeight) < GROWTH_THRESHOLD) return;
 
     clearTimeout(refreshTimer);
-
     refreshTimer = setTimeout(refreshAfterGrowth, GROWTH_DELAY_MS);
 }
 
@@ -129,18 +128,17 @@ function handleThemeChange(): void {
 }
 
 function hardDisarm(): void {
-    window.__apaMotion?.disarm();
     revealAll();
+    window.__apaMotion?.disarm();
 }
 
 function initMotion(): void {
     if (registered) return;
 
     registered = true;
-
     registerPageScript(start);
-    reducedMotionQuery.addEventListener('change', handlePreferenceChange);
     document.addEventListener('focusin', handleFocusIn);
+    reducedMotionQuery.addEventListener('change', handlePreferenceChange);
     window.addEventListener('afterprint', handleAfterPrint);
     window.addEventListener(STORAGE.theme.topic, handleThemeChange);
     window.addEventListener('beforeprint', handleBeforePrint);
@@ -148,8 +146,8 @@ function initMotion(): void {
 }
 
 function observeDocumentHeight(): void {
-    lastDocumentHeight = documentHeight();
     heightObserver = new ResizeObserver(handleDocumentResize);
+    lastDocumentHeight = documentHeight();
     heightObserver.observe(document.body);
 }
 
@@ -178,15 +176,15 @@ function start(signal: AbortSignal): void {
 function teardown(): void {
     clearHeroField();
     context?.revert();
-    context = undefined;
     clearTimeout(refreshTimer);
     heightObserver?.disconnect();
-    heightObserver = undefined;
-    refreshTimer = undefined;
     ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     ScrollTrigger.clearScrollMemory();
     clearScrub();
     clearTransport();
+    context = undefined;
+    heightObserver = undefined;
+    refreshTimer = undefined;
 }
 
 gsap.registerPlugin(ScrollTrigger);

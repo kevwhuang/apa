@@ -1,6 +1,6 @@
 ---
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import { PALETTE } from '@lib/constants';
+import { PALETTE } from '@lib/shared/constants';
 
 const INDEX_PAD = 2;
 
@@ -170,7 +170,9 @@ const SESSION_FILES = [
         align-self: flex-start;
         display: inline-block;
         padding-block: var(--space-sm);
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .workshop__link:active {

@@ -35,10 +35,10 @@ function buildOdometer(host: HTMLElement, display: string): HTMLElement[] {
         const slot = document.createElement('span');
 
         slot.className = 'odometer__slot';
+        reels.push(reel);
+        rest.set(reel, -(DIGITS.length + Number(character)) * (CYCLE_PERCENT / DIGITS.length));
         slot.append(reel);
         track.append(slot);
-        rest.set(reel, -(DIGITS.length + Number(character)) * (CYCLE_PERCENT / DIGITS.length));
-        reels.push(reel);
     }
 
     host.replaceChildren(reader, track);

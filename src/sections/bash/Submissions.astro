@@ -1,8 +1,8 @@
 ---
 import IconUpload from '@components/icons/Upload.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { UPLOAD, UPLOAD_EXTENSIONS_LABEL } from '@lib/constants';
-import { formatBytes, getProgram } from '@lib/utils';
+import { UPLOAD, UPLOAD_EXTENSIONS_LABEL } from '@lib/shared/constants';
+import { formatBytes, getProgram } from '@lib/shared/utils';
 
 const program = getProgram('bash');
 ---
@@ -207,7 +207,7 @@ const program = getProgram('bash');
                     value="0"
                 />
                 <p
-                    class="label text-ink-subtle"
+                    class="label min-w-[34px] text-ink-subtle"
                     data-row-percent
                 />
                 <button
@@ -270,7 +270,9 @@ const program = getProgram('bash');
         min-height: 220px;
         padding: var(--space-2xl);
         position: relative;
-        transition: background var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            background var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui);
     }
 
     .dropzone:active {
@@ -329,11 +331,11 @@ const program = getProgram('bash');
 
 <script>
     import { BASH_SUBMISSIONS } from '@lib/programs/submissions';
-    import { MOCK_LATENCY_MS, STORAGE } from '@lib/constants';
+    import { MOCK_LATENCY_MS, STORAGE } from '@lib/shared/constants';
     import { QUEUE_FULL_MESSAGE } from '@lib/audio/uploads';
     import { createDropzone } from '@lib/audio/dropzone';
-    import { createStore } from '@lib/state';
-    import { delay, formatDateStamp, formatTime, registerPageScript, rovingFocus, setHidden, setText } from '@lib/utils';
+    import { createStore } from '@lib/shared/state';
+    import { delay, formatDateStamp, formatTime, registerPageScript, rovingFocus, setHidden, setText } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
 
     interface BoardElements {
@@ -370,7 +372,6 @@ const program = getProgram('bash');
 
     function initBashSubmissions(signal: AbortSignal) {
         overflowToasted = false;
-
         createDropzone({ messages: { rejected: reportRejection }, signal });
     }
 
@@ -413,6 +414,7 @@ const program = getProgram('bash');
 
             for (let index = 1; index <= pageCount(); index += 1) {
                 const fragment = chipTemplate.content.cloneNode(true) as DocumentFragment;
+
                 const chip = fragment.querySelector('button');
 
                 if (!chip) continue;
@@ -445,6 +447,7 @@ const program = getProgram('bash');
 
             rows.slice(start, start + PAGE_SIZE).forEach((entry, index) => {
                 const fragment = rowTemplate.content.cloneNode(true) as DocumentFragment;
+
                 const row = fragment.querySelector('tr');
 
                 if (!row) return;
@@ -454,10 +457,10 @@ const program = getProgram('bash');
                 stamp.dateTime = entry.submittedAt;
                 stamp.textContent = formatStamp(entry.submittedAt);
 
+                setText(row.querySelector('[data-cell-edition]'), entry.edition);
                 setText(row.querySelector('[data-cell-index]'), String(start + index + 1).padStart(2, '0'));
                 setText(row.querySelector('[data-cell-producer]'), entry.producer);
                 setText(row.querySelector('[data-cell-title]'), entry.title);
-                setText(row.querySelector('[data-cell-edition]'), entry.edition);
                 row.querySelector('[data-cell-submitted]')?.append(stamp);
                 body.append(fragment);
             });

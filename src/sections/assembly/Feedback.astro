@@ -1,8 +1,8 @@
 ---
 import IconUpload from '@components/icons/Upload.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { UPLOAD, UPLOAD_EXTENSIONS_LABEL } from '@lib/constants';
-import { formatBytes } from '@lib/utils';
+import { UPLOAD, UPLOAD_EXTENSIONS_LABEL } from '@lib/shared/constants';
+import { formatBytes } from '@lib/shared/utils';
 ---
 
 <section
@@ -212,7 +212,7 @@ import { formatBytes } from '@lib/utils';
                     value="0"
                 />
                 <p
-                    class="label text-ink-subtle"
+                    class="label min-w-[34px] text-ink-subtle"
                     data-row-percent
                 />
                 <button
@@ -235,7 +235,9 @@ import { formatBytes } from '@lib/utils';
         min-height: 220px;
         padding: var(--space-2xl);
         position: relative;
-        transition: background var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            background var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui);
     }
 
     .dropzone:active {
@@ -271,7 +273,9 @@ import { formatBytes } from '@lib/utils';
         display: flex;
         min-height: var(--control-size);
         overflow-wrap: anywhere;
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .feedback__href:active {
@@ -309,11 +313,11 @@ import { formatBytes } from '@lib/utils';
 </style>
 
 <script>
-    import { UPLOAD } from '@lib/constants';
+    import { UPLOAD } from '@lib/shared/constants';
     import { createDropzone, nextFocusTarget } from '@lib/audio/dropzone';
     import { isValidationBypassed } from '@lib/ui/forms';
     import { parseTrackLink } from '@lib/programs/feedback';
-    import { registerPageScript, rovingFocus, setMessage, setText } from '@lib/utils';
+    import { registerPageScript, rovingFocus, setMessage, setText } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
 
     type FeedbackMode = 'file' | 'link';
@@ -386,9 +390,9 @@ import { formatBytes } from '@lib/utils';
 
         if (!row) return;
 
-        linkQueue.push({ link: parsed.link, row });
         clearLinkError(input);
         form.reset();
+        linkQueue.push({ link: parsed.link, row });
         input.focus();
         announce(`${parsed.link.host} link queued for the next Assembly.`);
     }
@@ -438,6 +442,7 @@ import { formatBytes } from '@lib/utils';
         if (!template) return null;
 
         const fragment = template.content.cloneNode(true) as DocumentFragment;
+
         const row = fragment.querySelector<HTMLElement>('li');
 
         if (!row) return null;

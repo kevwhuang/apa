@@ -9,7 +9,7 @@ import {
     EVENT_TYPES,
     GENRES,
     PRODUCT_CATEGORIES,
-} from '@lib/constants';
+} from '@lib/shared/constants';
 
 const bash = defineCollection({
     loader: glob({ base: `./${CONTENT_DIR}/bash`, pattern: '**/*.md' }),

@@ -2,8 +2,8 @@
 import { getCollection } from 'astro:content';
 
 import PageHead from '@components/shared/PageHead.astro';
-import { CHECKOUT_STEPS, FIELD_LIMITS, US_STATES } from '@lib/constants';
-import { toCatalog } from '@lib/utils';
+import { CHECKOUT_STEPS, FIELD_LIMITS, US_STATES } from '@lib/shared/constants';
+import { toCatalog } from '@lib/shared/utils';
 
 type FieldInputMode = 'numeric';
 
@@ -51,10 +51,10 @@ const catalog = toCatalog(await getCollection('products'));
     <div>
         <PageHead
             class="mb-6 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
-            eyebrow="Checkout"
+            eyebrow="Store / Checkout"
             headingId="checkout-title"
         >
-            Checkout
+            Lock it in.
         </PageHead>
         <p
             class="max-w-2xl mb-10 text-lmd text-ink-muted"
@@ -89,12 +89,12 @@ const catalog = toCatalog(await getCollection('products'));
     data-catalog={JSON.stringify(catalog)}
 >
     <div
-        class="slab slab--card slab--roomy max-w-xl w-full mx-auto text-center"
+        class="slab slab--card flex flex-col items-start max-w-(--measure-form) w-full gap-4 mx-auto"
         data-checkout-empty
         hidden
     >
-        <p class="label mb-3 text-ink-muted">Empty</p>
-        <p class="mb-6 font-extrabold font-sans text-2xl">There is nothing to check out.</p>
+        <p class="label text-ink-muted">Empty</p>
+        <p class="font-extrabold font-sans text-2xl">There is nothing to check out.</p>
         <a
             class="btn btn--primary"
             href="/store"
@@ -124,7 +124,7 @@ const catalog = toCatalog(await getCollection('products'));
                 />
             </aside>
             <fieldset
-                class="step-pane slab slab--card"
+                class="slab slab--card step-pane"
                 aria-labelledby="checkout-review-title"
                 data-step="0"
             >
@@ -154,7 +154,7 @@ const catalog = toCatalog(await getCollection('products'));
                     </div>
                     <div class="review-totals__row">
                         <dt>Shipping</dt>
-                        <dd data-shipping>&mdash;</dd>
+                        <dd data-shipping>$0.00</dd>
                     </div>
                     <div class="review-totals__row">
                         <dt>Tax</dt>
@@ -172,7 +172,7 @@ const catalog = toCatalog(await getCollection('products'));
                 </dl>
             </fieldset>
             <fieldset
-                class="step-pane slab slab--card hidden"
+                class="slab slab--card step-pane hidden"
                 aria-labelledby="checkout-shipping-title"
                 data-step="1"
                 disabled
@@ -236,7 +236,7 @@ const catalog = toCatalog(await getCollection('products'));
                 </div>
             </fieldset>
             <fieldset
-                class="step-pane slab slab--card hidden"
+                class="slab slab--card step-pane hidden"
                 aria-labelledby="checkout-payment-title"
                 data-step="2"
                 disabled
@@ -383,7 +383,7 @@ const catalog = toCatalog(await getCollection('products'));
                 </div>
                 <div class="flex justify-between gap-3">
                     <dt>Shipping</dt>
-                    <dd data-shipping>&mdash;</dd>
+                    <dd data-shipping>$0.00</dd>
                 </div>
                 <div class="flex justify-between gap-3 mb-2">
                     <dt>Tax</dt>
@@ -483,19 +483,13 @@ const catalog = toCatalog(await getCollection('products'));
         font-size: var(--text-smd);
         gap: var(--space-xs);
         min-height: var(--control-size);
-        padding: var(--space-2xs) var(--space-sm) var(--space-2xs) 0;
-        transition: background-color var(--duration-fast) var(--motion-ease-ui);
+        padding-block: var(--space-2xs);
     }
 
     .checkout__check-field {
         display: flex;
         flex-direction: column;
         gap: var(--space-3xs);
-    }
-
-    .checkout__check-field .checkout__check:has(.box:enabled):active,
-    .checkout__check-field .checkout__check:has(.box:enabled):hover {
-        background-color: var(--color-surface-sunken);
     }
 
     .checkout__fields {
@@ -539,18 +533,8 @@ const catalog = toCatalog(await getCollection('products'));
         background-color: var(--color-surface-sunken);
     }
 
-    .checkout__prods:has(.box:checked):has(.checkout__check:active),
-    .checkout__prods:has(.box:checked):has(.checkout__check:hover) {
-        background-color: var(--color-accent-20);
-    }
-
     .checkout__prods:has(.box:disabled) {
         cursor: not-allowed;
-    }
-
-    .checkout__prods:has(.box:enabled:not(:checked)):has(.checkout__check:active),
-    .checkout__prods:has(.box:enabled:not(:checked)):has(.checkout__check:hover) {
-        background-color: var(--color-surface);
     }
 
     .checkout__summary {
@@ -637,9 +621,9 @@ const catalog = toCatalog(await getCollection('products'));
 <script>
     import { navigate } from 'astro:transitions/client';
 
-    import { CHECKOUT_STEPS, EMAIL_PATTERN, FIELD_LIMITS } from '@lib/constants';
+    import { CHECKOUT_STEPS, EMAIL_PATTERN, FIELD_LIMITS } from '@lib/shared/constants';
     import { clearFieldErrors, focusFirstError, isValidationBypassed, renderIssueList, setFieldErrors, validateFields } from '@lib/ui/forms';
-    import { formatPrice, formatProds, formatVariant, parseCatalog, registerPageScript, setPending, setText } from '@lib/utils';
+    import { formatPrice, formatProds, formatVariant, parseCatalog, registerPageScript, setPending, setText } from '@lib/shared/utils';
     import { getItems, prodsForCents, prodsToCents, reconcile, totals } from '@lib/commerce/cart';
     import { getSession } from '@lib/account/session';
     import { placeOrder } from '@lib/commerce/checkout';
@@ -726,6 +710,7 @@ const catalog = toCatalog(await getCollection('products'));
         if (!pane) return;
 
         const controls = Array.from(pane.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input, select'));
+
         const control = controls.find(element => !element.disabled && element.offsetParent !== null);
 
         (control ?? pane.querySelector<HTMLElement>('[tabindex="-1"]'))?.focus();
@@ -827,8 +812,8 @@ const catalog = toCatalog(await getCollection('products'));
 
         blocked = false;
         catalog = parseCatalog(source?.dataset.catalog);
-        form.noValidate = true;
         step = REVIEW_STEP;
+        form.noValidate = true;
 
         if (getItems().length === 0) {
             body.setAttribute('hidden', '');
@@ -838,7 +823,6 @@ const catalog = toCatalog(await getCollection('products'));
         }
 
         updateSteps(controls, false);
-
         backButton.addEventListener('click', () => handleBackClick(controls), { signal });
         form.addEventListener('submit', event => void handleFormSubmit(event, controls), { signal });
         signal.addEventListener('abort', () => clearCardFields(form), { once: true });
@@ -871,6 +855,7 @@ const catalog = toCatalog(await getCollection('products'));
 
         const now = new Date();
         const expiry = new Date(CENTURY + Number(match[2]), Number(match[1]), 1);
+
         const limit = new Date(now.getFullYear() + MAX_EXPIRY_YEARS, now.getMonth(), 1);
 
         return expiry > now && expiry <= limit;
@@ -933,7 +918,6 @@ const catalog = toCatalog(await getCollection('products'));
 
     function renderOrder(form: HTMLFormElement) {
         orderItems = getItems();
-
         renderProds(form);
         renderCardFields(form);
         renderItems();
@@ -966,7 +950,7 @@ const catalog = toCatalog(await getCollection('products'));
         });
 
         setAll('[data-discount]', `\u2212${formatPrice(summary.discountCents)}`);
-        setAll('[data-shipping]', summary.subtotalCents === 0 ? '\u2014' : formatPrice(summary.shippingCents));
+        setAll('[data-shipping]', formatPrice(summary.shippingCents));
         setAll('[data-subtotal]', formatPrice(summary.subtotalCents));
         setAll('[data-tax]', formatPrice(summary.taxCents));
         setAll('[data-total]', formatPrice(summary.totalCents));
@@ -1008,6 +992,7 @@ const catalog = toCatalog(await getCollection('products'));
         }
 
         clearCardFields(controls.form);
+
         await navigate('/store/orders');
     }
 
@@ -1027,10 +1012,9 @@ const catalog = toCatalog(await getCollection('products'));
         });
 
         controls.aside.toggleAttribute('hidden', step === REVIEW_STEP);
-        controls.body.classList.toggle('checkout__body--solo', step === REVIEW_STEP);
         controls.backButton.classList.toggle('invisible', step === REVIEW_STEP);
+        controls.body.classList.toggle('checkout__body--solo', step === REVIEW_STEP);
         controls.nextButton.textContent = step === LAST_STEP ? 'Place order' : 'Continue';
-
         renderOrder(controls.form);
 
         if (!moveFocus) return;

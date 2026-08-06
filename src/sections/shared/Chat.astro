@@ -153,7 +153,9 @@ import IconClose from '@components/icons/Close.astro';
         flex-shrink: 0;
         height: 50px;
         justify-content: center;
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
         width: 50px;
     }
 
@@ -203,7 +205,10 @@ import IconClose from '@components/icons/Close.astro';
         inset: auto 0 var(--chat-offset) auto;
         justify-content: center;
         position: fixed;
-        transition: background var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            background var(--duration-fast) var(--motion-ease-ui),
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
         width: var(--launcher-size);
         z-index: var(--z-drawer);
     }
@@ -313,9 +318,9 @@ import IconClose from '@components/icons/Close.astro';
 </style>
 
 <script>
-    import { PALETTE } from '@lib/constants';
-    import { ROOM_MEMBERS, closeChat, getChatState, getMessages, getOnlineCount, onChatChange, openChat, seedRoom, sendChatMessage } from '@lib/chat';
-    import { formatTime, getInitials, initPanelResize, isTopFloatWindow, raiseWindow, registerPageScript, setText } from '@lib/utils';
+    import { PALETTE } from '@lib/shared/constants';
+    import { ROOM_MEMBERS, closeChat, getChatState, getMessages, getOnlineCount, onChatChange, openChat, seedRoom, sendChatMessage } from '@lib/chat/chat';
+    import { formatTime, getInitials, initPanelResize, isTopFloatWindow, raiseWindow, registerPageScript, setText } from '@lib/shared/utils';
 
     const CHAT_MIN_WIDTH = 340;
     const GROUP_WINDOW_MS = 300_000;
@@ -337,6 +342,7 @@ import IconClose from '@components/icons/Close.astro';
         if (!template) return null;
 
         const fragment = template.content.cloneNode(true) as DocumentFragment;
+
         const avatar = fragment.querySelector<HTMLElement>('[data-chat-avatar]');
         const item = fragment.querySelector<HTMLElement>('.chat__message');
 
@@ -345,11 +351,11 @@ import IconClose from '@components/icons/Close.astro';
         const grouped = previous !== undefined && previous.name === message.name && message.sentAt - previous.sentAt < GROUP_WINDOW_MS;
 
         item.classList.toggle('chat__message--grouped', grouped);
-        avatar.style.background = message.self ? SELF_COLOR : (MEMBER_COLORS.get(message.name) ?? SELF_COLOR);
         setText(avatar, getInitials(message.name));
         setText(fragment.querySelector('[data-chat-author]'), message.name);
-        setText(fragment.querySelector('[data-chat-time]'), formatTime(new Date(message.sentAt)));
         setText(fragment.querySelector('[data-chat-text]'), message.body);
+        setText(fragment.querySelector('[data-chat-time]'), formatTime(new Date(message.sentAt)));
+        avatar.style.background = message.self ? SELF_COLOR : (MEMBER_COLORS.get(message.name) ?? SELF_COLOR);
 
         return item;
     }
@@ -369,6 +375,7 @@ import IconClose from '@components/icons/Close.astro';
     function handleClose(dialog: HTMLDialogElement | null) {
         const active = document.activeElement;
         const launcher = document.querySelector<HTMLElement>('[data-chat-launcher]');
+
         const held = active === null || active === document.body || (dialog?.contains(active) ?? false);
 
         closeChat();
@@ -417,6 +424,7 @@ import IconClose from '@components/icons/Close.astro';
         const body = field.value;
 
         field.value = '';
+
         await sendChatMessage(body);
     }
 
@@ -435,6 +443,7 @@ import IconClose from '@components/icons/Close.astro';
         unsubscribeChat?.();
         unsubscribeChat = onChatChange(render);
         signal.addEventListener('abort', teardown, { once: true });
+
         initPanelResize({
             handle: grip,
             label: RESIZE_LABEL,
@@ -450,13 +459,11 @@ import IconClose from '@components/icons/Close.astro';
         document.querySelector<HTMLElement>('[data-chat-close]')?.addEventListener('click', closeWindow, { signal });
         form.addEventListener('submit', event => void handleSubmit(event), { signal });
         launcher.addEventListener('click', handleLaunch, { signal });
-
         seedRoom();
-
         window.clearInterval(tallyTimer);
         tallyTimer = window.setInterval(renderTally, TALLY_INTERVAL_MS);
 
-        if (getChatState().open) openWindow(false);
+        if (getChatState().open && !dialog.open) closeChat();
 
         render();
     }
@@ -469,8 +476,8 @@ import IconClose from '@components/icons/Close.astro';
         if (!dialog || dialog.open) return;
 
         dialog.show();
-        raiseWindow(dialog);
         document.querySelector<HTMLElement>('[data-chat-launcher]')?.setAttribute('aria-expanded', 'true');
+        raiseWindow(dialog);
 
         if (moveFocus) {
             (field ?? dialog.querySelector<HTMLElement>('[data-chat-close]'))?.focus();
@@ -510,6 +517,7 @@ import IconClose from '@components/icons/Close.astro';
 
             if (item) log.append(item);
         });
+
         log.scrollTop = log.scrollHeight;
     }
 

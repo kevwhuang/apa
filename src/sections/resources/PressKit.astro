@@ -4,9 +4,9 @@ import { getCollection } from 'astro:content';
 import BrandLockup from '@components/brand/Lockup.astro';
 import BrandMark from '@components/brand/Mark.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { ASSET_KIND_LABELS, KIND_COLORS, LINKS } from '@lib/constants';
-import { BRAND, BRAND_DOWNLOADS, BRAND_SIZES } from '@lib/brand';
-import { formatDateOnly, toIsoDate } from '@lib/utils';
+import { ASSET_KIND_LABELS, KIND_COLORS, LINKS } from '@lib/shared/constants';
+import { BRAND, BRAND_DOWNLOADS, BRAND_SIZES } from '@lib/shared/brand';
+import { formatDateOnly, toIsoDate } from '@lib/shared/utils';
 
 const PRESS_KINDS = ['brochure', 'media-kit', 'photo-pack', 'press-kit'] as const;
 
@@ -275,7 +275,9 @@ const press = downloads
     .press-kit__link {
         display: inline-block;
         padding-block: var(--space-3xs);
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .press-kit__link:active {

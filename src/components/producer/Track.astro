@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 
 import IconPause from '@components/icons/Pause.astro';
 import IconPlay from '@components/icons/Play.astro';
-import { formatDuration } from '@lib/utils';
+import { formatDuration } from '@lib/shared/utils';
 
 import type { CollectionEntry } from 'astro:content';
 
@@ -23,9 +23,11 @@ const WAVE_PHASE_STEP = 1.7;
 const { class: rowClass, producerId, track } = Astro.props;
 
 const producers = await getCollection('producers');
+
 const artist = producers.find(entry => entry.id === producerId)?.data.name ?? '';
 
 const seed = [...`${producerId}:${track.title}`].reduce((total, character) => (total * WAVE_HASH_MULTIPLIER + character.charCodeAt(0)) % WAVE_HASH_MODULUS, 0);
+
 const waveHeights = Array.from({ length: WAVE_BAR_COUNT }, (_, index) => Math.round(WAVE_MIN_HEIGHT + Math.abs(Math.sin(seed + index * WAVE_PHASE_STEP)) * WAVE_MAX_SPAN));
 ---
 
@@ -80,7 +82,10 @@ const waveHeights = Array.from({ length: WAVE_BAR_COUNT }, (_, index) => Math.ro
 
 <style>
     .producer-track {
-        transition: background-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .producer-track:active {

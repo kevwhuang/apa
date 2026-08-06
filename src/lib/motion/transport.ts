@@ -13,9 +13,9 @@ let trigger: ScrollTrigger | undefined;
 function clearTransport(): void {
     decay?.kill();
     trigger?.kill();
+    document.documentElement.style.removeProperty(VELOCITY_PROPERTY);
     decay = undefined;
     trigger = undefined;
-    document.documentElement.style.removeProperty(VELOCITY_PROPERTY);
 }
 
 function initTransport(): void {
@@ -32,6 +32,7 @@ function initTransport(): void {
         onUpdate(self) {
             velocity.value = gsap.utils.clamp(-VELOCITY_LIMIT, VELOCITY_LIMIT, self.getVelocity() / tokens.velocityCap);
             writeVelocity();
+
             decay = gsap.to(velocity, {
                 duration: tokens.duration.slow,
                 ease: tokens.ease.standard,

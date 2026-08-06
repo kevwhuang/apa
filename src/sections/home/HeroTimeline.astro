@@ -1,7 +1,7 @@
 ---
 import WaveformBars from '@components/shared/WaveformBars.astro';
 import { STEP_COUNT, stepEnergy } from '@lib/motion/pattern';
-import { getProgram } from '@lib/utils';
+import { getProgram } from '@lib/shared/utils';
 
 const BAR_CONTRAST = 1.6;
 const BAR_MAX = 92;
@@ -9,6 +9,7 @@ const BAR_MIN = 8;
 
 const assembly = getProgram('assembly');
 const barPeak = Math.max(...Array.from({ length: STEP_COUNT }, (_, step) => stepEnergy(step)));
+
 const bars = Array.from({ length: STEP_COUNT }, (_, step) => BAR_MIN + (BAR_MAX - BAR_MIN) * (stepEnergy(step) / barPeak) ** BAR_CONTRAST);
 const bash = getProgram('bash');
 const hangout = getProgram('hangout');
@@ -35,7 +36,7 @@ const hangout = getProgram('hangout');
         </div>
         <h1
             id="hero-title"
-            class="hero__title mb-10 font-extrabold font-sans leading-[0.86] text-[clamp(40px,min(10vw,13.5svh),148px)] tracking-[-0.045em]"
+            class="hero__title mb-10 font-extrabold font-sans leading-[0.86] text-[clamp(40px,min(calc(4px_+_11.25vw),13.5svh),148px)] tracking-[-0.045em]"
             data-motion-stagger="strike"
         >
             <span class="block">Austin's</span>

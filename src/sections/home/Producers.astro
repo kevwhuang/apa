@@ -5,14 +5,15 @@ import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import ProducerLinks from '@components/producer/Links.astro';
 import ProducerTrack from '@components/producer/Track.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { PALETTE } from '@lib/constants';
-import { formatMonthOnly, getInitials, toIsoDate } from '@lib/utils';
+import { PALETTE } from '@lib/shared/constants';
+import { formatMonthOnly, getInitials, toIsoDate } from '@lib/shared/utils';
 
 const STRIP_LIMIT = 4;
 
 const producers = await getCollection('producers');
 
 const featured = producers.find(producer => producer.data.featured);
+
 const roster = producers.filter(producer => producer.id !== featured?.id).slice(0, STRIP_LIMIT);
 const track = featured?.data.tracks[0];
 ---
@@ -46,7 +47,7 @@ const track = featured?.data.tracks[0];
                             class="slab slab--bare slab--card aspect-square"
                             color={PALETTE[0]}
                             label={getInitials(featured.data.name)}
-                            labelClass="leading-none text-[clamp(64px,10vw,120px)] text-surface-raised/80 [text-shadow:3px_3px_0_var(--color-ink-20)]"
+                            labelClass="leading-none text-[clamp(64px,calc(45.333px_+_5.8333vw),120px)] text-surface-raised/80 [text-shadow:3px_3px_0_var(--color-ink-20)]"
                         />
                     </div>
                     <p

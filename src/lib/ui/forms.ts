@@ -1,5 +1,5 @@
-import { PASSWORD_MIN_LENGTH } from '@lib/constants';
-import { describeCartIssue, setText } from '@lib/utils';
+import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
+import { describeCartIssue, setText } from '@lib/shared/utils';
 
 const BYPASS_WINDOW_MS = 0;
 

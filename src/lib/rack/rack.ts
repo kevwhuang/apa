@@ -1,8 +1,9 @@
-import { buildBlock } from '@lib/audio/rack/blocks';
-import { createStore } from '@lib/state';
-import { decodeRackFile } from '@lib/audio/rack/loader';
-import { ensureRackAudio, suspendRackAudio } from '@lib/audio/rack/context';
-import { getPlayerState, onPlayerChange, togglePlayback } from '@lib/audio';
+import { STORAGE } from '@lib/shared/constants';
+import { buildBlock } from '@lib/rack/blocks';
+import { createStore } from '@lib/shared/state';
+import { decodeRackFile } from '@lib/rack/loader';
+import { ensureRackAudio, suspendRackAudio } from '@lib/rack/context';
+import { getPlayerState, onPlayerChange, togglePlayback } from '@lib/audio/player';
 
 const CROSSFADE_SECONDS = 0.015;
 
@@ -25,8 +26,6 @@ const MODULE_NAMES: Record<RackKind, string> = {
     tuner: 'Pitchfork',
 };
 
-const RACK_KEY = 'apa.rack';
-
 const RACK_ORDER: RackKind[] = [
     'trim',
     'filter',
@@ -46,7 +45,6 @@ const RACK_ORDER: RackKind[] = [
     'tuner',
 ];
 
-const RACK_TOPIC = 'apa:rack-changed';
 const REBUILD_DELAY_MS = 20;
 const SETTLE_DELAY_MS = 60;
 
@@ -55,9 +53,9 @@ const params = new Map<string, number>();
 
 const store = createStore<RackState>({
     fallback: { activeKinds: [], durationSeconds: 0, fileName: null, playing: false },
-    key: RACK_KEY,
-    scope: 'memory',
-    topic: RACK_TOPIC,
+    key: STORAGE.rack.key,
+    scope: STORAGE.rack.scope,
+    topic: STORAGE.rack.topic,
 });
 
 let buffer: AudioBuffer | undefined;
@@ -71,7 +69,6 @@ let startedAt = 0;
 
 function applyRebuild() {
     rebuild = undefined;
-
     connectChain();
     pruneBlocks();
 
@@ -81,10 +78,11 @@ function applyRebuild() {
 function connectChain() {
     const { context, master } = ensureRackAudio();
     const chain = [...store.get().activeKinds].sort((left, right) => RACK_ORDER.indexOf(left) - RACK_ORDER.indexOf(right));
+
     const head = ensureInput(context);
 
-    head.disconnect();
     blocks.forEach(block => block.output.disconnect());
+    head.disconnect();
 
     let tail: AudioNode = head;
 
@@ -110,6 +108,7 @@ function ensureBlock(kind: RackKind, context: AudioContext) {
 
         if (target === kind) block.setParam(name, value);
     });
+
     blocks.set(kind, block);
 
     return block;
@@ -184,12 +183,12 @@ function pauseRack(): void {
     if (!state.playing) return;
 
     pausedPosition = getRackPosition();
-    stopSource(CROSSFADE_SECONDS);
     clearTimeout(rebuild);
     clearTimeout(settle);
+    stopSource(CROSSFADE_SECONDS);
+    store.set({ ...state, playing: false });
     rebuild = undefined;
     settle = setTimeout(suspendRackAudio, SETTLE_DELAY_MS);
-    store.set({ ...state, playing: false });
 }
 
 function playRack(): void {
@@ -200,9 +199,9 @@ function playRack(): void {
     if (getPlayerState().playing) togglePlayback();
 
     clearTimeout(settle);
-    settle = undefined;
     startSource(pausedPosition);
     store.set({ ...state, playing: true });
+    settle = undefined;
 }
 
 function pruneBlocks() {
@@ -256,35 +255,36 @@ function setModuleActive(kind: RackKind, active: boolean): void {
 }
 
 function setRackParam(kind: RackKind, name: string, value: number): void {
-    params.set(`${kind}:${name}`, value);
     blocks.get(kind)?.setParam(name, value);
+    params.set(`${kind}:${name}`, value);
 }
 
 function startSource(offset: number) {
     if (!buffer) return;
 
     const { context } = ensureRackAudio();
+
     const head = ensureInput(context);
 
-    stopSource(0);
     clearTimeout(rebuild);
-    rebuild = undefined;
     connectChain();
+    stopSource(0);
+    rebuild = undefined;
 
     const next = context.createBufferSource();
     const now = context.currentTime;
 
     next.buffer = buffer;
     next.loop = true;
-    next.connect(head);
-    next.start(0, offset % buffer.duration);
-    source = next;
-    startedAt = now - offset;
+    cancelAnimationFrame(frame);
     head.gain.cancelScheduledValues(now);
     head.gain.setValueAtTime(0, now);
     head.gain.linearRampToValueAtTime(1, now + CROSSFADE_SECONDS);
-    cancelAnimationFrame(frame);
+    next.connect(head);
+    next.start(0, offset % buffer.duration);
     frame = requestAnimationFrame(tick);
+    source = next;
+    startedAt = now - offset;
 }
 
 function stopSource(seconds: number) {

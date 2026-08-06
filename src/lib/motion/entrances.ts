@@ -109,7 +109,9 @@ function playEntrance(entering: Element[]): void {
         if (!name || revealed.has(target)) continue;
 
         const from = origins.get(target) ?? 'start';
+
         const key = `${name}:${from}`;
+
         const group = groups.get(key) ?? { from, name, targets: [] };
 
         group.targets.push(target);
@@ -166,10 +168,10 @@ function revealAll(): void {
 }
 
 function revealElement(target: Element): void {
-    revealed.add(target);
     gsap.killTweensOf(target);
     clearRest([target], REST_PROPERTIES);
     gsap.set(target, { opacity: 1 });
+    revealed.add(target);
 }
 
 function revealTarget(target: Element): void {

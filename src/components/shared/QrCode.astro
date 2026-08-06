@@ -22,6 +22,10 @@ const TIMING_INDEX = 6;
 
 const { caption, class: qrClass, data, label } = Astro.props;
 
+const runs = toRuns(buildModules(data));
+
+const viewSize = MODULE_COUNT + QUIET_ZONE * 2;
+
 function buildModules(seed: string): boolean[][] {
     const grid: boolean[][] = [];
     const random = createRandom(hashSeed(seed));
@@ -113,10 +117,6 @@ function toRuns(grid: boolean[][]): ModuleRun[] {
 
     return runs;
 }
-
-const runs = toRuns(buildModules(data));
-
-const viewSize = MODULE_COUNT + QUIET_ZONE * 2;
 ---
 
 <figure class:list={['qr', qrClass]}>
@@ -145,7 +145,7 @@ const viewSize = MODULE_COUNT + QUIET_ZONE * 2;
         ))}
     </svg>
     {caption && (
-        <figcaption class="qr__caption label">{caption}</figcaption>
+        <figcaption class="label qr__caption">{caption}</figcaption>
     )}
 </figure>
 
@@ -166,7 +166,7 @@ const viewSize = MODULE_COUNT + QUIET_ZONE * 2;
         aspect-ratio: 1;
         display: block;
         max-width: 100%;
-        width: clamp(240px, 26vw, 320px);
+        width: clamp(240px, calc(213.333px + 8.3333vw), 320px);
     }
 
     .qr__quiet {

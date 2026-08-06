@@ -1,5 +1,5 @@
-import { UPLOAD } from '@lib/constants';
-import { formatBytes } from '@lib/utils';
+import { UPLOAD } from '@lib/shared/constants';
+import { formatBytes } from '@lib/shared/utils';
 
 const PEAK_COUNT = 200;
 const QUEUE_FULL_MESSAGE = `You can queue ${UPLOAD.maxFiles} files at a time.`;
@@ -47,6 +47,7 @@ async function decodePeaks(buffer: ArrayBuffer) {
 
 function extractPeaks(buffer: AudioBuffer) {
     const channel = buffer.getChannelData(0);
+
     const blockSize = Math.max(1, Math.floor(channel.length / PEAK_COUNT));
     const peaks = new Float32Array(PEAK_COUNT);
 
@@ -71,6 +72,7 @@ function formatExtensions(extensions: readonly string[]) {
     const names = extensions
         .filter(extension => !extensions.some(other => other !== extension && other.startsWith(extension)))
         .map(extension => extension.toUpperCase());
+
     const last = names.pop() ?? '';
 
     return names.length > 0 ? `${names.join(', ')} or ${last}` : last;
@@ -101,12 +103,10 @@ function readArrayBuffer(file: File, options: UploadOptions) {
         const reader = new FileReader();
 
         options.signal.addEventListener('abort', () => reader.abort(), { once: true });
-
         reader.addEventListener('abort', () => reject(new Error('Cancelled.')));
         reader.addEventListener('error', () => reject(new Error('That file could not be read.')));
         reader.addEventListener('load', () => resolve(toArrayBuffer(reader.result)));
         reader.addEventListener('progress', event => options.onProgress(event.loaded, event.total || file.size));
-
         reader.readAsArrayBuffer(file);
     });
 }
@@ -174,7 +174,6 @@ async function uploadSubmission(file: File, options: UploadOptions): Promise<Upl
 
     entry.loadedBytes = file.size;
     entry.status = 'ready';
-
     options.onProgress(file.size, file.size);
 
     if (file.size > UPLOAD.maxDecodeBytes) return { entry, ok: true };
@@ -193,6 +192,7 @@ export {
     QUEUE_FULL_MESSAGE,
     UPLOAD_EXTENSIONS_OR_LIST,
     acceptFiles,
+    formatExtensions,
     getExtension,
     getSizeError,
     releaseAudioContext,

@@ -1,4 +1,4 @@
-import { BYTES_PER_KILOBYTE, BYTES_PER_MEGABYTE, CENTS_PER_DOLLAR, EVENT_PROGRAMS, PALETTE } from '@lib/constants';
+import { BYTES_PER_KILOBYTE, BYTES_PER_MEGABYTE, CENTS_PER_DOLLAR, EVENT_PROGRAMS, PALETTE } from '@lib/shared/constants';
 
 import type { CollectionEntry } from 'astro:content';
 
@@ -263,11 +263,11 @@ function initPanelResize(options: PanelResizeOptions): void {
 
         const next = Math.round(Math.min(Math.max(width, min), max));
 
-        panelWidths.set(property, next);
-        panel.style.setProperty(property, `${next}px`);
         handle.setAttribute('aria-valuemax', String(Math.round(max)));
         handle.setAttribute('aria-valuemin', String(Math.round(min)));
         handle.setAttribute('aria-valuenow', String(next));
+        panel.style.setProperty(property, `${next}px`);
+        panelWidths.set(property, next);
     }
 
     function bounds() {
@@ -330,11 +330,11 @@ function initPanelResize(options: PanelResizeOptions): void {
         return undefined;
     }
 
+    apply(current());
     handle.setAttribute('aria-label', label);
     handle.setAttribute('aria-orientation', 'vertical');
     handle.setAttribute('role', 'separator');
     handle.tabIndex = 0;
-    apply(current());
     handle.addEventListener('keydown', handleKeydown, { signal });
     handle.addEventListener('pointercancel', handlePointerUp, { signal });
     handle.addEventListener('pointerdown', handlePointerDown, { signal });
@@ -426,6 +426,7 @@ function pickTileColor(seed: string): string {
 
 function raiseWindow(target: HTMLElement): void {
     const base = floatWindowBase();
+
     const ordered = Array.from(document.querySelectorAll<HTMLElement>('[data-float-window]'))
         .filter(element => element !== target)
         .toSorted((a, b) => toLevel(a.style.zIndex, base) - toLevel(b.style.zIndex, base));
@@ -458,6 +459,15 @@ function rovingFocus(buttons: NodeListOf<HTMLButtonElement>, signal?: AbortSigna
     all.forEach((button, index) => {
         button.addEventListener('keydown', event => handleRovingKeydown(event, all, index), { signal });
     });
+}
+
+function setAvatarImage(image: HTMLImageElement | null, avatar: string): void {
+    if (!image) return;
+
+    if (avatar.length === 0) image.removeAttribute('src');
+    else image.src = avatar;
+
+    image.hidden = avatar.length === 0;
 }
 
 function setHidden(element: HTMLElement | null, hidden: boolean): void {
@@ -594,6 +604,7 @@ export {
     raiseWindow,
     registerPageScript,
     rovingFocus,
+    setAvatarImage,
     setHidden,
     setMessage,
     setPending,

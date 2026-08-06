@@ -1,6 +1,6 @@
 import { QUEUE_FULL_MESSAGE, acceptFiles, releaseAudioContext, uploadSubmission } from '@lib/audio/uploads';
-import { STORAGE } from '@lib/constants';
-import { formatBytes, formatDuration, setText } from '@lib/utils';
+import { STORAGE } from '@lib/shared/constants';
+import { formatBytes, formatDuration, setText } from '@lib/shared/utils';
 
 interface Dropzone {
     clear: () => void;
@@ -65,7 +65,6 @@ const DEFAULT_SELECTORS: DropzoneSelectors = {
 };
 
 const PERCENT = 100;
-const PERCENT_SLOT = '5ch';
 const ROW_CONTROL_SELECTOR = '[data-row-cancel], [data-row-remove]';
 
 function createDropzone(options: DropzoneOptions): Dropzone | null {
@@ -141,18 +140,16 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
 
     function clear() {
         queue.forEach(item => item.controller.abort());
-
         depth = 0;
         queue = [];
-
         list.replaceChildren();
         notify();
     }
 
     function handleDragEnter(event: DragEvent) {
         event.preventDefault();
-        depth += 1;
         zone.classList.add('is-dragging');
+        depth += 1;
     }
 
     function handleDragLeave() {
@@ -163,8 +160,8 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
 
     function handleDrop(event: DragEvent) {
         event.preventDefault();
-        depth = 0;
         zone.classList.remove('is-dragging');
+        depth = 0;
 
         const files = event.dataTransfer?.files;
 
@@ -189,11 +186,11 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
         const target = nextFocusTarget(row, selectors.input);
 
         queued?.controller.abort();
-        queue = queue.filter(item => item.entry.id !== entry.id);
         row.remove();
+        queue = queue.filter(item => item.entry.id !== entry.id);
+        notify();
         target?.focus();
         announce(messages.removed(entry.file.name));
-        notify();
 
         if (queue.length === 0) releaseAudioContext();
     }
@@ -216,7 +213,9 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
         }
 
         const source = Array.from(files);
+
         const batch = room === undefined ? source : source.slice(0, room);
+
         const created = acceptFiles(batch, queue.map(item => item.entry));
         const skipped = source.length - batch.length;
 
@@ -295,6 +294,7 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
         if (!template) return null;
 
         const fragment = template.content.cloneNode(true) as DocumentFragment;
+
         const row = fragment.querySelector<HTMLElement>('li');
 
         if (!row) return null;
@@ -303,10 +303,9 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
         const error = row.querySelector<HTMLElement>('[data-row-error]');
         const progress = row.querySelector<HTMLProgressElement>('[data-row-progress]');
 
+        progress?.setAttribute('aria-label', `Read progress for ${entry.file.name}`);
         setText(row.querySelector('[data-row-meta]'), describeEntry(entry));
         setText(row.querySelector('[data-row-name]'), entry.file.name);
-        row.querySelector<HTMLElement>('[data-row-percent]')?.style.setProperty('min-width', PERCENT_SLOT);
-        progress?.setAttribute('aria-label', `Read progress for ${entry.file.name}`);
 
         if (entry.status === 'rejected') {
             setText(error, entry.error ?? 'That file was not accepted.');
@@ -324,17 +323,16 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
     if (options.accept) input.accept = options.accept;
 
     list.replaceChildren();
-
     input.addEventListener('change', handleInputChange, { signal });
     input.addEventListener('keydown', handleInputKeydown, { signal });
+    signal.addEventListener('abort', releaseAudioContext, { once: true });
+    window.addEventListener(STORAGE.theme.topic, handleThemeChange, { signal });
+    window.addEventListener('dragover', preventNavigation, { signal });
+    window.addEventListener('drop', preventNavigation, { signal });
     zone.addEventListener('dragenter', handleDragEnter, { signal });
     zone.addEventListener('dragleave', handleDragLeave, { signal });
     zone.addEventListener('dragover', preventNavigation, { signal });
     zone.addEventListener('drop', handleDrop, { signal });
-    window.addEventListener(STORAGE.theme.topic, handleThemeChange, { signal });
-    window.addEventListener('dragover', preventNavigation, { signal });
-    window.addEventListener('drop', preventNavigation, { signal });
-    signal.addEventListener('abort', releaseAudioContext, { once: true });
 
     return {
         clear,

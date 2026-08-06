@@ -27,11 +27,11 @@ import {
     TREMOLO_DEPTH_DEFAULT,
     TREMOLO_RATE_DEFAULT,
     TRIM_GAIN_DEFAULT,
-} from '@lib/audio/rack/blocks';
-import { MODULE_NAMES } from '@lib/audio/rack/rack';
-import { RACK_EXTENSION_LIST, RACK_MAX_BYTES } from '@lib/audio/rack/loader';
-import { UPLOAD } from '@lib/constants';
-import { formatBytes } from '@lib/utils';
+} from '@lib/rack/blocks';
+import { MODULE_NAMES } from '@lib/rack/rack';
+import { RACK_EXTENSION_LIST, RACK_MAX_BYTES } from '@lib/rack/loader';
+import { UPLOAD } from '@lib/shared/constants';
+import { formatBytes } from '@lib/shared/utils';
 
 interface Module {
     blurb: string;
@@ -407,7 +407,7 @@ const PAD_LENGTH = 2;
             The modules, in signal order
         </SectionHead>
         <ul
-            class="rank rack__grid list-none"
+            class="rack__grid rank list-none"
             data-motion-from="center"
             data-motion-stagger="flip"
         >
@@ -547,7 +547,11 @@ const PAD_LENGTH = 2;
         flex: 0 0 auto;
         height: var(--control-size);
         padding: 0;
-        transition: background var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            background var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
         width: var(--control-size);
     }
 
@@ -757,7 +761,10 @@ const PAD_LENGTH = 2;
         min-height: 132px;
         padding: var(--space-sm);
         text-align: center;
-        transition: background var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            background var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .rack__drop:active {
@@ -877,7 +884,11 @@ const PAD_LENGTH = 2;
         flex: 0 0 auto;
         height: 64px;
         justify-content: center;
-        transition: background var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            background var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
         width: 64px;
     }
 
@@ -986,7 +997,7 @@ const PAD_LENGTH = 2;
 </style>
 
 <script>
-    import { ANALYSER_FFT } from '@lib/audio/rack/blocks';
+    import { ANALYSER_FFT } from '@lib/rack/blocks';
     import {
         MODULE_NAMES,
         RACK_ORDER,
@@ -998,11 +1009,11 @@ const PAD_LENGTH = 2;
         setModuleActive,
         setRackParam,
         toggleRack,
-    } from '@lib/audio/rack/rack';
-    import { STORAGE } from '@lib/constants';
-    import { formatDuration, registerPageScript, setHidden, setText } from '@lib/utils';
+    } from '@lib/rack/rack';
+    import { STORAGE } from '@lib/shared/constants';
+    import { formatDuration, registerPageScript, setHidden, setText } from '@lib/shared/utils';
     import { initRig } from '@lib/motion/rig';
-    import { validateRackFile } from '@lib/audio/rack/loader';
+    import { validateRackFile } from '@lib/rack/loader';
 
     interface MeterView {
         accent: string;
@@ -1077,13 +1088,16 @@ const PAD_LENGTH = 2;
 
     function applyParam(view: ModuleView, range: HTMLInputElement) {
         const param = range.dataset.moduleParam ?? '';
+
         const key = `${view.kind}:${param}`;
+
         const mapped = (MAP[key] ?? (value => value))(Number(range.value));
+
         const text = (FORMAT[key] ?? String)(mapped);
 
         range.ariaValueText = text;
-        setText(view.card.querySelector(`[data-module-value="${param}"]`), text);
         setRackParam(view.kind, param, mapped);
+        setText(view.card.querySelector(`[data-module-value="${param}"]`), text);
     }
 
     function bindParam(view: ModuleView, range: HTMLInputElement, signal: AbortSignal) {
@@ -1099,6 +1113,7 @@ const PAD_LENGTH = 2;
         if (!toggle) return null;
 
         const kind = card.dataset.module as RackKind;
+
         const view: ModuleView = {
             canvas,
             card,
@@ -1130,6 +1145,7 @@ const PAD_LENGTH = 2;
     function createMeterView(canvas: HTMLCanvasElement) {
         const rect = canvas.getBoundingClientRect();
         const styles = getComputedStyle(canvas);
+
         const height = Math.round(rect.height) || canvas.height;
         const ratio = Math.min(PIXEL_RATIO_MAX, Math.max(1, window.devicePixelRatio || 1));
         const width = Math.round(rect.width) || canvas.width;
@@ -1166,8 +1182,9 @@ const PAD_LENGTH = 2;
         }
 
         const level = Math.min(1, Math.sqrt(peak));
-        const lit = Math.round(level * METER_SEGMENTS);
         const width = view.width / METER_SEGMENTS;
+
+        const lit = Math.round(level * METER_SEGMENTS);
 
         for (let index = 0; index < METER_SEGMENTS; index += 1) {
             surface.fillStyle = index >= METER_SEGMENTS - ACCENT_SEGMENTS ? view.accent : view.ink;
@@ -1199,8 +1216,8 @@ const PAD_LENGTH = 2;
 
     function handleDrop(event: DragEvent, zone: HTMLElement, signal: AbortSignal) {
         preventNavigation(event);
-        setDragDepth(zone, 0);
         handleFiles(event.dataTransfer?.files, signal);
+        setDragDepth(zone, 0);
     }
 
     function handleFiles(files: FileList | null | undefined, signal: AbortSignal) {
@@ -1238,19 +1255,19 @@ const PAD_LENGTH = 2;
         if (!input || !toggle || !zone || cards.length === 0) return;
 
         unsubscribe?.();
-        views = collectViews(cards, signal);
         unsubscribe = onRackChange(render);
-        signal.addEventListener('abort', teardown, { once: true });
+        views = collectViews(cards, signal);
         input.addEventListener('change', () => handleInputChange(input, signal), { signal });
         input.addEventListener('keydown', event => handleInputKeydown(event, input), { signal });
+        signal.addEventListener('abort', teardown, { once: true });
         toggle.addEventListener('click', toggleRack, { signal });
+        window.addEventListener(STORAGE.theme.topic, handleThemeChange, { signal });
+        window.addEventListener('dragover', preventNavigation, { signal });
+        window.addEventListener('drop', preventNavigation, { signal });
         zone.addEventListener('dragenter', event => handleDragEnter(event, zone), { signal });
         zone.addEventListener('dragleave', () => handleDragLeave(zone), { signal });
         zone.addEventListener('dragover', preventNavigation, { signal });
         zone.addEventListener('drop', event => handleDrop(event, zone, signal), { signal });
-        window.addEventListener(STORAGE.theme.topic, handleThemeChange, { signal });
-        window.addEventListener('dragover', preventNavigation, { signal });
-        window.addEventListener('drop', preventNavigation, { signal });
         render();
     }
 
@@ -1266,15 +1283,15 @@ const PAD_LENGTH = 2;
             return;
         }
 
-        setText(document.querySelector('[data-rack-meta-text]'), 'Decoding\u2026');
         setDecoding(true);
+        setText(document.querySelector('[data-rack-meta-text]'), 'Decoding\u2026');
 
         const result = await loadRackFile(file);
 
         if (signal.aborted || token !== requests) return;
 
-        setDecoding(false);
         render();
+        setDecoding(false);
 
         if (!result.ok) setText(document.querySelector('[data-rack-error]'), result.message);
     }
@@ -1291,10 +1308,10 @@ const PAD_LENGTH = 2;
     function render() {
         const state = getRackState();
 
+        cancelAnimationFrame(frame);
         renderMaster(state);
         renderPath(state);
         views.forEach(view => renderView(view, state));
-        cancelAnimationFrame(frame);
 
         if (state.playing) frame = requestAnimationFrame(renderFrame);
     }
@@ -1312,11 +1329,11 @@ const PAD_LENGTH = 2;
 
         meta.title = state.fileName ?? '';
         toggle.disabled = state.fileName === null;
-        toggle.setAttribute('aria-pressed', String(state.playing));
         setHidden(document.querySelector<HTMLElement>('[data-rack-icon-pause]'), !state.playing);
         setHidden(document.querySelector<HTMLElement>('[data-rack-icon-play]'), state.playing);
         setText(document.querySelector('[data-rack-meta-text]'), state.fileName === null ? 'No file loaded' : `${state.fileName} \u00b7 ${formatDuration(state.durationSeconds)}`);
         setText(document.querySelector('[data-rack-toggle-label]'), state.playing ? 'Pause the rack' : 'Play the rack');
+        toggle.setAttribute('aria-pressed', String(state.playing));
     }
 
     function renderPath(state: RackState) {
@@ -1331,6 +1348,7 @@ const PAD_LENGTH = 2;
 
         for (const kind of chain) {
             const fragment = template.content.cloneNode(true) as DocumentFragment;
+
             const node = fragment.querySelector<HTMLElement>('[data-rack-plug]');
 
             if (!node) continue;
@@ -1360,8 +1378,8 @@ const PAD_LENGTH = 2;
         const master = document.querySelector<HTMLElement>('[data-rack-master]');
         const zone = document.querySelector<HTMLElement>('[data-rack-drop]');
 
-        setHidden(document.querySelector<HTMLElement>('[data-rack-spinner]'), !active);
         master?.classList.toggle('is-decoding', active);
+        setHidden(document.querySelector<HTMLElement>('[data-rack-spinner]'), !active);
 
         if (active) zone?.setAttribute('aria-busy', 'true');
         else zone?.removeAttribute('aria-busy');

@@ -2,11 +2,12 @@
 
 declare module 'eslint-plugin-jsx-a11y';
 
-type AssetKind = (typeof import('@lib/constants').ASSET_KINDS)[number];
+type AssetKind = (typeof import('@lib/shared/constants').ASSET_KINDS)[number];
+type AvatarResult = { dataUrl: string; ok: true } | { message: string; ok: false };
 type CartIssueKind = 'out-of-stock' | 'price-changed' | 'quantity-reduced' | 'removed';
-type EventCadence = (typeof import('@lib/constants').EVENT_CADENCES)[number];
-type EventStatus = (typeof import('@lib/constants').EVENT_STATUSES)[number];
-type EventType = (typeof import('@lib/constants').EVENT_TYPES)[number];
+type EventCadence = (typeof import('@lib/shared/constants').EVENT_CADENCES)[number];
+type EventStatus = (typeof import('@lib/shared/constants').EVENT_STATUSES)[number];
+type EventType = (typeof import('@lib/shared/constants').EVENT_TYPES)[number];
 type FieldErrors = Record<string, string>;
 type MotionBezier = [number, number, number, number];
 type MotionDurationToken = 'base' | 'cinematic' | 'fast' | 'slow' | 'slower' | 'slowest';
@@ -17,16 +18,16 @@ type MotionScrubName = 'drift' | 'float';
 type MotionStaggerOrigin = 'center' | 'end' | 'start';
 type MotionStaggerToken = 'base' | 'tight';
 type OnboardingGate = { email: string; state: 'granted'; token: OnboardingToken } | { reason: OnboardingRejection; state: 'rejected' };
-type OnboardingRejection = 'completed' | 'expired' | 'malformed' | 'missing';
+type OnboardingRejection = 'expired' | 'malformed' | 'missing';
 type OrderResult = { code: PaymentErrorCode; message: string; ok: false } | { ok: true; order: Order };
 type PaymentErrorCode = 'card-declined' | 'cart-changed' | 'empty-cart';
-type ProductCategory = (typeof import('@lib/constants').PRODUCT_CATEGORIES)[number];
+type ProductCategory = (typeof import('@lib/shared/constants').PRODUCT_CATEGORIES)[number];
 type ProgramState = 'active' | 'planned';
 type RackKind = 'chorus' | 'compressor' | 'delay' | 'distortion' | 'eq' | 'filter' | 'gate' | 'highpass' | 'limiter' | 'meter' | 'pan' | 'reverb' | 'saturator' | 'tremolo' | 'trim' | 'tuner';
 type RackLoadResult = { buffer: AudioBuffer; ok: true } | { message: string; ok: false };
 type SessionErrorCode = 'already-registered' | 'invalid-credentials' | 'invalid-email' | 'weak-password';
 type SessionResult = { code: SessionErrorCode; message: string; ok: false } | { ok: true; session: Session };
-type StorageScope = 'local' | 'memory' | 'session';
+type StorageScope = 'local' | 'memory';
 type Theme = 'dark' | 'light';
 type Timer = ReturnType<typeof setInterval>;
 type ToastTone = 'error' | 'info' | 'success';
@@ -187,6 +188,7 @@ interface MotionTokens {
 
 interface OnboardingDraft {
     artistName: string;
+    avatar: string;
     email: string;
     genres: string[];
     location: string;
@@ -243,6 +245,7 @@ interface ProducerRecord extends Omit<import('astro:content').CollectionEntry<'p
 
 interface Profile {
     artistName: string;
+    avatar: string;
     createdAt: number;
     onboarded: boolean;
     prods: number;
@@ -268,6 +271,7 @@ interface RackState {
 
 interface Session {
     artistName: string;
+    avatar: string;
     createdAt: number;
     email: string;
     expiresAt: number;

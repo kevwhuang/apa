@@ -8,12 +8,13 @@ import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import ProducerLinks from '@components/producer/Links.astro';
 import ProducerTrack from '@components/producer/Track.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { JOIN_ROUTE, LINKS, PALETTE } from '@lib/constants';
-import { formatMonthOnly, getInitials, toIsoDate } from '@lib/utils';
+import { JOIN_ROUTE, LINKS, PALETTE } from '@lib/shared/constants';
+import { formatMonthOnly, getInitials, toIsoDate } from '@lib/shared/utils';
 
 const producers = await getCollection('producers');
 
 const allGenres = Array.from(new Set(producers.flatMap(producer => producer.data.genres))).sort((a, b) => a.localeCompare(b));
+
 const roster = [...producers]
     .sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || a.data.name.localeCompare(b.data.name))
     .map(producer => ({
@@ -47,9 +48,9 @@ const roster = [...producers]
             data-motion="rise"
         >
             <span class="sr-only">Search the roster</span>
-            <span class="relative block max-w-[360px] w-full">
+            <span class="block relative max-w-[360px] w-full">
                 <span
-                    class="absolute bottom-0 left-4 top-0 flex items-center text-ink-muted pointer-events-none"
+                    class="absolute bottom-0 flex items-center left-4 top-0 text-ink-muted pointer-events-none"
                     aria-hidden="true"
                 >
                     <IconSearch />
@@ -63,7 +64,7 @@ const roster = [...producers]
                     type="search"
                 />
                 <button
-                    class="active:translate-y-px hover:text-accent-deep absolute right-0 top-0 inline-flex items-center justify-center h-(--control-size) w-(--control-size) text-ink-muted transition-colors"
+                    class="active:translate-y-px hover:text-accent-deep absolute inline-flex items-center justify-center right-0 top-0 h-(--control-size) w-(--control-size) text-ink-muted transition-colors"
                     aria-label="Clear search"
                     data-producers-clear
                     hidden
@@ -187,7 +188,7 @@ const roster = [...producers]
         ))}
     </ul>
     <div
-        class="slab slab--sunk flex flex-col items-start gap-4"
+        class="slab slab--sunk flex flex-col items-start max-w-(--measure-form) w-full gap-4 mx-auto"
         data-producers-empty
         hidden
     >
@@ -308,7 +309,7 @@ const roster = [...producers]
 </style>
 
 <script>
-    import { initFilterGroup, initSearchField, registerPageScript } from '@lib/utils';
+    import { initFilterGroup, initSearchField, registerPageScript } from '@lib/shared/utils';
     import { initTracks } from '@lib/audio/tracks';
 
     function describeProducers(shown: number, total: number, genre: string, query: string) {

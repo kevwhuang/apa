@@ -1,5 +1,5 @@
-import { LINKS, ONBOARDING_ROUTE, ONBOARDING_TOKEN_PARAM } from '@lib/constants';
-import { formatProds } from '@lib/utils';
+import { LINKS, ONBOARDING_ROUTE, ONBOARDING_TOKEN_PARAM } from '@lib/shared/constants';
+import { formatProds } from '@lib/shared/utils';
 
 const SENDER_NAME = 'Austin Producer Alliance';
 

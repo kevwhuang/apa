@@ -1,6 +1,6 @@
-import { MOCK_LATENCY_MS, STORAGE } from '@lib/constants';
-import { createStore } from '@lib/state';
-import { delay } from '@lib/utils';
+import { MOCK_LATENCY_MS, STORAGE } from '@lib/shared/constants';
+import { createStore } from '@lib/shared/state';
+import { delay } from '@lib/shared/utils';
 import { getSession } from '@lib/account/session';
 
 const CHAT_REPLIES = [

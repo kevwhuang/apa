@@ -3,8 +3,8 @@ import { getCollection } from 'astro:content';
 
 import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import { PALETTE, PRODUCT_CATEGORIES } from '@lib/constants';
-import { formatPrice, getStockLabel } from '@lib/utils';
+import { PALETTE, PRODUCT_CATEGORIES } from '@lib/shared/constants';
+import { formatPrice, getStockLabel } from '@lib/shared/utils';
 
 const CATEGORIES = ['all', ...PRODUCT_CATEGORIES] as const;
 
@@ -158,7 +158,7 @@ const products = await getCollection('products');
 </style>
 
 <script>
-    import { initFilterGroup, registerPageScript } from '@lib/utils';
+    import { initFilterGroup, registerPageScript } from '@lib/shared/utils';
 
     function initStoreGrid(signal: AbortSignal) {
         const buttons = document.querySelectorAll<HTMLButtonElement>('.category-btn');

@@ -6,15 +6,15 @@ import { ClientRouter } from 'astro:transitions';
 
 import '@/global.css';
 import '@/styles.css';
-import bootstrap from '@lib/bootstrap.js?raw';
-import AiWindow from '@sections/shared/AiWindow.astro';
-import AudioDock from '@sections/shared/AudioDock.astro';
-import ChatWindow from '@sections/shared/ChatWindow.astro';
+import Ai from '@sections/shared/Ai.astro';
+import Chat from '@sections/shared/Chat.astro';
 import Footer from '@sections/shared/Footer.astro';
 import Navbar from '@sections/shared/Navbar.astro';
+import Player from '@sections/shared/Player.astro';
 import Toaster from '@sections/shared/Toaster.astro';
-import { BRAND, BRAND_ICONS, BRAND_OG } from '@lib/brand';
-import { LINKS, STORAGE } from '@lib/constants';
+import bootstrap from '@lib/raw/bootstrap.ts?raw';
+import { BRAND, BRAND_ICONS, BRAND_OG } from '@lib/shared/brand';
+import { LINKS, STORAGE } from '@lib/shared/constants';
 
 interface Props {
     description: string;
@@ -94,15 +94,15 @@ const ogImageUrl = new URL(BRAND_ICONS.og, Astro.site).href;
             </main>
             <Footer />
         </div>
-        <AiWindow />
-        <AudioDock />
-        <ChatWindow />
+        <Ai />
+        <Chat />
+        <Player />
         <Toaster />
     </body>
 </html>
 
 <script>
-    import { initMotion } from '@lib/motion';
+    import { initMotion } from '@lib/motion/motion';
     import { syncSessionAttribute } from '@lib/account/session';
     import { syncThemeAttribute } from '@lib/ui/theme';
 

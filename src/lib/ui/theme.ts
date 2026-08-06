@@ -1,5 +1,5 @@
-import { STORAGE } from '@lib/constants';
-import { createStore } from '@lib/state';
+import { STORAGE } from '@lib/shared/constants';
+import { createStore } from '@lib/shared/state';
 
 const DARK_QUERY = '(prefers-color-scheme: dark)';
 const META_SELECTOR = 'meta[name="theme-color"]';

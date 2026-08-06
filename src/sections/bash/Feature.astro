@@ -1,6 +1,6 @@
 ---
 import PageHead from '@components/shared/PageHead.astro';
-import { getProgram } from '@lib/utils';
+import { getProgram } from '@lib/shared/utils';
 
 const program = getProgram('bash');
 ---
@@ -14,7 +14,7 @@ const program = getProgram('bash');
         aria-hidden="true"
         data-scrub="drift"
     />
-    <div class="flex flex-col gap-6 relative">
+    <div class="flex flex-col relative gap-6">
         <PageHead
             class="font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
             eyebrow={`${program.shortName} / ${program.cadence}`}

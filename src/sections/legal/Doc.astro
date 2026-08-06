@@ -1,6 +1,6 @@
 ---
-import { LINKS, SESSION_TTL_DAYS, SITE_UPDATED, STORAGE } from '@lib/constants';
-import { formatDateOnly } from '@lib/utils';
+import { LINKS, SESSION_TTL_DAYS, SITE_UPDATED, STORAGE } from '@lib/shared/constants';
+import { formatDateOnly } from '@lib/shared/utils';
 
 interface Props {
     kind: 'privacy' | 'terms';
@@ -10,91 +10,48 @@ const SECTIONS: Record<Props['kind'], { body: string[]; heading: string }[]> = {
     privacy: [
         {
             body: [
-                'Nothing, on our side. This site has no backend and no database \u2014 the interactive surfaces you will find here (the contact form, the store checkout, the sign-in, the member chat, the Assembly track-feedback uploader, the Bash uploader, the rack, the AI assistant) are working demonstrations that run entirely in your browser. Submitting them does not send, transmit, or store your name, email, message, files, or payment details anywhere. The <a href="/terms">terms of service</a> describe how those demonstrations behave; this page covers what they keep, which is very little and never leaves your device.',
-                'When a form offers to send a message, it composes an ordinary email in your own mail app through a mailto link and shows you exactly what it wrote \u2014 nothing is transmitted unless you press send there, and at that point you are simply emailing us, which the Email section below covers. Files you hand to the Assembly track-feedback uploader, to the Bash submission form, or to the rack are read locally to draw the waveforms, meters, and progress readouts you see, then go nowhere.',
-                'Two things are worth stating outright, because people reasonably assume otherwise. Passwords are never written down: the sign-in and the onboarding flow check what you type while the page is open and then drop it, and the onboarding draft records only that a password was set, never the password. Card numbers are never kept either \u2014 checkout compares what you type against the demo number it suggests, and the receipt it saves holds the order number, the line items, the totals, and the email address you entered. Nothing else.',
-                'The AI assistant is a keyword matcher, not a model. It reads your question against six written answers, falls back to a seventh when none of them fit, and makes no request to anything \u2014 the conversation sits in page memory and a reload wipes it. The track player is the same idea in audio: every loop you hear is synthesized by Web Audio from a number derived from the track\'s id, so no audio file is ever fetched, and the volume and mute you set last only until the page reloads.',
+                'Nothing, on our side. This site has no backend and no database. Every interactive surface \u2014 the contact form, the sign-in and onboarding, the store checkout, the member chat, the track-feedback and Bash uploaders, the rack, the AI assistant \u2014 is a demonstration that runs entirely in your browser. Submitting them sends nothing anywhere. The <a href="/terms">terms of service</a> describe how the demonstrations behave; this page covers the little they keep, all of it on your device.',
+                'The specifics people reasonably worry about. The contact form composes a message in your own mail app through a mailto link, and nothing is sent unless you press send there. Files handed to an uploader or the rack are read locally to draw waveforms and meters, then go nowhere; the one picture that stays is a portrait you choose for your profile, which is kept in your browser\'s own storage and listed below. Passwords are checked while the page is open and then dropped, never stored. Checkout checks only that a card number is the right shape, charges nothing, and never keeps the number; the receipt it saves holds the order number, the line items, the totals, a timestamp, and the email you entered. The AI assistant matches keywords against canned answers written into the page and makes no requests.',
             ],
             heading: 'What we collect',
         },
         {
             body: [
-                'A few features remember things between pages or visits. They do it with your browser\'s built-in storage, on your device, and none of it is ever transmitted to us or to anyone else. The whole inventory runs to eleven keys, listed below with what each one holds.',
-                `Longer-lived storage (localStorage) holds seven keys: <code>${STORAGE.adminProds.key}</code>, the Prods adjustments entered in the admin console on top of its sample roster, which never expire on their own; <code>${STORAGE.cart.key}</code>, the contents of your demonstration store cart; <code>apa.cart-seeded</code>, a one-time marker that the demonstration cart was pre-filled, which is what stops it refilling once you empty it; <code>${STORAGE.newsletter.key}</code>, the address you subscribed to the seasonal dispatch with, kept so the form does not ask twice; <code>${STORAGE.profiles.key}</code>, the roster profile (artist name, join date, onboarding state, and Prods balance) for each address that has signed in, so it survives signing out; <code>${STORAGE.session.key}</code>, the demo sign-in session \u2014 email, artist name, a join stamp, onboarding state, Prods balance, and an expiry stamp that retires it by itself after ${SESSION_TTL_DAYS} days; and <code>${STORAGE.theme.key}</code>, your light-or-dark theme choice.`,
-                `Per-tab storage (sessionStorage) empties as soon as the tab closes. It holds <code>${STORAGE.bashBoard.key}</code>, the Bash submission board, so its pager and its refresh have something to page through \u2014 those rows are sample entries from past editions, not anything you uploaded; <code>${STORAGE.chat.key}</code>, the demo member chat room, meaning its three seeded producers and whatever you have typed back; <code>${STORAGE.onboardingDraft.key}</code>, an in-progress draft of the onboarding questionnaire (artist name, email address, genres, and roles, plus the step you reached and the flag that a password was set); and <code>${STORAGE.order.key}</code>, the receipt from your most recent demonstration checkout.`,
-                'Three surfaces write nothing at all. The rack holds your loaded file, which of its sixteen modules are switched on, where their sliders sit, and everything its meters are reading in page memory, so leaving the page ends that session and coming back starts a clean one. The track player keeps its volume, mute, and position the same way. So does the AI assistant conversation.',
+                'A few features remember things between pages or visits, using your browser\'s built-in storage \u2014 eleven keys in all, every one of them in localStorage on your device and none transmitted to us or anyone else.',
+                `Seven of them: <code>${STORAGE.adminProds.key}</code>, Prods adjustments made in the admin console; <code>${STORAGE.cart.key}</code>, your demonstration cart; <code>apa.cart-seeded</code>, a marker that the cart was pre-filled once, so it does not refill after you empty it; <code>${STORAGE.newsletter.key}</code>, the address you gave the newsletter form, kept so it does not ask twice; <code>${STORAGE.profiles.key}</code>, the demo roster profile for each address that has signed in (artist name, the portrait image you chose, role, join date, onboarding state, and Prods balance); <code>${STORAGE.session.key}</code>, the demo sign-in session \u2014 email, artist name, portrait, role, join stamp, onboarding state, Prods balance, and an expiry stamp that retires it on its own after ${SESSION_TTL_DAYS} days; and <code>${STORAGE.theme.key}</code>, your theme choice.`,
+                `The remaining four sit alongside them, and keep what they hold just the same: <code>${STORAGE.bashBoard.key}</code>, the sample Bash submission board; <code>${STORAGE.chat.key}</code>, the demo member chat, meaning its seeded producers and whatever you have typed back, plus whether the panel was open; <code>${STORAGE.onboardingDraft.key}</code>, an in-progress onboarding draft (artist name, portrait, email, location, genres, roles, and the step you reached); and <code>${STORAGE.order.key}</code>, the receipt from your most recent demonstration checkout.`,
+                'The rack, the track player, and the AI assistant keep their state in page memory only, so leaving the page ends it. The sign-in session is the one key that runs down a clock; every other key sits there until you clear it or a demonstration clears it for you \u2014 placing a demo order empties the cart on the spot. Clearing site data for this domain removes all eleven keys at once and ends the demo session with them, and signing out clears the session while leaving your profile in place on purpose.',
             ],
             heading: 'Data stored in your browser',
         },
         {
             body: [
-                'Retention is a short subject when nothing is collected. We keep no record of your visit, so on our side there is no lifetime to describe \u2014 no logs of our own, no backups, no archive that outlives this sentence. Everything with a clock on it is on your device.',
-                `That clock reads one of three ways. <code>${STORAGE.session.key}</code> carries an expiry stamp ${SESSION_TTL_DAYS} days out and deletes itself the first time the site reads it after that. The four sessionStorage keys die with the tab. The rest of localStorage sits there until you clear it or a demonstration clears it for you \u2014 placing a demo order empties the cart on the spot. Nothing else runs down a timer.`,
-                'Email is the one exception, and barely one: a message you send us sits in an ordinary mailbox for as long as the conversation stays useful, or until you tell us you are done with it.',
+                'This site sets no cookies and runs no analytics \u2014 no tracking pixels, no ad networks, and no third-party scripts, fonts, or frames. Do Not Track and Global Privacy Control change nothing here because there is nothing to switch off; consider the signal honored on arrival.',
             ],
-            heading: 'How long any of it lasts',
+            heading: 'Cookies & tracking',
         },
         {
             body: [
-                'None. This site sets no cookies \u2014 not for preferences, not for sessions, not for advertising. There is no cookie banner because there is nothing to consent to.',
+                'The site is served by Netlify, which keeps standard server access logs \u2014 IP address, requested page, timestamp, browser \u2014 as part of operating its network. Those logs live with Netlify, not with us, and its <a href="https://www.netlify.com/privacy/" rel="noopener noreferrer" target="_blank">privacy policy</a> covers them.',
+                `The Alliance also organizes on <a href="${LINKS.meetup}" rel="noopener noreferrer" target="_blank">Meetup</a>, <a href="${LINKS.discord}" rel="noopener noreferrer" target="_blank">Discord</a>, and <a href="${LINKS.instagram}" rel="noopener noreferrer" target="_blank">Instagram</a>. Following those links takes you off this site and onto each service's own terms and privacy practices.`,
             ],
-            heading: 'Cookies',
+            heading: 'Hosting & third parties',
         },
         {
             body: [
-                'We run no analytics, no tracking pixels, and no ad networks. Fonts, images, and scripts are served from our own hosting, so pages make no third-party requests \u2014 no embedded players, no map frames, no font CDN \u2014 and no script on this site reports your visit to anyone.',
-            ],
-            heading: 'Analytics & tracking',
-        },
-        {
-            body: [
-                'Send the Do Not Track header if your browser offers it, or Global Privacy Control. Neither changes what happens here, because there is nothing to switch off: no analytics to opt out of, no profile to suppress, no advertising identity to reset. Consider the signal honored on arrival.',
-            ],
-            heading: 'Do Not Track',
-        },
-        {
-            body: [
-                'The site is served by Netlify. Like any host, Netlify keeps standard server access logs \u2014 IP address, requested page, timestamp, browser \u2014 as part of operating and securing its network. Those logs live with Netlify, not with us; we do not collect them, enrich them, or use them to identify visitors.',
-                'Netlify\'s own handling of that data is described in its <a href="https://www.netlify.com/privacy/" rel="noopener noreferrer" target="_blank">privacy policy</a>.',
-            ],
-            heading: 'Hosting & server logs',
-        },
-        {
-            body: [
-                `If you write to us at <a href="mailto:${LINKS.email}">${LINKS.email}</a>, we receive your address and whatever you chose to say. We use them to reply and for nothing else \u2014 no lists, no sharing, no automated processing. Ask us to delete a thread and we will.`,
-                `The press address in our <a href="/resources">resources library</a>, <a href="mailto:${LINKS.pressEmail}">${LINKS.pressEmail}</a>, reaches the same organizers and is handled the same way. Neither address is subscribed to anything, and neither one puts you on a list you did not ask for.`,
+                `Write to <a href="mailto:${LINKS.email}">${LINKS.email}</a> and we receive your address and whatever you chose to say. We use them to reply and for nothing else \u2014 no lists, no sharing, no automated processing. The press address, <a href="mailto:${LINKS.pressEmail}">${LINKS.pressEmail}</a>, reaches the same organizers and works the same way. Mail sits in an ordinary mailbox; ask us to delete a thread and we will.`,
             ],
             heading: 'Email',
         },
         {
             body: [
-                `The Alliance organizes on platforms we do not run: RSVPs on <a href="${LINKS.meetup}" rel="noopener noreferrer" target="_blank">Meetup</a>, day-to-day conversation on <a href="${LINKS.discord}" rel="noopener noreferrer" target="_blank">Discord</a>, and recaps on <a href="${LINKS.instagram}" rel="noopener noreferrer" target="_blank">Instagram</a>. Following any of those links takes you off this site and onto that service's own terms and privacy practices \u2014 what they collect there is between you and them.`,
-            ],
-            heading: 'Links to other services',
-        },
-        {
-            body: [
-                'This site is not directed at children under 13, and because nothing is collected here, no personal information about anyone \u2014 child or adult \u2014 is gathered or held. Our <a href="/terms#eligibility">terms of service</a> draw the same line for membership. If you believe a child has emailed us personal information, write to us and we will delete it.',
+                'This site is not directed at children under 13, and nothing anyone enters here \u2014 child or adult \u2014 ever reaches us; what the demonstrations keep stays in your own browser. The <a href="/terms#eligibility">terms of service</a> draw the same line for membership. If you believe a child has emailed us personal information, write to us and we will delete it.',
             ],
             heading: 'Children',
         },
         {
             body: [
-                'Wherever you are reading this from, the answer is the one the rest of this page gives. The site is served worldwide and collects nothing anywhere, so nothing crosses a border, lands on a foreign server, or gets processed by anyone on our behalf. There is no transfer mechanism to name because there is no transfer.',
-                'The Alliance itself is about as local as an organization gets: monthly Assemblies at Station Austin on Brazos Street, the Bash across town at Austin Community College, the Hangout wherever a room will have us. Visit the site from Lisbon or Seoul and you get the same pages and the same silence about you.',
-            ],
-            heading: 'Visitors outside the United States',
-        },
-        {
-            body: [
-                'Everything this site keeps about you sits on your own device, so the controls are already in your hands. Clearing site data for this domain in your browser settings removes all eleven keys at once and ends the demo session with them. Removing a single key in developer tools works too, if you would rather keep your theme and drop the rest. Signing out clears the session and leaves your profile in place on purpose, which is why signing back in restores your artist name and Prods balance.',
-                'The one thing that lives anywhere else is email you chose to send us, and the Email section above covers what happens when you want a thread gone. Beyond that there is no account to close, no data export to request, and no marketing to unsubscribe from \u2014 there is no account, no data, and no marketing.',
-            ],
-            heading: 'Your choices',
-        },
-        {
-            body: [
-                'If the site ever gains real infrastructure \u2014 a live store, member accounts, an actual mailing list \u2014 this policy will be rewritten to say precisely what changed, before it ships. The date at the top marks the current version; meaningful revisions will be called out on this page rather than slipped in quietly.',
+                'If the site gains real infrastructure \u2014 a live store, member accounts, a mailing list \u2014 this policy will be rewritten to say what changed before it ships. The date at the top marks the current version.',
             ],
             heading: 'Changes to this policy',
         },
@@ -102,94 +59,57 @@ const SECTIONS: Record<Props['kind'], { body: string[]; heading: string }[]> = {
     terms: [
         {
             body: [
-                'You need to be 13 or older to use this site, the same floor our <a href="/privacy#children">privacy policy</a> draws. Nothing here is built for anyone younger, and membership starts at the same age.',
-                'Events are a separate question, and the venue answers it. Assembly runs at Station Austin and the Bash at Austin Community College; the Hangout moves, and its room is announced to members before the night with whatever age policy comes attached. Where a room is 18+ or 21+, the venue\'s rule holds over anything written here. Under 18, come with a parent or guardian and read the listing before you plan around it.',
+                'You need to be 13 or older to use this site \u2014 the same floor our <a href="/privacy#children">privacy policy</a> draws \u2014 and membership starts at the same age. Venues set event ages: where a room is 18+ or 21+, the venue\'s rule holds over anything written here, so read the listing before you plan around it.',
             ],
             heading: 'Eligibility',
         },
         {
             body: [
-                'Membership is open to anyone making music in or around Austin, and to anyone in the creative industry who wants to work alongside them. There are no dues and no auditions \u2014 show up, introduce yourself, make things. Membership is personal and non-transferable.',
-                'One standing rule travels with it: treat the room the way you want the scene to be. Harassment, discrimination, and gatekeeping have no home here, in person or in the Discord. Organizers may warn, remove, or ban anyone who makes the community worse for everyone else, and their call is final.',
+                'Membership is open to anyone making music in or around Austin, and to anyone in the creative industry who wants to work alongside them. No dues, no auditions; it is personal and non-transferable. One standing rule travels with it: treat the room the way you want the scene to be. Harassment, discrimination, and gatekeeping have no home here, in person or in the Discord.',
+                'Leaving is simple \u2014 stop coming, leave the Discord, and you are no longer a member; there is no account to cancel. The other direction belongs to the organizers, who may warn, turn away, or remove anyone who makes the community worse, with no notice when the safety of the room is the reason, and whose call is final. Removal changes nothing about what you own: your tracks, samples, and name stay yours.',
             ],
             heading: 'Membership & conduct',
         },
         {
             body: [
-                `Events happen in rooms our venue partners lend us. Attending means following the house rules of whichever space we are in, respecting the schedule and the people running it, and leaving the room as we found it. RSVPs run through <a href="${LINKS.meetup}" rel="noopener noreferrer" target="_blank">Meetup</a> and some rooms cap attendance \u2014 an RSVP is a plan, not a contract, but tell us if yours changes. Repeated disregard for house rules can end in removal from an event or from future ones.`,
-                'We document what we do. Most events are photographed and some are filmed for recaps on our channels, and by attending you consent to appearing in that coverage. If you would rather not, tell an organizer at check-in and we will keep you out of frame; if a published photo of you needs to come down, email us and it will.',
+                `Events happen in rooms our venue partners lend us, and attending means following the house rules of whichever space we are in. RSVPs run through <a href="${LINKS.meetup}" rel="noopener noreferrer" target="_blank">Meetup</a> and some rooms cap attendance \u2014 an RSVP is a plan, not a contract, but tell us if yours changes.`,
+                'Most events are photographed and some are filmed for recaps, and attending means consenting to that coverage. Tell an organizer at check-in and we will keep you out of frame; email us and a published photo of you comes down.',
             ],
             heading: 'Events & photography',
         },
         {
             body: [
-                'Assemblies set aside time for tracks to be heard, and feedback sessions are the heart of them. Feedback is opinion, offered producer to producer to make the work better \u2014 it is not professional, legal, or A&R advice, and what you do with it is your call.',
-                'Playing a work-in-progress for the room is not publication and gives nobody in it any rights. What gets shared in session stays with its maker, and recording someone else\'s unreleased work without asking is the fastest way to test the conduct section above.',
+                'Feedback at an Assembly is opinion, offered producer to producer \u2014 not professional, legal, or A&R advice. Playing a work-in-progress for the room is not publication and gives nobody in it any rights, and recording someone else\'s unreleased work without asking is a conduct violation.',
+                'Submitting to the <a href="/bash">Bash</a> transfers no ownership. You grant only what the event needs: permission to play submissions at the Bash, to feature them in recaps, and to include them, with credit, in a community compilation. Submit only material you have the rights to share \u2014 uncleared work comes down, and the clearance stays your responsibility.',
+                'The uploaders and the member chat on this site are demonstrations: files and messages stay in your browser and reach no one, so bring your track with you on the night, and clear site data when you want the chat gone.',
             ],
-            heading: 'Track feedback',
+            heading: 'Your work',
         },
         {
             body: [
-                'The <a href="/bash">Bash</a> runs on submitted work \u2014 samples contributed to the pack and tracks built from it. You keep your work: submitting transfers no ownership of anything, and every right in your samples and tracks stays with you.',
-                'What you grant the Alliance is only what the event needs \u2014 permission to play submissions at the Bash, to feature them in recaps, and to include them, with credit, in the community compilation when a round produces one. Submit only material you have the rights to share; if a submission turns out to contain uncleared third-party work, we will pull it from anything we have published, and the clearance stays your responsibility.',
-                'That same narrow permission covers everything else you hand over. A link or a bounce queued for Assembly track feedback is a request to be played at the next Assembly and nothing more, and because that queue lives in the page rather than on a server, bring the same link or file with you on the night. Messages you type into the member chat stay yours too, and the room empties with the browser tab, so there is nothing there for anyone to hold onto. In every case the license runs exactly as far as running the event, and no further.',
+                'The store is a demonstration. Checkout validates the shape of a card number and nothing more, no payment is collected or processed, and no order placed today obligates anyone to anything. Your cart and receipt exist only in your browser \u2014 the <a href="/privacy#data-stored-in-your-browser">privacy policy</a> lists exactly where. These terms will be updated before any real money moves.',
+                'Prods are the Alliance\'s participation currency: members earn them for showing up and contributing, and each is worth $1.00 of credit toward items in our inventory, redeemed in person. Prods are not money \u2014 no cash value, no buying, selling, or transferring \u2014 and the program may change or wind down as the Alliance evolves.',
             ],
-            heading: 'Bash submissions',
+            heading: 'Store & Prods',
         },
         {
             body: [
-                'The store is currently a demonstration. Checkout accepts the test card numbers it suggests and nothing else, no payment is collected or processed, and no order placed today obligates anyone to anything. Your cart and order confirmation exist only in your browser \u2014 the <a href="/privacy#data-stored-in-your-browser">privacy policy</a> lists exactly where.',
-                'When real ordering arrives it will work the way the Alliance does: order online, then collect in person at an <a href="/assembly">Assembly</a>. These terms will be updated before any real money moves.',
-            ],
-            heading: 'Store & orders',
-        },
-        {
-            body: [
-                'Prods are the Alliance\'s participation currency: members earn them for showing up and contributing \u2014 attending meets, submitting tracks, giving talks, bringing friends \u2014 and each Prod is worth $1.00 of credit toward items in our inventory, redeemed in person.',
-                'Prods are a community reward, not money. They have no cash value and cannot be bought, sold, or transferred, and the program \u2014 earn rates, inventory, and all \u2014 may change or wind down as the Alliance evolves. The current rules are set out in the Prods document in our <a href="/resources">resources library</a>, which is still being prepared.',
-            ],
-            heading: 'Prods',
-        },
-        {
-            body: [
-                'Use the site as a visitor, not a target. Do not probe or disrupt it, harvest it for spam lists, impersonate the Alliance or its members, or present its demonstration surfaces \u2014 checkout, sign-in, chat \u2014 to anyone as the real thing. That is the whole list.',
-                'The <a href="/rack">rack</a> is the one surface doing real work rather than pretending: it decodes a file you choose and runs it through a Web Audio chain in your own browser. Load audio you have the right to load, and watch your levels \u2014 sixteen modules in series can get loud faster than headphones forgive.',
+                'Use the site as a visitor, not a target. Do not probe or disrupt it, harvest it for spam lists, impersonate the Alliance or its members, or present its demonstration surfaces to anyone as the real thing. The <a href="/rack">rack</a> does real work in your browser \u2014 load only audio you have the right to load, and watch your levels.',
             ],
             heading: 'Acceptable use',
         },
         {
             body: [
-                'Leaving is simple, because there is nothing to cancel. Stop coming, leave the Discord, and you are no longer a member. The demo sign-in has no account behind it, so clearing site data in your browser ends it more completely than we ever could.',
-                'The other direction belongs to the organizers. Break the conduct rules and we can warn you, turn you away from a night, or end your membership outright, with no notice at all when the safety of the room is the reason. Removal covers the Discord and future events alike. It changes nothing about what you own: your tracks, your samples, and your name stay yours, and if you want your <a href="/bash">Bash</a> submissions pulled from anything we have published, say so and they come down.',
-            ],
-            heading: 'Leaving & removal',
-        },
-        {
-            body: [
-                'The Alliance name, the tick mark, and the writing and design of this site belong to the Austin Producer Alliance. Press and partners are welcome to the brand assets in our <a href="/resources">resources library</a>; ask before reusing anything else.',
-                'Producer work that appears here \u2014 tracks, titles, names \u2014 belongs to the producers who made it and is shown with their permission. Nothing on this site grants you a license to any of it.',
+                'The Alliance name, the tick mark, and the writing and design of this site belong to the Austin Producer Alliance. Press and partners are welcome to the brand assets in our <a href="/resources">resources library</a>; ask before reusing anything else. Producer work shown here belongs to the producers who made it, and nothing on this site grants you a license to any of it.',
             ],
             heading: 'Intellectual property',
         },
         {
             body: [
-                'This site and everything the Alliance runs are provided as-is by a volunteer community organization, without warranties of any kind. We do our best, and that is the whole promise.',
-                'To the fullest extent the law allows, the Alliance and its organizers are not liable for indirect or consequential damages arising from the site, its demonstrations, or attendance at events. Nothing here limits liability that cannot lawfully be limited.',
+                'This site and everything the Alliance runs are provided as-is by a volunteer community organization, without warranties of any kind. To the fullest extent the law allows, the Alliance and its organizers are not liable for indirect or consequential damages arising from the site or attendance at events; nothing here limits liability that cannot lawfully be limited.',
+                `Texas law governs these terms, and disputes belong in the state or federal courts of Travis County. If a court strikes part of these terms, the rest stands. These terms and the <a href="/privacy">privacy policy</a> are the entire agreement between you and the Alliance about this site and its events, and a term we do not enforce today stays enforceable tomorrow. Before any of that, write to <a href="mailto:${LINKS.email}">${LINKS.email}</a> \u2014 a volunteer collective and a filing fee are a poor match.`,
             ],
-            heading: 'Disclaimer & liability',
-        },
-        {
-            body: [
-                'Texas law governs these terms, without regard to its conflict-of-laws rules, and anything that ends up in court belongs in the state or federal courts of Travis County \u2014 the county we meet in. Both sides agree to that venue.',
-                `We would rather it never gets that far. Write to <a href="mailto:${LINKS.email}">${LINKS.email}</a> first and give us a chance to sort it out; a volunteer collective and a filing fee are a poor match.`,
-            ],
-            heading: 'Governing law',
-        },
-        {
-            body: [
-                'Three standard clauses, in plain words. If a court strikes part of these terms, the rest stands exactly as written. These terms and the <a href="/privacy">privacy policy</a> are the entire agreement between you and the Alliance about this site and its events, so nothing said in a Discord thread or across a table at Station Austin overrides them. And letting something slide once is not a rule change: a term we do not enforce today stays enforceable tomorrow.',
-            ],
-            heading: 'Boilerplate, briefly',
+            heading: 'Liability & law',
         },
         {
             body: [
@@ -278,7 +198,9 @@ function slugify(heading: string) {
         text-decoration-line: underline;
         text-decoration-thickness: 2px;
         text-underline-offset: 4px;
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .legal__body :global(a:active) {

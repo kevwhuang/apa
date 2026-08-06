@@ -1,6 +1,6 @@
 import { getCollection } from 'astro:content';
 
-import { toProducerRecord } from '@lib/utils';
+import { toProducerRecord } from '@lib/shared/utils';
 
 import type { APIRoute } from 'astro';
 

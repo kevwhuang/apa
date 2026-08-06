@@ -65,7 +65,7 @@ import IconSpark from '@components/icons/Spark.astro';
                 type="text"
             />
             <button
-                class="btn btn--accent ai__send"
+                class="ai__send btn btn--accent"
                 data-ai-send
                 type="submit"
             >
@@ -149,7 +149,9 @@ import IconSpark from '@components/icons/Spark.astro';
         flex-shrink: 0;
         height: 50px;
         justify-content: center;
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
         width: 50px;
     }
 
@@ -199,7 +201,10 @@ import IconSpark from '@components/icons/Spark.astro';
         inset: auto 0 var(--ai-offset) auto;
         justify-content: center;
         position: fixed;
-        transition: background var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            background var(--duration-fast) var(--motion-ease-ui),
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
         width: var(--launcher-size);
         z-index: var(--z-drawer);
     }
@@ -238,7 +243,9 @@ import IconSpark from '@components/icons/Spark.astro';
         align-self: flex-start;
         display: inline-flex;
         min-height: 24px;
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .ai__source:active {
@@ -285,8 +292,8 @@ import IconSpark from '@components/icons/Spark.astro';
 </style>
 
 <script>
-    import { MOCK_LATENCY_MS } from '@lib/constants';
-    import { delay, initPanelResize, isTopFloatWindow, raiseWindow, registerPageScript, setPending, setText } from '@lib/utils';
+    import { MOCK_LATENCY_MS } from '@lib/shared/constants';
+    import { delay, initPanelResize, isTopFloatWindow, raiseWindow, registerPageScript, setPending, setText } from '@lib/shared/utils';
 
     interface AiAnswer {
         body: string;
@@ -334,7 +341,7 @@ import IconSpark from '@components/icons/Spark.astro';
             label: 'Browse the store',
         },
         {
-            body: 'The rack is a Web Audio chain in the browser. Load a file, switch a few modules on, and the dock plays the result back with those modules in the signal path.',
+            body: 'The rack is a Web Audio chain in the browser. Load a file, switch a few modules on, and the track player plays the result back with those modules in the signal path.',
             href: '/rack',
             keywords: ['audio', 'effect', 'module', 'plugin', 'rack', 'synth'],
             label: 'Open the rack',
@@ -373,20 +380,20 @@ import IconSpark from '@components/icons/Spark.astro';
 
         messages = [...messages, { answer: null, text }];
         pending = true;
-
         render();
+
         await delay(MOCK_LATENCY_MS * THINKING_FACTOR);
 
         const answer = matchAnswer(text);
 
         messages = [...messages, { answer, text: answer.body }];
         pending = false;
-
         render();
     }
 
     function buildAnswer(answer: AiAnswer) {
         const item = cloneRow('[data-ai-answer]');
+
         const source = item?.querySelector<HTMLAnchorElement>('[data-ai-source]');
 
         if (!item || !source) return null;
@@ -431,6 +438,7 @@ import IconSpark from '@components/icons/Spark.astro';
     function handleClose(dialog: HTMLDialogElement | null) {
         const active = document.activeElement;
         const launcher = document.querySelector<HTMLElement>('[data-ai-launcher]');
+
         const held = active === null || active === document.body || (dialog?.contains(active) ?? false);
 
         launcher?.setAttribute('aria-expanded', 'false');
@@ -477,6 +485,7 @@ import IconSpark from '@components/icons/Spark.astro';
         const question = field.value;
 
         field.value = '';
+
         await askQuestion(question);
     }
 
@@ -493,6 +502,7 @@ import IconSpark from '@components/icons/Spark.astro';
 
         aside.classList.add('is-ready');
         launcher.setAttribute('aria-expanded', String(dialog.open));
+
         initPanelResize({
             handle: grip,
             label: RESIZE_LABEL,
@@ -539,8 +549,8 @@ import IconSpark from '@components/icons/Spark.astro';
         if (!dialog || dialog.open) return;
 
         dialog.show();
-        raiseWindow(dialog);
         document.querySelector<HTMLElement>('[data-ai-launcher]')?.setAttribute('aria-expanded', 'true');
+        raiseWindow(dialog);
         (field ?? dialog.querySelector<HTMLElement>('[data-ai-close]'))?.focus();
     }
 

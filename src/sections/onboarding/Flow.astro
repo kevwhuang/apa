@@ -3,10 +3,13 @@ import { getCollection } from 'astro:content';
 
 import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import { ARTIST_NAME_MAX_LENGTH, GENRES, ROLES } from '@lib/constants';
-import { formatDate } from '@lib/utils';
+import { ARTIST_NAME_MAX_LENGTH, AVATAR, GENRES, ROLES, US_STATES } from '@lib/shared/constants';
+import { AVATAR_EXTENSIONS_OR_LIST } from '@lib/account/images';
+import { formatBytes, formatDate } from '@lib/shared/utils';
 
+const DEFAULT_CITY = 'Austin';
 const DEFAULT_ROLE = 'fan';
+const DEFAULT_STATE = 'TX';
 const ONBOARDING_ROLES = ['producer', 'engineer', 'artist', 'fan'];
 
 const STEPS = [
@@ -17,7 +20,6 @@ const STEPS = [
 const WELCOME_LINKS = [
     { blurb: 'How the Alliance works and who keeps it running.', href: '/about', label: 'About' },
     { blurb: 'Merch, music, and what your prods buy.', href: '/store', label: 'Store' },
-    { blurb: 'The rest of the room, from the top.', href: '/', label: 'Home' },
 ];
 
 const events = await getCollection('events');
@@ -56,26 +58,7 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
     aria-label="Onboarding"
 >
     <div
-        class="slab slab--card flex flex-col items-start gap-4"
-        data-onboarding-surface="complete"
-        hidden
-    >
-        <p class="label text-accent-deep">Account / Complete</p>
-        <h2 class="font-extrabold font-sans text-3xl tracking-tight">
-            You are already set up.
-        </h2>
-        <p class="max-w-2xl text-md text-ink-muted">
-            This account has already been through onboarding, so there is nothing left to fill in.
-        </p>
-        <a
-            class="btn btn--primary"
-            href="/settings"
-        >
-            Open your settings &rarr;
-        </a>
-    </div>
-    <div
-        class="slab slab--card flex flex-col items-start gap-4"
+        class="slab slab--card flex flex-col items-start max-w-(--measure-form) w-full gap-4 mx-auto"
         data-onboarding-surface="expired"
         hidden
     >
@@ -166,17 +149,24 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
                             color="var(--color-ink-subtle)"
                             label="??"
                             labelClass="onboarding-preview__initials leading-none text-[20cqw] text-surface-raised/80 [text-shadow:2px_2px_0_var(--color-ink-20)]"
-                        />
+                        >
+                            <img
+                                class="absolute inset-0 object-cover h-full w-full"
+                                alt=""
+                                data-preview-avatar
+                                hidden
+                            />
+                        </PlaceholderTile>
                         <div class="onboarding-preview__body p-4">
-                            <h3
+                            <h2
                                 class="mb-2 font-extrabold font-sans text-lg tracking-tight wrap-break-word"
                                 data-empty
                                 data-preview-name
                             >
                                 Your artist name
-                            </h3>
+                            </h2>
                             <p
-                                class="mb-3 font-mono text-2xs uppercase text-ink-muted wrap-break-word"
+                                class="mb-3 font-mono text-2xs uppercase wrap-break-word text-ink-muted"
                                 data-preview-meta
                             >
                                 Austin, TX
@@ -198,6 +188,45 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
                     </p>
                 </div>
                 <div class="flex flex-col gap-2">
+                    <p class="label mb-1 text-ink-muted">
+                        Portrait <span class="text-ink-subtle">/ Optional</span>
+                    </p>
+                    <div class="onboarding__portrait">
+                        <label class="onboarding__pick">
+                            <span class="label">Choose an image</span>
+                            <input
+                                id="onboarding-portrait"
+                                class="onboarding__file sr-only"
+                                accept={AVATAR.acceptAttribute}
+                                aria-describedby="onboarding-portrait-error onboarding-portrait-help"
+                                data-portrait-input
+                                name="portrait"
+                                type="file"
+                            />
+                        </label>
+                        <button
+                            class="action-text hover:text-accent-deep flex items-center min-h-(--control-size) px-1 text-ink-muted transition-colors"
+                            data-portrait-remove
+                            hidden
+                            type="button"
+                        >
+                            Remove
+                        </button>
+                    </div>
+                    <p
+                        id="onboarding-portrait-error"
+                        class="action-text text-accent-deep"
+                        data-field-error
+                        hidden
+                    />
+                    <p
+                        id="onboarding-portrait-help"
+                        class="text-sm text-ink-subtle"
+                    >
+                        {AVATAR_EXTENSIONS_OR_LIST}. Up to {formatBytes(AVATAR.maxFileBytes)}, at least {AVATAR.minEdgePixels}px on each side.
+                    </p>
+                </div>
+                <div class="flex flex-col gap-2">
                     <label class="block">
                         <span class="label block mb-2 text-ink-muted">Artist name</span>
                         <input
@@ -208,7 +237,6 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
                             autocomplete="nickname"
                             maxlength={ARTIST_NAME_MAX_LENGTH}
                             name="artistName"
-                            required
                             type="text"
                         />
                     </label>
@@ -219,32 +247,65 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
                         hidden
                     />
                 </div>
-                <div class="flex flex-col gap-2">
-                    <label class="block">
-                        <span class="label block mb-2 text-ink-muted">Location</span>
-                        <input
-                            id="onboarding-location"
-                            class="input font-sans"
-                            aria-describedby="onboarding-location-error"
-                            aria-invalid="false"
-                            autocomplete="address-level2"
-                            name="location"
-                            type="text"
-                            value="Austin, TX"
+                <div class="onboarding__pair">
+                    <div class="flex flex-col gap-2">
+                        <label class="block">
+                            <span class="label block mb-2 text-ink-muted">City</span>
+                            <input
+                                id="onboarding-city"
+                                class="input font-sans"
+                                aria-describedby="onboarding-city-error"
+                                aria-invalid="false"
+                                autocomplete="address-level2"
+                                name="city"
+                                required
+                                type="text"
+                                value={DEFAULT_CITY}
+                            />
+                        </label>
+                        <p
+                            id="onboarding-city-error"
+                            class="action-text text-accent-deep"
+                            data-field-error
+                            hidden
                         />
-                    </label>
-                    <p
-                        id="onboarding-location-error"
-                        class="action-text text-accent-deep"
-                        data-field-error
-                        hidden
-                    />
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="block">
+                            <span class="label block mb-2 text-ink-muted">State</span>
+                            <span class="select">
+                                <select
+                                    id="onboarding-state"
+                                    class="input font-sans"
+                                    aria-describedby="onboarding-state-error"
+                                    aria-invalid="false"
+                                    autocomplete="address-level1"
+                                    name="state"
+                                    required
+                                >
+                                    {US_STATES.map(state => (
+                                        <option
+                                            selected={state.code === DEFAULT_STATE}
+                                            value={state.code}
+                                        >
+                                            {state.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </span>
+                        </label>
+                        <p
+                            id="onboarding-state-error"
+                            class="action-text text-accent-deep"
+                            data-field-error
+                            hidden
+                        />
+                    </div>
                 </div>
                 <fieldset class="onboarding__group flex flex-col gap-3">
                     <legend class="label mb-1 text-ink-muted">
-                        What you make
+                        What you make <span class="text-ink-subtle">/ Pick up to five</span>
                     </legend>
-                    <p class="text-sm text-ink-subtle">Pick up to five.</p>
                     <div class="flex flex-wrap gap-2">
                         {GENRES.map(genre => (
                             <label class="onboarding__chip">
@@ -269,9 +330,8 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
                 </fieldset>
                 <fieldset class="onboarding__group flex flex-col gap-3">
                     <legend class="label mb-1 text-ink-muted">
-                        What do you do?
+                        What do you do? <span class="text-ink-subtle">/ Pick one</span>
                     </legend>
-                    <p class="text-sm text-ink-subtle">Pick one.</p>
                     <div class="flex flex-wrap gap-2">
                         {roles.map(role => (
                             <label class="onboarding__chip">
@@ -361,12 +421,6 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
                 >
                     Continue &rarr;
                 </button>
-                <p
-                    class="label onboarding-form__count text-ink-subtle"
-                    data-onboarding-count
-                >
-                    Step 01 / 02
-                </p>
             </div>
         </form>
     </div>
@@ -381,10 +435,6 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
 <style>
     .onboarding-form {
         padding: var(--space-lg);
-    }
-
-    .onboarding-form__count {
-        margin-inline-start: auto;
     }
 
     .onboarding-form__foot {
@@ -407,7 +457,9 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
         font-family: var(--font-mono);
         font-size: var(--text-lg);
         line-height: 1;
-        transition: color var(--duration-fast) var(--motion-ease-ui), translate var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            translate var(--duration-fast) var(--motion-ease-ui);
     }
 
     .onboarding-next__blurb {
@@ -511,7 +563,10 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
         height: var(--rail-node);
         justify-content: center;
         line-height: 1;
-        transition: background-color var(--duration-fast) var(--motion-ease-ui), border-color var(--duration-fast) var(--motion-ease-ui), color var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            color var(--duration-fast) var(--motion-ease-ui);
         width: var(--rail-node);
     }
 
@@ -586,18 +641,16 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
         transition: background-color var(--duration-fast) var(--motion-ease-ui);
     }
 
-    .onboarding__chip:active,
-    .onboarding__chip:hover {
-        background-color: var(--color-surface);
-    }
-
     .onboarding__chip:has(.box:checked) {
         background-color: var(--color-surface-sunken);
     }
 
-    .onboarding__chip:has(.box:checked):active,
-    .onboarding__chip:has(.box:checked):hover {
-        background-color: var(--color-accent-20);
+    .onboarding__file {
+        clip-path: inset(50%);
+        height: 100%;
+        inset: 0;
+        margin: 0;
+        width: 100%;
     }
 
     .onboarding__flow {
@@ -614,9 +667,60 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
         padding: 0;
     }
 
+    .onboarding__pair {
+        display: grid;
+        gap: var(--space-md);
+        grid-template-columns: minmax(0, 1fr) minmax(0, 220px);
+    }
+
     .onboarding__pane {
         border: 0;
         padding: 0;
+    }
+
+    .onboarding__pick {
+        align-items: center;
+        background-color: var(--color-surface);
+        background-image: repeating-linear-gradient(135deg, var(--color-ink-10) 0 6px, transparent 6px 12px);
+        border: 2px dashed var(--color-ink);
+        display: flex;
+        flex: 1 1 220px;
+        justify-content: center;
+        min-height: var(--control-size);
+        padding: var(--space-2xs) var(--space-sm);
+        position: relative;
+        text-align: center;
+        transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
+            box-shadow var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .onboarding__pick:active {
+        background-color: var(--color-surface-raised);
+        border-color: var(--color-accent-deep);
+    }
+
+    .onboarding__pick:has(.onboarding__file:focus) {
+        border-color: var(--color-accent-deep);
+        border-style: solid;
+    }
+
+    .onboarding__pick:has(.onboarding__file[aria-invalid='true']) {
+        border-color: var(--color-accent-deep);
+        box-shadow: 3px 3px 0 0 var(--color-accent-20);
+    }
+
+    .onboarding__pick:hover {
+        background-color: var(--color-surface-raised);
+        border-color: var(--color-accent-deep);
+    }
+
+    .onboarding__portrait {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-sm);
     }
 
     @media (max-width: 768px) {
@@ -649,7 +753,8 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
             display: contents;
         }
 
-        .onboarding__flow {
+        .onboarding__flow,
+        .onboarding__pair {
             grid-template-columns: minmax(0, 1fr);
         }
     }
@@ -671,17 +776,19 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
 <script>
     import { navigate } from 'astro:transitions/client';
 
-    import { ONBOARDING_TOKEN_PARAM } from '@lib/constants';
+    import { ONBOARDING_TOKEN_PARAM } from '@lib/shared/constants';
     import { clearFieldErrors, focusFirstError, isValidationBypassed, setFieldErrors, validateFields } from '@lib/ui/forms';
     import { clearOnboardingDraft, getOnboardingDraft, saveOnboardingDraft, verifyOnboardingToken } from '@lib/account/onboarding';
-    import { getInitials, pickTileColor, registerPageScript, setHidden, setPending, setText } from '@lib/utils';
+    import { getInitials, pickTileColor, registerPageScript, setAvatarImage, setHidden, setPending, setText } from '@lib/shared/utils';
     import { getSession, startSession, updateSession } from '@lib/account/session';
+    import { stageAvatar } from '@lib/account/images';
     import { toast } from '@lib/ui/toasts';
 
     const BASICS_RULES: Record<string, FieldRule> = {
-        artistName: { message: 'Enter the name the roster should show.', required: true },
+        city: { message: 'Name the city you work out of.', required: true },
     };
 
+    const COMPLETION_ENABLED = false;
     const DEFAULT_LOCATION = 'Austin, TX';
     const DEMO_EMAIL = 'you@austinproduceralliance.com';
     const GENRE_MAX = 5;
@@ -690,7 +797,9 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
     const STEP_RULES: Record<string, FieldRule>[] = [BASICS_RULES, {}];
 
     let accountEmail = '';
+    let avatar = '';
     let signedIn: Promise<SessionResult> | undefined;
+    let staging = false;
     let step = 0;
 
     function collect(form: HTMLFormElement) {
@@ -698,9 +807,10 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
 
         return {
             artistName: String(values.get('artistName') ?? '').trim(),
+            avatar,
             email: accountEmail,
             genres: values.getAll('genres').map(String),
-            location: String(values.get('location') ?? '').trim(),
+            location: getLocation(values),
             roles: [getRole(values)],
         };
     }
@@ -714,7 +824,7 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
 
         await signedIn;
 
-        const session = await updateSession({ artistName: draft.artistName, onboarded: true, role: draft.roles[0] });
+        const session = await updateSession({ artistName: draft.artistName, avatar: draft.avatar, onboarded: true, role: draft.roles[0] });
 
         if (!session) {
             setPending(button, false);
@@ -724,14 +834,27 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
             return;
         }
 
-        setPending(button, false);
+        if (!getSession()?.onboarded) {
+            setPending(button, false);
+            toast('That could not be saved \u2014 your browser storage may be full. Try a smaller portrait.', 'error');
+            button?.focus();
+
+            return;
+        }
+
         clearOnboardingDraft();
         setHidden(back, true);
         setHidden(button, true);
-        setText(document.querySelector<HTMLElement>('[data-onboarding-count]'), 'Done');
+        setPending(button, false);
         toast('You are all set. Your card is on the roster.', 'success');
 
         await navigate('/');
+    }
+
+    function getLocation(values: FormData) {
+        const city = String(values.get('city') ?? '').trim();
+
+        return city ? `${city}, ${String(values.get('state') ?? '')}` : '';
     }
 
     function getRole(values: FormData) {
@@ -746,8 +869,50 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
         showStep(form, true);
     }
 
+    async function handlePortraitChange(form: HTMLFormElement, input: HTMLInputElement) {
+        const file = input.files?.item(0);
+
+        input.value = '';
+
+        if (!file || staging) return;
+
+        staging = true;
+
+        try {
+            const staged = await stageAvatar(file);
+
+            clearFieldErrors(form);
+
+            if (!staged.ok) {
+                setFieldErrors(form, { portrait: staged.message });
+                input.focus();
+                toast(staged.message, 'error');
+
+                return;
+            }
+
+            avatar = staged.dataUrl;
+            renderPreview(form);
+            saveOnboardingDraft({ ...collect(form), step: step + 1 });
+            toast('Portrait staged.', 'success');
+        } finally {
+            staging = false;
+        }
+    }
+
+    function handlePortraitRemove(form: HTMLFormElement) {
+        avatar = '';
+        clearFieldErrors(form);
+        renderPreview(form);
+        saveOnboardingDraft({ ...collect(form), step: step + 1 });
+        form.querySelector<HTMLInputElement>('[data-portrait-input]')?.focus();
+        toast('Portrait removed.', 'info');
+    }
+
     async function handleSubmit(event: SubmitEvent, form: HTMLFormElement) {
         event.preventDefault();
+
+        if (staging) return;
 
         const errors = validate(form);
 
@@ -762,6 +927,12 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
         }
 
         if (step === LAST_STEP) {
+            if (!COMPLETION_ENABLED) {
+                toast('Completion is switched off while the flow is under review.', 'info');
+
+                return;
+            }
+
             await complete(form);
 
             return;
@@ -780,18 +951,19 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
     function initOnboardingFlow(signal: AbortSignal) {
         const form = document.querySelector<HTMLFormElement>('[data-onboarding-form]');
         const gate = verifyOnboardingToken(new URLSearchParams(window.location.search).get(ONBOARDING_TOKEN_PARAM));
+        const picture = document.querySelector<HTMLInputElement>('[data-portrait-input]');
         const session = getSession();
 
         if (!form) return;
 
-        if (session?.onboarded === true) {
-            showSurface('complete');
+        if (COMPLETION_ENABLED && session?.onboarded === true) {
+            void navigate('/settings', { history: 'replace' });
 
             return;
         }
 
         if (gate.state === 'rejected' && gate.reason !== 'missing') {
-            showSurface(gate.reason === 'completed' ? 'complete' : 'expired');
+            showSurface('expired');
 
             return;
         }
@@ -799,25 +971,26 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
         accountEmail = gate.state === 'granted' ? gate.email : (session?.email ?? DEMO_EMAIL);
         step = 0;
         form.noValidate = true;
-
-        showSurface('flow');
-        setText(document.querySelector<HTMLElement>('[data-onboarding-email]'), accountEmail);
         prefill(form, session);
         restore(form);
         renderPreview(form);
+        setText(document.querySelector<HTMLElement>('[data-onboarding-email]'), accountEmail);
         showStep(form, false);
+        showSurface('flow');
         void signIn();
-
         form.addEventListener('input', () => renderPreview(form), { signal });
         form.addEventListener('submit', event => void handleSubmit(event, form), { signal });
         form.querySelector<HTMLButtonElement>('[data-onboarding-back]')?.addEventListener('click', () => handleBack(form), { signal });
+        form.querySelector<HTMLButtonElement>('[data-portrait-remove]')?.addEventListener('click', () => handlePortraitRemove(form), { signal });
+        picture?.addEventListener('change', () => void handlePortraitChange(form, picture), { signal });
     }
 
     function prefill(form: HTMLFormElement, session: Session | null) {
         if (!session || session.email !== accountEmail) return;
 
-        setValue(form, 'artistName', session.artistName);
+        avatar = session.avatar;
         setRole(form, session.role);
+        setValue(form, 'artistName', session.artistName);
     }
 
     function renderPreview(form: HTMLFormElement) {
@@ -828,15 +1001,17 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
 
         const artistName = String(values.get('artistName') ?? '').trim();
         const genres = values.getAll('genres').map(String);
-        const location = String(values.get('location') ?? '').trim() || DEFAULT_LOCATION;
+        const location = getLocation(values) || DEFAULT_LOCATION;
         const role = getRole(values);
 
         if (tile) tile.style.background = pickTileColor(artistName);
 
+        document.querySelector<HTMLElement>('[data-preview-genres-empty]')?.toggleAttribute('hidden', genres.length > 0);
+        setAvatarImage(document.querySelector<HTMLImageElement>('[data-preview-avatar]'), avatar);
+        setHidden(document.querySelector<HTMLElement>('[data-portrait-remove]'), avatar.length === 0);
+        setPreviewText(document.querySelector<HTMLElement>('[data-preview-name]'), artistName, 'Your artist name');
         setText(document.querySelector<HTMLElement>('.onboarding-preview__initials'), getInitials(artistName) || '??');
         setText(document.querySelector<HTMLElement>('[data-preview-meta]'), role ? `${role} \u2014 ${location}` : location);
-        setPreviewText(document.querySelector<HTMLElement>('[data-preview-name]'), artistName, 'Your artist name');
-        document.querySelector<HTMLElement>('[data-preview-genres-empty]')?.toggleAttribute('hidden', genres.length > 0);
 
         if (!list || !template) return;
 
@@ -855,12 +1030,15 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
 
         if (draft.email !== accountEmail) return;
 
-        setValue(form, 'artistName', draft.artistName);
-        setValue(form, 'location', draft.location);
+        const [draftCity = '', draftState = ''] = draft.location.split(/,\s*/);
+
+        avatar = draft.avatar || avatar;
+        step = Math.min(LAST_STEP, Math.max(0, draft.step - 1));
         setChecked(form, 'genres', draft.genres);
         setRole(form, draft.roles[0] ?? '');
-
-        step = Math.min(LAST_STEP, Math.max(0, draft.step - 1));
+        setValue(form, 'artistName', draft.artistName);
+        setValue(form, 'city', draftCity);
+        setValue(form, 'state', draftState.toUpperCase());
     }
 
     function setChecked(form: HTMLFormElement, name: string, values: string[]) {
@@ -885,7 +1063,10 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
     function setValue(form: HTMLFormElement, name: string, value: string) {
         const control = form.querySelector<HTMLInputElement | HTMLSelectElement>(`[name="${name}"]`);
 
-        if (control && value) control.value = value;
+        if (!control || !value) return;
+        if (control instanceof HTMLSelectElement && !Array.from(control.options).some(option => option.value === value)) return;
+
+        control.value = value;
     }
 
     function showStep(form: HTMLFormElement, moveFocus: boolean) {
@@ -906,7 +1087,6 @@ const roles = ROLES.filter(role => ONBOARDING_ROLES.includes(role.id));
         if (next) next.textContent = step === LAST_STEP ? 'Finish \u2192' : 'Continue \u2192';
 
         setText(document.querySelector<HTMLElement>('[data-onboarding-announce]'), `Step ${step + 1} of ${STEP_NAMES.length}, ${STEP_NAMES[step]}`);
-        setText(document.querySelector<HTMLElement>('[data-onboarding-count]'), `Step 0${step + 1} / 0${STEP_NAMES.length}`);
 
         if (!moveFocus) return;
 

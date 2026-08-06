@@ -20,6 +20,20 @@ const BASIS_POINTS_DIVISOR = 10_000;
 const BYTES_PER_KILOBYTE = 1_024;
 const BYTES_PER_MEGABYTE = 1_048_576;
 
+const MAX_AVATAR_MEGABYTES = 5;
+
+const AVATAR = {
+    acceptAttribute: '.jpeg,.jpg,.png,.webp,image/jpeg,image/png,image/webp',
+    extensions: ['jpeg', 'jpg', 'png', 'webp'],
+    fallbackType: 'image/jpeg',
+    maxDataUrlLength: 200_000,
+    maxFileBytes: MAX_AVATAR_MEGABYTES * BYTES_PER_MEGABYTE,
+    minEdgePixels: 200,
+    renderPixels: 512,
+    renderQuality: 0.82,
+    renderType: 'image/webp',
+} as const;
+
 const CANONICAL = {
     history: 'Austin Producer Alliance was founded in May 2022 by Kevin Huang and Kyle Henderson to build the city\'s foremost community for music producers. What began as a Discord server grew into a recurring meetup at the Austin Central Library, then into a collective in partnership with longtime sponsor Station Austin (formerly Capital Factory). To date, APA has welcomed more than 500 producers and creatives to its events.',
     mission: 'We bring Austin\'s music producers together. Through meetups, workshops, and collaborations, producers of every genre and experience level find their people, sharpen their craft, and support one another. Our goal is a lasting community for those behind the city\'s sound.',
@@ -29,9 +43,7 @@ const CENTS_PER_DOLLAR = 100;
 const CHECKOUT_STEPS = ['01 Review', '02 Shipping', '03 Payment'] as const;
 
 const COMMERCE = {
-    freeShippingThresholdCents: 7_500,
     maxQuantityPerItem: 10,
-    shippingFlatCents: 800,
     taxBasisPoints: 825,
 } as const;
 
@@ -224,8 +236,8 @@ const PASSWORD_MIN_LENGTH = 12;
 
 const PLATFORMS = [
     { blurb: 'Event listings and RSVPs for every meet on the calendar.', href: LINKS.meetup, label: 'Meetup' },
-    { blurb: 'Recaps, announcements, and work from across the roster.', href: LINKS.instagram, label: 'Instagram' },
     { blurb: 'The day-to-day room where the community actually talks.', href: LINKS.discord, label: 'Discord' },
+    { blurb: 'Recaps, announcements, and work from across the roster.', href: LINKS.instagram, label: 'Instagram' },
 ] as const;
 
 const PRODUCT_CATEGORIES = ['accessory', 'apparel', 'music'] as const;
@@ -241,7 +253,7 @@ const ROLES = [
 ] as const;
 
 const SESSION_TTL_DAYS = 14;
-const SITE_UPDATED = '2026-08-03';
+const SITE_UPDATED = '2026-08-05';
 
 const SPONSORS = [
     { logo: stationAustin, name: 'Station Austin' },
@@ -252,14 +264,15 @@ const SPONSOR_LOGO_WIDTH = 640;
 
 const STORAGE = {
     adminProds: { key: 'apa.admin-prods', scope: 'local', topic: 'apa:admin-prods-changed' },
-    bashBoard: { key: 'apa.bash-board', scope: 'session', topic: 'apa:bash-board-changed' },
+    bashBoard: { key: 'apa.bash-board', scope: 'local', topic: 'apa:bash-board-changed' },
     cart: { key: 'apa.cart', scope: 'local', topic: 'apa:cart-changed' },
-    chat: { key: 'apa.chat', scope: 'session', topic: 'apa:chat-changed' },
+    chat: { key: 'apa.chat', scope: 'local', topic: 'apa:chat-changed' },
     newsletter: { key: 'apa.newsletter', scope: 'local', topic: 'apa:newsletter-changed' },
-    onboardingDraft: { key: 'apa.onboarding', scope: 'session', topic: 'apa:onboarding-changed' },
-    order: { key: 'apa.order', scope: 'session', topic: 'apa:order-changed' },
+    onboardingDraft: { key: 'apa.onboarding-draft', scope: 'local', topic: 'apa:onboarding-draft-changed' },
+    order: { key: 'apa.order', scope: 'local', topic: 'apa:order-changed' },
     player: { key: 'apa.player', scope: 'memory', topic: 'apa:player-changed' },
     profiles: { key: 'apa.profiles', scope: 'local', topic: 'apa:profiles-changed' },
+    rack: { key: 'apa.rack', scope: 'memory', topic: 'apa:rack-changed' },
     session: { key: 'apa.session', scope: 'local', topic: 'apa:session-changed' },
     theme: { key: 'apa.theme', scope: 'local', topic: 'apa:theme-changed' },
 } as const;
@@ -339,6 +352,7 @@ export {
     ARTIST_NAME_MAX_LENGTH,
     ASSET_KINDS,
     ASSET_KIND_LABELS,
+    AVATAR,
     BASIS_POINTS_DIVISOR,
     BYTES_PER_KILOBYTE,
     BYTES_PER_MEGABYTE,

@@ -5,21 +5,22 @@ import IconInstagram from '@components/icons/Instagram.astro';
 import IconMeetup from '@components/icons/Meetup.astro';
 import IconMoon from '@components/icons/Moon.astro';
 import IconSun from '@components/icons/Sun.astro';
-import { BRAND } from '@lib/brand';
-import { LINKS, NAV_GROUPS, SITE_UPDATED } from '@lib/constants';
-import { formatDateOnly } from '@lib/utils';
+import { BRAND } from '@lib/shared/brand';
+import { LINKS, NAV_GROUPS, SITE_UPDATED } from '@lib/shared/constants';
+import { formatDateOnly } from '@lib/shared/utils';
 
 const ACCOUNT_LINKS = [
     { href: '/here', label: 'Here' },
-    { href: '/settings', label: 'Settings' },
     { href: '/store/cart', label: 'Cart' },
+    { href: '/store/orders', label: 'Orders' },
+    { href: '/settings', label: 'Settings' },
     { href: '/admin', label: 'Admin' },
 ] as const;
 
 const SOCIALS = [
     { Icon: IconMeetup, href: LINKS.meetup, label: 'Meetup' },
-    { Icon: IconInstagram, href: LINKS.instagram, label: 'Instagram' },
     { Icon: IconDiscord, href: LINKS.discord, label: 'Discord' },
+    { Icon: IconInstagram, href: LINKS.instagram, label: 'Instagram' },
 ];
 
 const columns = [
@@ -183,7 +184,7 @@ const year = new Date().getFullYear();
         font-size: var(--text-sm);
         line-height: 1.7;
         margin-bottom: var(--space-md);
-        max-width: 34ch;
+        max-width: 300px;
     }
 
     .footer__link {
@@ -191,7 +192,9 @@ const year = new Date().getFullYear();
         display: inline-flex;
         font-size: var(--text-sm);
         min-height: 36px;
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .footer__link:active {
@@ -215,7 +218,9 @@ const year = new Date().getFullYear();
         display: inline-flex;
         height: 50px;
         justify-content: center;
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
         width: 50px;
     }
 
@@ -298,9 +303,9 @@ const year = new Date().getFullYear();
 </style>
 
 <script>
-    import { STORAGE } from '@lib/constants';
+    import { STORAGE } from '@lib/shared/constants';
     import { getTheme, toggleTheme } from '@lib/ui/theme';
-    import { registerPageScript } from '@lib/utils';
+    import { registerPageScript } from '@lib/shared/utils';
 
     function initFooter(signal: AbortSignal) {
         const toggle = document.querySelector<HTMLElement>('.theme-toggle');
@@ -308,7 +313,6 @@ const year = new Date().getFullYear();
         if (!toggle) return;
 
         updateThemeToggle(toggle);
-
         toggle.addEventListener('click', () => toggleTheme(), { signal });
         window.addEventListener(STORAGE.theme.topic, () => updateThemeToggle(toggle), { signal });
     }

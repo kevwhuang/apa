@@ -1,7 +1,7 @@
 ---
 import PageHead from '@components/shared/PageHead.astro';
-import { LINKS } from '@lib/constants';
-import { getProgram } from '@lib/utils';
+import { LINKS } from '@lib/shared/constants';
+import { getProgram } from '@lib/shared/utils';
 
 const HOUSE_RULES: { detail: string; href?: string; term: string }[] = [
     { detail: 'Monthly, midweek, halfway between Assemblies', term: 'Cadence' },
@@ -79,7 +79,9 @@ const program = getProgram('hangout');
     .house-rules__link {
         display: inline-block;
         padding-block: var(--space-xs);
-        transition: color var(--duration-fast) var(--motion-ease-ui), transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .house-rules__link:active {

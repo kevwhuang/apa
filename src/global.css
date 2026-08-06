@@ -27,8 +27,14 @@
     --color-surface-violet: #2a1e5c;
     --default-transition-duration: 0.2s;
     --default-transition-timing-function: ease;
-    --font-mono: 'Space Mono', 'Courier New', monospace;
-    --font-sans: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+    --font-mono:
+        'Space Mono',
+        'Courier New',
+        monospace;
+    --font-sans:
+        'Bricolage Grotesque Variable',
+        system-ui,
+        sans-serif;
     --text-2xl: clamp(26px, calc(23.333px + 0.8333vw), 34px);
     --text-2xs: 11px;
     --text-3xl: clamp(31px, calc(26.667px + 1.3542vw), 44px);
@@ -54,7 +60,7 @@
     --cut: calc(var(--drift-unit) * 0.75);
     --drift-gate: 1;
     --drift-step: 1;
-    --drift-unit: clamp(12px, calc(1.33px + 3.33vw), 44px);
+    --drift-unit: clamp(12px, calc(1.333px + 3.3333vw), 44px);
     --drift-x: 1;
     --duration-base: 0.25s;
     --duration-cinematic: 1.4s;

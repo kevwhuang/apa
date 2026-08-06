@@ -1,6 +1,6 @@
 import gsap from 'gsap';
 
-import { REDUCED_MOTION_QUERY } from '@lib/constants';
+import { REDUCED_MOTION_QUERY } from '@lib/shared/constants';
 import { getMotionTokens } from '@lib/motion/tokens';
 
 const DRIFT_SCRUB = 0.6;

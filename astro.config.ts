@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 import tailwind from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 
-const PRIVATE_ROUTES = new Set(['/404', '/500', '/admin', '/here', '/onboarding', '/settings', '/sign-in', '/store/cart', '/store/checkout', '/store/orders']);
+const PRIVATE_ROUTES = new Set(['/404', '/500', '/admin', '/here', '/onboarding', '/settings', '/signin', '/store/cart', '/store/checkout', '/store/orders']);
 
 export default defineConfig({
     adapter: netlify(),
