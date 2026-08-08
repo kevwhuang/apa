@@ -2,9 +2,10 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
 import { describeCartIssue, setText } from '@lib/shared/utils';
 
 const BYPASS_WINDOW_MS = 0;
+const PLACEHOLDER_EMAIL = 'you@studio.fm';
 
-let bypassing = false;
 let bypassTimer: Timer | undefined;
+let bypassing = false;
 
 function clearFieldErrors(form: HTMLFormElement): void {
     form.querySelectorAll('[aria-invalid]').forEach((control) => {
@@ -64,6 +65,17 @@ function handleBypassClick(event: MouseEvent): void {
     bypassTimer = setTimeout(releaseBypass, BYPASS_WINDOW_MS);
 }
 
+function handleReveal(button: HTMLButtonElement): void {
+    const input = document.getElementById(button.dataset.reveal ?? '');
+    const shown = button.getAttribute('aria-pressed') === 'true';
+
+    if (!(input instanceof HTMLInputElement)) return;
+
+    button.setAttribute('aria-label', shown ? 'Show password' : 'Hide password');
+    button.setAttribute('aria-pressed', shown ? 'false' : 'true');
+    input.type = shown ? 'password' : 'text';
+}
+
 function hasLetterAndDigit(value: string): boolean {
     return /[a-z]/i.test(value) && /\d/.test(value);
 }
@@ -74,6 +86,14 @@ function isValidationBypassed(): boolean {
 
 function passwordRule(): FieldRule {
     return { message: `Use at least ${PASSWORD_MIN_LENGTH} characters, including a letter and a digit.`, min: PASSWORD_MIN_LENGTH, required: true, validate: hasLetterAndDigit };
+}
+
+function readEmail(values: FormData): string {
+    const email = String(values.get('email') ?? '').trim();
+
+    if (email.length > 0 || !isValidationBypassed()) return email;
+
+    return PLACEHOLDER_EMAIL;
 }
 
 function releaseBypass(): void {
@@ -110,6 +130,12 @@ function setFieldErrors(form: HTMLFormElement, errors: FieldErrors): void {
     });
 }
 
+function setRole(form: HTMLFormElement, value: string): void {
+    const match = Array.from(form.querySelectorAll<HTMLInputElement>('[name="role"]')).find(radio => radio.value === value);
+
+    if (match) match.checked = true;
+}
+
 function validateFields(form: HTMLFormElement, rules: Record<string, FieldRule>): FieldErrors {
     if (isValidationBypassed()) return {};
 
@@ -143,10 +169,13 @@ export {
     clearFieldErrors,
     confirmRule,
     focusFirstError,
+    handleReveal,
     hasLetterAndDigit,
     isValidationBypassed,
     passwordRule,
+    readEmail,
     renderIssueList,
     setFieldErrors,
+    setRole,
     validateFields,
 };

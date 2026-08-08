@@ -2,6 +2,7 @@ import gsap from 'gsap';
 
 import { STEP_COUNT, stepDuration } from '@lib/motion/pattern';
 import { getMotionTokens, readColorToken } from '@lib/motion/tokens';
+import { isSlowDevice } from '@lib/shared/utils';
 
 interface FieldOptions {
     accentColor: string;
@@ -41,7 +42,6 @@ const QUALITY_STEPS = [
 
 const RIPPLE_CYCLES = 0.7;
 const RIPPLE_PERIOD = 17;
-const SLOW_CORE_COUNT = 4;
 const SPRITE_LEVELS = 10;
 const SWEEP_SLOWDOWN = 2;
 const SWELL_CYCLES = 1.2;
@@ -118,9 +118,9 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
 
     if (!context) return;
 
-    const tokens = getMotionTokens();
-    const ratio = Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO);
     const mobile = window.innerWidth <= MOBILE_WIDTH;
+    const ratio = Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO);
+    const tokens = getMotionTokens();
 
     let accentSheet: HTMLCanvasElement | undefined;
     let bed = new Float32Array(0);
@@ -131,15 +131,15 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
     let handle = 0;
     let inkSheet: HTMLCanvasElement | undefined;
     let last = 0;
-    let quality = mobile || slowDevice() ? 1 : 0;
+    let quality = mobile || isSlowDevice() ? 1 : 0;
     let rows = 0;
     let running = false;
 
     function draw(elapsed: number) {
         if (!context || !inkSheet) return;
 
-        const pitch = QUALITY_STEPS[quality].pitch * (mobile ? MOBILE_PITCH_SCALE : 1);
         const drift = 0.5 + 0.5 * Math.sin(TAU * (elapsed / DRIFT_PERIOD));
+        const pitch = QUALITY_STEPS[quality].pitch * (mobile ? MOBILE_PITCH_SCALE : 1);
         const ripplePhase = elapsed / RIPPLE_PERIOD;
         const swellPhase = elapsed / SWELL_PERIOD;
 
@@ -183,8 +183,8 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
     function frame(now: number) {
         handle = requestAnimationFrame(frame);
 
-        const interval = 1 / QUALITY_STEPS[quality].fps;
         const elapsed = now / MILLISECONDS_PER_SECOND;
+        const interval = 1 / QUALITY_STEPS[quality].fps;
 
         if (elapsed - last < interval) return;
 
@@ -202,9 +202,9 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
     }
 
     function resize() {
+        const height = holder.clientHeight;
         const pitch = QUALITY_STEPS[quality].pitch * (mobile ? MOBILE_PITCH_SCALE : 1);
         const width = holder.clientWidth;
-        const height = holder.clientHeight;
 
         if (!width || !height) return;
 
@@ -287,12 +287,6 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
         canvas.remove();
     });
     window.addEventListener('resize', resize, { signal });
-}
-
-function slowDevice(): boolean {
-    const { connection } = navigator as Navigator & { connection?: { saveData?: boolean } };
-
-    return connection?.saveData === true || (navigator.hardwareConcurrency ?? 0) <= SLOW_CORE_COUNT;
 }
 
 export { initHeroField };

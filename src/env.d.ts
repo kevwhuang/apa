@@ -21,12 +21,12 @@ type MotionStaggerToken = 'base' | 'tight';
 type OnboardingGate = { email: string; state: 'granted'; token: OnboardingToken } | { reason: OnboardingRejection; state: 'rejected' };
 type OnboardingRejection = 'expired' | 'malformed' | 'missing';
 type OrderResult = { code: PaymentErrorCode; message: string; ok: false } | { ok: true; order: Order };
-type PaymentErrorCode = 'cart-changed' | 'empty-cart';
+type PaymentErrorCode = 'cart-changed' | 'empty-cart' | 'storage-full';
 type ProductCategory = (typeof import('@lib/shared/constants').PRODUCT_CATEGORIES)[number];
 type ProgramState = 'active' | 'planned';
 type RackKind = 'chorus' | 'compressor' | 'delay' | 'distortion' | 'eq' | 'filter' | 'gate' | 'highpass' | 'limiter' | 'meter' | 'pan' | 'reverb' | 'saturator' | 'tremolo' | 'trim' | 'tuner';
 type RackLoadResult = { buffer: AudioBuffer; ok: true } | { message: string; ok: false };
-type SessionErrorCode = 'already-registered' | 'invalid-credentials' | 'invalid-email' | 'weak-password';
+type SessionErrorCode = 'already-registered' | 'invalid-credentials' | 'invalid-email' | 'storage-full' | 'weak-password';
 type SessionResult = { code: SessionErrorCode; message: string; ok: false } | { ok: true; session: Session };
 type StorageScope = 'local' | 'memory';
 type Theme = 'dark' | 'light';
@@ -237,6 +237,7 @@ interface PlayerState {
 interface PlayerTrack {
     artist: string;
     durationSeconds: number;
+    file?: string;
     id: string;
     title: string;
 }
@@ -254,6 +255,12 @@ interface Profile {
     onboarded: boolean;
     prods: number;
     role: string;
+}
+
+interface RackAudio {
+    context: AudioContext;
+    input: GainNode;
+    master: GainNode;
 }
 
 interface RackBlock {
@@ -334,7 +341,7 @@ interface UploadEntry {
 }
 
 interface UploadOptions {
-    onProgress: (loadedBytes: number, totalBytes: number) => void;
+    onProgress?: (loadedBytes: number, totalBytes: number) => void;
     signal: AbortSignal;
 }
 

@@ -42,8 +42,8 @@ const ENDPOINTS: Endpoint[] = [
         aria-label="API contract"
         data-motion-stagger="rise"
     >
-        <div class="api__cell api__cell--flag">
-            <dt class="label api__key">Endpoints</dt>
+        <div class="api__cell--flag content-center grid px-(--space-sm) py-(--space-xs) bg-surface">
+            <dt class="label mb-(--space-2xs) text-ink-inverse-muted">Endpoints</dt>
             <dd
                 class="font-extrabold font-sans leading-[0.9] text-4xl tracking-tight"
                 data-motion-count={String(ENDPOINTS.length)}
@@ -51,16 +51,16 @@ const ENDPOINTS: Endpoint[] = [
                 {ENDPOINTS.length}
             </dd>
         </div>
-        <div class="api__cell">
-            <dt class="label api__key">Methods</dt>
+        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-surface">
+            <dt class="label mb-(--space-3xs) text-ink-muted">Methods</dt>
             <dd class="font-mono text-smd">GET</dd>
         </div>
-        <div class="api__cell">
-            <dt class="label api__key">Format</dt>
+        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-surface">
+            <dt class="label mb-(--space-3xs) text-ink-muted">Format</dt>
             <dd class="font-mono text-smd">JSON</dd>
         </div>
-        <div class="api__cell">
-            <dt class="label api__key">Caching</dt>
+        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-surface">
+            <dt class="label mb-(--space-3xs) text-ink-muted">Caching</dt>
             <dd class="font-mono text-smd">no-store</dd>
         </div>
     </dl>
@@ -79,7 +79,7 @@ const ENDPOINTS: Endpoint[] = [
             Endpoints
         </SectionHead>
         <div
-            class="api__scroller"
+            class="overflow-x-auto"
             data-motion="unfold"
         >
             <table class="api__table border-2 border-ink">
@@ -114,12 +114,12 @@ const ENDPOINTS: Endpoint[] = [
                                 scope="row"
                             >
                                 <span class="label mr-2 px-2 py-1 bg-ink text-ink-inverse">GET</span>
-                                <code class="api__path font-bold font-mono text-smd">{endpoint.path}</code>
+                                <code class="font-bold font-mono text-smd tracking-[-0.01em]">{endpoint.path}</code>
                             </th>
-                            <td class="api__blurb px-4 py-4 leading-relaxed text-sm text-ink-muted">{endpoint.blurb}</td>
+                            <td class="min-w-[320px] px-4 py-4 leading-relaxed text-sm text-ink-muted">{endpoint.blurb}</td>
                             <td class="px-4 py-4 text-right">
                                 <a
-                                    class="action-text api__open"
+                                    class="action-text api__open inline-flex items-center min-h-(--control-size) gap-(--space-2xs) transition-[color,transform]"
                                     href={endpoint.path}
                                 >
                                     Open <IconArrow />
@@ -134,31 +134,10 @@ const ENDPOINTS: Endpoint[] = [
 </section>
 
 <style>
-    .api__blurb {
-        min-width: 320px;
-    }
-
-    .api__cell {
-        align-content: center;
-        background-color: var(--color-surface);
-        display: grid;
-        padding: var(--space-xs) var(--space-sm);
-    }
-
     .api__cell--flag {
         background-color: var(--color-ink);
         color: var(--color-ink-inverse);
         padding: var(--space-md) var(--space-lg);
-    }
-
-    .api__cell--flag .api__key {
-        color: var(--color-ink-inverse-muted);
-        margin-bottom: var(--space-2xs);
-    }
-
-    .api__key {
-        color: var(--color-ink-muted);
-        margin-bottom: var(--space-3xs);
     }
 
     .api__ledger {
@@ -169,26 +148,8 @@ const ENDPOINTS: Endpoint[] = [
         grid-template-columns: minmax(200px, 0.62fr) repeat(3, minmax(0, 1fr));
     }
 
-    .api__open {
-        align-items: center;
-        display: inline-flex;
-        gap: var(--space-2xs);
-        min-height: var(--control-size);
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
     .api__open:active {
         transform: translateY(1px);
-    }
-
-    .api__path {
-        letter-spacing: -0.01em;
-    }
-
-    .api__scroller {
-        overflow-x: auto;
     }
 
     .api__table {

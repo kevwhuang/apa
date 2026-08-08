@@ -1,6 +1,6 @@
 import { QUEUE_FULL_MESSAGE, acceptFiles, releaseAudioContext, uploadSubmission } from '@lib/audio/uploads';
 import { STORAGE } from '@lib/shared/constants';
-import { formatBytes, formatDuration, setText } from '@lib/shared/utils';
+import { formatBytes, formatDuration, preventNavigation, setText } from '@lib/shared/utils';
 
 interface Dropzone {
     clear: () => void;
@@ -15,7 +15,6 @@ interface DropzoneElements {
 }
 
 interface DropzoneMessages {
-    added: (accepted: number, skipped: number) => string;
     failed: (name: string, reason: string) => string;
     full: () => string;
     ready: (name: string) => string;
@@ -48,7 +47,6 @@ interface QueuedUpload {
 }
 
 const DEFAULT_MESSAGES: DropzoneMessages = {
-    added: accepted => `${accepted} ${accepted === 1 ? 'file' : 'files'} added.`,
     failed: (name, reason) => `${name} failed: ${reason}`,
     full: () => QUEUE_FULL_MESSAGE,
     ready: name => `${name} ready.`,
@@ -110,10 +108,6 @@ function nextFocusTarget(row: HTMLElement, fallback: string): HTMLElement | null
     const before = row.previousElementSibling?.querySelector<HTMLElement>(ROW_CONTROL_SELECTOR);
 
     return after ?? before ?? document.querySelector<HTMLElement>(fallback);
-}
-
-function preventNavigation(event: DragEvent) {
-    event.preventDefault();
 }
 
 function setCancelLabel(row: HTMLElement, entry: UploadEntry, reading: boolean) {
@@ -205,19 +199,11 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
 
     function intake(files: File[] | FileList) {
         const room = options.capacity?.();
-
-        if (room !== undefined && room <= 0) {
-            announce(messages.full());
-
-            return;
-        }
-
         const source = Array.from(files);
 
-        const batch = room === undefined ? source : source.slice(0, room);
+        const batch = room === undefined ? source : source.slice(0, Math.max(0, room));
 
-        const created = acceptFiles(batch, queue.map(item => item.entry));
-        const skipped = source.length - batch.length;
+        const created = [...acceptFiles(batch, queue.map(item => item.entry)), ...overflowEntries(source.slice(batch.length))];
 
         let accepted = 0;
 
@@ -240,11 +226,21 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
         if (accepted === 0) return;
 
         notify();
-        announce(messages.added(accepted, skipped));
     }
 
     function notify() {
         onQueueChange?.(queue.map(item => item.entry));
+    }
+
+    function overflowEntries(files: File[]): UploadEntry[] {
+        return files.map(file => ({
+            error: messages.full(),
+            file,
+            id: crypto.randomUUID(),
+            loadedBytes: 0,
+            status: 'rejected',
+            totalBytes: file.size,
+        }));
     }
 
     async function readEntry(entry: UploadEntry, row: HTMLElement) {

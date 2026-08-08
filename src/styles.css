@@ -364,33 +364,6 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
     position: absolute;
 }
 
-.odometer {
-    align-items: flex-start;
-    display: inline-flex;
-    font-variant-numeric: tabular-nums;
-    line-height: 1.15;
-    user-select: none;
-}
-
-.odometer__digit,
-.odometer__fixed,
-.odometer__slot {
-    display: block;
-    height: 1.15em;
-}
-
-.odometer__reel {
-    display: block;
-}
-
-.odometer__slot {
-    overflow: hidden;
-}
-
-.page {
-    overflow-x: clip;
-}
-
 .partner-tile {
     transition: background-color var(--duration-fast) var(--motion-ease-ui);
 }
@@ -477,10 +450,6 @@ html[data-theme='dark'] .partner-tile__logo {
 
 .rank--2 {
     --rank-cols: var(--rank-cols-2);
-}
-
-.rank--4 {
-    --rank-cols: var(--rank-cols-4);
 }
 
 .rank--split {

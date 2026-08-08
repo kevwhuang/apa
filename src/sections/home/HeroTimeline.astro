@@ -16,15 +16,15 @@ const hangout = getProgram('hangout');
 ---
 
 <section
-    class="hero stage stage--hero overflow-hidden relative border-b-2 border-ink bg-surface"
+    class="hero stage stage--hero content-center overflow-hidden relative min-h-svh border-b-2 border-ink text-center bg-surface"
     aria-labelledby="hero-title"
 >
     <div
-        class="halftone hero__drift stage__item--full absolute pointer-events-none"
+        class="halftone hero__drift stage__item--full -inset-y-[8%] absolute inset-x-0 pointer-events-none"
         aria-hidden="true"
         data-scrub="drift"
     />
-    <div class="hero__field stage__item--full absolute pointer-events-none" aria-hidden="true" />
+    <div class="hero__field stage__item--full absolute inset-0 pointer-events-none" aria-hidden="true" />
     <div class="relative">
         <div
             class="hero__meta label flex flex-wrap items-center justify-center gap-3 mb-6 text-ink-muted"
@@ -55,7 +55,7 @@ const hangout = getProgram('hangout');
                 />
                 <div class="hero__playhead" aria-hidden="true" />
             </div>
-            <div class="hero__foot grid grid-cols-1 max-w-3xl gap-8 md:grid-cols-2">
+            <div class="hero__foot grid grid-cols-1 max-w-3xl gap-8 mx-auto md:grid-cols-2">
                 <p
                     class="leading-relaxed text-md"
                     data-motion="blur"
@@ -84,12 +84,6 @@ const hangout = getProgram('hangout');
 </section>
 
 <style is:global>
-    .hero {
-        align-content: center;
-        min-height: 100svh;
-        text-align: center;
-    }
-
     .hero__canvas {
         --hero-dim: color-mix(in srgb, currentColor 38%, transparent);
         height: 100%;
@@ -99,18 +93,6 @@ const hangout = getProgram('hangout');
         position: absolute;
         transition: opacity var(--duration-cinematic) var(--motion-ease-entrance);
         width: 100%;
-    }
-
-    .hero__drift {
-        inset: -8% calc(-1 * var(--launcher-rail)) -8% 0;
-    }
-
-    .hero__field {
-        inset: 0 calc(-1 * var(--launcher-rail)) 0 0;
-    }
-
-    .hero__foot {
-        margin-inline: auto;
     }
 
     .hero__playhead {

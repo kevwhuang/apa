@@ -66,7 +66,7 @@ const upcoming = editions.filter(edition => edition.data.status === 'upcoming').
                                         </p>
                                         <p>
                                             <a
-                                                class="action-text bash__rsvp hover:text-accent-deep underline underline-offset-4 transition-colors"
+                                                class="action-text hover:text-accent-deep inline-flex items-center gap-(--space-2xs) min-h-(--control-size) underline underline-offset-4 transition-colors"
                                                 href={LINKS.meetup}
                                                 rel="noopener noreferrer"
                                                 target="_blank"
@@ -90,7 +90,7 @@ const upcoming = editions.filter(edition => edition.data.status === 'upcoming').
                 )}
         <p data-motion="rise">
             <a
-                class="action-text bash__rsvp hover:text-accent-deep underline underline-offset-4 transition-colors"
+                class="action-text hover:text-accent-deep inline-flex items-center gap-(--space-2xs) min-h-(--control-size) underline underline-offset-4 transition-colors"
                 href="/events"
             >
                 See the full calendar <IconArrow />
@@ -98,12 +98,3 @@ const upcoming = editions.filter(edition => edition.data.status === 'upcoming').
         </p>
     </div>
 </section>
-
-<style>
-    .bash__rsvp {
-        align-items: center;
-        display: inline-flex;
-        gap: var(--space-2xs);
-        min-height: var(--control-size);
-    }
-</style>

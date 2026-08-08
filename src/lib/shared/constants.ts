@@ -24,7 +24,8 @@ const MAX_AVATAR_MEGABYTES = 5;
 
 const AVATAR = {
     acceptAttribute: '.jpeg,.jpg,.png,.webp,image/jpeg,image/png,image/webp',
-    extensions: ['jpeg', 'jpg', 'png', 'webp'],
+    aliasExtensions: ['jpeg'],
+    extensions: ['jpg', 'png', 'webp'],
     fallbackType: 'image/jpeg',
     maxDataUrlLength: 200_000,
     maxFileBytes: MAX_AVATAR_MEGABYTES * BYTES_PER_MEGABYTE,
@@ -170,6 +171,7 @@ const LINKS = {
 
 const MAX_DECODE_MEGABYTES = 25;
 const MAX_FILE_MEGABYTES = 50;
+const MAX_SPOTLIGHT_MEGABYTES = 20;
 const MAX_TOTAL_MEGABYTES = 150;
 const MEMBER_ROLES = ['artist', 'engineer', 'fan', 'producer'] as const;
 const MILLISECONDS_PER_DAY = 86_400_000;
@@ -216,6 +218,13 @@ const NAV_GROUPS = [
 ] as const;
 
 const ONBOARDING_ROUTE = '/onboarding';
+
+const ONBOARDING_STEPS = [
+    { blurb: 'Name, sound, and what you do.', name: 'Basics' },
+    { blurb: 'What the account carries.', name: 'Why an account' },
+    { blurb: 'A guided lap around the room.', name: 'The tour' },
+] as const;
+
 const ONBOARDING_TOKEN_PARAM = 't';
 const ONBOARDING_TOKEN_TTL_HOURS = 24;
 
@@ -239,8 +248,8 @@ const PALETTE = [
 const CARD_COLORS = PALETTE.slice(0, 4);
 
 const PARTNERS = [
-    { logo: stationAustin, name: 'Station Austin' },
     { logo: austinCommunityCollege, name: 'Austin Community College' },
+    { logo: stationAustin, name: 'Station Austin' },
 ] as const;
 
 const PARTNER_LOGO_WIDTH = 640;
@@ -252,8 +261,49 @@ const PLATFORMS = [
     { blurb: 'Recaps, announcements, and work from across the roster.', href: LINKS.instagram, label: 'Instagram' },
 ] as const;
 
+const POINTER_COARSE_QUERY = '(pointer: coarse)';
 const PRODUCT_CATEGORIES = ['accessory', 'apparel', 'music'] as const;
 const PRODUCT_SIZES = ['S', 'M', 'L', 'XL'] as const;
+
+const PROFILE_FIELDS = {
+    artistName: {
+        autocomplete: 'nickname',
+        help: `Up to ${ARTIST_NAME_MAX_LENGTH} characters. This is what the roster shows \u2014 it cannot be used to sign in.`,
+        label: 'Artist name',
+        maxLength: ARTIST_NAME_MAX_LENGTH,
+    },
+    bio: {
+        help: 'A line or two on what you make and how you make it.',
+        label: 'Bio',
+        maxLength: 280,
+    },
+    city: {
+        autocomplete: 'address-level2',
+        label: 'City',
+        message: 'Name the city you work out of.',
+        required: true,
+    },
+    genres: {
+        label: 'What you make',
+        max: 5,
+        message: 'Pick five at most.',
+        qualifier: 'Pick up to five',
+    },
+    portrait: {
+        label: 'Portrait',
+        picker: 'Choose an image',
+    },
+    role: {
+        label: 'What do you do?',
+        qualifier: 'Pick one',
+    },
+    state: {
+        autocomplete: 'address-level1',
+        label: 'State',
+        required: true,
+    },
+} as const;
+
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
 const ROLES = [
@@ -265,8 +315,18 @@ const ROLES = [
     { description: 'Here for the music. Every account starts here.', id: 'fan' },
 ] as const;
 
+const PROFILE_ROLES = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.id));
+
 const SESSION_TTL_DAYS = 14;
-const SITE_UPDATED = '2026-08-05T00:00:00-05:00';
+const SITE_UPDATED = '2026-08-07T00:00:00-05:00';
+
+const SPOTLIGHT = {
+    acceptAttribute: '.mp3,audio/mpeg',
+    extensions: ['mp3'],
+    maxFileBytes: MAX_SPOTLIGHT_MEGABYTES * BYTES_PER_MEGABYTE,
+} as const;
+
+const SPOTLIGHT_EXTENSIONS_LABEL = SPOTLIGHT.extensions.map(extension => extension.toUpperCase()).join(', ');
 
 const STORAGE = {
     adminProds: { key: 'apa.admin-prods', scope: 'local', topic: 'apa:admin-prods-changed' },
@@ -284,12 +344,45 @@ const STORAGE = {
     tour: { key: 'apa.tour', scope: 'local', topic: 'apa:tour-changed' },
 } as const;
 
+const TOUR_STOPS = [
+    {
+        blurb: 'Events, the directory, the gallery, the store.',
+        body: 'Everything lives here \u2014 events, the directory, the gallery, the store.',
+        name: 'The nav',
+        selectors: ['.site-nav', '.nav-toggle'],
+    },
+    {
+        blurb: 'Your profile and your cart, side by side.',
+        body: 'Your profile keeps orders, Prods, and settings. The cart sits right beside it.',
+        name: 'Profile and cart',
+        selectors: ['.account', '.cart-link'],
+    },
+    {
+        blurb: 'Ask it anything about the Alliance.',
+        body: 'Ask the assistant anything \u2014 programs, events, Prods.',
+        name: 'The assistant',
+        selectors: ['[data-ai-launcher]'],
+    },
+    {
+        blurb: 'The member room, one tap away.',
+        body: 'The member room \u2014 talk to the Alliance.',
+        name: 'Member chat',
+        selectors: ['[data-chat-launcher]'],
+    },
+    {
+        blurb: 'It keeps playing, page to page.',
+        body: 'The floating player follows you from page to page.',
+        name: 'The player',
+        selectors: ['[data-player-launcher]'],
+    },
+] as const;
+
 const TRACK_PLAY_TOPIC = 'apa:track-play';
 const TRACK_STATE_TOPIC = 'apa:track-state';
 
 const UPLOAD = {
-    acceptAttribute: '.aif,.aiff,.flac,.m4a,.mp3,.wav,audio/aiff,audio/flac,audio/mp4,audio/mpeg,audio/wav,audio/x-aiff,audio/x-wav',
-    extensions: ['aif', 'aiff', 'flac', 'm4a', 'mp3', 'wav'],
+    acceptAttribute: '.aif,.aiff,.flac,.mp3,.wav,audio/aiff,audio/flac,audio/mpeg,audio/wav,audio/x-aiff,audio/x-wav',
+    extensions: ['aif', 'aiff', 'flac', 'mp3', 'wav'],
     failureTrigger: 'fail',
     maxDecodeBytes: MAX_DECODE_MEGABYTES * BYTES_PER_MEGABYTE,
     maxFileBytes: MAX_FILE_MEGABYTES * BYTES_PER_MEGABYTE,
@@ -356,7 +449,6 @@ const US_STATES = [
 const WELCOME_PRODS = 1;
 
 export {
-    ARTIST_NAME_MAX_LENGTH,
     ASSET_KINDS,
     ASSET_KIND_LABELS,
     AVATAR,
@@ -389,6 +481,7 @@ export {
     MOCK_LATENCY_MS,
     NAV_GROUPS,
     ONBOARDING_ROUTE,
+    ONBOARDING_STEPS,
     ONBOARDING_TOKEN_PARAM,
     ONBOARDING_TOKEN_TTL_HOURS,
     ORDER_ID,
@@ -398,13 +491,19 @@ export {
     PARTNER_LOGO_WIDTH,
     PASSWORD_MIN_LENGTH,
     PLATFORMS,
+    POINTER_COARSE_QUERY,
     PRODUCT_CATEGORIES,
     PRODUCT_SIZES,
+    PROFILE_FIELDS,
+    PROFILE_ROLES,
     REDUCED_MOTION_QUERY,
     ROLES,
     SESSION_TTL_DAYS,
     SITE_UPDATED,
+    SPOTLIGHT,
+    SPOTLIGHT_EXTENSIONS_LABEL,
     STORAGE,
+    TOUR_STOPS,
     TRACK_PLAY_TOPIC,
     TRACK_STATE_TOPIC,
     UPLOAD,

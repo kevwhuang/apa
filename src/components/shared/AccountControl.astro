@@ -1,5 +1,8 @@
 ---
 import IconChevron from '@components/icons/Chevron.astro';
+import IconMoon from '@components/icons/Moon.astro';
+import IconPower from '@components/icons/Power.astro';
+import IconSun from '@components/icons/Sun.astro';
 import IconUser from '@components/icons/User.astro';
 ---
 
@@ -38,6 +41,14 @@ import IconUser from '@components/icons/User.astro';
             <li>
                 <a
                     class="account__item"
+                    href="/store/orders"
+                >
+                    Orders
+                </a>
+            </li>
+            <li>
+                <a
+                    class="account__item"
                     href="/settings"
                 >
                     Settings
@@ -46,10 +57,27 @@ import IconUser from '@components/icons/User.astro';
             <li>
                 <button
                     class="account__item"
+                    aria-pressed="false"
+                    data-account-theme
+                    type="button"
+                >
+                    Theme
+                    <span class="account__moon">
+                        <IconMoon />
+                    </span>
+                    <span class="account__sun">
+                        <IconSun />
+                    </span>
+                </button>
+            </li>
+            <li>
+                <button
+                    class="account__item"
                     data-account-signout
                     type="button"
                 >
                     Sign out
+                    <IconPower />
                 </button>
             </li>
         </ul>
@@ -71,6 +99,8 @@ import IconUser from '@components/icons/User.astro';
         display: flex;
         font-family: var(--font-mono);
         font-size: var(--text-sm);
+        gap: var(--space-sm);
+        justify-content: space-between;
         letter-spacing: 0.04em;
         min-height: 50px;
         padding-inline: var(--space-sm);
@@ -81,6 +111,12 @@ import IconUser from '@components/icons/User.astro';
             transform var(--duration-fast) var(--motion-ease-ui);
         white-space: nowrap;
         width: 100%;
+    }
+
+    .account__item :global(svg) {
+        flex: none;
+        height: 18px;
+        width: 18px;
     }
 
     .account__item:active {
@@ -127,6 +163,10 @@ import IconUser from '@components/icons/User.astro';
         }
     }
 
+    .account__moon {
+        display: flex;
+    }
+
     .account__out {
         align-items: center;
         background: var(--color-accent);
@@ -155,6 +195,10 @@ import IconUser from '@components/icons/User.astro';
         background: var(--color-accent-deep);
         border-color: var(--color-accent-deep);
         color: var(--color-ink-inverse);
+    }
+
+    .account__sun {
+        display: none;
     }
 
     .account__toggle {
@@ -197,6 +241,14 @@ import IconUser from '@components/icons/User.astro';
         display: none;
     }
 
+    :global(html[data-theme='dark']) .account__moon {
+        display: none;
+    }
+
+    :global(html[data-theme='dark']) .account__sun {
+        display: flex;
+    }
+
     @media (max-width: 768px) {
         .account {
             position: static;
@@ -216,7 +268,9 @@ import IconUser from '@components/icons/User.astro';
 <script>
     import { navigate } from 'astro:transitions/client';
 
+    import { STORAGE } from '@lib/shared/constants';
     import { endSession, getSession, onSessionChange } from '@lib/account/session';
+    import { getTheme, toggleTheme } from '@lib/ui/theme';
     import { registerPageScript, setPending } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
 
@@ -239,8 +293,15 @@ import IconUser from '@components/icons/User.astro';
         signal.addEventListener('abort', () => unsubscribe?.(), { once: true });
 
         const signOut = document.querySelector<HTMLButtonElement>('[data-account-signout]');
+        const theme = document.querySelector<HTMLButtonElement>('[data-account-theme]');
 
         signOut?.addEventListener('click', () => void handleSignOut(signOut), { signal });
+
+        if (!theme) return;
+
+        renderTheme(theme);
+        theme.addEventListener('click', () => toggleTheme(), { signal });
+        window.addEventListener(STORAGE.theme.topic, () => renderTheme(theme), { signal });
     }
 
     function render() {
@@ -252,6 +313,10 @@ import IconUser from '@components/icons/User.astro';
         if (!name) return;
 
         name.textContent = session ? `Account, signed in as ${session.artistName || session.email}` : 'Account';
+    }
+
+    function renderTheme(button: HTMLButtonElement) {
+        button.setAttribute('aria-pressed', String(getTheme() === 'dark'));
     }
 
     registerPageScript(initAccount);

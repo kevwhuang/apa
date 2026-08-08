@@ -12,7 +12,7 @@ const BASH_SUBMISSIONS: BashSubmission[] = [
     { edition: 'January', producer: 'Felix Trench', submittedAt: '2026-01-24T17:54:00-06:00', title: 'Loose Ends' },
     { edition: 'March', producer: 'Inez Rao', submittedAt: '2026-03-21T16:05:00-05:00', title: 'Creek Bed' },
     { edition: 'March', producer: 'Theo Marsh', submittedAt: '2026-03-21T16:24:00-05:00', title: 'Grackle Hour' },
-    { edition: 'March', producer: 'Yara Soto', submittedAt: '2026-03-21T16:48:00-05:00', title: 'Sixth Street Hiss' },
+    { edition: 'March', producer: 'Aephonics', submittedAt: '2026-03-21T16:48:00-05:00', title: 'Sixth Street Hiss' },
     { edition: 'March', producer: 'Cole Bratton', submittedAt: '2026-03-21T17:07:00-05:00', title: 'Rain on Tin' },
     { edition: 'March', producer: 'Devon Park', submittedAt: '2026-03-21T17:33:00-05:00', title: 'Cicada Grid' },
     { edition: 'March', producer: 'Mia Solano', submittedAt: '2026-03-21T17:56:00-05:00', title: 'Trainyard Bloom' },
@@ -29,7 +29,7 @@ const BASH_SUBMISSIONS: BashSubmission[] = [
     { edition: 'July', producer: 'Theo Marsh', submittedAt: '2026-07-25T16:59:00-05:00', title: 'Loop of Record' },
     { edition: 'July', producer: 'Inez Rao', submittedAt: '2026-07-25T17:18:00-05:00', title: 'Dust on the Needle' },
     { edition: 'July', producer: 'Cole Bratton', submittedAt: '2026-07-25T17:37:00-05:00', title: 'Sample Estate' },
-    { edition: 'July', producer: 'Yara Soto', submittedAt: '2026-07-25T17:50:00-05:00', title: 'Flip Ritual' },
+    { edition: 'July', producer: 'Aephonics', submittedAt: '2026-07-25T17:50:00-05:00', title: 'Flip Ritual' },
     { edition: 'July', producer: 'Mia Solano', submittedAt: '2026-07-25T17:58:00-05:00', title: 'Last Pressing' },
 ];
 

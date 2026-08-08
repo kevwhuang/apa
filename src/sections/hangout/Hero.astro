@@ -50,19 +50,19 @@ const program = getProgram('hangout');
                 <p class="label mb-4 text-accent-deep">House rules / Every month</p>
                 <dl>
                     {HOUSE_RULES.map(rule => (
-                        <div class="house-rules__row">
+                        <div class="first:border-t-0 first:pt-0 last:pb-0 grid grid-cols-[76px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-sm) border-t border-ink-20">
                             <dt class="label pt-1 text-ink-subtle">{rule.term}</dt>
                             <dd class="text-smd">
                                 {rule.href
                                     ? (
                                             <a
-                                                class="house-rules__link hover:text-accent-deep decoration-2 decoration-accent font-bold underline underline-offset-4"
+                                                class="active:translate-y-px hover:text-accent-deep inline-block py-(--space-xs) decoration-2 decoration-accent font-bold underline underline-offset-4 transition-[color,transform]"
                                                 href={rule.href}
                                                 rel="noopener noreferrer"
                                                 target="_blank"
                                             >
                                                 {rule.detail}
-                                                <span class="sr-only"> (opens in a new tab)</span>
+                                                <span class="sr-only">&nbsp;(opens in a new tab)</span>
                                             </a>
                                         )
                                     : rule.detail}
@@ -74,35 +74,3 @@ const program = getProgram('hangout');
         </div>
     </div>
 </section>
-
-<style>
-    .house-rules__link {
-        display: inline-block;
-        padding-block: var(--space-xs);
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .house-rules__link:active {
-        transform: translateY(1px);
-    }
-
-    .house-rules__row {
-        align-items: baseline;
-        border-top: 1px solid var(--color-ink-20);
-        display: grid;
-        gap: var(--space-xs);
-        grid-template-columns: 76px minmax(0, 1fr);
-        padding-block: var(--space-sm);
-    }
-
-    .house-rules__row:first-child {
-        border-top: 0;
-        padding-top: 0;
-    }
-
-    .house-rules__row:last-child {
-        padding-bottom: 0;
-    }
-</style>

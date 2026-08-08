@@ -51,7 +51,7 @@ const program = getProgram('assembly');
                 <p class="label mb-4 text-accent-deep">Running order / Every edition</p>
                 <ol class="list-none">
                     {AGENDA.map(item => (
-                        <li class="agenda__row">
+                        <li class="first:border-t-0 first:pt-0 last:pb-0 grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-sm) border-t border-ink-20">
                             <span
                                 class="label pt-1 text-ink-subtle"
                                 data-placeholder
@@ -69,23 +69,3 @@ const program = getProgram('assembly');
         </div>
     </div>
 </section>
-
-<style>
-    .agenda__row {
-        align-items: baseline;
-        border-top: 1px solid var(--color-ink-20);
-        display: grid;
-        gap: var(--space-xs);
-        grid-template-columns: 72px minmax(0, 1fr);
-        padding-block: var(--space-sm);
-    }
-
-    .agenda__row:first-child {
-        border-top: 0;
-        padding-top: 0;
-    }
-
-    .agenda__row:last-child {
-        padding-bottom: 0;
-    }
-</style>

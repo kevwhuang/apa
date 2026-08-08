@@ -28,10 +28,10 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
             </p>
         </div>
         <div
-            class="signin slab slab--bare slab--card"
+            class="signin slab slab--bare slab--card max-w-(--measure-form) w-full mx-auto"
             data-motion="unfold"
         >
-            <fieldset class="signin__modes">
+            <fieldset class="grid grid-cols-2 min-w-0 border-b-2 border-ink">
                 <legend class="sr-only">What do you want to do?</legend>
                 <label class="action-text signin__tab">
                     <input
@@ -54,7 +54,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                 </label>
             </fieldset>
             <form
-                class="signin__panel signin__panel--in flex flex-col gap-6"
+                class="signin__panel--in flex flex-col gap-6 p-(--space-lg)"
                 data-auth-form="signin"
             >
                 <h2 class="sr-only">
@@ -84,7 +84,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                 <div class="signin__field flex flex-col gap-2">
                     <label class="block">
                         <span class="label block mb-2 text-ink-muted">Password</span>
-                        <span class="signin__control">
+                        <span class="block relative">
                             <input
                                 id="signin-password"
                                 class="input pr-12 font-sans"
@@ -102,10 +102,10 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                                 data-reveal="signin-password"
                                 type="button"
                             >
-                                <span class="signin__glyph signin__glyph--show">
+                                <span class="signin__glyph--show flex items-center">
                                     <IconEye />
                                 </span>
-                                <span class="signin__glyph signin__glyph--hide">
+                                <span class="signin__glyph--hide flex items-center">
                                     <IconEyeOff />
                                 </span>
                             </button>
@@ -126,7 +126,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                 </button>
             </form>
             <form
-                class="signin__panel signin__panel--up flex flex-col gap-6"
+                class="signin__panel--up flex flex-col gap-6 p-(--space-lg)"
                 data-auth-form="signup"
             >
                 <h2 class="sr-only">
@@ -156,7 +156,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                 <div class="signin__field flex flex-col gap-2">
                     <label class="block">
                         <span class="label block mb-2 text-ink-muted">Password</span>
-                        <span class="signin__control">
+                        <span class="block relative">
                             <input
                                 id="signup-password"
                                 class="input pr-12 font-sans"
@@ -175,10 +175,10 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                                 data-reveal="signup-password"
                                 type="button"
                             >
-                                <span class="signin__glyph signin__glyph--show">
+                                <span class="signin__glyph--show flex items-center">
                                     <IconEye />
                                 </span>
-                                <span class="signin__glyph signin__glyph--hide">
+                                <span class="signin__glyph--hide flex items-center">
                                     <IconEyeOff />
                                 </span>
                             </button>
@@ -194,7 +194,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                 <div class="signin__field flex flex-col gap-2">
                     <label class="block">
                         <span class="label block mb-2 text-ink-muted">Confirm password</span>
-                        <span class="signin__control">
+                        <span class="block relative">
                             <input
                                 id="signup-confirm"
                                 class="input pr-12 font-sans"
@@ -212,10 +212,10 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                                 data-reveal="signup-confirm"
                                 type="button"
                             >
-                                <span class="signin__glyph signin__glyph--show">
+                                <span class="signin__glyph--show flex items-center">
                                     <IconEye />
                                 </span>
-                                <span class="signin__glyph signin__glyph--hide">
+                                <span class="signin__glyph--hide flex items-center">
                                     <IconEyeOff />
                                 </span>
                             </button>
@@ -240,42 +240,12 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
 </section>
 
 <style>
-    .signin {
-        margin-inline: auto;
-        max-width: var(--measure-form);
-        width: 100%;
-    }
-
     .signin:has(#mode-signup:checked) .signin__panel--in {
         display: none;
     }
 
     .signin:not(:has(#mode-signup:checked)) .signin__panel--up {
         display: none;
-    }
-
-    .signin__control {
-        display: block;
-        position: relative;
-    }
-
-    .signin__glyph {
-        align-items: center;
-        display: flex;
-    }
-
-    .signin__modes {
-        border: 0;
-        border-bottom: 2px solid var(--color-ink);
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        margin: 0;
-        min-inline-size: 0;
-        padding: 0;
-    }
-
-    .signin__panel {
-        padding: var(--space-lg);
     }
 
     .signin__radio {
@@ -385,7 +355,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
 <script>
     import { navigate } from 'astro:transitions/client';
 
-    import { clearFieldErrors, confirmRule, focusFirstError, isValidationBypassed, passwordRule, setFieldErrors, validateFields } from '@lib/ui/forms';
+    import { clearFieldErrors, confirmRule, focusFirstError, handleReveal, passwordRule, readEmail, setFieldErrors, validateFields } from '@lib/ui/forms';
     import { getSession, onSessionChange, startSession } from '@lib/account/session';
     import { registerPageScript, setPending } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
@@ -394,10 +364,9 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
         'already-registered': 'email',
         'invalid-credentials': 'password',
         'invalid-email': 'email',
+        'storage-full': 'email',
         'weak-password': 'password',
     };
-
-    const PLACEHOLDER_EMAIL = 'you@studio.fm';
 
     const SIGNIN_RULES: Record<string, FieldRule> = {
         email: { message: 'Enter your email address.', required: true },
@@ -411,17 +380,6 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
     };
 
     let unsubscribe: (() => void) | undefined;
-
-    function handleReveal(button: HTMLButtonElement) {
-        const input = document.getElementById(button.dataset.reveal ?? '');
-        const shown = button.getAttribute('aria-pressed') === 'true';
-
-        if (!(input instanceof HTMLInputElement)) return;
-
-        button.setAttribute('aria-label', shown ? 'Show password' : 'Hide password');
-        button.setAttribute('aria-pressed', shown ? 'false' : 'true');
-        input.type = shown ? 'password' : 'text';
-    }
 
     function handleSessionChange(session: Session | null) {
         if (session) void navigate('/settings');
@@ -499,14 +457,6 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
         reveals.forEach((button) => {
             button.addEventListener('click', () => handleReveal(button), { signal });
         });
-    }
-
-    function readEmail(values: FormData) {
-        const email = String(values.get('email') ?? '').trim();
-
-        if (email.length > 0 || !isValidationBypassed()) return email;
-
-        return PLACEHOLDER_EMAIL;
     }
 
     function sessionLabel(session: Session) {

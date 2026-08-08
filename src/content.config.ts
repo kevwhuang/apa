@@ -11,6 +11,7 @@ import {
     MEMBER_ROLES,
     PRODUCT_CATEGORIES,
     PRODUCT_SIZES,
+    PROFILE_FIELDS,
 } from '@lib/shared/constants';
 
 const bash = defineCollection({
@@ -72,7 +73,7 @@ const producers = defineCollection({
         avatar: z.string().optional(),
         bio: z.string(),
         featured: z.boolean().default(false),
-        genres: z.array(z.enum(GENRES)).max(5).default([]),
+        genres: z.array(z.enum(GENRES)).max(PROFILE_FIELDS.genres.max).default([]),
         joined: z.coerce.date(),
         links: z.array(z.object({
             href: z.string(),
@@ -83,6 +84,7 @@ const producers = defineCollection({
         roles: z.array(z.enum(MEMBER_ROLES)).length(1),
         tracks: z.array(z.object({
             durationSeconds: z.number().int().positive(),
+            file: z.string().optional(),
             title: z.string(),
         })).max(1).default([]),
     }),

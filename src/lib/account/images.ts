@@ -1,6 +1,7 @@
 import { AVATAR } from '@lib/shared/constants';
 import { formatExtensions, getExtension, getSizeError } from '@lib/audio/uploads';
 
+const AVATAR_EXTENSIONS = [...AVATAR.extensions, ...AVATAR.aliasExtensions];
 const AVATAR_EXTENSIONS_OR_LIST = formatExtensions(AVATAR.extensions);
 
 async function decodeImage(file: File) {
@@ -20,7 +21,7 @@ function normalizeAvatar(value: string): string {
 function rejectionReason(file: File) {
     const extension = getExtension(file.name);
 
-    if (!AVATAR.extensions.some(allowed => allowed === extension)) {
+    if (!AVATAR_EXTENSIONS.some(allowed => allowed === extension)) {
         return `That is a .${extension || 'file'} \u2014 we take ${AVATAR_EXTENSIONS_OR_LIST}.`;
     }
 

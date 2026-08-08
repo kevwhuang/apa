@@ -227,11 +227,11 @@ const PAD_LENGTH = 2;
 ---
 
 <section
-    class="rack__hero stage stage--tight overflow-hidden relative border-b-2 border-ink"
+    class="stage stage--tight content-between overflow-hidden relative min-h-[min(820px,82svh)] border-b-2 border-ink"
     aria-labelledby="rig-title"
 >
     <div
-        class="rack__scene stage__item--full absolute pointer-events-none"
+        class="rack__scene stage__item--full absolute inset-0 pointer-events-none"
         aria-hidden="true"
     />
     <div
@@ -260,8 +260,8 @@ const PAD_LENGTH = 2;
         aria-label="How the rack works"
         data-motion-stagger="rise"
     >
-        <div class="rack__cell rack__cell--flag">
-            <dt class="label rack__key">Modules</dt>
+        <div class="rack__cell--flag content-center grid px-(--space-sm) py-(--space-xs) bg-surface">
+            <dt class="label mb-(--space-2xs) text-ink-inverse-muted">Modules</dt>
             <dd
                 class="font-extrabold font-sans leading-[0.9] text-4xl tracking-tight"
                 data-motion-count={String(MODULES.length)}
@@ -269,16 +269,16 @@ const PAD_LENGTH = 2;
                 {MODULES.length}
             </dd>
         </div>
-        <div class="rack__cell">
-            <dt class="label rack__key">Formats</dt>
+        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-surface">
+            <dt class="label mb-(--space-3xs) text-ink-muted">Formats</dt>
             <dd class="font-mono text-smd">{RACK_EXTENSION_LIST}</dd>
         </div>
-        <div class="rack__cell">
-            <dt class="label rack__key">Ceiling</dt>
+        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-surface">
+            <dt class="label mb-(--space-3xs) text-ink-muted">Ceiling</dt>
             <dd class="font-mono text-smd">{formatBytes(RACK_MAX_BYTES)} per file</dd>
         </div>
-        <div class="rack__cell">
-            <dt class="label rack__key">Output</dt>
+        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-surface">
+            <dt class="label mb-(--space-3xs) text-ink-muted">Output</dt>
             <dd class="font-mono text-smd">Plays through the site player</dd>
         </div>
     </dl>
@@ -309,7 +309,7 @@ const PAD_LENGTH = 2;
             >
                 <IconUpload />
                 <span class="action-text">Drop audio or browse</span>
-                <span class="rack__hint font-mono text-xs">
+                <span class="font-mono text-xs text-ink-inverse-muted">
                     {RACK_EXTENSION_LIST} up to {formatBytes(RACK_MAX_BYTES)}
                 </span>
                 <input
@@ -322,7 +322,7 @@ const PAD_LENGTH = 2;
                     type="file"
                 />
             </label>
-            <div class="rack__deck">
+            <div class="flex items-center gap-(--space-sm) p-(--space-sm) border border-ink-inverse-10">
                 <button
                     class="rack__play"
                     aria-pressed="false"
@@ -344,9 +344,9 @@ const PAD_LENGTH = 2;
                         Play the rack
                     </span>
                 </button>
-                <div class="rack__status">
+                <div class="min-w-0">
                     <p
-                        class="rack__meta font-mono text-smd"
+                        class="rack__meta flex items-center gap-(--space-2xs) font-mono text-smd"
                         aria-live="polite"
                         data-rack-meta
                     >
@@ -357,7 +357,7 @@ const PAD_LENGTH = 2;
                             hidden
                         />
                         <span
-                            class="rack__meta-text"
+                            class="truncate"
                             data-rack-meta-text
                         >
                             No file loaded
@@ -365,16 +365,16 @@ const PAD_LENGTH = 2;
                     </p>
                     <p
                         id="rack-error"
-                        class="rack__error font-mono text-xs"
+                        class="empty:hidden font-mono text-xs text-accent-light"
                         aria-live="polite"
                         data-rack-error
                     />
                 </div>
             </div>
-            <div class="rack__signal">
-                <p class="label rack__signal-label">Signal path</p>
+            <div class="col-span-full">
+                <p class="label mb-(--space-2xs) text-ink-inverse-muted">Signal path</p>
                 <ol
-                    class="rack__path list-none"
+                    class="flex flex-wrap items-center gap-(--space-sm) list-none"
                     data-rack-path
                 >
                     <li class="rack__node">In</li>
@@ -419,18 +419,18 @@ const PAD_LENGTH = 2;
                     <article
                         id={module.id}
                         class:list={[
-                            'module rack__card slab slab--card',
+                            'module slab slab--card grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-[1/span_5] space-y-(--space-xs)',
                             module.well && 'module--well slab--well',
                         ]}
                         data-module={module.kind}
                     >
-                        <p class="label module__role">
-                            <span class="module__index">{String(index + 1).padStart(PAD_LENGTH, '0')}</span>
+                        <p class="label flex flex-wrap items-baseline row-1 gap-(--space-2xs)">
+                            <span class="text-(--module-accent)">{String(index + 1).padStart(PAD_LENGTH, '0')}</span>
                             <span>{module.role}</span>
                         </p>
-                        <div class="module__head">
+                        <div class="flex flex-wrap items-center justify-between row-2 gap-(--space-2xs)">
                             <h3
-                                class="module__name font-extrabold font-sans text-xl tracking-tight"
+                                class="min-w-0 font-extrabold font-sans text-xl tracking-tight"
                                 data-module-name
                             >
                                 {MODULE_NAMES[module.kind]}
@@ -445,14 +445,14 @@ const PAD_LENGTH = 2;
                                 <span class="sr-only">{MODULE_NAMES[module.kind]} active</span>
                             </button>
                         </div>
-                        <p class="module__blurb leading-relaxed text-sm">
+                        <p class="row-3 leading-relaxed text-sm text-(--module-mute)">
                             {module.blurb}
                         </p>
                         {module.sliders.length > 0 && (
-                            <div class="module__params">
+                            <div class="flex flex-col row-4">
                                 {module.sliders.map(slider => (
-                                    <label class="module__param">
-                                        <span class="label module__param-label">{slider.label}</span>
+                                    <label class="grid grid-cols-[72px_minmax(0,1fr)_76px] items-center min-h-(--control-size) gap-(--space-2xs)">
+                                        <span class="label whitespace-nowrap text-(--module-mute)">{slider.label}</span>
                                         <input
                                             class="module__range"
                                             aria-valuetext={slider.display}
@@ -464,7 +464,7 @@ const PAD_LENGTH = 2;
                                             value={slider.value}
                                         />
                                         <output
-                                            class="module__value font-mono text-xs"
+                                            class="font-mono text-xs select-none"
                                             data-module-value={slider.param}
                                         >
                                             {slider.display}
@@ -474,9 +474,9 @@ const PAD_LENGTH = 2;
                             </div>
                         )}
                         {module.viz === 'canvas' && (
-                            <div class="module__viz">
+                            <div class="row-5">
                                 <canvas
-                                    class="module__canvas"
+                                    class="block min-h-20 w-full border-2 border-(--module-line) bg-(--module-fill)"
                                     aria-label={`${MODULE_NAMES[module.kind]} level meter`}
                                     data-module-canvas
                                     height="80"
@@ -486,9 +486,9 @@ const PAD_LENGTH = 2;
                             </div>
                         )}
                         {module.viz === 'readout' && (
-                            <div class="module__viz">
+                            <div class="row-5">
                                 <p
-                                    class="module__readout font-mono"
+                                    class="flex items-center justify-center min-h-(--control-size) px-(--space-xs) py-(--space-2xs) border-2 border-(--module-line) font-mono text-center text-md bg-(--module-fill)"
                                     data-module-readout
                                 >
                                     {module.readout}
@@ -514,14 +514,6 @@ const PAD_LENGTH = 2;
 
     .module :focus-visible {
         outline-color: var(--module-accent);
-    }
-
-    .module > * {
-        margin-bottom: var(--space-xs);
-    }
-
-    .module > :last-child {
-        margin-bottom: 0;
     }
 
     .module--engaged::before {
@@ -580,54 +572,6 @@ const PAD_LENGTH = 2;
         color: var(--color-ink-inverse);
     }
 
-    .module__blurb {
-        color: var(--module-mute);
-        grid-row: 3;
-    }
-
-    .module__canvas {
-        background-color: var(--module-fill);
-        border: 2px solid var(--module-line);
-        display: block;
-        min-height: 80px;
-        width: 100%;
-    }
-
-    .module__head {
-        align-items: center;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-2xs);
-        grid-row: 2;
-        justify-content: space-between;
-    }
-
-    .module__index {
-        color: var(--module-accent);
-    }
-
-    .module__name {
-        min-width: 0;
-    }
-
-    .module__param {
-        align-items: center;
-        display: grid;
-        gap: var(--space-2xs);
-        grid-template-columns: 64px minmax(0, 1fr) 76px;
-        min-height: var(--control-size);
-    }
-
-    .module__param-label {
-        color: var(--module-mute);
-    }
-
-    .module__params {
-        display: flex;
-        flex-direction: column;
-        grid-row: 4;
-    }
-
     .module__range {
         appearance: none;
         background: transparent;
@@ -682,34 +626,6 @@ const PAD_LENGTH = 2;
         background: var(--module-accent);
     }
 
-    .module__readout {
-        align-items: center;
-        background-color: var(--module-fill);
-        border: 2px solid var(--module-line);
-        display: flex;
-        font-size: var(--text-md);
-        justify-content: center;
-        min-height: var(--control-size);
-        padding: var(--space-2xs) var(--space-xs);
-        text-align: center;
-    }
-
-    .module__role {
-        align-items: baseline;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-2xs);
-        grid-row: 1;
-    }
-
-    .module__value {
-        user-select: none;
-    }
-
-    .module__viz {
-        grid-row: 5;
-    }
-
     .rack .action-text:hover {
         color: var(--color-accent-light);
     }
@@ -724,37 +640,10 @@ const PAD_LENGTH = 2;
         grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
     }
 
-    .rack__card {
-        display: grid;
-        grid-row: 1 / span 5;
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: subgrid;
-    }
-
-    .rack__cell {
-        align-content: center;
-        background-color: var(--color-surface);
-        display: grid;
-        padding: var(--space-xs) var(--space-sm);
-    }
-
     .rack__cell--flag {
         background-color: var(--color-ink);
         color: var(--color-ink-inverse);
         padding: var(--space-md) var(--space-lg);
-    }
-
-    .rack__cell--flag .rack__key {
-        color: var(--color-ink-inverse-muted);
-        margin-bottom: var(--space-2xs);
-    }
-
-    .rack__deck {
-        align-items: center;
-        border: 1px solid var(--color-ink-inverse-10);
-        display: flex;
-        gap: var(--space-sm);
-        padding: var(--space-sm);
     }
 
     .rack__drop {
@@ -795,33 +684,11 @@ const PAD_LENGTH = 2;
         border-style: solid;
     }
 
-    .rack__error {
-        color: var(--color-accent-light);
-    }
-
-    .rack__error:empty {
-        display: none;
-    }
-
     .rack__grid {
         --rank-cols: repeat(2, minmax(0, 1fr));
         column-gap: var(--space-lg);
         grid-auto-rows: auto;
         row-gap: 0;
-    }
-
-    .rack__hero {
-        align-content: space-between;
-        min-height: min(820px, 82svh);
-    }
-
-    .rack__hint {
-        color: var(--color-ink-inverse-muted);
-    }
-
-    .rack__key {
-        color: var(--color-ink-muted);
-        margin-bottom: var(--space-3xs);
     }
 
     .rack__ledger {
@@ -830,18 +697,6 @@ const PAD_LENGTH = 2;
         display: grid;
         gap: 2px;
         grid-template-columns: minmax(200px, 0.62fr) repeat(3, minmax(0, 1fr));
-    }
-
-    .rack__meta {
-        align-items: center;
-        display: flex;
-        gap: var(--space-2xs);
-    }
-
-    .rack__meta-text {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
     }
 
     .rack__node {
@@ -874,13 +729,6 @@ const PAD_LENGTH = 2;
         border-color: var(--color-accent);
         color: var(--color-ink);
         font-weight: 700;
-    }
-
-    .rack__path {
-        align-items: center;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-sm);
     }
 
     .rack__play {
@@ -926,29 +774,12 @@ const PAD_LENGTH = 2;
         border-color: var(--color-ink-inverse-muted);
     }
 
-    .rack__scene {
-        inset: 0 calc(-1 * var(--launcher-rail)) 0 0;
-    }
-
     .rack__scene > :global(.rack__canvas) {
         display: block;
         height: 100%;
         mask-image: linear-gradient(to bottom, currentColor 78%, transparent);
         transition: opacity var(--duration-cinematic) var(--motion-ease-entrance);
         width: 100%;
-    }
-
-    .rack__signal {
-        grid-column: 1 / -1;
-    }
-
-    .rack__signal-label {
-        color: var(--color-ink-inverse-muted);
-        margin-bottom: var(--space-2xs);
-    }
-
-    .rack__status {
-        min-width: 0;
     }
 
     .rack__tile {
@@ -967,7 +798,7 @@ const PAD_LENGTH = 2;
 
     .rack__veil {
         background-image: linear-gradient(to bottom, var(--color-surface), color-mix(in srgb, var(--color-surface) 74%, transparent) 38%, transparent 68%);
-        inset: 0 calc(-1 * var(--launcher-rail)) 0 0;
+        inset: 0;
     }
 
     @media (max-width: 1024px) {
@@ -1019,7 +850,7 @@ const PAD_LENGTH = 2;
         toggleRack,
     } from '@lib/rack/rack';
     import { STORAGE } from '@lib/shared/constants';
-    import { formatDuration, registerPageScript, setHidden, setText } from '@lib/shared/utils';
+    import { formatDuration, preventNavigation, registerPageScript, setHidden, setText } from '@lib/shared/utils';
     import { initRig } from '@lib/motion/rig';
     import { validateRackFile } from '@lib/rack/loader';
 
@@ -1053,7 +884,7 @@ const PAD_LENGTH = 2;
     const PIXEL_RATIO_MAX = 2;
     const UNLIT_ALPHA = 0.15;
 
-    const FORMAT: Record<string, (value: number) => string> = {
+    const PARAM_FORMATS: Record<string, (value: number) => string> = {
         'chorus:depth': value => `${Math.round(value * PERCENT)}%`,
         'chorus:rate': value => `${value.toFixed(2)} Hz`,
         'compressor:ratio': value => `${value.toFixed(1)}:1`,
@@ -1080,7 +911,7 @@ const PAD_LENGTH = 2;
         'trim:gain': signedDecibels,
     };
 
-    const MAP: Record<string, (value: number) => number> = {
+    const PARAM_SCALES: Record<string, (value: number) => number> = {
         'distortion:tone': value => DISTORTION_TONE_MIN * (DISTORTION_TONE_MAX / DISTORTION_TONE_MIN) ** value,
         'filter:cutoff': value => CUTOFF_MIN * (CUTOFF_MAX / CUTOFF_MIN) ** value,
         'highpass:cutoff': value => HIGHPASS_MIN * (HIGHPASS_MAX / HIGHPASS_MIN) ** value,
@@ -1099,9 +930,9 @@ const PAD_LENGTH = 2;
 
         const key = `${view.kind}:${param}`;
 
-        const mapped = (MAP[key] ?? (value => value))(Number(range.value));
+        const mapped = (PARAM_SCALES[key] ?? (value => value))(Number(range.value));
 
-        const text = (FORMAT[key] ?? String)(mapped);
+        const text = (PARAM_FORMATS[key] ?? String)(mapped);
 
         range.ariaValueText = text;
         setRackParam(view.kind, param, mapped);
@@ -1307,10 +1138,6 @@ const PAD_LENGTH = 2;
     function paintView(view: ModuleView) {
         if (view.canvas && view.meter) drawMeter(view.canvas, getRackAnalyser(view.kind), view.meter);
         if (view.readout) setText(view.readout, getRackReadout(view.kind) ?? view.idle);
-    }
-
-    function preventNavigation(event: DragEvent) {
-        event.preventDefault();
     }
 
     function render() {

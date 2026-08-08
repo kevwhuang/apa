@@ -90,7 +90,7 @@ const SWITCHES = [
             {SWITCHES.map(control => (
                 <li>
                     <div class="admin__row slab slab--card flex flex-wrap items-center gap-x-6 gap-y-4">
-                        <div class="admin__body flex-1">
+                        <div class="flex-1 min-w-[200px]">
                             <h3
                                 id={`${control.id}-name`}
                                 class="mb-1 font-extrabold font-sans text-lg tracking-tight"
@@ -136,12 +136,12 @@ const SWITCHES = [
             Actions
         </SectionHead>
         <ul
-            class="admin__actions grid gap-6 list-none md:grid-cols-2"
+            class="auto-rows-auto grid gap-6 list-none md:grid-cols-2"
             data-motion-stagger="flip"
         >
             {ACTIONS.map(action => (
-                <li class="admin__action">
-                    <article class="admin__card slab slab--card">
+                <li class="content-start grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-span-5 gap-y-(--space-xs)">
+                    <article class="slab slab--card content-start grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-span-5 gap-y-(--space-xs)">
                         <p class="label text-accent-deep">{action.count}</p>
                         <h3 class="font-extrabold font-sans text-lg tracking-tight">
                             {action.name}
@@ -188,24 +188,6 @@ const SWITCHES = [
 </section>
 
 <style>
-    .admin__action,
-    .admin__card {
-        align-content: start;
-        display: grid;
-        grid-row: span 5;
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: subgrid;
-        row-gap: var(--space-xs);
-    }
-
-    .admin__actions {
-        grid-auto-rows: auto;
-    }
-
-    .admin__body {
-        min-width: 200px;
-    }
-
     .admin__confirm {
         border-left: 2px solid var(--color-accent-deep);
     }

@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 
 import IconArrow from '@components/icons/Arrow.astro';
+import SectionHead from '@components/shared/SectionHead.astro';
 import { PARTNERS, PARTNER_LOGO_WIDTH } from '@lib/shared/constants';
 ---
 
@@ -10,45 +11,115 @@ import { PARTNERS, PARTNER_LOGO_WIDTH } from '@lib/shared/constants';
     aria-labelledby="partners-title"
 >
     <div>
-        <h2
-            id="partners-title"
-            class="sr-only"
+        <SectionHead
+            class="font-extrabold font-sans text-5xl tracking-tight"
+            eyebrow="Partners / Backing"
+            headingId="partners-title"
         >
-            Partners
-        </h2>
+            Backed by our top partners.
+        </SectionHead>
         <p
-            class="label mb-8 text-center text-ink-muted"
-            data-motion="stamp"
+            class="max-w-2xl leading-relaxed text-md text-ink-muted"
+            data-motion="blur"
         >
-            Backed by
+            The rooms, the gear, and the nights that hold the calendar together &mdash; partners
+            make all of it possible. Every one starts the same way: a conversation about what you
+            already have.
         </p>
-        <ul
-            class="grid grid-cols-2 gap-px mb-8 border-2 border-ink list-none bg-ink"
-            data-motion-stagger="rise"
-        >
-            {PARTNERS.map(partner => (
-                <li class="partner-tile flex items-center justify-center h-24 p-5 bg-surface md:h-32 md:p-8">
+    </div>
+    <ul
+        class="backers mark slab slab--bare slab--lift list-none"
+        data-motion="rise"
+        style={`--backers-cols: ${PARTNERS.length + 1}`}
+    >
+        {PARTNERS.map(partner => (
+            <li class="partner-tile grid grid-rows-[auto_minmax(0,1fr)] gap-(--space-md) min-h-(--backers-cell) p-(--space-lg) bg-surface">
+                <p class="label text-ink-muted">{partner.name}</p>
+                <div class="backers__logo">
                     <Image
                         class="partner-tile__logo object-contain max-h-full max-w-full"
-                        alt={partner.name}
+                        alt={`${partner.name} logo`}
                         densities={[1, 2]}
                         src={partner.logo}
                         width={PARTNER_LOGO_WIDTH}
                     />
-                </li>
-            ))}
-        </ul>
-        <p
-            class="font-mono text-center text-xs uppercase text-ink-muted"
-            data-motion="rise"
-        >
-            Become a partner &mdash;&#32;
+                </div>
+            </li>
+        ))}
+        <li class="backers__action grid">
             <a
-                class="action-text hover:text-accent-deep inline-flex items-center gap-2 min-h-(--control-size) underline underline-offset-4 transition-colors"
+                class="backers__cta grid grid-rows-[auto_minmax(0,1fr)] gap-(--space-md) min-h-(--backers-cell) p-(--space-lg)"
                 href="/partners"
             >
-                see the ways in <IconArrow />
+                <span class="label">Become a partner</span>
+                <span class="self-end font-extrabold font-sans leading-[0.95] text-3xl text-balance tracking-[-0.03em]">
+                    See the ways in <IconArrow />
+                </span>
             </a>
-        </p>
-    </div>
+        </li>
+    </ul>
 </section>
+
+<style>
+    .backers {
+        --backers-cell: clamp(180px, calc(146.667px + 10.4167vw), 280px);
+        --slab-fill: var(--color-ink);
+        display: grid;
+        gap: var(--slab-rule);
+        grid-template-columns: repeat(var(--backers-cols), minmax(0, 1fr));
+    }
+
+    .backers__cta {
+        background-color: var(--color-accent);
+        color: var(--color-ink);
+        transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .backers__cta:active {
+        transform: translateY(1px);
+    }
+
+    .backers__cta:focus-visible {
+        outline-offset: -4px;
+    }
+
+    .backers__cta:hover {
+        background-color: var(--color-accent-deep);
+        color: var(--color-ink-inverse);
+    }
+
+    .backers__logo {
+        align-items: center;
+        align-self: center;
+        display: flex;
+        height: clamp(62px, calc(50.667px + 3.5417vw), 96px);
+        justify-content: center;
+    }
+
+    @media (max-width: 1024px) {
+        .backers {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .backers__action {
+            grid-column: 1 / -1;
+        }
+
+        .backers__cta {
+            align-content: center;
+            gap: var(--space-xs);
+            grid-template-rows: auto auto;
+            min-height: 0;
+            padding-block: var(--space-2xl);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .backers {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+</style>

@@ -32,7 +32,7 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
 >
     <div data-motion="stamp">
         <a
-            class="product__crumb hover:text-accent-deep font-bold font-mono text-sm tracking-wide uppercase text-ink-muted"
+            class="active:translate-y-px hover:text-accent-deep inline-flex items-center min-h-(--control-size) gap-(--space-2xs) font-bold font-mono text-sm tracking-wide uppercase text-ink-muted transition-[color,transform]"
             href="/store"
         >
             <IconArrow left /> All products
@@ -274,7 +274,7 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
 
     .product-gallery__thumb {
         aspect-ratio: 1;
-        border: 2px solid var(--color-ink-20);
+        border: 2px solid var(--color-ink-subtle);
         display: block;
         overflow: hidden;
         padding: 0;
@@ -303,20 +303,6 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
     .product-gallery__thumb[aria-pressed='true'] {
         border-color: var(--color-ink);
         box-shadow: var(--lift) var(--lift) 0 0 var(--color-ink);
-    }
-
-    .product__crumb {
-        align-items: center;
-        display: inline-flex;
-        gap: var(--space-2xs);
-        min-height: var(--control-size);
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .product__crumb:active {
-        transform: translateY(1px);
     }
 
     .product__swatch {
@@ -348,9 +334,23 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
     import { registerPageScript } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
 
+    const STORAGE_MESSAGE = 'Nothing was added \u2014 your browser storage is full. Clear some space and try again.';
+
     let maxQuantity = 1;
     let quantity = 1;
     let stock = 0;
+
+    function applyVariationFromQuery(swatches: NodeListOf<HTMLButtonElement>) {
+        const requested = new URLSearchParams(window.location.search).get('variation')?.trim().toLowerCase();
+
+        if (!requested) return;
+
+        const match = Array.from(swatches).find(swatch => swatch.dataset.variation?.toLowerCase() === requested);
+
+        if (!match) return;
+
+        selectVariation(match.dataset.variation ?? '');
+    }
 
     function countInCart(slug: string, variation: string | undefined, size: string | undefined) {
         const line = getItems().find(item => item.productSlug === slug
@@ -377,7 +377,7 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
             return;
         }
 
-        add({
+        const persisted = add({
             image,
             priceCents: Number(form.dataset.priceCents),
             productSlug: slug,
@@ -386,6 +386,12 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
             title,
             variation,
         }, maxQuantity);
+
+        if (!persisted) {
+            toast(STORAGE_MESSAGE, 'error');
+
+            return;
+        }
 
         toast(`${countInCart(slug, variation, size)} \u00d7 ${title} in your cart.`, 'success');
     }
@@ -398,7 +404,7 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
         quantity = Math.min(maxQuantity, Math.max(1, quantity + step));
         updateQuantity(decrease, increase, output);
 
-        if (step > 0 && quantity >= maxQuantity) toast(limitMessage(), 'info');
+        if (quantity >= maxQuantity && step > 0) toast(limitMessage(), 'info');
     }
 
     function handleSizeClick(button: HTMLButtonElement, sizeButtons: NodeListOf<HTMLButtonElement>) {
@@ -424,6 +430,8 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
         quantity = 1;
         stock = Number(form.dataset.stock) || 0;
 
+        applyVariationFromQuery(swatches);
+
         if (decrease && increase && quantityOutput) {
             updateQuantity(decrease, increase, quantityOutput);
             decrease.addEventListener('click', () => handleQuantityClick(-1, decrease, increase, quantityOutput), { signal });
@@ -446,7 +454,7 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
     }
 
     function limitMessage() {
-        return stock > COMMERCE.maxQuantityPerItem ? 'Five per order is the limit.' : 'That\u2019s all we have.';
+        return stock > COMMERCE.maxQuantityPerItem ? 'Five per order is the limit.' : 'That\'s all we have.';
     }
 
     function selectVariation(variation: string) {

@@ -32,9 +32,9 @@ function initTracks(): void {
 }
 
 function readTrack(button: HTMLButtonElement) {
-    const { trackArtist = '', trackDuration = '0', trackId = '', trackTitle = '' } = button.dataset;
+    const { trackArtist = '', trackDuration = '0', trackFile, trackId = '', trackTitle = '' } = button.dataset;
 
-    return { artist: trackArtist, durationSeconds: Number(trackDuration), id: trackId, title: trackTitle };
+    return { artist: trackArtist, durationSeconds: Number(trackDuration), file: trackFile, id: trackId, title: trackTitle };
 }
 
 function start(signal: AbortSignal) {

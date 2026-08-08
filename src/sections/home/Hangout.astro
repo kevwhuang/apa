@@ -42,7 +42,7 @@ const program = getProgram('hangout');
         </p>
         {next
             ? (
-                    <div class="hangout-flyer">
+                    <div class="relative">
                         <div
                             class="halftone--accent hangout-flyer__field absolute pointer-events-none"
                             aria-hidden="true"
@@ -60,13 +60,16 @@ const program = getProgram('hangout');
                                     <span class="hangout-flyer__tag label px-2 py-1 bg-ink text-ink-inverse">
                                         Next {program.shortName}
                                     </span>
-                                    <time datetime={next.data.date.toISOString()}>
+                                    <time
+                                        class="contents"
+                                        datetime={next.data.date.toISOString()}
+                                    >
                                         <span class="hangout-flyer__day">{formatCalendarDay(next.data.date)}</span>
-                                        <span class="hangout-flyer__month">{formatCalendarMonth(next.data.date)}</span>
+                                        <span class="hangout-flyer__month block font-mono leading-normal text-sm tracking-[0.08em] uppercase whitespace-nowrap">{formatCalendarMonth(next.data.date)}</span>
                                     </time>
-                                    <span class="hangout-flyer__weekday">{formatWeekday(next.data.date)}</span>
+                                    <span class="hangout-flyer__weekday font-mono text-2xs tracking-[0.06em] uppercase text-ink">{formatWeekday(next.data.date)}</span>
                                 </p>
-                                <div class="hangout-flyer__body">
+                                <div class="content-start p-(--space-lg)">
                                     <h3 class="mb-5 font-extrabold font-sans leading-[0.95] text-4xl tracking-[-0.03em]">{next.data.title}</h3>
                                     <p
                                         class="mb-1 font-mono text-xs uppercase text-ink-muted"
@@ -86,7 +89,7 @@ const program = getProgram('hangout');
                                             target="_blank"
                                         >
                                             RSVP on Meetup
-                                            <span class="sr-only"> (opens in a new tab)</span>
+                                            <span class="sr-only">&nbsp;(opens in a new tab)</span>
                                         </a>
                                         <a
                                             class="btn"
@@ -122,7 +125,7 @@ const program = getProgram('hangout');
                                 target="_blank"
                             >
                                 RSVP on Meetup
-                                <span class="sr-only"> (opens in a new tab)</span>
+                                <span class="sr-only">&nbsp;(opens in a new tab)</span>
                             </a>
                             <a
                                 class="btn"
@@ -137,15 +140,6 @@ const program = getProgram('hangout');
 </section>
 
 <style>
-    .hangout-flyer {
-        position: relative;
-    }
-
-    .hangout-flyer__body {
-        align-content: start;
-        padding: var(--space-lg);
-    }
-
     .hangout-flyer__card {
         display: grid;
         grid-template-columns: auto minmax(0, 1fr) auto;
@@ -163,15 +157,6 @@ const program = getProgram('hangout');
 
     .hangout-flyer__field {
         inset: calc(-1 * var(--space-lg)) calc(-1 * var(--space-2xl));
-    }
-
-    .hangout-flyer__month {
-        display: block;
-        font-family: var(--font-mono);
-        font-size: var(--text-sm);
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        white-space: nowrap;
     }
 
     .hangout-flyer__rail {
@@ -198,18 +183,6 @@ const program = getProgram('hangout');
         gap: var(--space-2xs);
         justify-items: start;
         padding: var(--space-lg);
-    }
-
-    .hangout-flyer__stamp time {
-        display: contents;
-    }
-
-    .hangout-flyer__weekday {
-        color: var(--color-ink-70);
-        font-family: var(--font-mono);
-        font-size: var(--text-2xs);
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
     }
 
     @media (max-width: 768px) {

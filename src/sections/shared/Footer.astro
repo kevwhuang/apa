@@ -1,13 +1,10 @@
 ---
-import BrandMark from '@components/brand/Mark.astro';
 import IconDiscord from '@components/icons/Discord.astro';
 import IconInstagram from '@components/icons/Instagram.astro';
 import IconMeetup from '@components/icons/Meetup.astro';
-import IconMoon from '@components/icons/Moon.astro';
-import IconSun from '@components/icons/Sun.astro';
 import { BRAND } from '@lib/shared/brand';
 import { LINKS, NAV_GROUPS, SITE_UPDATED } from '@lib/shared/constants';
-import { formatDate } from '@lib/shared/utils';
+import { formatDateStamp } from '@lib/shared/utils';
 
 const ACCOUNT_LINKS = [
     { href: '/here', label: 'Here' },
@@ -29,9 +26,9 @@ const columns = [
         head: 'Browse',
         items: [
             ...NAV_GROUPS.flatMap(group => ('href' in group ? [{ href: group.href, label: group.label }] : [])),
-            { href: '/api', label: 'API' },
             { href: '/privacy', label: 'Privacy' },
             { href: '/terms', label: 'Terms' },
+            { href: '/api', label: 'API' },
         ],
     },
     {
@@ -53,44 +50,14 @@ const year = new Date().getFullYear();
             class="footer__grid"
             style={`--footer-cols: ${columns.length}`}
         >
-            <div>
-                <a
-                    class="footer__brand"
-                    aria-label={`${BRAND.name} \u2014 home`}
-                    href="/"
-                >
-                    <BrandMark class="footer__mark" />
-                </a>
-                <p class="footer__lede">
-                    A collective of music producers in Austin, Texas. Assemblies for the craft, Bashes on the clock,
-                    Hangouts in between &mdash; every genre, every experience level, in person since 2022. Open to
-                    anyone in the creative industry who wants to find their people.
-                </p>
-                <p class="footer__updated">
-                    Last updated <time datetime={SITE_UPDATED}>{formatDate(updated)}</time>
-                </p>
-                <button
-                    class="theme-toggle"
-                    aria-label="Dark theme"
-                    aria-pressed="false"
-                    type="button"
-                >
-                    <span class="theme-toggle__moon">
-                        <IconMoon />
-                    </span>
-                    <span class="theme-toggle__sun">
-                        <IconSun />
-                    </span>
-                </button>
-            </div>
             {columns.map(column => (
                 <div>
-                    <h2 class="footer__head label">{column.head}</h2>
-                    <ul class="footer__links list-none">
+                    <h2 class="footer__head label mb-(--space-2xs) text-ink-muted">{column.head}</h2>
+                    <ul class="list-none">
                         {column.items.map(item => (
                             <li>
                                 <a
-                                    class="footer__link"
+                                    class="footer__link active:translate-y-px hover:text-accent-deep inline-flex items-center min-h-9 leading-normal text-sm transition-[color,transform]"
                                     href={item.href}
                                 >
                                     {item.label}
@@ -103,14 +70,8 @@ const year = new Date().getFullYear();
         </div>
     </div>
     <div class="stage stage--flush border-t-2 border-ink">
-        <div class="footer__bar">
-            <div class="footer__credit">
-                <p>&copy; {year} {BRAND.name}. All rights reserved.</p>
-                <p>
-                    Made by <a class="footer__credit-link" href={LINKS.aephonics} rel="noopener noreferrer" target="_blank">Aephonics<span class="sr-only"> (opens in a new tab)</span></a>.
-                </p>
-            </div>
-            <ul class="footer__socials list-none">
+        <div class="footer__row footer__sign">
+            <ul class="footer__socials [grid-area:socials] flex gap-(--space-2xs) list-none">
                 {SOCIALS.map(({ Icon, href, label }) => (
                     <li>
                         <a
@@ -125,48 +86,20 @@ const year = new Date().getFullYear();
                     </li>
                 ))}
             </ul>
+            <div class="footer__meta">
+                <p class="footer__copy text-balance">&copy; {year} <span class="footer__owner whitespace-nowrap"><a class="footer__home" href="/">{BRAND.name}</a>.</span> All rights reserved.</p>
+                <p class="footer__stamp">
+                    <span class="footer__credit whitespace-nowrap">Made by <a class="footer__credit-link" href={LINKS.aephonics} rel="noopener noreferrer" target="_blank">Aephonics<span class="sr-only">&nbsp;(opens in a new tab)</span></a>.</span>
+                    <span class="footer__updated whitespace-nowrap">Updated <time datetime={SITE_UPDATED}>{formatDateStamp(updated)}</time>.</span>
+                </p>
+            </div>
         </div>
     </div>
 </footer>
 
 <style>
-    .footer__bar {
-        align-items: center;
-        color: var(--color-ink-muted);
-        display: flex;
-        flex-wrap: wrap;
-        font-family: var(--font-mono);
-        font-size: var(--text-xs);
-        gap: var(--space-sm);
-        justify-content: space-between;
-        padding-block: var(--space-2xs);
-        padding-inline-end: calc(var(--launcher-size) - var(--launcher-rail));
-    }
-
-    .footer__brand {
-        color: var(--color-ink);
-        display: block;
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .footer__brand:active {
-        transform: translateY(1px);
-    }
-
-    .footer__brand:hover {
-        color: var(--color-accent-deep);
-    }
-
-    .footer__credit {
-        align-items: center;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-xs);
-    }
-
-    .footer__credit-link {
+    .footer__credit-link,
+    .footer__home {
         color: var(--color-accent-deep);
         display: inline-block;
         text-decoration-color: transparent;
@@ -178,11 +111,13 @@ const year = new Date().getFullYear();
             transform var(--duration-fast) var(--motion-ease-ui);
     }
 
-    .footer__credit-link:active {
+    .footer__credit-link:active,
+    .footer__home:active {
         transform: translateY(1px);
     }
 
-    .footer__credit-link:hover {
+    .footer__credit-link:hover,
+    .footer__home:hover {
         color: var(--color-accent);
         text-decoration-color: currentcolor;
     }
@@ -190,57 +125,54 @@ const year = new Date().getFullYear();
     .footer__grid {
         column-gap: var(--space-lg);
         display: grid;
-        grid-template-columns: minmax(0, 1.6fr) repeat(var(--footer-cols), minmax(0, 1fr));
+        grid-template-columns: repeat(var(--footer-cols), max-content);
+        justify-content: space-between;
+        padding-inline-end: var(--space-2xl);
         row-gap: var(--space-2xl);
     }
 
-    .footer__head {
-        color: var(--color-ink-muted);
-        margin-bottom: var(--space-2xs);
+    .footer__meta {
+        align-items: flex-end;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3xs);
+        grid-area: meta;
+        text-align: right;
     }
 
-    .footer__lede {
-        color: var(--color-ink-muted);
-        font-size: var(--text-sm);
-        line-height: 1.7;
-        margin-bottom: var(--space-md);
-        max-width: 300px;
-    }
-
-    .footer__link {
+    .footer__row {
         align-items: center;
-        display: inline-flex;
-        font-size: var(--text-sm);
-        min-height: 36px;
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
+        color: var(--color-ink-muted);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        gap: var(--space-sm);
+        letter-spacing: 0.04em;
+        min-height: calc(var(--control-size) + 2 * var(--space-2xs));
+        padding-block: var(--space-2xs);
     }
 
-    .footer__link:active {
-        transform: translateY(1px);
-    }
-
-    .footer__link:hover {
-        color: var(--color-accent-deep);
-    }
-
-    :global(.footer__mark) {
-        display: block;
-        height: auto;
-        margin-bottom: var(--space-md);
-        width: 100%;
+    .footer__sign {
+        --footer-social: 56px;
+        display: grid;
+        grid-template-areas: 'socials meta';
+        grid-template-columns: auto auto;
+        justify-content: space-between;
     }
 
     .footer__social {
         align-items: center;
         display: inline-flex;
-        height: 50px;
+        height: var(--footer-social);
         justify-content: center;
         transition:
             color var(--duration-fast) var(--motion-ease-ui),
             transform var(--duration-fast) var(--motion-ease-ui);
-        width: 50px;
+        width: var(--footer-social);
+    }
+
+    .footer__social :global(svg) {
+        height: 32px;
+        width: 32px;
     }
 
     .footer__social:active {
@@ -251,94 +183,33 @@ const year = new Date().getFullYear();
         color: var(--color-accent-deep);
     }
 
-    .footer__socials {
+    .footer__stamp {
         display: flex;
         flex-wrap: wrap;
-        gap: var(--space-3xs);
+        gap: var(--space-2xs);
+        justify-content: flex-end;
     }
 
-    .footer__updated {
-        color: var(--color-ink-subtle);
-        font-family: var(--font-mono);
-        font-size: var(--text-2xs);
-        letter-spacing: 0.04em;
-        margin-bottom: var(--space-xs);
-        text-transform: uppercase;
-    }
-
-    .theme-toggle {
-        align-items: center;
-        border: 1px solid var(--color-ink-20);
-        border-radius: 4px;
-        color: var(--color-ink-subtle);
-        display: inline-flex;
-        justify-content: center;
-        min-height: 36px;
-        min-width: 36px;
-        transition:
-            border-color var(--duration-fast) var(--motion-ease-ui),
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .theme-toggle:active {
-        transform: translateY(1px);
-    }
-
-    .theme-toggle:hover {
-        border-color: var(--color-accent-deep);
-        color: var(--color-accent-deep);
-    }
-
-    .theme-toggle__moon {
-        display: flex;
-    }
-
-    .theme-toggle__sun {
-        display: none;
-    }
-
-    :global(html[data-theme='dark']) .theme-toggle__moon {
-        display: none;
-    }
-
-    :global(html[data-theme='dark']) .theme-toggle__sun {
-        display: flex;
-    }
-
-    @media (max-width: 1024px) {
+    @media (max-width: 768px) {
         .footer__grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(2, max-content);
         }
 
-        .footer__grid > :first-child {
-            grid-column: 1 / -1;
+        .footer__meta {
+            align-items: center;
+            text-align: center;
         }
 
-        :global(.footer__mark) {
-            max-width: 300px;
+        .footer__sign {
+            grid-template-areas:
+                'socials'
+                'meta';
+            grid-template-columns: minmax(0, 1fr);
+            justify-items: center;
+        }
+
+        .footer__stamp {
+            justify-content: center;
         }
     }
 </style>
-
-<script>
-    import { STORAGE } from '@lib/shared/constants';
-    import { getTheme, toggleTheme } from '@lib/ui/theme';
-    import { registerPageScript } from '@lib/shared/utils';
-
-    function initFooter(signal: AbortSignal) {
-        const toggle = document.querySelector<HTMLElement>('.theme-toggle');
-
-        if (!toggle) return;
-
-        updateThemeToggle(toggle);
-        toggle.addEventListener('click', () => toggleTheme(), { signal });
-        window.addEventListener(STORAGE.theme.topic, () => updateThemeToggle(toggle), { signal });
-    }
-
-    function updateThemeToggle(button: HTMLElement) {
-        button.setAttribute('aria-pressed', String(getTheme() === 'dark'));
-    }
-
-    registerPageScript(initFooter);
-</script>

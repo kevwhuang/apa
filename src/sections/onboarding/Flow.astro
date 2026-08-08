@@ -4,33 +4,28 @@ import { getCollection } from 'astro:content';
 import IconArrow from '@components/icons/Arrow.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import { ARTIST_NAME_MAX_LENGTH, AVATAR, GENRES, MEMBER_ROLES, ROLES, US_STATES } from '@lib/shared/constants';
+import { AVATAR, GENRES, ONBOARDING_STEPS, PROFILE_FIELDS, PROFILE_ROLES, TOUR_STOPS, US_STATES } from '@lib/shared/constants';
 import { AVATAR_EXTENSIONS_OR_LIST } from '@lib/account/images';
 import { formatBytes, formatDate } from '@lib/shared/utils';
 
 const ACCOUNT_BENEFITS = [
-    { blurb: 'The rewards currency \u2014 earned at events and on submissions, spent in the store.', label: 'Prods' },
-    { blurb: 'Member checkout, order history, and Prods redeemed at the register.', label: 'The store' },
-    { blurb: 'Member-only drops, unlockable resources, and packs you get early.', label: 'Exclusives' },
-    { blurb: 'Your producer card, tracks, and links on the member roster.', label: 'The directory' },
-    { blurb: 'Your event attendance and your order history, kept in one place.', label: 'Histories' },
-    { blurb: 'Member chat, the rack, and the floating player, synced to your session.', label: 'Interactive' },
-    { blurb: 'Event announcements and the newsletter, sent to the address on your account.', label: 'The dispatch' },
+    { blurb: 'Prods are the Alliance\'s rewards currency. You earn them at events, on submissions, and in workshops, and spend them at the store register.', label: 'Prods' },
+    { blurb: 'Your producer card sits on the member roster with your tracks and your links, so the room can find you and hear what you make.', label: 'The directory' },
+    { blurb: 'Drop a track for an Assembly feedback session or for the Bash, and it goes in under your name.', label: 'Submissions' },
+    { blurb: 'Member-only drops, unlockable resources, and sample packs land on your account before they go anywhere else.', label: 'Exclusives' },
+    { blurb: 'Checkout remembers you, every order stays in one list, and your Prods come off the total at the register.', label: 'The store' },
+    { blurb: 'Member chat, the plugin rack, and the floating player follow your session from page to page.', label: 'The docks' },
+    { blurb: 'Every event you check into and every order you place is kept together, so a year with the Alliance is one scroll away.', label: 'Histories' },
+    { blurb: 'Event announcements and the newsletter go to the address on your account, and nothing else does.', label: 'The dispatch' },
 ];
 
 const DEFAULT_CITY = 'Austin';
 const DEFAULT_ROLE = 'fan';
 const DEFAULT_STATE = 'TX';
 
-const STEPS = [
-    { blurb: 'Name, sound, and what you do.', name: 'Basics' },
-    { blurb: 'What the account carries.', name: 'Why an account' },
-    { blurb: 'Where the room lives.', name: 'What\u2019s next' },
-];
-
 const WELCOME_LINKS = [
     { blurb: 'How the Alliance works and who keeps it running.', href: '/about', label: 'About' },
-    { blurb: 'Merch, music, and what your prods buy.', href: '/store', label: 'Store' },
+    { blurb: 'Merch, music, and what your Prods buy.', href: '/store', label: 'Store' },
 ];
 
 const events = await getCollection('events');
@@ -38,8 +33,6 @@ const events = await getCollection('events');
 const [nextAssembly] = events
     .filter(event => event.data.type === 'assembly' && event.data.status === 'upcoming')
     .sort((a, b) => +a.data.date - +b.data.date);
-
-const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.id));
 ---
 
 <section
@@ -92,7 +85,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         data-onboarding-surface="flow"
     >
         <div class="onboarding__aside">
-            <div class="onboarding__rail-block">
+            <div>
                 <p
                     id="onboarding-progress-label"
                     class="label mb-4 text-ink-muted"
@@ -104,7 +97,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                     aria-labelledby="onboarding-progress-label"
                     data-motion="rise"
                 >
-                    {STEPS.map((step, index) => (
+                    {ONBOARDING_STEPS.map((step, index) => (
                         <li
                             class="onboarding-rail__step"
                             aria-current={index === 0 ? 'step' : undefined}
@@ -117,9 +110,9 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                                 <span class="onboarding-rail__index">0{index + 1}</span>
                                 <span class="onboarding-rail__check">&check;</span>
                             </span>
-                            <span class="onboarding-rail__body">
-                                <span class="label onboarding-rail__name">{step.name}</span>
-                                <span class="onboarding-rail__blurb">{step.blurb}</span>
+                            <span class="flex flex-col min-w-0 gap-(--space-3xs)">
+                                <span class="label onboarding-rail__name text-ink-muted">{step.name}</span>
+                                <span class="onboarding-rail__blurb leading-[1.4] text-sm text-ink-subtle">{step.blurb}</span>
                             </span>
                         </li>
                     ))}
@@ -136,7 +129,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
             data-onboarding-form
         >
             <fieldset
-                class="onboarding__pane flex flex-col gap-6"
+                class="flex flex-col gap-6"
                 data-onboarding-pane="0"
             >
                 <legend class="mb-6 font-extrabold font-sans text-2xl tracking-tight">
@@ -152,9 +145,9 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                         data-onboarding-email
                     />
                 </p>
-                <div class="onboarding-preview flex flex-col max-w-xs gap-3">
+                <div class="onboarding-preview flex flex-col self-center max-w-xs w-full gap-3">
                     <p class="label text-ink-muted">Roster preview</p>
-                    <article class="onboarding-preview__card slab slab--bare slab--card overflow-clip">
+                    <article class="slab slab--bare slab--card overflow-clip">
                         <PlaceholderTile
                             class="onboarding-preview__tile aspect-[5/3] border-b-2 border-ink"
                             color="var(--color-ink-subtle)"
@@ -171,7 +164,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                         </PlaceholderTile>
                         <div class="onboarding-preview__body p-4">
                             <h2
-                                class="mb-2 font-extrabold font-sans text-lg tracking-tight wrap-break-word"
+                                class="data-empty:text-ink-subtle mb-2 font-extrabold font-sans text-lg tracking-tight wrap-break-word"
                                 data-empty
                                 data-preview-name
                             >
@@ -195,20 +188,18 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                             </p>
                         </div>
                     </article>
-                    <p class="text-sm text-ink-subtle">
-                        A live sketch of your card. It joins the roster once you finish.
-                    </p>
                 </div>
                 <div class="flex flex-col gap-2">
-                    <p class="label mb-1 text-ink-muted">Portrait</p>
-                    <div class="onboarding__portrait">
+                    <p class="label mb-1 text-ink-muted">{PROFILE_FIELDS.portrait.label}</p>
+                    <div class="flex flex-wrap items-center gap-(--space-sm)">
                         <label class="onboarding__pick">
-                            <span class="label">Choose an image</span>
+                            <span class="label">{PROFILE_FIELDS.portrait.picker}</span>
                             <input
                                 id="onboarding-portrait"
                                 class="onboarding__file sr-only"
                                 accept={AVATAR.acceptAttribute}
                                 aria-describedby="onboarding-portrait-error onboarding-portrait-help"
+                                aria-invalid="false"
                                 data-portrait-input
                                 name="portrait"
                                 type="file"
@@ -238,14 +229,14 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="block">
-                        <span class="label block mb-2 text-ink-muted">Artist name</span>
+                        <span class="label block mb-2 text-ink-muted">{PROFILE_FIELDS.artistName.label}</span>
                         <input
                             id="onboarding-artist-name"
                             class="input font-sans"
-                            aria-describedby="onboarding-artist-name-error"
+                            aria-describedby="onboarding-artist-name-error onboarding-artist-name-help"
                             aria-invalid="false"
-                            autocomplete="nickname"
-                            maxlength={ARTIST_NAME_MAX_LENGTH}
+                            autocomplete={PROFILE_FIELDS.artistName.autocomplete}
+                            maxlength={PROFILE_FIELDS.artistName.maxLength}
                             name="artistName"
                             type="text"
                         />
@@ -256,10 +247,16 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                         data-field-error
                         hidden
                     />
+                    <p
+                        id="onboarding-artist-name-help"
+                        class="text-sm text-ink-subtle"
+                    >
+                        {PROFILE_FIELDS.artistName.help}
+                    </p>
                 </div>
-                <fieldset class="onboarding__group flex flex-col gap-3">
+                <fieldset class="flex flex-col gap-3">
                     <legend class="label mb-1 text-ink-muted">
-                        What you make <span class="text-ink-subtle">/ Pick up to five</span>
+                        {PROFILE_FIELDS.genres.label} <span class="text-ink-subtle">/ {PROFILE_FIELDS.genres.qualifier}</span>
                     </legend>
                     <div class="flex flex-wrap gap-2">
                         {GENRES.map(genre => (
@@ -283,12 +280,12 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                         hidden
                     />
                 </fieldset>
-                <fieldset class="onboarding__group flex flex-col gap-3">
+                <fieldset class="flex flex-col gap-3">
                     <legend class="label mb-1 text-ink-muted">
-                        What do you do? <span class="text-ink-subtle">/ Pick one</span>
+                        {PROFILE_FIELDS.role.label} <span class="text-ink-subtle">/ {PROFILE_FIELDS.role.qualifier}</span>
                     </legend>
                     <div class="flex flex-wrap gap-2">
-                        {roles.map(role => (
+                        {PROFILE_ROLES.map(role => (
                             <label class="onboarding__chip">
                                 <input
                                     class="box"
@@ -305,15 +302,15 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                 <div class="onboarding__pair">
                     <div class="flex flex-col gap-2">
                         <label class="block">
-                            <span class="label block mb-2 text-ink-muted">City</span>
+                            <span class="label block mb-2 text-ink-muted">{PROFILE_FIELDS.city.label}</span>
                             <input
                                 id="onboarding-city"
                                 class="input font-sans"
                                 aria-describedby="onboarding-city-error"
                                 aria-invalid="false"
-                                autocomplete="address-level2"
+                                autocomplete={PROFILE_FIELDS.city.autocomplete}
                                 name="city"
-                                required
+                                required={PROFILE_FIELDS.city.required}
                                 type="text"
                                 value={DEFAULT_CITY}
                             />
@@ -327,16 +324,16 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                     </div>
                     <div class="flex flex-col gap-2">
                         <label class="block">
-                            <span class="label block mb-2 text-ink-muted">State</span>
+                            <span class="label block mb-2 text-ink-muted">{PROFILE_FIELDS.state.label}</span>
                             <span class="select">
                                 <select
                                     id="onboarding-state"
                                     class="input font-sans"
                                     aria-describedby="onboarding-state-error"
                                     aria-invalid="false"
-                                    autocomplete="address-level1"
+                                    autocomplete={PROFILE_FIELDS.state.autocomplete}
                                     name="state"
-                                    required
+                                    required={PROFILE_FIELDS.state.required}
                                 >
                                     {US_STATES.map(state => (
                                         <option
@@ -359,7 +356,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                 </div>
             </fieldset>
             <fieldset
-                class="onboarding__pane flex flex-col gap-6"
+                class="flex flex-col gap-6"
                 data-onboarding-pane="1"
                 hidden
             >
@@ -370,30 +367,25 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                     Why an account
                 </legend>
                 <p class="text-smd text-ink-muted">
-                    Nothing to fill in. Here is what the account is for.
+                    Everything below comes with the account.
                 </p>
                 <ul
-                    class="onboarding-benefits list-none"
-                    data-motion-stagger="rise"
+                    class="onboarding-benefits slab slab--bare slab--card list-none"
+                    data-onboarding-reveal
                 >
                     {ACCOUNT_BENEFITS.map((benefit, index) => (
-                        <li class="onboarding-benefits__row slab slab--sunk">
-                            <span
-                                class="label onboarding-benefits__index"
-                                aria-hidden="true"
-                            >
-                                0{index + 1}
-                            </span>
-                            <span class="onboarding-benefits__body">
-                                <strong class="onboarding-benefits__lead">{benefit.label}</strong>
-                                <span class="onboarding-benefits__blurb">{benefit.blurb}</span>
-                            </span>
+                        <li
+                            class="onboarding-benefits__cell onboarding-reveal flex flex-col min-w-0 gap-(--space-2xs) p-(--space-md)"
+                            style={`--row-index: ${index}`}
+                        >
+                            <p class="font-extrabold font-sans leading-[1.2] text-lmd tracking-[-0.02em]">{benefit.label}</p>
+                            <p class="leading-normal text-sm wrap-anywhere text-ink-muted">{benefit.blurb}</p>
                         </li>
                     ))}
                 </ul>
             </fieldset>
             <fieldset
-                class="onboarding__pane flex flex-col gap-6"
+                class="flex flex-col gap-6"
                 data-onboarding-pane="2"
                 hidden
             >
@@ -401,20 +393,56 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                     class="mb-6 font-extrabold font-sans text-2xl tracking-tight"
                     tabindex="-1"
                 >
-                    What&rsquo;s next
+                    Take the tour
                 </legend>
                 <p class="text-smd text-ink-muted">
-                    Setup is done. Here is the rest of the room.
+                    Setup is done. One guided lap and you will know where everything lives.
                 </p>
-                <ul class="onboarding-next list-none">
+                <div class="onboarding-tour slab slab--well">
+                    <p class="label text-accent">The guided tour / {TOUR_STOPS.length} stops</p>
+                    <p class="max-w-[36ch] font-extrabold font-sans leading-[1.2] text-lmd tracking-[-0.02em]">
+                        A short walk through the five things you will reach for most.
+                    </p>
+                    <ol
+                        class="grid border-y-2 border-ink-inverse-10 list-none"
+                        data-onboarding-reveal
+                    >
+                        {TOUR_STOPS.map((stop, index) => (
+                            <li
+                                class="onboarding-tour__stop onboarding-reveal grid grid-cols-[auto_minmax(0,1fr)] gap-x-(--space-sm) py-(--space-xs)"
+                                style={`--row-index: ${index}`}
+                            >
+                                <span
+                                    class="shrink-0 font-bold font-mono leading-normal text-xs tracking-[0.06em] text-accent"
+                                    aria-hidden="true"
+                                >
+                                    {String(index + 1).padStart(2, '0')}
+                                </span>
+                                <span class="flex flex-col min-w-0 gap-(--space-3xs)">
+                                    <span class="font-bold font-sans leading-[1.2] text-smd tracking-[-0.01em]">{stop.name}</span>
+                                    <span class="leading-[1.4] text-sm wrap-anywhere text-ink-inverse-muted">{stop.blurb}</span>
+                                </span>
+                            </li>
+                        ))}
+                    </ol>
+                    <button
+                        class="btn btn--accent self-start"
+                        data-onboarding-tour
+                        type="button"
+                    >
+                        Take the site tour <IconArrow />
+                    </button>
+                </div>
+                <p class="label mt-2 text-ink-muted">Or go straight there</p>
+                <ul class="grid gap-(--space-sm) list-none">
                     {nextAssembly && (
                         <li class="grid">
                             <a
                                 class="onboarding-next__line slab slab--card slab--hover"
                                 href="/assembly"
                             >
-                                <span class="onboarding-next__head">
-                                    <span class="onboarding-next__label">Next Assembly</span>
+                                <span class="flex items-center justify-between gap-(--space-sm)">
+                                    <span class="font-bold font-mono text-smd tracking-[0.02em] uppercase">Next Assembly</span>
                                     <span
                                         class="onboarding-next__arrow"
                                         aria-hidden="true"
@@ -422,7 +450,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                                         <IconArrow />
                                     </span>
                                 </span>
-                                <span class="onboarding-next__blurb">
+                                <span class="onboarding-next__blurb leading-normal text-sm wrap-anywhere text-ink-muted transition-colors">
                                     <time datetime={nextAssembly.data.date.toISOString()}>{formatDate(nextAssembly.data.date)}</time> at {nextAssembly.data.location}. Come say hi.
                                 </span>
                             </a>
@@ -434,8 +462,8 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                                 class="onboarding-next__line slab slab--card slab--hover"
                                 href={link.href}
                             >
-                                <span class="onboarding-next__head">
-                                    <span class="onboarding-next__label">{link.label}</span>
+                                <span class="flex items-center justify-between gap-(--space-sm)">
+                                    <span class="font-bold font-mono text-smd tracking-[0.02em] uppercase">{link.label}</span>
                                     <span
                                         class="onboarding-next__arrow"
                                         aria-hidden="true"
@@ -443,20 +471,13 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                                         <IconArrow />
                                     </span>
                                 </span>
-                                <span class="onboarding-next__blurb">{link.blurb}</span>
+                                <span class="onboarding-next__blurb leading-normal text-sm wrap-anywhere text-ink-muted transition-colors">{link.blurb}</span>
                             </a>
                         </li>
                     ))}
                 </ul>
-                <button
-                    class="btn self-start"
-                    data-onboarding-tour
-                    type="button"
-                >
-                    Take the site tour <IconArrow />
-                </button>
             </fieldset>
-            <div class="onboarding-form__foot">
+            <div class="flex flex-wrap items-center gap-(--space-sm) pt-(--space-md) border-t-2 border-ink">
                 <button
                     class="btn"
                     data-onboarding-back
@@ -486,59 +507,33 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
 <style>
     .onboarding-benefits {
         display: grid;
-        gap: var(--space-sm);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .onboarding-benefits__blurb {
-        color: var(--color-ink-muted);
-        font-size: var(--text-sm);
-        line-height: 1.5;
-        overflow-wrap: anywhere;
+    .onboarding-benefits__cell {
+        --benefit-fill: var(--color-surface-raised);
+        --benefit-grain: var(--color-surface-sunken);
+        background-color: var(--benefit-fill);
+        background-image: radial-gradient(circle, var(--benefit-grain) 0.8px, transparent 0.8px);
+        background-size: var(--grain-pitch) var(--grain-pitch);
     }
 
-    .onboarding-benefits__body {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-3xs);
-        min-width: 0;
+    .onboarding-benefits__cell:not(:nth-child(-n + 2)) {
+        border-top: 2px solid var(--color-ink);
     }
 
-    .onboarding-benefits__index {
-        color: var(--color-accent-deep);
-        line-height: 1.3;
+    .onboarding-benefits__cell:nth-child(4n + 2),
+    .onboarding-benefits__cell:nth-child(4n + 3) {
+        --benefit-fill: var(--color-surface-sunken);
+        --benefit-grain: var(--color-surface-raised);
     }
 
-    .onboarding-benefits__lead {
-        font-family: var(--font-sans);
-        font-size: var(--text-smd);
-        font-weight: 700;
-        letter-spacing: -0.01em;
-        line-height: 1.2;
-    }
-
-    .onboarding-benefits__row {
-        column-gap: var(--space-sm);
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr);
-        padding: var(--space-sm) var(--space-md);
+    .onboarding-benefits__cell:nth-child(odd) {
+        border-right: 2px solid var(--color-ink);
     }
 
     .onboarding-form {
         padding: var(--space-lg);
-    }
-
-    .onboarding-form__foot {
-        align-items: center;
-        border-top: 2px solid var(--color-ink);
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-sm);
-        padding-top: var(--space-md);
-    }
-
-    .onboarding-next {
-        display: grid;
-        gap: var(--space-sm);
     }
 
     .onboarding-next__arrow {
@@ -552,35 +547,12 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
             translate var(--duration-fast) var(--motion-ease-ui);
     }
 
-    .onboarding-next__blurb {
-        color: var(--color-ink-muted);
-        font-size: var(--text-sm);
-        line-height: 1.5;
-        overflow-wrap: anywhere;
-        transition: color var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .onboarding-next__head {
-        align-items: center;
-        display: flex;
-        gap: var(--space-sm);
-        justify-content: space-between;
-    }
-
-    .onboarding-next__label {
-        font-family: var(--font-mono);
-        font-size: var(--text-smd);
-        font-weight: 700;
-        letter-spacing: 0.02em;
-        text-transform: uppercase;
-    }
-
     .onboarding-next__line {
         display: flex;
         flex-direction: column;
         gap: var(--space-2xs);
         justify-content: center;
-        min-height: 84px;
+        min-height: 64px;
         padding: var(--space-sm) var(--space-md);
         transition:
             background-color var(--duration-fast) var(--motion-ease-ui),
@@ -607,10 +579,6 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         color: var(--color-ink-inverse-muted);
     }
 
-    .onboarding-preview__body [data-empty] {
-        color: var(--color-ink-subtle);
-    }
-
     .onboarding-rail {
         --rail-node: 34px;
         display: flex;
@@ -618,25 +586,11 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         gap: var(--space-md);
     }
 
-    .onboarding-rail__blurb {
-        color: var(--color-ink-subtle);
-        font-size: var(--text-sm);
-        line-height: 1.4;
-    }
-
-    .onboarding-rail__body {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-3xs);
-        min-width: 0;
-    }
-
     .onboarding-rail__check {
         display: none;
     }
 
     .onboarding-rail__name {
-        color: var(--color-ink-muted);
         line-height: 1.3;
     }
 
@@ -708,6 +662,29 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         color: var(--color-ink-inverse);
     }
 
+    [data-onboarding-reveal='off'] .onboarding-reveal {
+        opacity: 0;
+        translate: 0 var(--space-2xs);
+    }
+
+    [data-onboarding-reveal='on'] .onboarding-reveal {
+        transition:
+            opacity var(--duration-slow) var(--motion-ease-entrance),
+            translate var(--duration-slow) var(--motion-ease-entrance);
+        transition-delay: min(calc(var(--row-index) * var(--stagger-base)), var(--stagger-max-total));
+    }
+
+    .onboarding-tour {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-md);
+        padding: var(--space-lg);
+    }
+
+    .onboarding-tour__stop + .onboarding-tour__stop {
+        border-top: 2px solid var(--color-ink-inverse-10);
+    }
+
     .onboarding__account {
         padding: var(--space-xs);
     }
@@ -754,20 +731,10 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         row-gap: var(--space-lg);
     }
 
-    .onboarding__group {
-        border: 0;
-        padding: 0;
-    }
-
     .onboarding__pair {
         display: grid;
         gap: var(--space-md);
         grid-template-columns: minmax(0, 1fr) minmax(0, 220px);
-    }
-
-    .onboarding__pane {
-        border: 0;
-        padding: 0;
     }
 
     .onboarding__pick {
@@ -808,14 +775,29 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         border-color: var(--color-accent-deep);
     }
 
-    .onboarding__portrait {
-        align-items: center;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-sm);
-    }
-
     @media (max-width: 768px) {
+        .onboarding-benefits {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .onboarding-benefits__cell:not(:first-child) {
+            border-top: 2px solid var(--color-ink);
+        }
+
+        .onboarding-benefits__cell:nth-child(4n + 3) {
+            --benefit-fill: var(--color-surface-raised);
+            --benefit-grain: var(--color-surface-sunken);
+        }
+
+        .onboarding-benefits__cell:nth-child(4n + 4) {
+            --benefit-fill: var(--color-surface-sunken);
+            --benefit-grain: var(--color-surface-raised);
+        }
+
+        .onboarding-benefits__cell:nth-child(odd) {
+            border-right: 0;
+        }
+
         .onboarding-rail {
             --rail-node: 28px;
             background-color: var(--color-ink);
@@ -866,9 +848,9 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
 <script>
     import { navigate } from 'astro:transitions/client';
 
-    import { ONBOARDING_TOKEN_PARAM } from '@lib/shared/constants';
+    import { ONBOARDING_STEPS, ONBOARDING_TOKEN_PARAM, PROFILE_FIELDS } from '@lib/shared/constants';
     import { armTour } from '@lib/tour/tour';
-    import { clearFieldErrors, focusFirstError, isValidationBypassed, setFieldErrors, validateFields } from '@lib/ui/forms';
+    import { clearFieldErrors, focusFirstError, isValidationBypassed, setFieldErrors, setRole, validateFields } from '@lib/ui/forms';
     import { clearOnboardingDraft, getOnboardingDraft, saveOnboardingDraft, verifyOnboardingToken } from '@lib/account/onboarding';
     import { getInitials, pickTileColor, registerPageScript, setAvatarImage, setHidden, setPending, setText } from '@lib/shared/utils';
     import { getSession, startSession, updateSession } from '@lib/account/session';
@@ -876,22 +858,31 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
     import { toast } from '@lib/ui/toasts';
 
     const BASICS_RULES: Record<string, FieldRule> = {
-        city: { message: 'Name the city you work out of.', required: true },
+        city: { message: PROFILE_FIELDS.city.message, required: PROFILE_FIELDS.city.required },
     };
 
     const COMPLETION_ENABLED = false;
     const DEFAULT_LOCATION = 'Austin, TX';
     const DEMO_EMAIL = 'you@austinproduceralliance.com';
-    const GENRE_MAX = 5;
     const LAST_STEP = 2;
-    const STEP_NAMES = ['Basics', 'Why an account', 'What\u2019s next'];
     const STEP_RULES: Record<string, FieldRule>[] = [BASICS_RULES, {}, {}];
+    const STORAGE_MESSAGE = 'Your progress was not saved \u2014 your browser storage is full.';
 
     let accountEmail = '';
     let avatar = '';
     let signedIn: Promise<SessionResult> | undefined;
     let staging = false;
     let step = 0;
+
+    function armReveal(form: HTMLFormElement) {
+        const list = form.querySelector<HTMLElement>(`[data-onboarding-pane="${step}"] [data-onboarding-reveal]`);
+
+        if (!list) return;
+
+        list.dataset.onboardingReveal = 'off';
+        void list.offsetHeight;
+        list.dataset.onboardingReveal = 'on';
+    }
 
     function collect(form: HTMLFormElement) {
         const values = new FormData(form);
@@ -956,7 +947,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         if (step === 0) return;
 
         step -= 1;
-        saveOnboardingDraft({ ...collect(form), step: step + 1 });
+        persistDraft(form);
         showStep(form, true);
     }
 
@@ -977,14 +968,13 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
             if (!staged.ok) {
                 setFieldErrors(form, { portrait: staged.message });
                 input.focus();
-                toast(staged.message, 'error');
 
                 return;
             }
 
             avatar = staged.dataUrl;
             renderPreview(form);
-            saveOnboardingDraft({ ...collect(form), step: step + 1 });
+            persistDraft(form);
             toast('Portrait staged.', 'success');
         } finally {
             staging = false;
@@ -995,7 +985,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         avatar = '';
         clearFieldErrors(form);
         renderPreview(form);
-        saveOnboardingDraft({ ...collect(form), step: step + 1 });
+        persistDraft(form);
         form.querySelector<HTMLInputElement>('[data-portrait-input]')?.focus();
         toast('Portrait removed.', 'info');
     }
@@ -1032,7 +1022,9 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         const draft = collect(form);
 
         step += 1;
-        saveOnboardingDraft({ ...draft, step: step + 1 });
+
+        if (!persistDraft(form).persisted) toast(STORAGE_MESSAGE, 'error');
+
         showStep(form, true);
 
         await signedIn;
@@ -1081,6 +1073,10 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         form.querySelector<HTMLButtonElement>('[data-onboarding-tour]')?.addEventListener('click', () => void handleTour(), { signal });
         form.querySelector<HTMLButtonElement>('[data-portrait-remove]')?.addEventListener('click', () => handlePortraitRemove(form), { signal });
         picture?.addEventListener('change', () => void handlePortraitChange(form, picture), { signal });
+    }
+
+    function persistDraft(form: HTMLFormElement) {
+        return saveOnboardingDraft({ ...collect(form), step: step + 1 });
     }
 
     function prefill(form: HTMLFormElement, session: Session | null) {
@@ -1152,12 +1148,6 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         setText(element, value || fallback);
     }
 
-    function setRole(form: HTMLFormElement, value: string) {
-        const match = Array.from(form.querySelectorAll<HTMLInputElement>('[name="role"]')).find(radio => radio.value === value);
-
-        if (match) match.checked = true;
-    }
-
     function setValue(form: HTMLFormElement, name: string, value: string) {
         const control = form.querySelector<HTMLInputElement | HTMLSelectElement>(`[name="${name}"]`);
 
@@ -1184,7 +1174,9 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
 
         setText(next?.querySelector<HTMLElement>('[data-onboarding-next-label]') ?? null, step === LAST_STEP ? 'Finish' : 'Continue');
 
-        setText(document.querySelector<HTMLElement>('[data-onboarding-announce]'), `Step ${step + 1} of ${STEP_NAMES.length}, ${STEP_NAMES[step]}`);
+        setText(document.querySelector<HTMLElement>('[data-onboarding-announce]'), `Step ${step + 1} of ${ONBOARDING_STEPS.length}, ${ONBOARDING_STEPS[step].name}`);
+
+        armReveal(form);
 
         if (!moveFocus) return;
 
@@ -1218,7 +1210,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
 
         const values = new FormData(form);
 
-        if (step === 0 && values.getAll('genres').length > GENRE_MAX) errors.genres = 'Pick five at most.';
+        if (step === 0 && values.getAll('genres').length > PROFILE_FIELDS.genres.max) errors.genres = PROFILE_FIELDS.genres.message;
 
         return errors;
     }

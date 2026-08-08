@@ -1,6 +1,6 @@
 ---
 import { LINKS, SESSION_TTL_DAYS, SITE_UPDATED, STORAGE } from '@lib/shared/constants';
-import { formatDate } from '@lib/shared/utils';
+import { formatDateStamp } from '@lib/shared/utils';
 
 interface Props {
     kind: 'privacy' | 'terms';
@@ -143,12 +143,12 @@ function slugify(heading: string) {
     class="stage stage--tight"
     aria-labelledby={`${kind}-title`}
 >
-    <div class="legal wrap-break-word">
+    <div class="max-w-(--measure-prose) mx-auto wrap-break-word">
         <p
             class="label mb-4 text-accent-deep"
             data-motion="stamp"
         >
-            Last updated / <time datetime={SITE_UPDATED}>{formatDate(updated)}</time>
+            Last updated / <time datetime={SITE_UPDATED}>{formatDateStamp(updated)}</time>
         </p>
         <h1
             id={`${kind}-title`}
@@ -186,11 +186,6 @@ function slugify(heading: string) {
 </section>
 
 <style>
-    .legal {
-        margin-inline: auto;
-        max-width: var(--measure-prose);
-    }
-
     .legal__body :global(a) {
         display: inline-block;
         max-width: 100%;

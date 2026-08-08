@@ -44,6 +44,7 @@ const PANEL_RESIZE_STEP = 16;
 const PANEL_WIDE_DIVISOR = 2;
 const PANEL_WIDE_VIEWPORT = 1_024;
 const SECONDS_PER_MINUTE = 60;
+const SLOW_CORE_COUNT = 4;
 
 const panelWidths = new Map<string, number>();
 
@@ -354,6 +355,12 @@ function initSearchField(options: SearchFieldOptions): void {
     });
 }
 
+function isSlowDevice(): boolean {
+    const { connection } = navigator as Navigator & { connection?: { saveData?: boolean } };
+
+    return connection?.saveData === true || (navigator.hardwareConcurrency ?? 0) <= SLOW_CORE_COUNT;
+}
+
 function isTopFloatWindow(target: HTMLElement): boolean {
     const base = floatWindowBase();
     const visible = Array.from(document.querySelectorAll<HTMLElement>('[data-float-window]')).filter(element => element.checkVisibility());
@@ -414,6 +421,20 @@ function pickTileColor(seed: string): string {
     const total = Array.from(seed).reduce((sum, character) => sum + character.charCodeAt(0), 0);
 
     return PALETTE[total % PALETTE.length];
+}
+
+function preventNavigation(event: DragEvent): void {
+    event.preventDefault();
+}
+
+function productHref(catalog: CatalogEntry[], item: CartItem): string {
+    const sku = catalog.find(entry => entry.slug === item.productSlug)?.sku;
+
+    if (!sku) return '';
+
+    if (!item.variation) return `/store/${sku}`;
+
+    return `/store/${sku}?variation=${encodeURIComponent(item.variation.toLowerCase())}`;
 }
 
 function raiseWindow(target: HTMLElement): void {
@@ -498,6 +519,21 @@ function setProductImage(image: HTMLImageElement | null, sources: ImageSources, 
 
 function setText(element: Element | null, value: string): void {
     if (element) element.textContent = value;
+}
+
+function setTitleLink(element: Element | null, catalog: CatalogEntry[], item: CartItem, text: string): void {
+    if (!(element instanceof HTMLAnchorElement)) return;
+
+    const href = productHref(catalog, item);
+
+    if (href.length === 0) {
+        element.replaceWith(text);
+
+        return;
+    }
+
+    element.href = href;
+    setText(element, text);
 }
 
 function toAsset(entry: CollectionEntry<'downloads'>, docs: CollectionEntry<'docs'>[]) {
@@ -626,12 +662,14 @@ export {
     initFilterGroup,
     initPanelResize,
     initSearchField,
+    isSlowDevice,
     isTopFloatWindow,
     mergeAssets,
     mergeCalendar,
     parseCatalog,
     parseImageSources,
     pickTileColor,
+    preventNavigation,
     raiseWindow,
     registerPageScript,
     rovingFocus,
@@ -641,6 +679,7 @@ export {
     setPending,
     setProductImage,
     setText,
+    setTitleLink,
     toAustinIso,
     toCatalog,
     toIsoDate,

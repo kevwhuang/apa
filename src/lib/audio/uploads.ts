@@ -1,6 +1,7 @@
 import { UPLOAD } from '@lib/shared/constants';
 import { formatBytes } from '@lib/shared/utils';
 
+const DECODE_FAILED_MESSAGE = 'That file could not be decoded.';
 const PEAK_COUNT = 200;
 const QUEUE_FULL_MESSAGE = `You can queue ${UPLOAD.maxFiles} files at a time.`;
 const UPLOAD_EXTENSIONS_OR_LIST = formatExtensions(UPLOAD.extensions);
@@ -32,8 +33,6 @@ function acceptFiles(files: FileList | File[], queued: UploadEntry[]): UploadEnt
 }
 
 async function decodePeaks(buffer: ArrayBuffer) {
-    if (typeof AudioContext === 'undefined') return null;
-
     try {
         audioContext ??= new AudioContext();
 
@@ -106,14 +105,14 @@ function readArrayBuffer(file: File, options: UploadOptions) {
         reader.addEventListener('abort', () => reject(new Error('Cancelled.')));
         reader.addEventListener('error', () => reject(new Error('That file could not be read.')));
         reader.addEventListener('load', () => resolve(toArrayBuffer(reader.result)));
-        reader.addEventListener('progress', event => options.onProgress(event.loaded, event.total || file.size));
+        reader.addEventListener('progress', event => options.onProgress?.(event.loaded, event.total || file.size));
         reader.readAsArrayBuffer(file);
     });
 }
 
 function rejectionReason(file: File, queued: UploadEntry[]) {
     const extension = getExtension(file.name);
-    const oversize = getSizeError(file, UPLOAD.maxFileBytes);
+    const sizeError = getSizeError(file, UPLOAD.maxFileBytes);
 
     if (!UPLOAD.extensions.some(allowed => allowed === extension)) {
         return `That is a .${extension || 'file'} \u2014 we take ${UPLOAD_EXTENSIONS_OR_LIST}.`;
@@ -123,7 +122,7 @@ function rejectionReason(file: File, queued: UploadEntry[]) {
         return 'That does not look like an audio file.';
     }
 
-    if (oversize) return oversize;
+    if (sizeError) return sizeError;
 
     if (queued.length >= UPLOAD.maxFiles) return QUEUE_FULL_MESSAGE;
 
@@ -174,16 +173,16 @@ async function uploadSubmission(file: File, options: UploadOptions): Promise<Upl
 
     entry.loadedBytes = file.size;
     entry.status = 'ready';
-    options.onProgress(file.size, file.size);
+    options.onProgress?.(file.size, file.size);
 
-    if (file.size > UPLOAD.maxDecodeBytes) return { entry, ok: true };
+    if (file.size > UPLOAD.maxDecodeBytes || typeof AudioContext === 'undefined') return { entry, ok: true };
 
     const decoded = await decodePeaks(buffer);
 
-    if (decoded) {
-        entry.durationSeconds = decoded.durationSeconds;
-        entry.peaks = decoded.peaks;
-    }
+    if (!decoded) return { message: DECODE_FAILED_MESSAGE, ok: false };
+
+    entry.durationSeconds = decoded.durationSeconds;
+    entry.peaks = decoded.peaks;
 
     return { entry, ok: true };
 }

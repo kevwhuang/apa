@@ -8,6 +8,11 @@ import {
 import { createStore } from '@lib/shared/state';
 import { normalizeAvatar } from '@lib/account/images';
 
+interface OnboardingSave {
+    draft: OnboardingDraft;
+    persisted: boolean;
+}
+
 const BASE64_GROUP = 4;
 
 const DEFAULT_DRAFT: OnboardingDraft = {
@@ -20,7 +25,7 @@ const DEFAULT_DRAFT: OnboardingDraft = {
     step: 1,
 };
 
-const draft = createStore<OnboardingDraft>({
+const store = createStore<OnboardingDraft>({
     fallback: DEFAULT_DRAFT,
     key: STORAGE.onboardingDraft.key,
     normalize: normalizeDraft,
@@ -29,7 +34,7 @@ const draft = createStore<OnboardingDraft>({
 });
 
 function clearOnboardingDraft(): void {
-    draft.remove();
+    store.remove();
 }
 
 function createOnboardingToken(email: string): string {
@@ -66,7 +71,7 @@ function encodeToken(token: OnboardingToken): string {
 }
 
 function getOnboardingDraft(): OnboardingDraft {
-    return draft.get();
+    return store.get();
 }
 
 function getOnboardingHref(email: string): string {
@@ -87,8 +92,10 @@ function normalizeDraft(value: OnboardingDraft): OnboardingDraft {
     };
 }
 
-function saveOnboardingDraft(patch: Partial<OnboardingDraft>): OnboardingDraft {
-    return draft.update(current => ({ ...current, ...patch }));
+function saveOnboardingDraft(patch: Partial<OnboardingDraft>): OnboardingSave {
+    const next = store.update(current => ({ ...current, ...patch }));
+
+    return { draft: next, persisted: store.persisted() };
 }
 
 function verifyOnboardingToken(token: string | null): OnboardingGate {

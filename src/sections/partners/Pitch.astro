@@ -176,7 +176,7 @@ const TIERS: Tier[] = [
             the check just makes it official.
         </p>
         <ul
-            class="tiers grid grid-cols-1 gap-5 list-none lg:grid-cols-3"
+            class="tiers grid auto-rows-auto grid-cols-1 gap-5 list-none lg:grid-cols-3"
             data-motion-from="center"
             data-motion-stagger="flip"
         >
@@ -335,10 +335,6 @@ const TIERS: Tier[] = [
         --slab-level: var(--z-card);
         --slab-line: var(--color-ink);
         --slab-rule: 2px;
-    }
-
-    .tiers {
-        grid-auto-rows: auto;
     }
 
     .tiers > li {

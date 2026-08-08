@@ -34,7 +34,7 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
 >
     <div data-motion="unfold">
         <form
-            class="contact-form slab slab--card flex flex-col gap-6"
+            class="contact-form slab slab--card flex flex-col max-w-(--measure-form) gap-6 mx-auto"
             data-contact-form
         >
             <div class="grid grid-cols-1 gap-6 md:gap-5 md:grid-cols-2">
@@ -110,9 +110,9 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
             </div>
             <div class="flex flex-col gap-2">
                 <label class="flex flex-col gap-2">
-                    <span class="contact-field__head label text-ink-muted">
+                    <span class="label flex flex-wrap items-baseline gap-(--space-2xs) text-ink-muted">
                         Message
-                        <span class="contact-field__hint text-ink-subtle">{MESSAGE_MAX} characters max</span>
+                        <span class="flex-1 text-right whitespace-nowrap text-ink-subtle">{MESSAGE_MAX} characters max</span>
                     </span>
                     <textarea
                         id="contact-message"
@@ -132,14 +132,14 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
                     hidden
                 />
             </div>
-            <div class="contact-form__foot">
+            <div class="flex flex-col gap-(--space-xs) pt-(--space-md) border-t-2 border-ink">
                 <button
                     class="btn btn--primary contact-form__submit w-full"
                     type="submit"
                 >
                     Compose the email
                     <span
-                        class="contact-form__arrow"
+                        class="contact-form__arrow transition-[translate]"
                         aria-hidden="true"
                     >
                         <IconArrow />
@@ -151,7 +151,7 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
             </div>
         </form>
         <div
-            class="contact__done slab slab--card flex flex-col gap-5"
+            class="contact__done slab slab--card flex flex-col max-w-(--measure-form) gap-5 mx-auto"
             data-contact-done
             hidden
         >
@@ -165,29 +165,29 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
             <p class="text-smd text-ink-muted">
                 The button below opens this message in your email app.
             </p>
-            <dl class="contact__receipt">
-                <div class="contact__receipt-row">
+            <dl class="flex flex-col">
+                <div class="grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-ink-20">
                     <dt class="label text-ink-subtle">From</dt>
                     <dd
                         class="font-mono text-sm wrap-break-word"
                         data-contact-from
                     />
                 </div>
-                <div class="contact__receipt-row">
+                <div class="grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-ink-20">
                     <dt class="label text-ink-subtle">To</dt>
                     <dd
                         class="font-mono text-sm wrap-break-word"
                         data-contact-to
                     />
                 </div>
-                <div class="contact__receipt-row">
+                <div class="grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-ink-20">
                     <dt class="label text-ink-subtle">Subject</dt>
                     <dd
                         class="font-mono text-sm wrap-break-word"
                         data-contact-subject
                     />
                 </div>
-                <div class="contact__receipt-row contact__receipt-row--message">
+                <div class="contact__receipt-row--message grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-ink-20">
                     <dt class="label text-ink-subtle">Message</dt>
                     <dd
                         class="contact__receipt-body slab slab--sunk text-smd whitespace-pre-line wrap-break-word"
@@ -195,7 +195,7 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
                     />
                 </div>
             </dl>
-            <div class="contact__done-actions flex flex-wrap gap-3">
+            <div class="flex flex-wrap gap-3 pt-(--space-md) border-t-2 border-ink">
                 <a
                     class="btn btn--accent"
                     data-contact-send
@@ -237,16 +237,16 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
                     class="contact-line contact-line--accent slab slab--card slab--hover"
                     href={`mailto:${LINKS.email}`}
                 >
-                    <span class="contact-line__head">
-                        <span class="contact-line__label">Email</span>
+                    <span class="flex items-center justify-between gap-(--space-sm)">
+                        <span class="font-mono font-bold text-md tracking-[0.02em] uppercase">Email</span>
                         <span
-                            class="contact-line__arrow"
+                            class="contact-line__arrow shrink-0 font-mono text-xl leading-none text-accent-deep transition-[color,translate]"
                             aria-hidden="true"
                         >
                             <IconArrow />
                         </span>
                     </span>
-                    <span class="contact-line__blurb font-mono">{LINKS.email}</span>
+                    <span class="contact-line__blurb font-mono text-sm leading-normal wrap-anywhere text-ink-muted transition-colors">{LINKS.email}</span>
                 </a>
             </li>
             {PLATFORMS.map(platform => (
@@ -257,17 +257,17 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
                         rel="noopener noreferrer"
                         target="_blank"
                     >
-                        <span class="contact-line__head">
-                            <span class="contact-line__label">{platform.label}</span>
+                        <span class="flex items-center justify-between gap-(--space-sm)">
+                            <span class="font-mono font-bold text-md tracking-[0.02em] uppercase">{platform.label}</span>
                             <span
-                                class="contact-line__arrow"
+                                class="contact-line__arrow shrink-0 font-mono text-xl leading-none text-accent-deep transition-[color,translate]"
                                 aria-hidden="true"
                             >
                                 <IconArrow />
                             </span>
                         </span>
-                        <span class="contact-line__blurb">{platform.blurb}</span>
-                        <span class="sr-only"> (opens in a new tab)</span>
+                        <span class="contact-line__blurb text-sm leading-normal wrap-anywhere text-ink-muted transition-colors">{platform.blurb}</span>
+                        <span class="sr-only">&nbsp;(opens in a new tab)</span>
                     </a>
                 </li>
             ))}
@@ -276,36 +276,9 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
 </section>
 
 <style>
-    .contact-field__head {
-        align-items: baseline;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-2xs);
-    }
-
-    .contact-field__hint {
-        flex: 1;
-        text-align: right;
-        white-space: nowrap;
-    }
-
     .contact-form,
     .contact__done {
-        margin-inline: auto;
-        max-width: var(--measure-form);
         padding: var(--space-lg);
-    }
-
-    .contact-form__arrow {
-        transition: translate var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .contact-form__foot {
-        border-top: 2px solid var(--color-ink);
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-xs);
-        padding-top: var(--space-md);
     }
 
     .contact-form__submit:hover .contact-form__arrow {
@@ -364,61 +337,8 @@ const MESSAGE_MAX = CONTACT_LIMITS.message.toLocaleString('en-US');
         color: var(--color-ink-inverse);
     }
 
-    .contact-line__arrow {
-        color: var(--color-accent-deep);
-        flex-shrink: 0;
-        font-family: var(--font-mono);
-        font-size: var(--text-xl);
-        line-height: 1;
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            translate var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .contact-line__blurb {
-        color: var(--color-ink-muted);
-        font-size: var(--text-sm);
-        line-height: 1.5;
-        overflow-wrap: anywhere;
-        transition: color var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .contact-line__head {
-        align-items: center;
-        display: flex;
-        gap: var(--space-sm);
-        justify-content: space-between;
-    }
-
-    .contact-line__label {
-        font-family: var(--font-mono);
-        font-size: var(--text-md);
-        font-weight: 700;
-        letter-spacing: 0.02em;
-        text-transform: uppercase;
-    }
-
-    .contact__done-actions {
-        border-top: 2px solid var(--color-ink);
-        padding-top: var(--space-md);
-    }
-
-    .contact__receipt {
-        display: flex;
-        flex-direction: column;
-    }
-
     .contact__receipt-body {
         padding: var(--space-sm);
-    }
-
-    .contact__receipt-row {
-        align-items: baseline;
-        border-bottom: 1px solid var(--color-ink-20);
-        display: grid;
-        gap: var(--space-xs);
-        grid-template-columns: 64px minmax(0, 1fr);
-        padding-block: var(--space-3xs);
     }
 
     .contact__receipt-row--message {

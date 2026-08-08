@@ -78,13 +78,13 @@ const [next, ...later] = upcoming;
                                     </p>
                                     <p>
                                         <a
-                                            class="action-text assembly-next__rsvp hover:text-accent-deep underline underline-offset-4 transition-colors"
+                                            class="action-text hover:text-accent-deep inline-flex items-center gap-(--space-2xs) min-h-(--control-size) underline underline-offset-4 transition-colors"
                                             href={LINKS.meetup}
                                             rel="noopener noreferrer"
                                             target="_blank"
                                         >
                                             RSVP on Meetup <IconArrow />
-                                            <span class="sr-only"> (opens in a new tab)</span>
+                                            <span class="sr-only">&nbsp;(opens in a new tab)</span>
                                         </a>
                                     </p>
                                 </div>
@@ -164,13 +164,6 @@ const [next, ...later] = upcoming;
 
     .assembly-next__row {
         gap: var(--space-xs) var(--space-md);
-    }
-
-    .assembly-next__rsvp {
-        align-items: center;
-        display: inline-flex;
-        gap: var(--space-2xs);
-        min-height: var(--control-size);
     }
 
     @media (max-width: 768px) {

@@ -19,7 +19,7 @@ function buildOdometer(host: HTMLElement, display: string): HTMLElement[] {
 
     reader.className = 'sr-only';
     reader.textContent = display;
-    track.className = 'odometer';
+    track.className = 'odometer inline-flex items-start leading-[1.15] tabular-nums select-none';
     track.setAttribute('aria-hidden', 'true');
 
     const reels: HTMLElement[] = [];
@@ -34,7 +34,7 @@ function buildOdometer(host: HTMLElement, display: string): HTMLElement[] {
         const reel = createReel();
         const slot = document.createElement('span');
 
-        slot.className = 'odometer__slot';
+        slot.className = 'odometer__slot block overflow-hidden h-[1.15em]';
         reels.push(reel);
         rest.set(reel, -(DIGITS.length + Number(character)) * (CYCLE_PERCENT / DIGITS.length));
         slot.append(reel);
@@ -49,7 +49,7 @@ function buildOdometer(host: HTMLElement, display: string): HTMLElement[] {
 function createFixed(character: string): HTMLElement {
     const fixed = document.createElement('span');
 
-    fixed.className = 'odometer__fixed';
+    fixed.className = 'odometer__fixed block h-[1.15em]';
     fixed.textContent = character;
 
     return fixed;
@@ -58,13 +58,13 @@ function createFixed(character: string): HTMLElement {
 function createReel(): HTMLElement {
     const reel = document.createElement('span');
 
-    reel.className = 'odometer__reel';
+    reel.className = 'odometer__reel block';
 
     for (let cycle = 0; cycle < REEL_CYCLES; cycle += 1) {
         for (const digit of DIGITS) {
             const cell = document.createElement('span');
 
-            cell.className = 'odometer__digit';
+            cell.className = 'odometer__digit block h-[1.15em]';
             cell.textContent = digit;
             reel.append(cell);
         }

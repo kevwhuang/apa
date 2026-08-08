@@ -2,7 +2,7 @@ import { STORAGE } from '@lib/shared/constants';
 import { buildBlock } from '@lib/rack/blocks';
 import { createStore } from '@lib/shared/state';
 import { decodeRackFile } from '@lib/rack/loader';
-import { ensureRackAudio, suspendRackAudio } from '@lib/rack/context';
+import { ensureRackAudio, hasChainFeed, setRackChainBuilder, suspendRackAudio } from '@lib/rack/context';
 import { getPlayerState, onPlayerChange, togglePlayback } from '@lib/audio/player';
 
 const CROSSFADE_SECONDS = 0.015;
@@ -59,6 +59,7 @@ const store = createStore<RackState>({
 });
 
 let buffer: AudioBuffer | undefined;
+let bus: GainNode | undefined;
 let frame = 0;
 let input: GainNode | undefined;
 let pausedPosition = 0;
@@ -71,15 +72,18 @@ function applyRebuild() {
     rebuild = undefined;
     connectChain();
     pruneBlocks();
+}
 
-    if (source) fadeInput(1);
+function attachChain() {
+    connectChain();
+    startTicking();
 }
 
 function connectChain() {
-    const { context, master } = ensureRackAudio();
+    const { context, input: head, master } = ensureRackAudio();
     const chain = [...store.get().activeKinds].sort((left, right) => RACK_ORDER.indexOf(left) - RACK_ORDER.indexOf(right));
 
-    const head = ensureInput(context);
+    input = head;
 
     blocks.forEach(block => block.output.disconnect());
     head.disconnect();
@@ -94,6 +98,7 @@ function connectChain() {
     }
 
     tail.connect(master);
+    fade(head, 1);
 }
 
 function ensureBlock(kind: RackKind, context: AudioContext) {
@@ -114,20 +119,23 @@ function ensureBlock(kind: RackKind, context: AudioContext) {
     return block;
 }
 
-function ensureInput(context: AudioContext) {
-    if (!input) input = context.createGain();
+function ensureBus(audio: RackAudio) {
+    if (!bus) {
+        bus = audio.context.createGain();
+        bus.connect(audio.input);
+    }
 
-    return input;
+    return bus;
 }
 
-function fadeInput(target: number) {
-    if (!input) return;
+function fade(node: GainNode | undefined, target: number) {
+    if (!node) return;
 
-    const now = input.context.currentTime;
+    const now = node.context.currentTime;
 
-    input.gain.cancelScheduledValues(now);
-    input.gain.setValueAtTime(input.gain.value, now);
-    input.gain.linearRampToValueAtTime(target, now + CROSSFADE_SECONDS);
+    node.gain.cancelScheduledValues(now);
+    node.gain.setValueAtTime(node.gain.value, now);
+    node.gain.linearRampToValueAtTime(target, now + CROSSFADE_SECONDS);
 }
 
 function getRackAnalyser(kind: RackKind): AnalyserNode | undefined {
@@ -152,6 +160,10 @@ function getRackState(): RackState {
 
 function handlePlayerChange(state: PlayerState) {
     if (state.playing) pauseRack();
+}
+
+function hasFeed() {
+    return Boolean(source) || hasChainFeed();
 }
 
 function isModuleActive(kind: RackKind): boolean {
@@ -216,14 +228,14 @@ function pruneBlocks() {
 }
 
 function scheduleRebuild() {
-    if (!source) {
+    if (!hasFeed()) {
         pruneBlocks();
 
         return;
     }
 
     clearTimeout(rebuild);
-    fadeInput(0);
+    fade(input, 0);
     rebuild = setTimeout(applyRebuild, REBUILD_DELAY_MS);
 }
 
@@ -262,42 +274,44 @@ function setRackParam(kind: RackKind, name: string, value: number): void {
 function startSource(offset: number) {
     if (!buffer) return;
 
-    const { context } = ensureRackAudio();
+    const audio = ensureRackAudio();
 
-    const head = ensureInput(context);
+    const feed = ensureBus(audio);
 
     clearTimeout(rebuild);
     connectChain();
     stopSource(0);
     rebuild = undefined;
 
-    const next = context.createBufferSource();
-    const now = context.currentTime;
+    const next = audio.context.createBufferSource();
+    const now = audio.context.currentTime;
 
     next.buffer = buffer;
     next.loop = true;
-    cancelAnimationFrame(frame);
-    head.gain.cancelScheduledValues(now);
-    head.gain.setValueAtTime(0, now);
-    head.gain.linearRampToValueAtTime(1, now + CROSSFADE_SECONDS);
-    next.connect(head);
+    feed.gain.cancelScheduledValues(now);
+    feed.gain.setValueAtTime(0, now);
+    feed.gain.linearRampToValueAtTime(1, now + CROSSFADE_SECONDS);
+    next.connect(feed);
     next.start(0, offset % buffer.duration);
-    frame = requestAnimationFrame(tick);
     source = next;
     startedAt = now - offset;
+    startTicking();
+}
+
+function startTicking() {
+    if (frame !== 0 || !hasFeed()) return;
+
+    frame = requestAnimationFrame(tick);
 }
 
 function stopSource(seconds: number) {
-    cancelAnimationFrame(frame);
-    frame = 0;
-
     const node = source;
 
     source = undefined;
 
     if (!node) return;
 
-    if (seconds > 0) fadeInput(0);
+    if (seconds > 0) fade(bus, 0);
 
     try {
         node.stop(node.context.currentTime + seconds);
@@ -308,9 +322,11 @@ function stopSource(seconds: number) {
 }
 
 function tick() {
+    frame = 0;
+
     for (const kind of store.get().activeKinds) blocks.get(kind)?.tick?.();
 
-    frame = requestAnimationFrame(tick);
+    startTicking();
 }
 
 function toggleRack(): void {
@@ -324,6 +340,7 @@ function toggleRack(): void {
 }
 
 onPlayerChange(handlePlayerChange);
+setRackChainBuilder(attachChain);
 
 export {
     MODULE_NAMES,

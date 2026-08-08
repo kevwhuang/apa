@@ -44,7 +44,7 @@ import { formatBytes } from '@lib/shared/utils';
                     role="group"
                 >
                     <button
-                        class="chip feedback__mode is-active active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
+                        class="chip feedback__mode is-active active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse h-(--control-size)"
                         aria-controls="feedback-panel-link"
                         aria-pressed="true"
                         data-mode="link"
@@ -53,7 +53,7 @@ import { formatBytes } from '@lib/shared/utils';
                         Paste a link
                     </button>
                     <button
-                        class="chip feedback__mode active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
+                        class="chip feedback__mode active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse h-(--control-size)"
                         aria-controls="feedback-panel-file"
                         aria-pressed="false"
                         data-mode="file"
@@ -138,7 +138,7 @@ import { formatBytes } from '@lib/shared/utils';
                     </p>
                 </div>
                 <ol
-                    class="feedback__list list-none"
+                    class="empty:hidden flex flex-col gap-(--space-sm) list-none"
                     aria-label="Queued for the next Assembly"
                     data-feedback-list
                 />
@@ -160,14 +160,14 @@ import { formatBytes } from '@lib/shared/utils';
                 />
             </div>
             <a
-                class="feedback__href hover:text-accent-deep font-mono text-sm underline underline-offset-4"
+                class="active:translate-y-px hover:text-accent-deep flex items-center min-h-(--control-size) font-mono text-sm underline underline-offset-4 wrap-anywhere transition-[color,transform]"
                 data-row-href
                 href="/assembly"
                 rel="noopener noreferrer"
                 target="_blank"
             >
                 <span data-row-label>Queued link</span>
-                <span class="sr-only"> (opens in a new tab)</span>
+                <span class="sr-only">&nbsp;(opens in a new tab)</span>
             </a>
             <div class="flex justify-end">
                 <button
@@ -196,7 +196,7 @@ import { formatBytes } from '@lib/shared/utils';
                 />
             </div>
             <canvas
-                class="feedback__wave"
+                class="block h-18 max-w-full w-full text-accent-deep"
                 aria-hidden="true"
                 data-row-canvas
                 height="72"
@@ -210,7 +210,7 @@ import { formatBytes } from '@lib/shared/utils';
             />
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <progress
-                    class="feedback__progress"
+                    class="flex-[1_1_140px] h-3 min-w-0 accent-accent-deep"
                     data-row-progress
                     max="100"
                     value="0"
@@ -271,49 +271,6 @@ import { formatBytes } from '@lib/shared/utils';
         margin: 0;
         width: 100%;
     }
-
-    .feedback__href {
-        align-items: center;
-        display: flex;
-        min-height: var(--control-size);
-        overflow-wrap: anywhere;
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .feedback__href:active {
-        transform: translateY(1px);
-    }
-
-    .feedback__list {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-sm);
-    }
-
-    .feedback__list:empty {
-        display: none;
-    }
-
-    .feedback__mode {
-        height: var(--control-size);
-    }
-
-    .feedback__progress {
-        accent-color: var(--color-accent-deep);
-        flex: 1 1 140px;
-        height: 12px;
-        min-width: 0;
-    }
-
-    .feedback__wave {
-        color: var(--color-accent-deep);
-        display: block;
-        height: 72px;
-        max-width: 100%;
-        width: 100%;
-    }
 </style>
 
 <script>
@@ -322,7 +279,6 @@ import { formatBytes } from '@lib/shared/utils';
     import { isValidationBypassed } from '@lib/ui/forms';
     import { parseTrackLink } from '@lib/programs/feedback';
     import { registerPageScript, rovingFocus, setMessage, setText } from '@lib/shared/utils';
-    import { toast } from '@lib/ui/toasts';
 
     type FeedbackMode = 'file' | 'link';
 
@@ -350,14 +306,6 @@ import { formatBytes } from '@lib/shared/utils';
         setMessage(document.querySelector<HTMLElement>('[data-link-error]'), '');
     }
 
-    function describeIntake(accepted: number, skipped: number) {
-        const noun = accepted === 1 ? 'file' : 'files';
-
-        return skipped > 0
-            ? `${accepted} ${noun} queued \u2014 ${skipped} skipped, the list holds ${UPLOAD.maxFiles}.`
-            : `${accepted} ${noun} queued for the next Assembly.`;
-    }
-
     function handleLinkRemove(link: TrackLink, row: HTMLElement) {
         const target = nextFocusTarget(row, '#feedback-link');
 
@@ -371,7 +319,7 @@ import { formatBytes } from '@lib/shared/utils';
         event.preventDefault();
 
         if (!isValidationBypassed() && capacity() <= 0) {
-            reportListFull();
+            setLinkError(input, LIST_FULL_MESSAGE);
 
             return;
         }
@@ -415,10 +363,7 @@ import { formatBytes } from '@lib/shared/utils';
 
         createDropzone({
             capacity,
-            messages: {
-                added: reportIntake,
-                full: reportListFull,
-            },
+            messages: { full: () => LIST_FULL_MESSAGE },
             onQueueChange: (entries) => {
                 queuedFiles = entries.length;
             },
@@ -466,20 +411,6 @@ import { formatBytes } from '@lib/shared/utils';
         list.append(fragment);
 
         return row;
-    }
-
-    function reportIntake(accepted: number, skipped: number) {
-        const message = describeIntake(accepted, skipped);
-
-        if (skipped > 0) toast(message, 'error');
-
-        return message;
-    }
-
-    function reportListFull() {
-        toast(LIST_FULL_MESSAGE, 'error');
-
-        return LIST_FULL_MESSAGE;
     }
 
     function resolveLink(raw: string) {

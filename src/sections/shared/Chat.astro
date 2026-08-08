@@ -29,15 +29,15 @@ import IconClose from '@components/icons/Close.astro';
             class="grip"
             data-chat-grip
         />
-        <div class="chat__head">
-            <div class="chat__title">
+        <div class="chat__head flex items-center justify-between shrink-0 gap-(--space-2xs) pl-(--space-sm) border-b border-ink-20">
+            <div class="chat__title flex items-center min-w-0 gap-(--space-sm)">
                 <h2
                     id="chat-title"
-                    class="chat__eyebrow label"
+                    class="chat__eyebrow label text-accent-deep"
                 >
                     Global
                 </h2>
-                <p class="chat__tally">
+                <p class="chat__tally flex items-center shrink-0 font-mono leading-none text-2xs tracking-[0.06em] uppercase text-ink-muted">
                     <span data-chat-online>0 online</span>
                 </p>
             </div>
@@ -51,12 +51,12 @@ import IconClose from '@components/icons/Close.astro';
             </button>
         </div>
         <ol
-            class="chat__log list-none"
+            class="chat__log flex flex-1 flex-col overflow-y-auto overscroll-contain min-h-0 gap-(--space-2xs) p-(--space-sm) list-none"
             aria-live="polite"
             data-chat-log
         />
         <form
-            class="chat__form"
+            class="chat__form flex shrink-0 gap-(--space-2xs) p-(--space-sm) border-ink-20 border-t"
             data-chat-form
         >
             <input
@@ -70,7 +70,7 @@ import IconClose from '@components/icons/Close.astro';
                 type="text"
             />
             <button
-                class="btn btn--accent chat__send"
+                class="btn btn--accent chat__send h-(--control-size)"
                 type="submit"
             >
                 Send
@@ -83,18 +83,18 @@ import IconClose from '@components/icons/Close.astro';
                     aria-hidden="true"
                     data-chat-avatar
                 />
-                <span class="chat__meta">
+                <span class="chat__meta [grid-area:meta] flex flex-wrap items-baseline min-w-0 gap-x-(--space-2xs)">
                     <span
-                        class="chat__author"
+                        class="chat__author min-w-0 font-bold leading-[1.2] text-sm wrap-anywhere"
                         data-chat-author
                     />
                     <span
-                        class="chat__time"
+                        class="chat__time font-mono text-2xs text-ink-muted"
                         data-chat-time
                     />
                 </span>
                 <span
-                    class="chat__body"
+                    class="chat__body [grid-area:body] leading-[1.45] text-sm wrap-anywhere"
                     data-chat-text
                 />
             </li>
@@ -106,7 +106,7 @@ import IconClose from '@components/icons/Close.astro';
     >
         <input
             data-chat-haptic
-            switch
+            {...{ switch: '' }}
             tabindex="-1"
             type="checkbox"
         />
@@ -121,14 +121,6 @@ import IconClose from '@components/icons/Close.astro';
 
     .chat.is-ready {
         display: block;
-    }
-
-    .chat__author {
-        font-size: var(--text-sm);
-        font-weight: 700;
-        line-height: 1.2;
-        min-width: 0;
-        overflow-wrap: anywhere;
     }
 
     .chat__avatar {
@@ -149,13 +141,6 @@ import IconClose from '@components/icons/Close.astro';
         text-transform: uppercase;
         user-select: none;
         width: 30px;
-    }
-
-    .chat__body {
-        font-size: var(--text-sm);
-        grid-area: body;
-        line-height: 1.45;
-        overflow-wrap: anywhere;
     }
 
     .chat__close {
@@ -180,28 +165,6 @@ import IconClose from '@components/icons/Close.astro';
 
     .chat__close:hover {
         color: var(--color-accent-deep);
-    }
-
-    .chat__eyebrow {
-        color: var(--color-accent-deep);
-    }
-
-    .chat__form {
-        border-top: 1px solid var(--color-ink-20);
-        display: flex;
-        flex-shrink: 0;
-        gap: var(--space-2xs);
-        padding: var(--space-sm);
-    }
-
-    .chat__head {
-        align-items: center;
-        border-bottom: 1px solid var(--color-ink-20);
-        display: flex;
-        flex-shrink: 0;
-        gap: var(--space-2xs);
-        justify-content: space-between;
-        padding-left: var(--space-sm);
     }
 
     .chat__launcher {
@@ -238,17 +201,6 @@ import IconClose from '@components/icons/Close.astro';
         color: var(--color-ink);
     }
 
-    .chat__log {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        gap: var(--space-2xs);
-        min-height: 0;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-        padding: var(--space-sm);
-    }
-
     .chat__message {
         column-gap: var(--space-2xs);
         display: grid;
@@ -272,44 +224,6 @@ import IconClose from '@components/icons/Close.astro';
         display: none;
     }
 
-    .chat__meta {
-        align-items: baseline;
-        column-gap: var(--space-2xs);
-        display: flex;
-        flex-wrap: wrap;
-        grid-area: meta;
-        min-width: 0;
-    }
-
-    .chat__send {
-        height: 50px;
-    }
-
-    .chat__tally {
-        align-items: center;
-        color: var(--color-ink-muted);
-        display: flex;
-        flex-shrink: 0;
-        font-family: var(--font-mono);
-        font-size: var(--text-2xs);
-        letter-spacing: 0.06em;
-        line-height: 1;
-        text-transform: uppercase;
-    }
-
-    .chat__time {
-        color: var(--color-ink-muted);
-        font-family: var(--font-mono);
-        font-size: var(--text-2xs);
-    }
-
-    .chat__title {
-        align-items: center;
-        display: flex;
-        gap: var(--space-sm);
-        min-width: 0;
-    }
-
     .chat__window {
         background: var(--color-surface-raised);
         border: 2px solid var(--color-ink);
@@ -331,7 +245,7 @@ import IconClose from '@components/icons/Close.astro';
 </style>
 
 <script>
-    import { PALETTE } from '@lib/shared/constants';
+    import { PALETTE, POINTER_COARSE_QUERY } from '@lib/shared/constants';
     import { ROOM_MEMBERS, closeChat, getChatState, getMessages, getOnlineCount, onChatChange, openChat, seedRoom, sendChatMessage } from '@lib/chat/chat';
     import { formatTime, getInitials, initPanelResize, isTopFloatWindow, raiseWindow, registerPageScript, setText } from '@lib/shared/utils';
 
@@ -340,8 +254,7 @@ import IconClose from '@components/icons/Close.astro';
     const LAUNCHER_SIZE = 50;
     const LIVE_RESET_DELAY = 200;
     const MEMBER_COLORS = new Map<string, string>(ROOM_MEMBERS.map((member, index) => [member.name, PALETTE[(index + 1) % PALETTE.length]]));
-    const POINTER_COARSE_QUERY = '(pointer: coarse)';
-    const RECEIVE_HAPTICS_MS = [12, 60, 24];
+    const RECEIVE_HAPTICS_MS = [60, 90, 110];
     const RESIZE_LABEL = 'Resize member chat';
     const SELF_COLOR = PALETTE[PALETTE.length - 1];
     const TALLY_INTERVAL_MS = 60_000;
@@ -510,15 +423,21 @@ import IconClose from '@components/icons/Close.astro';
     }
 
     function pulseReceive() {
-        if (!window.matchMedia(POINTER_COARSE_QUERY).matches) return;
+        const canVibrate = typeof navigator.vibrate === 'function';
+        const fallbackSwitch = document.querySelector<HTMLInputElement>('[data-chat-haptic]');
 
-        if ('vibrate' in navigator) {
+        if (!canVibrate && !fallbackSwitch) return;
+        if (!window.matchMedia(POINTER_COARSE_QUERY).matches) return;
+        if (document.visibilityState !== 'visible') return;
+        if (navigator.userActivation?.hasBeenActive === false) return;
+
+        if (canVibrate) {
             navigator.vibrate(RECEIVE_HAPTICS_MS);
 
             return;
         }
 
-        document.querySelector<HTMLInputElement>('[data-chat-haptic]')?.click();
+        fallbackSwitch?.click();
     }
 
     function render() {

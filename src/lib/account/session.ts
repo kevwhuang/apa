@@ -12,12 +12,18 @@ import { createStore } from '@lib/shared/state';
 import { delay } from '@lib/shared/utils';
 import { normalizeAvatar } from '@lib/account/images';
 
+interface SessionSave {
+    persisted: boolean;
+    session: Session | null;
+}
+
 const DEFAULT_ROLE = 'fan';
 
 const MESSAGES: Record<SessionErrorCode, string> = {
     'already-registered': 'That address is already registered. Sign in instead.',
     'invalid-credentials': 'That email and password do not match.',
     'invalid-email': 'Enter a valid email address.',
+    'storage-full': 'You are not signed in \u2014 your browser storage is full. Clear some space and try again.',
     'weak-password': `Use at least ${PASSWORD_MIN_LENGTH} characters.`,
 };
 
@@ -69,6 +75,10 @@ function handleStorageEvent(event: StorageEvent, callback: (session: Session | n
 
 function isSignedIn(): boolean {
     return getSession() !== null;
+}
+
+function isStored(session: Session | null): boolean {
+    return JSON.stringify(store.get()) === JSON.stringify(session);
 }
 
 function normalizeProfile(value: Profile): Profile {
@@ -125,7 +135,7 @@ function reject(code: SessionErrorCode): SessionResult {
     return { code, message: MESSAGES[code], ok: false };
 }
 
-function saveProfile(session: Session): void {
+function saveProfile(session: Session): boolean {
     const profile: Profile = {
         artistName: session.artistName,
         avatar: session.avatar,
@@ -136,6 +146,25 @@ function saveProfile(session: Session): void {
     };
 
     profiles.update(current => ({ ...current, [session.email.toLowerCase()]: profile }));
+
+    return profiles.persisted();
+}
+
+async function saveSession(patch: Partial<Session>): Promise<SessionSave> {
+    await delay(MOCK_LATENCY_MS);
+
+    const session = getSession();
+
+    if (!session) return { persisted: false, session: null };
+
+    const next = store.set({ ...session, ...patch });
+
+    if (!next) return { persisted: false, session: null };
+
+    const stored = store.persisted() && isStored(next);
+    const profiled = saveProfile(next);
+
+    return { persisted: stored && profiled, session: next };
 }
 
 async function startSession(draft: SessionDraft): Promise<SessionResult> {
@@ -165,10 +194,16 @@ async function startSession(draft: SessionDraft): Promise<SessionResult> {
         role: profile?.role || DEFAULT_ROLE,
     };
 
-    saveProfile(session);
-    store.set(session);
+    const next = store.set(session);
 
-    return { ok: true, session };
+    if (!next) return reject('storage-full');
+
+    const stored = store.persisted() && isStored(next);
+    const profiled = saveProfile(next);
+
+    if (!stored || !profiled) return reject('storage-full');
+
+    return { ok: true, session: next };
 }
 
 function syncSessionAttribute(): void {
@@ -184,17 +219,9 @@ function toDisplayName(email: string): string {
 }
 
 async function updateSession(patch: Partial<Session>): Promise<Session | null> {
-    await delay(MOCK_LATENCY_MS);
+    const { session } = await saveSession(patch);
 
-    const session = getSession();
-
-    if (!session) return null;
-
-    const next = store.set({ ...session, ...patch });
-
-    if (next) saveProfile(next);
-
-    return next;
+    return session;
 }
 
-export { endSession, getSession, onSessionChange, startSession, syncSessionAttribute, updateSession };
+export { endSession, getSession, onSessionChange, saveSession, startSession, syncSessionAttribute, updateSession };

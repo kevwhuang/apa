@@ -77,10 +77,10 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
         data-motion-stagger="rise"
     >
         {figures.map(figure => (
-            <li class="wall__item">
+            <li class="break-inside-avoid mb-(--space-md)">
                 <figure class="flex flex-col gap-3">
                     <button
-                        class="wall__frame slab slab--bare slab--card slab--hover block overflow-hidden w-full"
+                        class="wall__frame slab slab--bare slab--card slab--hover block overflow-hidden w-full mb-[calc(var(--z-card)*var(--lift))]"
                         aria-label={`View ${figure.label}`}
                         data-wall-alt={figure.alt}
                         data-wall-label={figure.label}
@@ -131,7 +131,7 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
             tabindex="-1"
         >
             <img
-                class="wall__photo block object-contain h-auto min-h-0 w-full cursor-default select-none"
+                class="block object-contain aspect-(--wall-ratio) h-auto min-h-0 w-full border-2 border-ink-inverse cursor-default pointer-events-auto select-none"
                 alt=""
                 data-wall-photo
                 draggable="false"
@@ -139,6 +139,10 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
             <p
                 class="label shrink-0"
                 data-wall-caption
+            />
+            <span
+                class="spinner"
+                aria-hidden="true"
             />
         </div>
     </div>
@@ -183,10 +187,6 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
         color: var(--color-accent-deep);
     }
 
-    .wall__frame {
-        margin-bottom: calc(var(--z-card) * var(--lift));
-    }
-
     .wall__frame:active .wall__image {
         filter: none;
         transform: scale(1);
@@ -204,20 +204,9 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
             transform var(--duration-slower) var(--motion-ease-ui);
     }
 
-    .wall__item {
-        break-inside: avoid;
-        margin-bottom: var(--space-md);
-    }
-
     .wall__list {
         column-gap: var(--space-md);
         columns: 3;
-    }
-
-    .wall__photo {
-        aspect-ratio: var(--wall-ratio);
-        border: 2px solid var(--color-ink-inverse);
-        pointer-events: auto;
     }
 
     .wall__stack {
@@ -228,6 +217,14 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
         transition: transform var(--duration-fast) var(--motion-ease-ui);
         width: min(100%, calc(var(--wall-frame) * var(--wall-ratio)));
         z-index: var(--z-page);
+    }
+
+    .wall__stack .spinner {
+        display: none;
+        font-size: var(--text-2xl);
+        inset: 50% auto auto 50%;
+        position: absolute;
+        translate: -50% -50%;
     }
 
     .wall__viewer {
@@ -246,6 +243,15 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
             visibility 0s var(--duration-fast);
         visibility: hidden;
         z-index: calc(var(--z-toast) + 1);
+    }
+
+    .wall__viewer .spinner {
+        border-color: var(--color-ink-inverse-10);
+        border-top-color: currentColor;
+    }
+
+    .wall__viewer[data-loading] .spinner {
+        display: inline-block;
     }
 
     .wall__viewer[data-open] {
@@ -352,7 +358,10 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
 
         const { wallAlt = '', wallLabel = '', wallRatio = '1', wallSource = '' } = frame.dataset;
 
-        if (viewerPhoto.getAttribute('src') !== wallSource) viewerPhoto.style.visibility = 'hidden';
+        if (viewerPhoto.getAttribute('src') !== wallSource) {
+            viewer.setAttribute('data-loading', '');
+            viewerPhoto.style.visibility = 'hidden';
+        }
 
         document.documentElement.style.overflow = 'hidden';
         trigger = frame;
@@ -367,6 +376,7 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
     }
 
     function showViewerPhoto() {
+        viewer?.removeAttribute('data-loading');
         viewerPhoto?.style.removeProperty('visibility');
     }
 

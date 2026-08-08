@@ -9,6 +9,7 @@ const MAX_ORDER_CENTS = 100_000_000;
 const MESSAGES: Record<PaymentErrorCode, string> = {
     'cart-changed': 'Your cart changed while you were checking out. Review it and try again.',
     'empty-cart': 'There is nothing in your cart.',
+    'storage-full': 'Your order was not placed \u2014 your browser storage is full. Clear some space and try again.',
 };
 
 const store = createStore<Order | null>({
@@ -29,6 +30,10 @@ function createOrderId() {
 
 function getLastOrder(): Order | null {
     return store.get();
+}
+
+function isStored(order: Order | null) {
+    return JSON.stringify(store.get()) === JSON.stringify(order);
 }
 
 function matchesCart(items: CartItem[]) {
@@ -89,12 +94,15 @@ async function placeOrder(input: OrderInput): Promise<OrderResult> {
         totals: totals(input.items, prodsApplied, input.promoCode),
     };
 
+    const stored = store.set(order);
+
+    if (!stored || !store.persisted() || !isStored(stored)) return reject('storage-full');
+
     clear();
-    store.set(order);
 
     if (session && prodsApplied > 0) await updateSession({ prods: session.prods - prodsApplied });
 
-    return { ok: true, order };
+    return { ok: true, order: stored };
 }
 
 function reject(code: PaymentErrorCode) {

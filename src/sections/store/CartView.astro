@@ -48,7 +48,7 @@ const images = await toImageSources();
             >
                 <p class="label text-accent-deep">Your cart changed</p>
                 <ul
-                    class="cart__issues list-none"
+                    class="flex flex-col gap-(--space-3xs) list-none"
                     data-cart-issues
                 />
                 <button
@@ -75,7 +75,7 @@ const images = await toImageSources();
                 </a>
             </div>
             <ul
-                class="cart-items flex flex-col list-none"
+                class="empty:hidden flex flex-col gap-(--space-lg) list-none"
                 data-cart-list
             />
             <p
@@ -126,7 +126,7 @@ const images = await toImageSources();
     <template data-cart-row>
         <li class="cart-items__row slab slab--bare slab--card">
             <div
-                class="cart-items__tile flex items-center justify-center overflow-hidden relative aspect-square"
+                class="@container flex items-center justify-center self-start overflow-hidden relative aspect-square"
                 data-row-tile
             >
                 <div
@@ -149,10 +149,15 @@ const images = await toImageSources();
             <div class="cart-items__body flex flex-col">
                 <div class="flex flex-col gap-1 mb-3">
                     <div class="cart-items__heading flex items-start gap-3">
-                        <p
-                            class="min-w-0 font-extrabold font-sans"
-                            data-row-title
-                        />
+                        <p class="min-w-0 font-extrabold font-sans">
+                            <a
+                                class="hover:text-accent-deep hover:underline underline-offset-4 transition-colors"
+                                data-row-title
+                                href="/store"
+                            >
+                                Item
+                            </a>
+                        </p>
                         <p
                             class="shrink-0 ml-auto font-mono text-2xs text-ink-subtle"
                             data-row-sku
@@ -163,7 +168,7 @@ const images = await toImageSources();
                         data-row-variant
                     />
                 </div>
-                <div class="cart-items__controls flex flex-wrap items-center">
+                <div class="flex flex-wrap items-center gap-x-(--space-md) gap-y-(--space-2xs)">
                     <div class="inline-flex items-center border-2 border-ink">
                         <button
                             class="active:bg-ink active:text-ink-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-ink aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-(--control-size) w-(--control-size) font-bold transition-colors"
@@ -185,7 +190,7 @@ const images = await toImageSources();
                         </button>
                     </div>
                     <button
-                        class="cart-items__remove"
+                        class="cart-items__remove active:translate-y-px hover:text-accent-deep inline-flex items-center justify-center shrink-0 h-(--control-size) w-(--control-size) text-ink-muted transition-[color,transform]"
                         data-row-remove
                         type="button"
                     >
@@ -242,36 +247,10 @@ const images = await toImageSources();
         color: var(--color-ink-subtle);
     }
 
-    .cart-items {
-        gap: var(--space-lg);
-    }
-
-    .cart-items:empty {
-        display: none;
-    }
-
     .cart-items__body {
         align-self: start;
         gap: var(--space-sm);
         padding: var(--space-lg);
-    }
-
-    .cart-items__controls {
-        column-gap: var(--space-md);
-        row-gap: var(--space-2xs);
-    }
-
-    .cart-items__remove {
-        align-items: center;
-        color: var(--color-ink-muted);
-        display: inline-flex;
-        flex-shrink: 0;
-        height: var(--control-size);
-        justify-content: center;
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-        width: var(--control-size);
     }
 
     .cart-items__remove :global(svg) {
@@ -279,16 +258,8 @@ const images = await toImageSources();
         width: 24px;
     }
 
-    .cart-items__remove:active {
-        transform: translateY(1px);
-    }
-
     .cart-items__remove:focus-visible {
         outline-offset: -2px;
-    }
-
-    .cart-items__remove:hover {
-        color: var(--color-accent-deep);
     }
 
     .cart-items__row {
@@ -297,19 +268,8 @@ const images = await toImageSources();
         grid-template-columns: var(--row-square, var(--row-tile)) minmax(0, 1fr);
     }
 
-    .cart-items__tile {
-        align-self: start;
-        container-type: inline-size;
-    }
-
     .cart__grid:has([data-cart-summary][hidden]) > .cart__main {
         grid-column: 1 / -1;
-    }
-
-    .cart__issues {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-3xs);
     }
 
     .cart__notice {
@@ -340,8 +300,8 @@ const images = await toImageSources();
 
 <script>
     import { CARD_COLORS, COMMERCE } from '@lib/shared/constants';
-    import { formatPrice, formatVariant, parseCatalog, parseImageSources, registerPageScript, setProductImage, setText } from '@lib/shared/utils';
-    import { getItems, onChange, reconcile, remove, setQuantity, totals } from '@lib/commerce/cart';
+    import { formatPrice, formatVariant, parseCatalog, parseImageSources, registerPageScript, setProductImage, setText, setTitleLink } from '@lib/shared/utils';
+    import { getItems, onCartChange, reconcile, remove, setQuantity, totals } from '@lib/commerce/cart';
     import { isValidationBypassed, renderIssueList } from '@lib/ui/forms';
     import { toast } from '@lib/ui/toasts';
 
@@ -356,6 +316,7 @@ const images = await toImageSources();
     const SQUARE_PASSES = 6;
     const SQUARE_RATIO = 0.6;
     const SQUARE_TOLERANCE = 0.5;
+    const STORAGE_MESSAGE = 'Nothing was removed \u2014 your browser storage is full. Clear some space and try again.';
 
     let catalog: CatalogEntry[] = [];
     let images: ImageSources = {};
@@ -405,7 +366,12 @@ const images = await toImageSources();
     }
 
     function handleRemoveClick(index: number, item: CartItem) {
-        remove(index);
+        if (!remove(index)) {
+            toast(STORAGE_MESSAGE, 'error');
+
+            return;
+        }
+
         toast(`Removed ${item.title} from your cart.`, 'info');
     }
 
@@ -426,7 +392,7 @@ const images = await toImageSources();
         renderCart(checkout, list, signal);
 
         const observer = new ResizeObserver(() => scheduleSquares(list));
-        const unsubscribe = onChange(() => renderCart(checkout, list, signal));
+        const unsubscribe = onCartChange(() => renderCart(checkout, list, signal));
 
         observer.observe(list);
         checkout.addEventListener('click', event => handleCheckoutClick(event, checkout), { signal });
@@ -491,7 +457,7 @@ const images = await toImageSources();
         setText(fragment.querySelector('[data-row-price]'), formatPrice(item.priceCents * item.quantity));
         setText(fragment.querySelector('[data-row-quantity]'), String(item.quantity));
         setText(fragment.querySelector('[data-row-sku]'), skuFor(item));
-        setText(fragment.querySelector('[data-row-title]'), item.title);
+        setTitleLink(fragment.querySelector('[data-row-title]'), catalog, item, item.title);
         setText(fragment.querySelector('[data-row-variant]'), formatVariant(item));
 
         if (tile) tile.style.background = CARD_COLORS[index % CARD_COLORS.length];

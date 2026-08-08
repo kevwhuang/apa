@@ -27,7 +27,7 @@ const program = getProgram('bash');
             aria-hidden="true"
         >
             <div
-                class="bash-well__drift halftone--accent absolute"
+                class="halftone--accent absolute -inset-y-[8%] inset-x-0"
                 data-scrub="drift"
             />
         </div>
@@ -111,9 +111,5 @@ const program = getProgram('bash');
     .bash-well {
         padding-block: var(--space-2xl);
         padding-inline: max(var(--shell-pad), calc(100% - var(--shell-inner))) 0;
-    }
-
-    .bash-well__drift {
-        inset: -8% 0;
     }
 </style>

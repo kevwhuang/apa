@@ -27,14 +27,14 @@ const assets = downloads.filter(asset => asset.data.title.includes(program.name)
         </SectionHead>
         <div class="grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
             <ul
-                class="bash-assets__list list-none"
+                class="flex flex-col list-none"
                 data-motion-stagger="rise"
             >
                 {assets.map(asset => (
-                    <li class="bash-assets__row">
+                    <li class="first:border-t-0 flex flex-wrap items-baseline justify-between gap-(--space-sm) py-(--space-md) border-t border-ink-20">
                         <div class="flex flex-col gap-1">
                             <a
-                                class="bash-assets__link hover:text-accent-deep decoration-2 decoration-accent font-bold font-sans underline underline-offset-4"
+                                class="active:translate-y-px hover:text-accent-deep inline-block self-start py-(--space-sm) decoration-2 decoration-accent font-bold font-sans underline underline-offset-4 transition-[color,transform]"
                                 href={`/resources#${asset.id}`}
                             >
                                 {asset.data.title}
@@ -70,37 +70,3 @@ const assets = downloads.filter(asset => asset.data.title.includes(program.name)
         </div>
     </div>
 </section>
-
-<style>
-    .bash-assets__link {
-        align-self: flex-start;
-        display: inline-block;
-        padding-block: var(--space-sm);
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .bash-assets__link:active {
-        transform: translateY(1px);
-    }
-
-    .bash-assets__list {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .bash-assets__row {
-        align-items: baseline;
-        border-top: 1px solid var(--color-ink-20);
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-sm);
-        justify-content: space-between;
-        padding-block: var(--space-md);
-    }
-
-    .bash-assets__row:first-child {
-        border-top: 0;
-    }
-</style>

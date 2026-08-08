@@ -5,7 +5,7 @@
     transition:persist
 >
     <ol
-        class="toaster__list list-none"
+        class="toaster__list flex flex-col items-center gap-(--space-2xs) list-none"
         aria-live="polite"
         data-toast-list
     />
@@ -15,18 +15,18 @@
                 class="toast__badge"
                 aria-hidden="true"
             />
-            <span class="toast__body">
+            <span class="toast__body flex flex-1 flex-col justify-center min-w-0 gap-(--space-3xs) pe-(--space-xs) ps-(--space-md) py-(--space-sm)">
                 <span
-                    class="toast__label"
+                    class="toast__label font-bold font-mono leading-[1.2] text-2xs tracking-[0.04em] uppercase wrap-anywhere text-(--toast-tone)"
                     data-toast-label
                 />
                 <span
-                    class="toast__message"
+                    class="toast__message min-w-0 font-sans leading-[1.45] text-smd wrap-anywhere"
                     data-toast-message
                 />
             </span>
             <button
-                class="toast__close"
+                class="toast__close active:translate-y-px hover:text-accent-light inline-flex items-center justify-center self-center shrink-0 h-12 w-12 me-(--space-2xs) leading-none text-xl text-inherit transition-[color,transform]"
                 data-toast-close
                 type="button"
             >
@@ -87,61 +87,6 @@
         content: var(--toast-glyph);
     }
 
-    .toast__body {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        gap: var(--space-3xs);
-        justify-content: center;
-        min-width: 0;
-        padding-block: var(--space-sm);
-        padding-inline: var(--space-md) var(--space-xs);
-    }
-
-    .toast__close {
-        align-items: center;
-        align-self: center;
-        color: inherit;
-        display: inline-flex;
-        flex-shrink: 0;
-        font-size: var(--text-xl);
-        height: 48px;
-        justify-content: center;
-        line-height: 1;
-        margin-inline-end: var(--space-2xs);
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-        width: 48px;
-    }
-
-    .toast__close:active {
-        transform: translateY(1px);
-    }
-
-    .toast__close:hover {
-        color: var(--color-accent-light);
-    }
-
-    .toast__label {
-        color: var(--toast-tone);
-        font-family: var(--font-mono);
-        font-size: var(--text-2xs);
-        font-weight: 700;
-        letter-spacing: 0.04em;
-        line-height: 1.2;
-        overflow-wrap: anywhere;
-        text-transform: uppercase;
-    }
-
-    .toast__message {
-        font-family: var(--font-sans);
-        font-size: var(--text-smd);
-        line-height: 1.45;
-        min-width: 0;
-        overflow-wrap: anywhere;
-    }
-
     .toaster {
         align-items: center;
         background: transparent;
@@ -159,13 +104,6 @@
         position: fixed;
         width: auto;
         z-index: var(--z-toast);
-    }
-
-    .toaster__list {
-        align-items: center;
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2xs);
     }
 
     @keyframes toast__rise {

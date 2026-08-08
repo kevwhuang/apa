@@ -36,11 +36,11 @@ import IconArrow from '@components/icons/Arrow.astro';
     >
         <p
             id="tour-eyebrow"
-            class="label tour__eyebrow"
+            class="label tour__eyebrow text-accent-deep"
             data-tour-eyebrow
         />
         <p
-            class="tour__body"
+            class="tour__body leading-normal text-smd wrap-anywhere"
             data-tour-body
         />
         <p
@@ -48,7 +48,7 @@ import IconArrow from '@components/icons/Arrow.astro';
             aria-live="polite"
             data-tour-announce
         />
-        <div class="tour__foot">
+        <div class="tour__foot flex flex-wrap items-center gap-(--space-2xs) pt-(--space-sm) border-ink border-t-2">
             <button
                 class="btn"
                 data-tour-back
@@ -65,7 +65,7 @@ import IconArrow from '@components/icons/Arrow.astro';
                 <span data-tour-next-label>Next</span> <IconArrow />
             </button>
             <button
-                class="action-text tour__skip"
+                class="action-text tour__skip inline-flex items-center min-h-(--control-size) ms-auto px-(--space-3xs) text-ink-muted transition-[color]"
                 data-tour-skip
                 type="button"
             >
@@ -89,12 +89,6 @@ import IconArrow from '@components/icons/Arrow.astro';
         z-index: calc(var(--z-toast) + 1);
     }
 
-    .tour__body {
-        font-size: var(--text-smd);
-        line-height: 1.5;
-        overflow-wrap: anywhere;
-    }
-
     .tour__card {
         display: flex;
         flex-direction: column;
@@ -116,19 +110,6 @@ import IconArrow from '@components/icons/Arrow.astro';
             opacity: 0;
             translate: 0 6px;
         }
-    }
-
-    .tour__eyebrow {
-        color: var(--color-accent-deep);
-    }
-
-    .tour__foot {
-        align-items: center;
-        border-top: 2px solid var(--color-ink);
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-2xs);
-        padding-top: var(--space-sm);
     }
 
     .tour__pane {
@@ -166,16 +147,6 @@ import IconArrow from '@components/icons/Arrow.astro';
         width: var(--tour-width);
     }
 
-    .tour__skip {
-        align-items: center;
-        color: var(--color-ink-muted);
-        display: inline-flex;
-        margin-inline-start: auto;
-        min-height: var(--control-size);
-        padding-inline: var(--space-3xs);
-        transition: color var(--duration-fast) var(--motion-ease-ui);
-    }
-
     @media (prefers-reduced-motion: reduce) {
         .tour__card {
             transition: none;
@@ -185,7 +156,9 @@ import IconArrow from '@components/icons/Arrow.astro';
 </style>
 
 <script>
-    import { REDUCED_MOTION_QUERY } from '@lib/shared/constants';
+    import { navigate } from 'astro:transitions/client';
+
+    import { ONBOARDING_ROUTE, REDUCED_MOTION_QUERY, TOUR_STOPS } from '@lib/shared/constants';
     import { disarmTour, isTourArmed } from '@lib/tour/tour';
     import { registerPageScript, setHidden, setText } from '@lib/shared/utils';
 
@@ -200,67 +173,43 @@ import IconArrow from '@components/icons/Arrow.astro';
 
     interface TourStop {
         body: string;
-        target: HTMLElement;
+        targets: HTMLElement[];
     }
 
-    const FOCUS_SELECTOR = 'a[href], button, input, select, textarea';
     const TOUR_EDGE = 16;
     const TOUR_GAP = 12;
     const TOUR_PAD = 6;
     const TOUR_ROUTE = '/';
     const TOUR_SIDES = ['bottom', 'top', 'right', 'left'] as const;
 
-    const TOUR_STOPS = [
-        { body: 'Everything lives here \u2014 events, the directory, the gallery, the store.', selectors: ['.site-nav', '.nav-toggle'] },
-        { body: 'Your account, orders, and settings.', selectors: ['.account'] },
-        { body: 'The member room \u2014 talk to the Alliance.', selectors: ['[data-chat-launcher]'] },
-        { body: 'Ask the assistant anything about programs or Prods.', selectors: ['[data-ai-launcher]'] },
-        { body: 'The floating player follows you around the site.', selectors: ['[data-player-launcher]'] },
-    ] as const;
-
     let frame: number | undefined;
     let running = false;
     let step = 0;
     let stops: TourStop[] = [];
 
-    function clamp(value: number, min: number, max: number): number {
+    function clamp(value: number, min: number, max: number) {
         return Math.max(min, Math.min(value, max));
     }
 
-    function closeTour() {
+    async function closeTour() {
         if (!running) return;
-
-        const target = stops[step]?.target;
 
         running = false;
         stopFrame();
         document.documentElement.style.overflow = '';
         setHidden(document.querySelector<HTMLElement>('[data-tour]'), true);
-        (findFocusable(target) ?? document.querySelector<HTMLElement>('.site-header__brand'))?.focus({ preventScroll: true });
+
+        await navigate(ONBOARDING_ROUTE);
     }
 
     function currentPath() {
         return window.location.pathname.replace(/\/$/, '') || TOUR_ROUTE;
     }
 
-    function findFocusable(target: HTMLElement | undefined) {
-        if (!target) return null;
-
-        const nested = Array.from(target.querySelectorAll<HTMLElement>(FOCUS_SELECTOR));
-
-        const candidates = target.matches(FOCUS_SELECTOR) ? [target, ...nested] : nested;
-
-        return candidates.find(candidate => candidate.checkVisibility()) ?? null;
-    }
-
-    function findTarget(selectors: readonly string[]) {
-        for (const selector of selectors) {
-            const element = document.querySelector<HTMLElement>(selector);
-
-            if (element?.checkVisibility()) return element;
-        }
-
-        return null;
+    function findTargets(selectors: readonly string[]) {
+        return selectors
+            .map(selector => document.querySelector<HTMLElement>(selector))
+            .filter((element): element is HTMLElement => Boolean(element?.checkVisibility()));
     }
 
     function handleKeydown(event: KeyboardEvent) {
@@ -268,7 +217,7 @@ import IconArrow from '@components/icons/Arrow.astro';
 
         if (event.key === 'Escape') {
             event.preventDefault();
-            closeTour();
+            void closeTour();
         } else if (event.key === 'ArrowLeft') {
             event.preventDefault();
             showStep(step - 1);
@@ -282,7 +231,7 @@ import IconArrow from '@components/icons/Arrow.astro';
 
     function handleNext() {
         if (step === stops.length - 1) {
-            closeTour();
+            void closeTour();
 
             return;
         }
@@ -329,8 +278,8 @@ import IconArrow from '@components/icons/Arrow.astro';
         return Array.from(document.querySelectorAll<HTMLButtonElement>('[data-tour-back], [data-tour-next], [data-tour-skip]')).filter(button => !button.hidden);
     }
 
-    function measure(target: HTMLElement): TourBox {
-        const rect = target.getBoundingClientRect();
+    function measure(targets: readonly HTMLElement[]) {
+        const rect = unite(targets);
 
         const left = clamp(rect.left - TOUR_PAD, 0, window.innerWidth);
         const top = clamp(rect.top - TOUR_PAD, 0, window.innerHeight);
@@ -386,7 +335,7 @@ import IconArrow from '@components/icons/Arrow.astro';
 
         if (!card || !root || !stop) return;
 
-        const cutout = measure(stop.target);
+        const cutout = measure(stop.targets);
 
         root.style.setProperty('--tour-height', `${cutout.height}px`);
         root.style.setProperty('--tour-left', `${cutout.left}px`);
@@ -403,29 +352,29 @@ import IconArrow from '@components/icons/Arrow.astro';
         const resolved: TourStop[] = [];
 
         TOUR_STOPS.forEach((stop) => {
-            const target = findTarget(stop.selectors);
+            const targets = findTargets(stop.selectors);
 
-            if (target) resolved.push({ body: stop.body, target });
+            if (targets.length) resolved.push({ body: stop.body, targets });
         });
 
         return resolved;
     }
 
-    function revealTarget(target: HTMLElement) {
-        const rect = target.getBoundingClientRect();
-
-        if (rect.top >= TOUR_EDGE && rect.bottom <= window.innerHeight - TOUR_EDGE) return;
-
-        target.scrollIntoView({ behavior: window.matchMedia(REDUCED_MOTION_QUERY).matches ? 'auto' : 'smooth', block: 'center' });
-    }
-
     function schedule() {
-        if (!running || frame !== undefined) return;
+        if (frame !== undefined || !running) return;
 
         frame = requestAnimationFrame(() => {
             frame = undefined;
             render();
         });
+    }
+
+    function scrollToTargets(targets: readonly HTMLElement[]) {
+        const rect = unite(targets);
+
+        if (rect.bottom <= window.innerHeight - TOUR_EDGE && rect.top >= TOUR_EDGE) return;
+
+        targets[0].scrollIntoView({ behavior: window.matchMedia(REDUCED_MOTION_QUERY).matches ? 'auto' : 'smooth', block: 'center' });
     }
 
     function showStep(next: number) {
@@ -443,7 +392,7 @@ import IconArrow from '@components/icons/Arrow.astro';
         setText(document.querySelector('[data-tour-body]'), stop.body);
         setText(document.querySelector('[data-tour-eyebrow]'), `Tour / ${step + 1} of ${stops.length}`);
         setText(document.querySelector('[data-tour-next-label]'), step === last ? 'Done' : 'Next');
-        revealTarget(stop.target);
+        scrollToTargets(stop.targets);
         render();
         document.querySelector<HTMLElement>('[data-tour-next]')?.focus({ preventScroll: true });
     }
@@ -457,7 +406,7 @@ import IconArrow from '@components/icons/Arrow.astro';
         document.addEventListener('keydown', handleKeydown, { signal });
         document.querySelector<HTMLElement>('[data-tour-back]')?.addEventListener('click', () => showStep(step - 1), { signal });
         document.querySelector<HTMLElement>('[data-tour-next]')?.addEventListener('click', handleNext, { signal });
-        document.querySelector<HTMLElement>('[data-tour-skip]')?.addEventListener('click', closeTour, { signal });
+        document.querySelector<HTMLElement>('[data-tour-skip]')?.addEventListener('click', () => void closeTour(), { signal });
         window.addEventListener('resize', schedule, { signal });
         window.addEventListener('scroll', schedule, { capture: true, passive: true, signal });
     }
@@ -474,7 +423,18 @@ import IconArrow from '@components/icons/Arrow.astro';
         document.documentElement.style.overflow = '';
     }
 
-    function widestSide(room: Record<TourSide, number>): TourSide {
+    function unite(targets: readonly HTMLElement[]) {
+        const rects = targets.map(target => target.getBoundingClientRect());
+
+        return {
+            bottom: Math.max(...rects.map(rect => rect.bottom)),
+            left: Math.min(...rects.map(rect => rect.left)),
+            right: Math.max(...rects.map(rect => rect.right)),
+            top: Math.min(...rects.map(rect => rect.top)),
+        };
+    }
+
+    function widestSide(room: Record<TourSide, number>) {
         return TOUR_SIDES.reduce<TourSide>((best, name) => (room[name] > room[best] ? name : best), TOUR_SIDES[0]);
     }
 

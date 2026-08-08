@@ -127,7 +127,7 @@ function withEnd(list: CalendarItem[]) {
                 target="_blank"
             >
                 RSVP for {assemblyProgram.shortName} on Meetup <IconArrow />
-                <span class="sr-only"> (opens in a new tab)</span>
+                <span class="sr-only">&nbsp;(opens in a new tab)</span>
             </a>
         </div>
         {nextAssembly
@@ -147,16 +147,16 @@ function withEnd(list: CalendarItem[]) {
                                         Next {assemblyProgram.shortName}
                                     </span>
                                     <time
-                                        class="sheet__stamp"
+                                        class="contents"
                                         datetime={nextAssembly.date.toISOString()}
                                     >
                                         <span class="sheet__day">{formatCalendarDay(nextAssembly.date)}</span>
-                                        <span class="sheet__month">{formatCalendarMonth(nextAssembly.date)}</span>
+                                        <span class="font-mono leading-normal text-sm tracking-[0.08em] uppercase whitespace-nowrap">{formatCalendarMonth(nextAssembly.date)}</span>
                                     </time>
-                                    <span class="sheet__weekday">{formatWeekday(nextAssembly.date)}</span>
+                                    <span class="font-mono text-2xs tracking-[0.06em] uppercase text-ink-inverse-muted">{formatWeekday(nextAssembly.date)}</span>
                                 </p>
                                 <div
-                                    class="sheet__body"
+                                    class="p-(--space-lg)"
                                     data-motion="rise"
                                 >
                                     <p class="label mb-4 text-ink-subtle">
@@ -183,17 +183,17 @@ function withEnd(list: CalendarItem[]) {
                                     aria-hidden="true"
                                     data-motion-stagger="stamp"
                                 >
-                                    <p class="docket__head label text-ink-subtle">No.</p>
-                                    <p class="docket__head label text-ink-subtle">Date</p>
-                                    <p class="docket__head docket__head--session label text-ink-subtle">Session</p>
-                                    <p class="docket__head docket__head--room label text-ink-subtle">Room</p>
+                                    <p class="label pb-(--space-2xs) text-ink-subtle">No.</p>
+                                    <p class="label pb-(--space-2xs) text-ink-subtle">Date</p>
+                                    <p class="docket__head--session label pb-(--space-2xs) text-ink-subtle">Session</p>
+                                    <p class="docket__head--room label pb-(--space-2xs) text-ink-subtle">Room</p>
                                 </div>
                                 <hr
-                                    class="docket__rule h-0.5 border-0 bg-ink"
+                                    class="col-span-full h-0.5 border-0 bg-ink"
                                     data-motion="rule"
                                 />
                                 <ul
-                                    class="docket__rows list-none"
+                                    class="docket__rows gap-y-0 list-none"
                                     aria-label={`Later ${assemblyProgram.name} dates`}
                                     data-motion-stagger="rise"
                                 >
@@ -202,7 +202,7 @@ function withEnd(list: CalendarItem[]) {
                                             id={event.id}
                                             class="docket__row"
                                         >
-                                            <p class="docket__no">{entryNumber(index + 2)}</p>
+                                            <p class="docket__no font-mono tabular-nums text-base text-ink-subtle">{entryNumber(index + 2)}</p>
                                             <p
                                                 class="docket__date flex flex-col gap-1"
                                                 data-placeholder
@@ -252,7 +252,7 @@ function withEnd(list: CalendarItem[]) {
             aria-hidden="true"
         >
             <div
-                class="bash-well__drift halftone--accent absolute"
+                class="halftone--accent absolute -inset-y-[8%] inset-x-0"
                 data-scrub="drift"
             />
         </div>
@@ -368,9 +368,12 @@ function withEnd(list: CalendarItem[]) {
                             class="archive-card__stamp"
                             data-placeholder
                         >
-                            <time datetime={event.date.toISOString()}>
-                                <span class="archive-card__day">{formatCalendarDay(event.date)}</span>
-                                <span class="archive-card__month">{formatCalendarMonth(event.date)}</span>
+                            <time
+                                class="contents"
+                                datetime={event.date.toISOString()}
+                            >
+                                <span class="font-extrabold font-sans leading-none text-3xl tracking-[-0.02em]">{formatCalendarDay(event.date)}</span>
+                                <span class="font-mono text-2xs tracking-[0.06em] uppercase whitespace-nowrap">{formatCalendarMonth(event.date)}</span>
                             </time>
                         </p>
                         <div class="archive-card__body">
@@ -455,22 +458,6 @@ function withEnd(list: CalendarItem[]) {
         padding: var(--space-sm) var(--space-md) var(--space-md);
     }
 
-    .archive-card__day {
-        font-family: var(--font-sans);
-        font-size: var(--text-3xl);
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        line-height: 1;
-    }
-
-    .archive-card__month {
-        font-family: var(--font-mono);
-        font-size: var(--text-2xs);
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        white-space: nowrap;
-    }
-
     .archive-card__stamp {
         align-items: center;
         border-right: 2px solid var(--color-ink);
@@ -482,10 +469,6 @@ function withEnd(list: CalendarItem[]) {
         min-width: 92px;
         padding: var(--space-sm) var(--space-xs);
         text-align: center;
-    }
-
-    .archive-card__stamp time {
-        display: contents;
     }
 
     .archive-grid {
@@ -511,10 +494,6 @@ function withEnd(list: CalendarItem[]) {
         padding-inline: max(var(--shell-pad), calc(100% - var(--shell-inner))) 0;
     }
 
-    .bash-well__drift {
-        inset: -8% 0;
-    }
-
     .docket {
         --docket-no: 48px;
         column-gap: var(--space-md);
@@ -533,23 +512,12 @@ function withEnd(list: CalendarItem[]) {
         width: 2px;
     }
 
-    .docket__head {
-        padding-bottom: var(--space-2xs);
-    }
-
     .docket__heads,
     .docket__row,
     .docket__rows {
         display: grid;
         grid-column: 1 / -1;
         grid-template-columns: subgrid;
-    }
-
-    .docket__no {
-        color: var(--color-ink-subtle);
-        font-family: var(--font-mono);
-        font-size: var(--text-base);
-        font-variant-numeric: tabular-nums;
     }
 
     .docket__row {
@@ -566,14 +534,6 @@ function withEnd(list: CalendarItem[]) {
         outline-offset: 3px;
     }
 
-    .docket__rows {
-        row-gap: 0;
-    }
-
-    .docket__rule {
-        grid-column: 1 / -1;
-    }
-
     .sheet {
         display: grid;
         grid-template-columns: auto minmax(0, 1fr);
@@ -585,24 +545,12 @@ function withEnd(list: CalendarItem[]) {
         outline-offset: 3px;
     }
 
-    .sheet__body {
-        padding: var(--space-lg);
-    }
-
     .sheet__day {
         font-family: var(--font-sans);
         font-size: clamp(56px, calc(34.667px + 6.6667vw), 120px);
         font-weight: 800;
         letter-spacing: -0.04em;
         line-height: 0.8;
-    }
-
-    .sheet__month {
-        font-family: var(--font-mono);
-        font-size: var(--text-sm);
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        white-space: nowrap;
     }
 
     .sheet__plate {
@@ -613,18 +561,6 @@ function withEnd(list: CalendarItem[]) {
         gap: var(--space-2xs);
         justify-items: start;
         padding: var(--space-lg);
-    }
-
-    .sheet__stamp {
-        display: contents;
-    }
-
-    .sheet__weekday {
-        color: var(--color-ink-inverse-muted);
-        font-family: var(--font-mono);
-        font-size: var(--text-2xs);
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
     }
 
     @media (max-width: 1024px) {

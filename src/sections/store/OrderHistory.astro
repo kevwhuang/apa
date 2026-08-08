@@ -126,13 +126,15 @@ const images = await toImageSources();
     </div>
     <template data-order-row>
         <li class="first:border-t-0 flex items-center gap-4 p-4 border-t-2 border-ink">
-            <img
-                class="object-cover shrink-0 h-14 w-14 border-2 border-ink"
-                alt=""
-                data-row-photo
-                hidden
-                loading="lazy"
-            />
+            <span class="block shrink-0 h-14 w-14 border-2 border-ink bg-ink">
+                <img
+                    class="block object-cover h-full w-full"
+                    alt=""
+                    data-row-photo
+                    hidden
+                    loading="lazy"
+                />
+            </span>
             <div class="flex-1 min-w-0">
                 <p
                     class="font-bold font-sans"
@@ -171,7 +173,7 @@ const images = await toImageSources();
                 No orders yet &mdash; receipts from the store land here.
             </p>
             <div
-                class="order__scroller scroll-slot"
+                class="order__scroller scroll-slot overflow-x-auto border-2 border-ink"
                 data-order-ledger
                 hidden
             >
@@ -233,7 +235,7 @@ const images = await toImageSources();
                 <time data-cell="date" />
             </td>
             <td
-                class="order__cell order__items text-sm"
+                class="order__cell text-sm wrap-anywhere"
                 data-cell="items"
             />
             <td
@@ -247,10 +249,6 @@ const images = await toImageSources();
 <style>
     .order__cell {
         padding: var(--space-sm);
-    }
-
-    .order__items {
-        overflow-wrap: anywhere;
     }
 
     .order__list {
@@ -305,8 +303,6 @@ const images = await toImageSources();
 
     .order__scroller {
         --scroll-slot-max: calc(52px + 5 * (33px + var(--space-md)));
-        border: 2px solid var(--color-ink);
-        overflow-x: auto;
     }
 
     .order__stamp {
@@ -352,56 +348,92 @@ const images = await toImageSources();
 </style>
 
 <script>
-    import { MILLISECONDS_PER_DAY } from '@lib/shared/constants';
+    import { COMMERCE } from '@lib/shared/constants';
     import { formatDateStamp, formatPrice, formatVariant, parseImageSources, registerPageScript, setProductImage, setText, toIsoDate } from '@lib/shared/utils';
     import { getLastOrder } from '@lib/commerce/checkout';
     import { totals } from '@lib/commerce/cart';
 
-    const NEWEST_ORDER_AGE_DAYS = 9;
+    interface OrderSeed {
+        email: string;
+        id: string;
+        items: CartItem[];
+        placedAt: string;
+        prodsApplied?: number;
+        promoCode?: string;
+    }
 
-    const NEWEST_ORDER_ITEMS: CartItem[] = [
-        { image: '725841936_bone', priceCents: 3_500, productSlug: 'tick-tee', quantity: 1, size: 'M', title: 'Tick Tee', variation: 'Bone' },
-        { image: '639158247_assorted', priceCents: 800, productSlug: 'sticker-pack', quantity: 2, title: 'Sticker Pack', variation: 'Assorted' },
-        { image: '843207156_natural', priceCents: 2_200, productSlug: 'tote-bag', quantity: 1, title: 'Tote Bag', variation: 'Natural' },
-    ];
-
-    const OLDER_ORDER_AGE_DAYS = 24;
-
-    const OLDER_ORDER_ITEMS: CartItem[] = [
-        { image: '639158247_assorted', priceCents: 800, productSlug: 'sticker-pack', quantity: 2, title: 'Sticker Pack', variation: 'Assorted' },
-        { image: '843207156_natural', priceCents: 2_200, productSlug: 'tote-bag', quantity: 1, title: 'Tote Bag', variation: 'Natural' },
-    ];
-
-    const OLDEST_ORDER_AGE_DAYS = 96;
-
-    const OLDEST_ORDER_ITEMS: CartItem[] = [
-        { image: '358214679_charcoal', priceCents: 7_800, productSlug: 'bash-hoodie', quantity: 1, size: 'L', title: 'Bash Hoodie', variation: 'Charcoal' },
-        { image: '639158247_assorted', priceCents: 800, productSlug: 'sticker-pack', quantity: 1, title: 'Sticker Pack', variation: 'Assorted' },
-    ];
-
-    const PAST_ORDERS: Order[] = [
+    const PAST_ORDER_SEEDS: OrderSeed[] = [
         {
             email: 'p\u2022\u2022\u2022\u2022\u2022\u2022@example.com',
             id: 'APA-04217',
-            items: NEWEST_ORDER_ITEMS,
-            placedAt: Date.now() - NEWEST_ORDER_AGE_DAYS * MILLISECONDS_PER_DAY,
-            totals: totals(NEWEST_ORDER_ITEMS),
+            items: [
+                { image: '639158247_assorted', priceCents: 800, productSlug: 'sticker-pack', quantity: 2, title: 'Sticker Pack', variation: 'Assorted' },
+                { image: '725841936_bone', priceCents: 3_500, productSlug: 'tick-tee', quantity: 1, size: 'M', title: 'Tick Tee', variation: 'Bone' },
+                { image: '843207156_natural', priceCents: 2_200, productSlug: 'tote-bag', quantity: 1, title: 'Tote Bag', variation: 'Natural' },
+            ],
+            placedAt: '2026-07-28T16:42:00-05:00',
+        },
+        {
+            email: 'd\u2022\u2022\u2022\u2022\u2022\u2022\u2022@example.com',
+            id: 'APA-04106',
+            items: [
+                { image: '214837905_orange', priceCents: 1_800, productSlug: 'assembly-tape', quantity: 1, title: 'Assembly Sessions Tape', variation: 'Orange' },
+                { image: '421960583_translucent', priceCents: 2_500, productSlug: 'compilation', quantity: 1, title: 'Compilation LP', variation: 'Translucent' },
+            ],
+            placedAt: '2026-07-04T11:15:00-05:00',
+            promoCode: COMMERCE.discountCode,
+        },
+        {
+            email: 'j\u2022\u2022\u2022\u2022@example.com',
+            id: 'APA-03994',
+            items: [
+                { image: '358214679_charcoal', priceCents: 7_800, productSlug: 'bash-hoodie', quantity: 1, size: 'L', title: 'Bash Hoodie', variation: 'Charcoal' },
+            ],
+            placedAt: '2026-06-13T18:20:00-05:00',
+            prodsApplied: 15,
+        },
+        {
+            email: 'i\u2022\u2022\u2022\u2022\u2022@example.com',
+            id: 'APA-03871',
+            items: [
+                { image: '514372860_bone', priceCents: 4_000, productSlug: 'monogram-cap', quantity: 1, title: 'Monogram Cap', variation: 'Bone' },
+                { image: '639158247_assorted', priceCents: 800, productSlug: 'sticker-pack', quantity: 1, title: 'Sticker Pack', variation: 'Assorted' },
+                { image: '918465302_cotton', priceCents: 4_800, productSlug: 'waveform-longsleeve', quantity: 1, size: 'M', title: 'Waveform Longsleeve', variation: 'Cotton' },
+            ],
+            placedAt: '2026-05-22T09:05:00-05:00',
+            prodsApplied: 24,
+            promoCode: COMMERCE.discountCode,
+        },
+        {
+            email: 's\u2022\u2022\u2022\u2022\u2022\u2022@example.com',
+            id: 'APA-03742',
+            items: [
+                { image: '421960583_mint', priceCents: 2_500, productSlug: 'compilation', quantity: 1, title: 'Compilation LP', variation: 'Mint' },
+                { image: '725841936_lime', priceCents: 3_500, productSlug: 'tick-tee', quantity: 1, size: 'S', title: 'Tick Tee', variation: 'Lime' },
+            ],
+            placedAt: '2026-04-18T14:30:00-05:00',
         },
         {
             email: 'r\u2022\u2022\u2022\u2022\u2022@example.com',
             id: 'APA-03586',
-            items: OLDER_ORDER_ITEMS,
-            placedAt: Date.now() - OLDER_ORDER_AGE_DAYS * MILLISECONDS_PER_DAY,
-            totals: totals(OLDER_ORDER_ITEMS),
+            items: [
+                { image: '639158247_assorted', priceCents: 800, productSlug: 'sticker-pack', quantity: 2, title: 'Sticker Pack', variation: 'Assorted' },
+                { image: '843207156_natural', priceCents: 2_200, productSlug: 'tote-bag', quantity: 1, title: 'Tote Bag', variation: 'Natural' },
+            ],
+            placedAt: '2026-03-09T12:48:00-05:00',
         },
         {
             email: 'm\u2022\u2022\u2022\u2022@example.com',
             id: 'APA-03581',
-            items: OLDEST_ORDER_ITEMS,
-            placedAt: Date.now() - OLDEST_ORDER_AGE_DAYS * MILLISECONDS_PER_DAY,
-            totals: totals(OLDEST_ORDER_ITEMS),
+            items: [
+                { image: '358214679_charcoal', priceCents: 7_800, productSlug: 'bash-hoodie', quantity: 1, size: 'XL', title: 'Bash Hoodie', variation: 'Charcoal' },
+                { image: '639158247_assorted', priceCents: 800, productSlug: 'sticker-pack', quantity: 1, title: 'Sticker Pack', variation: 'Assorted' },
+            ],
+            placedAt: '2026-02-14T15:10:00-06:00',
         },
     ];
+
+    const PAST_ORDERS: Order[] = PAST_ORDER_SEEDS.map(toPastOrder);
 
     const RECEIPT_FRESH_MS = 120_000;
 
@@ -538,6 +570,16 @@ const images = await toImageSources();
         if (!moveFocus) return;
 
         document.querySelector<HTMLElement>('#order-title')?.focus();
+    }
+
+    function toPastOrder(seed: OrderSeed) {
+        return {
+            email: seed.email,
+            id: seed.id,
+            items: seed.items,
+            placedAt: Date.parse(seed.placedAt),
+            totals: totals(seed.items, seed.prodsApplied ?? 0, seed.promoCode ?? ''),
+        };
     }
 
     registerPageScript(initOrderHistory);

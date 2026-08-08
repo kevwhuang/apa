@@ -426,7 +426,7 @@ function buildSaturator(context: AudioContext) {
     let pending = SATURATOR_DRIVE_DEFAULT;
     let reshape = 0;
 
-    makeup.gain.value = makeupFor(built);
+    makeup.gain.value = saturationMakeupFor(built);
     shaper.curve = saturationCurve(built);
     shaper.oversample = '4x';
     input.connect(shaper).connect(makeup);
@@ -454,7 +454,7 @@ function buildSaturator(context: AudioContext) {
 
             if (pending !== built && reshape === 0) reshape = requestAnimationFrame(rebuildCurve);
 
-            smooth(context, makeup.gain, makeupFor(value));
+            smooth(context, makeup.gain, saturationMakeupFor(value));
         },
     };
 }
@@ -610,10 +610,6 @@ function impulse(context: AudioContext, seconds: number) {
     return buffer;
 }
 
-function makeupFor(drive: number) {
-    return Math.tanh(drive) / drive;
-}
-
 function rootMeanSquare(data: Float32Array) {
     let power = 0;
 
@@ -633,6 +629,10 @@ function saturationCurve(drive: number) {
     }
 
     return samples;
+}
+
+function saturationMakeupFor(drive: number) {
+    return Math.tanh(drive) / drive;
 }
 
 function smooth(context: AudioContext, param: AudioParam, value: number) {

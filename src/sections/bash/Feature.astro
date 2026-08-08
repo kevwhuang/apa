@@ -10,7 +10,7 @@ const program = getProgram('bash');
     aria-labelledby="bash-title"
 >
     <div
-        class="bash-feature__drift halftone--accent stage__item--full absolute pointer-events-none"
+        class="halftone--accent stage__item--full absolute -inset-y-[8%] inset-x-0 pointer-events-none"
         aria-hidden="true"
         data-scrub="drift"
     />
@@ -33,9 +33,3 @@ const program = getProgram('bash');
         </p>
     </div>
 </section>
-
-<style>
-    .bash-feature__drift {
-        inset: -8% calc(-1 * var(--launcher-rail)) -8% 0;
-    }
-</style>

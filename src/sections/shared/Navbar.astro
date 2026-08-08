@@ -33,9 +33,9 @@ const { hasHero = false } = Astro.props;
             class="site-nav"
             aria-label="Primary"
         >
-            <ul class="site-nav__list list-none">
+            <ul class="site-nav__list flex list-none">
                 {NAV_GROUPS.map(group => (
-                    <li class="site-nav__group">
+                    <li class="site-nav__group relative">
                         {'items' in group && (
                             <Fragment>
                                 <button
@@ -81,7 +81,7 @@ const { hasHero = false } = Astro.props;
                 ))}
             </ul>
         </nav>
-        <div class="site-header__controls">
+        <div class="site-header__controls flex items-center gap-(--space-3xs) ml-auto">
             <AccountControl />
             <a
                 class="cart-link"
@@ -264,23 +264,12 @@ const { hasHero = false } = Astro.props;
         color: var(--color-accent-deep);
     }
 
-    .site-header__controls {
-        align-items: center;
-        display: flex;
-        gap: var(--space-3xs);
-        margin-left: auto;
-    }
-
     .site-header__name {
         font-size: var(--text-sm);
         font-weight: 800;
         letter-spacing: -0.01em;
         text-transform: uppercase;
         white-space: nowrap;
-    }
-
-    .site-nav__group {
-        position: relative;
     }
 
     .site-nav__item {
@@ -349,10 +338,6 @@ const { hasHero = false } = Astro.props;
     .site-nav__link[aria-current] {
         color: var(--color-accent-deep);
         font-weight: 700;
-    }
-
-    .site-nav__list {
-        display: flex;
     }
 
     .site-nav__menu {
@@ -501,7 +486,7 @@ const { hasHero = false } = Astro.props;
 </style>
 
 <script>
-    import { count, getItems, onChange, seedCart } from '@lib/commerce/cart';
+    import { count, getItems, onCartChange, seedCart } from '@lib/commerce/cart';
     import { registerPageScript } from '@lib/shared/utils';
 
     const CART_BADGE_MAX = 99;
@@ -515,11 +500,11 @@ const { hasHero = false } = Astro.props;
     const SCROLL_SOLID_THRESHOLD = 24;
     const SCROLL_TOP_THRESHOLD = 80;
 
-    let cartUnsubscribe: (() => void) | undefined;
     let hoverCloseTimer: number | undefined;
     let lastScrollY = 0;
     let pointerActive = false;
     let scrollTicking = false;
+    let unsubscribeCart: (() => void) | undefined;
 
     function canHover() {
         return window.matchMedia(HOVER_QUERY).matches;
@@ -699,9 +684,9 @@ const { hasHero = false } = Astro.props;
     }
 
     function initNavbar(signal: AbortSignal) {
-        cartUnsubscribe?.();
-        cartUnsubscribe = onChange(updateCart);
-        signal.addEventListener('abort', () => cartUnsubscribe?.(), { once: true });
+        unsubscribeCart?.();
+        unsubscribeCart = onCartChange(updateCart);
+        signal.addEventListener('abort', () => unsubscribeCart?.(), { once: true });
         signal.addEventListener('abort', clearHoverTimer, { once: true });
 
         const header = document.querySelector<HTMLElement>('.site-header');

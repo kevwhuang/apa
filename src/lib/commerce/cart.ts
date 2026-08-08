@@ -8,7 +8,7 @@ const SEED_ITEMS: CartItem[] = [
 
 const SEED_MARKER_KEY = 'apa.cart-seeded';
 
-const cart = createStore<CartItem[]>({
+const store = createStore<CartItem[]>({
     fallback: [],
     key: STORAGE.cart.key,
     normalize: normalizeItems,
@@ -16,8 +16,8 @@ const cart = createStore<CartItem[]>({
     topic: STORAGE.cart.topic,
 });
 
-function add(item: CartItem, maxQuantity: number = COMMERCE.maxQuantityPerItem): void {
-    cart.update((items) => {
+function add(item: CartItem, maxQuantity: number = COMMERCE.maxQuantityPerItem): boolean {
+    store.update((items) => {
         const next = [...items];
 
         const index = next.findIndex(existing => variantKey(existing) === variantKey(item));
@@ -32,6 +32,8 @@ function add(item: CartItem, maxQuantity: number = COMMERCE.maxQuantityPerItem):
 
         return next;
     });
+
+    return store.persisted();
 }
 
 function clampQuantity(quantity: number, maxQuantity: number = COMMERCE.maxQuantityPerItem): number {
@@ -41,7 +43,7 @@ function clampQuantity(quantity: number, maxQuantity: number = COMMERCE.maxQuant
 }
 
 function clear(): void {
-    cart.set([]);
+    store.set([]);
 }
 
 function compareItems(left: CartItem, right: CartItem): number {
@@ -53,7 +55,7 @@ function count(items = getItems()): number {
 }
 
 function getItems(): CartItem[] {
-    return cart.get();
+    return store.get();
 }
 
 function isCartItem(item: unknown): item is CartItem {
@@ -75,8 +77,8 @@ function normalizeItems(items: CartItem[]): CartItem[] {
     })).sort(compareItems);
 }
 
-function onChange(callback: (items: CartItem[]) => void): () => void {
-    return cart.onChange(callback);
+function onCartChange(callback: (items: CartItem[]) => void): () => void {
+    return store.onChange(callback);
 }
 
 function photoKey(productSlug: string, variation = ''): string {
@@ -127,19 +129,21 @@ function reconcile(catalog: CatalogEntry[], items = getItems()): CartIssue[] {
         next.push(reconciled);
     });
 
-    if (issues.length > 0) cart.set(next);
+    if (issues.length > 0) store.set(next);
 
     return issues;
 }
 
-function remove(index: number): void {
-    cart.update((items) => {
+function remove(index: number): boolean {
+    store.update((items) => {
         const next = [...items];
 
         next.splice(index, 1);
 
         return next;
     });
+
+    return store.persisted();
 }
 
 function seedCart(): void {
@@ -155,18 +159,20 @@ function seedCart(): void {
 
     if (getItems().length > 0) return;
 
-    cart.set(SEED_ITEMS.map(item => ({ ...item })));
+    store.set(SEED_ITEMS.map(item => ({ ...item })));
 }
 
-function setQuantity(index: number, quantity: number, maxQuantity: number = COMMERCE.maxQuantityPerItem): void {
+function setQuantity(index: number, quantity: number, maxQuantity: number = COMMERCE.maxQuantityPerItem): boolean {
     const items = getItems();
 
-    if (!items[index]) return;
+    if (!items[index]) return false;
 
     const next = [...items];
 
     next[index] = { ...next[index], quantity: clampQuantity(quantity, maxQuantity) };
-    cart.set(next);
+    store.set(next);
+
+    return store.persisted();
 }
 
 function subtotalCents(items = getItems()): number {
@@ -205,7 +211,7 @@ export {
     count,
     getItems,
     isPromoCode,
-    onChange,
+    onCartChange,
     photoKey,
     prodsForCents,
     prodsToCents,

@@ -7,7 +7,7 @@ const { left = false } = Astro.props;
 ---
 
 <svg
-    class:list={['icon-arrow', left && 'icon-arrow--left']}
+    class:list={['icon-arrow inline-block self-center shrink-0 h-[0.5em] w-[0.59em] -mb-[0.02em] align-[0.108em]', left && '-scale-x-100']}
     aria-hidden="true"
     fill="none"
     height="0.5em"
@@ -22,19 +22,3 @@ const { left = false } = Astro.props;
         stroke-linejoin="round"
     />
 </svg>
-
-<style>
-    .icon-arrow {
-        align-self: center;
-        display: inline-block;
-        flex-shrink: 0;
-        height: 0.5em;
-        margin-bottom: -0.02em;
-        vertical-align: 0.108em;
-        width: 0.59em;
-    }
-
-    .icon-arrow--left {
-        scale: -1 1;
-    }
-</style>

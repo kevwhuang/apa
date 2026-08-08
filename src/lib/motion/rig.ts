@@ -2,6 +2,7 @@ import { BufferAttribute, BufferGeometry, CanvasTexture, Color, DynamicDrawUsage
 
 import { REDUCED_MOTION_QUERY, STORAGE } from '@lib/shared/constants';
 import { STEP_COUNT, stepDuration, stepEnergy } from '@lib/motion/pattern';
+import { isSlowDevice } from '@lib/shared/utils';
 import { readColorToken } from '@lib/motion/tokens';
 
 interface Palette {
@@ -122,7 +123,6 @@ const SCAN_WIDTH = 0.32;
 const SCROLL_SLOWDOWN = 9;
 const SEGMENT_COUNT = 84;
 const SEGMENT_COUNT_MOBILE = 56;
-const SLOW_CORE_COUNT = 4;
 const SPIN_RATE = 0.01;
 const SPOKE_OPACITY = 0.16;
 const SPOKE_STRIDE = 7;
@@ -244,9 +244,13 @@ function initRig(signal: AbortSignal): void {
     const holder = document.querySelector<HTMLElement>(HOLDER_SELECTOR);
     const palette = readPalette();
 
-    if (!holder || !validPalette(palette)) return;
+    if (!holder || !isValidPalette(palette)) return;
 
     mountScene({ holder, palette, signal, still: window.matchMedia(REDUCED_MOTION_QUERY).matches });
+}
+
+function isValidPalette(palette: Palette): boolean {
+    return Boolean(palette.accent && palette.ink && palette.muted && palette.surface);
 }
 
 function mountScene({ holder, palette, signal, still }: SceneOptions): void {
@@ -330,7 +334,7 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     let last = 0;
     let pointerX = 0;
     let pointerY = 0;
-    let quality = mobile || slowDevice() ? 1 : 0;
+    let quality = mobile || isSlowDevice() ? 1 : 0;
     let running = false;
     let showGround = true;
     let showMotes = true;
@@ -417,7 +421,7 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     function repaint() {
         const next = readPalette();
 
-        if (!validPalette(next)) return;
+        if (!isValidPalette(next)) return;
 
         accentColor.set(next.accent);
         fog.color.set(next.surface);
@@ -725,12 +729,6 @@ function readPalette(): Palette {
     };
 }
 
-function slowDevice(): boolean {
-    const { connection } = navigator as Navigator & { connection?: { saveData?: boolean } };
-
-    return connection?.saveData === true || (navigator.hardwareConcurrency ?? 0) <= SLOW_CORE_COUNT;
-}
-
 function smoothEnergy(position: number): number {
     const index = Math.floor(position);
 
@@ -743,10 +741,6 @@ function smoothEnergy(position: number): number {
 
 function taperScale(ratio: number): number {
     return 1 - TAPER_DROP * ratio * ratio;
-}
-
-function validPalette(palette: Palette): boolean {
-    return Boolean(palette.accent && palette.ink && palette.muted && palette.surface);
 }
 
 export { initRig };

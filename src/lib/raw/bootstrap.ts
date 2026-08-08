@@ -1,6 +1,6 @@
 const ARMED_CLASS = 'is-motion-armed';
-const DARK_QUERY = '(prefers-color-scheme: dark)';
-const REDUCE = '(prefers-reduced-motion: reduce)';
+const DEFAULT_THEME = 'light';
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 const SESSION_KEY = '__SESSION_KEY__';
 const THEME_KEY = '__THEME_KEY__';
 const WATCHDOG_MS = 2_500;
@@ -18,7 +18,7 @@ function initMotionBridge() {
 
     function arm() {
         if (state.expired) return;
-        if (globalThis.matchMedia(REDUCE).matches) return disarm();
+        if (globalThis.matchMedia(REDUCED_MOTION_QUERY).matches) return disarm();
 
         globalThis.clearTimeout(watchdog);
         root.classList.add(ARMED_CLASS);
@@ -45,7 +45,7 @@ function initMotionBridge() {
     arm();
     doc.addEventListener('astro:after-swap', arm);
     doc.addEventListener('astro:before-swap', (event) => {
-        if (state.expired || globalThis.matchMedia(REDUCE).matches) return;
+        if (state.expired || globalThis.matchMedia(REDUCED_MOTION_QUERY).matches) return;
 
         event.newDocument.documentElement.classList.add(ARMED_CLASS);
     });
@@ -92,20 +92,16 @@ function initSessionState() {
 }
 
 function initTheme() {
-    let theme;
-
-    function preferred() {
-        return globalThis.matchMedia(DARK_QUERY).matches ? 'dark' : 'light';
-    }
+    let theme = DEFAULT_THEME;
 
     try {
         const raw = globalThis.localStorage.getItem(THEME_KEY);
 
         const stored = raw ? JSON.parse(raw) : null;
 
-        theme = stored === 'dark' || stored === 'light' ? stored : preferred();
+        if (stored === 'dark' || stored === 'light') theme = stored;
     } catch {
-        theme = preferred();
+        theme = DEFAULT_THEME;
     }
 
     root.dataset.theme = theme;

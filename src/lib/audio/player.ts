@@ -1,6 +1,6 @@
+import { RACK_MASTER_LEVEL, closeRackChain, openRackChain, setRackMuted, setRackVolume } from '@lib/rack/context';
 import { STORAGE, TRACK_STATE_TOPIC } from '@lib/shared/constants';
 import { createStore } from '@lib/shared/state';
-import { setRackMuted, setRackVolume } from '@lib/rack/context';
 
 const ATTACK_DIVISOR = 8;
 const BASS_LEVEL = 0.5;
@@ -15,10 +15,8 @@ const LEAD_LEVEL = 0.16;
 const LEAD_RELEASE = 0.34;
 const LEAD_THRESHOLD = 0.55;
 const LOOKAHEAD_MS = 25;
-const MASTER_LEVEL = 0.55;
 const MIDI_A4 = 69;
 const MINIMUM_GAIN = 0.0001;
-const MUTE_RAMP = 0.01;
 const NOISE_SECONDS = 1;
 const OCTAVE_THRESHOLD = 0.85;
 const PENTATONIC = [0, 3, 5, 7, 10];
@@ -36,6 +34,9 @@ const TEMPO_BASE = 84;
 const TEMPO_SPREAD = 5;
 const TEMPO_STEP = 8;
 const TUNING_HERTZ = 440;
+const VOICE_LEVEL = 0.55;
+
+const VOICE_MIX = VOICE_LEVEL / RACK_MASTER_LEVEL;
 
 const store = createStore<PlayerState>({
     fallback: { open: false, playing: false, position: 0 },
@@ -46,9 +47,12 @@ const store = createStore<PlayerState>({
 
 let context: AudioContext | undefined;
 let current: PlayerTrack | undefined;
-let master: GainNode | undefined;
+let element: HTMLAudioElement | undefined;
+let mix: GainNode | undefined;
 let muted = false;
 let noise: AudioBuffer | undefined;
+let route: MediaElementAudioSourceNode | undefined;
+let routed = false;
 let scheduler: Timer | undefined;
 let startedAt = 0;
 let stepCursor = 0;
@@ -74,21 +78,49 @@ function closePlayer(): void {
     store.set({ ...store.get(), open: false });
 }
 
-function ensureContext(): AudioContext | undefined {
-    if (context) return context;
+function endPlayback(position: number): void {
+    stopVoices();
+    closeRackChain();
+    store.set({ ...store.get(), playing: false, position });
+    announceTrackState();
+}
+
+function ensureAudio(): RackAudio | undefined {
     if (typeof AudioContext === 'undefined') return undefined;
 
-    context = new AudioContext();
-    master = context.createGain();
-    noise = context.createBuffer(1, context.sampleRate * NOISE_SECONDS, context.sampleRate);
-    master.gain.value = muted ? 0 : MASTER_LEVEL * volume;
-    master.connect(context.destination);
+    const audio = openRackChain();
 
-    const samples = noise.getChannelData(0);
+    context = audio.context;
 
-    for (let index = 0; index < samples.length; index += 1) samples[index] = Math.random() * 2 - 1;
+    if (!noise) {
+        noise = audio.context.createBuffer(1, audio.context.sampleRate * NOISE_SECONDS, audio.context.sampleRate);
 
-    return context;
+        const samples = noise.getChannelData(0);
+
+        for (let index = 0; index < samples.length; index += 1) samples[index] = Math.random() * 2 - 1;
+    }
+
+    if (!mix) {
+        mix = audio.context.createGain();
+        mix.gain.value = VOICE_MIX;
+    }
+
+    mix.connect(audio.input);
+
+    return audio;
+}
+
+function ensureElement(): HTMLAudioElement | undefined {
+    if (element) return element;
+    if (typeof Audio === 'undefined') return undefined;
+
+    element = new Audio();
+    element.muted = muted;
+    element.preload = 'auto';
+    element.volume = volume;
+    element.addEventListener('ended', stopPlayback);
+
+    return element;
 }
 
 function getPlayerState(): PlayerState {
@@ -100,7 +132,9 @@ function getPosition(): number {
     const track = current;
 
     if (!track) return 0;
-    if (!state.playing || !context) return Math.min(state.position, track.durationSeconds);
+    if (!state.playing) return Math.min(state.position, track.durationSeconds);
+    if (track.file) return Math.min(element?.currentTime ?? state.position, track.durationSeconds);
+    if (!context) return Math.min(state.position, track.durationSeconds);
 
     return Math.min(context.currentTime - startedAt, track.durationSeconds);
 }
@@ -140,11 +174,7 @@ function openPlayer(): void {
 }
 
 function pausePlayback(): void {
-    const position = getPosition();
-
-    stopVoices();
-    store.set({ ...store.get(), playing: false, position });
-    announceTrackState();
+    endPlayback(getPosition());
 }
 
 function playTrack(track: PlayerTrack): void {
@@ -155,7 +185,7 @@ function playTrack(track: PlayerTrack): void {
 }
 
 function pluck(track: PlayerTrack, at: number, midi: number, level: number, release: number, kind: OscillatorType): void {
-    if (!context || !master) return;
+    if (!context || !mix) return;
 
     const gain = context.createGain();
     const oscillator = context.createOscillator();
@@ -164,7 +194,7 @@ function pluck(track: PlayerTrack, at: number, midi: number, level: number, rele
     gain.gain.setValueAtTime(MINIMUM_GAIN, at);
     gain.gain.exponentialRampToValueAtTime(level, at + stepSeconds(track) / ATTACK_DIVISOR);
     gain.gain.exponentialRampToValueAtTime(MINIMUM_GAIN, at + release);
-    oscillator.connect(gain).connect(master);
+    oscillator.connect(gain).connect(mix);
     oscillator.frequency.setValueAtTime(noteHertz(midi), at);
     oscillator.start(at);
     oscillator.stop(at + release);
@@ -182,24 +212,70 @@ function registerVoice(voice: AudioScheduledSourceNode): void {
     }, { once: true });
 }
 
+function resumeFile(file: string, from: number, state: PlayerState): void {
+    const media = ensureElement();
+
+    if (!media) return;
+
+    stopVoices();
+    routeElement(media);
+
+    const source = new URL(file, location.href).href;
+
+    if (media.src !== source) media.src = source;
+
+    media.currentTime = from;
+    store.set({ ...state, open: true, playing: true, position: from });
+    announceTrackState();
+    media.play().catch(pausePlayback);
+}
+
 function resumePlayback(): void {
-    const audio = ensureContext();
     const state = store.get();
     const track = current;
 
-    if (!track || !audio) return;
-
-    void audio.resume();
-    stopVoices();
+    if (!track) return;
 
     const from = state.position >= track.durationSeconds ? 0 : state.position;
 
+    if (track.file) {
+        resumeFile(track.file, from, state);
+
+        return;
+    }
+
+    const audio = ensureAudio();
+
+    if (!audio) return;
+
+    stopVoices();
+
     scheduler = setInterval(tick, LOOKAHEAD_MS);
     stepCursor = Math.floor(from / stepSeconds(track));
-    stepTime = audio.currentTime + START_PADDING;
+    stepTime = audio.context.currentTime + START_PADDING;
     startedAt = stepTime - stepCursor * stepSeconds(track);
     store.set({ ...state, open: true, playing: true, position: from });
     announceTrackState();
+}
+
+function routeElement(media: HTMLAudioElement): void {
+    const audio = ensureAudio();
+
+    if (!audio) return;
+
+    if (!route) {
+        try {
+            route = audio.context.createMediaElementSource(media);
+        } catch {
+            return;
+        }
+
+        media.muted = false;
+        media.volume = 1;
+        routed = true;
+    }
+
+    route.connect(audio.input);
 }
 
 function scheduleStep(track: PlayerTrack, step: number, at: number): void {
@@ -236,14 +312,14 @@ function setMuted(next: boolean): void {
     muted = next;
     setRackMuted(next);
 
-    if (context && master) master.gain.setTargetAtTime(next ? 0 : MASTER_LEVEL * volume, context.currentTime, MUTE_RAMP);
+    if (element && !routed) element.muted = next;
 }
 
 function setVolume(fraction: number): void {
     volume = Math.min(Math.max(0, fraction), 1);
     setRackVolume(volume);
 
-    if (context && master) master.gain.setTargetAtTime(muted ? 0 : MASTER_LEVEL * volume, context.currentTime, MUTE_RAMP);
+    if (element && !routed) element.volume = volume;
 }
 
 function stepSeconds(track: PlayerTrack): number {
@@ -251,13 +327,12 @@ function stepSeconds(track: PlayerTrack): number {
 }
 
 function stopPlayback(): void {
-    stopVoices();
-    store.set({ ...store.get(), playing: false, position: 0 });
-    announceTrackState();
+    endPlayback(0);
 }
 
 function stopVoices(): void {
     clearInterval(scheduler);
+    element?.pause();
 
     voices.forEach((voice) => {
         try {
@@ -304,7 +379,7 @@ function togglePlayback(): void {
 }
 
 function whisper(at: number): void {
-    if (!context || !master || !noise) return;
+    if (!context || !mix || !noise) return;
 
     const filter = context.createBiquadFilter();
     const gain = context.createGain();
@@ -316,7 +391,7 @@ function whisper(at: number): void {
     gain.gain.setValueAtTime(HAT_LEVEL, at);
     gain.gain.exponentialRampToValueAtTime(MINIMUM_GAIN, at + HAT_RELEASE);
     registerVoice(source);
-    source.connect(filter).connect(gain).connect(master);
+    source.connect(filter).connect(gain).connect(mix);
     source.start(at);
     source.stop(at + HAT_RELEASE);
 }

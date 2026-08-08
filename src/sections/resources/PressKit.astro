@@ -38,7 +38,7 @@ const press = downloads
             The wordmark and lockup, in the formats a publication is likely to ask for.
         </p>
         <div
-            class="press-kit__marks slab slab--card slab--roomy mb-8"
+            class="slab slab--card slab--roomy flex flex-wrap items-center gap-(--space-2xl) mb-8"
             data-motion="unfold"
         >
             <BrandLockup
@@ -52,7 +52,7 @@ const press = downloads
             />
         </div>
         <div
-            class="press-kit__scroller"
+            class="overflow-x-auto"
             data-motion="unfold"
         >
             <table class="press-kit__table border-2 border-ink">
@@ -86,7 +86,7 @@ const press = downloads
                             <td class="px-4 py-4 font-mono text-xs uppercase">{download.format}</td>
                             <td class="px-4 py-4 text-right">
                                 <a
-                                    class="action-text press-kit__download"
+                                    class="action-text inline-flex items-center min-h-(--control-size) transition-colors"
                                     download={download.filename}
                                     href={download.asset.src}
                                 >
@@ -114,7 +114,7 @@ const press = downloads
             Press material
         </SectionHead>
         <div
-            class="press-kit__scroller mb-8"
+            class="overflow-x-auto mb-8"
             data-motion="unfold"
         >
             <table class="press-kit__table border-2 border-ink">
@@ -170,11 +170,11 @@ const press = downloads
                             </th>
                             <td class="px-4 py-4 font-mono text-xs text-ink-muted">
                                 <span
-                                    class="press-kit__kind"
+                                    class="inline-flex items-center gap-(--space-3xs)"
                                     style={`--kind-color: ${KIND_COLORS[asset.data.kind]}`}
                                 >
                                     <span
-                                        class="press-kit__swatch"
+                                        class="flex-none size-2 bg-(--kind-color)"
                                         aria-hidden="true"
                                     />
                                     {ASSET_KIND_LABELS[asset.data.kind]}
@@ -193,7 +193,7 @@ const press = downloads
                             <td class="px-4 py-4 text-right">
                                 {asset.availability === 'open' && (
                                     <a
-                                        class="action-text press-kit__download"
+                                        class="action-text inline-flex items-center min-h-(--control-size) transition-colors"
                                         href={asset.data.href}
                                     >
                                         Open
@@ -201,7 +201,7 @@ const press = downloads
                                 )}
                                 {asset.availability === 'scheduled' && (
                                     <span
-                                        class="label press-kit__countdown"
+                                        class="label text-accent-deep"
                                         data-unlock
                                         data-unlocks-at={asset.data.unlocksAt?.toISOString()}
                                     >
@@ -224,7 +224,7 @@ const press = downloads
         >
             Each entry also has a card in the&#32;
             <a
-                class="press-kit__link hover:text-accent-deep underline underline-offset-4"
+                class="active:translate-y-px hover:text-accent-deep inline-block py-(--space-3xs) underline underline-offset-4 transition-[color,transform]"
                 href="#library-title"
             >
                 asset library
@@ -273,59 +273,12 @@ const press = downloads
 </section>
 
 <style>
-    .press-kit__countdown {
-        color: var(--color-accent-deep);
-    }
-
-    .press-kit__download {
-        align-items: center;
-        display: inline-flex;
-        min-height: var(--control-size);
-        transition: color var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .press-kit__kind {
-        align-items: center;
-        display: inline-flex;
-        gap: var(--space-3xs);
-    }
-
-    .press-kit__link {
-        display: inline-block;
-        padding-block: var(--space-3xs);
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .press-kit__link:active {
-        transform: translateY(1px);
-    }
-
     .press-kit__lockup {
         color: var(--color-ink);
     }
 
     .press-kit__mark {
         color: var(--color-accent);
-    }
-
-    .press-kit__marks {
-        align-items: center;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-2xl);
-    }
-
-    .press-kit__scroller {
-        overflow-x: auto;
-    }
-
-    .press-kit__swatch {
-        background-color: var(--kind-color);
-        block-size: 8px;
-        flex: none;
-        inline-size: 8px;
     }
 
     .press-kit__table {

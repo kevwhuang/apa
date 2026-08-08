@@ -4,19 +4,18 @@ import IconEye from '@components/icons/Eye.astro';
 import IconEyeOff from '@components/icons/EyeOff.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import { ARTIST_NAME_MAX_LENGTH, AVATAR, GENRES, MEMBER_ROLES, PASSWORD_MIN_LENGTH, ROLES, UPLOAD, UPLOAD_EXTENSIONS_LABEL, US_STATES } from '@lib/shared/constants';
+import { AVATAR, GENRES, PASSWORD_MIN_LENGTH, PROFILE_FIELDS, PROFILE_ROLES, SPOTLIGHT, SPOTLIGHT_EXTENSIONS_LABEL, US_STATES } from '@lib/shared/constants';
 import { AVATAR_EXTENSIONS_OR_LIST } from '@lib/account/images';
 import { formatBytes, formatDateStamp, formatProds, getInitials, getStanding, pickTileColor } from '@lib/shared/utils';
 
 const ATTENDANCE = [
+    { date: '2026-07-25T13:30:00-05:00', event: 'Bash \u00b7 July' },
     { date: '2026-07-22T19:00:00-05:00', event: 'Hangout \u00b7 July' },
     { date: '2026-06-11T18:00:00-05:00', event: 'Assembly \u00b7 June' },
     { date: '2026-03-21T13:30:00-05:00', event: 'Bash \u00b7 March' },
     { date: '2025-11-15T13:30:00-06:00', event: 'Bash \u00b7 November' },
     { date: '2024-03-14T18:00:00-05:00', event: 'Assembly \u00b7 March' },
 ];
-
-const BIO_MAX_LENGTH = 280;
 
 const DEMO_PROFILE = {
     artistName: 'Nightshift',
@@ -31,10 +30,10 @@ const DEMO_PROFILE = {
         spotify: 'https://open.spotify.com/artist/4kZ1nightshift',
         youtube: 'https://youtube.com/@nightshift',
     },
-    prods: 7,
+    prods: 8,
     role: 'producer',
     state: 'TX',
-    track: { bytes: 8_642_048, name: 'Untitled Sketch 09.wav' },
+    track: { name: 'Untitled Sketch 09.mp3' },
 };
 
 const LINK_FIELDS = [
@@ -53,6 +52,7 @@ const PRODS_LEDGER = [
     { amount: -1, date: '2026-04-02T09:00:00-05:00', reason: 'Redeemed \u2014 Store credit' },
     { amount: 1, date: '2026-06-11T18:00:00-05:00', reason: 'Attended the June Assembly' },
     { amount: 1, date: '2026-07-22T19:00:00-05:00', reason: 'Attended the July Hangout' },
+    { amount: 1, date: '2026-07-25T13:30:00-05:00', reason: 'Attended the July Bash' },
 ];
 
 const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
@@ -60,8 +60,6 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
     balance: PRODS_LEDGER.slice(0, index + 1).reduce((total, item) => total + item.amount, 0),
     change: entry.amount > 0 ? `+${entry.amount}` : `\u2212${Math.abs(entry.amount)}`,
 })).toReversed();
-
-const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.id));
 ---
 
 <section
@@ -92,7 +90,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
     aria-label="Account and profile"
 >
     <div
-        class="settings__stack"
+        class="flex flex-col gap-(--space-2xl)"
         data-motion-stagger="rise"
     >
         <div class="flex flex-col gap-5">
@@ -113,7 +111,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                                 hidden
                             />
                         </PlaceholderTile>
-                        <div class="settings__facts">
+                        <div class="flex-[1_1_200px]">
                             <p
                                 class="mb-2 font-extrabold font-sans text-xl tracking-tight wrap-break-word"
                                 data-settings-name
@@ -174,7 +172,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                             {formatDateStamp(DEMO_PROFILE.joined)}
                         </dd>
                     </div>
-                    <div class="settings__wide p-(--space-md) bg-surface-raised">
+                    <div class="col-span-full p-(--space-md) bg-surface-raised">
                         <dt class="label mb-2 text-ink-muted">Email</dt>
                         <dd
                             class="font-mono text-sm wrap-break-word"
@@ -186,7 +184,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                 </dl>
             </div>
             <a
-                class="action-text settings__link hover:text-accent-deep self-start transition-colors"
+                class="action-text hover:text-accent-deep inline-flex items-center self-start min-h-(--control-size) gap-(--space-2xs) px-(--space-3xs) underline transition-colors"
                 data-settings-onboarding
                 hidden
                 href="/onboarding"
@@ -202,15 +200,16 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                 Profile
             </h2>
             <div class="flex flex-col gap-2">
-                <p class="label mb-1 text-ink-muted">Portrait</p>
-                <div class="settings__track">
+                <p class="label mb-1 text-ink-muted">{PROFILE_FIELDS.portrait.label}</p>
+                <div class="settings__track aria-busy:cursor-progress aria-busy:opacity-60 flex flex-wrap items-center gap-(--space-md)">
                     <label class="settings__pick">
-                        <span class="label">Choose an image</span>
+                        <span class="label">{PROFILE_FIELDS.portrait.picker}</span>
                         <input
                             id="settings-portrait"
                             class="settings__file sr-only"
                             accept={AVATAR.acceptAttribute}
                             aria-describedby="settings-portrait-error settings-portrait-help"
+                            aria-invalid="false"
                             data-portrait-input
                             name="portrait"
                             type="file"
@@ -250,14 +249,14 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
             </div>
             <div class="flex flex-col gap-2">
                 <label class="block">
-                    <span class="label block mb-2 text-ink-muted">Artist name</span>
+                    <span class="label block mb-2 text-ink-muted">{PROFILE_FIELDS.artistName.label}</span>
                     <input
                         id="settings-name"
                         class="input font-sans"
-                        aria-describedby="settings-name-error"
+                        aria-describedby="settings-name-error settings-name-help"
                         aria-invalid="false"
-                        autocomplete="nickname"
-                        maxlength={ARTIST_NAME_MAX_LENGTH}
+                        autocomplete={PROFILE_FIELDS.artistName.autocomplete}
+                        maxlength={PROFILE_FIELDS.artistName.maxLength}
                         name="artistName"
                         type="text"
                         value={DEMO_PROFILE.artistName}
@@ -269,20 +268,22 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                     data-field-error
                     hidden
                 />
-                <p class="text-sm text-ink-subtle">
-                    Up to {ARTIST_NAME_MAX_LENGTH} characters. This is what the roster shows
-                    &mdash; it cannot be used to sign in.
+                <p
+                    id="settings-name-help"
+                    class="text-sm text-ink-subtle"
+                >
+                    {PROFILE_FIELDS.artistName.help}
                 </p>
             </div>
             <div class="flex flex-col gap-2">
                 <label class="block">
-                    <span class="label block mb-2 text-ink-muted">Bio</span>
+                    <span class="label block mb-2 text-ink-muted">{PROFILE_FIELDS.bio.label}</span>
                     <textarea
                         id="settings-bio"
                         class="input input--area font-sans"
                         aria-describedby="settings-bio-error settings-bio-help"
                         aria-invalid="false"
-                        maxlength={BIO_MAX_LENGTH}
+                        maxlength={PROFILE_FIELDS.bio.maxLength}
                         name="bio"
                         rows="4"
                         set:text={DEMO_PROFILE.bio}
@@ -298,13 +299,13 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                     id="settings-bio-help"
                     class="text-sm text-ink-subtle"
                 >
-                    <span data-bio-count>{DEMO_PROFILE.bio.length}</span> of {BIO_MAX_LENGTH} characters.
-                    A line or two on what you make and how you make it.
+                    <span data-bio-count>{DEMO_PROFILE.bio.length}</span> of {PROFILE_FIELDS.bio.maxLength} characters.
+                    {PROFILE_FIELDS.bio.help}
                 </p>
             </div>
-            <fieldset class="settings__group flex flex-col gap-3">
+            <fieldset class="flex flex-col gap-3">
                 <legend class="label mb-1 text-ink-muted">
-                    What you make <span class="text-ink-subtle">/ Pick up to five</span>
+                    {PROFILE_FIELDS.genres.label} <span class="text-ink-subtle">/ {PROFILE_FIELDS.genres.qualifier}</span>
                 </legend>
                 <div class="flex flex-wrap gap-2">
                     {GENRES.map(genre => (
@@ -329,12 +330,12 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                     hidden
                 />
             </fieldset>
-            <fieldset class="settings__group flex flex-col gap-3">
+            <fieldset class="flex flex-col gap-3">
                 <legend class="label mb-1 text-ink-muted">
-                    What do you do? <span class="text-ink-subtle">/ Pick one</span>
+                    {PROFILE_FIELDS.role.label} <span class="text-ink-subtle">/ {PROFILE_FIELDS.role.qualifier}</span>
                 </legend>
                 <div class="flex flex-wrap gap-2">
-                    {roles.map(role => (
+                    {PROFILE_ROLES.map(role => (
                         <label class="settings__chip">
                             <input
                                 class="box"
@@ -351,15 +352,15 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
             <div class="settings__pair">
                 <div class="flex flex-col gap-2">
                     <label class="block">
-                        <span class="label block mb-2 text-ink-muted">City</span>
+                        <span class="label block mb-2 text-ink-muted">{PROFILE_FIELDS.city.label}</span>
                         <input
                             id="settings-city"
                             class="input font-sans"
                             aria-describedby="settings-city-error"
                             aria-invalid="false"
-                            autocomplete="address-level2"
+                            autocomplete={PROFILE_FIELDS.city.autocomplete}
                             name="city"
-                            required
+                            required={PROFILE_FIELDS.city.required}
                             type="text"
                             value={DEMO_PROFILE.city}
                         />
@@ -373,16 +374,16 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="block">
-                        <span class="label block mb-2 text-ink-muted">State</span>
+                        <span class="label block mb-2 text-ink-muted">{PROFILE_FIELDS.state.label}</span>
                         <span class="select">
                             <select
                                 id="settings-state"
                                 class="input font-sans"
                                 aria-describedby="settings-state-error"
                                 aria-invalid="false"
-                                autocomplete="address-level1"
+                                autocomplete={PROFILE_FIELDS.state.autocomplete}
                                 name="state"
-                                required
+                                required={PROFILE_FIELDS.state.required}
                             >
                                 {US_STATES.map(state => (
                                     <option
@@ -463,7 +464,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
             <div class="flex flex-col gap-2">
                 <label class="block">
                     <span class="label block mb-2 text-ink-muted">New password</span>
-                    <span class="settings__control">
+                    <span class="block relative">
                         <input
                             id="settings-password"
                             class="input pr-12 font-sans"
@@ -482,10 +483,10 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                             data-reveal="settings-password"
                             type="button"
                         >
-                            <span class="settings__glyph settings__glyph--show">
+                            <span class="settings__glyph--show flex items-center">
                                 <IconEye />
                             </span>
-                            <span class="settings__glyph settings__glyph--hide">
+                            <span class="settings__glyph--hide flex items-center">
                                 <IconEyeOff />
                             </span>
                         </button>
@@ -504,7 +505,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
             <div class="flex flex-col gap-2">
                 <label class="block">
                     <span class="label block mb-2 text-ink-muted">Confirm new password</span>
-                    <span class="settings__control">
+                    <span class="block relative">
                         <input
                             id="settings-confirm"
                             class="input pr-12 font-sans"
@@ -522,10 +523,10 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                             data-reveal="settings-confirm"
                             type="button"
                         >
-                            <span class="settings__glyph settings__glyph--show">
+                            <span class="settings__glyph--show flex items-center">
                                 <IconEye />
                             </span>
-                            <span class="settings__glyph settings__glyph--hide">
+                            <span class="settings__glyph--hide flex items-center">
                                 <IconEyeOff />
                             </span>
                         </button>
@@ -556,21 +557,22 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                 One file, and it is the one that plays on your roster card. Swap it whenever the
                 better take arrives.
             </p>
-            <div class="settings__track">
+            <div class="settings__track aria-busy:cursor-progress aria-busy:opacity-60 flex flex-wrap items-center gap-(--space-md)">
                 <label class="settings__pick">
                     <span class="label">Choose an audio file</span>
                     <input
                         id="settings-track"
                         class="settings__file sr-only"
-                        accept={UPLOAD.acceptAttribute}
+                        accept={SPOTLIGHT.acceptAttribute}
                         aria-describedby="settings-track-error settings-track-help"
+                        aria-invalid="false"
                         data-track-input
                         name="track"
                         type="file"
                     />
                 </label>
                 <p
-                    class="settings__empty text-sm text-ink-subtle"
+                    class="flex-[1_1_200px] text-sm text-ink-subtle"
                     data-track-empty
                     hidden
                 >
@@ -585,12 +587,6 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                         data-track-name
                     >
                         {DEMO_PROFILE.track.name}
-                    </p>
-                    <p
-                        class="label text-ink-muted"
-                        data-track-meta
-                    >
-                        {formatBytes(DEMO_PROFILE.track.bytes)}
                     </p>
                     <button
                         class="action-text hover:text-accent-deep flex items-center min-h-(--control-size) px-1 text-ink-muted transition-colors"
@@ -611,7 +607,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                 id="settings-track-help"
                 class="text-sm text-ink-subtle"
             >
-                {UPLOAD_EXTENSIONS_LABEL}. Up to {formatBytes(UPLOAD.maxFileBytes)}.
+                {SPOTLIGHT_EXTENSIONS_LABEL} only. Up to {formatBytes(SPOTLIGHT.maxFileBytes)}.
             </p>
             <button
                 class="btn btn--primary self-start"
@@ -633,7 +629,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
             <p class="max-w-2xl text-sm text-ink-subtle">
                 Every event you have checked in to since you joined, newest first.
             </p>
-            <div class="scroll-slot settings__scroller settings__scroller--attendance">
+            <div class="scroll-slot settings__scroller--attendance overflow-x-auto border-2 border-ink">
                 <table class="settings__table">
                     <caption class="sr-only">Events you checked in to, with the date of each check-in</caption>
                     <thead>
@@ -684,8 +680,8 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
                 Every Prod earned or spent since you joined, newest first, with the balance that
                 stood after each entry.
             </p>
-            <div class="scroll-slot settings__scroller settings__scroller--ledger">
-                <table class="settings__table settings__table--wide">
+            <div class="scroll-slot settings__scroller--ledger overflow-x-auto border-2 border-ink">
+                <table class="settings__table min-w-[520px]">
                     <caption class="sr-only">Dated ledger entries with reason, change, and running balance</caption>
                     <thead>
                         <tr class="font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
@@ -755,19 +751,6 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         background-color: var(--color-surface-sunken);
     }
 
-    .settings__control {
-        display: block;
-        position: relative;
-    }
-
-    .settings__empty {
-        flex: 1 1 200px;
-    }
-
-    .settings__facts {
-        flex: 1 1 200px;
-    }
-
     .settings__file {
         clip-path: inset(50%);
         height: 100%;
@@ -792,25 +775,6 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         display: flex;
         flex-direction: column;
         gap: var(--space-md);
-    }
-
-    .settings__glyph {
-        align-items: center;
-        display: flex;
-    }
-
-    .settings__group {
-        border: 0;
-        padding: 0;
-    }
-
-    .settings__link {
-        align-items: center;
-        display: inline-flex;
-        gap: var(--space-2xs);
-        min-height: var(--control-size);
-        padding-inline: var(--space-3xs);
-        text-decoration: underline;
     }
 
     .settings__overview {
@@ -910,23 +874,12 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         text-transform: capitalize;
     }
 
-    .settings__scroller {
-        border: 2px solid var(--color-ink);
-        overflow-x: auto;
-    }
-
     .settings__scroller--attendance {
-        --scroll-slot-max: 331px;
+        --scroll-slot-max: calc(44px + 5 * (33px + 24px));
     }
 
     .settings__scroller--ledger {
         --scroll-slot-max: calc(44px + 5 * (33px + 10 * var(--text-sm) / 7));
-    }
-
-    .settings__stack {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2xl);
     }
 
     .settings__staged {
@@ -962,21 +915,6 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         z-index: var(--z-page);
     }
 
-    .settings__table--wide {
-        min-width: 520px;
-    }
-
-    .settings__track {
-        align-items: center;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-md);
-    }
-
-    .settings__wide {
-        grid-column: 1 / -1;
-    }
-
     @media (max-width: 1024px) {
         .settings__overview {
             grid-template-columns: minmax(0, 1fr);
@@ -992,16 +930,15 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
 </style>
 
 <script>
-    import { MOCK_LATENCY_MS, UPLOAD } from '@lib/shared/constants';
-    import { UPLOAD_EXTENSIONS_OR_LIST, getExtension, getSizeError } from '@lib/audio/uploads';
-    import { clearFieldErrors, confirmRule, focusFirstError, isValidationBypassed, passwordRule, setFieldErrors, validateFields } from '@lib/ui/forms';
-    import { delay, formatBytes, formatDateStamp, formatProds, getInitials, getStanding, pickTileColor, registerPageScript, setAvatarImage, setPending, setText } from '@lib/shared/utils';
+    import { MOCK_LATENCY_MS, PROFILE_FIELDS, SPOTLIGHT, SPOTLIGHT_EXTENSIONS_LABEL } from '@lib/shared/constants';
+    import { clearFieldErrors, confirmRule, focusFirstError, handleReveal, isValidationBypassed, passwordRule, setFieldErrors, setRole, validateFields } from '@lib/ui/forms';
+    import { delay, formatDateStamp, formatProds, getInitials, getStanding, pickTileColor, registerPageScript, setAvatarImage, setPending, setText } from '@lib/shared/utils';
+    import { getExtension, getSizeError, releaseAudioContext, uploadSubmission } from '@lib/audio/uploads';
     import { getOnboardingHref } from '@lib/account/onboarding';
-    import { getSession, onSessionChange, updateSession } from '@lib/account/session';
+    import { getSession, onSessionChange, saveSession } from '@lib/account/session';
     import { stageAvatar } from '@lib/account/images';
     import { toast } from '@lib/ui/toasts';
 
-    const GENRE_MAX = 5;
     const INVALID_MESSAGE = 'Check the fields.';
     const LINK_MESSAGE = 'Use a full address that starts with https://.';
     const LINK_NAMES = ['instagram', 'spotify', 'soundcloud', 'youtube'];
@@ -1017,13 +954,15 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
     };
 
     const PROFILE_RULES: Record<string, FieldRule> = {
-        city: { message: 'Name the city you work out of.', required: true },
+        city: { message: PROFILE_FIELDS.city.message, required: PROFILE_FIELDS.city.required },
     };
 
     const SIGNED_OUT_MESSAGE = 'Sign in to save changes.';
+    const STORAGE_MESSAGE = 'Nothing was saved \u2014 your browser storage is full. Clear some space and try again.';
     const TRACK_MISSING_MESSAGE = 'Stage an audio file before you save.';
 
     let demoSummary = { email: '', name: '', prods: '', role: '', since: '', standing: '' };
+    let reading = false;
     let stagedAvatar = '';
     let staging = false;
     let unsubscribe: (() => void) | undefined;
@@ -1108,7 +1047,6 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
             if (!staged.ok) {
                 setFieldErrors(form, { portrait: staged.message });
                 input.focus();
-                toast(staged.message, 'error');
 
                 return;
             }
@@ -1129,7 +1067,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         const values = new FormData(form);
         const errors = validateFields(form, PROFILE_RULES);
 
-        if (!isValidationBypassed() && values.getAll('genres').length > GENRE_MAX) errors.genres = 'Pick five at most.';
+        if (!isValidationBypassed() && values.getAll('genres').length > PROFILE_FIELDS.genres.max) errors.genres = PROFILE_FIELDS.genres.message;
 
         clearFieldErrors(form);
 
@@ -1145,7 +1083,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
 
         setPending(button, true);
 
-        const saved = await updateSession({
+        const saved = await saveSession({
             artistName: String(values.get('artistName') ?? '').trim(),
             avatar: stagedAvatar,
             role: String(values.get('role') ?? ''),
@@ -1153,8 +1091,14 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
 
         setPending(button, false);
 
-        if (!saved) {
+        if (!saved.session) {
             toast(SIGNED_OUT_MESSAGE, 'info');
+
+            return;
+        }
+
+        if (!saved.persisted) {
+            toast(STORAGE_MESSAGE, 'error');
 
             return;
         }
@@ -1168,23 +1112,12 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         toast('Profile saved.', 'success');
     }
 
-    function handleReveal(button: HTMLButtonElement) {
-        const input = document.getElementById(button.dataset.reveal ?? '');
-        const shown = button.getAttribute('aria-pressed') === 'true';
-
-        if (!(input instanceof HTMLInputElement)) return;
-
-        button.setAttribute('aria-label', shown ? 'Show password' : 'Hide password');
-        button.setAttribute('aria-pressed', shown ? 'false' : 'true');
-        input.type = shown ? 'password' : 'text';
-    }
-
-    function handleTrackChange(form: HTMLFormElement, input: HTMLInputElement) {
+    async function handleTrackChange(form: HTMLFormElement, input: HTMLInputElement, signal: AbortSignal) {
         const file = input.files?.item(0);
 
         input.value = '';
 
-        if (!file) return;
+        if (reading || !file) return;
 
         const error = validateTrack(file);
 
@@ -1193,13 +1126,31 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         if (error) {
             setFieldErrors(form, { track: error });
             input.focus();
-            toast(error, 'error');
 
             return;
         }
 
-        stageTrack(form, file.name, formatBytes(file.size));
-        toast('Track staged.', 'success');
+        reading = true;
+        setBusy(form, true);
+
+        try {
+            const result = await uploadSubmission(file, { signal });
+
+            if (signal.aborted) return;
+
+            if (!result.ok) {
+                setFieldErrors(form, { track: result.message });
+                input.focus();
+
+                return;
+            }
+
+            stageTrack(form, file.name);
+            toast('Track staged.', 'success');
+        } finally {
+            reading = false;
+            setBusy(form, false);
+        }
     }
 
     async function handleTrackSubmit(event: SubmitEvent, form: HTMLFormElement) {
@@ -1254,7 +1205,7 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         unsubscribe?.();
         unsubscribe = onSessionChange(renderSession);
         bio?.addEventListener('input', () => handleBioInput(bio), { signal });
-        file?.addEventListener('change', () => handleTrackChange(track, file), { signal });
+        file?.addEventListener('change', () => void handleTrackChange(track, file, signal), { signal });
         links.addEventListener('submit', event => void handleLinksSubmit(event, links), { signal });
         password.addEventListener('submit', event => void handlePasswordSubmit(event, password), { signal });
 
@@ -1265,9 +1216,11 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         picture?.addEventListener('change', () => void handlePortraitChange(profile, picture), { signal });
         profile.addEventListener('submit', event => void handleProfileSubmit(event, profile), { signal });
         profile.querySelector<HTMLButtonElement>('[data-portrait-remove]')?.addEventListener('click', () => removePortrait(profile), { signal });
+        signal.addEventListener('abort', releaseAudioContext, { once: true });
         signal.addEventListener('abort', () => unsubscribe?.(), { once: true });
         track.addEventListener('submit', event => void handleTrackSubmit(event, track), { signal });
         track.querySelector<HTMLButtonElement>('[data-track-remove]')?.addEventListener('click', () => removeTrack(track), { signal });
+        reading = false;
         stagedAvatar = getSession()?.avatar ?? '';
         prefillProfile(profile);
         renderPortrait(profile);
@@ -1302,7 +1255,6 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         const staged = form.querySelector<HTMLElement>('[data-track-staged]');
 
         clearFieldErrors(form);
-        setText(form.querySelector('[data-track-meta]'), '');
         setText(form.querySelector('[data-track-name]'), '');
         empty?.removeAttribute('hidden');
         staged?.setAttribute('hidden', '');
@@ -1345,17 +1297,17 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
         link.href = getOnboardingHref(session.email);
     }
 
-    function setRole(form: HTMLFormElement, value: string) {
-        const match = Array.from(form.querySelectorAll<HTMLInputElement>('[name="role"]')).find(radio => radio.value === value);
+    function setBusy(form: HTMLFormElement, busy: boolean) {
+        const zone = form.querySelector<HTMLElement>('.settings__track');
 
-        if (match) match.checked = true;
+        if (busy) zone?.setAttribute('aria-busy', 'true');
+        else zone?.removeAttribute('aria-busy');
     }
 
-    function stageTrack(form: HTMLFormElement, name: string, meta: string) {
+    function stageTrack(form: HTMLFormElement, name: string) {
         const empty = form.querySelector<HTMLElement>('[data-track-empty]');
         const staged = form.querySelector<HTMLElement>('[data-track-staged]');
 
-        setText(form.querySelector('[data-track-meta]'), meta);
         setText(form.querySelector('[data-track-name]'), name);
         empty?.setAttribute('hidden', '');
         staged?.removeAttribute('hidden');
@@ -1364,11 +1316,11 @@ const roles = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.i
     function validateTrack(file: File) {
         const extension = getExtension(file.name);
 
-        if (!UPLOAD.extensions.some(allowed => allowed === extension)) {
-            return `That is a .${extension || 'file'} \u2014 we take ${UPLOAD_EXTENSIONS_OR_LIST}.`;
+        if (!SPOTLIGHT.extensions.some(allowed => allowed === extension)) {
+            return `That is a .${extension || 'file'} \u2014 the spotlight track takes ${SPOTLIGHT_EXTENSIONS_LABEL} only.`;
         }
 
-        return getSizeError(file, UPLOAD.maxFileBytes);
+        return getSizeError(file, SPOTLIGHT.maxFileBytes);
     }
 
     registerPageScript(initSettings);

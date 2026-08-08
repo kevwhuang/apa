@@ -21,14 +21,14 @@ const SESSION_FILES = [
         data-motion="unfold"
     >
         <div
-            class="mark slab slab--accent workshop__marker"
+            class="mark slab slab--accent workshop__marker flex flex-wrap items-center justify-between gap-x-(--space-md) gap-y-(--space-sm) mb-(--space-lg)"
             data-motion="stamp"
         >
             <p class="label inline-block px-2 py-1 bg-ink text-ink-inverse">
                 Next workshop
             </p>
             <p
-                class="label workshop__edition"
+                class="label font-bold"
                 data-placeholder
             >
                 Workshop 08
@@ -39,12 +39,12 @@ const SESSION_FILES = [
         </div>
         <h2
             id="workshop-title"
-            class="workshop__title font-extrabold font-sans leading-[0.95] text-5xl tracking-[-0.03em]"
+            class="mb-(--space-lg) font-extrabold font-sans leading-[0.95] text-5xl tracking-[-0.03em]"
         >
             Low end, under control
         </h2>
         <div class="grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-            <div class="workshop__aside">
+            <div class="flex flex-col self-start gap-(--space-md)">
                 <div class="slab slab--card">
                     <div
                         class="workshop__plate mb-6"
@@ -102,20 +102,20 @@ const SESSION_FILES = [
                 <div>
                     <p class="label mb-2 text-ink-muted">Session files</p>
                     <ul
-                        class="workshop__list list-none"
+                        class="flex flex-col list-none"
                         data-motion-stagger="rise"
                     >
                         {SESSION_FILES.map((file, index) => (
                             <li class="workshop__row">
                                 <p
-                                    class="label workshop__index"
+                                    class="label font-bold text-accent-deep"
                                     aria-hidden="true"
                                 >
                                     {String(index + 1).padStart(INDEX_PAD, '0')}
                                 </p>
                                 <div class="flex flex-col gap-1">
                                     <a
-                                        class="workshop__link hover:text-accent-deep decoration-2 decoration-accent font-bold font-sans underline underline-offset-4"
+                                        class="active:translate-y-px hover:text-accent-deep inline-block self-start py-(--space-sm) decoration-2 decoration-accent font-bold font-sans underline underline-offset-4 transition-[color,transform]"
                                         href="/resources"
                                     >
                                         {file.title}
@@ -151,49 +151,9 @@ const SESSION_FILES = [
         padding: var(--space-2xl);
     }
 
-    .workshop__aside {
-        align-self: start;
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-md);
-    }
-
-    .workshop__edition {
-        font-weight: 700;
-    }
-
-    .workshop__index {
-        color: var(--color-accent-deep);
-        font-weight: 700;
-    }
-
-    .workshop__link {
-        align-self: flex-start;
-        display: inline-block;
-        padding-block: var(--space-sm);
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .workshop__link:active {
-        transform: translateY(1px);
-    }
-
-    .workshop__list {
-        display: flex;
-        flex-direction: column;
-    }
-
     .workshop__marker {
         --slab-level: var(--z-ground);
         --slab-rule: 2px;
-        align-items: center;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-sm) var(--space-md);
-        justify-content: space-between;
-        margin-bottom: var(--space-lg);
     }
 
     .workshop__plate {
@@ -220,10 +180,6 @@ const SESSION_FILES = [
         flex-basis: 100%;
         rotate: calc(var(--tilt-unit) * -3);
         transform-origin: 0 50%;
-    }
-
-    .workshop__title {
-        margin-bottom: var(--space-lg);
     }
 
     @media (max-width: 768px) {

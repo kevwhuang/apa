@@ -4,6 +4,7 @@
     --color-accent: #ef3f0c;
     --color-accent-20: #ef3f0c33;
     --color-accent-deep: #b8300a;
+    --color-accent-deep-40: #b8300a66;
     --color-accent-light: #ff7d59;
     --color-bloom: #ff2e88;
     --color-bloom-deep: #c00a5c;
@@ -76,7 +77,6 @@
     --hero-field-accent: var(--color-accent);
     --hero-field-alpha-max: 0.11;
     --hero-field-ink: var(--color-ink);
-    --launcher-rail: var(--launcher-size);
     --launcher-size: 50px;
     --lift: max(2px, calc(var(--drift-unit) / 8));
     --measure-form: calc(var(--shell-max) * 3 / 4 - 2 * var(--shell-pad));
@@ -222,6 +222,7 @@ table {
     --color-accent: #c93107;
     --color-accent-20: #c9310733;
     --color-accent-deep: #ff8d6b;
+    --color-accent-deep-40: #ff8d6b66;
     --color-accent-light: #a12a06;
     --color-bloom: #ff2e88;
     --color-bloom-deep: #ff5ca8;
@@ -246,6 +247,10 @@ table {
     --hero-field-accent: var(--color-accent-deep);
 }
 
+[data-theme='dark'] ::selection {
+    background: var(--color-accent-deep-40);
+}
+
 [id] {
     scroll-margin-top: calc(var(--header-height) + var(--space-sm));
 }
@@ -261,7 +266,6 @@ table {
 @media (max-width: 768px) {
     :root {
         --drift-gate: 0;
-        --launcher-rail: calc(var(--launcher-size) - var(--shell-pad));
         --rank-cols-2: minmax(0, 1fr);
         --rank-cols-4: repeat(2, minmax(0, 1fr));
         --rank-cols-split: minmax(0, 1fr);

@@ -25,7 +25,7 @@ const track = featured?.data.tracks[0];
         aria-labelledby="featured-producer-title"
     >
         <div
-            class="halftone--accent producer-feature__drift stage__item--full absolute pointer-events-none"
+            class="halftone--accent stage__item--full absolute -inset-y-[8%] inset-x-0 pointer-events-none"
             aria-hidden="true"
             data-scrub="drift"
         />
@@ -36,7 +36,7 @@ const track = featured?.data.tracks[0];
                 headingId="featured-producer-title"
                 tone="dark"
             >
-                {featured.data.name}.
+                {featured.data.name}
             </SectionHead>
             <div class="rank rank--split items-start">
                 <div>
@@ -83,7 +83,7 @@ const track = featured?.data.tracks[0];
                         ))}
                     </ul>
                     {track && (
-                        <div class="slab slab--bare slab--card max-w-xl text-ink">
+                        <div class="producer-feature__track slab slab--bare slab--card text-ink">
                             <p class="label pb-2 pt-3 px-3 text-accent-deep">Spotlight</p>
                             <ProducerTrack
                                 producerId={featured.id}
@@ -160,15 +160,15 @@ const track = featured?.data.tracks[0];
 </section>
 
 <style>
-    .producer-feature__drift {
-        inset: -8% calc(-1 * var(--launcher-rail)) -8% 0;
-    }
-
     .producer-feature__portrait {
         --plate-drop: calc(var(--z-card) * var(--lift));
         padding-block-end: var(--plate-drop);
         padding-inline-end: var(--plate-drop);
         rotate: calc(var(--tilt-unit) * -2 * var(--drift-gate));
+    }
+
+    .producer-feature__track :global(.producer-track__bar) {
+        width: 6px;
     }
 
     .producer-strip {

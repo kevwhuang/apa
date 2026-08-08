@@ -42,7 +42,7 @@ const { linkClass, links } = Astro.props;
                         target="_blank"
                     >
                         {LinkIcon ? <LinkIcon /> : link.label}
-                        <span class="sr-only">{LinkIcon && link.label} (opens in a new tab)</span>
+                        <span class="sr-only">{LinkIcon && link.label}&nbsp;(opens in a new tab)</span>
                     </a>
                 </li>
             );

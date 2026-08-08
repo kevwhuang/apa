@@ -1,7 +1,7 @@
 import { STORAGE } from '@lib/shared/constants';
 import { createStore } from '@lib/shared/state';
 
-const DARK_QUERY = '(prefers-color-scheme: dark)';
+const DEFAULT_THEME: Theme = 'light';
 const META_SELECTOR = 'meta[name="theme-color"]';
 
 const THEME_COLORS: Record<Theme, string> = {
@@ -17,27 +17,8 @@ const store = createStore<Theme | null>({
     topic: STORAGE.theme.topic,
 });
 
-let darkQuery: MediaQueryList | null = null;
-
-function getDarkQuery(): MediaQueryList | null {
-    if (typeof window === 'undefined') return null;
-
-    if (darkQuery === null) {
-        darkQuery = window.matchMedia(DARK_QUERY);
-        darkQuery.addEventListener('change', handleSystemChange);
-    }
-
-    return darkQuery;
-}
-
 function getTheme(): Theme {
-    return store.get() ?? systemTheme();
-}
-
-function handleSystemChange(): void {
-    if (store.get() !== null) return;
-
-    stampTheme(systemTheme());
+    return store.get() ?? DEFAULT_THEME;
 }
 
 function normalizeTheme(value: Theme | null): Theme | null {
@@ -60,12 +41,7 @@ function stampTheme(theme: Theme): void {
 function syncThemeAttribute(): void {
     if (typeof document === 'undefined') return;
 
-    getDarkQuery();
     stampTheme(getTheme());
-}
-
-function systemTheme(): Theme {
-    return getDarkQuery()?.matches === true ? 'dark' : 'light';
 }
 
 function toggleTheme(): Theme {

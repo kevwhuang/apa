@@ -1,7 +1,12 @@
-function createStore<T>(options: StoreOptions<T>): Store<T> {
+interface PersistentStore<T> extends Store<T> {
+    persisted(): boolean;
+}
+
+function createStore<T>(options: StoreOptions<T>): PersistentStore<T> {
     const { fallback, key, normalize, scope, topic } = options;
 
     let memoryValue: T | undefined;
+    let written = true;
 
     function get(): T {
         if (scope === 'memory') return normalizeValue(memoryValue ?? fallback);
@@ -37,10 +42,13 @@ function createStore<T>(options: StoreOptions<T>): Store<T> {
         return () => window.removeEventListener(topic, handler);
     }
 
+    function persisted(): boolean {
+        return written;
+    }
+
     function remove(): void {
         memoryValue = undefined;
-
-        if (scope !== 'memory') removeRaw(key, scope);
+        written = scope === 'memory' || removeRaw(key, scope);
 
         notify(topic);
     }
@@ -50,8 +58,9 @@ function createStore<T>(options: StoreOptions<T>): Store<T> {
 
         if (scope === 'memory') {
             memoryValue = next;
+            written = true;
         } else {
-            writeRaw(key, scope, JSON.stringify(next));
+            written = writeRaw(key, scope, JSON.stringify(next));
         }
 
         notify(topic);
@@ -63,7 +72,7 @@ function createStore<T>(options: StoreOptions<T>): Store<T> {
         return set(updater(get()));
     }
 
-    return { get, onChange, remove, set, update };
+    return { get, onChange, persisted, remove, set, update };
 }
 
 function getStorage(scope: StorageScope): Storage | null {
@@ -88,15 +97,17 @@ function readRaw(key: string, scope: StorageScope): string | null {
     }
 }
 
-function removeRaw(key: string, scope: StorageScope): void {
+function removeRaw(key: string, scope: StorageScope): boolean {
     const storage = getStorage(scope);
 
-    if (!storage) return;
+    if (!storage) return false;
 
     try {
         storage.removeItem(key);
+
+        return true;
     } catch {
-        return;
+        return false;
     }
 }
 
@@ -104,15 +115,17 @@ function unsubscribed(): void {
     return undefined;
 }
 
-function writeRaw(key: string, scope: StorageScope, raw: string): void {
+function writeRaw(key: string, scope: StorageScope, raw: string): boolean {
     const storage = getStorage(scope);
 
-    if (!storage) return;
+    if (!storage) return false;
 
     try {
         storage.setItem(key, raw);
+
+        return true;
     } catch {
-        return;
+        return false;
     }
 }
 

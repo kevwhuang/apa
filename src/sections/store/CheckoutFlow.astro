@@ -117,7 +117,7 @@ const variants = Object.fromEntries(products
         data-checkout-body
     >
         <form
-            class="checkout-form flex flex-col gap-6"
+            class="flex flex-col gap-6"
             data-checkout-form
             data-motion="unfold"
         >
@@ -130,12 +130,12 @@ const variants = Object.fromEntries(products
             >
                 <p class="label text-accent-deep">Your cart changed</p>
                 <ul
-                    class="checkout__issues list-none"
+                    class="flex flex-col gap-(--space-3xs) list-none"
                     data-checkout-issues
                 />
             </aside>
             <fieldset
-                class="slab slab--card step-pane"
+                class="slab slab--card step-pane min-w-0"
                 aria-labelledby="checkout-review-title"
                 data-step="0"
             >
@@ -147,7 +147,7 @@ const variants = Object.fromEntries(products
                     Review
                 </h2>
                 <ul
-                    class="review-list mb-(--space-lg) border-2 border-ink list-none"
+                    class="mb-(--space-lg) border-2 border-ink list-none"
                     data-review-list
                 />
                 <div class="flex flex-col gap-2 mb-(--space-lg)">
@@ -188,7 +188,7 @@ const variants = Object.fromEntries(products
                             data-code-label
                         />
                         <button
-                            class="action-text checkout__code-remove text-ink-muted"
+                            class="action-text min-h-(--control-size) text-ink-muted transition-[color,transform]"
                             aria-label="Remove the discount code"
                             data-code-remove
                             type="button"
@@ -203,13 +203,13 @@ const variants = Object.fromEntries(products
                         hidden
                     />
                 </div>
-                <dl class="review-totals">
-                    <div class="review-totals__row">
+                <dl class="flex flex-col gap-(--space-2xs) pt-(--space-sm) border-t-2 border-ink font-mono">
+                    <div class="flex justify-between gap-(--space-sm)">
                         <dt>Subtotal</dt>
                         <dd data-subtotal>$0.00</dd>
                     </div>
                     <div
-                        class="review-totals__row"
+                        class="flex justify-between gap-(--space-sm)"
                         data-promo-row
                         hidden
                     >
@@ -222,22 +222,22 @@ const variants = Object.fromEntries(products
                         </dd>
                     </div>
                     <div
-                        class="review-totals__row"
+                        class="flex justify-between gap-(--space-sm)"
                         data-discount-row
                         hidden
                     >
                         <dt>Prods credit</dt>
                         <dd data-discount>$0.00</dd>
                     </div>
-                    <div class="review-totals__row">
+                    <div class="flex justify-between gap-(--space-sm)">
                         <dt>Shipping</dt>
                         <dd data-shipping>$0.00</dd>
                     </div>
-                    <div class="review-totals__row">
+                    <div class="flex justify-between gap-(--space-sm)">
                         <dt>Tax</dt>
                         <dd data-tax>$0.00</dd>
                     </div>
-                    <div class="review-totals__row review-totals__row--total">
+                    <div class="flex justify-between gap-(--space-sm) pt-(--space-sm) border-t-2 border-ink font-extrabold font-sans leading-normal text-2xl tracking-[-0.02em]">
                         <dt>Total</dt>
                         <dd
                             aria-live="polite"
@@ -249,7 +249,7 @@ const variants = Object.fromEntries(products
                 </dl>
             </fieldset>
             <fieldset
-                class="slab slab--card step-pane hidden"
+                class="slab slab--card step-pane hidden min-w-0"
                 aria-labelledby="checkout-shipping-title"
                 data-step="1"
                 disabled
@@ -261,7 +261,7 @@ const variants = Object.fromEntries(products
                 >
                     Shipping
                 </h2>
-                <div class="checkout__fields grid grid-cols-1 md:grid-cols-12">
+                <div class="grid grid-cols-1 gap-x-(--space-sm) gap-y-(--space-md) md:grid-cols-12">
                     {SHIPPING_FIELDS.map(field => (
                         <div class:list={['flex flex-col gap-2', field.column]}>
                             <label class="flex flex-col gap-2">
@@ -313,7 +313,7 @@ const variants = Object.fromEntries(products
                 </div>
             </fieldset>
             <fieldset
-                class="slab slab--card step-pane hidden"
+                class="slab slab--card step-pane hidden min-w-0"
                 aria-labelledby="checkout-payment-title"
                 data-step="2"
                 disabled
@@ -339,13 +339,13 @@ const variants = Object.fromEntries(products
                         />
                         <span>Pay with Prods</span>
                     </label>
-                    <p class="checkout__prods-meta">
+                    <p class="flex flex-col gap-(--space-3xs)">
                         <span
                             class="label"
                             data-prods-balance
                         />
                         <span
-                            class="checkout__note"
+                            class="leading-normal text-sm text-ink-muted"
                             data-prods-note
                         />
                     </p>
@@ -355,7 +355,7 @@ const variants = Object.fromEntries(products
                     data-card-fields
                 >
                     <legend class="sr-only">Card details</legend>
-                    <div class="checkout__fields grid grid-cols-1 md:grid-cols-6">
+                    <div class="grid grid-cols-1 gap-x-(--space-sm) gap-y-(--space-md) md:grid-cols-6">
                         {PAYMENT_FIELDS.map(field => (
                             <div class:list={['flex flex-col gap-2', field.column]}>
                                 <label class="flex flex-col gap-2">
@@ -385,7 +385,7 @@ const variants = Object.fromEntries(products
                         ))}
                     </div>
                 </fieldset>
-                <div class="checkout__check-field">
+                <div class="flex flex-col gap-(--space-3xs)">
                     <label class="checkout__check">
                         <input
                             id="checkout-terms"
@@ -506,32 +506,39 @@ const variants = Object.fromEntries(products
         </li>
     </template>
     <template data-review-row>
-        <li class="review-row first:border-t-0 border-t-2 border-ink">
-            <img
-                class="object-cover self-center shrink-0 h-16 w-16 border-2 border-ink"
-                alt=""
-                data-review-photo
-                hidden
-                loading="lazy"
-            />
-            <div class="review-row__body">
-                <p
-                    class="font-bold font-sans text-lmd"
-                    data-review-title
+        <li class="first:border-t-0 flex flex-wrap items-baseline justify-between gap-(--space-sm) p-(--space-md) border-t-2 border-ink">
+            <span class="block self-center shrink-0 h-16 w-16 border-2 border-ink bg-ink">
+                <img
+                    class="block object-cover h-full w-full"
+                    alt=""
+                    data-review-photo
+                    hidden
+                    loading="lazy"
                 />
-                <p class="review-row__meta">
+            </span>
+            <div class="flex flex-[1_1_88px] flex-col min-w-0 gap-(--space-2xs)">
+                <p class="font-bold font-sans text-lmd">
+                    <a
+                        class="hover:text-accent-deep hover:underline underline-offset-4 transition-colors"
+                        data-review-title
+                        href="/store"
+                    >
+                        Item
+                    </a>
+                </p>
+                <p class="flex flex-wrap items-center gap-(--space-2xs)">
                     <span
                         class="label min-w-0 text-ink-muted"
                         data-review-variant
                     />
                     <span
-                        class="label review-row__qty"
+                        class="label px-(--space-2xs) py-(--space-3xs) border border-ink-20 font-bold"
                         data-review-qty
                     />
                 </p>
             </div>
             <p
-                class="review-row__price font-bold font-mono text-lmd"
+                class="ms-auto font-bold font-mono text-lmd whitespace-nowrap"
                 data-review-price
             />
         </li>
@@ -539,17 +546,24 @@ const variants = Object.fromEntries(products
     <template data-summary-row>
         <li class="flex items-center justify-between gap-2 mb-3">
             <span class="flex items-center min-w-0 gap-2">
-                <img
-                    class="object-cover shrink-0 h-8 w-8 border-2 border-ink"
-                    alt=""
-                    data-summary-photo
-                    hidden
-                    loading="lazy"
-                />
-                <span
-                    class="min-w-0"
-                    data-summary-title
-                />
+                <span class="block shrink-0 h-8 w-8 border-2 border-ink bg-ink">
+                    <img
+                        class="block object-cover h-full w-full"
+                        alt=""
+                        data-summary-photo
+                        hidden
+                        loading="lazy"
+                    />
+                </span>
+                <span class="min-w-0">
+                    <a
+                        class="hover:text-accent-deep hover:underline underline-offset-4 transition-colors"
+                        data-summary-title
+                        href="/store"
+                    >
+                        Item
+                    </a>
+                </span>
             </span>
             <span
                 class="font-bold font-mono"
@@ -592,38 +606,9 @@ const variants = Object.fromEntries(products
         padding-block: var(--space-2xs);
     }
 
-    .checkout__check-field {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-3xs);
-    }
-
     .checkout__code-entry:has(.input[aria-invalid='true']) .btn {
         border-color: var(--color-accent-deep);
         color: var(--color-accent-deep);
-    }
-
-    .checkout__code-remove {
-        min-height: var(--control-size);
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .checkout__fields {
-        column-gap: var(--space-sm);
-        row-gap: var(--space-md);
-    }
-
-    .checkout__issues {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-3xs);
-    }
-
-    .checkout__note {
-        color: var(--color-ink-muted);
-        font-size: var(--text-sm);
     }
 
     .checkout__notice {
@@ -649,73 +634,8 @@ const variants = Object.fromEntries(products
         cursor: not-allowed;
     }
 
-    .checkout__prods-meta {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-3xs);
-    }
-
     .checkout__summary {
         --scroll-slot-max: 40vh;
-    }
-
-    .review-row {
-        align-items: baseline;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-sm);
-        justify-content: space-between;
-        padding: var(--space-md);
-    }
-
-    .review-row__body {
-        display: flex;
-        flex: 1 1 88px;
-        flex-direction: column;
-        gap: var(--space-2xs);
-        min-width: 0;
-    }
-
-    .review-row__meta {
-        align-items: center;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-2xs);
-    }
-
-    .review-row__price {
-        margin-inline-start: auto;
-        white-space: nowrap;
-    }
-
-    .review-row__qty {
-        border: 1px solid var(--color-ink-20);
-        font-weight: 700;
-        padding: var(--space-3xs) var(--space-2xs);
-    }
-
-    .review-totals {
-        border-top: 2px solid var(--color-ink);
-        display: flex;
-        flex-direction: column;
-        font-family: var(--font-mono);
-        gap: var(--space-2xs);
-        padding-top: var(--space-sm);
-    }
-
-    .review-totals__row {
-        display: flex;
-        gap: var(--space-sm);
-        justify-content: space-between;
-    }
-
-    .review-totals__row--total {
-        border-top: 2px solid var(--color-ink);
-        font-family: var(--font-sans);
-        font-size: var(--text-2xl);
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        padding-top: var(--space-sm);
     }
 
     .step--done {
@@ -728,7 +648,6 @@ const variants = Object.fromEntries(products
     }
 
     .step-pane {
-        min-width: 0;
         padding: var(--space-lg);
     }
 
@@ -744,7 +663,7 @@ const variants = Object.fromEntries(products
 
     import { CHECKOUT_STEPS, COMMERCE, EMAIL_PATTERN, FIELD_LIMITS } from '@lib/shared/constants';
     import { clearFieldErrors, focusFirstError, isValidationBypassed, renderIssueList, setFieldErrors, validateFields } from '@lib/ui/forms';
-    import { formatPrice, formatProds, formatVariant, parseCatalog, parseImageSources, registerPageScript, setPending, setProductImage, setText } from '@lib/shared/utils';
+    import { formatPrice, formatProds, formatVariant, parseCatalog, parseImageSources, registerPageScript, setPending, setProductImage, setText, setTitleLink } from '@lib/shared/utils';
     import { getItems, isPromoCode, photoKey, prodsForCents, prodsToCents, reconcile, totals } from '@lib/commerce/cart';
     import { getSession } from '@lib/account/session';
     import { placeOrder } from '@lib/commerce/checkout';
@@ -828,14 +747,14 @@ const variants = Object.fromEntries(products
         setProductImage(fragment.querySelector<HTMLImageElement>('[data-review-photo]'), images, item);
         setText(fragment.querySelector('[data-review-price]'), formatPrice(item.priceCents * item.quantity));
         setText(fragment.querySelector('[data-review-qty]'), `\u00d7 ${item.quantity}`);
-        setText(fragment.querySelector('[data-review-title]'), item.title);
+        setTitleLink(fragment.querySelector('[data-review-title]'), catalog, item, item.title);
         setText(fragment.querySelector('[data-review-variant]'), formatVariant(item));
     }
 
     function fillSummaryRow(fragment: DocumentFragment, item: CartItem) {
         setProductImage(fragment.querySelector<HTMLImageElement>('[data-summary-photo]'), images, item);
         setText(fragment.querySelector('[data-summary-price]'), formatPrice(item.priceCents * item.quantity));
-        setText(fragment.querySelector('[data-summary-title]'), `${item.quantity} \u00d7 ${item.title} \u2014 ${formatVariant(item)}`);
+        setTitleLink(fragment.querySelector('[data-summary-title]'), catalog, item, `${item.quantity} \u00d7 ${item.title} \u2014 ${formatVariant(item)}`);
     }
 
     function focusPane(pane: HTMLFieldSetElement | undefined) {
@@ -1174,7 +1093,7 @@ const variants = Object.fromEntries(products
     async function submitOrder(controls: CheckoutControls, bypass: boolean) {
         const issues = reconcile(catalog);
 
-        if (issues.length > 0 && !bypass) {
+        if (!bypass && issues.length > 0) {
             blocked = true;
             renderIssues(issues);
             renderOrder(controls.form);
@@ -1208,7 +1127,7 @@ const variants = Object.fromEntries(products
         await navigate('/store/orders');
     }
 
-    function toPhotoItem(item: CartItem): CartItem {
+    function toPhotoItem(item: CartItem) {
         const image = variants[photoKey(item.productSlug, item.variation)];
 
         return image ? { ...item, image } : item;

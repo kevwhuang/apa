@@ -69,7 +69,7 @@ const program = getProgram('bash');
                     {formatBytes(UPLOAD.maxTotalBytes)} in total.
                 </p>
                 <ul
-                    class="upload__list list-none"
+                    class="empty:hidden flex flex-col gap-(--space-sm) list-none"
                     aria-label="Selected files"
                     data-dropzone-list
                 />
@@ -105,7 +105,7 @@ const program = getProgram('bash');
                 record of afternoons spent on the clock.
             </p>
             <div
-                class="board__scroller mb-5"
+                class="overflow-x-auto mb-5"
                 data-motion="rise"
             >
                 <table
@@ -191,7 +191,7 @@ const program = getProgram('bash');
                 />
             </div>
             <canvas
-                class="upload__wave"
+                class="block h-18 max-w-full w-full text-accent-deep"
                 aria-hidden="true"
                 data-row-canvas
                 height="72"
@@ -205,7 +205,7 @@ const program = getProgram('bash');
             />
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <progress
-                    class="upload__progress"
+                    class="flex-[1_1_140px] h-3 min-w-0 accent-accent-deep"
                     data-row-progress
                     max="100"
                     value="0"
@@ -257,10 +257,6 @@ const program = getProgram('bash');
 </section>
 
 <style>
-    .board__scroller {
-        overflow-x: auto;
-    }
-
     .board__table {
         display: table;
         overflow-x: visible;
@@ -306,41 +302,14 @@ const program = getProgram('bash');
         margin: 0;
         width: 100%;
     }
-
-    .upload__list {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-sm);
-    }
-
-    .upload__list:empty {
-        display: none;
-    }
-
-    .upload__progress {
-        accent-color: var(--color-accent-deep);
-        flex: 1 1 140px;
-        height: 12px;
-        min-width: 0;
-    }
-
-    .upload__wave {
-        color: var(--color-accent-deep);
-        display: block;
-        height: 72px;
-        max-width: 100%;
-        width: 100%;
-    }
 </style>
 
 <script>
     import { BASH_SUBMISSIONS } from '@lib/programs/submissions';
     import { MOCK_LATENCY_MS, STORAGE } from '@lib/shared/constants';
-    import { QUEUE_FULL_MESSAGE } from '@lib/audio/uploads';
     import { createDropzone } from '@lib/audio/dropzone';
     import { createStore } from '@lib/shared/state';
     import { delay, formatDateStamp, formatTime, registerPageScript, rovingFocus, setHidden, setText } from '@lib/shared/utils';
-    import { toast } from '@lib/ui/toasts';
 
     interface BoardElements {
         body: HTMLElement;
@@ -354,15 +323,13 @@ const program = getProgram('bash');
 
     const PAGE_SIZE = 10;
 
-    const boardStore = createStore<BashSubmission[]>({
+    const board = createStore<BashSubmission[]>({
         fallback: [],
         key: STORAGE.bashBoard.key,
         normalize: value => (Array.isArray(value) ? value.toSorted(bySubmittedAt) : []),
         scope: STORAGE.bashBoard.scope,
         topic: STORAGE.bashBoard.topic,
     });
-
-    let overflowToasted = false;
 
     function bySubmittedAt(a: BashSubmission, b: BashSubmission) {
         return +new Date(a.submittedAt) - +new Date(b.submittedAt);
@@ -375,8 +342,7 @@ const program = getProgram('bash');
     }
 
     function initBashSubmissions(signal: AbortSignal) {
-        overflowToasted = false;
-        createDropzone({ messages: { rejected: reportRejection }, signal });
+        createDropzone({ signal });
     }
 
     function initSubmissionBoard(signal: AbortSignal) {
@@ -393,25 +359,11 @@ const program = getProgram('bash');
         startBoard({ body, chipTemplate, pager, refresh, refreshText, rowTemplate, status }, signal);
     }
 
-    function releaseOverflowToast() {
-        overflowToasted = false;
-    }
-
-    function reportRejection(name: string, reason: string) {
-        if (reason === QUEUE_FULL_MESSAGE && !overflowToasted) {
-            overflowToasted = true;
-            queueMicrotask(releaseOverflowToast);
-            toast(QUEUE_FULL_MESSAGE, 'error');
-        }
-
-        return `${name} rejected: ${reason}`;
-    }
-
     function startBoard(elements: BoardElements, signal: AbortSignal) {
         const { body, chipTemplate, pager, refresh, refreshText, rowTemplate, status } = elements;
 
         let page = 1;
-        let rows = boardStore.get();
+        let rows = board.get();
 
         function buildPager() {
             pager.replaceChildren();
@@ -475,7 +427,7 @@ const program = getProgram('bash');
 
             if (signal.aborted) return;
 
-            rows = boardStore.set([...BASH_SUBMISSIONS]);
+            rows = board.set([...BASH_SUBMISSIONS]);
             page = Math.min(page, pageCount());
             render();
             setRefresh('');

@@ -30,10 +30,10 @@ import IconSpark from '@components/icons/Spark.astro';
             class="grip"
             data-ai-grip
         />
-        <div class="ai__head">
+        <div class="ai__head flex items-center justify-between shrink-0 gap-(--space-2xs) pl-(--space-sm) border-b border-ink-20">
             <h2
                 id="ai-title"
-                class="ai__eyebrow label"
+                class="ai__eyebrow label text-accent-deep"
             >
                 Ask the Alliance
             </h2>
@@ -47,12 +47,12 @@ import IconSpark from '@components/icons/Spark.astro';
             </button>
         </div>
         <ol
-            class="ai__log list-none"
+            class="ai__log flex flex-1 flex-col overflow-y-auto overscroll-contain min-h-0 gap-(--space-2xs) p-(--space-sm) list-none"
             aria-live="polite"
             data-ai-log
         />
         <form
-            class="ai__form"
+            class="ai__form flex shrink-0 gap-(--space-2xs) p-(--space-sm) border-ink-20 border-t"
             data-ai-form
         >
             <input
@@ -66,7 +66,7 @@ import IconSpark from '@components/icons/Spark.astro';
                 type="text"
             />
             <button
-                class="ai__send btn btn--accent"
+                class="ai__send btn btn--accent relative h-(--control-size)"
                 data-ai-send
                 type="submit"
             >
@@ -78,9 +78,9 @@ import IconSpark from '@components/icons/Spark.astro';
             </button>
         </form>
         <template data-ai-answer>
-            <li class="ai__card">
+            <li class="ai__card flex flex-col self-start max-w-[95%] gap-(--space-2xs) px-(--space-xs) py-(--space-2xs) border-accent-deep border-l-[3px] bg-surface-sunken">
                 <p
-                    class="ai__body"
+                    class="ai__body leading-[1.45] text-sm wrap-anywhere"
                     data-ai-text
                 />
                 <a
@@ -93,11 +93,11 @@ import IconSpark from '@components/icons/Spark.astro';
             </li>
         </template>
         <template data-ai-ask>
-            <li class="ai__ask" />
+            <li class="ai__ask self-end max-w-[85%] px-(--space-xs) py-(--space-2xs) leading-[1.45] text-sm wrap-anywhere bg-ink text-ink-inverse" />
         </template>
         <template data-ai-thinking>
             <li
-                class="ai__thinking"
+                class="ai__thinking flex items-center self-start gap-(--space-2xs) py-(--space-2xs) font-mono text-2xs text-ink-muted"
                 data-ai-pending
             >
                 <span
@@ -118,34 +118,6 @@ import IconSpark from '@components/icons/Spark.astro';
 
     .ai.is-ready {
         display: block;
-    }
-
-    .ai__ask {
-        align-self: flex-end;
-        background: var(--color-ink);
-        color: var(--color-ink-inverse);
-        font-size: var(--text-sm);
-        line-height: 1.45;
-        max-width: 85%;
-        overflow-wrap: anywhere;
-        padding: var(--space-2xs) var(--space-xs);
-    }
-
-    .ai__body {
-        font-size: var(--text-sm);
-        line-height: 1.45;
-        overflow-wrap: anywhere;
-    }
-
-    .ai__card {
-        align-self: flex-start;
-        background: var(--color-surface-sunken);
-        border-left: 3px solid var(--color-accent-deep);
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2xs);
-        max-width: 95%;
-        padding: var(--space-2xs) var(--space-xs);
     }
 
     .ai__close {
@@ -170,28 +142,6 @@ import IconSpark from '@components/icons/Spark.astro';
 
     .ai__close:hover {
         color: var(--color-accent-deep);
-    }
-
-    .ai__eyebrow {
-        color: var(--color-accent-deep);
-    }
-
-    .ai__form {
-        border-top: 1px solid var(--color-ink-20);
-        display: flex;
-        flex-shrink: 0;
-        gap: var(--space-2xs);
-        padding: var(--space-sm);
-    }
-
-    .ai__head {
-        align-items: center;
-        border-bottom: 1px solid var(--color-ink-20);
-        display: flex;
-        flex-shrink: 0;
-        gap: var(--space-2xs);
-        justify-content: space-between;
-        padding-left: var(--space-sm);
     }
 
     .ai__launcher {
@@ -226,22 +176,6 @@ import IconSpark from '@components/icons/Spark.astro';
         --focus-ring: var(--color-ink);
         background: var(--color-accent);
         color: var(--color-ink);
-    }
-
-    .ai__log {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        gap: var(--space-2xs);
-        min-height: 0;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-        padding: var(--space-sm);
-    }
-
-    .ai__send {
-        height: 50px;
-        position: relative;
     }
 
     .ai__send .spinner {
@@ -286,17 +220,6 @@ import IconSpark from '@components/icons/Spark.astro';
         color: var(--color-accent-deep);
     }
 
-    .ai__thinking {
-        align-items: center;
-        align-self: flex-start;
-        color: var(--color-ink-muted);
-        display: flex;
-        font-family: var(--font-mono);
-        font-size: var(--text-2xs);
-        gap: var(--space-2xs);
-        padding: var(--space-2xs) 0;
-    }
-
     .ai__window {
         background: var(--color-surface-raised);
         border: 2px solid var(--color-ink);
@@ -318,7 +241,7 @@ import IconSpark from '@components/icons/Spark.astro';
 </style>
 
 <script>
-    import { MOCK_LATENCY_MS } from '@lib/shared/constants';
+    import { MOCK_LATENCY_MS, POINTER_COARSE_QUERY } from '@lib/shared/constants';
     import { delay, initPanelResize, isTopFloatWindow, raiseWindow, registerPageScript, setPending, setText } from '@lib/shared/utils';
 
     interface AiAnswer {
@@ -388,7 +311,7 @@ import IconSpark from '@components/icons/Spark.astro';
     const TOPIC_WEIGHT = 10;
 
     const WELCOME_ANSWER: AiAnswer = {
-        body: 'Hey \u2014 I\u2019m the Alliance assistant. Ask me about Assembly, the Bash, the Hangout, Prods, or the store.',
+        body: 'Hey \u2014 I\'m the Alliance assistant. Ask me about Assembly, the Bash, the Hangout, Prods, or the store.',
         href: '/events',
         keywords: [],
         label: 'See the calendar',
@@ -577,7 +500,10 @@ import IconSpark from '@components/icons/Spark.astro';
         dialog.show();
         document.querySelector<HTMLElement>('[data-ai-launcher]')?.setAttribute('aria-expanded', 'true');
         raiseWindow(dialog);
-        (field ?? dialog.querySelector<HTMLElement>('[data-ai-close]'))?.focus();
+
+        const close = dialog.querySelector<HTMLElement>('[data-ai-close]');
+
+        (window.matchMedia(POINTER_COARSE_QUERY).matches ? close : (field ?? close))?.focus();
     }
 
     function render() {
