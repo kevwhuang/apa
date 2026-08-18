@@ -19,8 +19,11 @@ const PAGE_INDEX = [
 ] as const;
 
 const assemblyProgram = getProgram('assembly');
+
 const bashEditions = await getCollection('bash');
+
 const bashProgram = getProgram('bash');
+
 const events = await getCollection('events');
 
 const endById = new Map<string, Date>(

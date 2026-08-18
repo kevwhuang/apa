@@ -8,9 +8,7 @@ import { toCatalog } from '@lib/shared/utils';
 import { toImageSources, toVariationSlug, toVariations } from '@lib/commerce/products';
 
 type FieldInputMode = 'numeric';
-
 type FieldKind = 'select' | 'text';
-
 type FieldType = 'email' | 'text';
 
 interface CheckoutField {
@@ -44,7 +42,9 @@ const SHIPPING_FIELDS: CheckoutField[] = [
 ];
 
 const products = await getCollection('products');
+
 const catalog = toCatalog(products);
+
 const images = await toImageSources();
 
 const variants = Object.fromEntries(products

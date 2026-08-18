@@ -2,8 +2,8 @@ import { BASIS_POINTS_DIVISOR, CENTS_PER_DOLLAR, COMMERCE, STORAGE } from '@lib/
 import { createStore } from '@lib/shared/state';
 
 const SEED_ITEMS: CartItem[] = [
-    { image: '725841936_bone', priceCents: 3_500, productSlug: 'tick-tee', quantity: 1, size: 'M', title: 'Tick Tee', variation: 'Bone' },
-    { image: '639158247_assorted', priceCents: 800, productSlug: 'sticker-pack', quantity: 2, title: 'Sticker Pack', variation: 'Assorted' },
+    { image: '725841936_bone', priceCents: 3_500, productSlug: 'tick_tee', quantity: 1, size: 'M', title: 'Tick Tee', variation: 'Bone' },
+    { image: '639158247_assorted', priceCents: 800, productSlug: 'sticker_pack', quantity: 2, title: 'Sticker Pack', variation: 'Assorted' },
 ];
 
 const SEED_MARKER_KEY = 'apa.cart-seeded';
