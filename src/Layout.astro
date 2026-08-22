@@ -15,7 +15,7 @@ import Toaster from '@sections/shared/Toaster.astro';
 import Tour from '@sections/shared/Tour.astro';
 import bootstrap from '@lib/raw/bootstrap.ts?raw';
 import { BRAND, BRAND_ICONS, BRAND_OG } from '@lib/shared/brand';
-import { LINKS, STORAGE } from '@lib/shared/constants';
+import { LINKS, ROUTES, STORAGE } from '@lib/shared/constants';
 
 interface Props {
     description: string;
@@ -25,55 +25,78 @@ interface Props {
 }
 
 const bootstrapScript = bootstrap.replace('__THEME_KEY__', STORAGE.theme.key).replace('__SESSION_KEY__', STORAGE.session.key);
-const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
+const canonicalUrl = new URL(Astro.routePattern.replace(/\[(\w+)\]/g, (_match, key) => Astro.params[key] ?? ''), Astro.site);
+const currentRoute = ROUTES.find(route => route.href === Astro.routePattern);
 const { description, hasHero, noindex, title } = Astro.props;
 const logoUrl = new URL(BRAND_ICONS.logo, Astro.site).href;
 const ogImageUrl = new URL(BRAND_ICONS.og, Astro.site).href;
+
+const breadcrumbRoutes = currentRoute && currentRoute !== ROUTES[0] ? [ROUTES[0], currentRoute] : [];
+
+const breadcrumbList = {
+    '@type': 'BreadcrumbList',
+    'itemListElement': breadcrumbRoutes.map((route, index) => ({
+        '@type': 'ListItem',
+        'item': new URL(route.href, Astro.site).href,
+        'name': route.label,
+        'position': index + 1,
+    })),
+};
+
+const structuredData = {
+    '@context': 'https://schema.org',
+    '@graph': [
+        ...(breadcrumbRoutes.length > 0 ? [breadcrumbList] : []),
+        {
+            '@type': 'ItemList',
+            'itemListElement': ROUTES.map((route, index) => ({
+                '@type': 'SiteNavigationElement',
+                'name': route.label,
+                'position': index + 1,
+                'url': new URL(route.href, Astro.site).href,
+            })),
+        },
+        {
+            '@type': 'Organization',
+            'inLanguage': 'en',
+            'logo': logoUrl,
+            'name': BRAND.name,
+            'sameAs': [LINKS.instagram, LINKS.discord, LINKS.meetup],
+            'url': Astro.site,
+        },
+    ],
+};
 ---
 
 <!doctype html>
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <meta content="width=device-width, initial-scale=1" name="viewport" />
         <title>{title}</title>
-        <meta content={description} name="description" />
         <meta content={BRAND.author} name="author" />
-        <meta content={BRAND.themeColor} name="theme-color" />
+        <meta content={description} name="description" />
         <meta content={noindex ? 'noindex, nofollow' : 'index, follow'} name="robots" />
-        <link href={canonicalUrl} rel="canonical" />
+        <meta content={BRAND.themeColor} name="theme-color" />
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
         <link href={BRAND_ICONS.appleTouch} rel="apple-touch-icon" />
+        <link href={canonicalUrl} rel="canonical" />
         <link href={BRAND_ICONS.png} rel="icon" type="image/png" />
-        <meta content={title} property="og:title" />
         <meta content={description} property="og:description" />
         <meta content={ogImageUrl} property="og:image" />
         <meta content={BRAND.name} property="og:image:alt" />
         <meta content={String(BRAND_OG.height)} property="og:image:height" />
         <meta content={String(BRAND_OG.width)} property="og:image:width" />
-        <meta content={canonicalUrl} property="og:url" />
+        <meta content="en_US" property="og:locale" />
         <meta content={BRAND.name} property="og:site_name" />
+        <meta content={title} property="og:title" />
         <meta content="website" property="og:type" />
+        <meta content={canonicalUrl} property="og:url" />
         <meta content="summary_large_image" name="twitter:card" />
-        <meta content={title} name="twitter:title" />
         <meta content={description} name="twitter:description" />
         <meta content={ogImageUrl} name="twitter:image" />
-        <script
-            is:inline
-            set:html={JSON.stringify({
-                '@context': 'https://schema.org',
-                '@type': 'Organization',
-                'inLanguage': 'en',
-                'logo': logoUrl,
-                'name': BRAND.name,
-                'sameAs': [LINKS.instagram, LINKS.discord, LINKS.meetup],
-                'url': Astro.site,
-            })}
-            type="application/ld+json"
-        />
-        <script
-            is:inline
-            set:html={bootstrapScript}
-        />
+        <meta content={title} name="twitter:title" />
+        <script is:inline set:html={JSON.stringify(structuredData)} type="application/ld+json" />
+        <script is:inline set:html={bootstrapScript} />
         <ClientRouter />
     </head>
     <body class="antialiased font-sans bg-surface text-ink">

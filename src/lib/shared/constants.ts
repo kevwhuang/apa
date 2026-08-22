@@ -317,6 +317,11 @@ const ROLES = [
 
 const PROFILE_ROLES = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.id));
 
+const ROUTES = [
+    { href: '/', label: 'Home' },
+    ...NAV_GROUPS.flatMap<{ href: string; label: string }>(group => ('href' in group ? [{ href: group.href, label: group.label }] : group.items)),
+] as const;
+
 const SESSION_TTL_DAYS = 14;
 const SITE_UPDATED = '2026-08-07T00:00:00-05:00';
 
@@ -498,6 +503,7 @@ export {
     PROFILE_ROLES,
     REDUCED_MOTION_QUERY,
     ROLES,
+    ROUTES,
     SESSION_TTL_DAYS,
     SITE_UPDATED,
     SPOTLIGHT,

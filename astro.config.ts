@@ -9,15 +9,19 @@ const PRIVATE_ROUTES = new Set(['/404', '/500', '/admin', '/here', '/onboarding'
 
 export default defineConfig({
     adapter: netlify(),
+    build: {
+        format: 'file',
+    },
     devToolbar: {
         enabled: false,
     },
     integrations: [
         react(),
         robots(),
-        sitemap({ filter: page => !PRIVATE_ROUTES.has(new URL(page).pathname.replace(/\/$/, '')) }),
+        sitemap({ filter: page => !PRIVATE_ROUTES.has(new URL(page).pathname), lastmod: new Date() }),
     ],
     site: 'https://austinproduceralliance.com',
+    trailingSlash: 'never',
     vite: {
         plugins: [tailwind()],
     },
