@@ -1156,7 +1156,7 @@ const variants = Object.fromEntries(products
 
         if (!moveFocus) return;
 
-        setText(document.querySelector('[data-checkout-announce]'), `Step ${step + 1} of ${CHECKOUT_STEPS.length}, ${CHECKOUT_STEPS[step]}`);
+        setText(document.querySelector('[data-checkout-announce]'), `Step ${step + 1} of ${CHECKOUT_STEPS.length}, ${CHECKOUT_STEPS[step]}.`);
         focusPane(controls.panes[step]);
     }
 

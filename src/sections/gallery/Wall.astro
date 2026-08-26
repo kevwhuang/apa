@@ -28,7 +28,7 @@ const images = import.meta.glob<{ default: ImageMetadata }>('/src/images/gallery
 const figures = await Promise.all(FIGURES.map(async (figure) => {
     const asset = images[`/src/images/gallery/${figure.slug}.webp`];
 
-    if (!asset) throw new Error(`Missing gallery asset: ${figure.slug}.webp`);
+    if (!asset) throw new Error(`Gallery asset ${figure.slug}.webp is missing.`);
 
     const metadata = asset.default;
 

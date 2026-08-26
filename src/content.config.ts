@@ -106,7 +106,7 @@ const products = defineCollection({
             hex: z.string(),
             name: z.string(),
         })).min(1).max(8),
-    }).refine(data => data.variations.some(variation => variation.name === data.base), { message: 'base must name one of the variations' }),
+    }).refine(data => data.variations.some(variation => variation.name === data.base), { message: 'Base must name one of the variations.' }),
 });
 
 export const collections = { bash, docs, downloads, events, producers, products };

@@ -362,7 +362,7 @@ const images = await toImageSources();
 
         const line = getItems()[index];
 
-        if (line) announce(`${line.quantity} \u00d7 ${line.title}, ${formatPrice(line.priceCents * line.quantity)}`);
+        if (line) announce(`${line.quantity} \u00d7 ${line.title}, ${formatPrice(line.priceCents * line.quantity)}.`);
     }
 
     function handleRemoveClick(index: number, item: CartItem) {

@@ -1174,7 +1174,7 @@ const [nextAssembly] = events
 
         setText(next?.querySelector<HTMLElement>('[data-onboarding-next-label]') ?? null, step === LAST_STEP ? 'Finish' : 'Continue');
 
-        setText(document.querySelector<HTMLElement>('[data-onboarding-announce]'), `Step ${step + 1} of ${ONBOARDING_STEPS.length}, ${ONBOARDING_STEPS[step].name}`);
+        setText(document.querySelector<HTMLElement>('[data-onboarding-announce]'), `Step ${step + 1} of ${ONBOARDING_STEPS.length}, ${ONBOARDING_STEPS[step].name}.`);
 
         armReveal(form);
 

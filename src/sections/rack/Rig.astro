@@ -360,7 +360,7 @@ const PAD_LENGTH = 2;
                             class="truncate"
                             data-rack-meta-text
                         >
-                            No file loaded
+                            No file loaded.
                         </span>
                     </p>
                     <p
@@ -1166,7 +1166,7 @@ const PAD_LENGTH = 2;
         toggle.disabled = state.fileName === null;
         setHidden(document.querySelector<HTMLElement>('[data-rack-icon-pause]'), !state.playing);
         setHidden(document.querySelector<HTMLElement>('[data-rack-icon-play]'), state.playing);
-        setText(document.querySelector('[data-rack-meta-text]'), state.fileName === null ? 'No file loaded' : `${state.fileName} \u00b7 ${formatDuration(state.durationSeconds)}`);
+        setText(document.querySelector('[data-rack-meta-text]'), state.fileName === null ? 'No file loaded.' : `${state.fileName} \u00b7 ${formatDuration(state.durationSeconds)}`);
         setText(document.querySelector('[data-rack-toggle-label]'), state.playing ? 'Pause the rack' : 'Play the rack');
         toggle.setAttribute('aria-pressed', String(state.playing));
     }

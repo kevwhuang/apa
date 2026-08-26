@@ -1,8 +1,6 @@
 ---
-import '@fontsource-variable/bricolage-grotesque/index.css';
-import '@fontsource/space-mono/400.css';
-import '@fontsource/space-mono/700.css';
 import { ClientRouter } from 'astro:transitions';
+import { Font } from 'astro:assets';
 
 import '@/global.css';
 import '@/styles.css';
@@ -97,9 +95,11 @@ const structuredData = {
         <meta content={title} name="twitter:title" />
         <script is:inline set:html={JSON.stringify(structuredData)} type="application/ld+json" />
         <script is:inline set:html={bootstrapScript} />
+        <Font cssVariable="--font-bricolage-grotesque" preload />
+        <Font cssVariable="--font-space-mono" preload />
         <ClientRouter />
     </head>
-    <body class="antialiased font-sans bg-surface text-ink">
+    <body class="antialiased bg-surface text-ink">
         <div class="grain" aria-hidden="true" />
         <div class="flex flex-col overflow-x-clip min-h-svh">
             <Navbar hasHero={hasHero} />

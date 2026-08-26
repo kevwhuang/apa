@@ -213,7 +213,7 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
             if (!row) return;
 
             if (entry.status === 'rejected') {
-                announce(messages.rejected(entry.file.name, entry.error ?? 'not accepted'));
+                announce(messages.rejected(entry.file.name, entry.error ?? 'That file was not accepted.'));
 
                 return;
             }

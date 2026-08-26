@@ -28,14 +28,8 @@
     --color-surface-violet: #2a1e5c;
     --default-transition-duration: 0.2s;
     --default-transition-timing-function: ease;
-    --font-mono:
-        'Space Mono',
-        'Courier New',
-        monospace;
-    --font-sans:
-        'Bricolage Grotesque Variable',
-        system-ui,
-        sans-serif;
+    --font-mono: var(--font-space-mono);
+    --font-sans: var(--font-bricolage-grotesque);
     --text-2xl: clamp(26px, calc(23.333px + 0.8333vw), 34px);
     --text-2xs: 11px;
     --text-3xl: clamp(31px, calc(26.667px + 1.3542vw), 44px);

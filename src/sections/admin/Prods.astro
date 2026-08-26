@@ -146,7 +146,7 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
                 aria-live="polite"
                 data-prods-count
             >
-                {MEMBERS.length} members
+                {MEMBERS.length} members.
             </p>
             <ul
                 class="prods__members scroll-slot border-2 border-ink divide-y divide-ink list-none"
@@ -579,7 +579,7 @@ const LEDGER_SEED = JSON.stringify(Object.fromEntries(MEMBERS.map(member => [mem
         });
 
         none?.classList.toggle('hidden', shown > 0);
-        setText(count, query.length === 0 ? `${buttons.length} members` : `${shown} of ${buttons.length} members match`);
+        setText(count, query.length === 0 ? `${buttons.length} members.` : `${shown} of ${buttons.length} members match.`);
     }
 
     function initAdminProds(signal: AbortSignal) {

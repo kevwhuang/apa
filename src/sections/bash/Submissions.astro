@@ -462,7 +462,7 @@ const program = getProgram('bash');
             const first = (page - 1) * PAGE_SIZE + 1;
             const last = Math.min(rows.length, page * PAGE_SIZE);
 
-            setText(status, `Showing ${first}\u2013${last} of ${rows.length} \u00b7 Page ${page} of ${pageCount()}`);
+            setText(status, `Showing ${first}\u2013${last} of ${rows.length} \u00b7 Page ${page} of ${pageCount()}.`);
         }
 
         if (rows.length > 0) render();

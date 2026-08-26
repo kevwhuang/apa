@@ -82,13 +82,13 @@ import IconWaveform from '@components/icons/Waveform.astro';
                     class="player__title min-w-0 font-extrabold text-md truncate"
                     data-player-title
                 >
-                    Nothing playing
+                    Nothing playing.
                 </p>
                 <p
                     class="player__artist min-w-0 font-mono text-2xs truncate text-ink-muted"
                     data-player-artist
                 >
-                    Play a track to load it here
+                    Play a track to load it here.
                 </p>
             </div>
             <div class="player__row flex items-center gap-(--space-2xs) px-(--space-md)">
@@ -398,12 +398,12 @@ import IconWaveform from '@components/icons/Waveform.astro';
         title: string;
     }
 
-    const EMPTY_ARTIST = 'Play a track to load it here';
-    const EMPTY_TITLE = 'Nothing playing';
+    const EMPTY_ARTIST = 'Play a track to load it here.';
+    const EMPTY_TITLE = 'Nothing playing.';
     const LAUNCHER_SIZE = 50;
     const PLAYER_MIN_WIDTH = 340;
     const RACK_ARTIST = 'Rack';
-    const RACK_EMPTY = 'No file loaded';
+    const RACK_EMPTY = 'No file loaded.';
     const RESIZE_LABEL = 'Resize track player';
     const SEEK_LABEL_RACK = 'Seek within the rack';
     const SEEK_LABEL_TRACK = 'Seek within the track';
@@ -504,7 +504,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
         if (!track) return;
 
         playTrack(track);
-        setText(document.querySelector('[data-player-status]'), `Playing ${track.title} by ${track.artist}`);
+        setText(document.querySelector('[data-player-status]'), `Playing ${track.title} by ${track.artist}.`);
     }
 
     function handleVolume(input: HTMLInputElement) {
