@@ -59,19 +59,19 @@ function withEnd(list: CalendarItem[]) {
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="programs-title"
 >
     <div>
         <PageHead
-            class="max-w-4xl mb-6 font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
+            class="max-w-4xl mb-6 text-6xl md:text-7xl"
             eyebrow="Events"
             headingId="programs-title"
         >
             What we run.
         </PageHead>
         <p
-            class="max-w-2xl mb-10 text-lmd text-ink-muted"
+            class="max-w-2xl mb-10 text-lg text-text-secondary"
             data-motion="blur"
         >
             Three programs run on a fixed cadence, each with its own shape and its own room.
@@ -85,7 +85,7 @@ function withEnd(list: CalendarItem[]) {
         >
             {PAGE_INDEX.map(item => (
                 <a
-                    class="chip active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
+                    class="chip active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse"
                     href={item.href}
                 >
                     {item.label}
@@ -96,19 +96,19 @@ function withEnd(list: CalendarItem[]) {
 </section>
 
 <section
-    class="stage stage--assembly stage--tight border-b-2 border-ink"
+    class="stage stage--assembly stage--tight border-b-2 border-border-strong"
     aria-labelledby="assembly-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-5xl tracking-tight"
+            class="text-4xl md:text-5xl"
             eyebrow={`${assemblyProgram.shortName} / ${assemblyProgram.cadence}`}
             headingId="assembly-title"
         >
             {assemblyProgram.name}.
         </SectionHead>
         <p
-            class="max-w-2xl mb-10 leading-relaxed text-md text-ink-muted"
+            class="max-w-2xl mb-10 leading-relaxed text-lg text-text-secondary"
             data-motion="rise"
         >
             {assemblyProgram.summary}
@@ -124,7 +124,7 @@ function withEnd(list: CalendarItem[]) {
                 About the {assemblyProgram.name}
             </a>
             <a
-                class="action-text hover:text-accent-deep inline-flex items-center gap-2 min-h-(--control-size) underline underline-offset-4 transition-colors"
+                class="action-text hover:text-link inline-flex items-center gap-2 min-h-(--control-size) underline underline-offset-4 transition-colors"
                 href={LINKS.meetup}
                 rel="noopener noreferrer"
                 target="_blank"
@@ -146,7 +146,7 @@ function withEnd(list: CalendarItem[]) {
                                     data-motion="stamp"
                                     data-placeholder
                                 >
-                                    <span class="label sheet__tag px-2 py-1 bg-accent text-ink">
+                                    <span class="label sheet__tag px-2 py-1 bg-bg-signal text-text-on-signal">
                                         Next {assemblyProgram.shortName}
                                     </span>
                                     <time
@@ -156,26 +156,26 @@ function withEnd(list: CalendarItem[]) {
                                         <span class="sheet__day">{formatCalendarDay(nextAssembly.date)}</span>
                                         <span class="font-mono leading-normal text-sm tracking-[0.08em] uppercase whitespace-nowrap">{formatCalendarMonth(nextAssembly.date)}</span>
                                     </time>
-                                    <span class="font-mono text-2xs tracking-[0.06em] uppercase text-ink-inverse-muted">{formatWeekday(nextAssembly.date)}</span>
+                                    <span class="font-mono text-xs tracking-[0.06em] uppercase text-event-assembly-text">{formatWeekday(nextAssembly.date)}</span>
                                 </p>
                                 <div
                                     class="p-(--space-lg)"
                                     data-motion="rise"
                                 >
-                                    <p class="label mb-4 text-ink-subtle">
+                                    <p class="label mb-4 text-text-secondary">
                                         Entry {entryNumber(1)} / {entryNumber(assemblies.length)}
                                     </p>
-                                    <h3 class="mb-3 font-extrabold font-sans text-2xl tracking-tight">{nextAssembly.title}</h3>
+                                    <h3 class="mb-3 text-2xl">{nextAssembly.title}</h3>
                                     <p
-                                        class="mb-1 font-mono text-xs uppercase text-ink-muted"
+                                        class="mb-1 font-mono text-xs uppercase text-text-secondary"
                                         data-placeholder
                                     >
                                         {formatTimeRange(nextAssembly.date, nextAssembly.end)}
                                     </p>
-                                    <address class="mb-4 font-mono not-italic text-xs uppercase text-ink-muted">
+                                    <address class="mb-4 font-mono not-italic text-xs uppercase text-text-secondary">
                                         {nextAssembly.location}
                                     </address>
-                                    <p class="max-w-2xl leading-relaxed text-ink-muted">{nextAssembly.excerpt}</p>
+                                    <p class="max-w-2xl leading-relaxed text-text-secondary">{nextAssembly.excerpt}</p>
                                 </div>
                             </article>
                         </div>
@@ -186,13 +186,13 @@ function withEnd(list: CalendarItem[]) {
                                     aria-hidden="true"
                                     data-motion-stagger="stamp"
                                 >
-                                    <p class="label pb-(--space-2xs) text-ink-subtle">No.</p>
-                                    <p class="label pb-(--space-2xs) text-ink-subtle">Date</p>
-                                    <p class="docket__head--session label pb-(--space-2xs) text-ink-subtle">Session</p>
-                                    <p class="docket__head--room label pb-(--space-2xs) text-ink-subtle">Room</p>
+                                    <p class="label pb-(--space-2xs) text-text-secondary">No.</p>
+                                    <p class="label pb-(--space-2xs) text-text-secondary">Date</p>
+                                    <p class="docket__head--session label pb-(--space-2xs) text-text-secondary">Session</p>
+                                    <p class="docket__head--room label pb-(--space-2xs) text-text-secondary">Room</p>
                                 </div>
                                 <hr
-                                    class="col-span-full h-0.5 border-0 bg-ink"
+                                    class="col-span-full h-0.5 border-0 bg-border-strong"
                                     data-motion="rule"
                                 />
                                 <ul
@@ -205,7 +205,7 @@ function withEnd(list: CalendarItem[]) {
                                             id={event.id}
                                             class="docket__row"
                                         >
-                                            <p class="docket__no font-mono tabular-nums text-base text-ink-subtle">{entryNumber(index + 2)}</p>
+                                            <p class="docket__no font-mono tabular-nums text-base text-text-secondary">{entryNumber(index + 2)}</p>
                                             <p
                                                 class="docket__date flex flex-col gap-1"
                                                 data-placeholder
@@ -216,12 +216,12 @@ function withEnd(list: CalendarItem[]) {
                                                 >
                                                     {formatDate(event.date)}
                                                 </time>
-                                                <span class="font-mono text-xs uppercase text-ink-muted">
+                                                <span class="font-mono text-xs uppercase text-text-secondary">
                                                     {formatTimeRange(event.date, event.end)}
                                                 </span>
                                             </p>
-                                            <h3 class="docket__session font-bold font-sans text-base tracking-tight">{event.title}</h3>
-                                            <address class="docket__room font-mono not-italic text-xs uppercase text-ink-muted">
+                                            <h3 class="docket__session text-base">{event.title}</h3>
+                                            <address class="docket__room font-mono not-italic text-xs uppercase text-text-secondary">
                                                 {event.location}
                                             </address>
                                         </li>
@@ -233,7 +233,7 @@ function withEnd(list: CalendarItem[]) {
                 )
             : (
                     <p
-                        class="mark slab slab--card max-w-(--measure-form) w-full mx-auto leading-relaxed text-ink-muted"
+                        class="mark slab slab--card max-w-(--measure-form) w-full mx-auto leading-relaxed text-text-secondary"
                         data-motion="rise"
                     >
                         No {assemblyProgram.name} on the calendar right now &mdash; the next date goes up here and on Meetup as soon as the room is booked.
@@ -243,7 +243,7 @@ function withEnd(list: CalendarItem[]) {
 </section>
 
 <section
-    class="stage stage--bash stage--tight border-b-2 border-ink"
+    class="stage stage--bash stage--tight border-b-2 border-border-strong"
     aria-labelledby="bash-title"
 >
     <div
@@ -261,7 +261,7 @@ function withEnd(list: CalendarItem[]) {
         </div>
         <div class="relative">
             <SectionHead
-                class="font-extrabold font-sans text-5xl tracking-tight"
+                class="text-4xl md:text-5xl"
                 eyebrow={`${bashProgram.shortName} / ${bashProgram.cadence}`}
                 headingId="bash-title"
                 tone="dark"
@@ -269,7 +269,7 @@ function withEnd(list: CalendarItem[]) {
                 {bashProgram.name}.
             </SectionHead>
             <p
-                class="max-w-xl mb-10 leading-relaxed text-md text-ink-inverse-muted"
+                class="max-w-xl mb-10 leading-relaxed text-lg text-text-inverse-secondary"
                 data-motion="rise"
             >
                 {bashProgram.summary}
@@ -285,7 +285,7 @@ function withEnd(list: CalendarItem[]) {
                     Everything about the {bashProgram.name} <IconArrow />
                 </a>
                 <a
-                    class="action-text hover:text-accent inline-flex items-center gap-2 min-h-(--control-size) underline underline-offset-4 text-ink-inverse transition-colors"
+                    class="action-text hover:text-link-on-inverse inline-flex items-center gap-2 min-h-(--control-size) underline underline-offset-4 text-text-inverse transition-colors"
                     href={LINKS.meetup}
                     rel="noopener noreferrer"
                     target="_blank"
@@ -304,23 +304,23 @@ function withEnd(list: CalendarItem[]) {
                     {upcomingBashes.map(edition => (
                         <li
                             id={edition.id}
-                            class="rank last:border-b-0 items-baseline py-4 border-b-2 border-ink"
+                            class="rank last:border-b-0 items-baseline py-4 border-b-2 border-border-strong"
                         >
                             <p
-                                class="flex flex-col gap-1 font-extrabold font-sans text-xl"
+                                class="flex flex-col gap-1 font-bold font-sans text-xl"
                                 data-placeholder
                             >
                                 <time datetime={edition.data.date.toISOString()}>{formatDate(edition.data.date)}</time>
-                                <span class="font-mono text-xs uppercase text-ink-muted">
+                                <span class="font-mono text-xs uppercase text-text-secondary">
                                     {formatTimeRange(edition.data.date, edition.data.end)}
                                 </span>
                             </p>
                             <div>
-                                <h3 class="mb-2 font-extrabold font-sans text-2xl tracking-tight">{edition.data.title}</h3>
-                                <address class="mb-3 font-mono not-italic text-xs uppercase text-ink-muted">
+                                <h3 class="mb-2 text-2xl">{edition.data.title}</h3>
+                                <address class="mb-3 font-mono not-italic text-xs uppercase text-text-secondary">
                                     {edition.data.location}
                                 </address>
-                                <p class="max-w-2xl leading-relaxed text-ink-muted">{edition.data.recap}</p>
+                                <p class="max-w-2xl leading-relaxed text-text-secondary">{edition.data.recap}</p>
                             </div>
                         </li>
                     ))}
@@ -328,7 +328,7 @@ function withEnd(list: CalendarItem[]) {
             )
         : (
                 <p
-                    class="slab slab--cut slab--lift max-w-(--measure-form) w-full mx-auto leading-relaxed text-ink-muted"
+                    class="slab slab--cut slab--lift max-w-(--measure-form) w-full mx-auto leading-relaxed text-text-secondary"
                     data-motion="rise"
                 >
                     No edition on the calendar right now &mdash; the next date goes up here and on Meetup as soon as the room is booked.
@@ -337,7 +337,7 @@ function withEnd(list: CalendarItem[]) {
 </section>
 
 <ProgramFlyer
-    class="border-b-2 border-ink"
+    class="border-b-2 border-border-strong"
     detailed
     events={hangouts}
     headingId="hangout-title"
@@ -345,12 +345,12 @@ function withEnd(list: CalendarItem[]) {
 />
 
 <section
-    class="slab--sunk stage stage--tight border-b-2 border-ink"
+    class="slab--sunk stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="past-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-4xl tracking-tight"
+            class="text-4xl text-balance"
             eyebrow={`Archive / ${pastEvents.length} on file`}
             headingId="past-title"
         >
@@ -375,22 +375,22 @@ function withEnd(list: CalendarItem[]) {
                                 class="contents"
                                 datetime={event.date.toISOString()}
                             >
-                                <span class="font-extrabold font-sans leading-none text-3xl tracking-[-0.02em]">{formatCalendarDay(event.date)}</span>
-                                <span class="font-mono text-2xs tracking-[0.06em] uppercase whitespace-nowrap">{formatCalendarMonth(event.date)}</span>
+                                <span class="font-bold font-display leading-none text-3xl tracking-[-0.02em]">{formatCalendarDay(event.date)}</span>
+                                <span class="font-mono text-xs tracking-[0.06em] uppercase whitespace-nowrap">{formatCalendarMonth(event.date)}</span>
                             </time>
                         </p>
                         <div class="archive-card__body">
                             <p
-                                class="label mb-2 text-ink-muted"
+                                class="label mb-2 text-text-secondary"
                                 data-placeholder
                             >
                                 {getProgram(event.type).shortName} / {formatTimeRange(event.date, event.end)}
                             </p>
-                            <h3 class="mb-2 font-extrabold font-sans text-lg tracking-tight">{event.title}</h3>
-                            <address class="mb-3 font-mono not-italic text-xs uppercase text-ink-muted">
+                            <h3 class="mb-2 text-lg">{event.title}</h3>
+                            <address class="mb-3 font-mono not-italic text-xs uppercase text-text-secondary">
                                 {event.location}
                             </address>
-                            <p class="leading-relaxed text-sm text-ink-muted">{event.excerpt}</p>
+                            <p class="leading-relaxed text-sm text-text-secondary">{event.excerpt}</p>
                         </div>
                     </article>
                 </li>
@@ -405,7 +405,7 @@ function withEnd(list: CalendarItem[]) {
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-4xl tracking-tight"
+            class="text-4xl text-balance"
             eyebrow="Planned"
             headingId="planned-title"
         >
@@ -416,10 +416,10 @@ function withEnd(list: CalendarItem[]) {
             data-motion-stagger="flip"
         >
             {planned.map(program => (
-                <li class="p-5 border-2 border-dashed border-ink-subtle">
-                    <p class="label mb-3 text-ink-muted">{program.cadence}</p>
-                    <h3 class="mb-2 font-bold font-sans text-lg tracking-tight">{program.name}</h3>
-                    <p class="text-sm text-ink-muted">{program.summary}</p>
+                <li class="p-5 border-2 border-dashed border-border">
+                    <p class="label mb-3 text-text-secondary">{program.cadence}</p>
+                    <h3 class="mb-2 text-lg">{program.name}</h3>
+                    <p class="text-sm text-text-secondary">{program.summary}</p>
                 </li>
             ))}
         </ul>
@@ -435,21 +435,23 @@ function withEnd(list: CalendarItem[]) {
     }
 
     .archive-card:target {
-        outline: 2px solid var(--color-accent-deep);
+        outline: 2px solid var(--color-border-selected);
         outline-offset: 3px;
     }
 
     .archive-card[data-program='assembly'] .archive-card__stamp {
-        background: var(--color-ink);
-        color: var(--color-ink-inverse);
+        background: var(--color-event-assembly);
+        color: var(--color-event-assembly-text);
     }
 
     .archive-card[data-program='bash'] .archive-card__stamp {
-        background: var(--color-accent);
+        background: var(--color-event-bash);
+        color: var(--color-event-bash-text);
     }
 
     .archive-card[data-program='hangout'] .archive-card__stamp {
-        background: var(--color-surface-sunken);
+        background: var(--color-event-hangout);
+        color: var(--color-event-hangout-text);
     }
 
     .archive-card__body {
@@ -463,13 +465,13 @@ function withEnd(list: CalendarItem[]) {
 
     .archive-card__stamp {
         align-items: center;
-        border-right: 2px solid var(--color-ink);
+        border-right: 2px solid var(--color-border-strong);
         display: flex;
         flex-direction: column;
         gap: var(--space-2xs);
         grid-row: span 4;
         justify-content: center;
-        min-width: 92px;
+        min-width: calc(var(--text-3xl) * 2.5);
         padding: var(--space-sm) var(--space-xs);
         text-align: center;
     }
@@ -507,7 +509,7 @@ function withEnd(list: CalendarItem[]) {
     }
 
     .docket::before {
-        background: var(--color-ink);
+        background: var(--color-border-strong);
         content: '';
         inset-block: 0;
         inset-inline-start: calc(var(--docket-no) + var(--space-md) / 2 - 1px);
@@ -529,11 +531,11 @@ function withEnd(list: CalendarItem[]) {
     }
 
     .docket__row + .docket__row {
-        border-top: 1px solid var(--color-ink-20);
+        border-top: 1px solid var(--color-border-subtle);
     }
 
     .docket__row:target {
-        outline: 2px solid var(--color-accent-deep);
+        outline: 2px solid var(--color-border-selected);
         outline-offset: 3px;
     }
 
@@ -544,22 +546,22 @@ function withEnd(list: CalendarItem[]) {
     }
 
     .sheet:target {
-        outline: 2px solid var(--color-accent-deep);
+        outline: 2px solid var(--color-border-selected);
         outline-offset: 3px;
     }
 
     .sheet__day {
-        font-family: var(--font-sans);
-        font-size: clamp(56px, calc(34.667px + 6.6667vw), 120px);
-        font-weight: 800;
-        letter-spacing: -0.04em;
+        font-family: var(--font-display);
+        font-size: var(--text-8xl);
+        font-weight: 700;
+        letter-spacing: -0.02em;
         line-height: 0.8;
     }
 
     .sheet__plate {
         align-content: center;
-        background: var(--color-ink);
-        color: var(--color-ink-inverse);
+        background: var(--color-event-assembly);
+        color: var(--color-event-assembly-text);
         display: grid;
         gap: var(--space-2xs);
         justify-items: start;
@@ -616,7 +618,7 @@ function withEnd(list: CalendarItem[]) {
         }
 
         .archive-card__stamp {
-            border-bottom: 2px solid var(--color-ink);
+            border-bottom: 2px solid var(--color-border-strong);
             border-right: 0;
             flex-direction: row;
             gap: var(--space-xs);

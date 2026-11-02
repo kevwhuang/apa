@@ -6,12 +6,12 @@ import { formatBytes } from '@lib/shared/utils';
 ---
 
 <section
-    class="stage stage--assembly stage--tight border-b-2 border-ink"
+    class="stage stage--assembly stage--tight border-b-2 border-border-strong"
     aria-labelledby="feedback-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-4xl tracking-tight"
+            class="text-4xl"
             eyebrow="Track feedback / Every assembly"
             headingId="feedback-title"
         >
@@ -22,17 +22,17 @@ import { formatBytes } from '@lib/shared/utils';
                 class="flex flex-col gap-4"
                 data-motion-stagger="blur"
             >
-                <p class="text-base text-ink-muted">
+                <p class="text-base text-text-secondary">
                     Every Assembly holds space for work in progress. Put a track on the list and
                     it gets played out loud at the next one, then talked through in the room while
                     it is still ringing.
                 </p>
-                <p class="text-smd text-ink-muted">
+                <p class="text-text-secondary">
                     A streaming or download link works, and so does a bounce straight out of your
                     session. Unfinished is fine &mdash; rough mixes get the most useful
                     conversation.
                 </p>
-                <p class="text-sm text-ink-subtle">
+                <p class="text-sm text-text-secondary">
                     Bring the same link or bounce with you on the night.
                 </p>
             </div>
@@ -44,7 +44,7 @@ import { formatBytes } from '@lib/shared/utils';
                     role="group"
                 >
                     <button
-                        class="chip feedback__mode is-active active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse h-(--control-size)"
+                        class="chip feedback__mode is-active active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse h-(--control-size)"
                         aria-controls="feedback-panel-link"
                         aria-pressed="true"
                         data-mode="link"
@@ -53,7 +53,7 @@ import { formatBytes } from '@lib/shared/utils';
                         Paste a link
                     </button>
                     <button
-                        class="chip feedback__mode active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse h-(--control-size)"
+                        class="chip feedback__mode active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse h-(--control-size)"
                         aria-controls="feedback-panel-file"
                         aria-pressed="false"
                         data-mode="file"
@@ -69,7 +69,7 @@ import { formatBytes } from '@lib/shared/utils';
                     data-motion="unfold"
                 >
                     <label class="flex flex-col gap-2">
-                        <span class="label text-ink-muted">Track link</span>
+                        <span class="label text-text-secondary">Track link</span>
                         <input
                             id="feedback-link"
                             class="input font-mono text-sm"
@@ -84,13 +84,13 @@ import { formatBytes } from '@lib/shared/utils';
                     </label>
                     <p
                         id="feedback-link-help"
-                        class="text-sm text-ink-muted"
+                        class="text-sm text-text-secondary"
                     >
                         SoundCloud, Dropbox, Drive &mdash; anywhere the room can press play.
                     </p>
                     <p
                         id="feedback-link-error"
-                        class="action-text text-accent-deep"
+                        class="action-text text-error-text"
                         data-link-error
                         hidden
                     />
@@ -113,10 +113,10 @@ import { formatBytes } from '@lib/shared/utils';
                         for="feedback-input"
                     >
                         <IconUpload />
-                        <span class="font-extrabold font-sans text-2xl tracking-tight">
+                        <span class="font-bold font-sans text-2xl tracking-tight">
                             Drop your bounce here
                         </span>
-                        <span class="label text-ink-muted">or choose a file</span>
+                        <span class="label text-text">or choose a file</span>
                         <input
                             id="feedback-input"
                             class="dropzone__input sr-only"
@@ -130,7 +130,7 @@ import { formatBytes } from '@lib/shared/utils';
                     </label>
                     <p
                         id="feedback-file-help"
-                        class="text-sm text-ink-muted"
+                        class="text-sm text-text-secondary"
                         data-placeholder
                     >
                         {UPLOAD_EXTENSIONS_LABEL}. Up to {formatBytes(UPLOAD.maxFileBytes)} each; the list
@@ -153,14 +153,14 @@ import { formatBytes } from '@lib/shared/utils';
     <template data-feedback-row-link>
         <li class="slab slab--card flex flex-col gap-2">
             <div class="flex flex-wrap items-baseline justify-between gap-3">
-                <p class="label px-2 py-1 bg-ink text-ink-inverse">Link</p>
+                <p class="label px-2 py-1 bg-bg-inverse text-text-inverse">Link</p>
                 <p
-                    class="label min-w-0 wrap-anywhere text-ink-muted"
+                    class="label min-w-0 wrap-anywhere text-text-secondary"
                     data-row-host
                 />
             </div>
             <a
-                class="active:translate-y-px hover:text-accent-deep flex items-center min-h-(--control-size) font-mono text-sm underline underline-offset-4 wrap-anywhere transition-[color,transform]"
+                class="active:translate-y-px hover:text-link flex items-center min-h-(--control-size) font-mono text-sm underline underline-offset-4 wrap-anywhere transition-[color,transform]"
                 data-row-href
                 href="/assembly"
                 rel="noopener noreferrer"
@@ -171,7 +171,7 @@ import { formatBytes } from '@lib/shared/utils';
             </a>
             <div class="flex justify-end">
                 <button
-                    class="action-text hover:text-accent-deep flex items-center min-h-(--control-size) px-1 text-ink-muted transition-colors"
+                    class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-colors"
                     data-row-remove
                     type="button"
                 >
@@ -184,19 +184,19 @@ import { formatBytes } from '@lib/shared/utils';
         <li class="slab slab--card flex flex-col gap-3">
             <div class="flex flex-wrap items-baseline justify-between gap-3">
                 <div class="flex flex-wrap items-baseline gap-3">
-                    <p class="label px-2 py-1 bg-ink text-ink-inverse">File</p>
+                    <p class="label px-2 py-1 bg-bg-inverse text-text-inverse">File</p>
                     <p
                         class="font-bold font-sans wrap-anywhere"
                         data-row-name
                     />
                 </div>
                 <p
-                    class="label text-ink-muted"
+                    class="label text-text-secondary"
                     data-row-meta
                 />
             </div>
             <canvas
-                class="block h-18 max-w-full w-full text-accent-deep"
+                class="block h-18 max-w-full w-full text-text-brand"
                 aria-hidden="true"
                 data-row-canvas
                 height="72"
@@ -204,23 +204,23 @@ import { formatBytes } from '@lib/shared/utils';
                 width="640"
             />
             <p
-                class="action-text text-accent-deep"
+                class="action-text text-error-text"
                 data-row-error
                 hidden
             />
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <progress
-                    class="flex-[1_1_140px] h-3 min-w-0 accent-accent-deep"
+                    class="flex-[1_1_140px] h-3 min-w-0 accent-native-accent"
                     data-row-progress
                     max="100"
                     value="0"
                 />
                 <p
-                    class="label min-w-[34px] text-ink-subtle"
+                    class="label min-w-[34px] text-text-secondary"
                     data-row-percent
                 />
                 <button
-                    class="action-text hover:text-accent-deep flex items-center min-h-(--control-size) px-1 text-ink-muted transition-colors"
+                    class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-colors"
                     data-row-cancel
                     type="button"
                 >
@@ -233,8 +233,8 @@ import { formatBytes } from '@lib/shared/utils';
 
 <style>
     .dropzone {
-        --slab-fill: var(--color-surface-sunken);
-        background-image: repeating-linear-gradient(135deg, var(--color-ink-10) 0 6px, transparent 6px 12px);
+        --slab-fill: var(--color-bg-sunken);
+        background-image: repeating-linear-gradient(135deg, var(--color-border-subtle) 0 6px, transparent 6px 12px);
         border-style: dashed;
         min-height: 220px;
         padding: var(--space-2xl);
@@ -245,22 +245,22 @@ import { formatBytes } from '@lib/shared/utils';
     }
 
     .dropzone:active {
-        --slab-fill: var(--color-surface-raised);
-        border-color: var(--color-accent-deep);
+        --slab-fill: var(--color-bg-raised);
+        border-color: var(--color-border-selected);
     }
 
     .dropzone:has(.dropzone__input:focus-visible) {
-        border-color: var(--color-accent-deep);
+        border-color: var(--color-border-selected);
         border-style: solid;
     }
 
     .dropzone:hover {
-        border-color: var(--color-accent-deep);
+        border-color: var(--color-border-selected);
     }
 
     .dropzone.is-dragging {
-        --slab-fill: var(--color-surface-raised);
-        border-color: var(--color-accent-deep);
+        --slab-fill: var(--color-bg-raised);
+        border-color: var(--color-border-selected);
         border-style: solid;
     }
 

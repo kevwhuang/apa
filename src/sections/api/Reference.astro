@@ -17,19 +17,19 @@ const ENDPOINTS: Endpoint[] = [
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="api-title"
 >
     <div class="flex flex-col gap-6">
         <PageHead
-            class="max-w-4xl font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
+            class="max-w-4xl text-5xl md:text-8xl"
             eyebrow="Resources / API"
             headingId="api-title"
         >
             Read the data.
         </PageHead>
         <p
-            class="max-w-2xl text-lmd text-ink-muted"
+            class="max-w-2xl text-lg text-text-secondary"
             data-motion="blur"
         >
             Everything the site publishes &mdash; the calendar, the roster, the store catalog, and
@@ -42,26 +42,26 @@ const ENDPOINTS: Endpoint[] = [
         aria-label="API contract"
         data-motion-stagger="rise"
     >
-        <div class="api__cell--flag content-center grid px-(--space-sm) py-(--space-xs) bg-surface">
-            <dt class="label mb-(--space-2xs) text-ink-inverse-muted">Endpoints</dt>
+        <div class="api__cell--flag content-center grid px-(--space-sm) py-(--space-xs)">
+            <dt class="label mb-(--space-2xs) text-text-inverse-secondary">Endpoints</dt>
             <dd
-                class="font-extrabold font-sans leading-[0.9] text-4xl tracking-tight"
+                class="font-bold font-display leading-[0.9] text-4xl tracking-[-0.02em]"
                 data-motion-count={String(ENDPOINTS.length)}
             >
                 {ENDPOINTS.length}
             </dd>
         </div>
-        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-surface">
-            <dt class="label mb-(--space-3xs) text-ink-muted">Methods</dt>
-            <dd class="font-mono text-smd">GET</dd>
+        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
+            <dt class="label mb-(--space-3xs) text-text-secondary">Methods</dt>
+            <dd class="font-mono text-sm">GET</dd>
         </div>
-        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-surface">
-            <dt class="label mb-(--space-3xs) text-ink-muted">Format</dt>
-            <dd class="font-mono text-smd">JSON</dd>
+        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
+            <dt class="label mb-(--space-3xs) text-text-secondary">Format</dt>
+            <dd class="font-mono text-sm">JSON</dd>
         </div>
-        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-surface">
-            <dt class="label mb-(--space-3xs) text-ink-muted">Caching</dt>
-            <dd class="font-mono text-smd">no-store</dd>
+        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
+            <dt class="label mb-(--space-3xs) text-text-secondary">Caching</dt>
+            <dd class="font-mono text-sm">no-store</dd>
         </div>
     </dl>
 </section>
@@ -72,7 +72,7 @@ const ENDPOINTS: Endpoint[] = [
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-3xl tracking-tight"
+            class="text-3xl"
             eyebrow="API / Reference"
             headingId="endpoints-title"
         >
@@ -82,10 +82,10 @@ const ENDPOINTS: Endpoint[] = [
             class="overflow-x-auto"
             data-motion="unfold"
         >
-            <table class="api__table border-2 border-ink">
+            <table class="api__table border-2 border-border-strong">
                 <caption class="sr-only">API endpoints, the payload each returns, and a link to open each one</caption>
                 <thead>
-                    <tr class="border-b-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
+                    <tr class="border-b-2 border-border-strong font-bold font-mono text-xs tracking-wide uppercase text-text-secondary">
                         <th
                             class="px-4 py-3 text-left"
                             scope="col"
@@ -106,17 +106,17 @@ const ENDPOINTS: Endpoint[] = [
                         </th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-ink">
+                <tbody class="divide-y divide-border-strong">
                     {ENDPOINTS.map(endpoint => (
-                        <tr class="hover:bg-surface-sunken transition-colors">
+                        <tr class="hover:bg-bg-hover transition-colors">
                             <th
                                 class="px-4 py-4 text-left whitespace-nowrap"
                                 scope="row"
                             >
-                                <span class="label mr-2 px-2 py-1 bg-ink text-ink-inverse">GET</span>
-                                <code class="font-bold font-mono text-smd tracking-[-0.01em]">{endpoint.path}</code>
+                                <span class="label mr-2 px-2 py-1 bg-bg-inverse text-text-inverse">GET</span>
+                                <code class="font-bold font-mono text-sm tracking-[-0.01em]">{endpoint.path}</code>
                             </th>
-                            <td class="min-w-[320px] px-4 py-4 leading-relaxed text-sm text-ink-muted">{endpoint.blurb}</td>
+                            <td class="min-w-[320px] px-4 py-4 leading-relaxed text-sm text-text-secondary">{endpoint.blurb}</td>
                             <td class="px-4 py-4 text-right">
                                 <a
                                     class="action-text api__open inline-flex items-center min-h-(--control-size) gap-(--space-2xs) transition-[color,transform]"
@@ -135,14 +135,14 @@ const ENDPOINTS: Endpoint[] = [
 
 <style>
     .api__cell--flag {
-        background-color: var(--color-ink);
-        color: var(--color-ink-inverse);
+        background-color: var(--color-bg-inverse);
+        color: var(--color-text-inverse);
         padding: var(--space-md) var(--space-lg);
     }
 
     .api__ledger {
-        background-color: var(--color-ink);
-        border: 2px solid var(--color-ink);
+        background-color: var(--color-border-strong);
+        border: 2px solid var(--color-border-strong);
         display: grid;
         gap: 2px;
         grid-template-columns: minmax(200px, 0.62fr) repeat(3, minmax(0, 1fr));

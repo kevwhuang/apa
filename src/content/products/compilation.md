@@ -6,11 +6,11 @@ category: music
 priceCents: 2500
 sizes: []
 variations:
-  - { name: Ember, hex: '#d2491a' }
-  - { name: Gold, hex: '#c9a227' }
-  - { name: Mint, hex: '#7fd8b0' }
-  - { name: Smoke, hex: '#6f6a78' }
-  - { name: Translucent, hex: '#2a1e5c' }
+  - { name: Ember, hex: '#bb4202' }
+  - { name: Gold, hex: '#f3c443' }
+  - { name: Mint, hex: '#a6e5e0' }
+  - { name: Smoke, hex: '#6f6a63' }
+  - { name: Translucent, hex: '#1f2945' }
 description: A run of tracks from across the roster, sequenced as a single listen and pressed to translucent vinyl.
 details:
   - Pressed on translucent vinyl

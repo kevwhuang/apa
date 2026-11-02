@@ -53,25 +53,25 @@ const variants = Object.fromEntries(products
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="checkout-title"
 >
     <div>
         <PageHead
-            class="mb-6 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="mb-6 text-5xl md:text-7xl"
             eyebrow="Store / Checkout"
             headingId="checkout-title"
         >
             Lock it in.
         </PageHead>
         <p
-            class="max-w-2xl mb-10 text-lmd text-ink-muted"
+            class="max-w-2xl mb-10 text-lg text-text-secondary"
             data-motion="rise"
         >
             Review, shipping, payment &mdash; three steps, and nothing places until you confirm the last one.
         </p>
         <ol
-            class="flex border-2 border-ink"
+            class="flex border-2 border-border-strong"
             aria-label="Checkout steps"
             data-motion="rule"
         >
@@ -79,8 +79,8 @@ const variants = Object.fromEntries(products
                 <li
                     class:list={[
                         'step flex-1 p-4 font-bold font-mono text-xs tracking-wide uppercase',
-                        index === 0 ? 'slab--well' : 'bg-surface',
-                        index > 0 && 'border-l-2 border-ink',
+                        index === 0 ? 'slab--well' : 'bg-bg-page',
+                        index > 0 && 'border-l-2 border-border-strong',
                     ]}
                     aria-current={index === 0 ? 'step' : undefined}
                 >
@@ -103,8 +103,8 @@ const variants = Object.fromEntries(products
         data-checkout-empty
         hidden
     >
-        <p class="label text-ink-muted">Empty</p>
-        <p class="font-extrabold font-sans text-2xl">There is nothing to check out.</p>
+        <p class="label text-text-secondary">Empty</p>
+        <p class="font-bold font-sans text-2xl text-balance">There is nothing to check out.</p>
         <a
             class="btn btn--primary"
             href="/store"
@@ -128,7 +128,7 @@ const variants = Object.fromEntries(products
                 hidden
                 role="status"
             >
-                <p class="label text-accent-deep">Your cart changed</p>
+                <p class="label text-warning-text">Your cart changed</p>
                 <ul
                     class="flex flex-col gap-(--space-3xs) list-none"
                     data-checkout-issues
@@ -141,13 +141,13 @@ const variants = Object.fromEntries(products
             >
                 <h2
                     id="checkout-review-title"
-                    class="mb-6 font-extrabold font-sans text-2xl tracking-tight"
+                    class="mb-6 text-2xl"
                     tabindex="-1"
                 >
                     Review
                 </h2>
                 <ul
-                    class="mb-(--space-lg) border-2 border-ink list-none"
+                    class="mb-(--space-lg) border-2 border-border-strong list-none"
                     data-review-list
                 />
                 <div class="flex flex-col gap-2 mb-(--space-lg)">
@@ -156,7 +156,7 @@ const variants = Object.fromEntries(products
                         data-code-entry
                     >
                         <label class="flex flex-1 flex-col min-w-0 gap-2">
-                            <span class="label text-ink-muted">Discount code</span>
+                            <span class="label text-text-secondary">Discount code</span>
                             <input
                                 id="checkout-code"
                                 class="input font-mono uppercase"
@@ -179,7 +179,7 @@ const variants = Object.fromEntries(products
                         </button>
                     </div>
                     <p
-                        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 border-2 border-ink"
+                        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 border-2 border-border-strong"
                         data-code-tag
                         hidden
                     >
@@ -188,7 +188,7 @@ const variants = Object.fromEntries(products
                             data-code-label
                         />
                         <button
-                            class="action-text min-h-(--control-size) text-ink-muted transition-[color,transform]"
+                            class="action-text min-h-(--control-size) text-text-secondary transition-[color,transform]"
                             aria-label="Remove the discount code"
                             data-code-remove
                             type="button"
@@ -198,12 +198,12 @@ const variants = Object.fromEntries(products
                     </p>
                     <p
                         id="checkout-code-error"
-                        class="action-text text-accent-deep"
+                        class="action-text text-error-text"
                         data-field-error
                         hidden
                     />
                 </div>
-                <dl class="flex flex-col gap-(--space-2xs) pt-(--space-sm) border-t-2 border-ink font-mono">
+                <dl class="flex flex-col gap-(--space-2xs) pt-(--space-sm) border-t-2 border-border-strong font-mono">
                     <div class="flex justify-between gap-(--space-sm)">
                         <dt>Subtotal</dt>
                         <dd data-subtotal>$0.00</dd>
@@ -237,7 +237,7 @@ const variants = Object.fromEntries(products
                         <dt>Tax</dt>
                         <dd data-tax>$0.00</dd>
                     </div>
-                    <div class="flex justify-between gap-(--space-sm) pt-(--space-sm) border-t-2 border-ink font-extrabold font-sans leading-normal text-2xl tracking-[-0.02em]">
+                    <div class="flex justify-between gap-(--space-sm) pt-(--space-sm) border-t-2 border-border-strong font-bold font-sans leading-normal text-2xl tracking-[-0.02em]">
                         <dt>Total</dt>
                         <dd
                             aria-live="polite"
@@ -256,7 +256,7 @@ const variants = Object.fromEntries(products
             >
                 <h2
                     id="checkout-shipping-title"
-                    class="mb-6 font-extrabold font-sans text-2xl tracking-tight"
+                    class="mb-6 text-2xl"
                     tabindex="-1"
                 >
                     Shipping
@@ -265,7 +265,7 @@ const variants = Object.fromEntries(products
                     {SHIPPING_FIELDS.map(field => (
                         <div class:list={['flex flex-col gap-2', field.column]}>
                             <label class="flex flex-col gap-2">
-                                <span class="label text-ink-muted">{field.label}</span>
+                                <span class="label text-text-secondary">{field.label}</span>
                                 {field.kind === 'select'
                                     ? (
                                             <span class="select">
@@ -304,7 +304,7 @@ const variants = Object.fromEntries(products
                             </label>
                             <p
                                 id={`checkout-${field.name}-error`}
-                                class="action-text text-accent-deep"
+                                class="action-text text-error-text"
                                 data-field-error
                                 hidden
                             />
@@ -320,7 +320,7 @@ const variants = Object.fromEntries(products
             >
                 <h2
                     id="checkout-payment-title"
-                    class="mb-6 font-extrabold font-sans text-2xl tracking-tight"
+                    class="mb-6 text-2xl"
                     tabindex="-1"
                 >
                     Payment
@@ -345,7 +345,7 @@ const variants = Object.fromEntries(products
                             data-prods-balance
                         />
                         <span
-                            class="leading-normal text-sm text-ink-muted"
+                            class="leading-normal text-sm text-text-secondary"
                             data-prods-note
                         />
                     </p>
@@ -359,7 +359,7 @@ const variants = Object.fromEntries(products
                         {PAYMENT_FIELDS.map(field => (
                             <div class:list={['flex flex-col gap-2', field.column]}>
                                 <label class="flex flex-col gap-2">
-                                    <span class="label text-ink-muted">{field.label}</span>
+                                    <span class="label text-text-secondary">{field.label}</span>
                                     <input
                                         id={`checkout-${field.name}`}
                                         class="input font-mono text-sm"
@@ -377,7 +377,7 @@ const variants = Object.fromEntries(products
                                 </label>
                                 <p
                                     id={`checkout-${field.name}-error`}
-                                    class="action-text text-accent-deep"
+                                    class="action-text text-error-text"
                                     data-field-error
                                     hidden
                                 />
@@ -399,7 +399,7 @@ const variants = Object.fromEntries(products
                         <span>
                             I accept the&#32;
                             <a
-                                class="hover:text-accent-deep decoration-2 decoration-accent font-bold underline underline-offset-4"
+                                class="hover:text-link decoration-2 decoration-text-brand font-bold underline underline-offset-4"
                                 href="/terms"
                             >
                                 terms of service
@@ -408,7 +408,7 @@ const variants = Object.fromEntries(products
                     </label>
                     <p
                         id="checkout-terms-error"
-                        class="action-text text-accent-deep"
+                        class="action-text text-error-text"
                         data-field-error
                         hidden
                     />
@@ -440,12 +440,12 @@ const variants = Object.fromEntries(products
             data-checkout-aside
             hidden
         >
-            <h2 class="label mb-4 text-ink-muted">Summary</h2>
+            <h2 class="label mb-4 text-text-secondary">Summary</h2>
             <ul
                 class="checkout__summary scroll-slot mb-4 list-none text-sm"
                 data-summary-list
             />
-            <dl class="flex flex-col gap-2 pt-4 border-t-2 border-ink font-mono text-sm">
+            <dl class="flex flex-col gap-2 pt-4 border-t-2 border-border-strong font-mono text-sm">
                 <div class="flex justify-between gap-3">
                     <dt>Subtotal</dt>
                     <dd data-subtotal>$0.00</dd>
@@ -479,7 +479,7 @@ const variants = Object.fromEntries(products
                     <dt>Tax</dt>
                     <dd data-tax>$0.00</dd>
                 </div>
-                <div class="flex justify-between gap-3 pt-2 border-t-2 border-ink font-extrabold font-sans text-lg">
+                <div class="flex justify-between gap-3 pt-2 border-t-2 border-border-strong font-bold font-sans text-lg">
                     <dt>Total</dt>
                     <dd
                         aria-live="polite"
@@ -492,9 +492,9 @@ const variants = Object.fromEntries(products
         </aside>
     </div>
     <template data-issue-row>
-        <li class="flex gap-2 text-sm text-ink-muted">
+        <li class="flex gap-2 text-sm text-text-secondary">
             <span
-                class="font-bold text-accent-deep"
+                class="font-bold text-warning-text"
                 aria-hidden="true"
             >
                 &middot;
@@ -506,8 +506,8 @@ const variants = Object.fromEntries(products
         </li>
     </template>
     <template data-review-row>
-        <li class="first:border-t-0 flex flex-wrap items-baseline justify-between gap-(--space-sm) p-(--space-md) border-t-2 border-ink">
-            <span class="block self-center shrink-0 h-16 w-16 border-2 border-ink bg-ink">
+        <li class="first:border-t-0 flex flex-wrap items-baseline justify-between gap-(--space-sm) p-(--space-md) border-t-2 border-border-strong">
+            <span class="block self-center shrink-0 h-14 w-14 border-2 border-border-strong bg-bg-inverse">
                 <img
                     class="block object-cover h-full w-full"
                     alt=""
@@ -517,9 +517,9 @@ const variants = Object.fromEntries(products
                 />
             </span>
             <div class="flex flex-[1_1_88px] flex-col min-w-0 gap-(--space-2xs)">
-                <p class="font-bold font-sans text-lmd">
+                <p class="font-bold font-sans text-base md:text-lg">
                     <a
-                        class="hover:text-accent-deep hover:underline underline-offset-4 transition-colors"
+                        class="hover:text-link hover:underline underline-offset-4 transition-colors"
                         data-review-title
                         href="/store"
                     >
@@ -528,17 +528,17 @@ const variants = Object.fromEntries(products
                 </p>
                 <p class="flex flex-wrap items-center gap-(--space-2xs)">
                     <span
-                        class="label min-w-0 text-ink-muted"
+                        class="label min-w-0 text-text-secondary"
                         data-review-variant
                     />
                     <span
-                        class="label px-(--space-2xs) py-(--space-3xs) border border-ink-20 font-bold"
+                        class="label px-(--space-2xs) py-(--space-3xs) border border-border-subtle font-bold"
                         data-review-qty
                     />
                 </p>
             </div>
             <p
-                class="ms-auto font-bold font-mono text-lmd whitespace-nowrap"
+                class="ms-auto font-bold font-mono text-lg whitespace-nowrap"
                 data-review-price
             />
         </li>
@@ -546,7 +546,7 @@ const variants = Object.fromEntries(products
     <template data-summary-row>
         <li class="flex items-center justify-between gap-2 mb-3">
             <span class="flex items-center min-w-0 gap-2">
-                <span class="block shrink-0 h-8 w-8 border-2 border-ink bg-ink">
+                <span class="block shrink-0 h-8 w-8 border-2 border-border-strong bg-bg-inverse">
                     <img
                         class="block object-cover h-full w-full"
                         alt=""
@@ -557,7 +557,7 @@ const variants = Object.fromEntries(products
                 </span>
                 <span class="min-w-0">
                     <a
-                        class="hover:text-accent-deep hover:underline underline-offset-4 transition-colors"
+                        class="hover:text-link hover:underline underline-offset-4 transition-colors"
                         data-summary-title
                         href="/store"
                     >
@@ -600,24 +600,28 @@ const variants = Object.fromEntries(products
         align-items: center;
         align-self: flex-start;
         display: flex;
-        font-size: var(--text-smd);
+        font-size: var(--text-sm);
         gap: var(--space-xs);
         min-height: var(--control-size);
         padding-block: var(--space-2xs);
     }
 
     .checkout__code-entry:has(.input[aria-invalid='true']) .btn {
-        border-color: var(--color-accent-deep);
-        color: var(--color-accent-deep);
+        border-color: var(--color-border-invalid);
+        color: var(--color-error-text);
+    }
+
+    .checkout__code-entry:has(.input[aria-invalid='true']) .btn:hover:not(:disabled) {
+        color: var(--color-error-text-on-inverse);
     }
 
     .checkout__notice {
-        border-left: 2px solid var(--color-accent-deep);
+        border-left: 2px solid var(--color-warning-border);
     }
 
     .checkout__prods {
         align-items: center;
-        border: 2px solid var(--color-ink);
+        border: 2px solid var(--color-border-strong);
         display: flex;
         flex-wrap: wrap;
         gap: var(--space-2xs) var(--space-sm);
@@ -627,7 +631,7 @@ const variants = Object.fromEntries(products
     }
 
     .checkout__prods:has(.box:checked) {
-        background-color: var(--color-surface-sunken);
+        background-color: var(--color-bg-sunken);
     }
 
     .checkout__prods:has(.box:disabled) {
@@ -639,8 +643,8 @@ const variants = Object.fromEntries(products
     }
 
     .step--done {
-        background: var(--color-surface-sunken);
-        color: var(--color-ink-muted);
+        background: var(--color-bg-sunken);
+        color: var(--color-text-secondary);
     }
 
     .step--done::before {
@@ -1137,7 +1141,7 @@ const variants = Object.fromEntries(products
         controls.steps.forEach((item, index) => {
             item.classList.toggle('slab--well', index === step);
             item.classList.toggle('step--done', index < step);
-            item.classList.toggle('bg-surface', index > step);
+            item.classList.toggle('bg-bg-page', index > step);
 
             if (index === step) item.setAttribute('aria-current', 'step');
             else item.removeAttribute('aria-current');

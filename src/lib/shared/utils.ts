@@ -33,7 +33,7 @@ interface SearchFieldOptions {
     signal: AbortSignal;
 }
 
-const EMPTY_TILE_COLOR = 'var(--color-ink-subtle)';
+const EMPTY_TILE_COLOR: TileColor = { bg: 'var(--color-bg-inverse)', text: 'var(--color-text-inverse-secondary)' };
 const FLOAT_WINDOW_BASE_Z = 70;
 const ISO_DATE_LENGTH = 10;
 const MAX_INITIALS = 2;
@@ -415,7 +415,7 @@ function parseJson<T>(raw: string | undefined, fallback: T): T {
     }
 }
 
-function pickTileColor(seed: string): string {
+function pickTileColor(seed: string): TileColor {
     if (seed.length === 0) return EMPTY_TILE_COLOR;
 
     const total = Array.from(seed).reduce((sum, character) => sum + character.charCodeAt(0), 0);

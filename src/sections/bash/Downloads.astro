@@ -14,12 +14,12 @@ const assets = downloads.filter(asset => asset.data.title.includes(program.name)
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="bash-assets-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-4xl tracking-tight"
+            class="text-4xl"
             eyebrow={`${program.shortName} / Resources`}
             headingId="bash-assets-title"
         >
@@ -31,18 +31,18 @@ const assets = downloads.filter(asset => asset.data.title.includes(program.name)
                 data-motion-stagger="rise"
             >
                 {assets.map(asset => (
-                    <li class="first:border-t-0 flex flex-wrap items-baseline justify-between gap-(--space-sm) py-(--space-md) border-t border-ink-20">
+                    <li class="first:border-t-0 flex flex-wrap items-baseline justify-between gap-(--space-sm) py-(--space-md) border-t border-border-subtle">
                         <div class="flex flex-col gap-1">
                             <a
-                                class="active:translate-y-px hover:text-accent-deep inline-block self-start py-(--space-sm) decoration-2 decoration-accent font-bold font-sans underline underline-offset-4 transition-[color,transform]"
+                                class="active:translate-y-px hover:text-link inline-block self-start py-(--space-sm) decoration-2 decoration-text-brand font-bold font-sans underline underline-offset-4 transition-[color,transform]"
                                 href={`/resources#${asset.id}`}
                             >
                                 {asset.data.title}
                             </a>
-                            <p class="text-sm text-ink-muted">{asset.data.description}</p>
+                            <p class="text-sm text-text-secondary">{asset.data.description}</p>
                         </div>
                         <p
-                            class="label shrink-0 text-ink-subtle"
+                            class="label shrink-0 text-text-secondary"
                             data-placeholder
                         >
                             {ASSET_KIND_LABELS[asset.data.kind]} &middot; {asset.data.format} &middot; {asset.data.size}
@@ -55,7 +55,7 @@ const assets = downloads.filter(asset => asset.data.title.includes(program.name)
                 aria-label="About the resource library"
                 data-motion="unfold"
             >
-                <p class="text-smd text-ink-muted">
+                <p class="text-text-secondary">
                     Every asset the Alliance publishes &mdash; press material, event packs, and the working
                     documents behind how it all runs &mdash; is listed in one place, each with its
                     format, size, and publication state.

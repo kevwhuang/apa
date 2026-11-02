@@ -227,7 +227,7 @@ const PAD_LENGTH = 2;
 ---
 
 <section
-    class="stage stage--tight content-between overflow-hidden relative min-h-[min(820px,82svh)] border-b-2 border-ink"
+    class="stage stage--tight content-between overflow-hidden relative min-h-[min(820px,82svh)] border-b-2 border-border-strong"
     aria-labelledby="rig-title"
 >
     <div
@@ -240,14 +240,14 @@ const PAD_LENGTH = 2;
     />
     <div class="flex flex-col relative gap-6">
         <PageHead
-            class="max-w-4xl font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
+            class="max-w-4xl text-5xl md:text-8xl"
             eyebrow="Resources / Rack"
             headingId="rig-title"
         >
             One rack, live.
         </PageHead>
         <p
-            class="max-w-2xl text-lmd text-ink-muted"
+            class="max-w-2xl text-lg text-text-secondary"
             data-motion="blur"
         >
             Sixteen Web Audio processors wired as a single chain in your browser &mdash; no
@@ -260,32 +260,32 @@ const PAD_LENGTH = 2;
         aria-label="How the rack works"
         data-motion-stagger="rise"
     >
-        <div class="rack__cell--flag content-center grid px-(--space-sm) py-(--space-xs) bg-surface">
-            <dt class="label mb-(--space-2xs) text-ink-inverse-muted">Modules</dt>
+        <div class="rack__cell--flag content-center grid px-(--space-sm) py-(--space-xs)">
+            <dt class="label mb-(--space-2xs) text-text-inverse-secondary">Modules</dt>
             <dd
-                class="font-extrabold font-sans leading-[0.9] text-4xl tracking-tight"
+                class="font-bold font-display leading-[0.9] text-4xl tracking-[-0.02em]"
                 data-motion-count={String(MODULES.length)}
             >
                 {MODULES.length}
             </dd>
         </div>
-        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-surface">
-            <dt class="label mb-(--space-3xs) text-ink-muted">Formats</dt>
-            <dd class="font-mono text-smd">{RACK_EXTENSION_LIST}</dd>
+        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
+            <dt class="label mb-(--space-3xs) text-text-secondary">Formats</dt>
+            <dd class="font-mono text-sm">{RACK_EXTENSION_LIST}</dd>
         </div>
-        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-surface">
-            <dt class="label mb-(--space-3xs) text-ink-muted">Ceiling</dt>
-            <dd class="font-mono text-smd">{formatBytes(RACK_MAX_BYTES)} per file</dd>
+        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
+            <dt class="label mb-(--space-3xs) text-text-secondary">Ceiling</dt>
+            <dd class="font-mono text-sm">{formatBytes(RACK_MAX_BYTES)} per file</dd>
         </div>
-        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-surface">
-            <dt class="label mb-(--space-3xs) text-ink-muted">Output</dt>
-            <dd class="font-mono text-smd">Plays through the site player</dd>
+        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
+            <dt class="label mb-(--space-3xs) text-text-secondary">Output</dt>
+            <dd class="font-mono text-sm">Plays through the site player</dd>
         </div>
     </dl>
 </section>
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="rack-title"
 >
     <div
@@ -294,7 +294,7 @@ const PAD_LENGTH = 2;
         data-rack-master
     >
         <SectionHead
-            class="font-extrabold font-sans text-2xl tracking-tight"
+            class="text-2xl text-balance"
             eyebrow="Master / One source"
             headingId="rack-title"
             tone="dark"
@@ -309,7 +309,7 @@ const PAD_LENGTH = 2;
             >
                 <IconUpload />
                 <span class="action-text">Drop audio or browse</span>
-                <span class="font-mono text-xs text-ink-inverse-muted">
+                <span class="font-mono text-xs text-text-inverse">
                     {RACK_EXTENSION_LIST} up to {formatBytes(RACK_MAX_BYTES)}
                 </span>
                 <input
@@ -322,7 +322,7 @@ const PAD_LENGTH = 2;
                     type="file"
                 />
             </label>
-            <div class="flex items-center gap-(--space-sm) p-(--space-sm) border border-ink-inverse-10">
+            <div class="flex items-center gap-(--space-sm) p-(--space-sm) border border-border-inverse-subtle">
                 <button
                     class="rack__play"
                     aria-pressed="false"
@@ -346,7 +346,7 @@ const PAD_LENGTH = 2;
                 </button>
                 <div class="min-w-0">
                     <p
-                        class="rack__meta flex items-center gap-(--space-2xs) font-mono text-smd"
+                        class="rack__meta flex items-center gap-(--space-2xs) font-mono text-sm"
                         aria-live="polite"
                         data-rack-meta
                     >
@@ -365,14 +365,14 @@ const PAD_LENGTH = 2;
                     </p>
                     <p
                         id="rack-error"
-                        class="empty:hidden font-mono text-xs text-accent-light"
+                        class="empty:hidden font-mono text-xs text-error-text-on-inverse"
                         aria-live="polite"
                         data-rack-error
                     />
                 </div>
             </div>
             <div class="col-span-full">
-                <p class="label mb-(--space-2xs) text-ink-inverse-muted">Signal path</p>
+                <p class="label mb-(--space-2xs) text-text-inverse-secondary">Signal path</p>
                 <ol
                     class="flex flex-wrap items-center gap-(--space-sm) list-none"
                     data-rack-path
@@ -403,7 +403,7 @@ const PAD_LENGTH = 2;
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-3xl tracking-tight"
+            class="text-2xl text-balance md:text-3xl"
             eyebrow={`Rack / ${MODULES.length} modules`}
             headingId="modules-title"
         >
@@ -430,7 +430,7 @@ const PAD_LENGTH = 2;
                         </p>
                         <div class="flex flex-wrap items-center justify-between row-2 gap-(--space-2xs)">
                             <h3
-                                class="min-w-0 font-extrabold font-sans text-xl tracking-tight"
+                                class="min-w-0 text-xl"
                                 data-module-name
                             >
                                 {MODULE_NAMES[module.kind]}
@@ -488,7 +488,7 @@ const PAD_LENGTH = 2;
                         {module.viz === 'readout' && (
                             <div class="row-5">
                                 <p
-                                    class="flex items-center justify-center min-h-(--control-size) px-(--space-xs) py-(--space-2xs) border-2 border-(--module-line) font-mono text-center text-md bg-(--module-fill)"
+                                    class="flex items-center justify-center min-h-(--control-size) px-(--space-xs) py-(--space-2xs) border-2 border-(--module-line) font-mono text-center text-lg bg-(--module-fill)"
                                     data-module-readout
                                 >
                                     {module.readout}
@@ -504,20 +504,20 @@ const PAD_LENGTH = 2;
 
 <style>
     .module {
-        --module-accent: var(--color-accent-deep);
-        --module-contrast: var(--color-ink-inverse);
-        --module-error: var(--color-accent-deep);
-        --module-fill: var(--color-surface-sunken);
-        --module-line: var(--color-ink);
-        --module-mute: var(--color-ink-muted);
+        --module-accent: var(--color-link);
+        --module-contrast: var(--color-text-inverse);
+        --module-fill: var(--color-bg-sunken);
+        --module-invert: var(--color-bg-inverse);
+        --module-line: var(--color-border-strong);
+        --module-mute: var(--color-text-secondary);
     }
 
     .module :focus-visible {
-        outline-color: var(--module-accent);
+        outline-color: var(--color-focus-ring);
     }
 
     .module--engaged::before {
-        background-color: var(--color-accent);
+        background-color: var(--color-bg-signal);
         content: '';
         inset: 0 auto 0 0;
         position: absolute;
@@ -525,14 +525,14 @@ const PAD_LENGTH = 2;
     }
 
     .module--well {
-        --module-accent: var(--color-accent-light);
-        --module-contrast: var(--color-ink);
-        --module-error: var(--color-accent-light);
-        --module-fill: var(--color-ink-inverse-10);
-        --module-line: var(--color-ink-inverse);
-        --module-mute: var(--color-ink-inverse-muted);
+        --module-accent: var(--color-link-on-inverse);
+        --module-contrast: var(--color-text);
+        --module-fill: var(--color-bg-inverse-raised);
+        --module-invert: var(--color-bg-page);
+        --module-line: currentColor;
+        --module-mute: var(--color-text-inverse-secondary);
         --slab-level: var(--z-card);
-        --slab-line: var(--color-ink);
+        --slab-line: var(--color-border-strong);
         --slab-rule: 2px;
     }
 
@@ -555,21 +555,21 @@ const PAD_LENGTH = 2;
     }
 
     .module__active:hover {
-        background-color: var(--module-line);
-        border-color: var(--module-line);
+        background-color: var(--module-invert);
+        border-color: var(--module-invert);
         color: var(--module-contrast);
     }
 
     .module__active[aria-pressed='true'] {
-        background-color: var(--color-accent);
-        border-color: var(--color-accent);
-        color: var(--color-ink);
+        background-color: var(--color-btn-primary-bg);
+        border-color: var(--color-btn-primary-bg);
+        color: var(--color-btn-primary-text);
     }
 
     .module__active[aria-pressed='true']:hover {
-        background-color: var(--color-accent-deep);
-        border-color: var(--color-accent-deep);
-        color: var(--color-ink-inverse);
+        background-color: var(--color-btn-primary-bg-hover);
+        border-color: var(--color-btn-primary-bg);
+        color: var(--color-btn-primary-text);
     }
 
     .module__range {
@@ -582,12 +582,12 @@ const PAD_LENGTH = 2;
     }
 
     .module__range:focus-visible {
-        outline: 2px solid var(--module-accent);
+        outline: 2px solid var(--color-focus-ring);
         outline-offset: 2px;
     }
 
     .module__range::-moz-range-thumb {
-        background: var(--color-accent);
+        background: var(--color-control-checked-bg);
         border: 2px solid var(--module-line);
         border-radius: 0;
         height: 20px;
@@ -608,7 +608,7 @@ const PAD_LENGTH = 2;
 
     .module__range::-webkit-slider-thumb {
         appearance: none;
-        background: var(--color-accent);
+        background: var(--color-control-checked-bg);
         border: 2px solid var(--module-line);
         height: 20px;
         transition: background var(--duration-fast) var(--motion-ease-ui);
@@ -618,20 +618,20 @@ const PAD_LENGTH = 2;
 
     .module__range:active::-moz-range-thumb,
     .module__range:hover::-moz-range-thumb {
-        background: var(--module-accent);
+        background: var(--color-control-checked-bg-hover);
     }
 
     .module__range:active::-webkit-slider-thumb,
     .module__range:hover::-webkit-slider-thumb {
-        background: var(--module-accent);
+        background: var(--color-control-checked-bg-hover);
     }
 
     .rack .action-text:hover {
-        color: var(--color-accent-light);
+        color: var(--color-link-on-inverse);
     }
 
     .rack.is-decoding .rack__meta {
-        color: var(--color-accent-light);
+        color: var(--color-link-on-inverse);
     }
 
     .rack__body {
@@ -641,16 +641,16 @@ const PAD_LENGTH = 2;
     }
 
     .rack__cell--flag {
-        background-color: var(--color-ink);
-        color: var(--color-ink-inverse);
+        background-color: var(--color-bg-inverse);
+        color: var(--color-text-inverse);
         padding: var(--space-md) var(--space-lg);
     }
 
     .rack__drop {
         align-items: center;
-        background-color: var(--color-ink-inverse-10);
-        background-image: repeating-linear-gradient(135deg, var(--color-ink-inverse-10) 0 6px, transparent 6px 12px);
-        border: 2px dashed var(--color-ink-inverse);
+        background-color: var(--color-bg-inverse-raised);
+        background-image: repeating-linear-gradient(135deg, var(--color-border-inverse-subtle) 0 6px, transparent 6px 12px);
+        border: 2px dashed currentColor;
         display: flex;
         flex-direction: column;
         gap: var(--space-3xs);
@@ -664,23 +664,27 @@ const PAD_LENGTH = 2;
             transform var(--duration-fast) var(--motion-ease-ui);
     }
 
+    .rack__drop > span {
+        background-color: var(--color-bg-inverse-raised);
+    }
+
     .rack__drop:active {
         transform: translateY(1px);
     }
 
     .rack__drop:has(input:focus-visible) {
-        border-color: var(--color-accent-light);
-        outline: 2px solid var(--color-accent-light);
+        border-color: var(--color-border-selected);
+        outline: 2px solid var(--color-focus-ring);
         outline-offset: 2px;
     }
 
     .rack__drop:hover {
-        border-color: var(--color-accent-light);
+        border-color: var(--color-border-selected);
     }
 
     .rack__drop.is-dragging {
-        background-color: var(--color-accent-20);
-        border-color: var(--color-accent-light);
+        background-image: none;
+        border-color: var(--color-border-selected);
         border-style: solid;
     }
 
@@ -692,8 +696,8 @@ const PAD_LENGTH = 2;
     }
 
     .rack__ledger {
-        background-color: var(--color-ink);
-        border: 2px solid var(--color-ink);
+        background-color: var(--color-border-strong);
+        border: 2px solid var(--color-border-strong);
         display: grid;
         gap: 2px;
         grid-template-columns: minmax(200px, 0.62fr) repeat(3, minmax(0, 1fr));
@@ -701,11 +705,11 @@ const PAD_LENGTH = 2;
 
     .rack__node {
         align-items: center;
-        border: 1px solid var(--color-ink-inverse-10);
-        color: var(--color-ink-inverse-muted);
+        border: 1px solid var(--color-border-inverse-subtle);
+        color: var(--color-text-inverse-secondary);
         display: inline-flex;
         font-family: var(--font-mono);
-        font-size: var(--text-2xs);
+        font-size: var(--text-xs);
         letter-spacing: 0.06em;
         min-height: 36px;
         padding: 0 var(--space-2xs);
@@ -714,7 +718,7 @@ const PAD_LENGTH = 2;
     }
 
     .rack__node + .rack__node::before {
-        color: var(--color-ink-inverse-muted);
+        color: var(--color-text-inverse-secondary);
         content: '\2192';
         inset: auto calc(100% + var(--space-3xs)) auto auto;
         position: absolute;
@@ -725,17 +729,17 @@ const PAD_LENGTH = 2;
     }
 
     .rack__node--plug {
-        background-color: var(--color-accent);
-        border-color: var(--color-accent);
-        color: var(--color-ink);
+        background-color: var(--color-bg-signal);
+        border-color: var(--color-bg-signal);
+        color: var(--color-text-on-signal);
         font-weight: 700;
     }
 
     .rack__play {
         align-items: center;
-        background-color: var(--color-accent);
-        border: 2px solid var(--color-accent);
-        color: var(--color-ink);
+        background-color: var(--color-btn-primary-bg);
+        border: 2px solid var(--color-btn-primary-bg);
+        color: var(--color-btn-primary-text);
         display: inline-flex;
         flex: 0 0 auto;
         height: 64px;
@@ -754,24 +758,25 @@ const PAD_LENGTH = 2;
 
     .rack__play:disabled {
         background-color: transparent;
-        border-color: var(--color-ink-inverse-muted);
-        color: var(--color-ink-inverse-muted);
+        border-color: currentColor;
+        color: var(--color-text-inverse-secondary);
         opacity: 0.55;
     }
 
     .rack__play:hover:not(:disabled) {
-        background-color: var(--color-accent-light);
-        border-color: var(--color-accent-light);
+        background-color: var(--color-btn-primary-bg-hover);
+        border-color: var(--color-btn-primary-bg);
     }
 
     .rack__play[aria-pressed='true'] {
-        background-color: var(--color-ink-inverse);
-        border-color: var(--color-ink-inverse);
+        background-color: var(--color-bg-page);
+        border-color: var(--color-bg-page);
+        color: var(--color-text);
     }
 
     .rack__play[aria-pressed='true']:hover {
-        background-color: var(--color-ink-inverse-muted);
-        border-color: var(--color-ink-inverse-muted);
+        background-color: var(--color-bg-hover);
+        border-color: var(--color-border-selected);
     }
 
     .rack__scene > :global(.rack__canvas) {
@@ -797,7 +802,7 @@ const PAD_LENGTH = 2;
     }
 
     .rack__veil {
-        background-image: linear-gradient(to bottom, var(--color-surface), color-mix(in srgb, var(--color-surface) 74%, transparent) 38%, transparent 68%);
+        background-image: linear-gradient(to bottom, var(--color-bg-page), color-mix(in srgb, var(--color-bg-page) 74%, transparent) 38%, transparent 68%);
         inset: 0;
     }
 
@@ -830,7 +835,7 @@ const PAD_LENGTH = 2;
         }
 
         .rack__veil {
-            background-image: linear-gradient(to bottom, var(--color-surface), color-mix(in srgb, var(--color-surface) 80%, transparent) 56%, transparent 92%);
+            background-image: linear-gradient(to bottom, var(--color-bg-page), color-mix(in srgb, var(--color-bg-page) 80%, transparent) 56%, transparent 92%);
         }
     }
 </style>
@@ -994,7 +999,7 @@ const PAD_LENGTH = 2;
         canvas.getContext('2d')?.setTransform(ratio, 0, 0, ratio, 0, 0);
 
         return {
-            accent: styles.getPropertyValue('--color-accent').trim(),
+            accent: styles.getPropertyValue('--color-chart-1').trim(),
             height,
             ink: styles.getPropertyValue('--module-line').trim(),
             width,

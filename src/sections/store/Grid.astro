@@ -25,19 +25,19 @@ const cards = products.map((product) => {
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="store-title"
 >
     <div>
         <PageHead
-            class="mb-6 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="mb-6 text-5xl md:text-7xl"
             eyebrow={`Store / ${products.length} items`}
             headingId="store-title"
         >
             Wear the alliance.
         </PageHead>
         <p
-            class="max-w-2xl mb-10 text-lmd text-ink-muted"
+            class="max-w-2xl mb-10 text-lg text-text-secondary"
             data-motion="blur"
         >
             Every order goes back into the calendar &mdash; room hire, gear for the Bash, and
@@ -53,7 +53,7 @@ const cards = products.map((product) => {
             {CATEGORIES.map((category, index) => (
                 <button
                     class:list={[
-                        'category-btn chip active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse h-(--control-size)',
+                        'category-btn chip active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse h-(--control-size)',
                         { 'is-active': index === 0 },
                     ]}
                     aria-pressed={index === 0 ? 'true' : 'false'}
@@ -65,7 +65,7 @@ const cards = products.map((product) => {
             ))}
         </div>
         <p
-            class="label text-ink-subtle"
+            class="label text-text-secondary"
             aria-live="polite"
             data-motion="stamp"
             data-store-status
@@ -102,7 +102,7 @@ const cards = products.map((product) => {
                     href={`/store/${product.data.sku}`}
                 >
                     <span
-                        class="product-card__frame block overflow-hidden relative aspect-square border-b-2 border-ink bg-surface-sunken"
+                        class="product-card__frame block overflow-hidden relative aspect-square border-b-2 border-border-strong bg-bg-sunken"
                         data-product-frame={inStock && photos.length > 1 ? 'loop' : undefined}
                     >
                         {photos.map((photo, index) => photo && (
@@ -116,7 +116,7 @@ const cards = products.map((product) => {
                         ))}
                         {getStockLabel(product.data.stock) && (
                             <span
-                                class="label absolute left-0 top-0 px-2 py-2 border-b-2 border-r-2 border-ink bg-ink text-ink-inverse"
+                                class="label absolute left-0 top-0 px-2 py-2 border-b-2 border-r-2 border-border-strong bg-bg-inverse text-text-inverse"
                                 data-placeholder
                             >
                                 {getStockLabel(product.data.stock)}
@@ -125,24 +125,24 @@ const cards = products.map((product) => {
                     </span>
                     <span class="block pb-(--space-2xs) pt-(--space-md) px-(--space-md)">
                         <span class="flex flex-wrap items-baseline justify-between gap-x-4 mb-2">
-                            <span class="label text-ink-muted">
+                            <span class="label text-text-secondary">
                                 {product.data.category}
                             </span>
                             {variationCount > 1 && (
                                 <span
-                                    class="product-card__variations font-mono text-2xs uppercase text-ink-subtle"
+                                    class="product-card__variations font-mono text-xs uppercase text-text-secondary"
                                     data-placeholder
                                 >
                                     {variationCount} variations
                                 </span>
                             )}
                         </span>
-                        <span class="block font-extrabold font-sans text-xl tracking-tight">
+                        <span class="block font-bold font-sans text-xl tracking-tight">
                             {product.data.title}
                         </span>
                     </span>
                     <span
-                        class="block pb-(--space-md) px-(--space-md) font-bold font-mono text-lmd"
+                        class="block pb-(--space-md) px-(--space-md) font-bold font-mono text-lg"
                         data-placeholder
                     >
                         {formatPrice(product.data.priceCents)}

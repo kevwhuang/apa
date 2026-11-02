@@ -1,5 +1,5 @@
-import austinCommunityCollege from '@images/logos/austin_community_college.png';
-import stationAustin from '@images/logos/station_austin.svg';
+import austinCommunityCollege from '@images/brand/sponsor_acc.png';
+import stationAustin from '@images/brand/sponsor_station_austin.svg';
 
 const ARTIST_NAME_MAX_LENGTH = 50;
 const ASSET_KINDS = ['brochure', 'document', 'media-kit', 'photo-pack', 'press-kit', 'sample-pack', 'slides', 'stems', 'video'] as const;
@@ -36,7 +36,7 @@ const AVATAR = {
 } as const;
 
 const CANONICAL = {
-    history: 'Austin Producer Alliance was founded in May 2022 by Kevin Huang and Kyle Henderson to build the city\'s foremost community for music producers. What began as a Discord server grew into a recurring meetup at the Austin Central Library, then into a collective in collaboration with longtime partner Station Austin (formerly Capital Factory). To date, APA has welcomed more than 500 producers and creatives to its events.',
+    history: 'Austin Producer Alliance was founded in May 2022 by Kevin Huang and Kyle Henderson to build the city\'s foremost community for music producers. What began as a Discord server grew into a recurring meetup at the Austin Central Library, then into a collective in collaboration with longtime partner Station Austin (formerly Capital Factory). To date, APA has welcomed more than 800 producers and creatives to its events.',
     mission: 'We bring Austin\'s music producers together. Through meetups, workshops, and collaborations, producers of every genre and experience level find their people, sharpen their craft, and support one another. Our goal is a lasting community for those behind the city\'s sound.',
 } as const;
 
@@ -148,25 +148,28 @@ const GENRES = ['afrobeats', 'ambient', 'disco', 'drum & bass', 'dubstep', 'expe
 const JOIN_ROUTE = '/contact#contact-topic';
 
 const KIND_COLORS: Record<AssetKind, string> = {
-    'brochure': 'var(--color-signal)',
-    'document': 'var(--color-ink-muted)',
-    'media-kit': 'var(--color-bloom-deep)',
-    'photo-pack': 'var(--color-pulse-deep)',
-    'press-kit': 'var(--color-accent-deep)',
-    'sample-pack': 'var(--color-surface-violet)',
-    'slides': 'var(--color-signal-deep)',
-    'stems': 'var(--color-accent)',
-    'video': 'var(--color-bloom)',
+    'brochure': 'var(--color-chart-2)',
+    'document': 'var(--color-chart-5)',
+    'media-kit': 'var(--color-chart-4)',
+    'photo-pack': 'var(--color-chart-3)',
+    'press-kit': 'var(--color-link)',
+    'sample-pack': 'var(--color-success-text)',
+    'slides': 'var(--color-info-text)',
+    'stems': 'var(--color-chart-1)',
+    'video': 'var(--color-warning-text)',
 };
 
 const LINKS = {
     aephonics: 'https://instagram.com/aephonics',
-    discord: 'https://discord.gg/aVM3mbRRpU',
+    discord: 'https://discord.gg/QvAtjbWZ7b',
     email: 'hello@austinproduceralliance.com',
     hub: 'https://austinproduceralliance.com',
-    instagram: 'https://www.instagram.com/austin_producer_alliance',
-    meetup: 'https://www.meetup.com/austin-producer-alliance',
+    instagram: 'https://www.instagram.com/austinproduceralliance',
+    linktree: 'https://linktr.ee/austinproduceralliance',
+    meetup: 'https://www.meetup.com/austinproduceralliance',
     pressEmail: 'press@austinproduceralliance.com',
+    soundcloud: 'https://soundcloud.com/austinproduceralliance',
+    spotify: 'https://open.spotify.com',
 } as const;
 
 const MAX_DECODE_MEGABYTES = 25;
@@ -235,14 +238,12 @@ const ORDER_ID = {
 } as const;
 
 const PALETTE = [
-    'var(--color-accent)',
-    'var(--color-signal)',
-    'var(--color-pulse-deep)',
-    'var(--color-bloom)',
-    'var(--color-surface-violet)',
-    'var(--color-bloom-deep)',
-    'var(--color-signal-deep)',
-    'var(--color-accent-deep)',
+    { bg: 'var(--color-avatar-1-bg)', text: 'var(--color-avatar-1-text)' },
+    { bg: 'var(--color-avatar-2-bg)', text: 'var(--color-avatar-2-text)' },
+    { bg: 'var(--color-avatar-3-bg)', text: 'var(--color-avatar-3-text)' },
+    { bg: 'var(--color-avatar-4-bg)', text: 'var(--color-avatar-4-text)' },
+    { bg: 'var(--color-avatar-5-bg)', text: 'var(--color-avatar-5-text)' },
+    { bg: 'var(--color-avatar-6-bg)', text: 'var(--color-avatar-6-text)' },
 ] as const;
 
 const CARD_COLORS = PALETTE.slice(0, 4);
@@ -256,9 +257,9 @@ const PARTNER_LOGO_WIDTH = 640;
 const PASSWORD_MIN_LENGTH = 12;
 
 const PLATFORMS = [
+    { blurb: 'Recaps, announcements, and work from across the roster.', href: LINKS.instagram, label: 'Instagram' },
     { blurb: 'Event listings and RSVPs for every meet on the calendar.', href: LINKS.meetup, label: 'Meetup' },
     { blurb: 'The day-to-day room where the community actually talks.', href: LINKS.discord, label: 'Discord' },
-    { blurb: 'Recaps, announcements, and work from across the roster.', href: LINKS.instagram, label: 'Instagram' },
 ] as const;
 
 const POINTER_COARSE_QUERY = '(pointer: coarse)';
@@ -323,7 +324,7 @@ const ROUTES = [
 ] as const;
 
 const SESSION_TTL_DAYS = 14;
-const SITE_UPDATED = '2026-08-07T00:00:00-05:00';
+const SITE_UPDATED = '2026-11-01T00:00:00-05:00';
 
 const SPOTLIGHT = {
     acceptAttribute: '.mp3,audio/mpeg',

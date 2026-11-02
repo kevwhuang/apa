@@ -18,7 +18,7 @@ const past = events
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-4xl tracking-tight"
+            class="text-4xl text-balance"
             eyebrow={`Archive / ${past.length} on file`}
             headingId="assembly-past-title"
         >
@@ -32,23 +32,23 @@ const past = events
                 <li>
                     <article
                         id={event.id}
-                        class="assembly-archive__card pt-4 border-t-2 border-ink"
+                        class="assembly-archive__card pt-4 border-t-2 border-border-strong"
                     >
                         <p
-                            class="label mb-2 text-ink-muted"
+                            class="label mb-2 text-text-secondary"
                             data-placeholder
                         >
-                            <span class="text-accent-deep">Session {String(past.length - index).padStart(2, '0')}</span>
+                            <span class="text-link">Session {String(past.length - index).padStart(2, '0')}</span>
                             {' / '}
                             <time datetime={event.data.date.toISOString()}>{formatDate(event.data.date)}</time>
                         </p>
-                        <h3 class="mb-1 font-bold font-sans text-lg tracking-tight">
+                        <h3 class="mb-1 text-lg">
                             {event.data.title}
                         </h3>
-                        <address class="mb-3 font-mono not-italic text-xs uppercase text-ink-muted">
+                        <address class="mb-3 font-mono not-italic text-xs uppercase text-text-secondary">
                             {event.data.location}
                         </address>
-                        <p class="leading-relaxed text-sm text-ink-muted">
+                        <p class="leading-relaxed text-sm text-text-secondary">
                             {event.data.excerpt}
                         </p>
                     </article>
@@ -57,7 +57,7 @@ const past = events
         </ol>
         <p data-motion="rise">
             <a
-                class="action-text hover:text-accent-deep inline-flex items-center gap-2 min-h-(--control-size) transition-colors"
+                class="action-text hover:text-link inline-flex items-center gap-2 min-h-(--control-size) transition-colors"
                 href="/events#past-title"
             >
                 The full archive, every program <IconArrow />

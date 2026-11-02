@@ -14,12 +14,12 @@ const upcoming = editions.filter(edition => edition.data.status === 'upcoming').
 ---
 
 <section
-    class="stage stage--bash stage--tight border-b-2 border-ink"
+    class="stage stage--bash stage--tight border-b-2 border-border-strong"
     aria-labelledby="next-editions-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-4xl tracking-tight"
+            class="text-4xl"
             eyebrow={`${program.shortName} / ${program.cadence}`}
             headingId="next-editions-title"
         >
@@ -37,36 +37,36 @@ const upcoming = editions.filter(edition => edition.data.status === 'upcoming').
                                     id={edition.id}
                                     class="slab slab--cut slab--lift grid grid-cols-12 items-start gap-x-2 gap-y-4 md:gap-x-6"
                                 >
-                                    <div class="col-span-12 md:col-span-3">
+                                    <div class="col-span-12 md:col-span-3 lg:col-span-4">
                                         <p
-                                            class="font-extrabold font-sans text-2xl"
+                                            class="font-bold font-sans text-2xl text-balance"
                                             data-placeholder
                                         >
                                             <time datetime={edition.data.date.toISOString()}>{formatDate(edition.data.date)}</time>
                                         </p>
                                         <p
-                                            class="font-mono text-2xs uppercase text-ink-muted"
+                                            class="font-mono text-xs uppercase text-text-secondary"
                                             data-placeholder
                                         >
                                             {formatTimeRange(edition.data.date, edition.data.end)}
                                         </p>
                                     </div>
-                                    <div class="col-span-12 md:col-span-9">
-                                        <span class="label inline-block mb-3 px-2 py-1 bg-accent text-ink">
+                                    <div class="col-span-12 md:col-span-9 lg:col-span-8">
+                                        <span class="label inline-block mb-3 px-2 py-1 bg-event-bash text-event-bash-text">
                                             {program.shortName} / {edition.data.edition}
                                         </span>
-                                        <h3 class="mb-2 font-extrabold font-sans text-3xl tracking-tight">
+                                        <h3 class="mb-2 font-display text-3xl">
                                             {edition.data.title}
                                         </h3>
-                                        <address class="mb-3 font-mono not-italic text-xs uppercase text-ink-muted">
+                                        <address class="mb-3 font-mono not-italic text-xs uppercase text-text-secondary">
                                             {edition.data.location}
                                         </address>
-                                        <p class="max-w-2xl mb-4 text-ink-muted">
+                                        <p class="max-w-2xl mb-4 text-text-secondary">
                                             {edition.data.prompt}
                                         </p>
                                         <p>
                                             <a
-                                                class="action-text hover:text-accent-deep inline-flex items-center gap-(--space-2xs) min-h-(--control-size) underline underline-offset-4 transition-colors"
+                                                class="action-text hover:text-link inline-flex items-center gap-(--space-2xs) min-h-(--control-size) underline underline-offset-4 transition-colors"
                                                 href={LINKS.meetup}
                                                 rel="noopener noreferrer"
                                                 target="_blank"
@@ -82,7 +82,7 @@ const upcoming = editions.filter(edition => edition.data.status === 'upcoming').
                 )
             : (
                     <p
-                        class="max-w-(--measure-form) mb-8 text-ink-muted"
+                        class="max-w-(--measure-form) mb-8 text-text-secondary"
                         data-motion="rise"
                     >
                         No edition on the calendar right now &mdash; the next one goes up as soon as the room is booked.
@@ -90,7 +90,7 @@ const upcoming = editions.filter(edition => edition.data.status === 'upcoming').
                 )}
         <p data-motion="rise">
             <a
-                class="action-text hover:text-accent-deep inline-flex items-center gap-(--space-2xs) min-h-(--control-size) underline underline-offset-4 transition-colors"
+                class="action-text hover:text-link inline-flex items-center gap-(--space-2xs) min-h-(--control-size) underline underline-offset-4 transition-colors"
                 href="/events"
             >
                 See the full calendar <IconArrow />

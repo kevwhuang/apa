@@ -17,16 +17,16 @@
             />
             <span class="toast__body flex flex-1 flex-col justify-center min-w-0 gap-(--space-3xs) pe-(--space-xs) ps-(--space-md) py-(--space-sm)">
                 <span
-                    class="toast__label font-bold font-mono leading-[1.2] text-2xs tracking-[0.04em] uppercase wrap-anywhere text-(--toast-tone)"
+                    class="toast__label font-bold font-mono leading-[1.2] text-xs tracking-[0.04em] uppercase wrap-anywhere"
                     data-toast-label
                 />
                 <span
-                    class="toast__message min-w-0 font-sans leading-[1.45] text-smd wrap-anywhere"
+                    class="toast__message min-w-0 font-sans leading-[1.45] text-sm wrap-anywhere"
                     data-toast-message
                 />
             </span>
             <button
-                class="toast__close active:translate-y-px hover:text-accent-light inline-flex items-center justify-center self-center shrink-0 h-12 w-12 me-(--space-2xs) leading-none text-xl text-inherit transition-[color,transform]"
+                class="toast__close active:translate-y-px hover:text-toast-action inline-flex items-center justify-center self-center shrink-0 h-12 w-12 me-(--space-2xs) leading-none text-xl text-inherit transition-[color,transform]"
                 data-toast-close
                 type="button"
             >
@@ -39,15 +39,16 @@
 
 <style>
     .toast {
-        --focus-ring: var(--color-accent-light);
+        --color-focus-ring: var(--color-focus-ring-offset);
         --toast-glyph: '\0069';
-        --toast-tone: var(--color-ink-inverse);
+        --toast-glyph-tone: var(--color-text);
+        --toast-tone: var(--color-bg-page);
         align-items: stretch;
         animation: var(--duration-slow) var(--motion-ease-entrance) both toast__rise;
-        background: var(--color-surface-inverse);
-        border: 2px solid var(--color-ink);
-        box-shadow: var(--lift) var(--lift) 0 0 var(--color-ink-20);
-        color: var(--color-ink-inverse);
+        background: var(--color-toast-bg);
+        border: 2px solid var(--color-border-strong);
+        box-shadow: var(--lift) var(--lift) 0 0 var(--color-border-subtle);
+        color: var(--color-toast-text);
         display: flex;
         min-height: 64px;
         pointer-events: auto;
@@ -56,23 +57,26 @@
 
     .toast--error {
         --toast-glyph: '\0021';
-        --toast-tone: var(--color-accent);
+        --toast-glyph-tone: var(--color-on-error);
+        --toast-tone: var(--color-error);
     }
 
     .toast--info {
         --toast-glyph: '\0069';
-        --toast-tone: var(--color-ink-inverse);
+        --toast-glyph-tone: var(--color-text);
+        --toast-tone: var(--color-bg-page);
     }
 
     .toast--success {
         --toast-glyph: '\2713';
-        --toast-tone: var(--color-pulse);
+        --toast-glyph-tone: var(--color-on-success);
+        --toast-tone: var(--color-success);
     }
 
     .toast__badge {
         align-items: center;
         background: var(--toast-tone);
-        color: var(--color-ink);
+        color: var(--toast-glyph-tone);
         display: flex;
         flex-shrink: 0;
         font-family: var(--font-mono);

@@ -11,7 +11,7 @@
 }
 
 :is(a, button, summary).action-text:hover {
-    color: var(--color-accent-deep);
+    color: var(--color-link);
 }
 
 .box {
@@ -20,11 +20,11 @@
     --box-size: 24px;
     appearance: none;
     background-color: transparent;
-    background-image: linear-gradient(var(--color-accent-deep), var(--color-accent-deep));
+    background-image: linear-gradient(var(--color-control-checked-bg), var(--color-control-checked-bg));
     background-position: center;
     background-repeat: no-repeat;
     background-size: 0 0;
-    border: 2px solid var(--color-ink);
+    border: 2px solid var(--color-control-border);
     cursor: pointer;
     flex-shrink: 0;
     height: var(--box-size);
@@ -45,7 +45,12 @@ label:active:not(:has(a:active)) > .box:not(:disabled, [aria-invalid='true']) {
 
 .box:checked {
     background-size: var(--box-mark) var(--box-mark);
-    border-color: var(--color-accent-deep);
+    border-color: var(--color-control-checked-bg);
+}
+
+.box:checked:hover:not(:active, :disabled, [aria-invalid='true'], label:has(a:hover) .box),
+label:hover:not(:active, :has(a:hover)) > .box:checked:not(:disabled, [aria-invalid='true']) {
+    border-color: var(--color-control-checked-bg);
 }
 
 .box:disabled {
@@ -55,23 +60,23 @@ label:active:not(:has(a:active)) > .box:not(:disabled, [aria-invalid='true']) {
 
 .box:hover:not(:active, :disabled, [aria-invalid='true'], label:has(a:hover) .box),
 label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='true']) {
-    border-color: var(--color-accent-deep);
-    box-shadow: var(--box-lift) var(--box-lift) 0 0 var(--color-ink);
+    border-color: var(--color-control-border-hover);
+    box-shadow: var(--box-lift) var(--box-lift) 0 0 var(--color-border-strong);
 }
 
 .box[aria-invalid='true'] {
-    border-color: var(--color-accent-deep);
-    box-shadow: 3px 3px 0 0 var(--color-accent-20);
+    border-color: var(--color-border-invalid);
+    box-shadow: 3px 3px 0 0 var(--color-error-surface);
 }
 
 .box[type='radio'] {
-    background-image: radial-gradient(circle closest-side, var(--color-accent-deep) 99%, transparent 100%);
+    background-image: radial-gradient(circle closest-side, var(--color-control-checked-bg) 99%, transparent 100%);
     border-radius: 9999px;
 }
 
 .btn {
-    --btn-fill: var(--color-ink);
-    --btn-text: var(--color-ink-inverse);
+    --btn-fill: var(--color-bg-inverse);
+    --btn-text: var(--color-text-inverse);
     align-items: center;
     border: 2px solid currentColor;
     cursor: pointer;
@@ -123,42 +128,47 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
 }
 
 .btn--accent {
-    background: var(--color-accent);
-    border-color: var(--color-accent);
-    color: var(--color-ink);
+    background: var(--color-btn-primary-bg);
+    border-color: var(--color-btn-primary-bg);
+    color: var(--color-btn-primary-text);
+}
+
+.btn--accent:active:not(:disabled) {
+    background: var(--color-btn-primary-bg-active);
+    border-color: var(--color-btn-primary-bg-active);
 }
 
 .btn--accent:disabled:hover {
-    background: var(--color-accent);
-    border-color: var(--color-accent);
-    color: var(--color-ink);
+    background: var(--color-btn-primary-bg);
+    border-color: var(--color-btn-primary-bg);
+    color: var(--color-btn-primary-text);
 }
 
 .btn--accent:hover {
-    background: var(--color-accent-deep);
-    border-color: var(--color-accent-deep);
-    color: var(--color-ink-inverse);
+    background: var(--color-btn-primary-bg-hover);
+    border-color: var(--color-btn-primary-bg);
+    color: var(--color-btn-primary-text);
 }
 
 .btn--primary {
-    background: var(--color-ink);
-    color: var(--color-ink-inverse);
+    background: var(--color-bg-inverse);
+    color: var(--color-text-inverse);
 }
 
 .btn--primary:disabled:hover {
-    background: var(--color-ink);
-    color: var(--color-ink-inverse);
+    background: var(--color-bg-inverse);
+    color: var(--color-text-inverse);
 }
 
 .btn--primary:hover {
-    background: var(--color-accent-deep);
-    border-color: var(--color-accent-deep);
-    color: var(--color-ink-inverse);
+    background: var(--color-btn-primary-bg);
+    border-color: var(--color-btn-primary-bg);
+    color: var(--color-btn-primary-text);
 }
 
 .chip {
     align-items: center;
-    border: 2px solid var(--color-ink);
+    border: 2px solid var(--color-border-strong);
     display: inline-flex;
     font-family: var(--font-mono);
     font-size: var(--text-xs);
@@ -239,22 +249,22 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
 }
 
 .halftone {
-    background-image: radial-gradient(circle, var(--color-ink) 0.8px, transparent 0.8px);
+    background-image: radial-gradient(circle, var(--color-text) 0.8px, transparent 0.8px);
     background-size: var(--grain-pitch) var(--grain-pitch);
     opacity: 0.06;
 }
 
 .halftone--accent {
-    background-image: radial-gradient(circle, var(--color-accent) 1px, transparent 1px);
+    background-image: radial-gradient(circle, var(--color-bg-signal) 1px, transparent 1px);
     background-size: 8px 8px;
     opacity: 0.12;
 }
 
 @layer components {
     .input {
-        background-color: var(--color-surface);
-        border: 2px solid var(--color-ink);
-        color: var(--color-ink);
+        background-color: var(--color-input-bg);
+        border: 2px solid var(--color-input-border);
+        color: var(--color-input-text);
         min-height: var(--control-size);
         padding: var(--space-2xs) var(--space-sm);
         transition:
@@ -265,7 +275,7 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
     }
 
     .input::placeholder {
-        color: var(--color-ink-muted);
+        color: var(--color-input-placeholder);
     }
 
     .input:disabled {
@@ -273,17 +283,17 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
     }
 
     .input:disabled:hover {
-        background-color: var(--color-surface);
+        background-color: var(--color-input-bg);
     }
 
     .input:focus-visible,
     .input:hover {
-        background-color: var(--color-surface-raised);
+        background-color: var(--color-bg-raised-hover);
     }
 
     .input[aria-invalid='true'] {
-        border-color: var(--color-accent-deep);
-        box-shadow: 3px 3px 0 0 var(--color-accent-20);
+        border-color: var(--color-input-border-invalid);
+        box-shadow: 3px 3px 0 0 var(--color-error-surface);
     }
 
     .input[type='number'] {
@@ -305,14 +315,14 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
     }
 
     .input--sunk {
-        background-color: var(--color-surface-sunken);
+        background-color: var(--color-bg-sunken);
     }
 }
 
 .is-active {
-    background: var(--color-ink);
-    border-color: var(--color-ink);
-    color: var(--color-ink-inverse);
+    background: var(--color-bg-inverse);
+    border-color: var(--color-border-strong);
+    color: var(--color-text-inverse);
 }
 
 .label {
@@ -331,14 +341,14 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
 
 .mark::before {
     background-image:
-        linear-gradient(var(--color-ink-subtle), var(--color-ink-subtle)),
-        linear-gradient(var(--color-ink-subtle), var(--color-ink-subtle)),
-        linear-gradient(var(--color-ink-subtle), var(--color-ink-subtle)),
-        linear-gradient(var(--color-ink-subtle), var(--color-ink-subtle)),
-        linear-gradient(var(--color-ink-subtle), var(--color-ink-subtle)),
-        linear-gradient(var(--color-ink-subtle), var(--color-ink-subtle)),
-        linear-gradient(var(--color-ink-subtle), var(--color-ink-subtle)),
-        linear-gradient(var(--color-ink-subtle), var(--color-ink-subtle));
+        linear-gradient(var(--color-border), var(--color-border)),
+        linear-gradient(var(--color-border), var(--color-border)),
+        linear-gradient(var(--color-border), var(--color-border)),
+        linear-gradient(var(--color-border), var(--color-border)),
+        linear-gradient(var(--color-border), var(--color-border)),
+        linear-gradient(var(--color-border), var(--color-border)),
+        linear-gradient(var(--color-border), var(--color-border)),
+        linear-gradient(var(--color-border), var(--color-border));
     background-position:
         left top,
         left top,
@@ -370,7 +380,7 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
 
 .partner-tile:active,
 .partner-tile:hover {
-    background-color: var(--color-surface-raised);
+    background-color: var(--color-bg-hover);
 }
 
 .partner-tile:active .partner-tile__logo,
@@ -460,12 +470,12 @@ html[data-theme='dark'] .partner-tile__logo {
     max-height: var(--scroll-slot-max, 384px);
     overflow-y: auto;
     overscroll-behavior: contain;
-    scrollbar-color: var(--color-ink) var(--color-surface-sunken);
+    scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
     scrollbar-width: thin;
 }
 
 .select {
-    color: var(--color-ink);
+    color: var(--color-input-text);
     display: block;
     position: relative;
 }
@@ -490,12 +500,12 @@ html[data-theme='dark'] .partner-tile__logo {
 }
 
 .slab {
-    --focus-ring: var(--color-accent-deep);
-    --slab-fill: var(--color-surface);
+    --color-focus-ring: var(--color-border-focus);
+    --slab-fill: var(--color-bg-page);
     --slab-level: var(--z-page);
-    --slab-line: var(--color-ink);
+    --slab-line: var(--color-border-strong);
     --slab-rule: 1px;
-    --slab-shadow: var(--color-ink);
+    --slab-shadow: var(--color-border-strong);
     background-color: var(--slab-fill);
     border: var(--slab-rule) solid var(--slab-line);
     box-shadow: calc(var(--slab-level) * var(--lift)) calc(var(--slab-level) * var(--lift)) 0 0 var(--slab-shadow);
@@ -505,7 +515,8 @@ html[data-theme='dark'] .partner-tile__logo {
 }
 
 .slab--accent {
-    --slab-fill: var(--color-accent);
+    --slab-fill: var(--color-bg-signal);
+    color: var(--color-text-on-signal);
 }
 
 .slab--bare {
@@ -513,7 +524,7 @@ html[data-theme='dark'] .partner-tile__logo {
 }
 
 .slab--card {
-    --slab-fill: var(--color-surface-raised);
+    --slab-fill: var(--color-bg-raised);
     --slab-level: var(--z-card);
     --slab-rule: 2px;
 }
@@ -572,7 +583,7 @@ html[data-theme='dark'] .partner-tile__logo {
 }
 
 .slab--lift {
-    --slab-fill: var(--color-surface-raised);
+    --slab-fill: var(--color-bg-raised);
     --slab-level: var(--z-lift);
     --slab-rule: 2px;
 }
@@ -582,43 +593,47 @@ html[data-theme='dark'] .partner-tile__logo {
 }
 
 .slab--sunk {
-    --slab-fill: var(--color-surface-sunken);
+    --slab-fill: var(--color-bg-sunken);
     --slab-level: var(--z-ground);
     --slab-rule: 0;
     background-color: var(--slab-fill);
-    background-image: radial-gradient(circle, var(--color-ink-10) 0.8px, transparent 0.8px);
+    background-image: radial-gradient(circle, var(--color-border-subtle) 0.8px, transparent 0.8px);
     background-size: var(--grain-pitch) var(--grain-pitch);
 }
 
 .slab--well {
-    --focus-ring: var(--color-accent-light);
-    --slab-fill: var(--color-surface-inverse);
+    --color-focus-ring: var(--color-focus-ring-offset);
+    --slab-fill: var(--color-bg-inverse);
     --slab-level: var(--z-ground);
     --slab-rule: 0;
     background-color: var(--slab-fill);
-    background-image: radial-gradient(circle, var(--color-ink-inverse-10) 0.8px, transparent 0.8px);
+    background-image: radial-gradient(circle, var(--color-border-inverse-subtle) 0.8px, transparent 0.8px);
     background-size: var(--grain-pitch) var(--grain-pitch);
-    color: var(--color-ink-inverse);
+    color: var(--color-text-inverse);
 }
 
 .slab--well .btn {
-    --btn-fill: var(--color-ink-inverse);
-    --btn-text: var(--color-ink);
+    --btn-fill: var(--color-bg-page);
+    --btn-text: var(--color-text);
 }
 
 .slab--well .slab {
-    --slab-line: var(--color-ink-inverse);
-    --slab-shadow: var(--color-ink-inverse);
+    --slab-line: var(--color-border-inverse-strong);
+    --slab-shadow: var(--color-border-inverse-strong);
 }
 
 .slab--well .spinner {
-    border-color: var(--color-ink-inverse-10);
+    border-color: var(--color-border-inverse-subtle);
     border-top-color: currentColor;
+}
+
+.slab--well :is(a, button, summary).action-text:hover {
+    color: var(--color-link-on-inverse);
 }
 
 .spinner {
     animation: 0.7s var(--motion-ease-linear) infinite spinner__turn;
-    border: 2px solid var(--color-ink-20);
+    border: 2px solid var(--color-border-subtle);
     border-radius: 9999px;
     border-top-color: currentColor;
     display: inline-block;
@@ -702,30 +717,9 @@ html[data-theme='dark'] .partner-tile__logo {
     --drift-x: -1;
 }
 
-@media (forced-colors: active) {
-    .box {
-        background-color: Canvas;
-        background-image: linear-gradient(SelectedItem, SelectedItem);
-        border-color: CanvasText;
-        forced-color-adjust: none;
-    }
-
-    .box:checked {
-        border-color: CanvasText;
-    }
-
-    .box:focus-visible {
-        outline-color: CanvasText;
-    }
-
-    .box:hover:not(:active, :disabled, [aria-invalid='true'], label:has(a:hover) .box),
-    label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='true']) {
-        border-color: Highlight;
-        box-shadow: var(--box-lift) var(--box-lift) 0 0 CanvasText;
-    }
-
-    .box[type='radio'] {
-        background-image: radial-gradient(circle closest-side, SelectedItem 99%, transparent 100%);
+@media (max-width: 768px) {
+    .slab--roomy {
+        padding: var(--space-lg);
     }
 }
 

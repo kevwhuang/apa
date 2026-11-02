@@ -28,7 +28,7 @@ const DONATION_USES = [
 ];
 
 const FOUNDING_YEAR = '2022';
-const PRODUCERS_WELCOMED = '500+';
+const PRODUCERS_WELCOMED = '800+';
 
 const assembly = getProgram('assembly');
 const bash = getProgram('bash');
@@ -57,19 +57,19 @@ const TIERS: Tier[] = [
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="partners-title"
 >
     <div class="flex flex-col gap-6">
         <PageHead
-            class="max-w-4xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="max-w-4xl text-4xl text-balance lg:text-6xl md:text-5xl"
             eyebrow="Partner with APA"
             headingId="partners-title"
         >
             Build with the producers behind Austin's sound.
         </PageHead>
         <p
-            class="max-w-2xl text-lmd text-ink-muted"
+            class="max-w-2xl text-lg text-text-secondary"
             data-motion="blur"
         >
             Partnering is the default here. The Alliance builds with venues, brands, studios, and
@@ -80,26 +80,26 @@ const TIERS: Tier[] = [
 </section>
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="numbers-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-4xl tracking-tight"
+            class="text-3xl md:text-4xl"
             eyebrow="Impact"
             headingId="numbers-title"
         >
             By the numbers
         </SectionHead>
         <dl
-            class="mark grid grid-cols-2 gap-px border-2 border-ink bg-ink md:grid-cols-4"
+            class="mark grid grid-cols-2 gap-px border-2 border-border-strong bg-border-strong xl:grid-cols-4"
             data-motion-stagger="stamp"
         >
             {STATS.map(stat => (
-                <div class="flex flex-col-reverse gap-3 p-4 text-center bg-surface md:p-8">
-                    <dt class="label text-ink-muted">{stat.label}</dt>
+                <div class="flex flex-col-reverse gap-3 p-4 text-center bg-bg-page md:p-8">
+                    <dt class="label text-text-secondary">{stat.label}</dt>
                     <dd
-                        class="font-extrabold font-sans text-3xl tracking-tight md:text-4xl"
+                        class="font-bold font-display text-2xl tracking-[-0.02em] md:text-4xl"
                         data-motion-count={stat.value}
                     >
                         {stat.value}
@@ -111,19 +111,19 @@ const TIERS: Tier[] = [
 </section>
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="lanes-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-4xl tracking-tight"
+            class="text-3xl md:text-4xl"
             eyebrow="Partnerships / Lanes"
             headingId="lanes-title"
         >
             Four ways in
         </SectionHead>
         <p
-            class="max-w-2xl mb-10 text-base text-ink-muted"
+            class="max-w-2xl mb-10 text-base text-text-secondary"
             data-motion="blur"
         >
             Every partnership looks a little different. These four are the ones the Alliance runs
@@ -136,9 +136,9 @@ const TIERS: Tier[] = [
         >
             {LANES.map((lane, index) => (
                 <li class="slab slab--card slab--hover p-(--space-lg)">
-                    <p class="label mb-4 text-ink-muted">{String(index + 1).padStart(2, '0')}</p>
-                    <h3 class="mb-2 font-extrabold font-sans text-2xl tracking-tight">{lane.name}</h3>
-                    <p class="leading-relaxed text-sm text-ink-muted">{lane.detail}</p>
+                    <p class="label mb-4 text-text-secondary">{String(index + 1).padStart(2, '0')}</p>
+                    <h3 class="mb-2 text-2xl">{lane.name}</h3>
+                    <p class="leading-relaxed text-sm text-text-secondary">{lane.detail}</p>
                 </li>
             ))}
         </ul>
@@ -147,7 +147,7 @@ const TIERS: Tier[] = [
             data-motion="rise"
         >
             <a
-                class="action-text hover:text-accent-deep inline-flex items-center gap-2 min-h-(--control-size) underline underline-offset-4 transition-colors"
+                class="action-text hover:text-link inline-flex items-center gap-2 min-h-(--control-size) underline underline-offset-4 transition-colors"
                 href={`/contact?topic=${encodeURIComponent(PARTNER_INQUIRY_TOPIC)}#contact-topic`}
             >
                 Start a conversation <IconArrow />
@@ -157,19 +157,19 @@ const TIERS: Tier[] = [
 </section>
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="tiers-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-4xl tracking-tight"
+            class="text-3xl md:text-4xl"
             eyebrow="Sponsorship / Tiers"
             headingId="tiers-title"
         >
             Pick a level
         </SectionHead>
         <p
-            class="max-w-2xl mb-10 text-base text-ink-muted"
+            class="max-w-2xl mb-10 text-base text-text-secondary"
             data-motion="blur"
         >
             Prefer classic sponsorship? Three annual levels, each one still a partnership &mdash;
@@ -188,21 +188,21 @@ const TIERS: Tier[] = [
                             tier.featured ? 'slab--well tier--featured' : 'slab--card',
                         ]}
                     >
-                        <p class:list={['label mb-4', tier.featured ? 'text-accent' : 'text-ink-muted']}>
+                        <p class:list={['label mb-4', tier.featured ? 'text-link-on-inverse' : 'text-text-secondary']}>
                             Tier {String(index + 1).padStart(2, '0')}
                         </p>
-                        <h3 class="mb-2 font-extrabold font-sans text-3xl tracking-tight">{tier.name}</h3>
+                        <h3 class="mb-2 font-display text-3xl">{tier.name}</h3>
                         <p
                             class="mb-8 font-bold font-mono text-2xl"
                             data-placeholder
                         >
-                            {tier.price}<span class:list={['font-normal text-sm', tier.featured ? 'text-ink-inverse-muted' : 'text-ink-muted']}> / yr</span>
+                            {tier.price}<span class:list={['font-normal text-sm', tier.featured ? 'text-text-inverse-secondary' : 'text-text-secondary']}> / yr</span>
                         </p>
                         <ul class="mb-8 space-y-3 text-sm">
                             {tier.perks.map(perk => (
                                 <li class="flex gap-2">
                                     <span
-                                        class:list={['font-bold', tier.featured ? 'text-accent' : 'text-accent-deep']}
+                                        class:list={['font-bold', tier.featured ? 'text-link-on-inverse' : 'text-link']}
                                         aria-hidden="true"
                                     >
                                         +
@@ -225,12 +225,12 @@ const TIERS: Tier[] = [
 </section>
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="donate-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-4xl tracking-tight"
+            class="text-3xl md:text-4xl"
             eyebrow="Donations"
             headingId="donate-title"
         >
@@ -238,7 +238,7 @@ const TIERS: Tier[] = [
         </SectionHead>
         <div class="grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
             <div data-motion="rise">
-                <p class="max-w-2xl mb-8 text-base text-ink-muted">
+                <p class="max-w-2xl mb-8 text-base text-text-secondary">
                     Sponsorship is a year-long relationship &mdash; a donation is one good afternoon.
                     Give any amount, once, and it lands directly on the line items that keep the
                     calendar running:
@@ -247,7 +247,7 @@ const TIERS: Tier[] = [
                     {DONATION_USES.map(use => (
                         <li class="flex gap-2">
                             <span
-                                class="font-bold text-accent-deep"
+                                class="font-bold text-link"
                                 aria-hidden="true"
                             >
                                 +
@@ -256,7 +256,7 @@ const TIERS: Tier[] = [
                         </li>
                     ))}
                 </ul>
-                <p class="text-sm text-ink-muted">
+                <p class="text-sm text-text-secondary">
                     The Alliance is volunteer-run and not yet a 501(c)(3), so donations aren't
                     tax-deductible &mdash; every dollar still shows up in the room.
                 </p>
@@ -265,7 +265,7 @@ const TIERS: Tier[] = [
                 class="slab slab--card slab--roomy"
                 data-motion="unfold"
             >
-                <p class="label mb-4 text-ink-muted">Suggested amounts</p>
+                <p class="label mb-4 text-text-secondary">Suggested amounts</p>
                 <ul class="flex flex-wrap gap-3 mb-8 list-none">
                     {DONATION_AMOUNTS.map(amount => (
                         <li class="chip">{amount}</li>
@@ -278,7 +278,7 @@ const TIERS: Tier[] = [
                 >
                     Arrange a donation
                 </a>
-                <p class="text-sm text-ink-muted">
+                <p class="text-sm text-text-secondary">
                     Online giving isn't live yet &mdash; the contact form is the way in for now.
                     Tell us the amount you have in mind and we'll take it from there.
                 </p>
@@ -293,18 +293,18 @@ const TIERS: Tier[] = [
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-4xl tracking-tight"
+            class="text-3xl md:text-4xl"
             eyebrow="Current partners"
             headingId="backers-title"
         >
             Backed by
         </SectionHead>
         <ul
-            class="grid grid-cols-1 gap-px border-2 border-ink list-none bg-ink md:grid-cols-2"
+            class="grid grid-cols-1 gap-px border-2 border-border-strong list-none bg-border-strong md:grid-cols-2"
             data-motion-stagger="rise"
         >
             {PARTNERS.map(partner => (
-                <li class="partner-tile flex flex-col items-center justify-center gap-5 p-6 bg-surface md:p-10">
+                <li class="partner-tile flex flex-col items-center justify-center gap-5 p-6 bg-bg-page md:p-10">
                     <div class="flex items-center justify-center h-20 w-full md:h-28">
                         <Image
                             class="partner-tile__logo object-contain max-h-full max-w-full"
@@ -314,7 +314,7 @@ const TIERS: Tier[] = [
                             width={PARTNER_LOGO_WIDTH}
                         />
                     </div>
-                    <p class="label text-center text-ink-muted">{partner.name}</p>
+                    <p class="label text-center text-text-secondary">{partner.name}</p>
                 </li>
             ))}
         </ul>
@@ -333,7 +333,7 @@ const TIERS: Tier[] = [
 
     .tier--featured {
         --slab-level: var(--z-card);
-        --slab-line: var(--color-ink);
+        --slab-line: var(--color-border-strong);
         --slab-rule: 2px;
     }
 

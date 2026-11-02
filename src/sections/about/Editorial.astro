@@ -52,7 +52,7 @@ const ROADMAP: { detail: string; name: string; status: RoadmapStatus; when: stri
     },
     {
         detail: 'Paperwork is on the desk. Nonprofit status unlocks tax-deductible sponsorship and city arts funding.',
-        name: 'Register as a 501(c)(3) nonprofit',
+        name: 'Register as a 501(c)\u2060(3) nonprofit',
         status: 'next',
         when: 'Fall 2026',
     },
@@ -89,12 +89,12 @@ const openingColors = PALETTE.slice(0, 3);
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="about-title"
 >
     <div>
         <PageHead
-            class="font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="text-4xl md:text-6xl text-balance"
             eyebrow="About / Est 2022"
             headingId="about-title"
         >
@@ -113,13 +113,13 @@ const openingColors = PALETTE.slice(0, 3);
             aria-label="On this page"
             data-motion="rise"
         >
-            <p class="label mb-3 text-ink-muted">Sections</p>
+            <p class="label mb-3 text-text-secondary">Sections</p>
             <nav aria-label="Sections">
                 <ul class="about__toc list-none text-sm">
                     {SECTIONS.map(section => (
                         <li>
                             <a
-                                class="about__link hover:text-accent-deep"
+                                class="about__link hover:text-link"
                                 href={section.href}
                             >
                                 {section.label}
@@ -129,26 +129,26 @@ const openingColors = PALETTE.slice(0, 3);
                 </ul>
             </nav>
         </aside>
-        <div class="space-y-8 leading-[1.65] text-lmd">
+        <div class="space-y-8 leading-[1.65] text-lg">
             <section
                 id="mission"
                 aria-labelledby="mission-title"
             >
                 <h2
                     id="mission-title"
-                    class="mb-8 font-extrabold font-sans text-4xl tracking-tight"
+                    class="mb-8 text-2xl sm:text-3xl md:text-4xl"
                     data-motion="strike"
                 >
                     Mission
                 </h2>
                 <figure
-                    class="mb-8 py-10 border-y-2 border-ink"
+                    class="mb-8 py-10 border-y-2 border-border-strong"
                     data-motion="unfold"
                 >
-                    <blockquote class="mb-6 font-extrabold font-sans leading-[1.15] text-2xl tracking-[-0.02em] md:text-3xl">
-                        <span class="text-accent">&ldquo;</span>{CANONICAL.mission}<span class="text-accent">&rdquo;</span>
+                    <blockquote class="mb-6 font-bold font-sans leading-[1.15] text-2xl tracking-[-0.02em] md:text-3xl">
+                        <span class="text-text-brand">&ldquo;</span>{CANONICAL.mission}<span class="text-text-brand">&rdquo;</span>
                     </blockquote>
-                    <figcaption class="label text-ink-muted">Austin Producer Alliance</figcaption>
+                    <figcaption class="label text-text-secondary">Austin Producer Alliance</figcaption>
                 </figure>
             </section>
             <section
@@ -157,7 +157,7 @@ const openingColors = PALETTE.slice(0, 3);
             >
                 <h2
                     id="history-title"
-                    class="mb-3 font-extrabold font-sans text-4xl tracking-tight"
+                    class="mb-3 text-2xl sm:text-3xl md:text-4xl"
                     data-motion="strike"
                 >
                     History
@@ -170,13 +170,13 @@ const openingColors = PALETTE.slice(0, 3);
             >
                 <h2
                     id="commitments-title"
-                    class="mb-3 font-extrabold font-sans text-4xl tracking-tight"
+                    class="mb-3 text-2xl sm:text-3xl md:text-4xl"
                     data-motion="strike"
                 >
                     Commitments
                 </h2>
                 <p
-                    class="mb-5 text-ink-muted"
+                    class="mb-5 text-text-secondary"
                     data-motion="blur"
                 >
                     Everyone who organizes for the Alliance holds to the same six.
@@ -187,7 +187,7 @@ const openingColors = PALETTE.slice(0, 3);
                 >
                     {COMMITMENTS.map((commitment, index) => (
                         <li class="flex gap-4">
-                            <span class="label pt-1 text-accent-deep">{String(index + 1).padStart(2, '0')}</span>
+                            <span class="label pt-1 text-link">{String(index + 1).padStart(2, '0')}</span>
                             <span>
                                 <strong class="font-bold font-sans">{commitment.name}</strong>: {commitment.description}
                             </span>
@@ -201,13 +201,13 @@ const openingColors = PALETTE.slice(0, 3);
             >
                 <h2
                     id="openings-title"
-                    class="mb-3 font-extrabold font-sans text-4xl tracking-tight"
+                    class="mb-3 text-2xl sm:text-3xl md:text-4xl"
                     data-motion="strike"
                 >
                     Openings
                 </h2>
                 <p
-                    class="mb-6 text-ink-muted"
+                    class="mb-6 text-text-secondary"
                     data-motion="blur"
                 >
                     The Alliance is run by its organizers. These are the seats we are looking to fill.
@@ -220,13 +220,14 @@ const openingColors = PALETTE.slice(0, 3);
                         <li class="slab slab--bare slab--card slab--hover">
                             <PlaceholderTile
                                 class="aspect-[4/3]"
-                                color={openingColors[index]}
+                                color={openingColors[index].bg}
                                 label={`${opening.hours}h`}
-                                labelClass="text-[56px] text-surface-raised/80"
+                                labelClass="text-4xl"
+                                labelColor={openingColors[index].text}
                             />
                             <div class="p-4">
-                                <h3 class="font-extrabold font-sans tracking-tight">{opening.name}</h3>
-                                <p class="mb-2 font-mono text-xs text-ink-muted">
+                                <h3>{opening.name}</h3>
+                                <p class="mb-2 font-mono text-xs text-text-secondary">
                                     {opening.hours} hours per month
                                 </p>
                                 <p class="leading-relaxed text-sm">{opening.responsibilities}</p>
@@ -236,7 +237,7 @@ const openingColors = PALETTE.slice(0, 3);
                 </ul>
                 <p data-motion="rise">
                     <a
-                        class="action-text hover:text-accent-deep inline-flex items-center gap-(--space-2xs) min-h-[50px] underline underline-offset-4 transition-colors"
+                        class="action-text hover:text-link inline-flex items-center gap-(--space-2xs) min-h-[50px] underline underline-offset-4 transition-colors"
                         href={JOIN_ROUTE}
                     >
                         Ask about an opening <IconArrow />
@@ -249,13 +250,13 @@ const openingColors = PALETTE.slice(0, 3);
             >
                 <h2
                     id="roadmap-title"
-                    class="mb-3 font-extrabold font-sans text-4xl tracking-tight"
+                    class="mb-3 text-2xl sm:text-3xl md:text-4xl"
                     data-motion="strike"
                 >
                     Roadmap
                 </h2>
                 <p
-                    class="mb-6 text-ink-muted"
+                    class="mb-6 text-text-secondary"
                     data-motion="blur"
                 >
                     The order of operations. Each milestone sets up the one after it.
@@ -273,21 +274,21 @@ const openingColors = PALETTE.slice(0, 3);
                                 class="roadmap__rail relative flex justify-center"
                                 aria-hidden="true"
                             >
-                                <span class="roadmap__node relative flex items-center justify-center h-(--roadmap-node) w-(--roadmap-node) border-2 border-ink font-mono font-bold text-smd leading-none tracking-[0.04em] bg-surface-raised text-accent-deep">{String(index + 1).padStart(2, '0')}</span>
+                                <span class="roadmap__node relative flex items-center justify-center h-(--roadmap-node) w-(--roadmap-node) border-2 border-border-strong font-mono font-bold text-sm leading-none tracking-[0.04em] bg-bg-raised text-link">{String(index + 1).padStart(2, '0')}</span>
                             </div>
                             <div class:list={[milestone.status === 'next' ? ['mark', 'slab', 'slab--well'] : ['slab', 'slab--card']]}>
                                 <div class="flex flex-wrap items-center justify-between gap-x-(--space-sm) gap-y-(--space-2xs) mb-(--space-sm)">
-                                    <span class="label roadmap__when text-ink-muted">{milestone.when}</span>
-                                    <span class="label roadmap__status inline-flex items-center px-(--space-2xs) py-(--space-3xs) border-2 border-ink text-ink-muted">{ROADMAP_STATUS[milestone.status]}</span>
+                                    <span class="label roadmap__when text-text-secondary">{milestone.when}</span>
+                                    <span class="label roadmap__status inline-flex items-center px-(--space-2xs) py-(--space-3xs) border-2 border-border-strong text-text-secondary">{ROADMAP_STATUS[milestone.status]}</span>
                                 </div>
-                                <h3 class="mb-2 font-extrabold font-sans text-xl tracking-tight">{milestone.name}</h3>
-                                <p class="roadmap__detail leading-relaxed text-smd text-ink-muted">{milestone.detail}</p>
+                                <h3 class="mb-2 text-xl">{milestone.name}</h3>
+                                <p class="roadmap__detail leading-relaxed text-base text-text-secondary">{milestone.detail}</p>
                             </div>
                         </li>
                     ))}
                 </ol>
                 <p
-                    class="label mb-4 text-ink-muted"
+                    class="label mb-4 text-text-secondary"
                     data-motion="stamp"
                 >
                     Active workstreams
@@ -303,15 +304,15 @@ const openingColors = PALETTE.slice(0, 3);
                         >
                             <h3
                                 id={action.headingId}
-                                class="mb-3 font-extrabold font-sans text-xl tracking-tight"
+                                class="mb-3 text-xl"
                             >
                                 {action.heading}
                             </h3>
-                            <ul class="space-y-2 list-none text-smd text-ink-muted">
+                            <ul class="space-y-2 list-none text-base text-text-secondary">
                                 {action.items.map(item => (
                                     <li class="flex gap-2">
                                         <span
-                                            class="font-bold text-accent-deep"
+                                            class="font-bold text-link"
                                             aria-hidden="true"
                                         >
                                             &middot;
@@ -330,13 +331,13 @@ const openingColors = PALETTE.slice(0, 3);
             >
                 <h2
                     id="join-title"
-                    class="mb-3 font-extrabold font-sans text-4xl tracking-tight"
+                    class="mb-3 text-2xl sm:text-3xl md:text-4xl"
                     data-motion="strike"
                 >
                     Join
                 </h2>
                 <p
-                    class="mb-6 text-ink-muted"
+                    class="mb-6 text-text-secondary"
                     data-motion="blur"
                 >
                     Organizing is one way in. Showing up is the other. The contact form carries a
@@ -390,7 +391,7 @@ const openingColors = PALETTE.slice(0, 3);
     }
 
     .roadmap__node::after {
-        background-color: var(--color-ink);
+        background-color: var(--color-border-strong);
         content: '';
         height: 2px;
         left: 100%;
@@ -400,7 +401,7 @@ const openingColors = PALETTE.slice(0, 3);
     }
 
     .roadmap__step:not(:last-child) .roadmap__rail::after {
-        background-color: var(--color-ink);
+        background-color: var(--color-border-strong);
         bottom: calc(-1 * var(--roadmap-gap));
         content: '';
         left: calc(50% - 1px);
@@ -410,37 +411,37 @@ const openingColors = PALETTE.slice(0, 3);
     }
 
     .roadmap__step[data-status='done'] .roadmap__node {
-        background-color: var(--color-ink);
-        color: var(--color-ink-inverse);
+        background-color: var(--color-bg-inverse);
+        color: var(--color-text-inverse);
     }
 
     .roadmap__step[data-status='done'] .roadmap__status {
-        background-color: var(--color-ink);
-        color: var(--color-ink-inverse);
+        background-color: var(--color-bg-inverse);
+        color: var(--color-text-inverse);
     }
 
     .roadmap__step[data-status='next'] .roadmap__detail {
-        color: var(--color-ink-inverse-muted);
+        color: var(--color-text-inverse-secondary);
     }
 
     .roadmap__step[data-status='next'] .roadmap__node {
-        background-color: var(--color-accent);
-        color: var(--color-ink);
+        background-color: var(--color-bg-signal);
+        color: var(--color-text-on-signal);
     }
 
     .roadmap__step[data-status='next'] .roadmap__status {
-        background-color: var(--color-accent-deep);
-        border-color: var(--color-accent-deep);
-        color: var(--color-ink-inverse);
+        background-color: var(--color-bg-signal);
+        border-color: var(--color-border-selected);
+        color: var(--color-text-on-signal);
     }
 
     .roadmap__step[data-status='next'] .roadmap__when {
-        color: var(--color-accent);
+        color: var(--color-link-on-inverse);
     }
 
     .roadmap__step[data-status='next'] .slab--well {
         --slab-level: var(--z-card);
-        --slab-line: var(--color-ink);
+        --slab-line: var(--color-border-strong);
         --slab-rule: 2px;
     }
 

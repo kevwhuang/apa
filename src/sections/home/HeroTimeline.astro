@@ -16,7 +16,7 @@ const hangout = getProgram('hangout');
 ---
 
 <section
-    class="hero stage stage--hero content-center overflow-hidden relative min-h-svh border-b-2 border-ink text-center bg-surface"
+    class="hero stage stage--hero content-center overflow-hidden relative min-h-svh border-b-2 border-border-strong text-center bg-bg-page"
     aria-labelledby="hero-title"
 >
     <div
@@ -27,21 +27,20 @@ const hangout = getProgram('hangout');
     <div class="hero__field stage__item--full absolute inset-0 pointer-events-none" aria-hidden="true" />
     <div class="relative">
         <div
-            class="hero__meta label flex flex-wrap items-center justify-center gap-3 mb-6 text-ink-muted"
+            class="hero__meta label flex flex-wrap items-center justify-center gap-3 mb-6 text-text-secondary"
             data-motion="stamp"
         >
-            <span class="inline-block h-2.5 w-2.5 bg-accent animate-pulse" aria-hidden="true" />
+            <span class="inline-block h-2.5 w-2.5 bg-bg-signal animate-pulse" aria-hidden="true" />
             <span>Austin, TX</span>
-            <span class="hidden md:inline">/ Est <time datetime="2022-05">2022</time> / More than 500 welcomed</span>
+            <span class="hidden md:inline">/ Est <time datetime="2022-05">2022</time> / More than 800 welcomed</span>
         </div>
         <h1
             id="hero-title"
-            class="hero__title mb-10 font-extrabold font-sans leading-[0.86] text-[clamp(40px,min(calc(4px_+_11.25vw),13.5svh),148px)] tracking-[-0.045em]"
+            class="hero__title mb-10 leading-[0.95] text-[clamp(48px,min(calc(16px_+_11.25vw),24svh),148px)]"
             data-motion-stagger="strike"
         >
-            <span class="block">Austin's</span>
-            <span class="block text-accent">producer</span>
-            <span class="block">community.</span>
+            <span class="block">Step in</span>
+            <span class="block text-text-brand">the mix.</span>
         </h1>
         <div
             class="hero__timeline relative"
@@ -50,14 +49,14 @@ const hangout = getProgram('hangout');
             <div class="mark slab slab--bare slab--card overflow-hidden relative mb-8">
                 <div class="halftone--accent absolute inset-0" aria-hidden="true" />
                 <WaveformBars
-                    class="block h-16 w-full px-3 py-2 text-accent/70"
+                    class="block h-16 w-full px-3 py-2 text-text-brand"
                     bars={bars}
                 />
                 <div class="hero__playhead" aria-hidden="true" />
             </div>
             <div class="hero__foot grid grid-cols-1 max-w-3xl gap-8 mx-auto md:grid-cols-2">
                 <p
-                    class="leading-relaxed text-md"
+                    class="leading-relaxed text-lg"
                     data-motion="blur"
                 >
                     A working community for music producers in Austin, Texas. At {assembly.name},
@@ -105,7 +104,7 @@ const hangout = getProgram('hangout');
 
     .hero__playhead::after,
     .hero__playhead::before {
-        background: var(--color-accent);
+        background: var(--color-bg-signal);
         content: '';
         position: absolute;
     }

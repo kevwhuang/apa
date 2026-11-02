@@ -59,7 +59,7 @@ const structuredData = {
             'inLanguage': 'en',
             'logo': logoUrl,
             'name': BRAND.name,
-            'sameAs': [LINKS.instagram, LINKS.discord, LINKS.meetup],
+            'sameAs': [LINKS.instagram, LINKS.meetup, LINKS.discord, LINKS.soundcloud, LINKS.linktree],
             'url': Astro.site,
         },
     ],
@@ -97,9 +97,10 @@ const structuredData = {
         <script is:inline set:html={bootstrapScript} />
         <Font cssVariable="--font-bricolage-grotesque" preload />
         <Font cssVariable="--font-space-mono" preload />
+        <Font cssVariable="--font-unbounded" preload />
         <ClientRouter />
     </head>
-    <body class="antialiased bg-surface text-ink">
+    <body class="antialiased bg-bg-page text-text">
         <div class="grain" aria-hidden="true" />
         <div class="flex flex-col overflow-x-clip min-h-svh">
             <Navbar hasHero={hasHero} />

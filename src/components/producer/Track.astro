@@ -33,7 +33,7 @@ const waveHeights = Array.from({ length: WAVE_BAR_COUNT }, (_, index) => Math.ro
 
 <button
     class:list={[
-        'producer-track group aria-pressed:bg-accent hover:bg-ink-10 flex items-center min-h-(--control-size) w-full gap-3 px-3 py-2 border-2 border-ink text-left transition-colors',
+        'producer-track group aria-pressed:bg-btn-primary-bg aria-pressed:text-btn-primary-text hover:bg-bg-raised-hover flex items-center min-h-(--control-size) w-full gap-3 px-3 py-2 border-2 border-border-strong text-left transition-colors',
         rowClass,
     ]}
     aria-pressed="false"
@@ -44,7 +44,7 @@ const waveHeights = Array.from({ length: WAVE_BAR_COUNT }, (_, index) => Math.ro
     data-track-title={track.title}
     type="button"
 >
-    <span class="group-aria-pressed:hidden inline-flex shrink-0 text-accent-deep">
+    <span class="group-aria-pressed:hidden inline-flex shrink-0 text-link">
         <IconPlay />
     </span>
     <span class="group-aria-pressed:inline-flex hidden shrink-0">
@@ -74,7 +74,7 @@ const waveHeights = Array.from({ length: WAVE_BAR_COUNT }, (_, index) => Math.ro
         ))}
     </span>
     <span
-        class="group-aria-pressed:text-ink shrink-0 font-mono tabular-nums text-xs text-ink-muted"
+        class="group-aria-pressed:text-btn-primary-text shrink-0 font-mono tabular-nums text-xs text-text-secondary"
         data-placeholder
     >
         {formatDuration(track.durationSeconds)}

@@ -24,19 +24,19 @@ const roster = [...producers]
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="directory-title"
 >
     <div>
         <PageHead
-            class="max-w-3xl mb-6 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-8xl"
+            class="max-w-3xl mb-6 text-4xl md:text-8xl"
             eyebrow="Directory / Roster"
             headingId="directory-title"
         >
             The directory.
         </PageHead>
         <p
-            class="max-w-2xl mb-10 text-lmd text-ink-muted"
+            class="max-w-2xl mb-10 text-lg text-text-secondary"
             data-motion="blur"
         >
             Every member card carries what they make, what they do, where they are based, and
@@ -54,14 +54,14 @@ const roster = [...producers]
             data-motion="rise"
         >
             <div>
-                <p class="label mb-3 text-ink-muted">Role</p>
+                <p class="label mb-3 text-text-secondary">Role</p>
                 <div
                     class="flex flex-wrap gap-2"
                     aria-label="Filter by role"
                     role="group"
                 >
                     <button
-                        class="chip is-active role-btn active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
+                        class="chip is-active role-btn active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse"
                         aria-pressed="true"
                         data-role=""
                         type="button"
@@ -70,7 +70,7 @@ const roster = [...producers]
                     </button>
                     {allRoles.map(role => (
                         <button
-                            class="chip role-btn active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
+                            class="chip role-btn active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse"
                             aria-pressed="false"
                             data-role={role}
                             type="button"
@@ -81,14 +81,14 @@ const roster = [...producers]
                 </div>
             </div>
             <div>
-                <p class="label mb-3 text-ink-muted">Genre</p>
+                <p class="label mb-3 text-text-secondary">Genre</p>
                 <div
                     class="flex flex-wrap gap-2"
                     aria-label="Filter by genre"
                     role="group"
                 >
                     <button
-                        class="chip genre-btn is-active active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
+                        class="chip genre-btn is-active active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse"
                         aria-pressed="true"
                         data-genre=""
                         type="button"
@@ -97,7 +97,7 @@ const roster = [...producers]
                     </button>
                     {allGenres.map(genre => (
                         <button
-                            class="chip genre-btn active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse"
+                            class="chip genre-btn active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse"
                             aria-pressed="false"
                             data-genre={genre}
                             type="button"
@@ -109,7 +109,7 @@ const roster = [...producers]
             </div>
         </div>
         <p
-            class="label text-ink-subtle"
+            class="label text-text-secondary"
             aria-live="polite"
             data-directory-status
             data-motion="stamp"
@@ -120,7 +120,7 @@ const roster = [...producers]
 </section>
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-label="Directory"
 >
     <ul
@@ -137,24 +137,25 @@ const roster = [...producers]
             >
                 <article class="producer-card__frame slab slab--bare slab--card">
                     <PlaceholderTile
-                        class="aspect-[5/3] border-b-2 border-ink"
-                        color={PALETTE[(index + 1) % PALETTE.length]}
+                        class="aspect-[5/3] border-b-2 border-border-strong"
+                        color={PALETTE[(index + 1) % PALETTE.length].bg}
                         label={getInitials(producer.data.name)}
-                        labelClass="leading-none text-[80px] text-surface-raised/80 [text-shadow:2px_2px_0_var(--color-ink-20)]"
+                        labelClass="leading-none text-6xl [text-shadow:2px_2px_0_var(--color-shadow-md)]"
+                        labelColor={PALETTE[(index + 1) % PALETTE.length].text}
                     >
                         {producer.data.featured && (
-                            <p class="label absolute left-0 top-0 px-2 py-2 border-b-2 border-r-2 border-ink bg-surface text-ink">Spotlight</p>
+                            <p class="label absolute left-0 top-0 px-2 py-2 border-b-2 border-r-2 border-border-strong bg-bg-page text-text">Spotlight</p>
                         )}
                     </PlaceholderTile>
                     <div class="producer-card__body p-(--space-md)">
                         <h2
-                            class="row-start-1 mb-2 font-extrabold font-sans text-xl tracking-tight"
+                            class="row-start-1 mb-2 text-xl"
                             data-placeholder
                         >
                             {producer.data.name}
                         </h2>
                         <p
-                            class="row-start-2 mb-3 font-mono text-2xs uppercase text-ink-muted"
+                            class="row-start-2 mb-3 font-mono text-xs uppercase text-text-secondary"
                             data-placeholder
                         >
                             {producer.data.roles.length > 0
@@ -163,7 +164,7 @@ const roster = [...producers]
                         </p>
                         {producer.data.bio.length > 0 && (
                             <p
-                                class="producer-card__bio scroll-slot row-start-3 mb-4 leading-relaxed text-sm text-ink-muted"
+                                class="producer-card__bio scroll-slot row-start-3 mb-4 leading-relaxed text-sm text-text-secondary"
                                 data-placeholder
                             >
                                 {producer.data.bio}
@@ -171,7 +172,7 @@ const roster = [...producers]
                         )}
                         <ul class="flex flex-wrap row-start-4 gap-2 mb-5 list-none">
                             {producer.data.genres.map(genre => (
-                                <li class="inline-flex items-center h-6 px-2 border-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase">{genre}</li>
+                                <li class="inline-flex items-center h-6 px-2 border-2 border-border-strong font-bold font-mono text-xs tracking-wide uppercase">{genre}</li>
                             ))}
                         </ul>
                         {producer.data.tracks[0] && (
@@ -181,15 +182,15 @@ const roster = [...producers]
                                 track={producer.data.tracks[0]}
                             />
                         )}
-                        <div class="flex flex-wrap items-center justify-between row-start-6 gap-x-4 gap-y-2 pt-4 border-t-2 border-ink">
+                        <div class="flex flex-wrap items-center justify-between row-start-6 gap-x-4 gap-y-2 pt-4 border-t-2 border-border-strong">
                             <p
-                                class="font-mono text-2xs uppercase text-ink-muted"
+                                class="font-mono text-xs uppercase text-text-secondary"
                                 data-placeholder
                             >
                                 Since <time datetime={toIsoDate(producer.data.joined)}>{formatCalendarMonth(producer.data.joined)}</time>
                             </p>
                             <ProducerLinks
-                                linkClass="hover:text-accent-deep"
+                                linkClass="hover:text-link"
                                 links={producer.data.links}
                             />
                         </div>
@@ -203,8 +204,8 @@ const roster = [...producers]
         data-directory-empty
         hidden
     >
-        <p class="font-extrabold font-sans text-xl tracking-tight">No matches.</p>
-        <p class="text-sm text-ink-muted">
+        <p class="font-bold font-sans text-xl tracking-tight">No matches.</p>
+        <p class="text-sm text-text-secondary">
             Nobody in the directory answers to &ldquo;<span class="font-mono wrap-anywhere" data-search-echo />&rdquo;.
         </p>
         <button
@@ -227,13 +228,13 @@ const roster = [...producers]
     >
         <div>
             <SectionHead
-                class="font-extrabold font-sans leading-[1.05] text-3xl tracking-[-0.035em] md:text-5xl"
+                class="text-3xl text-balance md:text-5xl"
                 eyebrow="Producers / Join"
                 headingId="roster-join-title"
             >
                 Want on this list?
             </SectionHead>
-            <p class="max-w-md text-ink-muted">
+            <p class="max-w-md text-text-secondary">
                 Two ways in. Pick Membership on the contact form and tell us what you make, or open
                 the Discord and say hello in the room where the day-to-day happens.
             </p>

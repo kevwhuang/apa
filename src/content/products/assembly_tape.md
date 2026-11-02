@@ -6,8 +6,8 @@ category: music
 priceCents: 1800
 sizes: []
 variations:
-  - { name: Clear, hex: '#d5cfc0' }
-  - { name: Orange, hex: '#e86a1e' }
+  - { name: Clear, hex: '#d7d2c6' }
+  - { name: Orange, hex: '#e9560c' }
 description: Twelve tracks cut live at Assembly nights and dubbed to cassette by hand. A numbered run of fifty, and once these go, they are gone.
 details:
   - Hand-dubbed C-40 cassette

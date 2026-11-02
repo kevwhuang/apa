@@ -35,6 +35,15 @@ export default defineConfig({
             subsets: ['latin'],
             weights: [400, 700],
         },
+        {
+            cssVariable: '--font-unbounded',
+            display: 'block',
+            name: 'Unbounded',
+            provider: fontProviders.fontsource(),
+            styles: ['normal'],
+            subsets: ['latin'],
+            weights: ['200 900'],
+        },
     ],
     integrations: [
         react(),

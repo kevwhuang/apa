@@ -46,19 +46,19 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="gallery-title"
 >
     <div>
         <PageHead
-            class="max-w-3xl mb-6 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="max-w-3xl mb-6 text-5xl md:text-7xl"
             eyebrow={`Gallery / ${FIGURES.length} shots`}
             headingId="gallery-title"
         >
             The wall.
         </PageHead>
         <p
-            class="max-w-2xl text-lmd text-ink-muted"
+            class="max-w-2xl text-lg text-text-secondary"
             data-motion="blur"
         >
             Assembly nights, Bash sets, Hangout afternoons, and whatever the studio looked like
@@ -98,7 +98,7 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
                             width={figure.columnWidth}
                         />
                     </button>
-                    <figcaption class="label text-ink-muted">{figure.label}</figcaption>
+                    <figcaption class="label text-text-secondary">{figure.label}</figcaption>
                 </figure>
             </li>
         ))}
@@ -131,7 +131,7 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
             tabindex="-1"
         >
             <img
-                class="block object-contain aspect-(--wall-ratio) h-auto min-h-0 w-full border-2 border-ink-inverse cursor-default pointer-events-auto select-none"
+                class="block object-contain aspect-(--wall-ratio) h-auto min-h-0 w-full border-2 border-current cursor-default pointer-events-auto select-none"
                 alt=""
                 data-wall-photo
                 draggable="false"
@@ -155,15 +155,16 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
         --close-inset: calc((var(--wall-gutter) - var(--close-size)) / 2);
         --close-size: 40px;
         align-items: center;
-        background-color: var(--color-ink-inverse);
-        border: var(--close-border) solid var(--color-ink);
-        color: var(--color-ink);
+        background-color: transparent;
+        border: var(--close-border) solid var(--color-btn-on-brand-border);
+        color: var(--color-btn-on-brand-text);
         display: flex;
         height: var(--close-size);
         inset: var(--close-inset) var(--close-inset) auto auto;
         justify-content: center;
         position: absolute;
         transition:
+            background-color var(--duration-fast) var(--motion-ease-ui),
             border-color var(--duration-fast) var(--motion-ease-ui),
             color var(--duration-fast) var(--motion-ease-ui),
             transform var(--duration-fast) var(--motion-ease-ui);
@@ -183,8 +184,9 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
 
     .wall__close:focus-visible,
     .wall__close:hover {
-        border-color: var(--color-accent-deep);
-        color: var(--color-accent-deep);
+        background-color: var(--color-btn-on-brand-bg-hover);
+        border-color: var(--color-link-on-brand);
+        color: var(--color-link-on-brand);
     }
 
     .wall__frame:active .wall__image {
@@ -228,14 +230,14 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
     }
 
     .wall__viewer {
-        --focus-ring: var(--color-accent-light);
+        --color-focus-ring: var(--color-focus-ring-on-brand);
         --wall-frame: calc(100dvh - 2 * var(--wall-gutter) - var(--wall-meta));
         --wall-gap: var(--space-xs);
         --wall-gutter: clamp(56px, 7vmin, 88px);
         --wall-meta: calc(var(--wall-gap) + var(--text-xs));
         --wall-ratio: 1;
-        background-color: var(--color-ink-70);
-        color: var(--color-ink-inverse);
+        background-color: var(--color-bg-overlay-strong);
+        color: var(--color-text-on-brand);
         opacity: 0;
         padding: var(--wall-gutter);
         transition:
@@ -246,7 +248,7 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
     }
 
     .wall__viewer .spinner {
-        border-color: var(--color-ink-inverse-10);
+        border-color: var(--color-border-on-brand);
         border-top-color: currentColor;
     }
 

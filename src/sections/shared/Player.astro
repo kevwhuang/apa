@@ -33,7 +33,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
             data-player-grip
         />
         <div class="player__head flex flex-none items-center justify-between min-h-[50px] pl-(--space-md) pr-(--space-2xs)">
-            <p class="label player__eyebrow text-accent-deep">Now playing</p>
+            <p class="label player__eyebrow text-link">Now playing</p>
             <button
                 class="player__close"
                 data-player-close
@@ -44,14 +44,14 @@ import IconWaveform from '@components/icons/Waveform.astro';
             </button>
         </div>
         <div
-            class="player__rack flex flex-auto flex-col overflow-y-auto overscroll-contain min-h-0 gap-(--space-2xs) px-(--space-md) py-(--space-sm) border-ink-20 border-t"
+            class="player__rack flex flex-auto flex-col overflow-y-auto overscroll-contain min-h-0 gap-(--space-2xs) px-(--space-md) py-(--space-sm) border-border-subtle border-t"
             data-player-rack
             hidden
         >
             <div class="player__rack-head flex items-baseline justify-between gap-(--space-2xs)">
-                <p class="label player__rack-label flex-none text-accent-deep">Rack</p>
+                <p class="label player__rack-label flex-none text-link">Rack</p>
                 <p
-                    class="player__rack-file min-w-0 font-mono text-2xs truncate text-ink-muted"
+                    class="player__rack-file min-w-0 font-mono text-xs truncate text-text-secondary"
                     data-player-rack-file
                 />
             </div>
@@ -61,7 +61,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
                 data-player-plugins
             />
             <p
-                class="player__straight font-mono text-2xs text-ink-muted"
+                class="player__straight font-mono text-xs text-text-secondary"
                 data-player-straight
             >
                 Straight through
@@ -76,16 +76,16 @@ import IconWaveform from '@components/icons/Waveform.astro';
         >
             Open the rack <IconArrow />
         </a>
-        <div class="player__controls flex flex-col flex-none gap-(--space-2xs) py-(--space-sm) border-ink-20 border-t">
+        <div class="player__controls flex flex-col flex-none gap-(--space-2xs) py-(--space-sm) border-border-subtle border-t">
             <div class="player__meta flex flex-col gap-(--space-3xs) px-(--space-md)">
                 <p
-                    class="player__title min-w-0 font-extrabold text-md truncate"
+                    class="player__title min-w-0 font-bold text-lg truncate"
                     data-player-title
                 >
                     Nothing playing.
                 </p>
                 <p
-                    class="player__artist min-w-0 font-mono text-2xs truncate text-ink-muted"
+                    class="player__artist min-w-0 font-mono text-xs truncate text-text-secondary"
                     data-player-artist
                 >
                     Play a track to load it here.
@@ -127,7 +127,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
                         type="range"
                         value="0"
                     />
-                    <p class="player__ends flex justify-between w-full font-mono text-2xs text-ink-muted select-none">
+                    <p class="player__ends flex justify-between w-full font-mono text-xs text-text-secondary select-none">
                         <span data-player-position>0:00</span>
                         <span data-player-duration>0:00</span>
                     </p>
@@ -163,7 +163,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
                         value="100"
                     />
                     <p
-                        class="player__ends flex justify-between w-full font-mono text-2xs text-ink-muted select-none"
+                        class="player__ends flex justify-between w-full font-mono text-xs text-text-secondary select-none"
                         aria-hidden="true"
                     >
                         <span>0</span>
@@ -209,18 +209,19 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     .player__close:hover {
-        color: var(--color-accent-deep);
+        color: var(--color-link);
     }
 
     .player__control {
         align-items: center;
-        border: 2px solid var(--color-ink);
+        border: 2px solid var(--color-border-strong);
         display: inline-flex;
         flex: 0 0 auto;
         height: 50px;
         justify-content: center;
         transition:
             background var(--duration-fast) var(--motion-ease-ui),
+            border-color var(--duration-fast) var(--motion-ease-ui),
             color var(--duration-fast) var(--motion-ease-ui),
             transform var(--duration-fast) var(--motion-ease-ui);
         width: 50px;
@@ -236,29 +237,29 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     .player__control:hover:not(:disabled) {
-        background: var(--color-ink);
-        color: var(--color-ink-inverse);
+        background: var(--color-bg-inverse);
+        color: var(--color-text-inverse);
     }
 
     .player__control--play {
-        background: var(--color-accent);
-        border-color: var(--color-accent);
-        color: var(--color-ink);
+        background: var(--color-btn-primary-bg);
+        border-color: var(--color-btn-primary-bg);
+        color: var(--color-btn-primary-text);
     }
 
     .player__control--play:hover:not(:disabled) {
-        background: var(--color-accent-deep);
-        border-color: var(--color-accent-deep);
-        color: var(--color-ink-inverse);
+        background: var(--color-btn-primary-bg-hover);
+        border-color: var(--color-btn-primary-bg);
+        color: var(--color-btn-primary-text);
     }
 
     .player__launcher {
-        --focus-ring: var(--color-accent-light);
+        --color-focus-ring: var(--color-focus-ring-offset);
         align-items: center;
-        background: var(--color-surface-inverse);
-        border: 2px solid var(--color-ink);
+        background: var(--color-bg-inverse);
+        border: 2px solid var(--color-border-strong);
         border-right: 0;
-        color: var(--color-ink-inverse);
+        color: var(--color-text-inverse);
         display: inline-flex;
         height: var(--launcher-size);
         inset: auto 0 var(--space-md) auto;
@@ -281,15 +282,14 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     .player__launcher:hover {
-        --focus-ring: var(--color-ink);
-        background: var(--color-accent);
-        color: var(--color-ink);
+        background: var(--color-btn-primary-bg);
+        color: var(--color-btn-primary-text);
     }
 
     .player__link {
         align-items: center;
-        border-top: 1px solid var(--color-ink-20);
-        color: var(--color-ink);
+        border-top: 1px solid var(--color-border-subtle);
+        color: var(--color-text);
         display: flex;
         flex: 0 0 auto;
         gap: var(--space-2xs);
@@ -309,14 +309,14 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     .player__link:hover {
-        color: var(--color-accent-deep);
+        color: var(--color-link);
     }
 
     .player__panel {
-        background: var(--color-surface-raised);
-        border: 2px solid var(--color-ink);
-        box-shadow: calc(-1 * var(--lift)) var(--lift) 0 0 var(--color-ink);
-        color: var(--color-ink);
+        background: var(--color-bg-raised);
+        border: 2px solid var(--color-border-strong);
+        box-shadow: calc(-1 * var(--lift)) var(--lift) 0 0 var(--color-border-strong);
+        color: var(--color-text);
         display: flex;
         flex-direction: column;
         height: auto;
@@ -329,8 +329,8 @@ import IconWaveform from '@components/icons/Waveform.astro';
 
     .player__plugin {
         align-items: center;
-        border: 1px solid var(--color-ink-20);
-        color: var(--color-ink-muted);
+        border: 1px solid var(--color-border-subtle);
+        color: var(--color-text-secondary);
         display: flex;
         font-family: var(--font-mono);
         font-size: var(--text-xs);
@@ -343,12 +343,12 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     .player__rack.is-playing .player__plugin {
-        border-color: var(--color-accent-deep);
-        color: var(--color-accent-deep);
+        border-color: var(--color-border-selected);
+        color: var(--color-link);
     }
 
     .player__slider {
-        accent-color: var(--color-accent);
+        accent-color: var(--color-control-checked-bg);
         cursor: pointer;
         height: 24px;
         transition:
@@ -360,7 +360,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
     .player__slider:active:not(:disabled),
     .player__slider:focus-visible,
     .player__slider:hover:not(:disabled) {
-        accent-color: var(--color-accent-deep);
+        accent-color: var(--color-native-accent);
     }
 
     .player__slider:disabled {

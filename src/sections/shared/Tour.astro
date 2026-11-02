@@ -36,11 +36,11 @@ import IconArrow from '@components/icons/Arrow.astro';
     >
         <p
             id="tour-eyebrow"
-            class="label tour__eyebrow text-accent-deep"
+            class="label tour__eyebrow text-link"
             data-tour-eyebrow
         />
         <p
-            class="tour__body leading-normal text-smd wrap-anywhere"
+            class="tour__body leading-normal text-sm wrap-anywhere"
             data-tour-body
         />
         <p
@@ -48,7 +48,7 @@ import IconArrow from '@components/icons/Arrow.astro';
             aria-live="polite"
             data-tour-announce
         />
-        <div class="tour__foot flex flex-wrap items-center gap-(--space-2xs) pt-(--space-sm) border-ink border-t-2">
+        <div class="tour__foot flex flex-wrap items-center gap-(--space-2xs) pt-(--space-sm) border-border-strong border-t-2">
             <button
                 class="btn"
                 data-tour-back
@@ -65,7 +65,7 @@ import IconArrow from '@components/icons/Arrow.astro';
                 <span data-tour-next-label>Next</span> <IconArrow />
             </button>
             <button
-                class="action-text tour__skip inline-flex items-center min-h-(--control-size) ms-auto px-(--space-3xs) text-ink-muted transition-[color]"
+                class="action-text tour__skip inline-flex items-center min-h-(--control-size) ms-auto px-(--space-3xs) text-text-secondary transition-[color]"
                 data-tour-skip
                 type="button"
             >
@@ -113,7 +113,7 @@ import IconArrow from '@components/icons/Arrow.astro';
     }
 
     .tour__pane {
-        background: var(--color-ink-70);
+        background: color-mix(in srgb, var(--color-bg-inverse) 70%, transparent);
         pointer-events: auto;
         position: fixed;
     }
@@ -141,7 +141,7 @@ import IconArrow from '@components/icons/Arrow.astro';
     .tour__ring {
         height: var(--tour-height);
         inset: var(--tour-top) auto auto var(--tour-left);
-        outline: 2px solid var(--color-accent);
+        outline: 2px solid var(--color-border-selected);
         pointer-events: auto;
         position: fixed;
         width: var(--tour-width);

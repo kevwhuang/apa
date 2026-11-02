@@ -54,30 +54,30 @@ const SWITCHES = [
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="admin-title"
 >
     <div class="flex flex-col gap-6">
         <PageHead
-            class="max-w-3xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="max-w-3xl text-3xl md:text-7xl sm:text-5xl"
             eyebrow="Internal / Admin"
             headingId="admin-title"
         >
             Operations.
         </PageHead>
-        <p class="max-w-2xl text-lmd text-ink-muted">
+        <p class="max-w-2xl text-lg text-text-secondary">
             Open and close Alliance programs, run cleanup actions, and manage member Prods.
         </p>
     </div>
 </section>
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="admin-switches-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-3xl tracking-tight"
+            class="text-2xl sm:text-3xl"
             eyebrow={`Console / ${SWITCHES.length} switches`}
             headingId="admin-switches-title"
         >
@@ -93,11 +93,11 @@ const SWITCHES = [
                         <div class="flex-1 min-w-[200px]">
                             <h3
                                 id={`${control.id}-name`}
-                                class="mb-1 font-extrabold font-sans text-lg tracking-tight"
+                                class="mb-1 text-balance text-lg"
                             >
                                 {control.name}
                             </h3>
-                            <p class="max-w-xl text-sm text-ink-muted">
+                            <p class="max-w-xl text-sm text-text-secondary">
                                 {control.blurb}
                             </p>
                         </div>
@@ -124,12 +124,12 @@ const SWITCHES = [
 </section>
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="admin-actions-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-3xl tracking-tight"
+            class="text-2xl sm:text-3xl"
             eyebrow={`Console / ${ACTIONS.length} actions`}
             headingId="admin-actions-title"
         >
@@ -142,11 +142,11 @@ const SWITCHES = [
             {ACTIONS.map(action => (
                 <li class="content-start grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-span-5 gap-y-(--space-xs)">
                     <article class="slab slab--card content-start grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-span-5 gap-y-(--space-xs)">
-                        <p class="label text-accent-deep">{action.count}</p>
-                        <h3 class="font-extrabold font-sans text-lg tracking-tight">
+                        <p class="label text-link">{action.count}</p>
+                        <h3 class="text-lg">
                             {action.name}
                         </h3>
-                        <p class="text-sm text-ink-muted">
+                        <p class="text-sm text-text-secondary">
                             {action.blurb}
                         </p>
                         <button
@@ -189,7 +189,7 @@ const SWITCHES = [
 
 <style>
     .admin__confirm {
-        border-left: 2px solid var(--color-accent-deep);
+        border-left: 2px solid var(--color-error-border);
     }
 
     .admin__row:has(.admin__switch:checked) .admin__state-off {
@@ -208,12 +208,12 @@ const SWITCHES = [
 
     .admin__switch {
         appearance: none;
-        background-color: var(--color-surface-sunken);
-        background-image: linear-gradient(var(--color-ink), var(--color-ink));
+        background-color: var(--color-bg-sunken);
+        background-image: linear-gradient(var(--color-bg-inverse), var(--color-bg-inverse));
         background-position: 5px center;
         background-repeat: no-repeat;
         background-size: 30px 30px;
-        border: 2px solid var(--color-ink);
+        border: 2px solid var(--color-control-border);
         cursor: pointer;
         flex-shrink: 0;
         height: 50px;
@@ -227,22 +227,22 @@ const SWITCHES = [
     }
 
     .admin__switch:active {
-        background-color: var(--color-surface);
+        background-color: var(--color-bg-page);
     }
 
     .admin__switch:checked {
-        background-color: var(--color-accent);
+        background-color: var(--color-control-checked-bg);
         background-position: calc(100% - 5px) center;
     }
 
     .admin__switch:focus-visible {
         box-shadow:
-            0 0 0 2px var(--color-surface),
-            0 0 0 4px var(--color-accent-deep);
+            0 0 0 2px var(--color-focus-ring-offset),
+            0 0 0 4px var(--color-focus-ring);
     }
 
     .admin__switch:hover {
-        border-color: var(--color-accent-deep);
+        border-color: var(--color-border-strong);
     }
 
     .admin__switch[aria-busy='true'] {
@@ -252,26 +252,6 @@ const SWITCHES = [
     @media (max-width: 768px) {
         .admin__state {
             text-align: left;
-        }
-    }
-
-    @media (forced-colors: active) {
-        .admin__switch {
-            background-color: Canvas;
-            background-image: linear-gradient(CanvasText, CanvasText);
-            border-color: CanvasText;
-            forced-color-adjust: none;
-        }
-
-        .admin__switch:checked {
-            background-color: SelectedItem;
-            background-image: linear-gradient(SelectedItemText, SelectedItemText);
-        }
-
-        .admin__switch:focus-visible {
-            box-shadow:
-                0 0 0 2px Canvas,
-                0 0 0 4px CanvasText;
         }
     }
 </style>

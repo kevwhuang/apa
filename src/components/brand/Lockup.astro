@@ -8,14 +8,35 @@ interface Props {
 }
 
 const { class: lockupClass, height = BRAND_SIZES.lockupPreview, label } = Astro.props;
-const Lockup = BRAND_LOGOS.lockup;
+const LockupDark = BRAND_LOGOS.lockupDark;
+const LockupLight = BRAND_LOGOS.lockupLight;
 ---
 
-<Lockup
-    class={lockupClass}
+<LockupLight
+    class:list={['lockup', 'lockup--light', lockupClass]}
     aria-hidden={label ? undefined : 'true'}
     aria-label={label}
-    fill="currentColor"
     height={height}
     role={label ? 'img' : undefined}
 />
+<LockupDark
+    class:list={['lockup', 'lockup--dark', lockupClass]}
+    aria-hidden={label ? undefined : 'true'}
+    aria-label={label}
+    height={height}
+    role={label ? 'img' : undefined}
+/>
+
+<style>
+    .lockup--dark {
+        display: none;
+    }
+
+    :global(html[data-theme='dark']) .lockup--light {
+        display: none;
+    }
+
+    :global(html[data-theme='dark']) .lockup--dark {
+        display: block;
+    }
+</style>

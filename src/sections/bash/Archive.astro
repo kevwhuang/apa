@@ -15,7 +15,7 @@ const past = editions.filter(edition => edition.data.status === 'past').sort((a,
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-4xl tracking-tight"
+            class="text-4xl"
             eyebrow={`Archive / ${past.length} on file`}
             headingId="editions-title"
         >
@@ -33,24 +33,24 @@ const past = editions.filter(edition => edition.data.status === 'past').sort((a,
                         class="bash-archive__card slab slab--card"
                     >
                         <p
-                            class="label mb-2 text-accent-deep"
+                            class="label mb-2 text-link"
                             data-placeholder
                         >
                             {edition.data.edition} / <time datetime={edition.data.date.toISOString()}>{formatDate(edition.data.date)}</time>
                         </p>
-                        <h3 class="mb-2 font-extrabold font-sans text-2xl tracking-tight">
+                        <h3 class="mb-2 text-2xl">
                             {edition.data.title}
                         </h3>
-                        <address class="mb-1 font-mono not-italic text-xs uppercase text-ink-muted">
+                        <address class="mb-1 font-mono not-italic text-xs uppercase text-text-secondary">
                             {edition.data.location}
                         </address>
                         <p
-                            class="mb-3 font-mono text-2xs uppercase text-ink-subtle"
+                            class="mb-3 font-mono text-xs uppercase text-text-secondary"
                             data-placeholder
                         >
                             {formatTimeRange(edition.data.date, edition.data.end)}
                         </p>
-                        <p class="text-sm text-ink-muted">
+                        <p class="text-sm text-text-secondary">
                             {edition.data.recap}
                         </p>
                     </article>

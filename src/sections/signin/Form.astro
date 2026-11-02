@@ -13,7 +13,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
     <div class="flex flex-col gap-8">
         <div class="flex flex-col gap-6">
             <PageHead
-                class="font-extrabold font-sans text-4xl text-center tracking-tight"
+                class="text-4xl text-center"
                 eyebrow="Account"
                 eyebrowClass="mb-4 text-center"
                 headingId="signin-title"
@@ -21,7 +21,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                 Sign in.
             </PageHead>
             <p
-                class="max-w-2xl mx-auto text-center text-lmd text-ink-muted"
+                class="max-w-2xl mx-auto text-center text-lg text-text-secondary"
                 data-motion="rise"
             >
                 One address, one password &mdash; the same account at the door, the store, and your settings.
@@ -31,7 +31,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
             class="signin slab slab--bare slab--card max-w-(--measure-form) w-full mx-auto"
             data-motion="unfold"
         >
-            <fieldset class="grid grid-cols-2 min-w-0 border-b-2 border-ink">
+            <fieldset class="grid grid-cols-2 min-w-0 border-b-2 border-border-strong">
                 <legend class="sr-only">What do you want to do?</legend>
                 <label class="action-text signin__tab">
                     <input
@@ -62,7 +62,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                 </h2>
                 <div class="signin__field flex flex-col gap-2">
                     <label class="block">
-                        <span class="label block mb-2 text-ink-muted">Email</span>
+                        <span class="label block mb-2 text-text-secondary">Email</span>
                         <input
                             id="signin-email"
                             class="input font-mono text-sm"
@@ -76,14 +76,14 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                     </label>
                     <p
                         id="signin-email-error"
-                        class="action-text text-accent-deep"
+                        class="action-text text-error-text"
                         data-field-error
                         hidden
                     />
                 </div>
                 <div class="signin__field flex flex-col gap-2">
                     <label class="block">
-                        <span class="label block mb-2 text-ink-muted">Password</span>
+                        <span class="label block mb-2 text-text-secondary">Password</span>
                         <span class="block relative">
                             <input
                                 id="signin-password"
@@ -113,7 +113,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                     </label>
                     <p
                         id="signin-password-error"
-                        class="action-text text-accent-deep"
+                        class="action-text text-error-text"
                         data-field-error
                         hidden
                     />
@@ -134,7 +134,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                 </h2>
                 <div class="signin__field flex flex-col gap-2">
                     <label class="block">
-                        <span class="label block mb-2 text-ink-muted">Email</span>
+                        <span class="label block mb-2 text-text-secondary">Email</span>
                         <input
                             id="signup-email"
                             class="input font-mono text-sm"
@@ -148,14 +148,14 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                     </label>
                     <p
                         id="signup-email-error"
-                        class="action-text text-accent-deep"
+                        class="action-text text-error-text"
                         data-field-error
                         hidden
                     />
                 </div>
                 <div class="signin__field flex flex-col gap-2">
                     <label class="block">
-                        <span class="label block mb-2 text-ink-muted">Password</span>
+                        <span class="label block mb-2 text-text-secondary">Password</span>
                         <span class="block relative">
                             <input
                                 id="signup-password"
@@ -186,14 +186,14 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                     </label>
                     <p
                         id="signup-password-error"
-                        class="action-text text-accent-deep"
+                        class="action-text text-error-text"
                         data-field-error
                         hidden
                     />
                 </div>
                 <div class="signin__field flex flex-col gap-2">
                     <label class="block">
-                        <span class="label block mb-2 text-ink-muted">Confirm password</span>
+                        <span class="label block mb-2 text-text-secondary">Confirm password</span>
                         <span class="block relative">
                             <input
                                 id="signup-confirm"
@@ -223,7 +223,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                     </label>
                     <p
                         id="signup-confirm-error"
-                        class="action-text text-accent-deep"
+                        class="action-text text-error-text"
                         data-field-error
                         hidden
                     />
@@ -260,7 +260,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
     .signin__reveal {
         align-items: center;
         bottom: 0;
-        color: var(--color-ink-muted);
+        color: var(--color-text-secondary);
         cursor: pointer;
         display: flex;
         justify-content: center;
@@ -292,7 +292,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
     }
 
     .signin__reveal:hover {
-        color: var(--color-accent-deep);
+        color: var(--color-link);
     }
 
     .signin__reveal[aria-pressed='false'] .signin__glyph--hide,
@@ -302,8 +302,8 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
 
     .signin__tab {
         align-items: center;
-        background-color: var(--color-surface);
-        color: var(--color-ink-muted);
+        background-color: var(--color-bg-page);
+        color: var(--color-tab-text);
         cursor: pointer;
         display: flex;
         justify-content: center;
@@ -317,38 +317,31 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
     }
 
     .signin__tab + .signin__tab {
-        border-left: 2px solid var(--color-ink);
+        border-left: 2px solid var(--color-border-strong);
     }
 
     .signin__tab:active {
-        background-color: var(--color-surface-sunken);
+        background-color: var(--color-bg-active);
     }
 
     .signin__tab:has(.signin__radio:checked) {
-        background-color: var(--color-ink);
-        color: var(--color-ink-inverse);
+        --color-focus-ring: var(--color-focus-ring-offset);
+        background-color: var(--color-bg-inverse);
+        color: var(--color-text-inverse);
     }
 
     .signin__tab:has(.signin__radio:focus-visible) {
-        outline: 2px solid var(--color-accent-deep);
+        outline: 2px solid var(--color-focus-ring);
         outline-offset: -4px;
     }
 
     .signin__tab:hover:not(:has(.signin__radio:checked)) {
-        background-color: var(--color-surface-sunken);
-        color: var(--color-ink);
+        background-color: var(--color-bg-hover);
+        color: var(--color-tab-text-hover);
     }
 
     :global([data-session='in']) .signin-stage {
         display: none;
-    }
-
-    @media (forced-colors: active) {
-        .signin__tab:has(.signin__radio:checked) {
-            background-color: SelectedItem;
-            color: SelectedItemText;
-            forced-color-adjust: none;
-        }
     }
 </style>
 

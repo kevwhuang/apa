@@ -7,7 +7,9 @@ import QrCode from '@components/shared/QrCode.astro';
 import { EMAIL_MAX_LENGTH } from '@lib/shared/constants';
 import { formatDate, formatTime, mergeCalendar } from '@lib/shared/utils';
 
-const DOOR_URL = 'austinproduceralliance.com/here';
+const DOOR_HOST = 'austinproduceralliance.com';
+const DOOR_PATH = 'here';
+const DOOR_URL = `${DOOR_HOST}/${DOOR_PATH}`;
 
 const bashEditions = await getCollection('bash');
 const events = await getCollection('events');
@@ -18,19 +20,19 @@ const nextEvent = upcoming.at(0);
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="checkin-title"
 >
     <div class="flex flex-col gap-6">
         <PageHead
-            class="max-w-3xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="max-w-3xl text-5xl md:text-7xl text-balance"
             eyebrow="Events / Check-in"
             headingId="checkin-title"
         >
             You made it.
         </PageHead>
         <p
-            class="max-w-2xl text-lmd text-ink-muted"
+            class="max-w-2xl text-lg text-text-secondary"
             data-motion="blur"
         >
             This is where the welcome code at the door sends you. Leave an address and the
@@ -40,7 +42,7 @@ const nextEvent = upcoming.at(0);
 </section>
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-label="Door pass"
 >
     <div class="rank rank--2 items-stretch">
@@ -51,25 +53,25 @@ const nextEvent = upcoming.at(0);
         >
             <div class="door-pass__panel slab slab--well flex flex-col h-full gap-6">
                 <div class="flex flex-col gap-6 mb-auto">
-                    <p class="label text-accent-light">Door pass</p>
-                    <p class="font-mono text-sm tracking-[-0.01em] wrap-break-word text-pulse md:text-lmd">
-                        {DOOR_URL}
+                    <p class="label text-link-on-inverse">Door pass</p>
+                    <p class="font-mono text-sm tracking-[-0.01em] wrap-break-word text-link-on-inverse md:text-lg">
+                        {DOOR_HOST}/<wbr />{DOOR_PATH}
                     </p>
                     {nextEvent && (
                         <dl class="door-pass__rows">
-                            <div class="last:border-b-0 grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-ink-inverse-10">
-                                <dt class="label text-ink-inverse-muted">Event</dt>
+                            <div class="last:border-b-0 grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-inverse-subtle">
+                                <dt class="label text-text-inverse-secondary">Event</dt>
                                 <dd
-                                    class="text-smd"
+                                    class="text-sm"
                                     data-placeholder
                                 >
                                     {nextEvent.title}
                                 </dd>
                             </div>
-                            <div class="last:border-b-0 grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-ink-inverse-10">
-                                <dt class="label text-ink-inverse-muted">When</dt>
+                            <div class="last:border-b-0 grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-inverse-subtle">
+                                <dt class="label text-text-inverse-secondary">When</dt>
                                 <dd
-                                    class="text-smd"
+                                    class="text-sm"
                                     data-placeholder
                                 >
                                     <time datetime={nextEvent.date.toISOString()}>
@@ -77,10 +79,10 @@ const nextEvent = upcoming.at(0);
                                     </time>
                                 </dd>
                             </div>
-                            <div class="last:border-b-0 grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-ink-inverse-10">
-                                <dt class="label text-ink-inverse-muted">Where</dt>
+                            <div class="last:border-b-0 grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-inverse-subtle">
+                                <dt class="label text-text-inverse-secondary">Where</dt>
                                 <dd
-                                    class="text-smd"
+                                    class="text-sm"
                                     data-placeholder
                                 >
                                     {nextEvent.location}
@@ -91,7 +93,7 @@ const nextEvent = upcoming.at(0);
                 </div>
                 <div class="door-pass__foot">
                     <p class="action-text door-pass__stamp">Checked</p>
-                    <p class="label text-ink-inverse-muted">1 Prod on arrival</p>
+                    <p class="label text-text-inverse-secondary">1 Prod on arrival</p>
                 </div>
             </div>
         </aside>
@@ -117,16 +119,16 @@ const nextEvent = upcoming.at(0);
         data-checkin-form
         data-motion="unfold"
     >
-        <header class="flex flex-wrap items-center justify-between gap-(--space-xs) pb-(--space-xs) border-b-2 border-ink">
-            <p class="label text-accent-deep">Check-in</p>
-            <p class="label text-ink-subtle">APA / Door 01</p>
+        <header class="flex flex-wrap items-center justify-between gap-(--space-xs) pb-(--space-xs) border-b-2 border-border-strong">
+            <p class="label text-link">Check-in</p>
+            <p class="label text-text-secondary">APA / Door 01</p>
         </header>
-        <h2 class="font-extrabold font-sans text-2xl tracking-tight">
+        <h2 class="text-2xl">
             Check in
         </h2>
         <div class="flex flex-col gap-2">
             <label class="flex flex-col gap-2">
-                <span class="label flex flex-wrap items-baseline text-ink"><span class="pr-(--space-2xs) text-accent-deep">01</span>Email</span>
+                <span class="label flex flex-wrap items-baseline text-text"><span class="pr-(--space-2xs) text-link">01</span>Email</span>
                 <input
                     id="checkin-email"
                     class="input font-mono text-sm"
@@ -141,13 +143,13 @@ const nextEvent = upcoming.at(0);
             </label>
             <p
                 id="checkin-email-error"
-                class="action-text text-accent-deep"
+                class="action-text text-error-text"
                 data-field-error
                 hidden
             />
         </div>
         <div class="flex flex-col gap-2">
-            <p class="label flex flex-wrap items-baseline text-ink"><span class="pr-(--space-2xs) text-accent-deep">02</span>Terms</p>
+            <p class="label flex flex-wrap items-baseline text-text"><span class="pr-(--space-2xs) text-link">02</span>Terms</p>
             <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <label class="checkin__check">
                     <input
@@ -162,7 +164,7 @@ const nextEvent = upcoming.at(0);
                     I accept the terms
                 </label>
                 <a
-                    class="active:translate-y-px hover:text-accent-deep inline-flex items-center min-h-(--control-size) px-(--space-3xs) text-sm underline transition-[color,transform]"
+                    class="active:translate-y-px hover:text-link inline-flex items-center min-h-(--control-size) px-(--space-3xs) text-sm underline transition-[color,transform]"
                     href="/terms"
                 >
                     Read them first
@@ -170,13 +172,13 @@ const nextEvent = upcoming.at(0);
             </div>
             <p
                 id="checkin-terms-error"
-                class="action-text text-accent-deep"
+                class="action-text text-error-text"
                 data-field-error
                 hidden
             />
         </div>
         <div class="flex flex-col gap-2">
-            <p class="label flex flex-wrap items-baseline text-ink"><span class="pr-(--space-2xs) text-accent-deep">03</span>Newsletter</p>
+            <p class="label flex flex-wrap items-baseline text-text"><span class="pr-(--space-2xs) text-link">03</span>Newsletter</p>
             <label class="checkin__check">
                 <input
                     id="checkin-newsletter"
@@ -188,7 +190,7 @@ const nextEvent = upcoming.at(0);
                 Add me to the seasonal newsletter
             </label>
         </div>
-        <div class="flex flex-wrap items-center gap-(--space-sm) pt-(--space-md) border-t-2 border-ink">
+        <div class="flex flex-wrap items-center gap-(--space-sm) pt-(--space-md) border-t-2 border-border-strong">
             <button
                 class="btn btn--primary checkin-form__submit"
                 type="submit"
@@ -203,18 +205,18 @@ const nextEvent = upcoming.at(0);
         hidden
     >
         <div class="checkin__receipt slab slab--card flex flex-col gap-4">
-            <header class="flex flex-wrap items-center justify-between gap-(--space-xs) pb-(--space-xs) border-b-2 border-ink">
-                <p class="label text-accent-deep">Arrival receipt</p>
-                <p class="label text-ink-subtle">APA / Door 01</p>
+            <header class="flex flex-wrap items-center justify-between gap-(--space-xs) pb-(--space-xs) border-b-2 border-border-strong">
+                <p class="label text-link">Arrival receipt</p>
+                <p class="label text-text-secondary">APA / Door 01</p>
             </header>
             <h2
-                class="font-extrabold font-sans text-3xl tracking-tight"
+                class="text-3xl"
                 data-checkin-heading
                 tabindex="-1"
             >
                 You are checked in.
             </h2>
-            <p class="text-md text-ink-muted">
+            <p class="text-lg text-text-secondary">
                 An account is open for&#32;
                 <span
                     class="font-mono text-sm wrap-anywhere"
@@ -228,7 +230,7 @@ const nextEvent = upcoming.at(0);
                 on it.&#32;
                 <span data-checkin-newsletter />
             </p>
-            <p class="action-text px-3 py-3 bg-accent text-ink">
+            <p class="action-text px-3 py-3 bg-bg-signal text-text-on-signal">
                 Your welcome email is below.
             </p>
             <button
@@ -245,46 +247,46 @@ const nextEvent = upcoming.at(0);
             data-checkin-mail
             data-event={nextEvent?.title}
         >
-            <header class="flex flex-wrap items-center justify-between gap-(--space-xs) pb-(--space-xs) border-b-2 border-ink">
-                <p class="label text-accent-deep">Welcome email</p>
+            <header class="flex flex-wrap items-center justify-between gap-(--space-xs) pb-(--space-xs) border-b-2 border-border-strong">
+                <p class="label text-link">Welcome email</p>
                 <p class="action-text mail__stamp">Sent</p>
             </header>
             <dl class="flex flex-col">
-                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-ink-20">
-                    <dt class="label text-ink-subtle">From</dt>
+                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-subtle">
+                    <dt class="label text-text-secondary">From</dt>
                     <dd
                         class="font-mono text-sm wrap-anywhere"
                         data-mail-from
                     />
                 </div>
-                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-ink-20">
-                    <dt class="label text-ink-subtle">To</dt>
+                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-subtle">
+                    <dt class="label text-text-secondary">To</dt>
                     <dd
                         class="font-mono text-sm wrap-anywhere"
                         data-mail-to
                     />
                 </div>
-                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-ink-20">
-                    <dt class="label text-ink-subtle">Reply to</dt>
+                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-subtle">
+                    <dt class="label text-text-secondary">Reply to</dt>
                     <dd
                         class="font-mono text-sm wrap-anywhere"
                         data-mail-reply
                     />
                 </div>
-                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-ink-20">
-                    <dt class="label text-ink-subtle">Subject</dt>
+                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-subtle">
+                    <dt class="label text-text-secondary">Subject</dt>
                     <dd
-                        class="font-bold font-sans text-md"
+                        class="font-bold font-sans text-lg"
                         data-mail-subject
                     />
                 </div>
             </dl>
             <p
-                class="mail__preheader text-sm text-ink-subtle"
+                class="mail__preheader text-sm text-text-secondary"
                 data-mail-preheader
             />
             <div
-                class="mail__body flex flex-col gap-4 text-smd"
+                class="mail__body flex flex-col gap-4"
                 data-mail-body
             />
             <div class="mail__actions">
@@ -295,7 +297,7 @@ const nextEvent = upcoming.at(0);
                 >
                     Finish your profile
                 </a>
-                <p class="action-text text-ink-subtle">Link lasts 24 hours</p>
+                <p class="action-text text-text-secondary">Link lasts 24 hours</p>
             </div>
         </article>
         <template data-mail-template>
@@ -317,7 +319,7 @@ const nextEvent = upcoming.at(0);
         align-items: center;
         align-self: flex-start;
         display: flex;
-        font-size: var(--text-smd);
+        font-size: var(--text-sm);
         gap: var(--space-xs);
         min-height: var(--control-size);
         padding-block: var(--space-2xs);
@@ -325,7 +327,7 @@ const nextEvent = upcoming.at(0);
 
     .door-pass__foot,
     .door-pass__rows {
-        background-image: repeating-linear-gradient(90deg, var(--color-ink-inverse-muted) 0 8px, transparent 8px 16px);
+        background-image: repeating-linear-gradient(90deg, var(--color-border) 0 8px, transparent 8px 16px);
         background-position: top left;
         background-repeat: no-repeat;
         background-size: 100% 1px;
@@ -346,15 +348,15 @@ const nextEvent = upcoming.at(0);
     }
 
     .door-pass__stamp {
-        border: 2px solid var(--color-accent-light);
-        color: var(--color-accent-light);
+        border: 2px solid var(--color-link-on-inverse);
+        color: var(--color-link-on-inverse);
         padding: var(--space-3xs) var(--space-2xs);
         rotate: calc(var(--tilt-unit) * -4);
     }
 
     .mail__actions {
         align-items: center;
-        background-image: repeating-linear-gradient(90deg, var(--color-ink-20) 0 8px, transparent 8px 16px);
+        background-image: repeating-linear-gradient(90deg, var(--color-border-subtle) 0 8px, transparent 8px 16px);
         background-position: top left;
         background-repeat: no-repeat;
         background-size: 100% 1px;
@@ -365,8 +367,8 @@ const nextEvent = upcoming.at(0);
     }
 
     .mail__stamp {
-        border: 2px solid var(--color-accent-deep);
-        color: var(--color-accent-deep);
+        border: 2px solid var(--color-link);
+        color: var(--color-link);
         padding: var(--space-3xs) var(--space-2xs);
         rotate: calc(var(--tilt-unit) * -3);
     }
@@ -374,14 +376,6 @@ const nextEvent = upcoming.at(0);
     @media (max-width: 768px) {
         .checkin-form__submit {
             width: 100%;
-        }
-    }
-
-    @media (forced-colors: active) {
-        .door-pass__stamp,
-        .mail__stamp {
-            border-color: CanvasText;
-            color: CanvasText;
         }
     }
 </style>

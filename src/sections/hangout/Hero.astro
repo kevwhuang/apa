@@ -13,28 +13,28 @@ const program = getProgram('hangout');
 ---
 
 <section
-    class="stage stage--hangout stage--tight border-b-2 border-ink"
+    class="stage stage--hangout stage--tight border-b-2 border-border-strong"
     aria-labelledby="hangout-title"
 >
     <div class="flex flex-col gap-6">
         <PageHead
-            class="max-w-4xl font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
+            class="max-w-4xl text-5xl md:text-7xl"
             eyebrow={`${program.shortName} / ${program.cadence}`}
             headingId="hangout-title"
         >
             No laptops.<br />
-            <span class="text-accent-deep">No agenda.</span>
+            <span class="text-text-brand">No agenda.</span>
         </PageHead>
         <div class="grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
             <div class="flex flex-col gap-5">
                 <p
-                    class="max-w-2xl leading-relaxed text-lmd text-ink-muted"
+                    class="max-w-2xl leading-relaxed text-lg text-text-secondary"
                     data-motion="blur"
                 >
                     {program.summary}
                 </p>
                 <p
-                    class="max-w-2xl leading-relaxed text-smd text-ink-muted"
+                    class="max-w-2xl leading-relaxed text-text-secondary"
                     data-motion="rise"
                 >
                     It runs two hours on a midweek evening, in a room booked for the occasion and
@@ -47,16 +47,16 @@ const program = getProgram('hangout');
                 aria-label="How a Hangout runs"
                 data-motion="rise"
             >
-                <p class="label mb-4 text-accent-deep">House rules / Every month</p>
+                <p class="label mb-4 text-link">House rules / Every month</p>
                 <dl>
                     {HOUSE_RULES.map(rule => (
-                        <div class="first:border-t-0 first:pt-0 last:pb-0 grid grid-cols-[76px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-sm) border-t border-ink-20">
-                            <dt class="label pt-1 text-ink-subtle">{rule.term}</dt>
-                            <dd class="text-smd">
+                        <div class="first:border-t-0 first:pt-0 last:pb-0 grid grid-cols-[76px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-sm) border-t border-border-subtle">
+                            <dt class="label pt-1 text-text-secondary">{rule.term}</dt>
+                            <dd class="text-sm">
                                 {rule.href
                                     ? (
                                             <a
-                                                class="active:translate-y-px hover:text-accent-deep inline-block py-(--space-xs) decoration-2 decoration-accent font-bold underline underline-offset-4 transition-[color,transform]"
+                                                class="active:translate-y-px hover:text-link inline-block py-(--space-xs) decoration-2 decoration-text-brand font-bold underline underline-offset-4 transition-[color,transform]"
                                                 href={rule.href}
                                                 rel="noopener noreferrer"
                                                 target="_blank"

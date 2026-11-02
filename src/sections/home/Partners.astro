@@ -7,19 +7,19 @@ import { PARTNERS, PARTNER_LOGO_WIDTH } from '@lib/shared/constants';
 ---
 
 <section
-    class="stage border-b-2 border-ink"
+    class="stage border-b-2 border-border-strong"
     aria-labelledby="partners-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-5xl tracking-tight"
+            class="text-5xl text-balance"
             eyebrow="Partners / Backing"
             headingId="partners-title"
         >
             Backed by our top partners.
         </SectionHead>
         <p
-            class="max-w-2xl leading-relaxed text-md text-ink-muted"
+            class="max-w-2xl leading-relaxed text-lg text-text-secondary"
             data-motion="blur"
         >
             The rooms, the gear, and the nights that hold the calendar together &mdash; partners
@@ -33,8 +33,8 @@ import { PARTNERS, PARTNER_LOGO_WIDTH } from '@lib/shared/constants';
         style={`--backers-cols: ${PARTNERS.length + 1}`}
     >
         {PARTNERS.map(partner => (
-            <li class="partner-tile grid grid-rows-[auto_minmax(0,1fr)] gap-(--space-md) min-h-(--backers-cell) p-(--space-lg) bg-surface">
-                <p class="label text-ink-muted">{partner.name}</p>
+            <li class="partner-tile grid grid-rows-[auto_minmax(0,1fr)] gap-(--space-md) min-h-(--backers-cell) p-(--space-lg) bg-bg-page">
+                <p class="label text-text-secondary">{partner.name}</p>
                 <div class="backers__logo">
                     <Image
                         class="partner-tile__logo object-contain max-h-full max-w-full"
@@ -52,7 +52,7 @@ import { PARTNERS, PARTNER_LOGO_WIDTH } from '@lib/shared/constants';
                 href="/partners"
             >
                 <span class="label">Become a partner</span>
-                <span class="self-end font-extrabold font-sans leading-[0.95] text-3xl text-balance tracking-[-0.03em]">
+                <span class="self-end font-bold font-display leading-[0.95] text-3xl text-balance tracking-[-0.02em]">
                     See the ways in <IconArrow />
                 </span>
             </a>
@@ -63,15 +63,16 @@ import { PARTNERS, PARTNER_LOGO_WIDTH } from '@lib/shared/constants';
 <style>
     .backers {
         --backers-cell: clamp(180px, calc(146.667px + 10.4167vw), 280px);
-        --slab-fill: var(--color-ink);
+        --slab-fill: var(--color-border-strong);
         display: grid;
         gap: var(--slab-rule);
         grid-template-columns: repeat(var(--backers-cols), minmax(0, 1fr));
     }
 
     .backers__cta {
-        background-color: var(--color-accent);
-        color: var(--color-ink);
+        --color-focus-ring: var(--color-btn-primary-text);
+        background-color: var(--color-btn-primary-bg);
+        color: var(--color-btn-primary-text);
         transition:
             background-color var(--duration-fast) var(--motion-ease-ui),
             color var(--duration-fast) var(--motion-ease-ui),
@@ -87,8 +88,8 @@ import { PARTNERS, PARTNER_LOGO_WIDTH } from '@lib/shared/constants';
     }
 
     .backers__cta:hover {
-        background-color: var(--color-accent-deep);
-        color: var(--color-ink-inverse);
+        background-color: var(--color-btn-primary-bg-hover);
+        color: var(--color-btn-primary-text);
     }
 
     .backers__logo {

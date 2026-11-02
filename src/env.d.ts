@@ -313,6 +313,11 @@ interface StoreOptions<T> {
     topic: string;
 }
 
+interface TileColor {
+    bg: string;
+    text: string;
+}
+
 interface ToastDetail {
     message: string;
     tone: ToastTone;

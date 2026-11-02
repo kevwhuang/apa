@@ -82,8 +82,8 @@ function initHeroField(signal: AbortSignal, still: boolean): void {
     const holder = document.querySelector<HTMLElement>(FIELD_SELECTOR);
     const styles = getComputedStyle(document.documentElement);
 
-    const accentColor = readColorToken(styles, '--hero-field-accent');
-    const inkColor = readColorToken(styles, '--hero-field-ink');
+    const accentColor = readColorToken(styles, '--color-text-brand');
+    const inkColor = readColorToken(styles, '--color-text');
 
     if (!holder || !accentColor || !inkColor) return;
 

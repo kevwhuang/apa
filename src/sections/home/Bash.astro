@@ -15,7 +15,7 @@ const program = getProgram('bash');
 ---
 
 <section
-    class="stage stage--bash border-b-2 border-ink"
+    class="stage stage--bash border-b-2 border-border-strong"
     aria-labelledby="bash-title"
 >
     <div
@@ -33,7 +33,7 @@ const program = getProgram('bash');
         </div>
         <div class="relative">
             <SectionHead
-                class="font-extrabold font-sans leading-[0.9] text-display tracking-[-0.04em]"
+                class="text-3xl md:text-7xl lg:text-8xl"
                 eyebrow={`${program.shortName} / ${program.cadence}`}
                 headingId="bash-title"
                 tone="dark"
@@ -41,7 +41,7 @@ const program = getProgram('bash');
                 Next {program.name}.
             </SectionHead>
             <p
-                class="max-w-xl mb-10 leading-relaxed text-md text-ink-inverse-muted"
+                class="max-w-xl mb-10 leading-relaxed text-lg text-text-inverse-secondary"
                 data-motion="rise"
             >
                 {program.summary}
@@ -57,7 +57,7 @@ const program = getProgram('bash');
                     {program.shortName} details
                 </a>
                 <a
-                    class="action-text hover:text-accent inline-flex items-center gap-2 min-h-(--control-size) underline underline-offset-4 text-ink-inverse transition-colors"
+                    class="action-text hover:text-link-on-inverse inline-flex items-center gap-2 min-h-(--control-size) underline underline-offset-4 text-text-inverse transition-colors"
                     href="/partners"
                 >
                     Partner on it <IconArrow />
@@ -70,28 +70,28 @@ const program = getProgram('bash');
         data-motion-stagger="rise"
     >
         <div>
-            <dt class="label mb-2 text-ink-muted">Cadence</dt>
-            <dd class="capitalize font-extrabold font-sans text-3xl">{program.cadence}</dd>
+            <dt class="label mb-2 text-text-secondary">Cadence</dt>
+            <dd class="capitalize font-bold font-display text-3xl tracking-[-0.02em]">{program.cadence}</dd>
         </div>
         <div>
-            <dt class="label mb-2 text-ink-muted">Next</dt>
+            <dt class="label mb-2 text-text-secondary">Next</dt>
             <dd data-placeholder>
                 {next
                     ? (
                             <>
-                                <span class="block mb-1 font-extrabold font-sans text-xl">
+                                <span class="block mb-1 font-bold font-sans text-xl">
                                     <time datetime={next.data.date.toISOString()}>{formatDate(next.data.date)}</time>
                                 </span>
-                                <span class="block font-mono text-xs uppercase text-ink-muted">
+                                <span class="block font-mono text-xs uppercase text-text-secondary">
                                     {formatTimeRange(next.data.date, next.data.end)}
                                 </span>
                             </>
                         )
-                    : <span class="font-extrabold font-sans text-xl">To be announced</span>}
+                    : <span class="font-bold font-sans text-xl">To be announced</span>}
             </dd>
         </div>
         <div>
-            <dt class="label mb-2 text-ink-muted">Where</dt>
+            <dt class="label mb-2 text-text-secondary">Where</dt>
             <dd>
                 <address class="font-bold font-sans not-italic text-lg">
                     {next ? next.data.location : 'To be announced'}
@@ -99,7 +99,7 @@ const program = getProgram('bash');
             </dd>
         </div>
         <div>
-            <dt class="label mb-2 text-ink-muted">Prompt</dt>
+            <dt class="label mb-2 text-text-secondary">Prompt</dt>
             <dd class="font-bold font-sans text-lg">
                 {next ? next.data.prompt : 'To be announced'}
             </dd>

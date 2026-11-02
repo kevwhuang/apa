@@ -22,19 +22,19 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="resources-title"
 >
     <div>
         <PageHead
-            class="max-w-3xl mb-6 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="max-w-3xl mb-6 text-4xl md:text-7xl sm:text-5xl"
             eyebrow="Downloads & press kit"
             headingId="resources-title"
         >
             Resources.
         </PageHead>
         <p
-            class="max-w-2xl text-lmd text-ink-muted"
+            class="max-w-2xl text-lg text-text-secondary"
             data-motion="blur"
         >
             Everything the Alliance hands out in one place &mdash; press material, brand assets,
@@ -44,12 +44,12 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
 </section>
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="library-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-3xl tracking-tight"
+            class="text-3xl"
             eyebrow={`Library / ${assets.length} assets`}
             headingId="library-title"
         >
@@ -68,7 +68,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             role="group"
         >
             <button
-                class="chip is-active resources__chip active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse gap-(--space-3xs)"
+                class="chip is-active resources__chip active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse gap-(--space-3xs)"
                 aria-pressed="true"
                 data-kind=""
                 type="button"
@@ -77,7 +77,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             </button>
             {kinds.map(entry => (
                 <button
-                    class="chip resources__chip active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse gap-(--space-3xs)"
+                    class="chip resources__chip active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse gap-(--space-3xs)"
                     aria-pressed="false"
                     data-kind={entry.kind}
                     style={`--kind-color: ${KIND_COLORS[entry.kind]}`}
@@ -92,7 +92,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             ))}
         </div>
         <p
-            class="label mb-10 text-ink-subtle"
+            class="label mb-10 text-text-secondary"
             aria-live="polite"
             data-motion="stamp"
             data-resources-status
@@ -114,7 +114,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                 >
                     <article class="resources__card slab slab--card slab--hover">
                         <header class="flex flex-wrap items-start justify-between gap-2">
-                            <p class="label inline-flex items-center gap-(--space-3xs) px-(--space-2xs) py-(--space-3xs) border-2 border-(--kind-color) text-ink">
+                            <p class="label inline-flex items-center gap-(--space-3xs) px-(--space-2xs) py-(--space-3xs) border-2 border-(--kind-color) text-text">
                                 <span
                                     class="flex-none size-2 bg-(--kind-color)"
                                     aria-hidden="true"
@@ -122,26 +122,26 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                                 {ASSET_KIND_LABELS[asset.data.kind]}
                             </p>
                             {asset.data.available && (
-                                <p class="label px-2 py-1 bg-accent text-ink">
+                                <p class="label px-2 py-1 bg-bg-signal text-text-on-signal">
                                     Published
                                 </p>
                             )}
                         </header>
                         <div class="flex flex-col gap-3">
-                            <h3 class="font-extrabold font-sans text-xl tracking-tight">
+                            <h3 class="text-xl">
                                 {asset.data.title}
                             </h3>
-                            <p class="leading-relaxed text-sm text-ink-muted">
+                            <p class="leading-relaxed text-sm text-text-secondary">
                                 {asset.data.description}
                             </p>
                         </div>
-                        <dl class="flex flex-col gap-(--space-3xs) pt-(--space-xs) border-t border-ink-20">
+                        <dl class="flex flex-col gap-(--space-3xs) pt-(--space-xs) border-t border-border-subtle">
                             <div class="flex justify-between gap-(--space-xs)">
-                                <dt class="label text-ink-subtle">Format</dt>
+                                <dt class="label text-text-secondary">Format</dt>
                                 <dd class="font-mono text-xs">{asset.data.format}</dd>
                             </div>
                             <div class="flex justify-between gap-(--space-xs)">
-                                <dt class="label text-ink-subtle">Size</dt>
+                                <dt class="label text-text-secondary">Size</dt>
                                 <dd
                                     class="font-mono text-xs"
                                     data-placeholder
@@ -150,14 +150,14 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                                 </dd>
                             </div>
                             <div class="flex justify-between gap-(--space-xs)">
-                                <dt class="label text-ink-subtle">Updated</dt>
+                                <dt class="label text-text-secondary">Updated</dt>
                                 <dd class="font-mono text-xs">
                                     <time datetime={toIsoDate(asset.data.date)}>{formatDate(asset.data.date)}</time>
                                 </dd>
                             </div>
                             {asset.data.unlocksAt && (
                                 <div class="flex justify-between gap-(--space-xs)">
-                                    <dt class="label text-ink-subtle">Unlocks</dt>
+                                    <dt class="label text-text-secondary">Unlocks</dt>
                                     <dd class="font-mono text-xs">
                                         <time datetime={asset.data.unlocksAt.toISOString()}>{formatDate(asset.data.unlocksAt)} &middot; {formatTime(asset.data.unlocksAt)}</time>
                                     </dd>
@@ -197,7 +197,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                             </div>
                         )}
                         {asset.availability === 'pending' && (
-                            <p class="label resources__blocked flex items-center min-h-(--control-size) px-4 text-ink-subtle">
+                            <p class="label resources__blocked flex items-center min-h-(--control-size) px-4 text-text-secondary">
                                 Not published yet
                             </p>
                         )}
@@ -210,8 +210,8 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             data-resources-empty
             hidden
         >
-            <p class="font-extrabold font-sans text-xl tracking-tight">No matches.</p>
-            <p class="text-sm text-ink-muted">
+            <p class="font-bold font-sans text-xl tracking-tight">No matches.</p>
+            <p class="text-sm text-text-secondary">
                 Nothing in the library answers to &ldquo;<span class="font-mono wrap-anywhere" data-search-echo />&rdquo;.
             </p>
             <button
@@ -227,12 +227,12 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
 
 <style>
     .resources__blocked {
-        background-image: repeating-linear-gradient(135deg, var(--color-ink-10) 0 6px, transparent 6px 12px);
-        border: 2px dashed var(--color-ink-20);
+        background-image: repeating-linear-gradient(135deg, var(--color-bg-sunken) 0 6px, transparent 6px 12px);
+        border: 2px dashed var(--color-border-subtle);
     }
 
     .resources__card {
-        --slab-fill: var(--color-surface-raised);
+        --slab-fill: var(--color-bg-raised);
         border-top: 4px solid var(--kind-color);
     }
 
@@ -247,9 +247,9 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
     }
 
     .resources__countdown {
-        background-image: repeating-linear-gradient(135deg, var(--color-ink-10) 0 6px, transparent 6px 12px);
-        border: 2px dashed var(--color-accent-deep);
-        color: var(--color-accent-deep);
+        background-image: repeating-linear-gradient(135deg, var(--color-bg-sunken) 0 6px, transparent 6px 12px);
+        border: 2px dashed var(--color-link);
+        color: var(--color-link);
     }
 
     .resources__grid {
@@ -264,7 +264,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
     }
 
     .resources__swatch--chip {
-        outline: 1px solid var(--color-surface);
+        outline: 1px solid var(--color-bg-page);
     }
 
     @media (max-width: 1024px) {

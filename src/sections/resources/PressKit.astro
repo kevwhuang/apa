@@ -20,19 +20,19 @@ const press = downloads
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="brand-assets-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-3xl tracking-tight"
+            class="text-3xl"
             eyebrow="Press kit / Brand"
             headingId="brand-assets-title"
         >
             Brand assets
         </SectionHead>
         <p
-            class="max-w-2xl mb-10 text-smd text-ink-muted"
+            class="max-w-2xl mb-10 text-text-secondary"
             data-motion="rise"
         >
             The wordmark and lockup, in the formats a publication is likely to ask for.
@@ -48,17 +48,17 @@ const press = downloads
             <BrandMark
                 class="press-kit__mark"
                 height={BRAND_SIZES.markPreview}
-                label={`${BRAND.name} wordmark`}
+                label={`${BRAND.name} symbol`}
             />
         </div>
         <div
             class="overflow-x-auto"
             data-motion="unfold"
         >
-            <table class="press-kit__table border-2 border-ink">
+            <table class="press-kit__table border-2 border-border-strong">
                 <caption class="sr-only">Brand assets, their formats, and downloads</caption>
                 <thead>
-                    <tr class="border-b-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
+                    <tr class="border-b-2 border-border-strong font-bold font-mono text-xs tracking-wide uppercase text-text-secondary">
                         <th
                             class="px-4 py-3 text-left"
                             scope="col"
@@ -79,7 +79,7 @@ const press = downloads
                         </th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-ink">
+                <tbody class="divide-y divide-border-strong">
                     {BRAND_DOWNLOADS.map(download => (
                         <tr>
                             <td class="px-4 py-4 font-bold font-sans">{download.label}</td>
@@ -102,12 +102,12 @@ const press = downloads
 </section>
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="press-material-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-3xl tracking-tight"
+            class="text-3xl"
             eyebrow={`Press kit / ${press.length} entries`}
             headingId="press-material-title"
         >
@@ -117,10 +117,10 @@ const press = downloads
             class="overflow-x-auto mb-8"
             data-motion="unfold"
         >
-            <table class="press-kit__table border-2 border-ink">
+            <table class="press-kit__table border-2 border-border-strong">
                 <caption class="sr-only">Press material, its format, and whether it is published</caption>
                 <thead>
-                    <tr class="border-b-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
+                    <tr class="border-b-2 border-border-strong font-bold font-mono text-xs tracking-wide uppercase text-text-secondary">
                         <th
                             class="px-4 py-3 text-left"
                             scope="col"
@@ -159,7 +159,7 @@ const press = downloads
                         </th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-ink">
+                <tbody class="divide-y divide-border-strong">
                     {press.map(asset => (
                         <tr>
                             <th
@@ -168,7 +168,7 @@ const press = downloads
                             >
                                 {asset.data.title}
                             </th>
-                            <td class="px-4 py-4 font-mono text-xs text-ink-muted">
+                            <td class="px-4 py-4 font-mono text-xs text-text-secondary">
                                 <span
                                     class="inline-flex items-center gap-(--space-3xs)"
                                     style={`--kind-color: ${KIND_COLORS[asset.data.kind]}`}
@@ -182,12 +182,12 @@ const press = downloads
                             </td>
                             <td class="px-4 py-4 font-mono text-xs uppercase">{asset.data.format}</td>
                             <td
-                                class="px-4 py-4 font-mono text-xs text-ink-muted"
+                                class="px-4 py-4 font-mono text-xs text-text-secondary"
                                 data-placeholder
                             >
                                 {asset.data.size}
                             </td>
-                            <td class="px-4 py-4 font-mono text-xs text-ink-muted">
+                            <td class="px-4 py-4 font-mono text-xs text-text-secondary">
                                 <time datetime={toIsoDate(asset.data.date)}>{formatDate(asset.data.date)}</time>
                             </td>
                             <td class="px-4 py-4 text-right">
@@ -201,7 +201,7 @@ const press = downloads
                                 )}
                                 {asset.availability === 'scheduled' && (
                                     <span
-                                        class="label text-accent-deep"
+                                        class="label text-link"
                                         data-unlock
                                         data-unlocks-at={asset.data.unlocksAt?.toISOString()}
                                     >
@@ -210,7 +210,7 @@ const press = downloads
                                     </span>
                                 )}
                                 {asset.availability === 'pending' && (
-                                    <span class="label text-ink-subtle">In preparation</span>
+                                    <span class="label text-text-secondary">In preparation</span>
                                 )}
                             </td>
                         </tr>
@@ -219,12 +219,12 @@ const press = downloads
             </table>
         </div>
         <p
-            class="text-smd text-ink-muted"
+            class="text-text-secondary"
             data-motion="blur"
         >
             Each entry also has a card in the&#32;
             <a
-                class="active:translate-y-px hover:text-accent-deep inline-block py-(--space-3xs) underline underline-offset-4 transition-[color,transform]"
+                class="active:translate-y-px hover:text-link inline-block py-(--space-3xs) underline underline-offset-4 transition-[color,transform]"
                 href="#library-title"
             >
                 asset library
@@ -244,13 +244,13 @@ const press = downloads
     >
         <div>
             <SectionHead
-                class="font-extrabold font-sans leading-[1.05] text-3xl tracking-[-0.035em] md:text-5xl"
+                class="text-3xl md:text-5xl"
                 eyebrow="Requests"
                 headingId="resources-ask-title"
             >
                 Ask us.
             </SectionHead>
-            <p class="max-w-md text-ink-muted">
+            <p class="max-w-md text-text-secondary">
                 Plenty of what is listed here is still being prepared &mdash; ask and we will
                 send what exists. For interviews and embargoed material, write to the press desk.
             </p>
@@ -274,11 +274,11 @@ const press = downloads
 
 <style>
     .press-kit__lockup {
-        color: var(--color-ink);
+        color: var(--color-text);
     }
 
     .press-kit__mark {
-        color: var(--color-accent);
+        color: var(--color-logo);
     }
 
     .press-kit__table {

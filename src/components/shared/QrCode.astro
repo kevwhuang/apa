@@ -152,22 +152,13 @@ function toRuns(grid: boolean[][]): ModuleRun[] {
 <style>
     .qr__code {
         aspect-ratio: 1;
+        color: var(--color-qr-code);
         display: block;
         max-width: 100%;
         width: clamp(240px, calc(213.333px + 8.3333vw), 320px);
     }
 
     .qr__quiet {
-        fill: var(--color-surface-raised);
-    }
-
-    @media (forced-colors: active) {
-        .qr__code {
-            forced-color-adjust: none;
-        }
-
-        .qr__quiet {
-            fill: Canvas;
-        }
+        fill: var(--color-qr-bg);
     }
 </style>

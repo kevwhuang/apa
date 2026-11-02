@@ -6,7 +6,7 @@ const program = getProgram('bash');
 ---
 
 <section
-    class="slab--well stage stage--tight overflow-clip border-b-2 border-ink"
+    class="slab--well stage stage--tight overflow-clip border-b-2 border-border-strong"
     aria-labelledby="bash-title"
 >
     <div
@@ -16,17 +16,17 @@ const program = getProgram('bash');
     />
     <div class="flex flex-col relative gap-6">
         <PageHead
-            class="font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-8xl"
+            class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl"
             eyebrow={`${program.shortName} / ${program.cadence}`}
             headingId="bash-title"
             tone="dark"
         >
             One prompt.<br />
-            <span class="text-accent">One afternoon.</span><br />
-            One showdown.
+            <span class="text-text-brand">One afternoon.</span><br />
+            One <span class="whitespace-nowrap">showdown.</span>
         </PageHead>
         <p
-            class="max-w-2xl leading-relaxed text-lmd text-ink-inverse-muted"
+            class="max-w-2xl leading-relaxed text-lg text-text-inverse-secondary"
             data-motion="blur"
         >
             {program.summary}

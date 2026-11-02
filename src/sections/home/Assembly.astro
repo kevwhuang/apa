@@ -15,18 +15,18 @@ const program = getProgram('assembly');
 ---
 
 <section
-    class="stage stage--assembly border-b-2 border-ink"
+    class="stage stage--assembly border-b-2 border-border-strong"
     aria-labelledby="landing-assembly-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans leading-[0.9] text-6xl tracking-[-0.04em] md:text-7xl"
+            class="text-4xl sm:text-5xl md:text-7xl"
             eyebrow={`${program.shortName} / ${program.cadence}`}
             headingId="landing-assembly-title"
         >
             Next {program.name}.
             <a
-                class="action-text hover:text-accent-deep hidden items-center gap-2 min-h-(--control-size) whitespace-nowrap transition-colors md:inline-flex"
+                class="action-text hover:text-link hidden items-center gap-2 min-h-(--control-size) whitespace-nowrap transition-colors md:inline-flex"
                 href="/events"
                 slot="cta"
             >
@@ -34,7 +34,7 @@ const program = getProgram('assembly');
             </a>
         </SectionHead>
         <p
-            class="max-w-2xl leading-relaxed text-md text-ink-muted"
+            class="max-w-2xl leading-relaxed text-lg text-text-secondary"
             data-motion="blur"
         >
             {program.summary}
@@ -49,7 +49,7 @@ const program = getProgram('assembly');
                         data-placeholder
                     >
                         <span
-                            class="assembly-sheet__tag label px-2 py-1 bg-accent text-ink"
+                            class="assembly-sheet__tag label px-2 py-1 bg-bg-signal text-text-on-signal"
                             data-motion="stamp"
                         >
                             Next {program.shortName}
@@ -61,7 +61,7 @@ const program = getProgram('assembly');
                             <span class="assembly-sheet__day">{formatCalendarDay(next.data.date)}</span>
                             <span class="assembly-sheet__month">{formatCalendarMonth(next.data.date)}</span>
                         </time>
-                        <span class="font-mono text-2xs tracking-[0.08em] uppercase text-ink-inverse-muted">{formatWeekday(next.data.date)}</span>
+                        <span class="font-mono text-xs tracking-[0.08em] uppercase text-event-assembly-text">{formatWeekday(next.data.date)}</span>
                         <span
                             class="halftone--accent absolute bottom-0 inset-x-0 h-[calc(var(--drift-unit)*2)]"
                             aria-hidden="true"
@@ -71,17 +71,17 @@ const program = getProgram('assembly');
                         class="assembly-sheet__body"
                         data-motion="rise"
                     >
-                        <h3 class="mb-4 font-extrabold font-sans text-3xl tracking-tight md:text-4xl">{next.data.title}</h3>
+                        <h3 class="mb-4 font-display text-3xl">{next.data.title}</h3>
                         <p
-                            class="mb-1 font-mono text-xs uppercase text-ink-muted"
+                            class="mb-1 font-mono text-xs uppercase text-text-secondary"
                             data-placeholder
                         >
                             {formatTimeRange(next.data.date, next.data.end)}
                         </p>
-                        <address class="mb-5 font-mono not-italic text-xs uppercase text-ink-muted">
+                        <address class="mb-5 font-mono not-italic text-xs uppercase text-text-secondary">
                             {next.data.location}
                         </address>
-                        <p class="max-w-2xl mb-8 leading-relaxed text-md text-ink-muted">{next.data.excerpt}</p>
+                        <p class="max-w-2xl mb-8 leading-relaxed text-lg text-text-secondary">{next.data.excerpt}</p>
                         <div class="flex flex-wrap gap-3">
                             <a
                                 class="btn btn--primary"
@@ -104,7 +104,7 @@ const program = getProgram('assembly');
                     class="max-w-(--measure-form)"
                     data-motion="rise"
                 >
-                    <p class="mb-8 text-ink-muted">
+                    <p class="mb-8 text-text-secondary">
                         No {program.name} on the calendar right now &mdash; the next date goes up as soon as the room is booked.
                     </p>
                     <div class="flex flex-wrap gap-3">
@@ -136,20 +136,20 @@ const program = getProgram('assembly');
 
     .assembly-sheet__body {
         padding-block: calc(var(--space-2xl) * 1.75);
-        padding-inline: calc(var(--space-2xl) * 1.5);
+        padding-inline: var(--space-2xl);
     }
 
     .assembly-sheet__day {
-        font-family: var(--font-sans);
-        font-size: clamp(80px, calc(46.667px + 10.4167vw), 180px);
-        font-weight: 800;
-        letter-spacing: -0.05em;
+        font-family: var(--font-display);
+        font-size: var(--text-10xl);
+        font-weight: 700;
+        letter-spacing: -0.02em;
         line-height: 0.78;
     }
 
     .assembly-sheet__month {
         font-family: var(--font-mono);
-        font-size: var(--text-md);
+        font-size: var(--text-lg);
         letter-spacing: 0.1em;
         text-transform: uppercase;
         white-space: nowrap;
@@ -157,8 +157,8 @@ const program = getProgram('assembly');
 
     .assembly-sheet__plate {
         align-content: center;
-        background: var(--color-surface-inverse);
-        color: var(--color-ink-inverse);
+        background: var(--color-event-assembly);
+        color: var(--color-event-assembly-text);
         display: grid;
         gap: var(--space-xs);
         justify-items: start;
@@ -191,6 +191,7 @@ const program = getProgram('assembly');
         }
 
         .assembly-sheet__day {
+            font-size: var(--text-9xl);
             grid-row: span 2;
         }
 

@@ -9,7 +9,7 @@ const images = await toImageSources();
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="order-title"
     data-images={JSON.stringify(images)}
 >
@@ -23,14 +23,14 @@ const images = await toImageSources();
             <IconCheck />
         </div>
         <PageHead
-            class="mb-6 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="mb-6 text-5xl md:text-7xl"
             eyebrow="Store / Orders"
             headingId="order-title"
         >
             <span data-order-heading>Your orders.</span>
         </PageHead>
         <p
-            class="label text-ink-muted"
+            class="label text-text-secondary"
             data-motion="stamp"
             data-order-number
             data-placeholder
@@ -42,7 +42,7 @@ const images = await toImageSources();
         data-order-detail
     >
         <ul
-            class="order__list scroll-slot border-2 border-ink list-none"
+            class="order__list scroll-slot border-2 border-border-strong list-none"
             data-order-list
         />
         <dl class="slab slab--sunk flex flex-col gap-2 font-mono text-sm">
@@ -99,7 +99,7 @@ const images = await toImageSources();
                     $0.00
                 </dd>
             </div>
-            <div class="flex justify-between gap-3 pt-2 border-t-2 border-ink font-extrabold font-sans text-lg">
+            <div class="flex justify-between gap-3 pt-2 border-t-2 border-border-strong font-bold font-sans text-lg">
                 <dt>Total</dt>
                 <dd
                     class="min-w-0 wrap-break-word"
@@ -125,8 +125,8 @@ const images = await toImageSources();
         </div>
     </div>
     <template data-order-row>
-        <li class="first:border-t-0 flex items-center gap-4 p-4 border-t-2 border-ink">
-            <span class="block shrink-0 h-14 w-14 border-2 border-ink bg-ink">
+        <li class="first:border-t-0 flex items-center gap-4 p-4 border-t-2 border-border-strong">
+            <span class="block shrink-0 h-14 w-14 border-2 border-border-strong bg-bg-inverse">
                 <img
                     class="block object-cover h-full w-full"
                     alt=""
@@ -141,7 +141,7 @@ const images = await toImageSources();
                     data-row-title
                 />
                 <p
-                    class="label text-ink-muted"
+                    class="label text-text-secondary"
                     data-row-variant
                 />
             </div>
@@ -159,7 +159,7 @@ const images = await toImageSources();
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-3xl tracking-tight"
+            class="text-3xl"
             eyebrow="Store / Ledger"
             headingId="order-ledger-title"
         >
@@ -167,20 +167,20 @@ const images = await toImageSources();
         </SectionHead>
         <div data-motion="unfold">
             <p
-                class="slab slab--card max-w-(--measure-form) w-full mx-auto leading-relaxed text-ink-muted"
+                class="slab slab--card max-w-(--measure-form) w-full mx-auto leading-relaxed text-text-secondary"
                 data-order-empty
             >
                 No orders yet &mdash; receipts from the store land here.
             </p>
             <div
-                class="order__scroller scroll-slot overflow-x-auto border-2 border-ink"
+                class="order__scroller scroll-slot overflow-x-auto border-2 border-border-strong"
                 data-order-ledger
                 hidden
             >
                 <table class="order__table">
                     <caption class="sr-only">Orders with date, items, and total &mdash; pick a row to load its receipt</caption>
                     <thead>
-                        <tr class="font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
+                        <tr class="font-bold font-mono text-xs tracking-wide uppercase text-text-secondary">
                             <th
                                 class="order__cell text-left"
                                 scope="col"
@@ -208,7 +208,7 @@ const images = await toImageSources();
                         </tr>
                     </thead>
                     <tbody
-                        class="divide-y divide-ink"
+                        class="divide-y divide-border-strong"
                         data-order-ledger-body
                     />
                 </table>
@@ -229,9 +229,9 @@ const images = await toImageSources();
                     data-cell="id"
                     type="button"
                 />
-                <time class="order__stamp font-mono text-2xs text-ink-muted" />
+                <time class="order__stamp font-mono text-xs text-text-secondary" />
             </th>
-            <td class="order__cell order__date font-mono text-xs whitespace-nowrap text-ink-muted">
+            <td class="order__cell order__date font-mono text-xs whitespace-nowrap text-text-secondary">
                 <time data-cell="date" />
             </td>
             <td
@@ -274,11 +274,11 @@ const images = await toImageSources();
     }
 
     .order__pick:hover {
-        color: var(--color-accent-deep);
+        color: var(--color-link);
     }
 
     .order__pick[aria-current] {
-        color: var(--color-accent-deep);
+        color: var(--color-link);
         font-weight: 700;
     }
 
@@ -294,11 +294,11 @@ const images = await toImageSources();
     }
 
     .order__row:has([aria-current]) {
-        background-color: var(--color-accent-20);
+        background-color: var(--color-bg-selected);
     }
 
     .order__row:hover {
-        background-color: var(--color-surface-sunken);
+        background-color: var(--color-bg-hover);
     }
 
     .order__scroller {
@@ -316,8 +316,8 @@ const images = await toImageSources();
     }
 
     .order__table thead th {
-        background-color: var(--color-surface);
-        box-shadow: inset 0 -2px 0 var(--color-ink);
+        background-color: var(--color-bg-page);
+        box-shadow: inset 0 -2px 0 var(--color-border-strong);
         position: sticky;
         top: 0;
         z-index: var(--z-page);

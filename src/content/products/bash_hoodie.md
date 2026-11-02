@@ -6,7 +6,7 @@ category: apparel
 priceCents: 7800
 sizes: [S, M, L, XL]
 variations:
-  - { name: Charcoal, hex: '#2a2a2a' }
+  - { name: Charcoal, hex: '#292421' }
 description: Heavy fleece pullover, cut for the walk out of the room after an afternoon on the clock.
 details:
   - Heavyweight brushed fleece

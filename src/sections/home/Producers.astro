@@ -21,7 +21,7 @@ const track = featured?.data.tracks[0];
 
 {featured && (
     <section
-        class="slab--well stage overflow-clip border-b-2 border-ink"
+        class="slab--well stage overflow-clip border-b-2 border-border-strong"
         aria-labelledby="featured-producer-title"
     >
         <div
@@ -31,7 +31,7 @@ const track = featured?.data.tracks[0];
         />
         <div class="relative">
             <SectionHead
-                class="font-extrabold font-sans leading-[0.9] text-display tracking-[-0.04em]"
+                class="text-3xl md:text-7xl lg:text-8xl"
                 eyebrow="Spotlight producer"
                 headingId="featured-producer-title"
                 tone="dark"
@@ -46,25 +46,26 @@ const track = featured?.data.tracks[0];
                     >
                         <PlaceholderTile
                             class="slab slab--bare slab--card aspect-square"
-                            color={PALETTE[0]}
+                            color={PALETTE[0].bg}
                             label={getInitials(featured.data.name)}
-                            labelClass="leading-none text-[clamp(64px,calc(45.333px_+_5.8333vw),120px)] text-surface-raised/80 [text-shadow:3px_3px_0_var(--color-ink-20)]"
+                            labelClass="leading-none text-8xl [text-shadow:3px_3px_0_var(--color-shadow-md)]"
+                            labelColor={PALETTE[0].text}
                         />
                     </div>
                     <p
-                        class:list={['label text-ink-inverse-muted', featured.data.links.length > 0 && 'mb-4']}
+                        class:list={['label text-text-inverse-secondary', featured.data.links.length > 0 && 'mb-4']}
                         data-placeholder
                     >
                         On the roster since <time datetime={toIsoDate(featured.data.joined)}>{formatCalendarMonth(featured.data.joined)}</time>
                     </p>
                     <ProducerLinks
-                        linkClass="hover:text-accent"
+                        linkClass="hover:text-link-on-inverse"
                         links={featured.data.links}
                     />
                 </div>
                 <div data-motion-stagger="rise">
                     <p
-                        class="mb-6 font-mono text-xs uppercase text-ink-inverse-muted"
+                        class="mb-6 font-mono text-xs uppercase text-text-inverse-secondary"
                         data-placeholder
                     >
                         {featured.data.roles.length > 0
@@ -72,19 +73,19 @@ const track = featured?.data.tracks[0];
                             : featured.data.location}
                     </p>
                     <p
-                        class="max-w-xl mb-6 leading-relaxed text-md text-ink-inverse-muted"
+                        class="max-w-xl mb-6 leading-relaxed text-lg text-text-inverse-secondary"
                         data-placeholder
                     >
                         {featured.data.bio}
                     </p>
                     <ul class:list={['flex flex-wrap gap-2 list-none', track && 'mb-8']}>
                         {featured.data.genres.map(genre => (
-                            <li class="inline-flex items-center h-6 px-2 border-2 border-ink-inverse font-bold font-mono text-2xs tracking-wide uppercase">{genre}</li>
+                            <li class="inline-flex items-center h-6 px-2 border-2 border-current font-bold font-mono text-xs tracking-wide uppercase">{genre}</li>
                         ))}
                     </ul>
                     {track && (
-                        <div class="producer-feature__track slab slab--bare slab--card text-ink">
-                            <p class="label pb-2 pt-3 px-3 text-accent-deep">Spotlight</p>
+                        <div class="producer-feature__track slab slab--bare slab--card text-text">
+                            <p class="label pb-2 pt-3 px-3 text-link">Spotlight</p>
                             <ProducerTrack
                                 producerId={featured.id}
                                 track={track}
@@ -98,18 +99,18 @@ const track = featured?.data.tracks[0];
 )}
 
 <section
-    class="slab--sunk stage border-b-2 border-ink"
+    class="slab--sunk stage border-b-2 border-border-strong"
     aria-labelledby="producers-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-5xl tracking-tight"
+            class="text-5xl text-balance"
             eyebrow="Producers / Roster"
             headingId="producers-title"
         >
             Every genre. One scene.
             <a
-                class="action-text hover:text-accent-deep hidden items-center gap-2 min-h-(--control-size) transition-colors md:inline-flex"
+                class="action-text hover:text-link hidden items-center gap-2 min-h-(--control-size) whitespace-nowrap transition-colors md:inline-flex"
                 href="/directory"
                 slot="cta"
             >
@@ -129,18 +130,19 @@ const track = featured?.data.tracks[0];
                         href={`/directory#${producer.id}`}
                     >
                         <PlaceholderTile
-                            class="aspect-square border-b-2 border-ink"
-                            color={PALETTE[(index + 1) % PALETTE.length]}
+                            class="aspect-square border-b-2 border-border-strong"
+                            color={PALETTE[(index + 1) % PALETTE.length].bg}
                             label={getInitials(producer.data.name)}
-                            labelClass="leading-none text-[56px] text-surface-raised/80 [text-shadow:2px_2px_0_var(--color-ink-20)] md:text-[64px]"
+                            labelClass="leading-none text-5xl [text-shadow:2px_2px_0_var(--color-shadow-md)]"
+                            labelColor={PALETTE[(index + 1) % PALETTE.length].text}
                         />
                         <h3
-                            class="mb-1 pt-4 px-4 font-extrabold font-sans text-lg tracking-tight"
+                            class="mb-1 pt-4 px-4 text-lg"
                             data-placeholder
                         >
                             {producer.data.name}
                         </h3>
-                        <p class="label pb-4 px-4 text-ink-muted">{producer.data.genres.slice(0, 2).join(' / ')}</p>
+                        <p class="label pb-4 px-4 text-text-secondary">{producer.data.genres.slice(0, 2).join(' / ')}</p>
                     </a>
                 </li>
             ))}

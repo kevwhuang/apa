@@ -11,19 +11,19 @@ const images = await toImageSources();
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="cart-title"
 >
     <div>
         <PageHead
-            class="mb-6 font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="mb-6 text-5xl md:text-7xl"
             eyebrow="Your cart"
             headingId="cart-title"
         >
             Cart
         </PageHead>
         <p
-            class="max-w-2xl text-lmd text-ink-muted"
+            class="max-w-2xl text-lg text-text-secondary"
             data-motion="rise"
         >
             Every line updates as you change it. Head to checkout when it reads right.
@@ -46,7 +46,7 @@ const images = await toImageSources();
                 hidden
                 role="status"
             >
-                <p class="label text-accent-deep">Your cart changed</p>
+                <p class="label text-warning-text">Your cart changed</p>
                 <ul
                     class="flex flex-col gap-(--space-3xs) list-none"
                     data-cart-issues
@@ -65,8 +65,8 @@ const images = await toImageSources();
                 data-motion="rise"
                 tabindex="-1"
             >
-                <p class="label text-ink-muted">Empty</p>
-                <p class="font-extrabold font-sans text-2xl">Nothing in the cart yet.</p>
+                <p class="label text-text-secondary">Empty</p>
+                <p class="font-bold font-sans text-2xl text-balance">Nothing in the cart yet.</p>
                 <a
                     class="btn btn--primary"
                     href="/store"
@@ -90,7 +90,7 @@ const images = await toImageSources();
             data-cart-summary
             data-motion="wipe"
         >
-            <h2 class="label mb-4 text-ink-muted">Summary</h2>
+            <h2 class="label mb-4 text-text-secondary">Summary</h2>
             <dl class="flex flex-col gap-2 mb-4 font-mono text-sm">
                 <div class="flex justify-between gap-3">
                     <dt>Subtotal</dt>
@@ -104,7 +104,7 @@ const images = await toImageSources();
                     <dt>Estimated tax</dt>
                     <dd data-tax>$0.00</dd>
                 </div>
-                <div class="flex justify-between gap-3 pt-3 border-t-2 border-ink font-extrabold font-sans text-lg">
+                <div class="flex justify-between gap-3 pt-3 border-t-2 border-border-strong font-bold font-sans text-lg">
                     <dt>Total</dt>
                     <dd
                         aria-live="polite"
@@ -134,7 +134,7 @@ const images = await toImageSources();
                     aria-hidden="true"
                 />
                 <span
-                    class="font-extrabold font-sans text-[length:14cqi] uppercase text-surface-raised/80 select-none"
+                    class="font-bold font-display text-[length:10cqi] uppercase select-none"
                     aria-hidden="true"
                     data-row-initial
                 />
@@ -149,9 +149,9 @@ const images = await toImageSources();
             <div class="cart-items__body flex flex-col">
                 <div class="flex flex-col gap-1 mb-3">
                     <div class="cart-items__heading flex items-start gap-3">
-                        <p class="min-w-0 font-extrabold font-sans">
+                        <p class="min-w-0 font-bold font-sans">
                             <a
-                                class="hover:text-accent-deep hover:underline underline-offset-4 transition-colors"
+                                class="hover:text-link hover:underline underline-offset-4 transition-colors"
                                 data-row-title
                                 href="/store"
                             >
@@ -159,19 +159,19 @@ const images = await toImageSources();
                             </a>
                         </p>
                         <p
-                            class="shrink-0 ml-auto font-mono text-2xs text-ink-subtle"
+                            class="shrink-0 ml-auto font-mono text-xs text-text-secondary"
                             data-row-sku
                         />
                     </div>
                     <p
-                        class="label text-ink-muted"
+                        class="label text-text-secondary"
                         data-row-variant
                     />
                 </div>
                 <div class="flex flex-wrap items-center gap-x-(--space-md) gap-y-(--space-2xs)">
-                    <div class="inline-flex items-center border-2 border-ink">
+                    <div class="inline-flex items-center border-2 border-border-strong">
                         <button
-                            class="active:bg-ink active:text-ink-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-ink aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-(--control-size) w-(--control-size) font-bold transition-colors"
+                            class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-bg-raised-hover h-(--control-size) w-(--control-size) font-bold transition-colors"
                             data-row-decrease
                             type="button"
                         >
@@ -182,7 +182,7 @@ const images = await toImageSources();
                             data-row-quantity
                         />
                         <button
-                            class="active:bg-ink active:text-ink-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-ink aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-surface-sunken h-(--control-size) w-(--control-size) font-bold transition-colors"
+                            class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-bg-raised-hover h-(--control-size) w-(--control-size) font-bold transition-colors"
                             data-row-increase
                             type="button"
                         >
@@ -190,7 +190,7 @@ const images = await toImageSources();
                         </button>
                     </div>
                     <button
-                        class="cart-items__remove active:translate-y-px hover:text-accent-deep inline-flex items-center justify-center shrink-0 h-(--control-size) w-(--control-size) text-ink-muted transition-[color,transform]"
+                        class="cart-items__remove active:translate-y-px hover:text-link inline-flex items-center justify-center shrink-0 h-(--control-size) w-(--control-size) text-text-secondary transition-[color,transform]"
                         data-row-remove
                         type="button"
                     >
@@ -205,9 +205,9 @@ const images = await toImageSources();
         </li>
     </template>
     <template data-cart-issue>
-        <li class="flex gap-2 text-sm text-ink-muted">
+        <li class="flex gap-2 text-sm text-text-secondary">
             <span
-                class="font-bold text-accent-deep"
+                class="font-bold text-warning-text"
                 aria-hidden="true"
             >
                 &middot;
@@ -231,8 +231,8 @@ const images = await toImageSources();
 
     .cart-checkout[aria-disabled='true'] {
         background: transparent;
-        border-color: var(--color-ink-20);
-        color: var(--color-ink-subtle);
+        border-color: var(--color-border);
+        color: var(--color-text-secondary);
         cursor: not-allowed;
         opacity: 1;
     }
@@ -243,8 +243,8 @@ const images = await toImageSources();
 
     .cart-checkout[aria-disabled='true']:hover {
         background: transparent;
-        border-color: var(--color-ink-20);
-        color: var(--color-ink-subtle);
+        border-color: var(--color-border);
+        color: var(--color-text-secondary);
     }
 
     .cart-items__body {
@@ -266,6 +266,7 @@ const images = await toImageSources();
         --row-tile: clamp(72px, calc(42.667px + 9.1667vw), 160px);
         display: grid;
         grid-template-columns: var(--row-square, var(--row-tile)) minmax(0, 1fr);
+        transition-property: none;
     }
 
     .cart__grid:has([data-cart-summary][hidden]) > .cart__main {
@@ -273,7 +274,7 @@ const images = await toImageSources();
     }
 
     .cart__notice {
-        border-left: 2px solid var(--color-accent-deep);
+        border-left: 2px solid var(--color-warning-border);
     }
 
     .cart__summary {
@@ -460,7 +461,12 @@ const images = await toImageSources();
         setTitleLink(fragment.querySelector('[data-row-title]'), catalog, item, item.title);
         setText(fragment.querySelector('[data-row-variant]'), formatVariant(item));
 
-        if (tile) tile.style.background = CARD_COLORS[index % CARD_COLORS.length];
+        if (tile) {
+            const color = CARD_COLORS[index % CARD_COLORS.length];
+
+            tile.style.background = color.bg;
+            tile.style.color = color.text;
+        }
 
         if (decrease) {
             decrease.setAttribute('aria-disabled', String(item.quantity <= 1));

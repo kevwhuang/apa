@@ -5,7 +5,7 @@ const DEFAULT_THEME: Theme = 'light';
 const META_SELECTOR = 'meta[name="theme-color"]';
 
 const THEME_COLORS: Record<Theme, string> = {
-    dark: '#141019',
+    dark: '#171310',
     light: '#f6f1e4',
 };
 

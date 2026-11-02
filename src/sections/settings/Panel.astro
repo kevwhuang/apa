@@ -36,6 +36,8 @@ const DEMO_PROFILE = {
     track: { name: 'Untitled Sketch 09.mp3' },
 };
 
+const DEMO_TILE = pickTileColor(DEMO_PROFILE.artistName);
+
 const LINK_FIELDS = [
     { label: 'Instagram', name: 'instagram', placeholder: 'https://instagram.com/\u2026', value: DEMO_PROFILE.links.instagram },
     { label: 'Spotify', name: 'spotify', placeholder: 'https://open.spotify.com/artist/\u2026', value: DEMO_PROFILE.links.spotify },
@@ -63,19 +65,19 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="settings-title"
 >
     <div class="flex flex-col gap-6">
         <PageHead
-            class="max-w-3xl font-extrabold font-sans leading-[0.9] text-5xl tracking-[-0.04em] md:text-7xl"
+            class="max-w-4xl text-5xl md:text-7xl"
             eyebrow="Account / Settings"
             headingId="settings-title"
         >
             Your settings.
         </PageHead>
         <p
-            class="max-w-2xl text-lmd text-ink-muted"
+            class="max-w-2xl text-lg text-text-secondary"
             data-motion="rise"
         >
             Everything your roster card carries: the name people read, the portrait behind it, a
@@ -95,14 +97,15 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
     >
         <div class="flex flex-col gap-5">
             <div class="settings__overview slab slab--bare slab--card grid gap-px">
-                <div class="p-(--space-md) bg-surface-raised">
-                    <p class="label mb-4 text-ink-muted">Your card</p>
+                <div class="p-(--space-md) bg-bg-raised">
+                    <p class="label mb-4 text-text-secondary">Your card</p>
                     <div class="flex flex-wrap gap-5">
                         <PlaceholderTile
-                            class="settings__tile self-start shrink-0 aspect-square w-[104px] border-2 border-ink"
-                            color={pickTileColor(DEMO_PROFILE.artistName)}
+                            class="settings__tile self-start shrink-0 aspect-square w-[104px] border-2 border-border-strong"
+                            color={DEMO_TILE.bg}
                             label={getInitials(DEMO_PROFILE.artistName)}
-                            labelClass="settings__initials leading-none text-[38cqw] text-surface-raised/80 [text-shadow:2px_2px_0_var(--color-ink-20)]"
+                            labelClass="settings__initials leading-none text-[32cqw] [text-shadow:2px_2px_0_var(--color-shadow-md)]"
+                            labelColor={DEMO_TILE.text}
                         >
                             <img
                                 class="absolute inset-0 object-cover h-full w-full"
@@ -113,7 +116,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                         </PlaceholderTile>
                         <div class="flex-[1_1_200px]">
                             <p
-                                class="mb-2 font-extrabold font-sans text-xl tracking-tight wrap-break-word"
+                                class="mb-2 font-bold font-sans text-xl tracking-tight wrap-break-word"
                                 data-settings-name
                             >
                                 {DEMO_PROFILE.artistName}
@@ -126,12 +129,12 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                                     {DEMO_PROFILE.role}
                                 </span>
                             </p>
-                            <p class="mb-3 font-mono text-2xs uppercase text-ink-muted">
+                            <p class="mb-3 font-mono text-xs uppercase text-text-secondary">
                                 <span data-settings-role>{DEMO_PROFILE.role}</span> &mdash; {DEMO_PROFILE.city}, {DEMO_PROFILE.state}
                             </p>
                             <ul class="flex flex-wrap gap-2 list-none">
                                 {DEMO_PROFILE.genres.map(genre => (
-                                    <li class="inline-flex items-center h-6 px-2 border-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase">{genre}</li>
+                                    <li class="inline-flex items-center h-6 px-2 border-2 border-border-strong font-bold font-mono text-xs tracking-wide uppercase">{genre}</li>
                                 ))}
                             </ul>
                         </div>
@@ -141,21 +144,21 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                     class="settings__stats grid gap-px"
                     aria-label="Account standing"
                 >
-                    <div class="p-(--space-md) bg-surface-raised">
-                        <dt class="label mb-2 text-ink-muted">Prods balance</dt>
+                    <div class="p-(--space-md) bg-bg-raised">
+                        <dt class="label mb-2 text-text-secondary">Prods balance</dt>
                         <dd
-                            class="font-extrabold font-sans leading-[0.9] text-4xl tracking-tight"
+                            class="font-bold font-display text-3xl tracking-[-0.02em]"
                             data-settings-prods
                         >
                             {formatProds(DEMO_PROFILE.prods)}
                         </dd>
                     </div>
-                    <div class="p-(--space-md) bg-surface-raised">
-                        <dt class="label mb-2 text-ink-muted">Events attended</dt>
-                        <dd class="font-extrabold font-sans text-3xl tracking-tight">{ATTENDANCE.length}</dd>
+                    <div class="p-(--space-md) bg-bg-raised">
+                        <dt class="label mb-2 text-text-secondary">Events attended</dt>
+                        <dd class="font-bold font-display text-3xl tracking-[-0.02em]">{ATTENDANCE.length}</dd>
                     </div>
-                    <div class="p-(--space-md) bg-surface-raised">
-                        <dt class="label mb-2 text-ink-muted">Standing</dt>
+                    <div class="p-(--space-md) bg-bg-raised">
+                        <dt class="label mb-2 text-text-secondary">Standing</dt>
                         <dd
                             class="label"
                             data-settings-standing
@@ -163,8 +166,8 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                             {getStanding(DEMO_PROFILE.prods)}
                         </dd>
                     </div>
-                    <div class="p-(--space-md) bg-surface-raised">
-                        <dt class="label mb-2 text-ink-muted">Member since</dt>
+                    <div class="p-(--space-md) bg-bg-raised">
+                        <dt class="label mb-2 text-text-secondary">Member since</dt>
                         <dd
                             class="font-mono text-sm"
                             data-settings-since
@@ -172,8 +175,8 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                             {formatDateStamp(DEMO_PROFILE.joined)}
                         </dd>
                     </div>
-                    <div class="col-span-full p-(--space-md) bg-surface-raised">
-                        <dt class="label mb-2 text-ink-muted">Email</dt>
+                    <div class="col-span-full p-(--space-md) bg-bg-raised">
+                        <dt class="label mb-2 text-text-secondary">Email</dt>
                         <dd
                             class="font-mono text-sm wrap-break-word"
                             data-settings-email
@@ -184,7 +187,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                 </dl>
             </div>
             <a
-                class="action-text hover:text-accent-deep inline-flex items-center self-start min-h-(--control-size) gap-(--space-2xs) px-(--space-3xs) underline transition-colors"
+                class="action-text hover:text-link inline-flex items-center self-start min-h-(--control-size) gap-(--space-2xs) px-(--space-3xs) underline transition-colors"
                 data-settings-onboarding
                 hidden
                 href="/onboarding"
@@ -196,11 +199,11 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
             class="settings__form slab slab--card"
             data-settings-form
         >
-            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
+            <h2 class="text-2xl">
                 Profile
             </h2>
             <div class="flex flex-col gap-2">
-                <p class="label mb-1 text-ink-muted">{PROFILE_FIELDS.portrait.label}</p>
+                <p class="label mb-1 text-text-secondary">{PROFILE_FIELDS.portrait.label}</p>
                 <div class="settings__track aria-busy:cursor-progress aria-busy:opacity-60 flex flex-wrap items-center gap-(--space-md)">
                     <label class="settings__pick">
                         <span class="label">{PROFILE_FIELDS.portrait.picker}</span>
@@ -221,12 +224,12 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                         hidden
                     >
                         <img
-                            class="object-cover h-16 w-16 border-2 border-ink"
+                            class="object-cover h-16 w-16 border-2 border-border-strong"
                             alt="Your staged portrait"
                             data-portrait-preview
                         />
                         <button
-                            class="action-text hover:text-accent-deep flex items-center min-h-(--control-size) px-1 text-ink-muted transition-colors"
+                            class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-colors"
                             data-portrait-remove
                             type="button"
                         >
@@ -236,20 +239,20 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                 </div>
                 <p
                     id="settings-portrait-error"
-                    class="action-text text-accent-deep"
+                    class="action-text text-error-text"
                     data-field-error
                     hidden
                 />
                 <p
                     id="settings-portrait-help"
-                    class="text-sm text-ink-subtle"
+                    class="text-sm text-text-secondary"
                 >
                     {AVATAR_EXTENSIONS_OR_LIST}. Up to {formatBytes(AVATAR.maxFileBytes)}, at least {AVATAR.minEdgePixels}px on each side.
                 </p>
             </div>
             <div class="flex flex-col gap-2">
                 <label class="block">
-                    <span class="label block mb-2 text-ink-muted">{PROFILE_FIELDS.artistName.label}</span>
+                    <span class="label block mb-2 text-text-secondary">{PROFILE_FIELDS.artistName.label}</span>
                     <input
                         id="settings-name"
                         class="input font-sans"
@@ -264,20 +267,20 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                 </label>
                 <p
                     id="settings-name-error"
-                    class="action-text text-accent-deep"
+                    class="action-text text-error-text"
                     data-field-error
                     hidden
                 />
                 <p
                     id="settings-name-help"
-                    class="text-sm text-ink-subtle"
+                    class="text-sm text-text-secondary"
                 >
                     {PROFILE_FIELDS.artistName.help}
                 </p>
             </div>
             <div class="flex flex-col gap-2">
                 <label class="block">
-                    <span class="label block mb-2 text-ink-muted">{PROFILE_FIELDS.bio.label}</span>
+                    <span class="label block mb-2 text-text-secondary">{PROFILE_FIELDS.bio.label}</span>
                     <textarea
                         id="settings-bio"
                         class="input input--area font-sans"
@@ -291,21 +294,21 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                 </label>
                 <p
                     id="settings-bio-error"
-                    class="action-text text-accent-deep"
+                    class="action-text text-error-text"
                     data-field-error
                     hidden
                 />
                 <p
                     id="settings-bio-help"
-                    class="text-sm text-ink-subtle"
+                    class="text-sm text-text-secondary"
                 >
                     <span data-bio-count>{DEMO_PROFILE.bio.length}</span> of {PROFILE_FIELDS.bio.maxLength} characters.
                     {PROFILE_FIELDS.bio.help}
                 </p>
             </div>
             <fieldset class="flex flex-col gap-3">
-                <legend class="label mb-1 text-ink-muted">
-                    {PROFILE_FIELDS.genres.label} <span class="text-ink-subtle">/ {PROFILE_FIELDS.genres.qualifier}</span>
+                <legend class="label mb-1 text-text-secondary">
+                    {PROFILE_FIELDS.genres.label} <span class="text-text-secondary">/ {PROFILE_FIELDS.genres.qualifier}</span>
                 </legend>
                 <div class="flex flex-wrap gap-2">
                     {GENRES.map(genre => (
@@ -325,14 +328,14 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                 </div>
                 <p
                     id="settings-genres-error"
-                    class="action-text text-accent-deep"
+                    class="action-text text-error-text"
                     data-field-error
                     hidden
                 />
             </fieldset>
             <fieldset class="flex flex-col gap-3">
-                <legend class="label mb-1 text-ink-muted">
-                    {PROFILE_FIELDS.role.label} <span class="text-ink-subtle">/ {PROFILE_FIELDS.role.qualifier}</span>
+                <legend class="label mb-1 text-text-secondary">
+                    {PROFILE_FIELDS.role.label} <span class="text-text-secondary">/ {PROFILE_FIELDS.role.qualifier}</span>
                 </legend>
                 <div class="flex flex-wrap gap-2">
                     {PROFILE_ROLES.map(role => (
@@ -352,7 +355,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
             <div class="settings__pair">
                 <div class="flex flex-col gap-2">
                     <label class="block">
-                        <span class="label block mb-2 text-ink-muted">{PROFILE_FIELDS.city.label}</span>
+                        <span class="label block mb-2 text-text-secondary">{PROFILE_FIELDS.city.label}</span>
                         <input
                             id="settings-city"
                             class="input font-sans"
@@ -367,14 +370,14 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                     </label>
                     <p
                         id="settings-city-error"
-                        class="action-text text-accent-deep"
+                        class="action-text text-error-text"
                         data-field-error
                         hidden
                     />
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="block">
-                        <span class="label block mb-2 text-ink-muted">{PROFILE_FIELDS.state.label}</span>
+                        <span class="label block mb-2 text-text-secondary">{PROFILE_FIELDS.state.label}</span>
                         <span class="select">
                             <select
                                 id="settings-state"
@@ -398,7 +401,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                     </label>
                     <p
                         id="settings-state-error"
-                        class="action-text text-accent-deep"
+                        class="action-text text-error-text"
                         data-field-error
                         hidden
                     />
@@ -415,17 +418,17 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
             class="settings__form slab slab--card"
             data-links-form
         >
-            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
+            <h2 class="text-2xl">
                 Links
             </h2>
-            <p class="max-w-2xl text-sm text-ink-subtle">
+            <p class="max-w-2xl text-sm text-text-secondary">
                 Where else you live online. Every field is optional, and whatever you fill in shows
                 up on your roster card.
             </p>
             {LINK_FIELDS.map(field => (
                 <div class="flex flex-col gap-2">
                     <label class="block">
-                        <span class="label block mb-2 text-ink-muted">{field.label}</span>
+                        <span class="label block mb-2 text-text-secondary">{field.label}</span>
                         <input
                             id={`settings-${field.name}`}
                             class="input font-mono text-sm"
@@ -441,7 +444,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                     </label>
                     <p
                         id={`settings-${field.name}-error`}
-                        class="action-text text-accent-deep"
+                        class="action-text text-error-text"
                         data-field-error
                         hidden
                     />
@@ -458,12 +461,12 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
             class="settings__form slab slab--card"
             data-password-form
         >
-            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
+            <h2 class="text-2xl">
                 Password
             </h2>
             <div class="flex flex-col gap-2">
                 <label class="block">
-                    <span class="label block mb-2 text-ink-muted">New password</span>
+                    <span class="label block mb-2 text-text-secondary">New password</span>
                     <span class="block relative">
                         <input
                             id="settings-password"
@@ -494,17 +497,17 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                 </label>
                 <p
                     id="settings-password-error"
-                    class="action-text text-accent-deep"
+                    class="action-text text-error-text"
                     data-field-error
                     hidden
                 />
-                <p class="text-sm text-ink-subtle">
+                <p class="text-sm text-text-secondary">
                     At least {PASSWORD_MIN_LENGTH} characters with a letter and a digit.
                 </p>
             </div>
             <div class="flex flex-col gap-2">
                 <label class="block">
-                    <span class="label block mb-2 text-ink-muted">Confirm new password</span>
+                    <span class="label block mb-2 text-text-secondary">Confirm new password</span>
                     <span class="block relative">
                         <input
                             id="settings-confirm"
@@ -534,7 +537,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                 </label>
                 <p
                     id="settings-confirm-error"
-                    class="action-text text-accent-deep"
+                    class="action-text text-error-text"
                     data-field-error
                     hidden
                 />
@@ -550,10 +553,10 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
             class="settings__form settings__form--full slab slab--card"
             data-track-form
         >
-            <h2 class="font-extrabold font-sans text-2xl tracking-tight">
+            <h2 class="text-2xl">
                 Spotlight
             </h2>
-            <p class="max-w-2xl text-sm text-ink-subtle">
+            <p class="max-w-2xl text-sm text-text-secondary">
                 One file, and it is the one that plays on your roster card. Swap it whenever the
                 better take arrives.
             </p>
@@ -572,7 +575,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                     />
                 </label>
                 <p
-                    class="flex-[1_1_200px] text-sm text-ink-subtle"
+                    class="flex-[1_1_200px] text-sm text-text-secondary"
                     data-track-empty
                     hidden
                 >
@@ -589,7 +592,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                         {DEMO_PROFILE.track.name}
                     </p>
                     <button
-                        class="action-text hover:text-accent-deep flex items-center min-h-(--control-size) px-1 text-ink-muted transition-colors"
+                        class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-colors"
                         data-track-remove
                         type="button"
                     >
@@ -599,13 +602,13 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
             </div>
             <p
                 id="settings-track-error"
-                class="action-text text-accent-deep"
+                class="action-text text-error-text"
                 data-field-error
                 hidden
             />
             <p
                 id="settings-track-help"
-                class="text-sm text-ink-subtle"
+                class="text-sm text-text-secondary"
             >
                 {SPOTLIGHT_EXTENSIONS_LABEL} only. Up to {formatBytes(SPOTLIGHT.maxFileBytes)}.
             </p>
@@ -622,18 +625,18 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
         >
             <h2
                 id="settings-attendance-title"
-                class="font-extrabold font-sans text-2xl tracking-tight"
+                class="text-2xl"
             >
                 Attendance
             </h2>
-            <p class="max-w-2xl text-sm text-ink-subtle">
+            <p class="max-w-2xl text-sm text-text-secondary">
                 Every event you have checked in to since you joined, newest first.
             </p>
-            <div class="scroll-slot settings__scroller--attendance overflow-x-auto border-2 border-ink">
+            <div class="scroll-slot settings__scroller--attendance overflow-x-auto border-2 border-border-strong">
                 <table class="settings__table">
                     <caption class="sr-only">Events you checked in to, with the date of each check-in</caption>
                     <thead>
-                        <tr class="font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
+                        <tr class="font-bold font-mono text-xs tracking-wide uppercase text-text-secondary">
                             <th
                                 class="px-4 py-3 text-left"
                                 scope="col"
@@ -648,7 +651,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-ink">
+                    <tbody class="divide-y divide-border-strong">
                         {ATTENDANCE.map(entry => (
                             <tr>
                                 <th
@@ -657,7 +660,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                                 >
                                     {entry.event}
                                 </th>
-                                <td class="px-4 py-4 font-mono text-right text-xs whitespace-nowrap text-ink-muted">
+                                <td class="px-4 py-4 font-mono text-right text-xs whitespace-nowrap text-text-secondary">
                                     <time datetime={entry.date}>{formatDateStamp(new Date(entry.date))}</time>
                                 </td>
                             </tr>
@@ -672,19 +675,19 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
         >
             <h2
                 id="settings-ledger-title"
-                class="font-extrabold font-sans text-2xl tracking-tight"
+                class="text-2xl"
             >
                 Prods ledger
             </h2>
-            <p class="max-w-2xl text-sm text-ink-subtle">
+            <p class="max-w-2xl text-sm text-text-secondary">
                 Every Prod earned or spent since you joined, newest first, with the balance that
                 stood after each entry.
             </p>
-            <div class="scroll-slot settings__scroller--ledger overflow-x-auto border-2 border-ink">
+            <div class="scroll-slot settings__scroller--ledger overflow-x-auto border-2 border-border-strong">
                 <table class="settings__table min-w-[520px]">
                     <caption class="sr-only">Dated ledger entries with reason, change, and running balance</caption>
                     <thead>
-                        <tr class="font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
+                        <tr class="font-bold font-mono text-xs tracking-wide uppercase text-text-secondary">
                             <th
                                 class="px-4 py-3 text-left"
                                 scope="col"
@@ -711,14 +714,14 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-ink">
+                    <tbody class="divide-y divide-border-strong">
                         {PRODS_ROWS.map(row => (
                             <tr>
-                                <td class="px-4 py-4 font-mono text-xs whitespace-nowrap text-ink-muted">
+                                <td class="px-4 py-4 font-mono text-xs whitespace-nowrap text-text-secondary">
                                     <time datetime={row.date}>{formatDateStamp(new Date(row.date))}</time>
                                 </td>
                                 <td class="px-4 py-4 text-sm">{row.reason}</td>
-                                <td class:list={['px-4 py-4 font-mono text-right text-xs', row.amount < 0 && 'text-accent-deep']}>
+                                <td class:list={['px-4 py-4 font-mono text-right text-xs', row.amount < 0 && 'text-error-text']}>
                                     {row.change}
                                 </td>
                                 <td class="px-4 py-4 font-mono text-right text-xs">{row.balance}</td>
@@ -734,7 +737,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
 <style>
     .settings__chip {
         align-items: center;
-        border: 2px solid var(--color-ink);
+        border: 2px solid var(--color-border-strong);
         display: flex;
         font-family: var(--font-mono);
         font-size: var(--text-xs);
@@ -748,7 +751,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
     }
 
     .settings__chip:has(.box:checked) {
-        background-color: var(--color-surface-sunken);
+        background-color: var(--color-bg-sunken);
     }
 
     .settings__file {
@@ -778,7 +781,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
     }
 
     .settings__overview {
-        --slab-fill: var(--color-ink);
+        --slab-fill: var(--color-border-strong);
         grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
     }
 
@@ -790,9 +793,9 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
 
     .settings__pick {
         align-items: center;
-        background-color: var(--color-surface);
-        background-image: repeating-linear-gradient(135deg, var(--color-ink-10) 0 6px, transparent 6px 12px);
-        border: 2px dashed var(--color-ink);
+        background-color: var(--color-bg-page);
+        background-image: repeating-linear-gradient(135deg, var(--color-border-subtle) 0 6px, transparent 6px 12px);
+        border: 2px dashed var(--color-border-strong);
         display: flex;
         flex: 1 1 220px;
         justify-content: center;
@@ -807,29 +810,29 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
     }
 
     .settings__pick:active {
-        background-color: var(--color-surface-raised);
-        border-color: var(--color-accent-deep);
+        background-color: var(--color-bg-active);
+        border-color: var(--color-border-selected);
     }
 
     .settings__pick:has(.settings__file:focus) {
-        border-color: var(--color-accent-deep);
+        border-color: var(--color-border-selected);
         border-style: solid;
     }
 
     .settings__pick:has(.settings__file[aria-invalid='true']) {
-        border-color: var(--color-accent-deep);
-        box-shadow: 3px 3px 0 0 var(--color-accent-20);
+        border-color: var(--color-border-invalid);
+        box-shadow: 3px 3px 0 0 var(--color-error-surface);
     }
 
     .settings__pick:hover {
-        background-color: var(--color-surface-raised);
-        border-color: var(--color-accent-deep);
+        background-color: var(--color-bg-hover);
+        border-color: var(--color-border-selected);
     }
 
     .settings__reveal {
         align-items: center;
         bottom: 0;
-        color: var(--color-ink-muted);
+        color: var(--color-text-secondary);
         cursor: pointer;
         display: flex;
         justify-content: center;
@@ -861,7 +864,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
     }
 
     .settings__reveal:hover {
-        color: var(--color-accent-deep);
+        color: var(--color-link);
     }
 
     .settings__reveal[aria-pressed='false'] .settings__glyph--hide,
@@ -908,8 +911,8 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
     }
 
     .settings__table thead th {
-        background-color: var(--color-surface-raised);
-        box-shadow: inset 0 -2px 0 var(--color-ink);
+        background-color: var(--color-bg-raised);
+        box-shadow: inset 0 -2px 0 var(--color-border-strong);
         position: sticky;
         top: 0;
         z-index: var(--z-page);
@@ -1276,8 +1279,12 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
 
         const name = session ? session.artistName || session.email : demoSummary.name;
         const role = session ? session.role : demoSummary.role;
+        const tileColor = pickTileColor(name);
 
-        if (tile) tile.style.background = pickTileColor(name);
+        if (tile) {
+            tile.style.background = tileColor.bg;
+            tile.style.color = tileColor.text;
+        }
 
         document.querySelectorAll<HTMLElement>('[data-settings-role]').forEach(element => setText(element, role));
         setAvatarImage(document.querySelector<HTMLImageElement>('[data-settings-avatar]'), session?.avatar ?? '');

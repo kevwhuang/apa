@@ -28,7 +28,7 @@ const { code, eyebrow, headingId, lede } = Astro.props;
     <div class="mark rank rank--2 items-center">
         <div class="flex flex-col gap-6">
             <PageHead
-                class="font-extrabold font-sans leading-[0.82] text-mega tracking-[-0.05em]"
+                class="text-5xl md:text-8xl lg:text-10xl"
                 eyebrow={eyebrow}
                 eyebrowMotion="rule"
                 headingId={headingId}
@@ -36,11 +36,11 @@ const { code, eyebrow, headingId, lede } = Astro.props;
                 {code}
             </PageHead>
             <hr
-                class="border-0 border-t-2 border-ink"
+                class="border-0 border-t-2 border-border-strong"
                 data-motion="rule"
             />
             <p
-                class="max-w-md leading-relaxed text-md text-ink-muted"
+                class="max-w-md leading-relaxed text-lg text-text-secondary"
                 data-motion="blur"
             >
                 {lede}
@@ -73,7 +73,7 @@ const { code, eyebrow, headingId, lede } = Astro.props;
                     aria-hidden="true"
                 />
                 <BrandMark
-                    class="error__mark relative text-ink-inverse"
+                    class="error__mark relative text-logo-on-signal"
                     height={MARK_HEIGHT}
                 />
             </div>
@@ -89,7 +89,7 @@ const { code, eyebrow, headingId, lede } = Astro.props;
     }
 
     .error__plate {
-        --slab-fill: var(--color-accent);
+        --slab-fill: var(--color-bg-signal);
         aspect-ratio: 1;
     }
 

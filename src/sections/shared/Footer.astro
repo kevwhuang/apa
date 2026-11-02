@@ -1,7 +1,10 @@
 ---
 import IconDiscord from '@components/icons/Discord.astro';
 import IconInstagram from '@components/icons/Instagram.astro';
+import IconLinktree from '@components/icons/Linktree.astro';
 import IconMeetup from '@components/icons/Meetup.astro';
+import IconSoundCloud from '@components/icons/SoundCloud.astro';
+import IconSpotify from '@components/icons/Spotify.astro';
 import { BRAND } from '@lib/shared/brand';
 import { LINKS, NAV_GROUPS, SITE_UPDATED } from '@lib/shared/constants';
 import { formatDateStamp } from '@lib/shared/utils';
@@ -15,9 +18,12 @@ const ACCOUNT_LINKS = [
 ] as const;
 
 const SOCIALS = [
+    { Icon: IconInstagram, href: LINKS.instagram, label: 'Instagram' },
     { Icon: IconMeetup, href: LINKS.meetup, label: 'Meetup' },
     { Icon: IconDiscord, href: LINKS.discord, label: 'Discord' },
-    { Icon: IconInstagram, href: LINKS.instagram, label: 'Instagram' },
+    { Icon: IconSpotify, href: LINKS.spotify, label: 'Spotify' },
+    { Icon: IconSoundCloud, href: LINKS.soundcloud, label: 'SoundCloud' },
+    { Icon: IconLinktree, href: LINKS.linktree, label: 'Linktree' },
 ];
 
 const columns = [
@@ -42,7 +48,7 @@ const year = new Date().getFullYear();
 ---
 
 <footer
-    class="border-t-2 border-ink bg-surface-sunken"
+    class="border-t-2 border-border-strong bg-bg-sunken"
     aria-label="Site footer"
 >
     <div class="stage stage--tight">
@@ -52,12 +58,12 @@ const year = new Date().getFullYear();
         >
             {columns.map(column => (
                 <div>
-                    <h2 class="footer__head label mb-(--space-2xs) text-ink-muted">{column.head}</h2>
+                    <h2 class="footer__head label mb-(--space-2xs) text-text-secondary">{column.head}</h2>
                     <ul class="list-none">
                         {column.items.map(item => (
                             <li>
                                 <a
-                                    class="footer__link active:translate-y-px hover:text-accent-deep inline-flex items-center min-h-9 leading-normal text-sm transition-[color,transform]"
+                                    class="footer__link active:translate-y-px hover:text-link inline-flex items-center min-h-9 leading-normal text-sm transition-[color,transform]"
                                     href={item.href}
                                 >
                                     {item.label}
@@ -69,7 +75,7 @@ const year = new Date().getFullYear();
             ))}
         </div>
     </div>
-    <div class="stage stage--flush border-t-2 border-ink">
+    <div class="stage stage--flush border-t-2 border-border-strong">
         <div class="footer__row footer__sign">
             <ul class="footer__socials [grid-area:socials] flex gap-(--space-2xs) list-none">
                 {SOCIALS.map(({ Icon, href, label }) => (
@@ -100,7 +106,7 @@ const year = new Date().getFullYear();
 <style>
     .footer__credit-link,
     .footer__home {
-        color: var(--color-accent-deep);
+        color: var(--color-link);
         display: inline-block;
         text-decoration-color: transparent;
         text-decoration-line: underline;
@@ -118,7 +124,7 @@ const year = new Date().getFullYear();
 
     .footer__credit-link:hover,
     .footer__home:hover {
-        color: var(--color-accent);
+        color: var(--color-link-hover);
         text-decoration-color: currentcolor;
     }
 
@@ -142,7 +148,7 @@ const year = new Date().getFullYear();
 
     .footer__row {
         align-items: center;
-        color: var(--color-ink-muted);
+        color: var(--color-text-secondary);
         font-family: var(--font-mono);
         font-size: var(--text-xs);
         gap: var(--space-sm);
@@ -180,7 +186,7 @@ const year = new Date().getFullYear();
     }
 
     .footer__social:hover {
-        color: var(--color-accent-deep);
+        color: var(--color-link);
     }
 
     .footer__stamp {
@@ -206,6 +212,11 @@ const year = new Date().getFullYear();
                 'meta';
             grid-template-columns: minmax(0, 1fr);
             justify-items: center;
+        }
+
+        .footer__socials {
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .footer__stamp {

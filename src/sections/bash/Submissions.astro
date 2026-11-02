@@ -8,12 +8,12 @@ const program = getProgram('bash');
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-ink"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="submissions-title"
 >
     <div>
         <SectionHead
-            class="font-extrabold font-sans text-4xl tracking-tight"
+            class="text-4xl text-balance"
             eyebrow={`${program.shortName} / Submissions`}
             headingId="submissions-title"
         >
@@ -24,11 +24,11 @@ const program = getProgram('bash');
                 class="flex flex-col gap-4"
                 data-motion-stagger="blur"
             >
-                <p class="text-base text-ink-muted">
+                <p class="text-base text-text-secondary">
                     Bounce what you made on the clock and drop it here.
                 </p>
                 <p
-                    class="text-smd text-ink-muted"
+                    class="text-text-secondary"
                     data-placeholder
                 >
                     Five minutes of stereo WAV runs close to the {formatBytes(UPLOAD.maxFileBytes)} ceiling,
@@ -45,10 +45,10 @@ const program = getProgram('bash');
                     for="submissions-input"
                 >
                     <IconUpload />
-                    <span class="font-extrabold font-sans text-2xl tracking-tight">
+                    <span class="font-bold font-sans text-2xl tracking-tight">
                         Drop your track here
                     </span>
-                    <span class="label text-ink-muted">or choose a file</span>
+                    <span class="label text-text">or choose a file</span>
                     <input
                         id="submissions-input"
                         class="dropzone__input sr-only"
@@ -62,7 +62,7 @@ const program = getProgram('bash');
                 </label>
                 <p
                     id="submissions-help"
-                    class="text-sm text-ink-muted"
+                    class="text-sm text-text-secondary"
                     data-placeholder
                 >
                     {UPLOAD_EXTENSIONS_LABEL}. Up to {formatBytes(UPLOAD.maxFileBytes)} each, {UPLOAD.maxFiles} files,{' '}
@@ -83,13 +83,13 @@ const program = getProgram('bash');
         <div>
             <div class="flex flex-wrap items-baseline justify-between gap-3 mb-3">
                 <h3
-                    class="font-extrabold font-sans text-2xl tracking-tight"
+                    class="text-2xl"
                     data-motion="rise"
                 >
                     The submission board
                 </h3>
                 <p
-                    class="label flex items-center gap-2 text-ink-subtle"
+                    class="label flex items-center gap-2 text-text-secondary"
                     data-board-refresh
                     hidden
                 >
@@ -98,7 +98,7 @@ const program = getProgram('bash');
                 </p>
             </div>
             <p
-                class="max-w-2xl mb-6 text-smd text-ink-muted"
+                class="max-w-2xl mb-6 text-text-secondary"
                 data-motion="rise"
             >
                 Every track turned in across past editions, oldest first &mdash; the running
@@ -109,12 +109,12 @@ const program = getProgram('bash');
                 data-motion="rise"
             >
                 <table
-                    class="board__table border-2 border-ink"
+                    class="board__table border-2 border-border-strong"
                     data-placeholder
                 >
                     <caption class="sr-only">Tracks submitted at past Bash editions</caption>
                     <thead>
-                        <tr class="border-b-2 border-ink font-bold font-mono text-2xs tracking-wide uppercase text-ink-muted">
+                        <tr class="border-b-2 border-border-strong font-bold font-mono text-xs tracking-wide uppercase text-text-secondary">
                             <th
                                 class="px-4 py-3 text-left"
                                 scope="col"
@@ -148,12 +148,12 @@ const program = getProgram('bash');
                         </tr>
                     </thead>
                     <tbody
-                        class="divide-y divide-ink"
+                        class="divide-y divide-border-strong"
                         data-board-body
                     >
                         <tr>
                             <td
-                                class="px-4 py-4 font-mono text-xs uppercase text-ink-muted"
+                                class="px-4 py-4 font-mono text-xs uppercase text-text-secondary"
                                 colspan="5"
                             >
                                 <span class="flex items-center gap-2">
@@ -171,7 +171,7 @@ const program = getProgram('bash');
                 data-board-pager
             />
             <p
-                class="label text-ink-subtle"
+                class="label text-text-secondary"
                 aria-live="polite"
                 data-board-status
                 data-motion="stamp"
@@ -186,12 +186,12 @@ const program = getProgram('bash');
                     data-row-name
                 />
                 <p
-                    class="label text-ink-muted"
+                    class="label text-text-secondary"
                     data-row-meta
                 />
             </div>
             <canvas
-                class="block h-18 max-w-full w-full text-accent-deep"
+                class="block h-18 max-w-full w-full text-text-brand"
                 aria-hidden="true"
                 data-row-canvas
                 height="72"
@@ -199,23 +199,23 @@ const program = getProgram('bash');
                 width="640"
             />
             <p
-                class="action-text text-accent-deep"
+                class="action-text text-error-text"
                 data-row-error
                 hidden
             />
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <progress
-                    class="flex-[1_1_140px] h-3 min-w-0 accent-accent-deep"
+                    class="flex-[1_1_140px] h-3 min-w-0 accent-native-accent"
                     data-row-progress
                     max="100"
                     value="0"
                 />
                 <p
-                    class="label min-w-[34px] text-ink-subtle"
+                    class="label min-w-[34px] text-text-secondary"
                     data-row-percent
                 />
                 <button
-                    class="action-text hover:text-accent-deep flex items-center min-h-(--control-size) px-1 text-ink-muted transition-colors"
+                    class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-colors"
                     data-row-cancel
                     type="button"
                 >
@@ -227,7 +227,7 @@ const program = getProgram('bash');
     <template data-board-row>
         <tr>
             <td
-                class="px-4 py-3 font-mono text-xs text-ink-subtle"
+                class="px-4 py-3 font-mono text-xs text-text-secondary"
                 data-cell-index
             />
             <td
@@ -239,18 +239,18 @@ const program = getProgram('bash');
                 data-cell-title
             />
             <td
-                class="px-4 py-3 font-mono text-2xs uppercase whitespace-nowrap text-ink-muted"
+                class="px-4 py-3 font-mono text-xs uppercase whitespace-nowrap text-text-secondary"
                 data-cell-edition
             />
             <td
-                class="px-4 py-3 font-mono text-2xs uppercase whitespace-nowrap text-ink-muted"
+                class="px-4 py-3 font-mono text-xs uppercase whitespace-nowrap text-text-secondary"
                 data-cell-submitted
             />
         </tr>
     </template>
     <template data-board-page>
         <button
-            class="chip active:bg-ink active:text-ink-inverse hover:bg-ink hover:text-ink-inverse min-w-(--control-size)"
+            class="chip active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse min-w-(--control-size)"
             type="button"
         />
     </template>
@@ -264,8 +264,8 @@ const program = getProgram('bash');
     }
 
     .dropzone {
-        --slab-fill: var(--color-surface-sunken);
-        background-image: repeating-linear-gradient(135deg, var(--color-ink-10) 0 6px, transparent 6px 12px);
+        --slab-fill: var(--color-bg-sunken);
+        background-image: repeating-linear-gradient(135deg, var(--color-border-subtle) 0 6px, transparent 6px 12px);
         border-style: dashed;
         min-height: 220px;
         padding: var(--space-2xl);
@@ -276,22 +276,22 @@ const program = getProgram('bash');
     }
 
     .dropzone:active {
-        --slab-fill: var(--color-surface-raised);
-        border-color: var(--color-accent-deep);
+        --slab-fill: var(--color-bg-raised);
+        border-color: var(--color-border-selected);
     }
 
     .dropzone:has(.dropzone__input:focus-visible) {
-        border-color: var(--color-accent-deep);
+        border-color: var(--color-border-selected);
         border-style: solid;
     }
 
     .dropzone:hover {
-        border-color: var(--color-accent-deep);
+        border-color: var(--color-border-selected);
     }
 
     .dropzone.is-dragging {
-        --slab-fill: var(--color-surface-raised);
-        border-color: var(--color-accent-deep);
+        --slab-fill: var(--color-bg-raised);
+        border-color: var(--color-border-selected);
         border-style: solid;
     }
 

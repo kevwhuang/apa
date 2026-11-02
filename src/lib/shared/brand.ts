@@ -1,7 +1,8 @@
-import lockup from '@images/logos/austin_producer_alliance_lockup.svg';
-import mark from '@images/logos/austin_producer_alliance.svg';
-import square from '@images/logos/austin_producer_alliance_square.png';
-import squareInverse from '@images/logos/austin_producer_alliance_square_white.png';
+import horizontalCream from '@images/brand/apa_horizontal_cream.svg';
+import lockup from '@images/brand/apa_horizontal_default.svg';
+import horizontalInk from '@images/brand/apa_horizontal_ink.svg';
+import symbol from '@images/brand/apa_symbol_default.svg';
+import wordmarkCream from '@images/brand/apa_wordmark_cream.svg';
 
 const BRAND = {
     author: 'Kevin Huang',
@@ -11,28 +12,28 @@ const BRAND = {
 
 const BRAND_DOWNLOADS = [
     {
-        asset: lockup,
-        filename: 'austin-producer-alliance-lockup.svg',
+        asset: symbol,
+        filename: 'austin-producer-alliance-symbol.svg',
         format: 'svg',
-        label: 'Lockup',
+        label: 'Symbol',
     },
     {
-        asset: mark,
+        asset: wordmarkCream,
         filename: 'austin-producer-alliance-wordmark.svg',
         format: 'svg',
         label: 'Wordmark',
     },
     {
-        asset: square,
-        filename: 'austin-producer-alliance-square.png',
-        format: 'png',
-        label: 'Wordmark on a square canvas',
+        asset: horizontalCream,
+        filename: 'austin-producer-alliance-lockup.svg',
+        format: 'svg',
+        label: 'Lockup',
     },
     {
-        asset: squareInverse,
-        filename: 'austin-producer-alliance-square-inverse.png',
-        format: 'png',
-        label: 'Wordmark on a square canvas, inverse',
+        asset: horizontalInk,
+        filename: 'austin-producer-alliance-lockup-inverse.svg',
+        format: 'svg',
+        label: 'Lockup, inverse',
     },
 ] as const;
 
@@ -45,7 +46,9 @@ const BRAND_ICONS = {
 
 const BRAND_LOGOS = {
     lockup,
-    mark,
+    lockupDark: horizontalInk,
+    lockupLight: horizontalCream,
+    symbol,
 } as const;
 
 const BRAND_OG = {
@@ -54,13 +57,14 @@ const BRAND_OG = {
 } as const;
 
 const BRAND_SIZES = {
+    lockupNav: 26,
     lockupPreview: 64,
     markNav: 32,
     markPreview: 40,
 } as const;
 
 function brandTitle(page: string): string {
-    return `${page} \u2014 ${BRAND.name}`;
+    return `${page} — ${BRAND.name}`;
 }
 
 export { BRAND, BRAND_DOWNLOADS, BRAND_ICONS, BRAND_LOGOS, BRAND_OG, BRAND_SIZES, brandTitle };

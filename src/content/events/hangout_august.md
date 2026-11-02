@@ -5,5 +5,5 @@ end: 2026-08-26T21:00:00-05:00
 location: Venue announced to members
 excerpt: A pop-up social landing midway between Assemblies. No laptops and no agenda — just the room, and the people in it.
 type: hangout
-status: upcoming
+status: past
 ---

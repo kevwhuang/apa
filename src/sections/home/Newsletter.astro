@@ -12,13 +12,13 @@ import SectionHead from '@components/shared/SectionHead.astro';
     >
         <div>
             <SectionHead
-                class="font-extrabold font-sans leading-[1.05] text-3xl tracking-[-0.035em] md:text-5xl"
+                class="text-3xl md:text-4xl lg:text-5xl"
                 eyebrow="Signal"
                 headingId="newsletter-title"
             >
                 Get the dispatch.
             </SectionHead>
-            <p class="max-w-md text-ink-muted">
+            <p class="max-w-md text-text-secondary">
                 One email a season. What's on the calendar, what the roster has been working on,
                 and where to find us next.
             </p>
@@ -26,7 +26,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
         <form class="newsletter-form flex flex-col gap-3">
             <div class="flex flex-col gap-3 lg:flex-row lg:gap-2 lg:items-end">
                 <label class="block flex-1">
-                    <span class="label block mb-2 text-ink-muted">
+                    <span class="label block mb-2 text-text-secondary">
                         Email
                     </span>
                     <input
@@ -50,12 +50,12 @@ import SectionHead from '@components/shared/SectionHead.astro';
             </div>
             <p
                 id="newsletter-email-error"
-                class="action-text text-accent-deep"
+                class="action-text text-error-text"
                 data-field-error
                 hidden
             />
             <p
-                class="action-text hidden p-3 bg-accent text-ink"
+                class="action-text hidden p-3 bg-bg-signal text-text-on-signal"
                 data-output
             />
         </form>

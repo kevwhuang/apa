@@ -722,10 +722,10 @@ function readPalette(): Palette {
     const styles = getComputedStyle(document.documentElement);
 
     return {
-        accent: readColorToken(styles, '--hero-field-accent'),
-        ink: readColorToken(styles, '--color-ink'),
-        muted: readColorToken(styles, '--color-ink-muted'),
-        surface: readColorToken(styles, '--color-surface'),
+        accent: readColorToken(styles, '--color-text-brand'),
+        ink: readColorToken(styles, '--color-text'),
+        muted: readColorToken(styles, '--color-text-secondary'),
+        surface: readColorToken(styles, '--color-bg-page'),
     };
 }
 

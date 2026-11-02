@@ -30,10 +30,10 @@ import IconSpark from '@components/icons/Spark.astro';
             class="grip"
             data-ai-grip
         />
-        <div class="ai__head flex items-center justify-between shrink-0 gap-(--space-2xs) pl-(--space-sm) border-b border-ink-20">
+        <div class="ai__head flex items-center justify-between shrink-0 gap-(--space-2xs) pl-(--space-sm) border-b border-border-subtle">
             <h2
                 id="ai-title"
-                class="ai__eyebrow label text-accent-deep"
+                class="ai__eyebrow label text-link"
             >
                 Ask the Alliance
             </h2>
@@ -52,7 +52,7 @@ import IconSpark from '@components/icons/Spark.astro';
             data-ai-log
         />
         <form
-            class="ai__form flex shrink-0 gap-(--space-2xs) p-(--space-sm) border-ink-20 border-t"
+            class="ai__form flex shrink-0 gap-(--space-2xs) p-(--space-sm) border-border-subtle border-t"
             data-ai-form
         >
             <input
@@ -78,7 +78,7 @@ import IconSpark from '@components/icons/Spark.astro';
             </button>
         </form>
         <template data-ai-answer>
-            <li class="ai__card flex flex-col self-start max-w-[95%] gap-(--space-2xs) px-(--space-xs) py-(--space-2xs) border-accent-deep border-l-[3px] bg-surface-sunken">
+            <li class="ai__card flex flex-col self-start max-w-[95%] gap-(--space-2xs) px-(--space-xs) py-(--space-2xs) border-blockquote-border border-l-[3px] bg-bg-sunken">
                 <p
                     class="ai__body leading-[1.45] text-sm wrap-anywhere"
                     data-ai-text
@@ -93,11 +93,11 @@ import IconSpark from '@components/icons/Spark.astro';
             </li>
         </template>
         <template data-ai-ask>
-            <li class="ai__ask self-end max-w-[85%] px-(--space-xs) py-(--space-2xs) leading-[1.45] text-sm wrap-anywhere bg-ink text-ink-inverse" />
+            <li class="ai__ask self-end max-w-[85%] px-(--space-xs) py-(--space-2xs) leading-[1.45] text-sm wrap-anywhere bg-bg-inverse text-text-inverse" />
         </template>
         <template data-ai-thinking>
             <li
-                class="ai__thinking flex items-center self-start gap-(--space-2xs) py-(--space-2xs) font-mono text-2xs text-ink-muted"
+                class="ai__thinking flex items-center self-start gap-(--space-2xs) py-(--space-2xs) font-mono text-xs text-text-secondary"
                 data-ai-pending
             >
                 <span
@@ -141,16 +141,16 @@ import IconSpark from '@components/icons/Spark.astro';
     }
 
     .ai__close:hover {
-        color: var(--color-accent-deep);
+        color: var(--color-link);
     }
 
     .ai__launcher {
-        --focus-ring: var(--color-accent-light);
+        --color-focus-ring: var(--color-focus-ring-offset);
         align-items: center;
-        background: var(--color-surface-inverse);
-        border: 2px solid var(--color-ink);
+        background: var(--color-bg-inverse);
+        border: 2px solid var(--color-border-strong);
         border-right: 0;
-        color: var(--color-ink-inverse);
+        color: var(--color-text-inverse);
         display: inline-flex;
         height: var(--launcher-size);
         inset: auto 0 var(--ai-offset) auto;
@@ -173,9 +173,8 @@ import IconSpark from '@components/icons/Spark.astro';
     }
 
     .ai__launcher:hover {
-        --focus-ring: var(--color-ink);
-        background: var(--color-accent);
-        color: var(--color-ink);
+        background: var(--color-btn-primary-bg);
+        color: var(--color-btn-primary-text);
     }
 
     .ai__send .spinner {
@@ -217,14 +216,14 @@ import IconSpark from '@components/icons/Spark.astro';
     }
 
     .ai__source:hover {
-        color: var(--color-accent-deep);
+        color: var(--color-link);
     }
 
     .ai__window {
-        background: var(--color-surface-raised);
-        border: 2px solid var(--color-ink);
-        box-shadow: calc(-1 * var(--lift)) var(--lift) 0 0 var(--color-ink);
-        color: var(--color-ink);
+        background: var(--color-bg-raised);
+        border: 2px solid var(--color-border-strong);
+        box-shadow: calc(-1 * var(--lift)) var(--lift) 0 0 var(--color-border-strong);
+        color: var(--color-text);
         height: min(600px, calc(100dvh - var(--header-height) - var(--space-md) - var(--ai-offset)));
         inset: auto var(--launcher-size) var(--ai-offset) auto;
         overflow: hidden;
