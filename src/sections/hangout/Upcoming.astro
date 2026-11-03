@@ -24,10 +24,10 @@ const [next, ...later] = upcoming;
     <div>
         <SectionHead
             class="text-4xl"
-            eyebrow={`${program.shortName} / ${program.cadence}`}
+            eyebrow={`${program.shortName} / planned`}
             headingId="hangout-upcoming-title"
         >
-            Next up
+            On the calendar
         </SectionHead>
         {next
             ? (
@@ -130,8 +130,8 @@ const [next, ...later] = upcoming;
                         class="max-w-(--measure-form) mb-8 text-text-secondary"
                         data-motion="rise"
                     >
-                        Nothing on the calendar right now &mdash; the next date goes up as soon as
-                        the room is booked.
+                        Nothing yet &mdash; the {program.name} has not launched, and the first date
+                        goes up as soon as the room is booked.
                     </p>
                 )}
         <p data-motion="rise">

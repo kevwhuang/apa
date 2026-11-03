@@ -2,14 +2,17 @@
 
 ## Overview
 
-Austin Producer Alliance (APA) is a collective of music producers in Austin, Texas, open to anyone in the creative industry who wants to collaborate alongside them. This document is the Alliance's operating reference.
+Austin Producer Alliance (APA) is an organization of music producers in Austin, Texas. This document is the Alliance's operating reference.
 
 ## Platforms
 
 - [Hub](https://austinproduceralliance.com)
-- [Meetup](https://www.meetup.com/austin-producer-alliance)
-- [Instagram](https://www.instagram.com/austin_producer_alliance)
-- [Discord](https://discord.gg/aVM3mbRRpU)
+- [Instagram](https://instagram.com/austinproduceralliance)
+- [Meetup](https://meetup.com/austinproduceralliance)
+- [Discord](https://discord.gg/QvAtjbWZ7b)
+- [Spotify](https://open.spotify.com)
+- [SoundCloud](https://soundcloud.com/austinproduceralliance)
+- [Linktree](https://linktr.ee/austinproduceralliance)
 
 ## Events
 
@@ -17,19 +20,19 @@ Austin Producer Alliance (APA) is a collective of music producers in Austin, Tex
 
 | Event | Cadence | Description |
 | :--- | :---: | :--- |
-| **Assembly** | Monthly | The Alliance's centerpiece at Station Austin, an evening devoted to craft and community, with time for tracks to be heard. |
-| **Hangout** | Monthly | A pop-up social for connecting beyond the music, landing midway between assemblies. |
-| **Producer&nbsp;Bash** | Bimonthly | An afternoon of producing against the clock at Austin Community College, sparked by a prompt and capped by a final showdown. |
+| **Assembly** | Monthly | The Alliance's centerpiece at STATION Austin, an evening devoted to craft and community, with time for tracks to be heard. |
+| **Bash** | Quarterly | An afternoon of producing against the clock at Austin Community College, sparked by a prompt and capped by a final showdown. |
+| **CAMP** | Biannually | A weekend retreat where producers disconnect from daily life and create together under one roof. |
 
 ### Planned
 
 | Event | Cadence | Description |
 | :--- | :---: | :--- |
+| **Hangout** | Monthly | A pop-up social for connecting beyond the music, landing midway between assemblies. |
 | **Open&nbsp;Decks** | Quarterly | An indoor or outdoor open stage where anyone can sign up and perform a set. |
-| **Studio&nbsp;Tour** | Yearly | An evening group tour through the inner workings of a real Austin studio. |
-| **Producer&nbsp;Camp** | Yearly | A weekend retreat where producers disconnect from daily life and create together under one roof. |
-| **Producer&nbsp;Royale** | Yearly | An all-day production tournament with group stages, knockout rounds, and winners decided by vote. |
-| **The&nbsp;Annual** | Yearly | The Alliance's largest party, an end-of-year mixer hosted in collaboration with partner communities. |
+| **Studio&nbsp;Tour** | Annually | An evening group tour through the inner workings of a real Austin studio. |
+| **The&nbsp;Royale** | Annually | An all-day production tournament with group stages, knockout rounds, and winners decided by vote. |
+| **The&nbsp;Annual** | Annually | The Alliance's largest party, an end-of-year mixer hosted in collaboration with partner communities. |
 
 ## Openings
 
@@ -60,27 +63,27 @@ Austin Producer Alliance (APA) is a collective of music producers in Austin, Tex
 
 - [ ] Launch the hub
 - [ ] Build an attendee check-in system
-- [ ] Implement the prods virtual currency
+- [ ] Implement the Prods virtual currency
 - [ ] Expand merchandise
 
 ## Roadmap
 
-1. Launch all planned events
-2. Register as a 501(c)(3) nonprofit
+1. Register as a 501(c)(3) nonprofit
+2. Launch all planned events
 3. Secure a grant
 4. Host an official SXSW event
 
 ## Sponsors
 
-- Station Austin
 - Austin Community College
+- STATION Austin
 
 ## Funding
 
 | Program | Award | Description |
 | :--- | :---: | :--- |
-| **[Nexus](https://createaustin.org/nexus)** | $5,000 / $10,000 | Austin grants for new and emerging small organizations and individual artists. Round 2 opens September 2026. |
-| **[Elevate](https://www.austintexas.gov/arts-culture/funding-programs)** | $4,000–$80,000 | Austin's largest cultural funding program, geared toward established institutions. |
+| **[Nexus](https://austintexas.gov/arts-culture/nexus)** | $5,000 / $10,000 | Austin grants for emerging and established artists and arts groups with budgets up to $150,000 and at least one year of Austin production history. Excludes 501(c) nonprofits. Fall 2026 recipients announced by December 1; next round unannounced. |
+| **[Elevate](https://austintexas.gov/arts-culture/elevate)** | $15,000–$80,000 | Austin's largest cultural funding program, for arts nonprofits, arts groups, and individual artists with at least two years of Austin production history. Arts groups cap at $40,000 and individuals at $30,000. FY27 recipients announced by November 30; next round unannounced. |
 
 ---
 
@@ -93,6 +96,6 @@ Austin Producer Alliance (APA) is a collective of music producers in Austin, Tex
 
 > We bring Austin's music producers together. Through meetups, workshops, and collaborations, producers of every genre and experience level find their people, sharpen their craft, and support one another. Our goal is a lasting community for those behind the city's sound.
 
-### History
+### Story
 
-> Austin Producer Alliance was founded in May 2022 by Kevin Huang and Kyle Henderson to build the city's foremost community for music producers. What began as a Discord server grew into a recurring meetup at the Austin Central Library, then into a collective in partnership with longtime sponsor Station Austin (formerly Capital Factory). To date, APA has welcomed more than 1,000 producers and creatives to its events.
+> Austin Producer Alliance was founded in May 2022 by Kevin Huang and Kyle Henderson to build the city's foremost community for music producers. What began as a Discord server grew into a recurring meetup at the Austin Central Library, then into a collective in partnership with longtime sponsor STATION Austin (formerly Capital Factory). To date, APA has welcomed more than 1,000 producers and creatives to its events.

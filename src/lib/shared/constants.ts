@@ -36,8 +36,8 @@ const AVATAR = {
 } as const;
 
 const CANONICAL = {
-    history: 'Austin Producer Alliance was founded in May 2022 by Kevin Huang and Kyle Henderson to build the city\'s foremost community for music producers. What began as a Discord server grew into a recurring meetup at the Austin Central Library, then into a collective in collaboration with longtime partner Station Austin (formerly Capital Factory). To date, APA has welcomed more than 800 producers and creatives to its events.',
     mission: 'We bring Austin\'s music producers together. Through meetups, workshops, and collaborations, producers of every genre and experience level find their people, sharpen their craft, and support one another. Our goal is a lasting community for those behind the city\'s sound.',
+    story: 'Austin Producer Alliance was founded in May 2022 by Kevin Huang and Kyle Henderson to build the city\'s foremost community for music producers. What began as a Discord server grew into a recurring meetup at the Austin Central Library, then into a collective in partnership with longtime sponsor STATION Austin (formerly Capital Factory). To date, APA has welcomed more than 1,000 producers and creatives to its events.',
 } as const;
 
 const CENTS_PER_DOLLAR = 100;
@@ -70,7 +70,7 @@ const DEMO_CREDENTIALS = {
 } as const;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const EVENT_CADENCES = ['monthly', 'bimonthly', 'quarterly', 'yearly'] as const;
+const EVENT_CADENCES = ['monthly', 'quarterly', 'biannually', 'annually'] as const;
 
 const EVENT_PROGRAMS: Record<EventType, EventProgram> = {
     'assembly': {
@@ -78,21 +78,28 @@ const EVENT_PROGRAMS: Record<EventType, EventProgram> = {
         name: 'Assembly',
         shortName: 'Assembly',
         state: 'active',
-        summary: 'The Alliance\'s centerpiece at Station Austin, an evening devoted to craft and community, with time for tracks to be heard.',
+        summary: 'The Alliance\'s centerpiece at STATION Austin, an evening devoted to craft and community, with time for tracks to be heard.',
+    },
+    'bash': {
+        cadence: 'quarterly',
+        name: 'Bash',
+        shortName: 'Bash',
+        state: 'active',
+        summary: 'An afternoon of producing against the clock at Austin Community College, sparked by a prompt and capped by a final showdown.',
+    },
+    'camp': {
+        cadence: 'biannually',
+        name: 'CAMP',
+        shortName: 'CAMP',
+        state: 'active',
+        summary: 'A weekend retreat where producers disconnect from daily life and create together under one roof.',
     },
     'hangout': {
         cadence: 'monthly',
         name: 'Hangout',
         shortName: 'Hangout',
-        state: 'active',
+        state: 'planned',
         summary: 'A pop-up social for connecting beyond the music, landing midway between Assemblies.',
-    },
-    'bash': {
-        cadence: 'bimonthly',
-        name: 'Bash',
-        shortName: 'Bash',
-        state: 'active',
-        summary: 'An afternoon of producing against the clock at Austin Community College, sparked by a prompt and capped by a final showdown.',
     },
     'open-decks': {
         cadence: 'quarterly',
@@ -102,28 +109,21 @@ const EVENT_PROGRAMS: Record<EventType, EventProgram> = {
         summary: 'An indoor or outdoor open stage where anyone can sign up and perform a set.',
     },
     'studio-tour': {
-        cadence: 'yearly',
+        cadence: 'annually',
         name: 'Studio Tour',
         shortName: 'Studio Tour',
         state: 'planned',
         summary: 'An evening group tour through the inner workings of a real Austin studio.',
     },
-    'producer-camp': {
-        cadence: 'yearly',
-        name: 'Producer Camp',
-        shortName: 'Camp',
-        state: 'planned',
-        summary: 'A weekend retreat where producers disconnect from daily life and create together under one roof.',
-    },
-    'producer-royale': {
-        cadence: 'yearly',
-        name: 'Producer Royale',
+    'the-royale': {
+        cadence: 'annually',
+        name: 'The Royale',
         shortName: 'Royale',
         state: 'planned',
         summary: 'An all-day production tournament with group stages, knockout rounds, and winners decided by vote.',
     },
     'the-annual': {
-        cadence: 'yearly',
+        cadence: 'annually',
         name: 'The Annual',
         shortName: 'Annual',
         state: 'planned',
@@ -132,7 +132,7 @@ const EVENT_PROGRAMS: Record<EventType, EventProgram> = {
 };
 
 const EVENT_STATUSES = ['past', 'upcoming'] as const;
-const EVENT_TYPES = ['assembly', 'hangout', 'bash', 'open-decks', 'studio-tour', 'producer-camp', 'producer-royale', 'the-annual'] as const;
+const EVENT_TYPES = ['assembly', 'bash', 'camp', 'hangout', 'open-decks', 'studio-tour', 'the-royale', 'the-annual'] as const;
 
 const FIELD_LIMITS = {
     address: 100,
@@ -164,9 +164,9 @@ const LINKS = {
     discord: 'https://discord.gg/QvAtjbWZ7b',
     email: 'hello@austinproduceralliance.com',
     hub: 'https://austinproduceralliance.com',
-    instagram: 'https://www.instagram.com/austinproduceralliance',
+    instagram: 'https://instagram.com/austinproduceralliance',
     linktree: 'https://linktr.ee/austinproduceralliance',
-    meetup: 'https://www.meetup.com/austinproduceralliance',
+    meetup: 'https://meetup.com/austinproduceralliance',
     pressEmail: 'press@austinproduceralliance.com',
     soundcloud: 'https://soundcloud.com/austinproduceralliance',
     spotify: 'https://open.spotify.com',
@@ -250,7 +250,7 @@ const CARD_COLORS = PALETTE.slice(0, 4);
 
 const PARTNERS = [
     { logo: austinCommunityCollege, name: 'Austin Community College' },
-    { logo: stationAustin, name: 'Station Austin' },
+    { logo: stationAustin, name: 'STATION Austin' },
 ] as const;
 
 const PARTNER_LOGO_WIDTH = 640;
@@ -324,7 +324,7 @@ const ROUTES = [
 ] as const;
 
 const SESSION_TTL_DAYS = 14;
-const SITE_UPDATED = '2026-11-01T00:00:00-05:00';
+const SITE_UPDATED = '2026-11-03T00:00:00-06:00';
 
 const SPOTLIGHT = {
     acceptAttribute: '.mp3,audio/mpeg',

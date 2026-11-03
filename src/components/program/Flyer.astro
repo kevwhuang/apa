@@ -31,7 +31,7 @@ const program = getProgram('hangout');
     <div>
         <SectionHead
             class="text-4xl md:text-5xl"
-            eyebrow={`${program.shortName} / ${program.cadence}`}
+            eyebrow={`${program.shortName} / planned`}
             headingId={headingId}
         >
             {program.name}.
@@ -62,7 +62,7 @@ const program = getProgram('hangout');
                     rel="noopener noreferrer"
                     target="_blank"
                 >
-                    RSVP for the {program.shortName} on Meetup <IconArrow />
+                    Watch for the first {program.shortName} on Meetup <IconArrow />
                 </a>
             </p>
         )}

@@ -45,19 +45,19 @@ const OPENINGS = [
 
 const ROADMAP: { detail: string; name: string; status: RoadmapStatus; when: string }[] = [
     {
-        detail: 'Assemblies, Hangouts, and Bashes now run on a recurring calendar. Five more programs are written down and queued behind them.',
+        detail: 'Assemblies and Bashes now run on a recurring calendar. Five more programs are written down and queued behind them.',
         name: 'Launch the flagship programs',
         status: 'done',
         when: 'Summer 2026',
     },
     {
-        detail: 'Paperwork is on the desk. Nonprofit status unlocks tax-deductible sponsorship and city arts funding.',
+        detail: 'Paperwork is on the desk. Nonprofit status unlocks tax-deductible sponsorship.',
         name: 'Register as a 501(c)\u2060(3) nonprofit',
         status: 'next',
         when: 'Fall 2026',
     },
     {
-        detail: 'First applications target the Nexus and Elevate programs once the nonprofit filing clears.',
+        detail: 'First applications target the Elevate program once the nonprofit filing clears.',
         name: 'Secure a grant',
         status: 'later',
         when: 'Spring 2027',
@@ -78,7 +78,7 @@ const ROADMAP_STATUS: Record<RoadmapStatus, string> = {
 
 const SECTIONS = [
     { href: '#mission', label: 'Mission' },
-    { href: '#history', label: 'History' },
+    { href: '#story', label: 'Story' },
     { href: '#commitments', label: 'Commitments' },
     { href: '#openings', label: 'Openings' },
     { href: '#roadmap', label: 'Roadmap' },
@@ -152,17 +152,17 @@ const openingColors = PALETTE.slice(0, 3);
                 </figure>
             </section>
             <section
-                id="history"
-                aria-labelledby="history-title"
+                id="story"
+                aria-labelledby="story-title"
             >
                 <h2
-                    id="history-title"
+                    id="story-title"
                     class="mb-3 text-2xl sm:text-3xl md:text-4xl"
                     data-motion="strike"
                 >
-                    History
+                    Story
                 </h2>
-                <p data-motion="blur">{CANONICAL.history}</p>
+                <p data-motion="blur">{CANONICAL.story}</p>
             </section>
             <section
                 id="commitments"

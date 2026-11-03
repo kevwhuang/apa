@@ -28,7 +28,7 @@ const DONATION_USES = [
 ];
 
 const FOUNDING_YEAR = '2022';
-const PRODUCERS_WELCOMED = '800+';
+const PRODUCERS_WELCOMED = '1,000+';
 
 const assembly = getProgram('assembly');
 const bash = getProgram('bash');
@@ -36,7 +36,7 @@ const hangout = getProgram('hangout');
 const programs = Object.values(EVENT_PROGRAMS);
 
 const LANES: Lane[] = [
-    { detail: `Host an ${assembly.name}, a ${hangout.name}, or the ${bash.name} itself. We fill the room; you keep the bar.`, name: 'Venues' },
+    { detail: `Host an ${assembly.name}, the ${bash.name} itself, or, once it launches, a ${hangout.name}. We fill the room; you keep the bar.`, name: 'Venues' },
     { detail: 'Demo nights, member pricing, and honest feedback from producers who run your tools every day.', name: 'Gear & software' },
     { detail: 'Open sessions, workshops, and a pipeline of members who want the hours.', name: 'Studios & schools' },
     { detail: 'Cover the scene as it happens \u2014 recaps, premieres, and the stories behind the tracks.', name: 'Media & press' },
@@ -294,7 +294,7 @@ const TIERS: Tier[] = [
     <div>
         <SectionHead
             class="text-3xl md:text-4xl"
-            eyebrow="Current partners"
+            eyebrow="Current sponsors"
             headingId="backers-title"
         >
             Backed by

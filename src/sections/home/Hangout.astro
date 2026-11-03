@@ -22,10 +22,10 @@ const program = getProgram('hangout');
     <div>
         <SectionHead
             class="text-4xl sm:text-5xl"
-            eyebrow={`${program.shortName} / ${program.cadence}`}
+            eyebrow={`${program.shortName} / planned`}
             headingId="landing-hangout-title"
         >
-            Next {program.name}.
+            {program.name}.
             <a
                 class="action-text hover:text-link hidden items-center gap-2 min-h-(--control-size) whitespace-nowrap transition-colors md:inline-flex"
                 href="/events"
@@ -115,7 +115,7 @@ const program = getProgram('hangout');
                         data-motion="rise"
                     >
                         <p class="mb-8 text-text-secondary">
-                            No {program.name} on the calendar right now &mdash; the next date goes up as soon as the room is booked.
+                            The {program.name} has not launched yet &mdash; it is planned as a {program.cadence} program, and the first date goes up as soon as the room is booked.
                         </p>
                         <div class="flex flex-wrap gap-3">
                             <a
@@ -124,7 +124,7 @@ const program = getProgram('hangout');
                                 rel="noopener noreferrer"
                                 target="_blank"
                             >
-                                RSVP on Meetup
+                                Follow along on Meetup
                                 <span class="sr-only">&nbsp;(opens in a new tab)</span>
                             </a>
                             <a
