@@ -4,7 +4,7 @@ import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import { CANONICAL, JOIN_ROUTE, LINKS, PALETTE } from '@lib/shared/constants';
 
-type RoadmapStatus = 'done' | 'later' | 'next';
+type RoadmapStatus = 'later' | 'next';
 
 const ACTIONS = [
     {
@@ -43,35 +43,30 @@ const OPENINGS = [
     { hours: 10, name: 'Media Manager', responsibilities: 'Directs APA\'s marketing across social media strategy, content creation, and distribution.' },
 ];
 
-const ROADMAP: { detail: string; name: string; status: RoadmapStatus; when: string }[] = [
-    {
-        detail: 'Assemblies and Bashes now run on a recurring calendar. Five more programs are written down and queued behind them.',
-        name: 'Launch the flagship programs',
-        status: 'done',
-        when: 'Summer 2026',
-    },
+const ROADMAP: { detail: string; name: string; status: RoadmapStatus }[] = [
     {
         detail: 'Paperwork is on the desk. Nonprofit status unlocks tax-deductible sponsorship.',
         name: 'Register as a 501(c)\u2060(3) nonprofit',
         status: 'next',
-        when: 'Fall 2026',
+    },
+    {
+        detail: 'Assembly, Bash, and CAMP run on a recurring calendar. Five more programs are written down and queued behind them.',
+        name: 'Launch all planned events',
+        status: 'later',
     },
     {
         detail: 'First applications target the Elevate program once the nonprofit filing clears.',
         name: 'Secure a grant',
         status: 'later',
-        when: 'Spring 2027',
     },
     {
         detail: 'The long-range marker: an official APA showcase on the SXSW calendar.',
         name: 'Host an official SXSW event',
         status: 'later',
-        when: 'Spring 2028',
     },
 ];
 
 const ROADMAP_STATUS: Record<RoadmapStatus, string> = {
-    done: 'Done',
     later: 'Later',
     next: 'Up next',
 };
@@ -277,8 +272,7 @@ const openingColors = PALETTE.slice(0, 3);
                                 <span class="roadmap__node relative flex items-center justify-center h-(--roadmap-node) w-(--roadmap-node) border-2 border-border-strong font-mono font-bold text-sm leading-none tracking-[0.04em] bg-bg-raised text-link">{String(index + 1).padStart(2, '0')}</span>
                             </div>
                             <div class:list={[milestone.status === 'next' ? ['mark', 'slab', 'slab--well'] : ['slab', 'slab--card']]}>
-                                <div class="flex flex-wrap items-center justify-between gap-x-(--space-sm) gap-y-(--space-2xs) mb-(--space-sm)">
-                                    <span class="label roadmap__when text-text-secondary">{milestone.when}</span>
+                                <div class="flex mb-(--space-sm)">
                                     <span class="label roadmap__status inline-flex items-center px-(--space-2xs) py-(--space-3xs) border-2 border-border-strong text-text-secondary">{ROADMAP_STATUS[milestone.status]}</span>
                                 </div>
                                 <h3 class="mb-2 text-xl">{milestone.name}</h3>
@@ -410,16 +404,6 @@ const openingColors = PALETTE.slice(0, 3);
         width: 2px;
     }
 
-    .roadmap__step[data-status='done'] .roadmap__node {
-        background-color: var(--color-bg-inverse);
-        color: var(--color-text-inverse);
-    }
-
-    .roadmap__step[data-status='done'] .roadmap__status {
-        background-color: var(--color-bg-inverse);
-        color: var(--color-text-inverse);
-    }
-
     .roadmap__step[data-status='next'] .roadmap__detail {
         color: var(--color-text-inverse-secondary);
     }
@@ -433,10 +417,6 @@ const openingColors = PALETTE.slice(0, 3);
         background-color: var(--color-bg-signal);
         border-color: var(--color-border-selected);
         color: var(--color-text-on-signal);
-    }
-
-    .roadmap__step[data-status='next'] .roadmap__when {
-        color: var(--color-link-on-inverse);
     }
 
     .roadmap__step[data-status='next'] .slab--well {

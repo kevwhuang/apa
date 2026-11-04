@@ -1,7 +1,7 @@
 import horizontalCream from '@images/brand/apa_horizontal_cream.svg';
-import lockup from '@images/brand/apa_horizontal_default.svg';
 import horizontalInk from '@images/brand/apa_horizontal_ink.svg';
-import symbol from '@images/brand/apa_symbol_default.svg';
+import lockup from '@images/brand/apa_horizontal_transparent.svg';
+import symbol from '@images/brand/apa_symbol_transparent.svg';
 import wordmarkCream from '@images/brand/apa_wordmark_cream.svg';
 
 const BRAND = {

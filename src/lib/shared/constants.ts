@@ -99,7 +99,7 @@ const EVENT_PROGRAMS: Record<EventType, EventProgram> = {
         name: 'Hangout',
         shortName: 'Hangout',
         state: 'planned',
-        summary: 'A pop-up social for connecting beyond the music, landing midway between Assemblies.',
+        summary: 'A pop-up social for connecting beyond the music, landing midway between assemblies.',
     },
     'open-decks': {
         cadence: 'quarterly',
@@ -167,9 +167,8 @@ const LINKS = {
     instagram: 'https://instagram.com/austinproduceralliance',
     linktree: 'https://linktr.ee/austinproduceralliance',
     meetup: 'https://meetup.com/austinproduceralliance',
-    pressEmail: 'press@austinproduceralliance.com',
     soundcloud: 'https://soundcloud.com/austinproduceralliance',
-    spotify: 'https://open.spotify.com',
+    spotify: 'https://open.spotify.com/user/31uvopo4bn7six3qvkkbkjxu2bwe',
 } as const;
 
 const MAX_DECODE_MEGABYTES = 25;

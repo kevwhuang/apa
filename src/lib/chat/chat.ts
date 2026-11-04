@@ -15,7 +15,7 @@ const ONLINE_WINDOW_MS = 900_000;
 
 const ROOM_MEMBERS = [
     { line: 'Anyone got stems to trade this week? I have a beat that needs a second pair of hands on it.', name: 'Devon Park' },
-    { line: 'That loop Devon closed the Hangout with is still stuck in my head. What did you track it on?', name: 'Inez Rao' },
+    { line: 'That loop Devon closed the Assembly with is still stuck in my head. What did you track it on?', name: 'Inez Rao' },
     { line: 'I have a session booked Thursday and a spare pair of ears going. Open invite to the room.', name: 'June Castillo' },
 ] as const;
 

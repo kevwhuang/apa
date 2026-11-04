@@ -9,10 +9,11 @@ const BAR_MIN = 8;
 
 const assembly = getProgram('assembly');
 const barPeak = Math.max(...Array.from({ length: STEP_COUNT }, (_, step) => stepEnergy(step)));
+const bash = getProgram('bash');
+const camp = getProgram('camp');
+const hangout = getProgram('hangout');
 
 const bars = Array.from({ length: STEP_COUNT }, (_, step) => BAR_MIN + (BAR_MAX - BAR_MIN) * (stepEnergy(step) / barPeak) ** BAR_CONTRAST);
-const bash = getProgram('bash');
-const hangout = getProgram('hangout');
 ---
 
 <section
@@ -59,8 +60,8 @@ const hangout = getProgram('hangout');
                     class="leading-relaxed text-lg"
                     data-motion="blur"
                 >
-                    A working community for music producers in Austin, Texas. At {assembly.name} and
-                    the {bash.cadence} {bash.name}, with the {hangout.name} still to come, producers
+                    A working community for music producers in Austin, Texas. At {assembly.name},
+                    the {bash.cadence} {bash.name}, and {camp.name}, with the {hangout.name} still to come, producers
                     of every genre and experience level find their people.
                 </p>
                 <div class="hero__actions flex flex-col items-center self-center gap-3">

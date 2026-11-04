@@ -10,7 +10,7 @@ Austin Producer Alliance (APA) is an organization of music producers in Austin, 
 - [Instagram](https://instagram.com/austinproduceralliance)
 - [Meetup](https://meetup.com/austinproduceralliance)
 - [Discord](https://discord.gg/QvAtjbWZ7b)
-- [Spotify](https://open.spotify.com)
+- [Spotify](https://open.spotify.com/user/31uvopo4bn7six3qvkkbkjxu2bwe)
 - [SoundCloud](https://soundcloud.com/austinproduceralliance)
 - [Linktree](https://linktr.ee/austinproduceralliance)
 

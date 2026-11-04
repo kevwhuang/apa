@@ -10,10 +10,10 @@ import { formatBytes, formatDateStamp, formatProds, getInitials, getStanding, pi
 
 const ATTENDANCE = [
     { date: '2026-07-25T13:30:00-05:00', event: 'Bash \u00b7 July' },
-    { date: '2026-07-22T19:00:00-05:00', event: 'Hangout \u00b7 July' },
+    { date: '2026-07-09T18:00:00-05:00', event: 'Assembly \u00b7 July' },
     { date: '2026-06-11T18:00:00-05:00', event: 'Assembly \u00b7 June' },
-    { date: '2026-03-21T13:30:00-05:00', event: 'Bash \u00b7 March' },
-    { date: '2025-11-15T13:30:00-06:00', event: 'Bash \u00b7 November' },
+    { date: '2026-04-18T13:30:00-05:00', event: 'Bash \u00b7 April' },
+    { date: '2025-10-18T13:30:00-05:00', event: 'Bash \u00b7 October' },
     { date: '2024-03-14T18:00:00-05:00', event: 'Assembly \u00b7 March' },
 ];
 
@@ -48,12 +48,12 @@ const LINK_FIELDS = [
 const PRODS_LEDGER = [
     { amount: 1, date: '2024-03-12T13:00:00-05:00', reason: 'Welcome Prod' },
     { amount: 1, date: '2024-03-14T18:00:00-05:00', reason: 'Attended the March Assembly' },
-    { amount: 1, date: '2025-11-15T13:30:00-06:00', reason: 'Attended the November Bash' },
-    { amount: 1, date: '2026-03-21T13:30:00-05:00', reason: 'Attended the March Bash' },
-    { amount: 2, date: '2026-03-28T11:00:00-05:00', reason: 'Finished a Bash track' },
-    { amount: -1, date: '2026-04-02T09:00:00-05:00', reason: 'Redeemed \u2014 Store credit' },
+    { amount: 1, date: '2025-10-18T13:30:00-05:00', reason: 'Attended the October Bash' },
+    { amount: 1, date: '2026-04-18T13:30:00-05:00', reason: 'Attended the April Bash' },
+    { amount: 2, date: '2026-04-25T11:00:00-05:00', reason: 'Finished a Bash track' },
+    { amount: -1, date: '2026-05-02T09:00:00-05:00', reason: 'Redeemed \u2014 Store credit' },
     { amount: 1, date: '2026-06-11T18:00:00-05:00', reason: 'Attended the June Assembly' },
-    { amount: 1, date: '2026-07-22T19:00:00-05:00', reason: 'Attended the July Hangout' },
+    { amount: 1, date: '2026-07-09T18:00:00-05:00', reason: 'Attended the July Assembly' },
     { amount: 1, date: '2026-07-25T13:30:00-05:00', reason: 'Attended the July Bash' },
 ];
 
@@ -74,7 +74,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
             eyebrow="Account / Settings"
             headingId="settings-title"
         >
-            Your settings.
+            Tune your card.
         </PageHead>
         <p
             class="max-w-2xl text-lg text-text-secondary"

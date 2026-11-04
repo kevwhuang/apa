@@ -13,6 +13,7 @@ type CalendarItem = ReturnType<typeof mergeCalendar>['upcoming'][number];
 const PAGE_INDEX = [
     { href: '#assembly-title', label: 'Assembly' },
     { href: '#bash-title', label: 'Bash' },
+    { href: '#camp-title', label: 'CAMP' },
     { href: '#hangout-title', label: 'Hangout' },
     { href: '#past-title', label: 'Archive' },
     { href: '#planned-title', label: 'Planned' },
@@ -23,6 +24,7 @@ const assemblyProgram = getProgram('assembly');
 const bashEditions = await getCollection('bash');
 
 const bashProgram = getProgram('bash');
+const campProgram = getProgram('camp');
 
 const events = await getCollection('events');
 
@@ -336,6 +338,33 @@ function withEnd(list: CalendarItem[]) {
             )}
 </section>
 
+<section
+    class="stage stage--tight border-b-2 border-border-strong"
+    aria-labelledby="camp-title"
+>
+    <div>
+        <SectionHead
+            class="text-4xl md:text-5xl"
+            eyebrow={`${campProgram.shortName} / ${campProgram.cadence}`}
+            headingId="camp-title"
+        >
+            {campProgram.name}.
+        </SectionHead>
+        <p
+            class="max-w-2xl leading-relaxed text-lg text-text-secondary"
+            data-motion="rise"
+        >
+            {campProgram.summary}
+        </p>
+    </div>
+    <p
+        class="slab slab--cut slab--lift max-w-(--measure-form) w-full mx-auto leading-relaxed text-text-secondary"
+        data-motion="rise"
+    >
+        No {campProgram.name} on the calendar right now &mdash; the next date goes up here and on Meetup as soon as it is booked.
+    </p>
+</section>
+
 <ProgramFlyer
     class="border-b-2 border-border-strong"
     detailed
@@ -447,11 +476,6 @@ function withEnd(list: CalendarItem[]) {
     .archive-card[data-program='bash'] .archive-card__stamp {
         background: var(--color-event-bash);
         color: var(--color-event-bash-text);
-    }
-
-    .archive-card[data-program='hangout'] .archive-card__stamp {
-        background: var(--color-event-hangout);
-        color: var(--color-event-hangout-text);
     }
 
     .archive-card__body {

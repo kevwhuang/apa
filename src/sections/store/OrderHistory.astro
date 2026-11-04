@@ -27,7 +27,7 @@ const images = await toImageSources();
             eyebrow="Store / Orders"
             headingId="order-title"
         >
-            <span data-order-heading>Your orders.</span>
+            <span data-order-heading>Your receipts.</span>
         </PageHead>
         <p
             class="label text-text-secondary"
@@ -474,7 +474,7 @@ const images = await toImageSources();
 
     function renderHeading(order: Order, fresh: boolean) {
         document.querySelector<HTMLElement>('[data-order-mark]')?.toggleAttribute('hidden', !fresh);
-        setText(document.querySelector('[data-order-heading]'), fresh ? 'Order received.' : 'Your orders.');
+        setText(document.querySelector('[data-order-heading]'), fresh ? 'Order received.' : 'Your receipts.');
         setText(document.querySelector('[data-order-number]'), `Order ${order.id} \u00b7 ${formatDateStamp(new Date(order.placedAt))}`);
     }
 
