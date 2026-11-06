@@ -42,7 +42,7 @@ const [nextAssembly] = events
     <div class="flex flex-col gap-6">
         <PageHead
             class="max-w-3xl text-5xl md:text-7xl"
-            eyebrow="Account / Onboarding"
+            eyebrow="Account setup"
             headingId="onboarding-title"
         >
             Welcome in.
@@ -66,7 +66,7 @@ const [nextAssembly] = events
         data-onboarding-surface="expired"
         hidden
     >
-        <p class="label text-link">Account / Link</p>
+        <p class="label text-link">Welcome link</p>
         <h2 class="text-3xl text-balance">
             This link no longer works.
         </h2>
@@ -153,7 +153,7 @@ const [nextAssembly] = events
                             color="var(--color-bg-inverse)"
                             data-motion="wipe"
                             label="??"
-                            labelClass="onboarding-preview__initials leading-none text-[20cqw] [text-shadow:2px_2px_0_var(--color-shadow-md)]"
+                            labelClass="onboarding-preview__initials leading-none text-[20cqw]"
                             labelColor="var(--color-text-inverse-secondary)"
                         >
                             <img
@@ -171,11 +171,11 @@ const [nextAssembly] = events
                             >
                                 Your artist name
                             </h2>
-                            <p
-                                class="mb-3 font-mono text-xs uppercase wrap-break-word text-text-secondary"
-                                data-preview-meta
-                            >
-                                Austin, TX
+                            <p class="mb-3 font-mono text-xs wrap-break-word text-text-secondary">
+                                <span
+                                    class="capitalize"
+                                    data-preview-role
+                                /><span data-preview-location>Austin, TX</span>
                             </p>
                             <ul
                                 class="flex flex-wrap gap-2 list-none"
@@ -257,7 +257,7 @@ const [nextAssembly] = events
                 </div>
                 <fieldset class="flex flex-col gap-3">
                     <legend class="label mb-1 text-text-secondary">
-                        {PROFILE_FIELDS.genres.label} <span class="text-text-secondary">/ {PROFILE_FIELDS.genres.qualifier}</span>
+                        {PROFILE_FIELDS.genres.label} <span class="text-text-secondary">({PROFILE_FIELDS.genres.qualifier})</span>
                     </legend>
                     <div class="flex flex-wrap gap-2">
                         {GENRES.map(genre => (
@@ -283,7 +283,7 @@ const [nextAssembly] = events
                 </fieldset>
                 <fieldset class="flex flex-col gap-3">
                     <legend class="label mb-1 text-text-secondary">
-                        {PROFILE_FIELDS.role.label} <span class="text-text-secondary">/ {PROFILE_FIELDS.role.qualifier}</span>
+                        {PROFILE_FIELDS.role.label} <span class="text-text-secondary">({PROFILE_FIELDS.role.qualifier})</span>
                     </legend>
                     <div class="flex flex-wrap gap-2">
                         {PROFILE_ROLES.map(role => (
@@ -400,7 +400,7 @@ const [nextAssembly] = events
                     Setup is done. One guided lap and you will know where everything lives.
                 </p>
                 <div class="onboarding-tour slab slab--well">
-                    <p class="label text-link-on-inverse">The guided tour / {TOUR_STOPS.length} stops</p>
+                    <p class="label text-link-on-inverse">The guided tour, {TOUR_STOPS.length} stops</p>
                     <p class="max-w-[36ch] font-bold font-sans leading-[1.2] text-lg tracking-[-0.02em]">
                         A short walk through the five things you will reach for most.
                     </p>
@@ -1097,7 +1097,8 @@ const [nextAssembly] = events
         setHidden(document.querySelector<HTMLElement>('[data-portrait-remove]'), avatar.length === 0);
         setPreviewText(document.querySelector<HTMLElement>('[data-preview-name]'), artistName, 'Your artist name');
         setText(document.querySelector<HTMLElement>('.onboarding-preview__initials'), getInitials(artistName) || '??');
-        setText(document.querySelector<HTMLElement>('[data-preview-meta]'), role ? `${role} \u2014 ${location}` : location);
+        setText(document.querySelector<HTMLElement>('[data-preview-role]'), role ? `${role} \u2014 ` : '');
+        setText(document.querySelector<HTMLElement>('[data-preview-location]'), location);
 
         if (!list || !template) return;
 

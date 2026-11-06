@@ -48,12 +48,12 @@ const track = featured?.data.tracks[0];
                             class="slab slab--bare slab--card aspect-square"
                             color={PALETTE[0].bg}
                             label={getInitials(featured.data.name)}
-                            labelClass="leading-none text-8xl [text-shadow:3px_3px_0_var(--color-shadow-md)]"
+                            labelClass="leading-none text-8xl"
                             labelColor={PALETTE[0].text}
                         />
                     </div>
                     <p
-                        class:list={['label text-text-inverse-secondary', featured.data.links.length > 0 && 'mb-4']}
+                        class:list={['font-mono text-xs text-text-inverse-secondary', featured.data.links.length > 0 && 'mb-4']}
                         data-placeholder
                     >
                         On the roster since <time datetime={toIsoDate(featured.data.joined)}>{formatCalendarMonth(featured.data.joined)}</time>
@@ -65,11 +65,11 @@ const track = featured?.data.tracks[0];
                 </div>
                 <div data-motion-stagger="rise">
                     <p
-                        class="mb-6 font-mono text-xs uppercase text-text-inverse-secondary"
+                        class="mb-6 font-mono text-xs text-text-inverse-secondary"
                         data-placeholder
                     >
                         {featured.data.roles.length > 0
-                            ? `${featured.data.roles.join(' \u00b7 ')} \u2014 ${featured.data.location}`
+                            ? <Fragment><span class="capitalize">{featured.data.roles.join(' \u00b7 ')}</span> &mdash; {featured.data.location}</Fragment>
                             : featured.data.location}
                     </p>
                     <p
@@ -105,7 +105,7 @@ const track = featured?.data.tracks[0];
     <div>
         <SectionHead
             class="text-5xl text-balance"
-            eyebrow="Producers / Roster"
+            eyebrow="The roster"
             headingId="producers-title"
         >
             Every genre. One scene.
@@ -133,7 +133,7 @@ const track = featured?.data.tracks[0];
                             class="aspect-square border-b-2 border-border-strong"
                             color={PALETTE[(index + 1) % PALETTE.length].bg}
                             label={getInitials(producer.data.name)}
-                            labelClass="leading-none text-5xl [text-shadow:2px_2px_0_var(--color-shadow-md)]"
+                            labelClass="leading-none text-5xl"
                             labelColor={PALETTE[(index + 1) % PALETTE.length].text}
                         />
                         <h3

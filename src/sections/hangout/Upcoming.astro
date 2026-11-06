@@ -24,7 +24,7 @@ const [next, ...later] = upcoming;
     <div>
         <SectionHead
             class="text-4xl"
-            eyebrow={`${program.shortName} / planned`}
+            eyebrow={`${program.shortName}, coming soon`}
             headingId="hangout-upcoming-title"
         >
             On the calendar
@@ -51,7 +51,7 @@ const [next, ...later] = upcoming;
                                         <time datetime={next.data.date.toISOString()}>{formatDate(next.data.date)}</time>
                                     </p>
                                     <p
-                                        class="font-mono text-xs uppercase text-text-secondary"
+                                        class="font-mono text-xs text-text-secondary"
                                         data-placeholder
                                     >
                                         {formatTimeRange(next.data.date, next.data.end)}
@@ -61,7 +61,7 @@ const [next, ...later] = upcoming;
                                     <h3 class="mb-2 font-display text-3xl">
                                         {next.data.title}
                                     </h3>
-                                    <address class="mb-3 font-mono not-italic text-xs uppercase text-text-secondary">
+                                    <address class="mb-3 font-mono not-italic text-xs text-text-secondary">
                                         {next.data.location}
                                     </address>
                                     <p class="max-w-2xl mb-4 leading-relaxed text-text-secondary">
@@ -106,7 +106,7 @@ const [next, ...later] = upcoming;
                                                     <time datetime={event.data.date.toISOString()}>{formatDate(event.data.date)}</time>
                                                 </p>
                                                 <p
-                                                    class="font-mono text-xs uppercase text-text-secondary"
+                                                    class="font-mono text-xs text-text-secondary"
                                                     data-placeholder
                                                 >
                                                     {formatTimeRange(event.data.date, event.data.end)}
@@ -115,7 +115,7 @@ const [next, ...later] = upcoming;
                                             <h3 class="text-lg">
                                                 {event.data.title}
                                             </h3>
-                                            <address class="hangout-next__meta font-mono not-italic text-xs uppercase text-text-secondary">
+                                            <address class="hangout-next__meta font-mono not-italic text-xs text-text-secondary">
                                                 {event.data.location}
                                             </address>
                                         </li>

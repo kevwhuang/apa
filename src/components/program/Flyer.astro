@@ -31,7 +31,7 @@ const program = getProgram('hangout');
     <div>
         <SectionHead
             class="text-4xl md:text-5xl"
-            eyebrow={`${program.shortName} / planned`}
+            eyebrow={`${program.shortName}, coming soon`}
             headingId={headingId}
         >
             {program.name}.
@@ -117,7 +117,7 @@ const program = getProgram('hangout');
                             <time datetime={event.date.toISOString()}>{formatDate(event.date)}</time>
                         </p>
                         <p
-                            class="font-mono text-xs uppercase text-text-secondary"
+                            class="font-mono text-xs text-text-secondary"
                             data-placeholder
                         >
                             {event.end
@@ -127,7 +127,7 @@ const program = getProgram('hangout');
                     </div>
                     <div>
                         <p class="label mb-3 text-text-secondary">Where</p>
-                        <address class="font-mono not-italic text-xs uppercase">{event.location}</address>
+                        <address class="font-mono not-italic text-xs">{event.location}</address>
                     </div>
                 </article>
             </li>

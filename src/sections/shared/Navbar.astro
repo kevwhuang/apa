@@ -125,7 +125,6 @@ const Lockup = BRAND_LOGOS.lockup;
     .cart-count {
         align-items: center;
         background: var(--color-badge-count-bg);
-        border-radius: 9999px;
         box-shadow: 0 0 0 2px var(--color-bg-page);
         color: var(--color-badge-count-text);
         display: inline-flex;
@@ -229,7 +228,7 @@ const Lockup = BRAND_LOGOS.lockup;
     .site-header--overlay.is-solid {
         background: var(--color-bg-page);
         border-bottom-color: var(--color-border-strong);
-        box-shadow: var(--lift) var(--lift) 0 0 var(--color-border-subtle);
+        box-shadow: var(--lift) var(--lift) 0 0 var(--color-border-strong);
     }
 
     .site-header.is-hidden {
@@ -282,7 +281,6 @@ const Lockup = BRAND_LOGOS.lockup;
         --nav-item-hover-bg: var(--color-nav-bg-hover);
         --nav-item-hover-ink: var(--color-link);
         align-items: center;
-        border-radius: 4px;
         display: flex;
         font-family: var(--font-mono);
         font-size: var(--text-sm);
@@ -348,9 +346,8 @@ const Lockup = BRAND_LOGOS.lockup;
 
     .site-nav__menu {
         background: var(--color-bg-raised);
-        border: 1px solid var(--color-border-subtle);
-        border-radius: 6px;
-        box-shadow: 0 12px 32px 0 var(--color-shadow-lg);
+        border: 2px solid var(--color-border-strong);
+        box-shadow: var(--lift) var(--lift) 0 0 var(--color-border-strong);
         display: flex;
         flex-direction: column;
         gap: 2px;
@@ -471,7 +468,6 @@ const Lockup = BRAND_LOGOS.lockup;
         .site-nav__menu {
             background: none;
             border: 0;
-            border-radius: 0;
             box-shadow: none;
             gap: 0;
             inset: auto;

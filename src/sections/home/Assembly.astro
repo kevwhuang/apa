@@ -21,7 +21,7 @@ const program = getProgram('assembly');
     <div>
         <SectionHead
             class="text-4xl sm:text-5xl md:text-7xl"
-            eyebrow={`${program.shortName} / ${program.cadence}`}
+            eyebrow={`${program.shortName}, ${program.cadence}`}
             headingId="landing-assembly-title"
         >
             Next {program.name}.
@@ -61,7 +61,7 @@ const program = getProgram('assembly');
                             <span class="assembly-sheet__day">{formatCalendarDay(next.data.date)}</span>
                             <span class="assembly-sheet__month">{formatCalendarMonth(next.data.date)}</span>
                         </time>
-                        <span class="font-mono text-xs tracking-[0.08em] uppercase text-event-assembly-text">{formatWeekday(next.data.date)}</span>
+                        <span class="font-mono text-xs tracking-[0.08em] text-event-assembly-text">{formatWeekday(next.data.date)}</span>
                         <span
                             class="halftone--accent absolute bottom-0 inset-x-0 h-[calc(var(--drift-unit)*2)]"
                             aria-hidden="true"
@@ -73,12 +73,12 @@ const program = getProgram('assembly');
                     >
                         <h3 class="mb-4 font-display text-3xl">{next.data.title}</h3>
                         <p
-                            class="mb-1 font-mono text-xs uppercase text-text-secondary"
+                            class="mb-1 font-mono text-xs text-text-secondary"
                             data-placeholder
                         >
                             {formatTimeRange(next.data.date, next.data.end)}
                         </p>
-                        <address class="mb-5 font-mono not-italic text-xs uppercase text-text-secondary">
+                        <address class="mb-5 font-mono not-italic text-xs text-text-secondary">
                             {next.data.location}
                         </address>
                         <p class="max-w-2xl mb-8 leading-relaxed text-lg text-text-secondary">{next.data.excerpt}</p>
@@ -151,7 +151,6 @@ const program = getProgram('assembly');
         font-family: var(--font-mono);
         font-size: var(--text-lg);
         letter-spacing: 0.1em;
-        text-transform: uppercase;
         white-space: nowrap;
     }
 

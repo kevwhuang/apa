@@ -19,7 +19,7 @@ const program = getProgram('hangout');
     <div class="flex flex-col gap-6">
         <PageHead
             class="max-w-4xl text-5xl md:text-7xl"
-            eyebrow={`${program.shortName} / planned`}
+            eyebrow={`${program.shortName}, coming soon`}
             headingId="hangout-title"
         >
             No laptops.<br />
@@ -48,7 +48,7 @@ const program = getProgram('hangout');
                 aria-label="How a Hangout will run"
                 data-motion="rise"
             >
-                <p class="label mb-4 text-link">House rules / As planned</p>
+                <p class="label mb-4 text-link">House rules, as planned</p>
                 <dl>
                     {HOUSE_RULES.map(rule => (
                         <div class="first:border-t-0 first:pt-0 last:pb-0 grid grid-cols-[76px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-sm) border-t border-border-subtle">

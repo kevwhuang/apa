@@ -71,7 +71,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
     <div class="flex flex-col gap-6">
         <PageHead
             class="max-w-4xl text-5xl md:text-7xl"
-            eyebrow="Account / Settings"
+            eyebrow="Account settings"
             headingId="settings-title"
         >
             Tune your card.
@@ -104,7 +104,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                             class="settings__tile self-start shrink-0 aspect-square w-[104px] border-2 border-border-strong"
                             color={DEMO_TILE.bg}
                             label={getInitials(DEMO_PROFILE.artistName)}
-                            labelClass="settings__initials leading-none text-[32cqw] [text-shadow:2px_2px_0_var(--color-shadow-md)]"
+                            labelClass="settings__initials leading-none text-[32cqw]"
                             labelColor={DEMO_TILE.text}
                         >
                             <img
@@ -129,8 +129,13 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                                     {DEMO_PROFILE.role}
                                 </span>
                             </p>
-                            <p class="mb-3 font-mono text-xs uppercase text-text-secondary">
-                                <span data-settings-role>{DEMO_PROFILE.role}</span> &mdash; {DEMO_PROFILE.city}, {DEMO_PROFILE.state}
+                            <p class="mb-3 font-mono text-xs text-text-secondary">
+                                <span
+                                    class="capitalize"
+                                    data-settings-role
+                                >
+                                    {DEMO_PROFILE.role}
+                                </span> &mdash; {DEMO_PROFILE.city}, {DEMO_PROFILE.state}
                             </p>
                             <ul class="flex flex-wrap gap-2 list-none">
                                 {DEMO_PROFILE.genres.map(genre => (
@@ -308,7 +313,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
             </div>
             <fieldset class="flex flex-col gap-3">
                 <legend class="label mb-1 text-text-secondary">
-                    {PROFILE_FIELDS.genres.label} <span class="text-text-secondary">/ {PROFILE_FIELDS.genres.qualifier}</span>
+                    {PROFILE_FIELDS.genres.label} <span class="text-text-secondary">({PROFILE_FIELDS.genres.qualifier})</span>
                 </legend>
                 <div class="flex flex-wrap gap-2">
                     {GENRES.map(genre => (
@@ -335,7 +340,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
             </fieldset>
             <fieldset class="flex flex-col gap-3">
                 <legend class="label mb-1 text-text-secondary">
-                    {PROFILE_FIELDS.role.label} <span class="text-text-secondary">/ {PROFILE_FIELDS.role.qualifier}</span>
+                    {PROFILE_FIELDS.role.label} <span class="text-text-secondary">({PROFILE_FIELDS.role.qualifier})</span>
                 </legend>
                 <div class="flex flex-wrap gap-2">
                     {PROFILE_ROLES.map(role => (

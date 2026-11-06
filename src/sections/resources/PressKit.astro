@@ -26,7 +26,7 @@ const press = downloads
     <div>
         <SectionHead
             class="text-3xl"
-            eyebrow="Press kit / Brand"
+            eyebrow="Logo files"
             headingId="brand-assets-title"
         >
             Brand assets
@@ -38,7 +38,7 @@ const press = downloads
             The wordmark and lockup, in the formats a publication is likely to ask for.
         </p>
         <div
-            class="slab slab--card slab--roomy flex flex-wrap items-center gap-(--space-2xl) mb-8"
+            class="press-kit__preview slab slab--card slab--roomy flex flex-wrap items-center gap-(--space-2xl) mb-8"
             data-motion="unfold"
         >
             <BrandLockup
@@ -108,7 +108,7 @@ const press = downloads
     <div>
         <SectionHead
             class="text-3xl"
-            eyebrow={`Press kit / ${press.length} entries`}
+            eyebrow={`Press kit, ${press.length} entries`}
             headingId="press-material-title"
         >
             Press material
@@ -279,6 +279,14 @@ const press = downloads
 
     .press-kit__mark {
         color: var(--color-logo);
+    }
+
+    .press-kit__preview {
+        --slab-fill: var(--color-cream);
+    }
+
+    :global(html[data-theme='dark']) .press-kit__preview {
+        --slab-fill: var(--color-ink);
     }
 
     .press-kit__table {

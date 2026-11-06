@@ -7,7 +7,7 @@ const SECONDS_PER_DAY = 86_400;
 const SECONDS_PER_HOUR = 3_600;
 const SECONDS_PER_MINUTE = 60;
 const TICK_MS = 1_000;
-const UNLOCKED_MESSAGE = 'any moment now';
+const PENDING_MESSAGE = 'Coming soon';
 
 let registered = false;
 let timer: Timer | undefined;
@@ -77,7 +77,7 @@ function unlock(node: HTMLElement): void {
     const ready = node.querySelector<HTMLElement>('[data-unlock-ready]');
 
     if (!ready) {
-        setText(node.querySelector('[data-unlock-remaining]'), UNLOCKED_MESSAGE);
+        setText(node.querySelector('[data-unlock-remaining]')?.parentElement ?? null, PENDING_MESSAGE);
 
         return;
     }

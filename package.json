@@ -1,6 +1,6 @@
 {
     "name": "apa",
-    "version": "26.11.3",
+    "version": "26.11.8",
     "type": "module",
     "author": "Kevin Huang",
     "scripts": {
@@ -11,25 +11,25 @@
         "test": "vitest run && playwright test"
     },
     "dependencies": {
-        "@astrojs/netlify": "^8.2.11",
+        "@astrojs/netlify": "^8.2.12",
         "@astrojs/react": "^6.0.6",
         "@astrojs/sitemap": "^3.7.4",
         "@netlify/blobs": "^10.7.13",
-        "@supabase/supabase-js": "^2.118.0",
-        "@tailwindcss/vite": "^4.3.4",
-        "astro": "^7.4.5",
+        "@supabase/supabase-js": "^2.119.0",
+        "@tailwindcss/vite": "^4.3.5",
+        "astro": "^7.4.7",
         "astro-robots-txt": "^1.0.0",
         "gsap": "^3.15.1",
         "react": "^19.3.1",
         "react-dom": "^19.3.1",
-        "tailwindcss": "^4.3.4",
+        "tailwindcss": "^4.3.5",
         "three": "^0.185.1",
-        "vite": "^8.3.5"
+        "vite": "^8.3.6"
     },
     "devDependencies": {
         "@astrojs/check": "^0.9.12",
         "@eslint/js": "^10.0.1",
-        "@playwright/test": "^1.64.1",
+        "@playwright/test": "^1.65.0",
         "@stylistic/eslint-plugin": "^5.10.0",
         "@types/react": "^19.3.0",
         "@types/three": "^0.185.4",

@@ -1,7 +1,7 @@
 import horizontalCream from '@images/brand/apa_horizontal_cream.svg';
 import horizontalInk from '@images/brand/apa_horizontal_ink.svg';
-import lockup from '@images/brand/apa_horizontal_transparent.svg';
-import symbol from '@images/brand/apa_symbol_transparent.svg';
+import lockup from '@images/brand/apa_horizontal_default.svg';
+import symbol from '@images/brand/apa_symbol_default.svg';
 import wordmarkCream from '@images/brand/apa_wordmark_cream.svg';
 
 const BRAND = {
@@ -13,27 +13,27 @@ const BRAND = {
 const BRAND_DOWNLOADS = [
     {
         asset: symbol,
-        filename: 'austin-producer-alliance-symbol.svg',
+        filename: 'apa_symbol_default.svg',
         format: 'svg',
-        label: 'Symbol',
+        label: 'Symbol, default',
     },
     {
         asset: wordmarkCream,
-        filename: 'austin-producer-alliance-wordmark.svg',
+        filename: 'apa_wordmark_cream.svg',
         format: 'svg',
-        label: 'Wordmark',
+        label: 'Wordmark, cream',
     },
     {
         asset: horizontalCream,
-        filename: 'austin-producer-alliance-lockup.svg',
+        filename: 'apa_horizontal_cream.svg',
         format: 'svg',
-        label: 'Lockup',
+        label: 'Lockup, cream',
     },
     {
         asset: horizontalInk,
-        filename: 'austin-producer-alliance-lockup-inverse.svg',
+        filename: 'apa_horizontal_ink.svg',
         format: 'svg',
-        label: 'Lockup, inverse',
+        label: 'Lockup, ink',
     },
 ] as const;
 

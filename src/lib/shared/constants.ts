@@ -287,7 +287,7 @@ const PROFILE_FIELDS = {
         label: 'What you make',
         max: 5,
         message: 'Pick five at most.',
-        qualifier: 'Pick up to five',
+        qualifier: 'pick up to five',
     },
     portrait: {
         label: 'Portrait',
@@ -295,7 +295,7 @@ const PROFILE_FIELDS = {
     },
     role: {
         label: 'What do you do?',
-        qualifier: 'Pick one',
+        qualifier: 'pick one',
     },
     state: {
         autocomplete: 'address-level1',
@@ -323,7 +323,7 @@ const ROUTES = [
 ] as const;
 
 const SESSION_TTL_DAYS = 14;
-const SITE_UPDATED = '2026-11-03T00:00:00-06:00';
+const SITE_UPDATED = '2026-11-08T00:00:00-06:00';
 
 const SPOTLIGHT = {
     acceptAttribute: '.mp3,audio/mpeg',

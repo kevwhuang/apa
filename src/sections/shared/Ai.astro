@@ -222,10 +222,10 @@ import IconSpark from '@components/icons/Spark.astro';
     .ai__window {
         background: var(--color-bg-raised);
         border: 2px solid var(--color-border-strong);
-        box-shadow: calc(-1 * var(--lift)) var(--lift) 0 0 var(--color-border-strong);
+        box-shadow: var(--lift) var(--lift) 0 0 var(--color-border-strong);
         color: var(--color-text);
         height: min(600px, calc(100dvh - var(--header-height) - var(--space-md) - var(--ai-offset)));
-        inset: auto var(--launcher-size) var(--ai-offset) auto;
+        inset: auto calc(var(--launcher-size) + var(--lift)) var(--ai-offset) auto;
         overflow: hidden;
         padding: 0;
         position: fixed;

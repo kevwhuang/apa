@@ -19,7 +19,7 @@ const past = events
     <div>
         <SectionHead
             class="text-4xl text-balance"
-            eyebrow={`Archive / ${past.length} on file`}
+            eyebrow={`Archive, ${past.length} sessions`}
             headingId="assembly-past-title"
         >
             Minutes from past sessions
@@ -39,13 +39,13 @@ const past = events
                             data-placeholder
                         >
                             <span class="text-link">Session {String(past.length - index).padStart(2, '0')}</span>
-                            {' / '}
+                            {' on '}
                             <time datetime={event.data.date.toISOString()}>{formatDate(event.data.date)}</time>
                         </p>
                         <h3 class="mb-1 text-lg">
                             {event.data.title}
                         </h3>
-                        <address class="mb-3 font-mono not-italic text-xs uppercase text-text-secondary">
+                        <address class="mb-3 font-mono not-italic text-xs text-text-secondary">
                             {event.data.location}
                         </address>
                         <p class="leading-relaxed text-sm text-text-secondary">

@@ -390,7 +390,7 @@ import IconArrow from '@components/icons/Arrow.astro';
         setHidden(document.querySelector<HTMLElement>('[data-tour-skip]'), step === last);
         setText(document.querySelector('[data-tour-announce]'), `Step ${step + 1} of ${stops.length}. ${stop.body}`);
         setText(document.querySelector('[data-tour-body]'), stop.body);
-        setText(document.querySelector('[data-tour-eyebrow]'), `Tour / ${step + 1} of ${stops.length}`);
+        setText(document.querySelector('[data-tour-eyebrow]'), `Tour stop ${step + 1} of ${stops.length}`);
         setText(document.querySelector('[data-tour-next-label]'), step === last ? 'Done' : 'Next');
         scrollToTargets(stop.targets);
         render();

@@ -252,10 +252,6 @@
     --color-selection-dark: #6f2f0e;
     --color-selection-light: #f2c2a3;
     --color-selection-text: #171310;
-    --color-shadow-lg: #17131026;
-    --color-shadow-md: #1713101a;
-    --color-shadow-pressed: #17131040;
-    --color-shadow-sm: #1713100d;
     --color-signal: #e9560c;
     --color-signal-dark: #bb4202;
     --color-signal-light: #ff6a2c;
@@ -304,9 +300,13 @@
     --color-white: #ffffff;
     --default-transition-duration: 0.2s;
     --default-transition-timing-function: ease;
+    --drop-shadow-*: initial;
     --font-display: var(--font-unbounded);
     --font-mono: var(--font-space-mono);
     --font-sans: var(--font-bricolage-grotesque);
+    --inset-shadow-*: initial;
+    --radius-*: initial;
+    --shadow-*: initial;
     --text-10xl: clamp(118.88px, calc(92.54px + 8.2317vw), 197.91px);
     --text-10xl--line-height: 0.95;
     --text-2xl: clamp(27.65px, calc(25.796px + 0.5787vw), 33.2px);
@@ -329,6 +329,7 @@
     --text-base--line-height: 1.5;
     --text-lg: clamp(19.2px, calc(18.517px + 0.2135vw), 21.25px);
     --text-lg--line-height: 1.4;
+    --text-shadow-*: initial;
     --text-sm: clamp(13.33px, calc(13.244px + 0.0278vw), 13.6px);
     --text-sm--line-height: 1.5;
     --text-xl: clamp(23.04px, calc(21.866px + 0.3669vw), 26.56px);
@@ -607,10 +608,6 @@ table {
     --color-scrollbar-track: #171310;
     --color-selection-bg: #6f2f0e;
     --color-selection-text: #f6f1e4;
-    --color-shadow-lg: #0d090799;
-    --color-shadow-md: #0d090780;
-    --color-shadow-pressed: #0d090799;
-    --color-shadow-sm: #0d090766;
     --color-stock-low: #f3c443;
     --color-success-border: #5d9f65;
     --color-success-surface: #152f1b;

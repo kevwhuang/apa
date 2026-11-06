@@ -22,7 +22,7 @@ const program = getProgram('hangout');
     <div>
         <SectionHead
             class="text-4xl sm:text-5xl"
-            eyebrow={`${program.shortName} / planned`}
+            eyebrow={`${program.shortName}, coming soon`}
             headingId="landing-hangout-title"
         >
             {program.name}.
@@ -65,19 +65,19 @@ const program = getProgram('hangout');
                                         datetime={next.data.date.toISOString()}
                                     >
                                         <span class="hangout-flyer__day">{formatCalendarDay(next.data.date)}</span>
-                                        <span class="hangout-flyer__month block font-mono leading-normal text-sm tracking-[0.08em] uppercase whitespace-nowrap">{formatCalendarMonth(next.data.date)}</span>
+                                        <span class="hangout-flyer__month block font-mono leading-normal text-sm tracking-[0.08em] whitespace-nowrap">{formatCalendarMonth(next.data.date)}</span>
                                     </time>
-                                    <span class="hangout-flyer__weekday font-mono text-xs tracking-[0.06em] uppercase text-event-hangout-text">{formatWeekday(next.data.date)}</span>
+                                    <span class="hangout-flyer__weekday font-mono text-xs tracking-[0.06em] text-event-hangout-text">{formatWeekday(next.data.date)}</span>
                                 </p>
                                 <div class="content-start p-(--space-md) md:p-(--space-lg)">
                                     <h3 class="mb-5 font-display text-3xl">{next.data.title}</h3>
                                     <p
-                                        class="mb-1 font-mono text-xs uppercase text-text-secondary"
+                                        class="mb-1 font-mono text-xs text-text-secondary"
                                         data-placeholder
                                     >
                                         {formatTimeRange(next.data.date, next.data.end)}
                                     </p>
-                                    <address class="mb-5 font-mono not-italic text-xs uppercase text-text-secondary">
+                                    <address class="mb-5 font-mono not-italic text-xs text-text-secondary">
                                         {next.data.location}
                                     </address>
                                     <p class="max-w-2xl mb-8 leading-relaxed text-lg text-text-secondary">{next.data.excerpt}</p>

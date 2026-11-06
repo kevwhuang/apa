@@ -315,12 +315,12 @@ import IconWaveform from '@components/icons/Waveform.astro';
     .player__panel {
         background: var(--color-bg-raised);
         border: 2px solid var(--color-border-strong);
-        box-shadow: calc(-1 * var(--lift)) var(--lift) 0 0 var(--color-border-strong);
+        box-shadow: var(--lift) var(--lift) 0 0 var(--color-border-strong);
         color: var(--color-text);
         display: flex;
         flex-direction: column;
         height: auto;
-        inset: auto var(--launcher-size) var(--space-md) auto;
+        inset: auto calc(var(--launcher-size) + var(--lift)) var(--space-md) auto;
         max-height: calc(100dvh - var(--header-height) - 2 * var(--space-md));
         position: fixed;
         width: var(--player-width, min(340px, calc(100vw - var(--launcher-size) - 2 * var(--space-md))));
