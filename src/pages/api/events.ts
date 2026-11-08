@@ -1,6 +1,6 @@
 import { getCollection } from 'astro:content';
 
-import { toAustinIso } from '@lib/shared/utils';
+import { isUpcoming, toAustinIso } from '@lib/shared/utils';
 
 import type { APIRoute } from 'astro';
 
@@ -15,7 +15,12 @@ export const GET: APIRoute = async () => {
         ...editions.map(entry => ({ ...entry.data, id: entry.id, type: 'bash' })),
     ]
         .sort((a, b) => +a.date - +b.date)
-        .map(record => ({ ...record, date: toAustinIso(record.date), end: toAustinIso(record.end) }));
+        .map(record => ({
+            ...record,
+            date: toAustinIso(record.date),
+            end: toAustinIso(record.end),
+            status: isUpcoming(record.end) ? 'upcoming' : 'past',
+        }));
 
     return Response.json(records, {
         headers: { 'Cache-Control': 'no-store' },

@@ -4,19 +4,19 @@ import { getCollection } from 'astro:content';
 import IconArrow from '@components/icons/Arrow.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import QrCode from '@components/shared/QrCode.astro';
+import Schedule from '@components/program/Schedule.astro';
 import { EMAIL_MAX_LENGTH } from '@lib/shared/constants';
 import { formatDate, formatTime, mergeCalendar } from '@lib/shared/utils';
 
 const DOOR_HOST = 'austinproduceralliance.com';
 const DOOR_PATH = 'here';
-const DOOR_URL = `${DOOR_HOST}/${DOOR_PATH}`;
 
 const bashEditions = await getCollection('bash');
 const events = await getCollection('events');
 
-const { upcoming } = mergeCalendar(events, bashEditions);
+const doorUrl = `${DOOR_HOST}/${DOOR_PATH}`;
 
-const nextEvent = upcoming.at(0);
+const { upcoming } = mergeCalendar(events, bashEditions);
 ---
 
 <section
@@ -25,7 +25,7 @@ const nextEvent = upcoming.at(0);
 >
     <div class="flex flex-col gap-6">
         <PageHead
-            class="max-w-3xl text-5xl md:text-7xl text-balance"
+            class="max-w-3xl text-5xl text-balance md:text-7xl"
             eyebrow="Event check-in"
             headingId="checkin-title"
         >
@@ -47,49 +47,47 @@ const nextEvent = upcoming.at(0);
 >
     <div class="rank rank--2 items-stretch">
         <aside
-            class="door-pass mark"
+            class="mark"
             aria-label="What you scanned"
             data-motion="wipe"
         >
             <div class="door-pass__panel slab slab--well flex flex-col h-full gap-6">
                 <div class="flex flex-col gap-6 mb-auto">
                     <p class="label text-link-on-inverse">Door pass</p>
-                    <p class="font-mono text-sm tracking-[-0.01em] wrap-break-word text-link-on-inverse md:text-lg">
+                    <p class="font-mono text-sm wrap-break-word text-link-on-inverse md:text-lg">
                         {DOOR_HOST}/<wbr />{DOOR_PATH}
                     </p>
-                    {nextEvent && (
-                        <dl class="door-pass__rows">
+                    {upcoming.map((event, index) => (
+                        <dl
+                            class="door-pass__rows"
+                            data-event-end={event.end.toISOString()}
+                            data-event-group="door"
+                            data-event-role="next"
+                            data-event-title={event.title}
+                            hidden={index > 0}
+                        >
                             <div class="last:border-b-0 grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-inverse-subtle">
                                 <dt class="label text-text-inverse-secondary">Event</dt>
-                                <dd
-                                    class="text-sm"
-                                    data-placeholder
-                                >
-                                    {nextEvent.title}
+                                <dd class="text-sm">
+                                    {event.title}
                                 </dd>
                             </div>
                             <div class="last:border-b-0 grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-inverse-subtle">
                                 <dt class="label text-text-inverse-secondary">When</dt>
-                                <dd
-                                    class="text-sm"
-                                    data-placeholder
-                                >
-                                    <time datetime={nextEvent.date.toISOString()}>
-                                        {formatDate(nextEvent.date)}, {formatTime(nextEvent.date)}
+                                <dd class="text-sm">
+                                    <time datetime={event.date.toISOString()}>
+                                        {formatDate(event.date)}, {formatTime(event.date)}
                                     </time>
                                 </dd>
                             </div>
                             <div class="last:border-b-0 grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-inverse-subtle">
                                 <dt class="label text-text-inverse-secondary">Where</dt>
-                                <dd
-                                    class="text-sm"
-                                    data-placeholder
-                                >
-                                    {nextEvent.location}
+                                <dd class="text-sm">
+                                    {event.location}
                                 </dd>
                             </div>
                         </dl>
-                    )}
+                    ))}
                 </div>
                 <div class="door-pass__foot">
                     <p class="action-text door-pass__stamp">Checked</p>
@@ -102,9 +100,9 @@ const nextEvent = upcoming.at(0);
             data-motion="rise"
         >
             <QrCode
-                caption={`Scan to check in \u00b7 ${DOOR_URL}`}
-                data={DOOR_URL}
-                label={`QR code for ${DOOR_URL}`}
+                caption={`Scan to check in \u00b7 ${doorUrl}`}
+                data={doorUrl}
+                label={`QR code for ${doorUrl}`}
             />
         </div>
     </div>
@@ -119,16 +117,19 @@ const nextEvent = upcoming.at(0);
         data-checkin-form
         data-motion="unfold"
     >
-        <header class="flex flex-wrap items-center justify-between gap-(--space-xs) pb-(--space-xs) border-b-2 border-border-strong">
+        <div class="flex flex-wrap items-center justify-between gap-(--space-xs) pb-(--space-xs) border-b-2 border-border-strong">
             <p class="label text-link">Check-in</p>
             <p class="label text-text-secondary">Door 01</p>
-        </header>
+        </div>
         <h2 class="text-2xl">
             Check in
         </h2>
         <div class="flex flex-col gap-2">
             <label class="flex flex-col gap-2">
-                <span class="label flex flex-wrap items-baseline text-text"><span class="pr-(--space-2xs) text-link">01</span>Email</span>
+                <span class="label flex flex-wrap items-baseline text-text">
+                    <span class="pr-(--space-2xs) text-link">01</span>
+                    Email
+                </span>
                 <input
                     id="checkin-email"
                     class="input font-mono text-sm"
@@ -149,7 +150,10 @@ const nextEvent = upcoming.at(0);
             />
         </div>
         <div class="flex flex-col gap-2">
-            <p class="label flex flex-wrap items-baseline text-text"><span class="pr-(--space-2xs) text-link">02</span>Terms</p>
+            <p class="label flex flex-wrap items-baseline text-text">
+                <span class="pr-(--space-2xs) text-link">02</span>
+                Terms
+            </p>
             <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <label class="checkin__check">
                     <input
@@ -178,7 +182,10 @@ const nextEvent = upcoming.at(0);
             />
         </div>
         <div class="flex flex-col gap-2">
-            <p class="label flex flex-wrap items-baseline text-text"><span class="pr-(--space-2xs) text-link">03</span>Newsletter</p>
+            <p class="label flex flex-wrap items-baseline text-text">
+                <span class="pr-(--space-2xs) text-link">03</span>
+                Newsletter
+            </p>
             <label class="checkin__check">
                 <input
                     id="checkin-newsletter"
@@ -205,10 +212,10 @@ const nextEvent = upcoming.at(0);
         hidden
     >
         <div class="checkin__receipt slab slab--card flex flex-col gap-4">
-            <header class="flex flex-wrap items-center justify-between gap-(--space-xs) pb-(--space-xs) border-b-2 border-border-strong">
+            <div class="flex flex-wrap items-center justify-between gap-(--space-xs) pb-(--space-xs) border-b-2 border-border-strong">
                 <p class="label text-link">Arrival receipt</p>
                 <p class="label text-text-secondary">Door 01</p>
-            </header>
+            </div>
             <h2
                 class="text-3xl"
                 data-checkin-heading
@@ -244,13 +251,11 @@ const nextEvent = upcoming.at(0);
         <article
             class="mail slab slab--lift flex flex-col gap-4"
             aria-label="Welcome email"
-            data-checkin-mail
-            data-event={nextEvent?.title}
         >
-            <header class="flex flex-wrap items-center justify-between gap-(--space-xs) pb-(--space-xs) border-b-2 border-border-strong">
+            <div class="flex flex-wrap items-center justify-between gap-(--space-xs) pb-(--space-xs) border-b-2 border-border-strong">
                 <p class="label text-link">Welcome email</p>
                 <p class="action-text mail__stamp">Sent</p>
-            </header>
+            </div>
             <dl class="flex flex-col">
                 <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-subtle">
                     <dt class="label text-text-secondary">From</dt>
@@ -282,11 +287,11 @@ const nextEvent = upcoming.at(0);
                 </div>
             </dl>
             <p
-                class="mail__preheader text-sm text-text-secondary"
+                class="text-sm text-text-secondary"
                 data-mail-preheader
             />
             <div
-                class="mail__body flex flex-col gap-4"
+                class="flex flex-col gap-4"
                 data-mail-body
             />
             <div class="mail__actions">
@@ -301,10 +306,12 @@ const nextEvent = upcoming.at(0);
             </div>
         </article>
         <template data-mail-template>
-            <p class="mail__paragraph leading-relaxed" />
+            <p class="leading-relaxed" />
         </template>
     </div>
 </section>
+
+<Schedule />
 
 <style>
     .checkin-form,
@@ -462,14 +469,13 @@ const nextEvent = upcoming.at(0);
     function renderCheckIn(form: HTMLFormElement, session: Session, newsletter: boolean) {
         const body = document.querySelector<HTMLElement>('[data-mail-body]');
         const done = document.querySelector<HTMLElement>('[data-checkin-done]');
-        const mail = document.querySelector<HTMLElement>('[data-checkin-mail]');
         const template = document.querySelector<HTMLTemplateElement>('[data-mail-template]');
 
-        if (!body || !done || !mail || !template) return;
+        if (!body || !done || !template) return;
 
         const message = composeOnboardingEmail({
             email: session.email,
-            eventName: mail.dataset.event,
+            eventName: document.querySelector<HTMLElement>('[data-event-title]:not([hidden])')?.dataset.eventTitle,
             prods: session.prods,
             token: createOnboardingToken(session.email),
         });
@@ -479,7 +485,12 @@ const nextEvent = upcoming.at(0);
         form.setAttribute('hidden', '');
         done.removeAttribute('hidden');
         setText(document.querySelector<HTMLElement>('[data-checkin-email]'), session.email);
-        setText(document.querySelector<HTMLElement>('[data-checkin-newsletter]'), newsletter ? 'You are on the seasonal newsletter too.' : 'You are not on the newsletter.');
+
+        setText(
+            document.querySelector<HTMLElement>('[data-checkin-newsletter]'),
+            newsletter ? 'You are on the seasonal newsletter too.' : 'You are not on the newsletter.',
+        );
+
         setText(document.querySelector<HTMLElement>('[data-checkin-prods]'), formatProds(session.prods));
         setText(document.querySelector<HTMLElement>('[data-mail-from]'), message.from);
         setText(document.querySelector<HTMLElement>('[data-mail-preheader]'), message.preheader);

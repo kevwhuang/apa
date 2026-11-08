@@ -2,19 +2,21 @@
 import { getCollection } from 'astro:content';
 
 import IconArrow from '@components/icons/Arrow.astro';
+import Schedule from '@components/program/Schedule.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { LINKS } from '@lib/shared/constants';
-import { formatDate, formatTimeRange, getProgram } from '@lib/shared/utils';
+import { formatDate, formatTimeRange, getProgram, isUpcoming, mapWorkshopLines } from '@lib/shared/utils';
 
 const events = await getCollection('events');
 
 const program = getProgram('assembly');
 
 const upcoming = events
-    .filter(event => event.data.type === 'assembly' && event.data.status === 'upcoming')
+    .filter(event => event.data.type === 'assembly' && isUpcoming(event.data.end))
     .sort((a, b) => +a.data.date - +b.data.date);
 
-const [next, ...later] = upcoming;
+const later = upcoming.slice(1);
+const workshopById = mapWorkshopLines(upcoming);
 ---
 
 <section
@@ -38,109 +40,122 @@ const [next, ...later] = upcoming;
                 RSVP on Meetup <IconArrow />
             </a>
         </SectionHead>
-        {next
-            ? (
-                    <Fragment>
-                        <div
-                            class:list={['mark', later.length > 0 ? 'mb-(--space-2xl)' : 'mb-6 md:mb-0']}
-                            data-motion="unfold"
-                        >
-                            <article
-                                id={next.id}
-                                class="slab slab--cut slab--lift grid grid-cols-12 items-start gap-x-2 gap-y-5 md:gap-x-6"
-                            >
-                                <div class="col-span-12 md:col-span-5 lg:col-span-4">
-                                    <p class="label inline-block mb-3 px-2 py-1 bg-event-assembly text-event-assembly-text">
-                                        Next
-                                    </p>
-                                    <p
-                                        class="mb-2 font-bold font-display leading-[0.95] text-3xl text-balance tracking-[-0.02em]"
-                                        data-placeholder
-                                    >
-                                        <time datetime={next.data.date.toISOString()}>{formatDate(next.data.date)}</time>
-                                    </p>
-                                    <p
-                                        class="font-mono text-xs text-text-secondary"
-                                        data-placeholder
-                                    >
-                                        {formatTimeRange(next.data.date, next.data.end)}
-                                    </p>
-                                </div>
-                                <div class="col-span-12 md:col-span-7 lg:col-span-8">
-                                    <h3 class="mb-2 text-2xl">
-                                        {next.data.title}
-                                    </h3>
-                                    <address class="mb-3 font-mono not-italic text-xs text-text-secondary">
-                                        {next.data.location}
-                                    </address>
-                                    <p class="max-w-2xl mb-4 leading-relaxed text-text-secondary">
-                                        {next.data.excerpt}
-                                    </p>
-                                    <p>
-                                        <a
-                                            class="action-text hover:text-link inline-flex items-center gap-(--space-2xs) min-h-(--control-size) underline underline-offset-4 transition-colors"
-                                            href={LINKS.meetup}
-                                            rel="noopener noreferrer"
-                                            target="_blank"
-                                        >
-                                            RSVP on Meetup <IconArrow />
-                                            <span class="sr-only">&nbsp;(opens in a new tab)</span>
-                                        </a>
-                                    </p>
-                                </div>
-                            </article>
-                        </div>
-                        {later.length > 0 && (
-                            <Fragment>
-                                <p
-                                    class="label mb-4 text-text-secondary"
-                                    data-motion="rise"
-                                >
-                                    And after that
+        {upcoming.map((event, index) => (
+            <div
+                class:list={['mark', index < later.length ? 'mb-(--space-2xl)' : 'mb-6 md:mb-0']}
+                data-event-end={event.data.end.toISOString()}
+                data-event-group="calendar"
+                data-event-role="next"
+                data-motion="unfold"
+                hidden={index > 0}
+            >
+                <article
+                    id={index === 0 ? event.id : undefined}
+                    class="slab slab--cut slab--lift grid grid-cols-12 items-start gap-x-2 gap-y-5 md:gap-x-6"
+                    data-event-id={event.id}
+                >
+                    <div class="col-span-12 md:col-span-5 lg:col-span-4">
+                        <p class="label inline-block mb-3 px-2 py-1 bg-event-assembly text-event-assembly-text">
+                            Next
+                        </p>
+                        <p class="mb-2 font-bold font-display leading-none text-3xl text-balance tracking-[-0.02em]">
+                            <time datetime={event.data.date.toISOString()}>{formatDate(event.data.date)}</time>
+                        </p>
+                        <p class="font-mono text-xs text-text-secondary">
+                            {formatTimeRange(event.data.date, event.data.end)}
+                        </p>
+                    </div>
+                    <div class="col-span-12 md:col-span-7 lg:col-span-8">
+                        <hgroup class="flex flex-col gap-1 mb-2">
+                            <h3 class="text-2xl">
+                                {event.data.title}
+                            </h3>
+                            {workshopById.has(event.id) && (
+                                <p class="font-bold font-sans text-base">
+                                    {workshopById.get(event.id)}
                                 </p>
-                                <ul
-                                    class="mb-6 border-2 border-border-strong list-none md:mb-0"
-                                    data-motion-stagger="rise"
-                                >
-                                    {later.map(event => (
-                                        <li
-                                            id={event.id}
-                                            class="assembly-next__row rank last:border-b-0 items-baseline px-5 py-3 border-b-2 border-border-strong"
-                                        >
-                                            <p
-                                                class="font-bold font-sans text-base"
-                                                data-placeholder
-                                            >
-                                                <time datetime={event.data.date.toISOString()}>{formatDate(event.data.date)}</time>
-                                            </p>
-                                            <p
-                                                class="assembly-next__meta font-mono text-xs text-text-secondary"
-                                                data-placeholder
-                                            >
-                                                {formatTimeRange(event.data.date, event.data.end)}
-                                            </p>
-                                            <h3 class="text-base">
-                                                {event.data.title}
-                                            </h3>
-                                            <address class="assembly-next__meta font-mono not-italic text-xs text-text-secondary">
-                                                {event.data.location}
-                                            </address>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </Fragment>
-                        )}
-                    </Fragment>
-                )
-            : (
-                    <p
-                        class="slab slab--cut slab--lift max-w-(--measure-form) w-full mb-6 mx-auto leading-relaxed text-text-secondary md:mb-0"
-                        data-motion="rise"
-                    >
-                        Nothing on the calendar right now &mdash; the next date goes up as soon as
-                        the room is booked.
-                    </p>
-                )}
+                            )}
+                        </hgroup>
+                        <address class="mb-3 font-mono not-italic text-xs text-text-secondary">
+                            {event.data.location}
+                        </address>
+                        <p class="max-w-2xl mb-4 leading-relaxed text-text-secondary">
+                            {event.data.excerpt}
+                        </p>
+                        <p>
+                            <a
+                                class="action-text hover:text-link inline-flex items-center gap-(--space-2xs) min-h-(--control-size) underline underline-offset-4 transition-colors"
+                                href={LINKS.meetup}
+                                rel="noopener noreferrer"
+                                target="_blank"
+                            >
+                                RSVP on Meetup <IconArrow />
+                                <span class="sr-only">&nbsp;(opens in a new tab)</span>
+                            </a>
+                        </p>
+                    </div>
+                </article>
+            </div>
+        ))}
+        {later.length > 0 && (
+            <Fragment>
+                <p
+                    class="label mb-4 text-text-secondary"
+                    data-event-group="calendar"
+                    data-event-role="many"
+                    data-motion="rise"
+                >
+                    And after that
+                </p>
+                <ul
+                    class="mb-6 border-2 border-border-strong list-none md:mb-0"
+                    data-event-group="calendar"
+                    data-event-role="many"
+                    data-motion-stagger="rise"
+                >
+                    {later.map(event => (
+                        <li
+                            id={event.id}
+                            class="assembly-next__row rank last:border-b-0 items-baseline px-5 py-3 border-b-2 border-border-strong"
+                            data-event-end={event.data.end.toISOString()}
+                            data-event-group="calendar"
+                            data-event-id={event.id}
+                            data-event-role="later"
+                        >
+                            <p class="font-bold font-sans text-base">
+                                <time datetime={event.data.date.toISOString()}>{formatDate(event.data.date)}</time>
+                            </p>
+                            <p class="assembly-next__meta font-mono text-xs text-text-secondary">
+                                {formatTimeRange(event.data.date, event.data.end)}
+                            </p>
+                            <hgroup class="flex flex-col gap-1">
+                                <h3 class="text-base">
+                                    {event.data.title}
+                                </h3>
+                                {workshopById.has(event.id) && (
+                                    <p class="font-bold font-sans text-sm">
+                                        {workshopById.get(event.id)}
+                                    </p>
+                                )}
+                            </hgroup>
+                            <address class="assembly-next__meta font-mono not-italic text-xs text-text-secondary">
+                                {event.data.location}
+                            </address>
+                        </li>
+                    ))}
+                </ul>
+            </Fragment>
+        )}
+        <p
+            class="slab slab--cut slab--lift max-w-(--measure-form) w-full mb-6 mx-auto leading-relaxed text-text-secondary md:mb-0"
+            data-event-group="calendar"
+            data-event-role="none"
+            data-motion="rise"
+            hidden={upcoming.length > 0}
+        >
+            Nothing on the calendar right now &mdash; the next date goes up as soon as
+            the room is booked.
+        </p>
         <p
             class="md:hidden"
             data-motion="rise"
@@ -156,6 +171,8 @@ const [next, ...later] = upcoming;
         </p>
     </div>
 </section>
+
+<Schedule />
 
 <style>
     .assembly-next__meta {

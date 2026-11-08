@@ -6,7 +6,6 @@ type AssetKind = (typeof import('@lib/shared/constants').ASSET_KINDS)[number];
 type AvatarResult = { dataUrl: string; ok: true } | { message: string; ok: false };
 type CartIssueKind = 'out-of-stock' | 'price-changed' | 'quantity-reduced' | 'removed';
 type EventCadence = (typeof import('@lib/shared/constants').EVENT_CADENCES)[number];
-type EventStatus = (typeof import('@lib/shared/constants').EVENT_STATUSES)[number];
 type EventType = (typeof import('@lib/shared/constants').EVENT_TYPES)[number];
 type FieldErrors = Record<string, string>;
 type ImageSources = Record<string, string>;
@@ -43,17 +42,12 @@ interface BashSubmission {
     title: string;
 }
 
-interface Calendar {
-    past: CalendarEvent[];
-    upcoming: CalendarEvent[];
-}
-
 interface CalendarEvent {
     date: Date;
+    end: Date;
     excerpt: string;
     id: string;
     location: string;
-    status: EventStatus;
     title: string;
     type: EventType;
 }

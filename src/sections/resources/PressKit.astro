@@ -7,16 +7,16 @@ import SectionHead from '@components/shared/SectionHead.astro';
 import { ASSET_KIND_LABELS, KIND_COLORS, LINKS } from '@lib/shared/constants';
 import { BRAND, BRAND_DOWNLOADS, BRAND_SIZES } from '@lib/shared/brand';
 import { formatDate, toIsoDate } from '@lib/shared/utils';
-import { toAvailability } from '@lib/resources/unlocks';
+import { isDownload, toAvailability } from '@lib/resources/unlocks';
 
-const PRESS_KINDS = ['brochure', 'media-kit', 'photo-pack', 'press-kit'] as const;
+const PRESS_KINDS = ['brochure', 'logo-kit', 'photo-pack', 'press-kit'] as const;
 
 const downloads = await getCollection('downloads');
 
 const press = downloads
     .filter(asset => PRESS_KINDS.some(kind => kind === asset.data.kind))
     .toSorted((a, b) => Number(b.data.available) - Number(a.data.available) || a.data.title.localeCompare(b.data.title))
-    .map(asset => ({ ...asset, availability: toAvailability(asset.data) }));
+    .map(asset => ({ ...asset, availability: toAvailability(asset.data), isDownload: isDownload(asset.data) }));
 ---
 
 <section
@@ -58,7 +58,7 @@ const press = downloads
             <table class="press-kit__table border-2 border-border-strong">
                 <caption class="sr-only">Brand assets, their formats, and downloads</caption>
                 <thead>
-                    <tr class="border-b-2 border-border-strong font-bold font-mono text-xs tracking-wide uppercase text-text-secondary">
+                    <tr class="border-b-2 border-border-strong font-bold font-mono text-xs tracking-[0.06em] uppercase text-text-secondary">
                         <th
                             class="px-4 py-3 text-left"
                             scope="col"
@@ -120,7 +120,7 @@ const press = downloads
             <table class="press-kit__table border-2 border-border-strong">
                 <caption class="sr-only">Press material, its format, and whether it is published</caption>
                 <thead>
-                    <tr class="border-b-2 border-border-strong font-bold font-mono text-xs tracking-wide uppercase text-text-secondary">
+                    <tr class="border-b-2 border-border-strong font-bold font-mono text-xs tracking-[0.06em] uppercase text-text-secondary">
                         <th
                             class="px-4 py-3 text-left"
                             scope="col"
@@ -183,7 +183,7 @@ const press = downloads
                             <td class="px-4 py-4 font-mono text-xs uppercase">{asset.data.format}</td>
                             <td
                                 class="px-4 py-4 font-mono text-xs text-text-secondary"
-                                data-placeholder
+                                data-placeholder={asset.data.available ? undefined : ''}
                             >
                                 {asset.data.size}
                             </td>
@@ -194,9 +194,10 @@ const press = downloads
                                 {asset.availability === 'open' && (
                                     <a
                                         class="action-text inline-flex items-center min-h-(--control-size) transition-colors"
+                                        download={asset.isDownload ? '' : undefined}
                                         href={asset.data.href}
                                     >
-                                        Open
+                                        {asset.isDownload ? 'Download' : 'Open'}
                                     </a>
                                 )}
                                 {asset.availability === 'scheduled' && (

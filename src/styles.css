@@ -14,6 +14,11 @@
     color: var(--color-link);
 }
 
+.bash-well.slab {
+    padding-block: var(--space-2xl);
+    padding-inline: max(var(--shell-pad), calc(100% - var(--shell-inner))) 0;
+}
+
 .box {
     --box-lift: 3px;
     --box-mark: 12px;
@@ -66,7 +71,7 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
 
 .box[aria-invalid='true'] {
     border-color: var(--color-border-invalid);
-    box-shadow: 3px 3px 0 0 var(--color-error-surface);
+    box-shadow: var(--box-lift) var(--box-lift) 0 0 var(--color-border-strong);
 }
 
 .box[type='radio'] {
@@ -293,7 +298,7 @@ label:hover:not(:active, :has(a:hover)) > .box:not(:disabled, [aria-invalid='tru
 
     .input[aria-invalid='true'] {
         border-color: var(--color-input-border-invalid);
-        box-shadow: 3px 3px 0 0 var(--color-error-surface);
+        box-shadow: var(--box-lift) var(--box-lift) 0 0 var(--color-border-strong);
     }
 
     .input[type='number'] {

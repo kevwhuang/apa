@@ -45,7 +45,7 @@ const ENDPOINTS: Endpoint[] = [
         <div class="api__cell--flag content-center grid px-(--space-sm) py-(--space-xs)">
             <dt class="label mb-(--space-2xs) text-text-inverse-secondary">Endpoints</dt>
             <dd
-                class="font-bold font-display leading-[0.9] text-4xl tracking-[-0.02em]"
+                class="font-bold font-display leading-none text-4xl tracking-[-0.02em]"
                 data-motion-count={String(ENDPOINTS.length)}
             >
                 {ENDPOINTS.length}
@@ -85,7 +85,7 @@ const ENDPOINTS: Endpoint[] = [
             <table class="api__table border-2 border-border-strong">
                 <caption class="sr-only">API endpoints, the payload each returns, and a link to open each one</caption>
                 <thead>
-                    <tr class="border-b-2 border-border-strong font-bold font-mono text-xs tracking-wide uppercase text-text-secondary">
+                    <tr class="border-b-2 border-border-strong font-bold font-mono text-xs tracking-[0.06em] uppercase text-text-secondary">
                         <th
                             class="px-4 py-3 text-left"
                             scope="col"
@@ -114,7 +114,7 @@ const ENDPOINTS: Endpoint[] = [
                                 scope="row"
                             >
                                 <span class="label mr-2 px-2 py-1 bg-bg-inverse text-text-inverse">GET</span>
-                                <code class="font-bold font-mono text-sm tracking-[-0.01em]">{endpoint.path}</code>
+                                <code class="font-bold font-mono text-sm">{endpoint.path}</code>
                             </th>
                             <td class="min-w-[320px] px-4 py-4 leading-relaxed text-sm text-text-secondary">{endpoint.blurb}</td>
                             <td class="px-4 py-4 text-right">

@@ -4,15 +4,15 @@ import { getCollection } from 'astro:content';
 import IconArrow from '@components/icons/Arrow.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { LINKS } from '@lib/shared/constants';
-import { formatCalendarDay, formatCalendarMonth, formatTimeRange, formatWeekday, getProgram } from '@lib/shared/utils';
+import { formatCalendarDay, formatCalendarMonth, formatTimeRange, formatWeekday, getProgram, isUpcoming } from '@lib/shared/utils';
 
 const events = await getCollection('events');
 
-const [next] = events
-    .filter(event => event.data.type === 'hangout' && event.data.status === 'upcoming')
-    .sort((a, b) => +a.data.date - +b.data.date);
-
 const program = getProgram('hangout');
+
+const [next] = events
+    .filter(event => event.data.type === 'hangout' && isUpcoming(event.data.end))
+    .sort((a, b) => +a.data.date - +b.data.date);
 ---
 
 <section
@@ -47,7 +47,7 @@ const program = getProgram('hangout');
                             class="halftone--accent hangout-flyer__field absolute pointer-events-none"
                             aria-hidden="true"
                         />
-                        <div class="hangout-flyer__frame mark tilt">
+                        <div class="mark tilt">
                             <article
                                 id={next.id}
                                 class="hangout-flyer__card slab slab--bare slab--card"
@@ -65,7 +65,7 @@ const program = getProgram('hangout');
                                         datetime={next.data.date.toISOString()}
                                     >
                                         <span class="hangout-flyer__day">{formatCalendarDay(next.data.date)}</span>
-                                        <span class="hangout-flyer__month block font-mono leading-normal text-sm tracking-[0.08em] whitespace-nowrap">{formatCalendarMonth(next.data.date)}</span>
+                                        <span class="hangout-flyer__month block font-mono leading-normal text-sm tracking-[0.06em] whitespace-nowrap">{formatCalendarMonth(next.data.date)}</span>
                                     </time>
                                     <span class="hangout-flyer__weekday font-mono text-xs tracking-[0.06em] text-event-hangout-text">{formatWeekday(next.data.date)}</span>
                                 </p>

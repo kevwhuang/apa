@@ -7,12 +7,13 @@ import SearchField from '@components/shared/SearchField.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { ASSET_KIND_LABELS, KIND_COLORS } from '@lib/shared/constants';
 import { formatDate, formatTime, mergeAssets, toIsoDate } from '@lib/shared/utils';
-import { toAvailability } from '@lib/resources/unlocks';
+import { isDownload, toAvailability } from '@lib/resources/unlocks';
 
 const assets = mergeAssets(await getCollection('downloads'), await getCollection('docs'))
     .map(asset => ({
         ...asset,
         availability: toAvailability(asset.data),
+        isDownload: isDownload(asset.data),
         search: [asset.data.title, asset.data.description, ASSET_KIND_LABELS[asset.data.kind], asset.data.format].join(' ').toLowerCase(),
     }));
 
@@ -144,7 +145,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                                 <dt class="label text-text-secondary">Size</dt>
                                 <dd
                                     class="font-mono text-xs"
-                                    data-placeholder
+                                    data-placeholder={asset.data.available ? undefined : ''}
                                 >
                                     {asset.data.size}
                                 </dd>
@@ -167,9 +168,11 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                         {asset.availability === 'open' && (
                             <a
                                 class="btn btn--primary"
+                                aria-label={asset.isDownload ? `Download ${asset.data.title}` : undefined}
+                                download={asset.isDownload ? '' : undefined}
                                 href={asset.data.href}
                             >
-                                Open {asset.data.title} <IconArrow />
+                                {asset.isDownload ? 'Download' : `Open ${asset.data.title}`} <IconArrow />
                             </a>
                         )}
                         {asset.availability === 'scheduled' && (
@@ -187,11 +190,13 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                                 {asset.data.href && (
                                     <a
                                         class="btn btn--primary"
+                                        aria-label={asset.isDownload ? `Download ${asset.data.title}` : undefined}
                                         data-unlock-ready
+                                        download={asset.isDownload ? '' : undefined}
                                         hidden
                                         href={asset.data.href}
                                     >
-                                        Open {asset.data.title} <IconArrow />
+                                        {asset.isDownload ? 'Download' : `Open ${asset.data.title}`} <IconArrow />
                                     </a>
                                 )}
                             </div>

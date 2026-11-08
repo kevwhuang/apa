@@ -4,14 +4,14 @@ import { getCollection } from 'astro:content';
 import IconArrow from '@components/icons/Arrow.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { LINKS } from '@lib/shared/constants';
-import { formatDate, formatTimeRange, getProgram } from '@lib/shared/utils';
+import { formatDate, formatTimeRange, getProgram, isUpcoming } from '@lib/shared/utils';
 
 const events = await getCollection('events');
 
 const program = getProgram('hangout');
 
 const upcoming = events
-    .filter(event => event.data.type === 'hangout' && event.data.status === 'upcoming')
+    .filter(event => event.data.type === 'hangout' && isUpcoming(event.data.end))
     .sort((a, b) => +a.data.date - +b.data.date);
 
 const [next, ...later] = upcoming;
@@ -45,7 +45,7 @@ const [next, ...later] = upcoming;
                                         Next date
                                     </p>
                                     <p
-                                        class="mb-2 font-bold font-display leading-[0.95] text-3xl text-balance tracking-[-0.02em]"
+                                        class="mb-2 font-bold font-display leading-none text-3xl text-balance tracking-[-0.02em]"
                                         data-placeholder
                                     >
                                         <time datetime={next.data.date.toISOString()}>{formatDate(next.data.date)}</time>

@@ -37,6 +37,10 @@ function initUnlocks(): void {
     registerPageScript(start);
 }
 
+function isDownload(data: CollectionEntry<'downloads'>['data']): boolean {
+    return data.format !== 'Web';
+}
+
 function start(signal: AbortSignal): void {
     const nodes = document.querySelectorAll<HTMLElement>('[data-unlock]');
 
@@ -86,4 +90,4 @@ function unlock(node: HTMLElement): void {
     ready.removeAttribute('hidden');
 }
 
-export { initUnlocks, toAvailability };
+export { initUnlocks, isDownload, toAvailability };

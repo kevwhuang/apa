@@ -2,17 +2,7 @@ import { defineCollection, reference } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
-import {
-    ASSET_KINDS,
-    CONTENT_DIR,
-    EVENT_STATUSES,
-    EVENT_TYPES,
-    GENRES,
-    MEMBER_ROLES,
-    PRODUCT_CATEGORIES,
-    PRODUCT_SIZES,
-    PROFILE_FIELDS,
-} from '@lib/shared/constants';
+import { ASSET_KINDS, CONTENT_DIR, EVENT_TYPES, GENRES, MEMBER_ROLES, PRODUCT_CATEGORIES, PRODUCT_SIZES, PROFILE_FIELDS } from '@lib/shared/constants';
 
 const bash = defineCollection({
     loader: glob({ base: `./${CONTENT_DIR}/bash`, pattern: '**/*.md' }),
@@ -23,7 +13,7 @@ const bash = defineCollection({
         location: z.string(),
         prompt: z.string(),
         recap: z.string(),
-        status: z.enum(EVENT_STATUSES).default('past'),
+        room: z.string().optional(),
         title: z.string(),
     }),
 });
@@ -57,13 +47,22 @@ const events = defineCollection({
     loader: glob({ base: `./${CONTENT_DIR}/events`, pattern: '**/*.md' }),
     schema: z.object({
         date: z.coerce.date(),
+        description: z.string().optional(),
         end: z.coerce.date(),
         excerpt: z.string(),
-        guest: z.string().optional(),
         location: z.string(),
-        status: z.enum(EVENT_STATUSES).default('upcoming'),
+        room: z.string().optional(),
+        speaker: z.string().optional(),
+        speakers: z.array(z.object({
+            bio: z.string().optional(),
+            credits: z.string().optional(),
+            name: z.string(),
+            realName: z.string().optional(),
+            website: z.url().optional(),
+        })).default([]),
         title: z.string(),
         type: z.enum(EVENT_TYPES),
+        workshop: z.string().optional(),
     }),
 });
 

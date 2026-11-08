@@ -4,9 +4,10 @@ import { getCollection } from 'astro:content';
 import IconArrow from '@components/icons/Arrow.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
+import Schedule from '@components/program/Schedule.astro';
 import { AVATAR, GENRES, ONBOARDING_STEPS, PROFILE_FIELDS, PROFILE_ROLES, TOUR_STOPS, US_STATES } from '@lib/shared/constants';
 import { AVATAR_EXTENSIONS_OR_LIST } from '@lib/account/images';
-import { formatBytes, formatDate } from '@lib/shared/utils';
+import { formatBytes, formatDate, isUpcoming } from '@lib/shared/utils';
 
 const ACCOUNT_BENEFITS = [
     { blurb: 'Prods are the Alliance\'s rewards currency. You earn them at events, on submissions, and in workshops, and spend them at the store register.', label: 'Prods' },
@@ -19,6 +20,7 @@ const ACCOUNT_BENEFITS = [
     { blurb: 'Event announcements and the newsletter go to the address on your account, and nothing else does.', label: 'The dispatch' },
 ];
 
+const CLASS_GENRE_CHIP = 'inline-flex items-center h-6 px-2 border-2 border-border-strong font-bold font-mono text-xs tracking-[0.06em] uppercase';
 const DEFAULT_CITY = 'Austin';
 const DEFAULT_ROLE = 'fan';
 const DEFAULT_STATE = 'TX';
@@ -30,8 +32,8 @@ const WELCOME_LINKS = [
 
 const events = await getCollection('events');
 
-const [nextAssembly] = events
-    .filter(event => event.data.type === 'assembly' && event.data.status === 'upcoming')
+const assemblies = events
+    .filter(event => event.data.type === 'assembly' && isUpcoming(event.data.end))
     .sort((a, b) => +a.data.date - +b.data.date);
 ---
 
@@ -145,7 +147,7 @@ const [nextAssembly] = events
                         data-onboarding-email
                     />
                 </p>
-                <div class="onboarding-preview flex flex-col self-center max-w-xs w-full gap-3">
+                <div class="flex flex-col self-center max-w-xs w-full gap-3">
                     <p class="label text-text-secondary">Roster preview</p>
                     <article class="slab slab--bare slab--card overflow-clip">
                         <PlaceholderTile
@@ -163,7 +165,7 @@ const [nextAssembly] = events
                                 hidden
                             />
                         </PlaceholderTile>
-                        <div class="onboarding-preview__body p-4">
+                        <div class="p-4">
                             <h2
                                 class="data-empty:text-text-secondary mb-2 text-lg wrap-break-word"
                                 data-empty
@@ -175,7 +177,8 @@ const [nextAssembly] = events
                                 <span
                                     class="capitalize"
                                     data-preview-role
-                                /><span data-preview-location>Austin, TX</span>
+                                />
+                                <span data-preview-location>Austin, TX</span>
                             </p>
                             <ul
                                 class="flex flex-wrap gap-2 list-none"
@@ -379,7 +382,7 @@ const [nextAssembly] = events
                             class="onboarding-benefits__cell onboarding-reveal flex flex-col min-w-0 gap-(--space-2xs) p-(--space-md)"
                             style={`--row-index: ${index}`}
                         >
-                            <p class="font-bold font-sans leading-[1.2] text-lg tracking-[-0.02em]">{benefit.label}</p>
+                            <p class="font-bold font-sans leading-[1.2] text-lg tracking-tight">{benefit.label}</p>
                             <p class="leading-normal text-sm wrap-anywhere text-text-secondary">{benefit.blurb}</p>
                         </li>
                     ))}
@@ -399,9 +402,9 @@ const [nextAssembly] = events
                 <p class="text-text-secondary">
                     Setup is done. One guided lap and you will know where everything lives.
                 </p>
-                <div class="onboarding-tour slab slab--well">
+                <div class="onboarding-tour slab slab--well mb-2">
                     <p class="label text-link-on-inverse">The guided tour, {TOUR_STOPS.length} stops</p>
-                    <p class="max-w-[36ch] font-bold font-sans leading-[1.2] text-lg tracking-[-0.02em]">
+                    <p class="max-w-md font-bold font-sans leading-[1.2] text-lg tracking-tight">
                         A short walk through the five things you will reach for most.
                     </p>
                     <ol
@@ -420,7 +423,7 @@ const [nextAssembly] = events
                                     {String(index + 1).padStart(2, '0')}
                                 </span>
                                 <span class="flex flex-col min-w-0 gap-(--space-3xs)">
-                                    <span class="font-bold font-sans leading-[1.2] text-sm tracking-[-0.01em]">{stop.name}</span>
+                                    <span class="font-bold font-sans leading-[1.2] text-sm tracking-tight">{stop.name}</span>
                                     <span class="leading-[1.4] text-sm wrap-anywhere text-text-inverse-secondary">{stop.blurb}</span>
                                 </span>
                             </li>
@@ -434,16 +437,22 @@ const [nextAssembly] = events
                         Take the site tour <IconArrow />
                     </button>
                 </div>
-                <p class="label mt-2 text-text-secondary">Or go straight there</p>
+                <p class="label text-text-secondary">Or go straight there</p>
                 <ul class="grid gap-(--space-sm) list-none">
-                    {nextAssembly && (
-                        <li class="grid">
+                    {assemblies.map((assembly, index) => (
+                        <li
+                            class="grid"
+                            data-event-end={assembly.data.end.toISOString()}
+                            data-event-group="onboarding"
+                            data-event-role="next"
+                            hidden={index > 0}
+                        >
                             <a
                                 class="onboarding-next__line slab slab--card slab--hover"
                                 href="/assembly"
                             >
                                 <span class="flex items-center justify-between gap-(--space-sm)">
-                                    <span class="font-bold font-mono text-sm tracking-[0.02em] uppercase">Next Assembly</span>
+                                    <span class="font-bold font-mono text-sm tracking-wide uppercase">Next Assembly</span>
                                     <span
                                         class="onboarding-next__arrow"
                                         aria-hidden="true"
@@ -452,11 +461,11 @@ const [nextAssembly] = events
                                     </span>
                                 </span>
                                 <span class="onboarding-next__blurb leading-normal text-sm wrap-anywhere text-text-secondary transition-colors">
-                                    <time datetime={nextAssembly.data.date.toISOString()}>{formatDate(nextAssembly.data.date)}</time> at {nextAssembly.data.location}. Come say hi.
+                                    <time datetime={assembly.data.date.toISOString()}>{formatDate(assembly.data.date)}</time> at {assembly.data.location}. Come say hi.
                                 </span>
                             </a>
                         </li>
-                    )}
+                    ))}
                     {WELCOME_LINKS.map(link => (
                         <li class="grid">
                             <a
@@ -464,7 +473,7 @@ const [nextAssembly] = events
                                 href={link.href}
                             >
                                 <span class="flex items-center justify-between gap-(--space-sm)">
-                                    <span class="font-bold font-mono text-sm tracking-[0.02em] uppercase">{link.label}</span>
+                                    <span class="font-bold font-mono text-sm tracking-wide uppercase">{link.label}</span>
                                     <span
                                         class="onboarding-next__arrow"
                                         aria-hidden="true"
@@ -499,11 +508,13 @@ const [nextAssembly] = events
     </div>
     <template data-preview-chip>
         <li
-            class="inline-flex items-center h-6 px-2 border-2 border-border-strong font-bold font-mono text-xs tracking-wide uppercase"
+            class={CLASS_GENRE_CHIP}
             data-preview-genre
         />
     </template>
 </section>
+
+<Schedule />
 
 <style>
     .onboarding-benefits {
@@ -559,7 +570,8 @@ const [nextAssembly] = events
             background-color var(--duration-fast) var(--motion-ease-ui),
             box-shadow var(--duration-base) var(--motion-ease-entrance),
             color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
+            transform var(--duration-fast) var(--motion-ease-ui),
+            translate var(--duration-base) var(--motion-ease-entrance);
     }
 
     .onboarding-next__line:active {
@@ -663,18 +675,6 @@ const [nextAssembly] = events
         color: var(--color-text-on-signal);
     }
 
-    [data-onboarding-reveal='off'] .onboarding-reveal {
-        opacity: 0;
-        translate: 0 var(--space-2xs);
-    }
-
-    [data-onboarding-reveal='on'] .onboarding-reveal {
-        transition:
-            opacity var(--duration-slow) var(--motion-ease-entrance),
-            translate var(--duration-slow) var(--motion-ease-entrance);
-        transition-delay: min(calc(var(--row-index) * var(--stagger-base)), var(--stagger-max-total));
-    }
-
     .onboarding-tour {
         display: flex;
         flex-direction: column;
@@ -774,6 +774,18 @@ const [nextAssembly] = events
     .onboarding__pick:hover {
         background-color: var(--color-bg-hover);
         border-color: var(--color-border-selected);
+    }
+
+    [data-onboarding-reveal='off'] .onboarding-reveal {
+        opacity: 0;
+        translate: 0 var(--space-2xs);
+    }
+
+    [data-onboarding-reveal='on'] .onboarding-reveal {
+        transition:
+            opacity var(--duration-slow) var(--motion-ease-entrance),
+            translate var(--duration-slow) var(--motion-ease-entrance);
+        transition-delay: min(calc(var(--row-index) * var(--stagger-base)), var(--stagger-max-total));
     }
 
     @media (max-width: 768px) {
@@ -1164,10 +1176,12 @@ const [nextAssembly] = events
         });
 
         back?.toggleAttribute('hidden', step === 0);
-
         setText(next?.querySelector<HTMLElement>('[data-onboarding-next-label]') ?? null, step === LAST_STEP ? 'Finish' : 'Continue');
 
-        setText(document.querySelector<HTMLElement>('[data-onboarding-announce]'), `Step ${step + 1} of ${ONBOARDING_STEPS.length}, ${ONBOARDING_STEPS[step].name}.`);
+        setText(
+            document.querySelector<HTMLElement>('[data-onboarding-announce]'),
+            `Step ${step + 1} of ${ONBOARDING_STEPS.length}, ${ONBOARDING_STEPS[step].name}.`,
+        );
 
         armReveal(form);
 

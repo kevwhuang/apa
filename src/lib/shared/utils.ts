@@ -2,7 +2,12 @@ import { BYTES_PER_KILOBYTE, BYTES_PER_MEGABYTE, CENTS_PER_DOLLAR, EVENT_PROGRAM
 
 import type { CollectionEntry } from 'astro:content';
 
-type ProgramEvent = CalendarEvent & { end?: Date };
+type ProgramEvent = CalendarEvent;
+
+interface Calendar {
+    past: CalendarEvent[];
+    upcoming: CalendarEvent[];
+}
 
 interface FilterGroupOptions {
     buttons: NodeListOf<HTMLButtonElement>;
@@ -34,6 +39,7 @@ interface SearchFieldOptions {
 }
 
 const EMPTY_TILE_COLOR: TileColor = { bg: 'var(--color-bg-inverse)', text: 'var(--color-text-inverse-secondary)' };
+const ENTRY_PAD = 2;
 const FLOAT_WINDOW_BASE_Z = 70;
 const ISO_DATE_LENGTH = 10;
 const MAX_INITIALS = 2;
@@ -114,6 +120,24 @@ function formatDuration(seconds: number): string {
     const remainder = Math.floor(seconds % SECONDS_PER_MINUTE);
 
     return `${minutes}:${String(remainder).padStart(2, '0')}`;
+}
+
+function formatEntry(value: number): string {
+    return String(value).padStart(ENTRY_PAD, '0');
+}
+
+function formatMonth(date: Date): string {
+    return date.toLocaleDateString('en-US', {
+        month: 'long',
+        timeZone: 'America/Chicago',
+    });
+}
+
+function formatMonthNumber(date: Date): string {
+    return date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        timeZone: 'America/Chicago',
+    });
 }
 
 function formatPrice(cents: number): string {
@@ -365,9 +389,20 @@ function isTopFloatWindow(target: HTMLElement): boolean {
     const base = floatWindowBase();
     const visible = Array.from(document.querySelectorAll<HTMLElement>('[data-float-window]')).filter(element => element.checkVisibility());
 
-    const top = visible.reduce<HTMLElement | undefined>((best, element) => (best && toLevel(best.style.zIndex, base) > toLevel(element.style.zIndex, base) ? best : element), undefined);
+    const top = visible.reduce<HTMLElement | undefined>(
+        (best, element) => (best && toLevel(best.style.zIndex, base) > toLevel(element.style.zIndex, base) ? best : element),
+        undefined,
+    );
 
     return top === target;
+}
+
+function isUpcoming(end: Date): boolean {
+    return end.getTime() >= Date.now();
+}
+
+function mapWorkshopLines(events: CollectionEntry<'events'>[]): Map<string, string> {
+    return new Map(events.flatMap(({ data, id }) => (data.workshop ? [[id, data.workshop] as const] : [])));
 }
 
 function maxPanelWidth(viewportWidth: number, reservedRight: number): number {
@@ -392,8 +427,12 @@ function mergeCalendar(events: CollectionEntry<'events'>[], bashEditions: Collec
     const merged = [...events.map(toCalendarEvent), ...bashEditions.map(toCalendarBashEvent)];
 
     return {
-        past: merged.filter(event => event.status === 'past').sort((a, b) => +b.date - +a.date),
-        upcoming: merged.filter(event => event.status === 'upcoming').sort((a, b) => +a.date - +b.date),
+        past: merged
+            .filter(event => !isUpcoming(event.end))
+            .sort((a, b) => +b.date - +a.date),
+        upcoming: merged
+            .filter(event => isUpcoming(event.end))
+            .sort((a, b) => +a.date - +b.date),
     };
 }
 
@@ -566,7 +605,14 @@ function toAustinIso(date: Date): string {
 
     const parts = Object.fromEntries(formatter.formatToParts(date).map(part => [part.type, part.value]));
 
-    const local = Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day), Number(parts.hour), Number(parts.minute), Number(parts.second));
+    const local = Date.UTC(
+        Number(parts.year),
+        Number(parts.month) - 1,
+        Number(parts.day),
+        Number(parts.hour),
+        Number(parts.minute),
+        Number(parts.second),
+    );
 
     const offsetMinutes = Math.round((local - date.getTime()) / MILLISECONDS_PER_MINUTE);
 
@@ -582,10 +628,10 @@ function toAustinIso(date: Date): string {
 function toCalendarBashEvent(entry: CollectionEntry<'bash'>) {
     return {
         date: entry.data.date,
+        end: entry.data.end,
         excerpt: entry.data.recap,
         id: entry.id,
         location: entry.data.location,
-        status: entry.data.status,
         title: entry.data.title,
         type: 'bash' as const,
     };
@@ -598,7 +644,6 @@ function toCalendarEvent(entry: CollectionEntry<'events'>) {
         excerpt: entry.data.excerpt,
         id: entry.id,
         location: entry.data.location,
-        status: entry.data.status,
         title: entry.data.title,
         type: entry.data.type,
     };
@@ -649,6 +694,9 @@ export {
     formatDate,
     formatDateStamp,
     formatDuration,
+    formatEntry,
+    formatMonth,
+    formatMonthNumber,
     formatPrice,
     formatProds,
     formatTime,
@@ -664,6 +712,8 @@ export {
     initSearchField,
     isSlowDevice,
     isTopFloatWindow,
+    isUpcoming,
+    mapWorkshopLines,
     mergeAssets,
     mergeCalendar,
     parseCatalog,
@@ -686,4 +736,4 @@ export {
     toProducerRecord,
 };
 
-export type { FilterGroupOptions, PanelResizeOptions, ProgramEvent, SearchFieldOptions };
+export type { ProgramEvent };

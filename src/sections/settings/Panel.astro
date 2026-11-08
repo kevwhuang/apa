@@ -9,12 +9,12 @@ import { AVATAR_EXTENSIONS_OR_LIST } from '@lib/account/images';
 import { formatBytes, formatDateStamp, formatProds, getInitials, getStanding, pickTileColor } from '@lib/shared/utils';
 
 const ATTENDANCE = [
-    { date: '2026-07-25T13:30:00-05:00', event: 'Bash \u00b7 July' },
-    { date: '2026-07-09T18:00:00-05:00', event: 'Assembly \u00b7 July' },
-    { date: '2026-06-11T18:00:00-05:00', event: 'Assembly \u00b7 June' },
-    { date: '2026-04-18T13:30:00-05:00', event: 'Bash \u00b7 April' },
-    { date: '2025-10-18T13:30:00-05:00', event: 'Bash \u00b7 October' },
-    { date: '2024-03-14T18:00:00-05:00', event: 'Assembly \u00b7 March' },
+    { date: '2026-07-25T13:30:00-05:00', event: '2026 July \u00b7 Bash' },
+    { date: '2026-07-09T18:00:00-05:00', event: '2026 July \u00b7 Assembly \u00b7 dk darkly' },
+    { date: '2026-06-11T18:00:00-05:00', event: '2026 June \u00b7 Assembly \u00b7 Alex LaCroix' },
+    { date: '2026-04-25T13:30:00-05:00', event: '2026 April \u00b7 Bash' },
+    { date: '2025-10-25T13:30:00-05:00', event: '2025 October \u00b7 Bash' },
+    { date: '2024-03-20T19:00:00-05:00', event: '2024 March \u00b7 Assembly \u00b7 Den Zuko' },
 ];
 
 const DEMO_PROFILE = {
@@ -47,14 +47,14 @@ const LINK_FIELDS = [
 
 const PRODS_LEDGER = [
     { amount: 1, date: '2024-03-12T13:00:00-05:00', reason: 'Welcome Prod' },
-    { amount: 1, date: '2024-03-14T18:00:00-05:00', reason: 'Attended the March Assembly' },
-    { amount: 1, date: '2025-10-18T13:30:00-05:00', reason: 'Attended the October Bash' },
-    { amount: 1, date: '2026-04-18T13:30:00-05:00', reason: 'Attended the April Bash' },
-    { amount: 2, date: '2026-04-25T11:00:00-05:00', reason: 'Finished a Bash track' },
+    { amount: 1, date: '2024-03-20T19:00:00-05:00', reason: 'Attended 2024 March \u00b7 Assembly \u00b7 Den Zuko' },
+    { amount: 1, date: '2025-10-25T13:30:00-05:00', reason: 'Attended 2025 October \u00b7 Bash' },
+    { amount: 1, date: '2026-04-25T13:30:00-05:00', reason: 'Attended 2026 April \u00b7 Bash' },
+    { amount: 2, date: '2026-04-25T17:00:00-05:00', reason: 'Finished a Bash track' },
     { amount: -1, date: '2026-05-02T09:00:00-05:00', reason: 'Redeemed \u2014 Store credit' },
-    { amount: 1, date: '2026-06-11T18:00:00-05:00', reason: 'Attended the June Assembly' },
-    { amount: 1, date: '2026-07-09T18:00:00-05:00', reason: 'Attended the July Assembly' },
-    { amount: 1, date: '2026-07-25T13:30:00-05:00', reason: 'Attended the July Bash' },
+    { amount: 1, date: '2026-06-11T18:00:00-05:00', reason: 'Attended 2026 June \u00b7 Assembly \u00b7 Alex LaCroix' },
+    { amount: 1, date: '2026-07-09T18:00:00-05:00', reason: 'Attended 2026 July \u00b7 Assembly \u00b7 dk darkly' },
+    { amount: 1, date: '2026-07-25T13:30:00-05:00', reason: 'Attended 2026 July \u00b7 Bash' },
 ];
 
 const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
@@ -139,7 +139,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                             </p>
                             <ul class="flex flex-wrap gap-2 list-none">
                                 {DEMO_PROFILE.genres.map(genre => (
-                                    <li class="inline-flex items-center h-6 px-2 border-2 border-border-strong font-bold font-mono text-xs tracking-wide uppercase">{genre}</li>
+                                    <li class="inline-flex items-center h-6 px-2 border-2 border-border-strong font-bold font-mono text-xs tracking-[0.06em] uppercase">{genre}</li>
                                 ))}
                             </ul>
                         </div>
@@ -641,7 +641,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                 <table class="settings__table">
                     <caption class="sr-only">Events you checked in to, with the date of each check-in</caption>
                     <thead>
-                        <tr class="font-bold font-mono text-xs tracking-wide uppercase text-text-secondary">
+                        <tr class="font-bold font-mono text-xs tracking-[0.06em] uppercase text-text-secondary">
                             <th
                                 class="px-4 py-3 text-left"
                                 scope="col"
@@ -692,7 +692,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                 <table class="settings__table min-w-[520px]">
                     <caption class="sr-only">Dated ledger entries with reason, change, and running balance</caption>
                     <thead>
-                        <tr class="font-bold font-mono text-xs tracking-wide uppercase text-text-secondary">
+                        <tr class="font-bold font-mono text-xs tracking-[0.06em] uppercase text-text-secondary">
                             <th
                                 class="px-4 py-3 text-left"
                                 scope="col"

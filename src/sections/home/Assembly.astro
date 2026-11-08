@@ -2,16 +2,17 @@
 import { getCollection } from 'astro:content';
 
 import IconArrow from '@components/icons/Arrow.astro';
+import Schedule from '@components/program/Schedule.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { formatCalendarDay, formatCalendarMonth, formatTimeRange, formatWeekday, getProgram } from '@lib/shared/utils';
+import { formatCalendarDay, formatCalendarMonth, formatTimeRange, formatWeekday, getProgram, isUpcoming } from '@lib/shared/utils';
 
 const events = await getCollection('events');
 
-const [next] = events
-    .filter(event => event.data.type === 'assembly' && event.data.status === 'upcoming')
-    .sort((a, b) => +a.data.date - +b.data.date);
-
 const program = getProgram('assembly');
+
+const upcoming = events
+    .filter(event => event.data.type === 'assembly' && isUpcoming(event.data.end))
+    .sort((a, b) => +a.data.date - +b.data.date);
 ---
 
 <section
@@ -40,90 +41,94 @@ const program = getProgram('assembly');
             {program.summary}
         </p>
     </div>
-    {next
-        ? (
-                <article class="assembly-sheet mark slab slab--bare slab--lift stage__item--runoff">
-                    <p
-                        class="assembly-sheet__plate"
-                        data-motion="wipe"
-                        data-placeholder
-                    >
-                        <span
-                            class="assembly-sheet__tag label px-2 py-1 bg-bg-signal text-text-on-signal"
-                            data-motion="stamp"
-                        >
-                            Next {program.shortName}
-                        </span>
-                        <time
-                            class="contents"
-                            datetime={next.data.date.toISOString()}
-                        >
-                            <span class="assembly-sheet__day">{formatCalendarDay(next.data.date)}</span>
-                            <span class="assembly-sheet__month">{formatCalendarMonth(next.data.date)}</span>
-                        </time>
-                        <span class="font-mono text-xs tracking-[0.08em] text-event-assembly-text">{formatWeekday(next.data.date)}</span>
-                        <span
-                            class="halftone--accent absolute bottom-0 inset-x-0 h-[calc(var(--drift-unit)*2)]"
-                            aria-hidden="true"
-                        />
-                    </p>
-                    <div
-                        class="assembly-sheet__body"
-                        data-motion="rise"
-                    >
-                        <h3 class="mb-4 font-display text-3xl">{next.data.title}</h3>
-                        <p
-                            class="mb-1 font-mono text-xs text-text-secondary"
-                            data-placeholder
-                        >
-                            {formatTimeRange(next.data.date, next.data.end)}
-                        </p>
-                        <address class="mb-5 font-mono not-italic text-xs text-text-secondary">
-                            {next.data.location}
-                        </address>
-                        <p class="max-w-2xl mb-8 leading-relaxed text-lg text-text-secondary">{next.data.excerpt}</p>
-                        <div class="flex flex-wrap gap-3">
-                            <a
-                                class="btn btn--primary"
-                                href="/assembly"
-                            >
-                                {program.shortName} details
-                            </a>
-                            <a
-                                class="btn"
-                                href="/events"
-                            >
-                                All events
-                            </a>
-                        </div>
-                    </div>
-                </article>
-            )
-        : (
-                <div
-                    class="max-w-(--measure-form)"
-                    data-motion="rise"
+    {upcoming.map((event, index) => (
+        <article
+            class="assembly-sheet mark slab slab--bare slab--lift stage__item--runoff"
+            data-event-end={event.data.end.toISOString()}
+            data-event-group="home-assembly"
+            data-event-role="next"
+            hidden={index > 0}
+        >
+            <p
+                class="assembly-sheet__plate"
+                data-motion="wipe"
+            >
+                <span
+                    class="assembly-sheet__tag label px-2 py-1 bg-bg-signal text-text-on-signal"
+                    data-motion="stamp"
                 >
-                    <p class="mb-8 text-text-secondary">
-                        No {program.name} on the calendar right now &mdash; the next date goes up as soon as the room is booked.
-                    </p>
-                    <div class="flex flex-wrap gap-3">
-                        <a
-                            class="btn btn--primary"
-                            href="/assembly"
-                        >
-                            {program.shortName} details
-                        </a>
-                        <a
-                            class="btn"
-                            href="/events"
-                        >
-                            All events
-                        </a>
-                    </div>
+                    Next {program.shortName}
+                </span>
+                <time
+                    class="contents"
+                    datetime={event.data.date.toISOString()}
+                >
+                    <span class="assembly-sheet__day">{formatCalendarDay(event.data.date)}</span>
+                    <span class="assembly-sheet__month">{formatCalendarMonth(event.data.date)}</span>
+                </time>
+                <span class="font-mono text-xs tracking-[0.06em] text-event-assembly-text">{formatWeekday(event.data.date)}</span>
+                <span
+                    class="halftone--accent absolute bottom-0 inset-x-0 h-[calc(var(--drift-unit)*2)]"
+                    aria-hidden="true"
+                />
+            </p>
+            <div
+                class="assembly-sheet__body"
+                data-motion="rise"
+            >
+                <h3 class="mb-4 font-display text-3xl">{event.data.title}</h3>
+                <p class="mb-1 font-mono text-xs text-text-secondary">
+                    {formatTimeRange(event.data.date, event.data.end)}
+                </p>
+                <address class="mb-5 font-mono not-italic text-xs text-text-secondary">
+                    {event.data.location}
+                </address>
+                <p class="max-w-2xl mb-8 leading-relaxed text-lg text-text-secondary">{event.data.excerpt}</p>
+                <div class="flex flex-wrap gap-3">
+                    <a
+                        class="btn btn--primary"
+                        href="/assembly"
+                    >
+                        {program.shortName} details
+                    </a>
+                    <a
+                        class="btn"
+                        href="/events"
+                    >
+                        All events
+                    </a>
                 </div>
-            )}
+            </div>
+        </article>
+    ))}
+    <div
+        class="max-w-(--measure-form)"
+        data-event-group="home-assembly"
+        data-event-role="none"
+        data-motion="rise"
+        hidden={upcoming.length > 0}
+    >
+        <p class="mb-8 text-text-secondary">
+            No {program.name} on the calendar right now &mdash; the next date goes up as soon as the room is booked.
+        </p>
+        <div class="flex flex-wrap gap-3">
+            <a
+                class="btn btn--primary"
+                href="/assembly"
+            >
+                {program.shortName} details
+            </a>
+            <a
+                class="btn"
+                href="/events"
+            >
+                All events
+            </a>
+        </div>
+    </div>
 </section>
+
+<Schedule />
 
 <style>
     .assembly-sheet {
@@ -169,7 +174,6 @@ const program = getProgram('assembly');
 
     @media (max-width: 1024px) {
         .assembly-sheet__body {
-            padding-block: calc(var(--space-2xl) * 1.75);
             padding-inline: var(--space-lg);
         }
 

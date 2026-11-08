@@ -78,7 +78,7 @@ const variants = Object.fromEntries(products
             {CHECKOUT_STEPS.map((step, index) => (
                 <li
                     class:list={[
-                        'step flex-1 p-4 font-bold font-mono text-xs tracking-wide uppercase',
+                        'step flex-1 p-4 font-bold font-mono text-xs tracking-[0.06em] uppercase',
                         index === 0 ? 'slab--well' : 'bg-bg-page',
                         index > 0 && 'border-l-2 border-border-strong',
                     ]}
@@ -237,7 +237,7 @@ const variants = Object.fromEntries(products
                         <dt>Tax</dt>
                         <dd data-tax>$0.00</dd>
                     </div>
-                    <div class="flex justify-between gap-(--space-sm) pt-(--space-sm) border-t-2 border-border-strong font-bold font-sans leading-normal text-2xl tracking-[-0.02em]">
+                    <div class="flex justify-between gap-(--space-sm) pt-(--space-sm) border-t-2 border-border-strong font-bold font-sans leading-normal text-2xl tracking-tight">
                         <dt>Total</dt>
                         <dd
                             aria-live="polite"

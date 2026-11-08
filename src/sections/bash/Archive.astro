@@ -1,14 +1,17 @@
 ---
 import { getCollection } from 'astro:content';
 
+import Schedule from '@components/program/Schedule.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { formatDate, formatTimeRange, getProgram } from '@lib/shared/utils';
+import { formatDate, formatTimeRange, getProgram, isUpcoming } from '@lib/shared/utils';
 
 const editions = await getCollection('bash');
 
-const past = editions.filter(edition => edition.data.status === 'past').sort((a, b) => +b.data.date - +a.data.date);
-
 const program = getProgram('bash');
+
+const archive = editions.toSorted((a, b) => +b.data.date - +a.data.date);
+
+const pastCount = archive.filter(edition => !isUpcoming(edition.data.end)).length;
 ---
 
 <section
@@ -18,26 +21,29 @@ const program = getProgram('bash');
     <div>
         <SectionHead
             class="text-4xl"
-            eyebrow={`Archive, ${past.length} editions`}
+            eyebrow={`Archive, ${pastCount} editions`}
             headingId="editions-title"
         >
             Past editions
         </SectionHead>
         <ul
             class="bash-archive list-none"
+            data-event-tally="editions-title"
             data-motion-from="center"
             data-motion-stagger="flip"
         >
-            {past.map(edition => (
-                <li>
+            {archive.map(edition => (
+                <li
+                    data-event-end={edition.data.end.toISOString()}
+                    data-event-role="past"
+                    hidden={isUpcoming(edition.data.end)}
+                >
                     <article
-                        id={edition.id}
+                        id={isUpcoming(edition.data.end) ? undefined : edition.id}
                         class="bash-archive__card slab slab--card"
+                        data-event-id={edition.id}
                     >
-                        <p
-                            class="label mb-2 text-link"
-                            data-placeholder
-                        >
+                        <p class="label mb-2 text-link">
                             {program.shortName} on <time datetime={edition.data.date.toISOString()}>{formatDate(edition.data.date)}</time>
                         </p>
                         <h3 class="mb-2 text-2xl">
@@ -46,10 +52,7 @@ const program = getProgram('bash');
                         <address class="mb-1 font-mono not-italic text-xs text-text-secondary">
                             {edition.data.location}
                         </address>
-                        <p
-                            class="mb-3 font-mono text-xs text-text-secondary"
-                            data-placeholder
-                        >
+                        <p class="mb-3 font-mono text-xs text-text-secondary">
                             {formatTimeRange(edition.data.date, edition.data.end)}
                         </p>
                         <p class="text-sm text-text-secondary">
@@ -61,6 +64,8 @@ const program = getProgram('bash');
         </ul>
     </div>
 </section>
+
+<Schedule />
 
 <style>
     .bash-archive {

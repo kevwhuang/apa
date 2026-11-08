@@ -2,12 +2,12 @@ import austinCommunityCollege from '@images/brand/sponsor_acc.png';
 import stationAustin from '@images/brand/sponsor_station_austin.svg';
 
 const ARTIST_NAME_MAX_LENGTH = 50;
-const ASSET_KINDS = ['brochure', 'document', 'media-kit', 'photo-pack', 'press-kit', 'sample-pack', 'slides', 'stems', 'video'] as const;
+const ASSET_KINDS = ['brochure', 'document', 'logo-kit', 'photo-pack', 'press-kit', 'sample-pack', 'slides', 'stems', 'video'] as const;
 
 const ASSET_KIND_LABELS: Record<AssetKind, string> = {
     'brochure': 'Brochure',
     'document': 'Document',
-    'media-kit': 'Media kit',
+    'logo-kit': 'Logo kit',
     'photo-pack': 'Photo pack',
     'press-kit': 'Press kit',
     'sample-pack': 'Sample pack',
@@ -131,7 +131,6 @@ const EVENT_PROGRAMS: Record<EventType, EventProgram> = {
     },
 };
 
-const EVENT_STATUSES = ['past', 'upcoming'] as const;
 const EVENT_TYPES = ['assembly', 'bash', 'camp', 'hangout', 'open-decks', 'studio-tour', 'the-royale', 'the-annual'] as const;
 
 const FIELD_LIMITS = {
@@ -150,7 +149,7 @@ const JOIN_ROUTE = '/contact#contact-topic';
 const KIND_COLORS: Record<AssetKind, string> = {
     'brochure': 'var(--color-chart-2)',
     'document': 'var(--color-chart-5)',
-    'media-kit': 'var(--color-chart-4)',
+    'logo-kit': 'var(--color-chart-4)',
     'photo-pack': 'var(--color-chart-3)',
     'press-kit': 'var(--color-link)',
     'sample-pack': 'var(--color-success-text)',
@@ -322,6 +321,7 @@ const ROUTES = [
     ...NAV_GROUPS.flatMap<{ href: string; label: string }>(group => ('href' in group ? [{ href: group.href, label: group.label }] : group.items)),
 ] as const;
 
+const SECOND_ENTRY = 2;
 const SESSION_TTL_DAYS = 14;
 const SITE_UPDATED = '2026-11-08T00:00:00-06:00';
 
@@ -473,7 +473,6 @@ export {
     EMAIL_PATTERN,
     EVENT_CADENCES,
     EVENT_PROGRAMS,
-    EVENT_STATUSES,
     EVENT_TYPES,
     FIELD_LIMITS,
     GENRES,
@@ -504,6 +503,7 @@ export {
     REDUCED_MOTION_QUERY,
     ROLES,
     ROUTES,
+    SECOND_ENTRY,
     SESSION_TTL_DAYS,
     SITE_UPDATED,
     SPOTLIGHT,

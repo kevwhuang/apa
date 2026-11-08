@@ -6,19 +6,34 @@ import PageHead from '@components/shared/PageHead.astro';
 
 import type { ImageMetadata } from 'astro';
 
+const CLASS_VIEWER_PHOTO = 'block object-contain aspect-(--wall-ratio) h-auto min-h-0 w-full border-2 border-current cursor-default pointer-events-auto select-none';
+
 const FIGURES = [
-    { alt: 'Hands resting on a mixing console during an Assembly demo', label: 'Assembly console close-up', slug: 'assembly_console' },
-    { alt: 'The Assembly room mid-session with every chair turned toward the screen', label: 'Assembly room, mid-session', slug: 'assembly_room' },
-    { alt: 'Confetti dropping over the room as the last Bash set lands', label: 'Bash confetti drop', slug: 'bash_confetti' },
-    { alt: 'The front row of the Bash crowd lit by the stage wash', label: 'Bash crowd, front row', slug: 'bash_crowd' },
-    { alt: 'The Bash main stage between sets with the gear still patched in', label: 'Bash main stage', slug: 'bash_stage' },
-    { alt: 'A listening circle with everyone facing the monitors', label: 'Listening circle', slug: 'hangout_listening' },
-    { alt: 'A patio at golden hour with the speakers carried outside', label: 'Patio, golden hour', slug: 'hangout_patio' },
-    { alt: 'A studio desk at load-in, notebooks and cables spread end to end', label: 'Studio desk at load-in', slug: 'studio_desk' },
-    { alt: 'Outboard racks patched and glowing in a member studio', label: 'Studio racks, patched in', slug: 'studio_racks' },
-    { alt: 'A full room at a studio takeover, everyone crowded around the desk', label: 'Studio takeover, full room', slug: 'studio_takeover' },
-    { alt: 'A stacked wall of cabinets and monitors built for a member showcase', label: 'Wall of sound', slug: 'wall_of_sound' },
-    { alt: 'Hands on a keyboard during a workshop while someone leans in to watch', label: 'Workshop hands on the keys', slug: 'workshop_hands' },
+    { alt: 'Nine people gather around a round black metal table on a covered dock, two seated and seven standing, with a lake and a bright cloud-filled sky behind them', label: '2026 October \u00b7 CAMP', slug: '2026_10_camp_river_oaks' },
+    { alt: 'Six people stand in a row in front of a vivid blue and purple painted mural with large block letters, red velvet ropes strung behind them', label: '2026 July \u00b7 Bash', slug: '2026_07_bash' },
+    { alt: 'About twenty people pose for a group photo against a dark wall, some kneeling in front and throwing up peace signs, with folded T-shirts stacked on a table at right', label: '2026 June \u00b7 Assembly \u00b7 Alex LaCroix', slug: '2026_06_assembly_alex_lacroix' },
+    { alt: 'A yellow waveform and plugin window glow on a projected wall above a wooden cabinet as a speaker sits at a desk alongside and attendees follow on laptops', label: '2026 May \u00b7 Assembly \u00b7 VonRyk', slug: '2026_05_assembly_vonryk' },
+    { alt: 'Thirteen people pose behind gray tables in front of a teal Ableton banner, four crouching in the front row', label: '2026 April \u00b7 Bash', slug: '2026_04_bash' },
+    { alt: 'Attendees seated at tables on both sides of a concrete aisle look toward the camera, while one person in a yellow jacket stands near the dark back wall', label: '2025 November \u00b7 Assembly \u00b7 Asher Nu & Uncharted Waters', slug: '2025_11_assembly_asher_nu_uncharted_waters' },
+    { alt: 'A speaker in a dark blazer gestures mid-sentence between two wall screens showing a Final Tips slide, with a handwritten note on the whiteboard behind', label: '2025 August \u00b7 Assembly \u00b7 Austin Breckenridge', slug: '2025_08_assembly_austin_breckenridge' },
+    { alt: 'Attendees spread across rows of white tables face the front, with a MIDI keyboard and laptop on the table at right and a red lettered wall panel on the left', label: '2025 July \u00b7 Assembly \u00b7 Justin M', slug: '2025_07_assembly_justin_m' },
+    { alt: 'Seen from the front of the room over a laptop, two studio monitors and printed QR code sheets, attendees sit at tables on both sides of a concrete aisle', label: '2025 May \u00b7 Assembly \u00b7 Jonathan Bolton & Saratonin', slug: '2025_05_assembly_jonathan_bolton_saratonin' },
+    { alt: 'Two people stand at the front of the room beside a title slide, talking with attendees seated at tables around them, word-covered panels lining the wall behind', label: '2025 April \u00b7 Assembly \u00b7 Alt Slauson', slug: '2025_04_assembly_alt_slauson' },
+    { alt: 'Attendees fill a long room at tables and laptops, facing a speaker between two wall screens of music software in the distance', label: '2025 March \u00b7 Assembly \u00b7 DREAMSHIFT', slug: '2025_03_assembly_dreamshift' },
+    { alt: 'A speaker at a laptop stands between two wall screens showing the same blue software window, with attendees following along on laptops at rows of tables', label: '2025 February \u00b7 Assembly \u00b7 Shane Hazleton', slug: '2025_02_assembly_shane_hazleton' },
+    { alt: 'Participants sit in office chairs around a central table of laptops and small keyboards in a lab with blue accent lighting, sports bottles lined up on a counter in the foreground', label: '2025 February \u00b7 Bash', slug: '2025_02_bash' },
+    { alt: 'A speaker stands smiling beside a laptop and studio monitor as attendees chat at tables across a wide room with a line-art mural on the far wall', label: '2025 January \u00b7 Assembly \u00b7 Boomchii & Asher Nu', slug: '2025_01_assembly_boomchii_asher_nu' },
+    { alt: 'Seen from the front of the room over a laptop and studio monitor, attendees sit on both sides of a concrete aisle with a white line-art mural on the far wall', label: '2024 December \u00b7 Assembly \u00b7 Justin M', slug: '2024_12_assembly_justin_m' },
+    { alt: 'Attendees sit at white tables under foil-wrapped ceiling ducts, several smiling toward the camera, with a red water bottle and a phone on the table in the foreground', label: '2024 October \u00b7 Assembly', slug: '2024_10_assembly' },
+    { alt: 'Attendees sit at rows of white tables with laptops and water bottles, a black wall on the left and a blue star mural at the far end', label: '2024 September \u00b7 Assembly', slug: '2024_09_assembly' },
+    { alt: 'Attendees listen from rows of white tables, one leaning back with both hands behind the head, with a red water bottle and cooler bag in the foreground and a blue star mural on the back wall', label: '2024 August \u00b7 Assembly', slug: '2024_08_assembly' },
+    { alt: 'A smiling speaker in a cap stands at a rolling desk with a laptop and two small studio monitors beside a projected slide titled Tips to Get Started in Sync', label: '2024 June \u00b7 Assembly \u00b7 Will Evans', slug: '2024_06_assembly_will_evans' },
+    { alt: 'A speaker stands beside a DJ controller and a pair of studio monitors, talking to attendees seated at tables in front of tall windows looking out on a lit street', label: '2024 May \u00b7 Assembly \u00b7 Kai Castro', slug: '2024_05_assembly_kai_castro' },
+    { alt: 'Attendees at rows of white tables face a speaker seated at a laptop as a video page is projected on the wall behind', label: '2024 April \u00b7 Assembly \u00b7 Justin M', slug: '2024_04_assembly_justin_m' },
+    { alt: 'A speaker with headphones around the neck stands behind a laptop and studio monitors as attendees at rows of tables watch a music session projected between two flags', label: '2024 March \u00b7 Assembly \u00b7 Den Zuko', slug: '2024_03_assembly_den_zuko' },
+    { alt: 'Attendees work heads-down with pens and laptops around a U of white tables, beneath a Cisco DevNet sign on a black wall', label: '2024 February \u00b7 Assembly \u00b7 Henyx', slug: '2024_02_assembly_henyx' },
+    { alt: 'Producers in headphones work at laptops and MIDI keyboards around a long central table in a computer lab with green accent lighting on the walls', label: '2023 August \u00b7 Bash', slug: '2023_08_bash' },
+    { alt: 'A speaker stands between two wall screens showing the same colorful track arrangement and addresses attendees seated at rows of white tables', label: '2023 August \u00b7 Assembly \u00b7 Lonely Child', slug: '2023_08_assembly_lonely_child' },
 ] as const;
 
 const IMAGE_DENSITY = 2;
@@ -62,7 +77,7 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
             data-motion="blur"
         >
             Assembly nights, Bash sets, and whatever the studio looked like
-            that week &mdash; shot by members, hung in no particular order. Open any frame to fill
+            that week &mdash; shot by members. Open any frame to fill
             the screen, then close it and keep walking the wall.
         </p>
     </div>
@@ -73,14 +88,17 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
     aria-label="Photo wall"
 >
     <ul
-        class="wall__list list-none"
+        class="wall__list flex flex-wrap gap-(--space-md) list-none"
         data-motion-stagger="rise"
     >
         {figures.map(figure => (
-            <li class="break-inside-avoid mb-(--space-md)">
+            <li
+                class="wall__item grow-(--figure-ratio) min-w-0"
+                style={`--figure-ratio: ${figure.ratio}`}
+            >
                 <figure class="flex flex-col gap-3">
                     <button
-                        class="wall__frame slab slab--bare slab--card slab--hover block overflow-hidden w-full mb-[calc(var(--z-card)*var(--lift))]"
+                        class="slab slab--bare slab--card slab--hover wall__frame block overflow-hidden w-full mb-[calc(var(--z-card)*var(--lift))]"
                         aria-label={`View ${figure.label}`}
                         data-wall-alt={figure.alt}
                         data-wall-label={figure.label}
@@ -131,7 +149,7 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
             tabindex="-1"
         >
             <img
-                class="block object-contain aspect-(--wall-ratio) h-auto min-h-0 w-full border-2 border-current cursor-default pointer-events-auto select-none"
+                class={CLASS_VIEWER_PHOTO}
                 alt=""
                 data-wall-photo
                 draggable="false"
@@ -206,9 +224,18 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
             transform var(--duration-slower) var(--motion-ease-ui);
     }
 
+    .wall__item {
+        flex-basis: calc(var(--figure-ratio) * var(--wall-row) + 4px);
+    }
+
     .wall__list {
-        column-gap: var(--space-md);
-        columns: 3;
+        --wall-row: clamp(156px, calc(129.333px + 8.3333vw), 236px);
+    }
+
+    .wall__list::after {
+        content: '';
+        flex-grow: 999999;
+        margin-inline-start: calc(-1 * var(--space-md));
     }
 
     .wall__stack {
@@ -266,15 +293,9 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
         transform: scale(1);
     }
 
-    @media (max-width: 1024px) {
-        .wall__list {
-            columns: 2;
-        }
-    }
-
     @media (max-width: 768px) {
-        .wall__list {
-            columns: 1;
+        .wall__item {
+            flex-basis: 100%;
         }
     }
 

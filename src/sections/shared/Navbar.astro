@@ -1,10 +1,11 @@
 ---
 import AccountControl from '@components/shared/AccountControl.astro';
+import BrandLockup from '@components/brand/Lockup.astro';
 import BrandMark from '@components/brand/Mark.astro';
 import IconCart from '@components/icons/Cart.astro';
 import IconChevron from '@components/icons/Chevron.astro';
 import IconMenu from '@components/icons/Menu.astro';
-import { BRAND, BRAND_LOGOS, BRAND_SIZES } from '@lib/shared/brand';
+import { BRAND, BRAND_SIZES } from '@lib/shared/brand';
 import { NAV_GROUPS } from '@lib/shared/constants';
 
 interface Props {
@@ -12,7 +13,6 @@ interface Props {
 }
 
 const { hasHero = false } = Astro.props;
-const Lockup = BRAND_LOGOS.lockup;
 ---
 
 <header
@@ -27,12 +27,9 @@ const Lockup = BRAND_LOGOS.lockup;
             href="/"
         >
             <BrandMark class="site-header__mark text-text-brand" />
-            <Lockup
-                class="site-header__lockup"
-                aria-hidden="true"
-                fill="currentColor"
-                height={BRAND_SIZES.lockupNav}
-            />
+            <span class="site-header__lockup">
+                <BrandLockup height={BRAND_SIZES.lockupNav} />
+            </span>
         </a>
         <nav
             id="site-nav"
@@ -271,10 +268,6 @@ const Lockup = BRAND_LOGOS.lockup;
 
     .site-header__brand :global(.site-header__mark) {
         display: none;
-    }
-
-    .site-header__lockup :global(path:first-child) {
-        fill: var(--color-logo);
     }
 
     .site-nav__item {
