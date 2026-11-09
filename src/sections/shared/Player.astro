@@ -13,26 +13,25 @@ import IconWaveform from '@components/icons/Waveform.astro';
     transition:persist
 >
     <button
-        class="player__launcher"
+        class="player__launcher z-(--z-drawer)"
         aria-controls="player-panel"
         aria-expanded="false"
         data-player-launcher
         type="button"
     >
         <IconWaveform />
-        <span class="sr-only">Open the track player</span>
+        <span class="sr-only">Open track player</span>
     </button>
     <div
         id="player-panel"
-        class="player__panel"
-        data-float-window
+        class="player__panel z-(--z-drawer)"
         hidden
     >
         <div
-            class="grip"
+            class="grip z-1"
             data-player-grip
         />
-        <div class="player__head flex flex-none items-center justify-between min-h-[50px] pl-(--space-md) pr-(--space-2xs)">
+        <div class="player__head flex flex-none items-center justify-between min-h-(--control-size) pl-(--space-md) pr-(--space-2xs)">
             <p class="label player__eyebrow text-link">Now playing</p>
             <button
                 class="player__close"
@@ -40,18 +39,18 @@ import IconWaveform from '@components/icons/Waveform.astro';
                 type="button"
             >
                 <IconClose />
-                <span class="sr-only">Close the track player</span>
+                <span class="sr-only">Close track player</span>
             </button>
         </div>
         <div
-            class="player__rack flex flex-auto flex-col overflow-y-auto overscroll-contain min-h-0 gap-(--space-2xs) px-(--space-md) py-(--space-sm) border-border-subtle border-t"
+            class="player__rack scroll-slot flex flex-auto flex-col min-h-0 gap-(--space-2xs) px-(--space-md) py-(--space-sm) border-border-subtle border-t"
             data-player-rack
             hidden
         >
             <div class="player__rack-head flex items-baseline justify-between gap-(--space-2xs)">
                 <p class="label player__rack-label flex-none text-link">Rack</p>
                 <p
-                    class="player__rack-file min-w-0 font-mono text-xs truncate text-text-secondary"
+                    class="player__rack-file min-w-0 text-base truncate text-text-secondary"
                     data-player-rack-file
                 />
             </div>
@@ -61,7 +60,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
                 data-player-plugins
             />
             <p
-                class="player__straight font-mono text-xs text-text-secondary"
+                class="player__straight font-mono text-base text-text-secondary"
                 data-player-straight
             >
                 Straight through
@@ -74,18 +73,18 @@ import IconWaveform from '@components/icons/Waveform.astro';
             class="action-text player__link"
             href="/rack"
         >
-            Open the rack <IconArrow />
+            Go to rack <IconArrow />
         </a>
         <div class="player__controls flex flex-col flex-none gap-(--space-2xs) py-(--space-sm) border-border-subtle border-t">
             <div class="player__meta flex flex-col gap-(--space-3xs) px-(--space-md)">
                 <p
-                    class="player__title min-w-0 font-bold text-lg truncate"
+                    class="player__title min-w-0 font-bold leading-(--text-xl) text-lg truncate"
                     data-player-title
                 >
-                    Nothing playing.
+                    Nothing playing
                 </p>
                 <p
-                    class="player__artist min-w-0 font-mono text-xs truncate text-text-secondary"
+                    class="player__artist min-w-0 text-base truncate text-text-secondary"
                     data-player-artist
                 >
                     Play a track to load it here.
@@ -117,7 +116,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
                 </button>
                 <div class="player__row-slider flex flex-auto flex-col min-w-0 gap-(--space-3xs)">
                     <input
-                        class="player__slider"
+                        class="range h-6"
                         aria-label="Seek within the track"
                         data-player-seek
                         disabled
@@ -127,7 +126,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
                         type="range"
                         value="0"
                     />
-                    <p class="player__ends flex justify-between w-full font-mono text-xs text-text-secondary select-none">
+                    <p class="player__ends flex justify-between w-full font-mono text-sm text-text-secondary select-none">
                         <span data-player-position>0:00</span>
                         <span data-player-duration>0:00</span>
                     </p>
@@ -153,7 +152,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
                 </button>
                 <div class="player__row-slider flex flex-auto flex-col min-w-0 gap-(--space-3xs)">
                     <input
-                        class="player__slider"
+                        class="range h-6"
                         aria-label="Volume"
                         data-player-volume
                         max="100"
@@ -163,7 +162,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
                         value="100"
                     />
                     <p
-                        class="player__ends flex justify-between w-full font-mono text-xs text-text-secondary select-none"
+                        class="player__ends flex justify-between w-full font-mono text-sm text-text-secondary select-none"
                         aria-hidden="true"
                     >
                         <span>0</span>
@@ -192,12 +191,12 @@ import IconWaveform from '@components/icons/Waveform.astro';
     .player__close {
         align-items: center;
         display: inline-flex;
-        height: 50px;
+        height: var(--control-size);
         justify-content: center;
         transition:
             color var(--duration-fast) var(--motion-ease-ui),
             transform var(--duration-fast) var(--motion-ease-ui);
-        width: 50px;
+        width: var(--control-size);
     }
 
     .player__close:active {
@@ -217,14 +216,14 @@ import IconWaveform from '@components/icons/Waveform.astro';
         border: 2px solid var(--color-border-strong);
         display: inline-flex;
         flex: 0 0 auto;
-        height: 50px;
+        height: var(--control-size);
         justify-content: center;
         transition:
             background var(--duration-fast) var(--motion-ease-ui),
             border-color var(--duration-fast) var(--motion-ease-ui),
             color var(--duration-fast) var(--motion-ease-ui),
             transform var(--duration-fast) var(--motion-ease-ui);
-        width: 50px;
+        width: var(--control-size);
     }
 
     .player__control:active:not(:disabled) {
@@ -232,8 +231,10 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     .player__control:disabled {
+        background: var(--color-btn-disabled-bg);
+        border-color: var(--color-btn-disabled-border);
+        color: var(--color-btn-disabled-text);
         cursor: not-allowed;
-        opacity: 0.55;
     }
 
     .player__control:hover:not(:disabled) {
@@ -257,7 +258,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
         --color-focus-ring: var(--color-focus-ring-offset);
         align-items: center;
         background: var(--color-bg-inverse);
-        border: 2px solid var(--color-border-strong);
+        border: 2px solid currentColor;
         border-right: 0;
         color: var(--color-text-inverse);
         display: inline-flex;
@@ -265,12 +266,8 @@ import IconWaveform from '@components/icons/Waveform.astro';
         inset: auto 0 var(--space-md) auto;
         justify-content: center;
         position: fixed;
-        transition:
-            background var(--duration-fast) var(--motion-ease-ui),
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
+        transition: transform var(--duration-fast) var(--motion-ease-ui);
         width: var(--launcher-size);
-        z-index: var(--z-drawer);
     }
 
     .player__launcher:active {
@@ -278,7 +275,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     .player__launcher:focus-visible {
-        outline-offset: -2px;
+        outline-offset: -4px;
     }
 
     .player__launcher:hover {
@@ -293,7 +290,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
         display: flex;
         flex: 0 0 auto;
         gap: var(--space-2xs);
-        min-height: 50px;
+        min-height: var(--control-size);
         padding: 0 var(--space-md);
         transition:
             color var(--duration-fast) var(--motion-ease-ui),
@@ -322,9 +319,9 @@ import IconWaveform from '@components/icons/Waveform.astro';
         height: auto;
         inset: auto calc(var(--launcher-size) + var(--lift)) var(--space-md) auto;
         max-height: calc(100dvh - var(--header-height) - 2 * var(--space-md));
+        max-width: calc(100vw - var(--launcher-size) - var(--lift) - var(--shell-pad));
         position: fixed;
         width: var(--player-width, min(340px, calc(100vw - var(--launcher-size) - 2 * var(--space-md))));
-        z-index: var(--z-drawer);
     }
 
     .player__plugin {
@@ -333,7 +330,8 @@ import IconWaveform from '@components/icons/Waveform.astro';
         color: var(--color-text-secondary);
         display: flex;
         font-family: var(--font-mono);
-        font-size: var(--text-xs);
+        font-size: var(--text-base);
+        line-height: var(--text-base--line-height);
         min-height: 36px;
         padding: var(--space-2xs) var(--space-sm);
         transition:
@@ -346,32 +344,11 @@ import IconWaveform from '@components/icons/Waveform.astro';
         border-color: var(--color-border-selected);
         color: var(--color-link);
     }
-
-    .player__slider {
-        accent-color: var(--color-control-checked-bg);
-        cursor: pointer;
-        height: 24px;
-        transition:
-            accent-color var(--duration-fast) var(--motion-ease-ui),
-            opacity var(--duration-fast) var(--motion-ease-ui);
-        width: 100%;
-    }
-
-    .player__slider:active:not(:disabled),
-    .player__slider:focus-visible,
-    .player__slider:hover:not(:disabled) {
-        accent-color: var(--color-native-accent);
-    }
-
-    .player__slider:disabled {
-        cursor: not-allowed;
-        opacity: 0.55;
-    }
 </style>
 
 <script>
+    import { LAUNCHER_SIZE, TRACK_PLAY_TOPIC, WINDOW_MARGINS } from '@lib/shared/constants';
     import { MODULE_NAMES, getRackPosition, getRackState, onRackChange, seekRack, toggleRack } from '@lib/rack/rack';
-    import { TRACK_PLAY_TOPIC } from '@lib/shared/constants';
     import {
         announceTrackState,
         closePlayer,
@@ -388,7 +365,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
         setVolume,
         togglePlayback,
     } from '@lib/audio/player';
-    import { formatDuration, initPanelResize, isTopFloatWindow, raiseWindow, registerPageScript, setHidden, setText } from '@lib/shared/utils';
+    import { claimFloatWindow, formatDuration, initPanelResize, onFloatWindowClaim, registerPageScript, setHidden, setText } from '@lib/shared/utils';
 
     interface PlayerSource {
         artist: string;
@@ -399,19 +376,18 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     const EMPTY_ARTIST = 'Play a track to load it here.';
-    const EMPTY_TITLE = 'Nothing playing.';
-    const LAUNCHER_SIZE = 50;
+    const EMPTY_TITLE = 'Nothing playing';
     const PLAYER_MIN_WIDTH = 340;
     const RACK_ARTIST = 'Rack';
-    const RACK_EMPTY = 'No file loaded.';
+    const RACK_EMPTY = 'No file loaded';
     const RESIZE_LABEL = 'Resize track player';
     const SEEK_LABEL_RACK = 'Seek within the rack';
     const SEEK_LABEL_TRACK = 'Seek within the track';
     const VOLUME_SCALE = 100;
-    const WINDOW_MARGINS = 48;
 
     let frame = 0;
-    let opened = false;
+    let isDragging = false;
+    let isOpened = false;
     let unsubscribe: (() => void) | undefined;
     let unsubscribeRack: (() => void) | undefined;
 
@@ -420,7 +396,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
         const rack = getRackState();
         const track = getTrack();
 
-        if (rack.fileName !== null && !player.playing) {
+        if (!player.playing && rack.fileName !== null) {
             return {
                 artist: RACK_ARTIST,
                 durationSeconds: rack.durationSeconds,
@@ -447,7 +423,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     function handleKeydown(event: KeyboardEvent) {
-        if (event.key !== 'Escape' || !getPlayerState().open) return;
+        if (!getPlayerState().open || event.key !== 'Escape') return;
 
         event.preventDefault();
         closePlayer();
@@ -455,24 +431,13 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     function handleLaunch() {
-        const panel = document.querySelector<HTMLElement>('#player-panel');
-
         if (getPlayerState().open) {
-            if (panel && !panel.hidden && !isTopFloatWindow(panel)) {
-                raiseWindow(panel);
-
-                return;
-            }
-
             closePlayer();
 
             return;
         }
 
         openPlayer();
-
-        if (panel) raiseWindow(panel);
-
         document.querySelector<HTMLElement>('[data-player-close]')?.focus();
     }
 
@@ -486,6 +451,13 @@ import IconWaveform from '@components/icons/Waveform.astro';
         }
 
         seekTo(seconds);
+    }
+
+    function handleSeekRelease() {
+        if (!isDragging) return;
+
+        isDragging = false;
+        render();
     }
 
     function handleToggle() {
@@ -507,14 +479,10 @@ import IconWaveform from '@components/icons/Waveform.astro';
         setText(document.querySelector('[data-player-status]'), `Playing ${track.title} by ${track.artist}.`);
     }
 
-    function handleVolume(input: HTMLInputElement) {
-        setVolume(Number(input.value) / VOLUME_SCALE);
-    }
-
     function initPlayer(signal: AbortSignal) {
         const grip = document.querySelector<HTMLElement>('[data-player-grip]');
         const launcher = document.querySelector<HTMLElement>('[data-player-launcher]');
-        const panel = document.querySelector<HTMLElement>('#player-panel');
+        const panel = document.querySelector<HTMLElement>('.player__panel');
         const player = document.querySelector<HTMLElement>('.player');
         const seek = document.querySelector<HTMLInputElement>('[data-player-seek]');
         const volume = document.querySelector<HTMLInputElement>('[data-player-volume]');
@@ -545,9 +513,17 @@ import IconWaveform from '@components/icons/Waveform.astro';
         document.querySelector<HTMLElement>('[data-player-mute]')?.addEventListener('click', toggleMute, { signal });
         document.querySelector<HTMLElement>('[data-player-toggle]')?.addEventListener('click', handleToggle, { signal });
         launcher.addEventListener('click', handleLaunch, { signal });
+        onFloatWindowClaim(panel, closePlayer, signal);
         player.addEventListener('keydown', handleKeydown, { signal });
         seek.addEventListener('input', () => handleSeek(seek), { signal });
-        volume.addEventListener('input', () => handleVolume(volume), { signal });
+
+        seek.addEventListener('pointerdown', () => {
+            isDragging = true;
+        }, { signal });
+
+        volume.addEventListener('input', () => setVolume(Number(volume.value) / VOLUME_SCALE), { signal });
+        window.addEventListener('pointercancel', handleSeekRelease, { signal });
+        window.addEventListener('pointerup', handleSeekRelease, { signal });
         window.addEventListener(TRACK_PLAY_TOPIC, handleTrackPlay, { signal });
         render();
     }
@@ -555,7 +531,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
     function render() {
         const artist = document.querySelector<HTMLElement>('[data-player-artist]');
         const launcher = document.querySelector<HTMLElement>('[data-player-launcher]');
-        const panel = document.querySelector<HTMLElement>('#player-panel');
+        const panel = document.querySelector<HTMLElement>('.player__panel');
         const seek = document.querySelector<HTMLInputElement>('[data-player-seek]');
         const source = getSource();
         const state = getPlayerState();
@@ -566,6 +542,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
 
         const playing = source?.playing ?? false;
 
+        artist.classList.toggle('font-mono', source !== undefined);
         artist.title = source?.artist ?? '';
         panel.hidden = !state.open;
         seek.max = String(Math.max(0, Math.floor(source?.durationSeconds ?? 0)));
@@ -582,9 +559,9 @@ import IconWaveform from '@components/icons/Waveform.astro';
         toggle.setAttribute('aria-pressed', String(playing));
         toggle.toggleAttribute('disabled', !source);
 
-        if (state.open && !opened) raiseWindow(panel);
+        if (!isOpened && state.open) claimFloatWindow(panel);
 
-        opened = state.open;
+        isOpened = state.open;
         cancelAnimationFrame(frame);
         renderRack();
 
@@ -600,14 +577,15 @@ import IconWaveform from '@components/icons/Waveform.astro';
 
         if (!file || !list || !rack || !template) return;
 
-        const loaded = state.fileName !== null;
+        const isLoaded = state.fileName !== null;
 
+        file.classList.toggle('font-mono', isLoaded);
         file.textContent = state.fileName ?? RACK_EMPTY;
         file.title = state.fileName ?? '';
-        rack.hidden = !loaded && state.activeKinds.length === 0;
+        rack.hidden = !isLoaded && state.activeKinds.length === 0;
         list.replaceChildren();
         rack.classList.toggle('is-playing', state.playing);
-        setHidden(document.querySelector<HTMLElement>('[data-player-straight]'), !loaded || state.activeKinds.length > 0);
+        setHidden(document.querySelector<HTMLElement>('[data-player-straight]'), !isLoaded || state.activeKinds.length > 0);
 
         for (const kind of [...state.activeKinds].reverse()) {
             const fragment = template.content.cloneNode(true) as DocumentFragment;
@@ -630,12 +608,12 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     function tickProgress() {
+        const seek = document.querySelector<HTMLInputElement>('[data-player-seek]');
         const source = getSource();
 
         const position = source?.rack ? getRackPosition() : getPosition();
-        const seek = document.querySelector<HTMLInputElement>('[data-player-seek]');
 
-        if (seek && document.activeElement !== seek) seek.value = String(Math.floor(position));
+        if (!isDragging && seek) seek.value = String(Math.floor(position));
 
         setText(document.querySelector('[data-player-position]'), formatDuration(position));
 
@@ -643,22 +621,22 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     function toggleLabel(source: PlayerSource | undefined) {
-        if (source?.rack) return source.playing ? 'Pause the rack' : 'Play the rack';
+        if (source?.rack) return source.playing ? 'Pause rack' : 'Play rack';
 
         return source?.playing ? 'Pause' : 'Play';
     }
 
     function toggleMute() {
         const button = document.querySelector<HTMLElement>('[data-player-mute]');
-        const next = !isMuted();
+        const shouldMute = !isMuted();
         const volume = document.querySelector<HTMLInputElement>('[data-player-volume]');
 
-        if (volume) volume.disabled = next;
+        if (volume) volume.disabled = shouldMute;
 
-        button?.setAttribute('aria-pressed', String(next));
-        setHidden(document.querySelector<HTMLElement>('.player__icon--muted'), !next);
-        setHidden(document.querySelector<HTMLElement>('.player__icon--sound'), next);
-        setMuted(next);
+        button?.setAttribute('aria-pressed', String(shouldMute));
+        setHidden(document.querySelector<HTMLElement>('.player__icon--muted'), !shouldMute);
+        setHidden(document.querySelector<HTMLElement>('.player__icon--sound'), shouldMute);
+        setMuted(shouldMute);
     }
 
     registerPageScript(initPlayer);

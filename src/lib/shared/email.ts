@@ -1,4 +1,4 @@
-import { LINKS, ONBOARDING_ROUTE, ONBOARDING_TOKEN_PARAM } from '@lib/shared/constants';
+import { LINKS, ONBOARDING_ROUTE, ONBOARDING_TOKEN_PARAMETER } from '@lib/shared/constants';
 import { formatProds } from '@lib/shared/utils';
 
 const SENDER_NAME = 'Austin Producer Alliance';
@@ -6,7 +6,7 @@ const SENDER_NAME = 'Austin Producer Alliance';
 function composeContactEmail(input: ContactEmailInput): MockEmail {
     const { email, message, name, topic } = input;
 
-    const subject = `${topic} \u2014 ${name}`;
+    const subject = `${topic} \u00b7 ${name}`;
 
     return {
         actionHref: `mailto:${LINKS.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`,
@@ -28,13 +28,13 @@ function composeOnboardingEmail(input: OnboardingEmailInput): MockEmail {
         : 'Thanks for checking in. You\'re part of the Alliance now.';
 
     return {
-        actionHref: `${ONBOARDING_ROUTE}?${ONBOARDING_TOKEN_PARAM}=${token}`,
-        actionLabel: 'Finish your profile',
+        actionHref: `${ONBOARDING_ROUTE}?${ONBOARDING_TOKEN_PARAMETER}=${token}`,
+        actionLabel: 'Finish profile',
         body: [
             greeting,
-            `Your account is open with ${formatProds(prods)} on it. Prods are our credit for taking part \u2014 they add up as you show up, and they spend like cash in the store.`,
+            `Your account is open with ${formatProds(prods)} on it. Prods are our credit for taking part. They add up as you show up, and each one takes $1.00 off in the store.`,
             'The link below signs you in and drops you into the last few basics, so the rest of the roster knows who you are and what you make.',
-            'The link works for the next 24 hours. If it expires, check in again and we will send a fresh one.',
+            'The link works for the next 24 hours. If it expires, checking in again sends a fresh one.',
         ],
         from: `${SENDER_NAME} <${LINKS.email}>`,
         preheader: `Finish your profile and claim ${formatProds(prods)}.`,

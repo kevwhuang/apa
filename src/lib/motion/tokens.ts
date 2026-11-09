@@ -16,18 +16,14 @@ const EASE_FALLBACKS: Record<MotionEaseToken, MotionBezier> = {
     linear: [0, 0, 1, 1],
     mechanical: [0.83, 0, 0.17, 1],
     snap: [0.34, 1.5, 0.64, 1],
-    standard: [0.4, 0, 0.2, 1],
 };
 
 const FALLBACK_DATA_KEY = 'motionTokenFallback';
 const MILLISECONDS_PER_SECOND = 1_000;
 
 const SCALAR_FALLBACKS = {
-    '--hero-field-alpha-max': 0.11,
     '--motion-travel': 24,
-    '--motion-travel-lg': 34,
     '--stagger-max-total': 0.45,
-    '--transport-velocity-cap': 2_400,
 };
 
 const STAGGER_FALLBACKS: Record<MotionStaggerToken, number> = {
@@ -38,7 +34,7 @@ const STAGGER_FALLBACKS: Record<MotionStaggerToken, number> = {
 let cache: MotionTokens | undefined;
 let fallbacks: string[] = [];
 
-function cubicBezier(x1: number, y1: number, x2: number, y2: number): MotionEase {
+function createCubicBezier(x1: number, y1: number, x2: number, y2: number) {
     const cx = 3 * x1;
     const cy = 3 * y1;
 
@@ -48,18 +44,6 @@ function cubicBezier(x1: number, y1: number, x2: number, y2: number): MotionEase
     const ax = 1 - cx - bx;
     const ay = 1 - cy - by;
 
-    function sampleX(t: number) {
-        return ((ax * t + bx) * t + cx) * t;
-    }
-
-    function sampleY(t: number) {
-        return ((ay * t + by) * t + cy) * t;
-    }
-
-    function slopeX(t: number) {
-        return (3 * ax * t + 2 * bx) * t + cx;
-    }
-
     return function solve(progress: number) {
         if (progress <= 0) return 0;
         if (progress >= 1) return 1;
@@ -67,18 +51,18 @@ function cubicBezier(x1: number, y1: number, x2: number, y2: number): MotionEase
         let t = progress;
 
         for (let index = 0; index < BEZIER_ITERATIONS; index += 1) {
-            const error = sampleX(t) - progress;
+            const error = ((ax * t + bx) * t + cx) * t - progress;
 
             if (Math.abs(error) < BEZIER_EPSILON) break;
 
-            const slope = slopeX(t);
+            const slope = (3 * ax * t + 2 * bx) * t + cx;
 
             if (Math.abs(slope) < BEZIER_EPSILON) break;
 
             t -= error / slope;
         }
 
-        return sampleY(t);
+        return ((ay * t + by) * t + cy) * t;
     };
 }
 
@@ -87,11 +71,10 @@ function getMotionTokens(): MotionTokens {
 
     fallbacks = [];
 
-    const styles = getComputedStyle(document.documentElement);
-
     const duration = {} as MotionTokens['duration'];
     const ease = {} as MotionTokens['ease'];
     const stagger = {} as MotionTokens['stagger'];
+    const styles = getComputedStyle(document.documentElement);
 
     for (const key of Object.keys(DURATION_FALLBACKS) as MotionDurationToken[]) {
         duration[key] = readNumber(styles, `--duration-${key}`, DURATION_FALLBACKS[key]);
@@ -106,14 +89,11 @@ function getMotionTokens(): MotionTokens {
     }
 
     cache = {
-        alphaMax: readNumber(styles, '--hero-field-alpha-max', SCALAR_FALLBACKS['--hero-field-alpha-max']),
         duration,
         ease,
         stagger,
         staggerMaxTotal: readNumber(styles, '--stagger-max-total', SCALAR_FALLBACKS['--stagger-max-total']),
         travel: readNumber(styles, '--motion-travel', SCALAR_FALLBACKS['--motion-travel']),
-        travelLarge: readNumber(styles, '--motion-travel-lg', SCALAR_FALLBACKS['--motion-travel-lg']),
-        velocityCap: readNumber(styles, '--transport-velocity-cap', SCALAR_FALLBACKS['--transport-velocity-cap']),
     };
 
     surfaceFallbacks();
@@ -125,21 +105,21 @@ function readColorToken(styles: CSSStyleDeclaration, name: string): string {
     return styles.getPropertyValue(name).trim();
 }
 
-function readEase(styles: CSSStyleDeclaration, name: string, fallback: MotionBezier): MotionEase {
+function readEase(styles: CSSStyleDeclaration, name: string, fallback: MotionBezier) {
     const match = CUBIC_BEZIER_PATTERN.exec(styles.getPropertyValue(name));
 
     const points = match ? match[1].split(',').map(Number) : [];
 
-    const valid = points.length === fallback.length && points.every(Number.isFinite);
+    const isValid = points.length === fallback.length && points.every(Number.isFinite);
 
-    if (!valid) fallbacks.push(name);
+    if (!isValid) fallbacks.push(name);
 
-    const [x1, y1, x2, y2] = valid ? points : fallback;
+    const [x1, y1, x2, y2] = isValid ? points : fallback;
 
-    return cubicBezier(x1, y1, x2, y2);
+    return createCubicBezier(x1, y1, x2, y2);
 }
 
-function readNumber(styles: CSSStyleDeclaration, name: string, fallback: number): number {
+function readNumber(styles: CSSStyleDeclaration, name: string, fallback: number) {
     const raw = styles.getPropertyValue(name).trim();
 
     const parsed = Number.parseFloat(raw);
@@ -157,7 +137,7 @@ function refreshMotionTokens(): void {
     cache = undefined;
 }
 
-function surfaceFallbacks(): void {
+function surfaceFallbacks() {
     const root = document.documentElement;
 
     if (!fallbacks.length) {

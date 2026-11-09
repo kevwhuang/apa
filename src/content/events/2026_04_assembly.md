@@ -1,9 +1,9 @@
 ---
-title: 2026 April · Assembly
+title: April 2026
 date: 2026-04-09T18:00:00-05:00
 end: 2026-04-09T21:00:00-05:00
 location: STATION Austin · 701 Brazos St
 room: Antone's on the 16th floor
-excerpt: An evening dedicated to networking and collaboration for music producers in Austin, open to all experience levels and genres.
+excerpt: Producers of every genre and experience level play finished songs and early sketches one at a time for feedback from the room. The rest of the night is for meeting people to make music with.
 type: assembly
 ---

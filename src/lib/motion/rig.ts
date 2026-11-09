@@ -1,27 +1,24 @@
-import { BufferAttribute, BufferGeometry, CanvasTexture, Color, DynamicDrawUsage, Fog, LineBasicMaterial, LineSegments, LinearFilter, Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry, Points, PointsMaterial, Scene, WebGLRenderer } from 'three';
+import { BufferAttribute, BufferGeometry, Color, DynamicDrawUsage, LineBasicMaterial, LineSegments, PerspectiveCamera, Points, PointsMaterial, Scene, WebGLRenderer } from 'three';
 
-import { REDUCED_MOTION_QUERY, STORAGE } from '@lib/shared/constants';
+import { MOBILE_WIDTH, REDUCED_MOTION_QUERY, STORAGE } from '@lib/shared/constants';
 import { STEP_COUNT, stepDuration, stepEnergy } from '@lib/motion/pattern';
 import { isSlowDevice } from '@lib/shared/utils';
 import { readColorToken } from '@lib/motion/tokens';
 
 interface Palette {
     accent: string;
-    ink: string;
-    muted: string;
-    surface: string;
+    faint: string;
+    line: string;
 }
 
 interface SceneOptions {
+    canvas: HTMLCanvasElement;
     holder: HTMLElement;
     palette: Palette;
     signal: AbortSignal;
     still: boolean;
 }
 
-const ALPHA_ENERGY = 1;
-const ALPHA_FLOOR = 0.24;
-const ALPHA_PULSE = 0.56;
 const AXIS_HEIGHT = 1;
 const AXIS_SHIFT = 9;
 const AXIS_SHIFT_MOBILE = 4;
@@ -39,12 +36,9 @@ const CAMERA_FAR = 140;
 const CAMERA_FOV = 40;
 const CAMERA_HEIGHT = 2.5;
 const CAMERA_NEAR = 0.1;
-const DEPTH_FADE_CURVE = 1.45;
-const DEPTH_FADE_FLOOR = 0.42;
-const FOG_FAR = 106;
-const FOG_NEAR = 44;
+const CANVAS_SELECTOR = '.rack__canvas';
+const FLARE_THRESHOLD = 0.25;
 const GROUND_AMPLITUDE = 1.8;
-const GROUND_AXIS_OPACITY = 0.26;
 const GROUND_BED = 0.5;
 const GROUND_COLUMNS = 26;
 const GROUND_COLUMNS_MOBILE = 16;
@@ -52,10 +46,8 @@ const GROUND_DEPTH = 96;
 const GROUND_DROP = -10;
 const GROUND_FLOOR = 0.74;
 const GROUND_LEAD = 8;
-const GROUND_MAJOR_OPACITY = 0.5;
 const GROUND_MAJOR_ROW = 6;
 const GROUND_MAJOR_STRIDE = 3;
-const GROUND_OPACITY = 0.17;
 const GROUND_PITCH = 0.3;
 const GROUND_RIPPLE = 2;
 const GROUND_ROLL = 0.05;
@@ -66,12 +58,8 @@ const GROUND_STRIDE = 3;
 const GROUND_WIDTH = 46;
 const GROUND_YAW = -0.18;
 const HOLDER_SELECTOR = '.rack__scene';
-const HOOP_OPACITY = 0.88;
 const MAX_PIXEL_RATIO = 2;
 const MILLISECONDS_PER_SECOND = 1_000;
-const MOBILE_WIDTH = 768;
-const MOTE_ALPHA_FLOOR = 0.14;
-const MOTE_ALPHA_RANGE = 0.9;
 const MOTE_COUNT = 240;
 const MOTE_COUNT_MOBILE = 90;
 const MOTE_DEPTH_STEP = 0.754_877_666_25;
@@ -79,16 +67,11 @@ const MOTE_DRIFT = 2.6;
 const MOTE_LANES = 12;
 const MOTE_LANE_SKEW = 0.013;
 const MOTE_LEAD = 6;
-const MOTE_NEAR_CURVE = 1.6;
-const MOTE_NEAR_FADE = 18;
 const MOTE_RADIUS_INNER = 5.6;
 const MOTE_RADIUS_RANGE = 2.8;
 const MOTE_SHELLS = 3;
-const MOTE_SIZE = 0.44;
+const MOTE_SIZE = 4;
 const MOTE_SPAN = 104;
-const MOTE_TEXTURE_CORE = 0.55;
-const MOTE_TEXTURE_FALLOFF = 0.72;
-const MOTE_TEXTURE_SIZE = 64;
 const ORBIT_LIFT = 0.5;
 const ORBIT_PERIOD = 168;
 const ORBIT_PUSH = 1.2;
@@ -100,9 +83,6 @@ const QUALITY_FPS = [30, 20, 12];
 const RADIUS_BASE = 6.2;
 const RADIUS_RANGE = 0.62;
 const READ_INNER = 0.93;
-const READ_OPACITY_FLOOR = 0.6;
-const READ_OPACITY_RANGE = 0.5;
-const READ_PULSE_GAIN = 0.3;
 const READ_RING = 6;
 const RIB_DEPTH = 0.005;
 const RIB_FINE_RATIO = 12;
@@ -113,18 +93,10 @@ const RING_COUNT_MOBILE = 18;
 const RING_NEAR = 8;
 const RING_SPAN = 78;
 const RING_TWIST = 0.0006;
-const SCAN_HEIGHT = 15;
-const SCAN_OPACITY = 0.22;
-const SCAN_PERIOD = 9.5;
-const SCAN_SWEEP = 6.6;
-const SCAN_TEXTURE_CORE = 0.46;
-const SCAN_TEXTURE_SIZE = 64;
-const SCAN_WIDTH = 0.32;
 const SCROLL_SLOWDOWN = 9;
 const SEGMENT_COUNT = 84;
 const SEGMENT_COUNT_MOBILE = 56;
 const SPIN_RATE = 0.01;
-const SPOKE_OPACITY = 0.16;
 const SPOKE_STRIDE = 7;
 const STILL_ELAPSED = 42.9;
 const STILL_SETTLE = 120;
@@ -136,12 +108,14 @@ const TARGET_DEPTH = -20;
 const TARGET_HEIGHT = 0.5;
 const TAU = Math.PI * 2;
 const TICK_STRIDE = 6;
+const VECTOR_COMPONENTS = 3;
+const Z_COMPONENT = 2;
 
 function buildGroundIndices(columns: number, rows: number) {
     const axis: number[] = [];
     const major: number[] = [];
-    const minor: number[] = [];
     const middle = Math.round((columns - 1) / 2 / GROUND_STRIDE) * GROUND_STRIDE;
+    const minor: number[] = [];
 
     for (let row = 0; row < rows; row += 1) {
         const target = row % GROUND_MAJOR_ROW === 0 ? major : minor;
@@ -192,69 +166,22 @@ function buildIndices(rings: number, segments: number) {
     return { hoop, read, spoke };
 }
 
-function buildMoteTexture() {
-    const surface = document.createElement('canvas');
-
-    surface.height = MOTE_TEXTURE_SIZE;
-    surface.width = MOTE_TEXTURE_SIZE;
-
-    const context = surface.getContext('2d');
-    const middle = MOTE_TEXTURE_SIZE / 2;
-
-    if (context) {
-        const gradient = context.createRadialGradient(middle, middle, 0, middle, middle, middle);
-
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-        gradient.addColorStop(MOTE_TEXTURE_CORE, `rgba(255, 255, 255, ${MOTE_TEXTURE_FALLOFF})`);
-        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        context.fillStyle = gradient;
-        context.fillRect(0, 0, MOTE_TEXTURE_SIZE, MOTE_TEXTURE_SIZE);
-    }
-
-    const texture = new CanvasTexture(surface);
-
-    texture.generateMipmaps = false;
-    texture.minFilter = LinearFilter;
-
-    return texture;
-}
-
-function buildScanTexture() {
-    const surface = document.createElement('canvas');
-
-    surface.height = SCAN_TEXTURE_SIZE;
-    surface.width = 1;
-
-    const context = surface.getContext('2d');
-
-    if (context) {
-        const gradient = context.createLinearGradient(0, 0, 0, SCAN_TEXTURE_SIZE);
-
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
-        gradient.addColorStop(SCAN_TEXTURE_CORE, 'rgba(255, 255, 255, 1)');
-        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        context.fillStyle = gradient;
-        context.fillRect(0, 0, 1, SCAN_TEXTURE_SIZE);
-    }
-
-    return new CanvasTexture(surface);
-}
-
 function initRig(signal: AbortSignal): void {
     const holder = document.querySelector<HTMLElement>(HOLDER_SELECTOR);
     const palette = readPalette();
 
-    if (!holder || !isValidPalette(palette)) return;
+    const canvas = holder?.querySelector<HTMLCanvasElement>(CANVAS_SELECTOR);
 
-    mountScene({ holder, palette, signal, still: window.matchMedia(REDUCED_MOTION_QUERY).matches });
+    if (!canvas || !holder || !isValidPalette(palette)) return;
+
+    mountScene({ canvas, holder, palette, signal, still: window.matchMedia(REDUCED_MOTION_QUERY).matches });
 }
 
-function isValidPalette(palette: Palette): boolean {
-    return Boolean(palette.accent && palette.ink && palette.muted && palette.surface);
+function isValidPalette(palette: Palette) {
+    return Boolean(palette.accent && palette.faint && palette.line);
 }
 
-function mountScene({ holder, palette, signal, still }: SceneOptions): void {
-    const canvas = document.createElement('canvas');
+function mountScene({ canvas, holder, palette, signal, still }: SceneOptions) {
     const ratio = Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO);
 
     let renderer: WebGLRenderer;
@@ -265,65 +192,54 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
         return;
     }
 
-    const mobile = window.innerWidth <= MOBILE_WIDTH;
+    const accentColor = new Color(palette.accent);
+    const camera = new PerspectiveCamera(CAMERA_FOV, 1, CAMERA_NEAR, CAMERA_FAR);
+    const geometry = new BufferGeometry();
+    const groundAxisMaterial = new LineBasicMaterial({ color: palette.accent });
+    const groundGeometry = new BufferGeometry();
+    const groundMajorMaterial = new LineBasicMaterial({ color: palette.line });
+    const groundMaterial = new LineBasicMaterial({ color: palette.faint });
+    const hoopMaterial = new LineBasicMaterial({ vertexColors: true });
+    const isMobile = window.innerWidth <= MOBILE_WIDTH;
+    const lineColor = new Color(palette.line);
+    const moteGeometry = new BufferGeometry();
+    const moteMaterial = new PointsMaterial({ color: palette.line, size: MOTE_SIZE, sizeAttenuation: false });
+    const readMaterial = new LineBasicMaterial({ color: palette.accent });
+    const scene = new Scene();
+    const spokeMaterial = new LineBasicMaterial({ color: palette.faint });
 
-    const columns = mobile ? GROUND_COLUMNS_MOBILE : GROUND_COLUMNS;
-    const dolly = mobile ? CAMERA_DEPTH_MOBILE : CAMERA_DEPTH;
-    const motes = mobile ? MOTE_COUNT_MOBILE : MOTE_COUNT;
-    const rings = mobile ? RING_COUNT_MOBILE : RING_COUNT;
-    const rows = mobile ? GROUND_ROWS_MOBILE : GROUND_ROWS;
-    const segments = mobile ? SEGMENT_COUNT_MOBILE : SEGMENT_COUNT;
-    const shift = mobile ? AXIS_SHIFT_MOBILE : AXIS_SHIFT;
+    const columns = isMobile ? GROUND_COLUMNS_MOBILE : GROUND_COLUMNS;
+    const dolly = isMobile ? CAMERA_DEPTH_MOBILE : CAMERA_DEPTH;
+    const ground = new LineSegments(groundGeometry, [groundMaterial, groundMajorMaterial, groundAxisMaterial]);
+    const mist = new Points(moteGeometry, moteMaterial);
+    const motes = isMobile ? MOTE_COUNT_MOBILE : MOTE_COUNT;
+    const rings = isMobile ? RING_COUNT_MOBILE : RING_COUNT;
+    const rows = isMobile ? GROUND_ROWS_MOBILE : GROUND_ROWS;
+    const segments = isMobile ? SEGMENT_COUNT_MOBILE : SEGMENT_COUNT;
+    const shift = isMobile ? AXIS_SHIFT_MOBILE : AXIS_SHIFT;
+    const tunnel = new LineSegments(geometry, [hoopMaterial, readMaterial, spokeMaterial]);
 
     const { axis, major, minor } = buildGroundIndices(columns, rows);
-    const { hoop, read, spoke } = buildIndices(rings, segments);
     const cosine = new Float32Array(segments);
-    const fades = new Float32Array(rings);
     const grades = new Float32Array(columns);
-    const groundPlaces = new Float32Array(columns * rows * 3);
+    const groundPlaces = new Float32Array(columns * rows * VECTOR_COMPONENTS);
+    const { hoop, read, spoke } = buildIndices(rings, segments);
     const moteCosine = new Float32Array(motes);
-    const motePlaces = new Float32Array(motes * 3);
+    const motePlaces = new Float32Array(motes * VECTOR_COMPONENTS);
     const moteSeeds = new Float32Array(motes);
     const moteSine = new Float32Array(motes);
     const moteSpans = new Float32Array(motes);
-    const moteTints = new Float32Array(motes * 4);
-    const positions = new Float32Array((rings + 1) * segments * 3);
+    const positions = new Float32Array((rings + 1) * segments * VECTOR_COMPONENTS);
+    const readDepth = RING_NEAR - (READ_RING / (rings - 1)) * RING_SPAN;
+    const ringPitch = (rings - 1) / RING_SPAN;
     const sine = new Float32Array(segments);
     const tapers = new Float32Array(rings);
-    const tints = new Float32Array((rings + 1) * segments * 4);
+    const tints = new Float32Array((rings + 1) * segments * VECTOR_COMPONENTS);
 
-    const moteTexture = buildMoteTexture();
-    const scanTexture = buildScanTexture();
-
-    const accentColor = new Color(palette.accent);
-    const camera = new PerspectiveCamera(CAMERA_FOV, 1, CAMERA_NEAR, CAMERA_FAR);
-    const fog = new Fog(palette.surface, FOG_NEAR, FOG_FAR);
-    const geometry = new BufferGeometry();
-    const groundAxisMaterial = new LineBasicMaterial({ color: palette.accent, opacity: GROUND_AXIS_OPACITY, transparent: true });
-    const groundGeometry = new BufferGeometry();
-    const groundMajorMaterial = new LineBasicMaterial({ color: palette.ink, opacity: GROUND_MAJOR_OPACITY, transparent: true });
-    const groundMaterial = new LineBasicMaterial({ color: palette.ink, opacity: GROUND_OPACITY, transparent: true });
-    const groundPlace = new BufferAttribute(groundPlaces, 3);
-    const hoopMaterial = new LineBasicMaterial({ opacity: HOOP_OPACITY, transparent: true, vertexColors: true });
-    const inkColor = new Color(palette.ink);
-    const moteGeometry = new BufferGeometry();
-    const moteMaterial = new PointsMaterial({ color: palette.muted, depthWrite: false, map: moteTexture, size: MOTE_SIZE, transparent: true, vertexColors: true });
-    const motePlace = new BufferAttribute(motePlaces, 3);
-    const moteTint = new BufferAttribute(moteTints, 4);
-    const place = new BufferAttribute(positions, 3);
-    const readDepth = RING_NEAR - (READ_RING / (rings - 1)) * RING_SPAN;
-    const readMaterial = new LineBasicMaterial({ color: palette.accent, opacity: READ_OPACITY_FLOOR, transparent: true });
-    const ringPitch = (rings - 1) / RING_SPAN;
-    const scanGeometry = new PlaneGeometry(SCAN_WIDTH, SCAN_HEIGHT);
-    const scanMaterial = new MeshBasicMaterial({ color: palette.accent, depthWrite: false, map: scanTexture, opacity: SCAN_OPACITY, transparent: true });
-    const scene = new Scene();
-    const spokeMaterial = new LineBasicMaterial({ color: palette.muted, opacity: SPOKE_OPACITY, transparent: true });
-    const tint = new BufferAttribute(tints, 4);
-
-    const ground = new LineSegments(groundGeometry, [groundMaterial, groundMajorMaterial, groundAxisMaterial]);
-    const mist = new Points(moteGeometry, moteMaterial);
-    const scan = new Mesh(scanGeometry, scanMaterial);
-    const tunnel = new LineSegments(geometry, [hoopMaterial, readMaterial, spokeMaterial]);
+    const groundPlace = new BufferAttribute(groundPlaces, VECTOR_COMPONENTS);
+    const motePlace = new BufferAttribute(motePlaces, VECTOR_COMPONENTS);
+    const place = new BufferAttribute(positions, VECTOR_COMPONENTS);
+    const tint = new BufferAttribute(tints, VECTOR_COMPONENTS);
 
     let breaches = 0;
     let cost = 0;
@@ -331,11 +247,11 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     let driftY = 0;
     let frames = 0;
     let handle = 0;
+    let isRunning = false;
     let last = 0;
     let pointerX = 0;
     let pointerY = 0;
-    let quality = mobile || isSlowDevice() ? 1 : 0;
-    let running = false;
+    let quality = isMobile || isSlowDevice() ? 1 : 0;
     let showGround = true;
     let showMotes = true;
     let stamp = STILL_ELAPSED;
@@ -366,7 +282,7 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
 
     function dispose() {
         stop();
-        canvas.remove();
+        canvas.hidden = true;
         geometry.dispose();
         groundAxisMaterial.dispose();
         groundGeometry.dispose();
@@ -375,13 +291,9 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
         hoopMaterial.dispose();
         moteGeometry.dispose();
         moteMaterial.dispose();
-        moteTexture.dispose();
         readMaterial.dispose();
         renderer.dispose();
         renderer.forceContextLoss();
-        scanGeometry.dispose();
-        scanMaterial.dispose();
-        scanTexture.dispose();
         spokeMaterial.dispose();
     }
 
@@ -396,8 +308,12 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
         camera.lookAt(shift * TARGET_BIAS, TARGET_HEIGHT, TARGET_DEPTH);
     }
 
-    function frame(now: number) {
-        handle = requestAnimationFrame(frame);
+    function render() {
+        renderer.render(scene, camera);
+    }
+
+    function renderFrame(now: number) {
+        handle = requestAnimationFrame(renderFrame);
 
         const elapsed = now / MILLISECONDS_PER_SECOND;
         const interval = 1 / QUALITY_FPS[quality];
@@ -414,25 +330,19 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
         watch(performance.now() - started);
     }
 
-    function render() {
-        renderer.render(scene, camera);
-    }
-
     function repaint() {
         const next = readPalette();
 
         if (!isValidPalette(next)) return;
 
         accentColor.set(next.accent);
-        fog.color.set(next.surface);
         groundAxisMaterial.color.set(next.accent);
-        groundMajorMaterial.color.set(next.ink);
-        groundMaterial.color.set(next.ink);
-        inkColor.set(next.ink);
-        moteMaterial.color.set(next.muted);
+        groundMajorMaterial.color.set(next.line);
+        groundMaterial.color.set(next.faint);
+        lineColor.set(next.line);
+        moteMaterial.color.set(next.line);
         readMaterial.color.set(next.accent);
-        scanMaterial.color.set(next.accent);
-        spokeMaterial.color.set(next.muted);
+        spokeMaterial.color.set(next.faint);
         shape(stamp);
         render();
     }
@@ -450,13 +360,7 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     }
 
     function shape(elapsed: number) {
-        const accentBlue = accentColor.b;
-        const accentGreen = accentColor.g;
-        const accentRed = accentColor.r;
         const head = pulseHead(elapsed, rings);
-        const inkBlue = inkColor.b;
-        const inkGreen = inkColor.g;
-        const inkRed = inkColor.r;
         const scroll = (elapsed / (stepDuration() * SCROLL_SLOWDOWN)) % STEP_COUNT;
         const shimmer = elapsed * RIB_SHIMMER_RATE;
         const swell = 1 - SWELL_RANGE + SWELL_RANGE * (0.5 + 0.5 * Math.sin(TAU * (elapsed / SWELL_PERIOD)));
@@ -468,27 +372,20 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
             const flare = pulseFlare(ring, head);
             const spin = ring * RING_TWIST + elapsed * SPIN_RATE;
 
-            const alpha = fades[ring] * Math.min(1, ALPHA_FLOOR + ALPHA_ENERGY * energy + ALPHA_PULSE * flare);
-            const blue = inkBlue + (accentBlue - inkBlue) * flare;
-            const green = inkGreen + (accentGreen - inkGreen) * flare;
-            const red = inkRed + (accentRed - inkRed) * flare;
             const rib = RIB_DEPTH * (RIB_FLOOR + (1 - RIB_FLOOR) * energy);
             const span = tapers[ring] * (RADIUS_BASE + RADIUS_RANGE * (BASE_RELIEF + energy) * swell * (1 + PULSE_LIFT * flare));
+            const tone = flare > FLARE_THRESHOLD ? accentColor : lineColor;
 
             for (let segment = 0; segment < segments; segment += 1) {
                 const sweep = segment / segments + spin;
                 const vertex = ring * segments + segment;
 
-                const offset = vertex * 3;
+                const offset = vertex * VECTOR_COMPONENTS;
                 const radius = span * (1 + rib * Math.sin(TAU * (RIB_FINE_RATIO * sweep + shimmer)));
-                const slot = vertex * 4;
 
                 positions[offset] = shift + radius * cosine[segment];
                 positions[offset + 1] = AXIS_HEIGHT + radius * sine[segment];
-                tints[slot] = red;
-                tints[slot + 1] = green;
-                tints[slot + 2] = blue;
-                tints[slot + 3] = alpha;
+                tone.toArray(tints, offset);
             }
 
             if (ring !== READ_RING) continue;
@@ -496,7 +393,7 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
             const inner = span * READ_INNER;
 
             for (let segment = 0; segment < segments; segment += 1) {
-                const offset = (rings * segments + segment) * 3;
+                const offset = (rings * segments + segment) * VECTOR_COMPONENTS;
 
                 positions[offset] = shift + inner * cosine[segment];
                 positions[offset + 1] = AXIS_HEIGHT + inner * sine[segment];
@@ -504,12 +401,10 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
         }
 
         place.needsUpdate = true;
-        readMaterial.opacity = Math.min(1, READ_OPACITY_FLOOR + READ_OPACITY_RANGE * smoothEnergy(READ_RING + scroll) + READ_PULSE_GAIN * pulseFlare(READ_RING, head));
-        scan.position.x = shift + SCAN_SWEEP * Math.sin(TAU * (elapsed / SCAN_PERIOD));
         tint.needsUpdate = true;
 
         if (showGround) shapeGround(elapsed);
-        if (showMotes) shapeMotes(elapsed, scroll);
+        if (showMotes) shapeMotes(elapsed);
     }
 
     function shapeGround(elapsed: number) {
@@ -519,21 +414,20 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
             const relief = GROUND_AMPLITUDE * (GROUND_BED + (1 - GROUND_BED) * smoothEnergy(row + scroll));
 
             for (let column = 0; column < columns; column += 1) {
-                groundPlaces[(row * columns + column) * 3 + 1] = relief * grades[column];
+                groundPlaces[(row * columns + column) * VECTOR_COMPONENTS + 1] = relief * grades[column];
             }
         }
 
         groundPlace.needsUpdate = true;
     }
 
-    function shapeMotes(elapsed: number, scroll: number) {
+    function shapeMotes(elapsed: number) {
         const travel = elapsed * MOTE_DRIFT;
 
         for (let mote = 0; mote < motes; mote += 1) {
             const advance = (moteSeeds[mote] + travel) % MOTE_SPAN;
-            const offset = mote * 3;
+            const offset = mote * VECTOR_COMPONENTS;
 
-            const approach = Math.min(1, (MOTE_SPAN - advance) / MOTE_NEAR_FADE) ** MOTE_NEAR_CURVE;
             const depth = RING_NEAR + MOTE_LEAD - MOTE_SPAN + advance;
 
             const lane = (RING_NEAR - depth) * ringPitch;
@@ -542,20 +436,18 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
 
             motePlaces[offset] = shift + radius * moteCosine[mote];
             motePlaces[offset + 1] = AXIS_HEIGHT + radius * moteSine[mote];
-            motePlaces[offset + 2] = depth;
-            moteTints[mote * 4 + 3] = approach * (MOTE_ALPHA_FLOOR + MOTE_ALPHA_RANGE * smoothEnergy(scroll + STEP_COUNT + lane));
+            motePlaces[offset + Z_COMPONENT] = depth;
         }
 
         motePlace.needsUpdate = true;
-        moteTint.needsUpdate = true;
     }
 
     function start() {
-        if (running || still) return;
+        if (isRunning || still) return;
 
-        handle = requestAnimationFrame(frame);
+        handle = requestAnimationFrame(renderFrame);
         last = performance.now() / MILLISECONDS_PER_SECOND;
-        running = true;
+        isRunning = true;
     }
 
     function steer(event: PointerEvent) {
@@ -564,8 +456,13 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     }
 
     function stop() {
-        running = false;
+        isRunning = false;
         cancelAnimationFrame(handle);
+    }
+
+    function teardown() {
+        observer.disconnect();
+        dispose();
     }
 
     function watch(duration: number) {
@@ -589,17 +486,16 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
 
         cosine[segment] = Math.cos(turn);
         sine[segment] = Math.sin(turn);
-        positions[(rings * segments + segment) * 3 + 2] = readDepth;
+        positions[(rings * segments + segment) * VECTOR_COMPONENTS + Z_COMPONENT] = readDepth;
     }
 
     for (let ring = 0; ring < rings; ring += 1) {
         const turn = ring / (rings - 1);
 
-        fades[ring] = DEPTH_FADE_FLOOR + (1 - DEPTH_FADE_FLOOR) * (1 - turn) ** DEPTH_FADE_CURVE;
         tapers[ring] = taperScale(turn);
 
         for (let segment = 0; segment < segments; segment += 1) {
-            positions[(ring * segments + segment) * 3 + 2] = RING_NEAR - turn * RING_SPAN;
+            positions[(ring * segments + segment) * VECTOR_COMPONENTS + Z_COMPONENT] = RING_NEAR - turn * RING_SPAN;
         }
     }
 
@@ -611,16 +507,15 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
 
     for (let row = 0; row < rows; row += 1) {
         for (let column = 0; column < columns; column += 1) {
-            const offset = (row * columns + column) * 3;
+            const offset = (row * columns + column) * VECTOR_COMPONENTS;
 
             groundPlaces[offset] = (column / (columns - 1) - 0.5) * GROUND_WIDTH;
-            groundPlaces[offset + 2] = (0.5 - row / (rows - 1)) * GROUND_DEPTH;
+            groundPlaces[offset + Z_COMPONENT] = (0.5 - row / (rows - 1)) * GROUND_DEPTH;
         }
     }
 
     for (let mote = 0; mote < motes; mote += 1) {
         const shell = Math.floor(mote / MOTE_LANES) % MOTE_SHELLS;
-        const slot = mote * 4;
 
         const angle = TAU * ((mote % MOTE_LANES) / MOTE_LANES + shell * MOTE_LANE_SKEW);
 
@@ -628,9 +523,6 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
         moteSeeds[mote] = ((mote * MOTE_DEPTH_STEP) % 1) * MOTE_SPAN;
         moteSine[mote] = Math.sin(angle);
         moteSpans[mote] = MOTE_RADIUS_INNER + MOTE_RADIUS_RANGE * (shell / (MOTE_SHELLS - 1));
-        moteTints[slot] = 1;
-        moteTints[slot + 1] = 1;
-        moteTints[slot + 2] = 1;
     }
 
     place.setUsage(DynamicDrawUsage);
@@ -648,8 +540,6 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     groundGeometry.addGroup(minor.length, major.length, 1);
     groundGeometry.addGroup(minor.length + major.length, axis.length, 2);
     motePlace.setUsage(DynamicDrawUsage);
-    moteTint.setUsage(DynamicDrawUsage);
-    moteGeometry.setAttribute('color', moteTint);
     moteGeometry.setAttribute('position', motePlace);
     camera.position.set(0, CAMERA_HEIGHT, dolly);
     camera.lookAt(shift * TARGET_BIAS, TARGET_HEIGHT, TARGET_DEPTH);
@@ -657,19 +547,14 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
     renderer.setPixelRatio(ratio);
     ground.position.set(shift, GROUND_DROP, RING_NEAR + GROUND_LEAD - GROUND_DEPTH / 2);
     ground.rotation.set(GROUND_PITCH, GROUND_YAW, GROUND_ROLL);
-    scan.position.set(shift, AXIS_HEIGHT, readDepth);
     ground.frustumCulled = false;
     mist.frustumCulled = false;
-    scan.frustumCulled = false;
     tunnel.frustumCulled = false;
-    scene.fog = fog;
     scene.add(ground);
     scene.add(mist);
-    scene.add(scan);
     scene.add(tunnel);
-    canvas.className = 'rack__canvas';
     canvas.style.opacity = '0';
-    holder.append(canvas);
+    canvas.hidden = false;
     resize();
     shape(STILL_ELAPSED);
     drift(STILL_ELAPSED);
@@ -691,16 +576,13 @@ function mountScene({ holder, palette, signal, still }: SceneOptions): void {
 
     observer.observe(holder);
     document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()), { signal });
-    signal.addEventListener('abort', () => {
-        observer.disconnect();
-        dispose();
-    });
+    signal.addEventListener('abort', teardown);
     window.addEventListener(STORAGE.theme.topic, repaint, { signal });
     window.addEventListener('pointermove', steer, { signal });
     window.addEventListener('resize', resize, { signal });
 }
 
-function pulseFlare(ring: number, head: number): number {
+function pulseFlare(ring: number, head: number) {
     const gap = Math.abs(ring - head);
 
     if (gap >= PULSE_WIDTH) return 0;
@@ -710,7 +592,7 @@ function pulseFlare(ring: number, head: number): number {
     return fade * fade;
 }
 
-function pulseHead(elapsed: number, rings: number): number {
+function pulseHead(elapsed: number, rings: number) {
     const bar = stepDuration() * BAR_STEPS;
 
     const progress = (elapsed % bar) / bar;
@@ -718,18 +600,17 @@ function pulseHead(elapsed: number, rings: number): number {
     return rings + PULSE_LEAD - progress * (rings + PULSE_LEAD * 2);
 }
 
-function readPalette(): Palette {
+function readPalette() {
     const styles = getComputedStyle(document.documentElement);
 
     return {
         accent: readColorToken(styles, '--color-text-brand'),
-        ink: readColorToken(styles, '--color-text'),
-        muted: readColorToken(styles, '--color-text-secondary'),
-        surface: readColorToken(styles, '--color-bg-page'),
+        faint: readColorToken(styles, '--color-border-subtle'),
+        line: readColorToken(styles, '--color-border'),
     };
 }
 
-function smoothEnergy(position: number): number {
+function smoothEnergy(position: number) {
     const index = Math.floor(position);
 
     const fraction = position - index;
@@ -739,7 +620,7 @@ function smoothEnergy(position: number): number {
     return stepEnergy(index) * (1 - blend) + stepEnergy(index + 1) * blend;
 }
 
-function taperScale(ratio: number): number {
+function taperScale(ratio: number) {
     return 1 - TAPER_DROP * ratio * ratio;
 }
 

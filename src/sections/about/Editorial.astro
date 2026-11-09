@@ -1,32 +1,15 @@
 ---
 import IconArrow from '@components/icons/Arrow.astro';
-import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import { CANONICAL, JOIN_ROUTE, LINKS, PALETTE } from '@lib/shared/constants';
+import SectionHead from '@components/shared/SectionHead.astro';
+import { CANONICAL, EVENT_PROGRAMS, JOIN_ROUTE, PALETTE } from '@lib/shared/constants';
 
-type RoadmapStatus = 'later' | 'next';
+const programs = Object.values(EVENT_PROGRAMS);
 
-const ACTIONS = [
-    {
-        heading: 'Executive',
-        headingId: 'executive-actions-title',
-        items: [
-            'Conduct organizer onboarding',
-            'Fill all role openings',
-            'Collaborate with music tech companies',
-        ],
-    },
-    {
-        heading: 'Technical',
-        headingId: 'technical-actions-title',
-        items: [
-            'Launch the hub',
-            'Build an attendee check-in system',
-            'Implement the Prods virtual currency',
-            'Expand merchandise',
-        ],
-    },
-];
+const activeNames = programs.filter(program => program.state === 'active').map(program => program.name);
+const plannedCount = programs.filter(program => program.state === 'planned').length;
+
+const activePrograms = new Intl.ListFormat('en', { type: 'conjunction' }).format(activeNames);
 
 const COMMITMENTS = [
     { description: 'advance the Alliance\'s vision through every decision', name: 'Alignment' },
@@ -40,36 +23,31 @@ const COMMITMENTS = [
 const OPENINGS = [
     { hours: 20, name: 'Lead', responsibilities: 'Joins as a full organizer with equal standing. Drives events from concept to execution and upholds every commitment.' },
     { hours: 10, name: 'Deputy', responsibilities: 'Supports the leads with events and operations. Runs auxiliary programming.' },
-    { hours: 10, name: 'Media Manager', responsibilities: 'Directs APA\'s marketing across social media strategy, content creation, and distribution.' },
+    { hours: 10, name: 'Media manager', responsibilities: 'Directs APA\'s marketing across social media strategy, content creation, and distribution.' },
 ];
 
-const ROADMAP: { detail: string; name: string; status: RoadmapStatus }[] = [
+const ROADMAP: { detail: string; name: string; status: 'later' | 'next' }[] = [
     {
-        detail: 'Paperwork is on the desk. Nonprofit status unlocks tax-deductible sponsorship.',
+        detail: 'Nonprofit status makes donations to the Alliance tax-deductible.',
         name: 'Register as a 501(c)\u2060(3) nonprofit',
         status: 'next',
     },
     {
-        detail: 'Assembly, Bash, and CAMP run on a recurring calendar. Five more programs are written down and queued behind them.',
+        detail: `${activePrograms} run on a recurring calendar, and ${plannedCount} more programs round out the lineup.`,
         name: 'Launch all planned events',
         status: 'later',
     },
     {
-        detail: 'First applications target the Elevate program once the nonprofit filing clears.',
+        detail: 'Grant funding helps the Alliance grow its programs.',
         name: 'Secure a grant',
         status: 'later',
     },
     {
-        detail: 'The long-range marker: an official APA showcase on the SXSW calendar.',
+        detail: 'The long-term goal is an official APA showcase on the SXSW calendar.',
         name: 'Host an official SXSW event',
         status: 'later',
     },
 ];
-
-const ROADMAP_STATUS: Record<RoadmapStatus, string> = {
-    later: 'Later',
-    next: 'Up next',
-};
 
 const SECTIONS = [
     { href: '#mission', label: 'Mission' },
@@ -77,44 +55,33 @@ const SECTIONS = [
     { href: '#commitments', label: 'Commitments' },
     { href: '#openings', label: 'Openings' },
     { href: '#roadmap', label: 'Roadmap' },
-    { href: '#join', label: 'Join' },
 ];
 
-const openingColors = PALETTE.slice(0, 3);
+const openingColors = PALETTE.slice(0, OPENINGS.length);
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-border-strong"
+    class="stage stage--tight"
     aria-labelledby="about-title"
 >
-    <div>
-        <PageHead
-            class="text-4xl md:text-6xl text-balance"
-            eyebrow="Austin, TX, since 2022"
-            headingId="about-title"
-        >
-            Austin's producers, in one room.
-        </PageHead>
-    </div>
-</section>
-
-<section
-    class="stage stage--tight"
-    aria-label="About details"
->
-    <div class="grid grid-cols-1 gap-12 md:grid-cols-[minmax(180px,0.28fr)_minmax(0,780px)] md:justify-between">
+    <h1
+        id="about-title"
+        class="sr-only"
+    >
+        About
+    </h1>
+    <div class="grid grid-cols-[160px_minmax(0,1fr)] gap-12 max-md:grid-cols-1">
         <aside
-            class="self-start md:sticky md:top-28"
+            class="self-start sticky top-28 max-md:static"
             aria-label="On this page"
             data-motion="rise"
         >
-            <p class="label mb-3 text-text-secondary">Sections</p>
             <nav aria-label="Sections">
-                <ul class="about__toc list-none text-sm">
+                <ul class="about__toc list-none">
                     {SECTIONS.map(section => (
                         <li>
                             <a
-                                class="about__link hover:text-link"
+                                class="about__link label hover:text-link"
                                 href={section.href}
                             >
                                 {section.label}
@@ -124,68 +91,64 @@ const openingColors = PALETTE.slice(0, 3);
                 </ul>
             </nav>
         </aside>
-        <div class="space-y-8 leading-[1.65] text-lg">
+        <div class="flex flex-col gap-(--space-2xl) text-lg">
             <section
                 id="mission"
                 aria-labelledby="mission-title"
             >
-                <h2
-                    id="mission-title"
-                    class="mb-8 text-2xl sm:text-3xl md:text-4xl"
-                    data-motion="strike"
+                <SectionHead
+                    class="text-4xl max-md:text-2xl"
+                    headingId="mission-title"
                 >
                     Mission
-                </h2>
+                </SectionHead>
                 <figure
-                    class="mb-8 py-10 border-y-2 border-border-strong"
+                    class="py-10 border-border-strong border-y-2"
                     data-motion="unfold"
                 >
-                    <blockquote class="mb-6 font-bold font-sans leading-[1.15] text-2xl tracking-tight md:text-3xl">
+                    <blockquote class="mb-6 font-bold font-sans leading-(--text-4xl) text-3xl tracking-tight max-md:leading-(--text-3xl) max-md:text-2xl">
                         <span class="text-text-brand">&ldquo;</span>{CANONICAL.mission}<span class="text-text-brand">&rdquo;</span>
                     </blockquote>
-                    <figcaption class="label text-text-secondary">Austin Producer Alliance</figcaption>
+                    <figcaption class="font-mono text-base text-right text-text-secondary">
+                        <span class="inline-block h-0.5 w-6 align-middle bg-current" aria-hidden="true" /> Austin Producer Alliance
+                    </figcaption>
                 </figure>
             </section>
             <section
                 id="story"
                 aria-labelledby="story-title"
             >
-                <h2
-                    id="story-title"
-                    class="mb-3 text-2xl sm:text-3xl md:text-4xl"
-                    data-motion="strike"
+                <SectionHead
+                    class="text-4xl max-md:text-2xl"
+                    headingId="story-title"
                 >
                     Story
-                </h2>
+                </SectionHead>
                 <p data-motion="blur">{CANONICAL.story}</p>
             </section>
             <section
                 id="commitments"
                 aria-labelledby="commitments-title"
             >
-                <h2
-                    id="commitments-title"
-                    class="mb-3 text-2xl sm:text-3xl md:text-4xl"
-                    data-motion="strike"
+                <SectionHead
+                    class="text-4xl max-md:text-xl"
+                    headingId="commitments-title"
                 >
                     Commitments
-                </h2>
+                </SectionHead>
                 <p
-                    class="mb-5 text-text-secondary"
+                    class="mb-10 text-text-secondary"
                     data-motion="blur"
                 >
                     Everyone who organizes for the Alliance holds to the same six.
                 </p>
                 <ul
-                    class="space-y-3 list-none"
+                    class="space-y-4 list-none"
                     data-motion-stagger="rise"
                 >
-                    {COMMITMENTS.map((commitment, index) => (
-                        <li class="flex gap-4">
-                            <span class="label pt-1 text-link">{String(index + 1).padStart(2, '0')}</span>
-                            <span>
-                                <strong class="font-bold font-sans">{commitment.name}</strong>: {commitment.description}
-                            </span>
+                    {COMMITMENTS.map(commitment => (
+                        <li>
+                            <strong class="font-bold font-sans">{commitment.name}</strong>: {commitment.description}
                         </li>
                     ))}
                 </ul>
@@ -194,45 +157,41 @@ const openingColors = PALETTE.slice(0, 3);
                 id="openings"
                 aria-labelledby="openings-title"
             >
-                <h2
-                    id="openings-title"
-                    class="mb-3 text-2xl sm:text-3xl md:text-4xl"
-                    data-motion="strike"
+                <SectionHead
+                    class="text-4xl max-md:text-2xl"
+                    headingId="openings-title"
                 >
                     Openings
-                </h2>
+                </SectionHead>
                 <p
-                    class="mb-6 text-text-secondary"
+                    class="mb-10 text-text-secondary"
                     data-motion="blur"
                 >
                     The Alliance is run by its organizers. These are the seats we are looking to fill.
                 </p>
                 <ul
-                    class="grid grid-cols-1 gap-5 mb-6 list-none md:grid-cols-3"
+                    class="grid grid-cols-3 gap-x-(--space-lg) gap-y-(--space-2xl) mb-8 list-none max-lg:grid-cols-2 max-md:grid-cols-1"
                     data-motion-stagger="flip"
                 >
                     {OPENINGS.map((opening, index) => (
-                        <li class="slab slab--bare slab--card slab--hover">
+                        <li class="slab slab--bare slab--card">
                             <PlaceholderTile
                                 class="aspect-[4/3]"
-                                color={openingColors[index].bg}
-                                label={`${opening.hours}h`}
-                                labelClass="text-4xl"
-                                labelColor={openingColors[index].text}
+                                color={openingColors[index].background}
                             />
-                            <div class="p-4">
-                                <h3>{opening.name}</h3>
-                                <p class="mb-2 font-mono text-xs text-text-secondary">
+                            <div class="p-(--space-md)">
+                                <h3 class="mb-1 text-base">{opening.name}</h3>
+                                <p class="mb-2 font-mono text-base text-text-secondary">
                                     {opening.hours} hours per month
                                 </p>
-                                <p class="leading-relaxed text-sm">{opening.responsibilities}</p>
+                                <p class="text-base">{opening.responsibilities}</p>
                             </div>
                         </li>
                     ))}
                 </ul>
                 <p data-motion="rise">
                     <a
-                        class="action-text hover:text-link inline-flex items-center gap-(--space-2xs) min-h-[50px] underline underline-offset-4 transition-colors"
+                        class="action-text hover:text-link inline-flex items-center min-h-(--control-size) gap-2 underline underline-offset-4 transition-[color,transform]"
                         href={JOIN_ROUTE}
                     >
                         Ask about an opening <IconArrow />
@@ -243,21 +202,20 @@ const openingColors = PALETTE.slice(0, 3);
                 id="roadmap"
                 aria-labelledby="roadmap-title"
             >
-                <h2
-                    id="roadmap-title"
-                    class="mb-3 text-2xl sm:text-3xl md:text-4xl"
-                    data-motion="strike"
+                <SectionHead
+                    class="text-4xl max-md:text-2xl"
+                    headingId="roadmap-title"
                 >
                     Roadmap
-                </h2>
+                </SectionHead>
                 <p
-                    class="mb-6 text-text-secondary"
+                    class="mb-10 text-text-secondary"
                     data-motion="blur"
                 >
-                    The order of operations. Each milestone sets up the one after it.
+                    These milestones are in order, and each one sets up the next.
                 </p>
                 <ol
-                    class="roadmap mb-10 list-none"
+                    class="roadmap grid gap-y-(--roadmap-gap) list-none"
                     data-motion-stagger="rise"
                 >
                     {ROADMAP.map((milestone, index) => (
@@ -266,97 +224,18 @@ const openingColors = PALETTE.slice(0, 3);
                             data-status={milestone.status}
                         >
                             <div
-                                class="roadmap__rail relative flex justify-center"
+                                class="roadmap__rail flex justify-center relative"
                                 aria-hidden="true"
                             >
-                                <span class="roadmap__node relative flex items-center justify-center h-(--roadmap-node) w-(--roadmap-node) border-2 border-border-strong font-mono font-bold text-sm leading-none bg-bg-raised text-link">{String(index + 1).padStart(2, '0')}</span>
+                                <span class="roadmap__node flex items-center justify-center relative h-(--roadmap-node) w-(--roadmap-node) border-2 border-border-strong font-bold font-mono leading-none text-sm bg-bg-raised text-link">{index + 1}</span>
                             </div>
-                            <div class:list={[milestone.status === 'next' ? ['mark', 'slab', 'slab--well'] : ['slab', 'slab--card']]}>
-                                <div class="flex mb-(--space-sm)">
-                                    <span class="label roadmap__status inline-flex items-center px-(--space-2xs) py-(--space-3xs) border-2 border-border-strong text-text-secondary">{ROADMAP_STATUS[milestone.status]}</span>
-                                </div>
+                            <div class:list={milestone.status === 'next' ? ['mark', 'slab', 'slab--well'] : ['slab', 'slab--card']}>
                                 <h3 class="mb-2 text-xl">{milestone.name}</h3>
-                                <p class="roadmap__detail leading-relaxed text-base text-text-secondary">{milestone.detail}</p>
+                                <p class="roadmap__detail text-base text-text-secondary">{milestone.detail}</p>
                             </div>
                         </li>
                     ))}
                 </ol>
-                <p
-                    class="label mb-4 text-text-secondary"
-                    data-motion="stamp"
-                >
-                    Active workstreams
-                </p>
-                <div
-                    class="grid grid-cols-1 gap-5 md:grid-cols-2"
-                    data-motion-stagger="flip"
-                >
-                    {ACTIONS.map(action => (
-                        <section
-                            class="slab slab--card"
-                            aria-labelledby={action.headingId}
-                        >
-                            <h3
-                                id={action.headingId}
-                                class="mb-3 text-xl"
-                            >
-                                {action.heading}
-                            </h3>
-                            <ul class="space-y-2 list-none text-base text-text-secondary">
-                                {action.items.map(item => (
-                                    <li class="flex gap-2">
-                                        <span
-                                            class="font-bold text-link"
-                                            aria-hidden="true"
-                                        >
-                                            &middot;
-                                        </span>
-                                        {item}
-                                    </li>
-                                ))}
-                            </ul>
-                        </section>
-                    ))}
-                </div>
-            </section>
-            <section
-                id="join"
-                aria-labelledby="join-title"
-            >
-                <h2
-                    id="join-title"
-                    class="mb-3 text-2xl sm:text-3xl md:text-4xl"
-                    data-motion="strike"
-                >
-                    Join
-                </h2>
-                <p
-                    class="mb-6 text-text-secondary"
-                    data-motion="blur"
-                >
-                    Organizing is one way in. Showing up is the other. The contact form carries a
-                    Membership topic, and the Discord is the room where the day-to-day conversation
-                    happens.
-                </p>
-                <div
-                    class="flex flex-wrap gap-3"
-                    data-motion="rise"
-                >
-                    <a
-                        class="btn btn--primary"
-                        href={JOIN_ROUTE}
-                    >
-                        Ask about membership
-                    </a>
-                    <a
-                        class="btn"
-                        href={LINKS.discord}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                    >
-                        Open the Discord
-                    </a>
-                </div>
             </section>
         </div>
     </div>
@@ -366,8 +245,8 @@ const openingColors = PALETTE.slice(0, 3);
     .about__link {
         align-items: center;
         display: inline-flex;
-        min-height: 50px;
-        min-width: 50px;
+        min-height: var(--control-size);
+        min-width: var(--control-size);
         transition:
             color var(--duration-fast) var(--motion-ease-ui),
             transform var(--duration-fast) var(--motion-ease-ui);
@@ -378,10 +257,8 @@ const openingColors = PALETTE.slice(0, 3);
     }
 
     .roadmap {
-        --roadmap-gap: var(--space-lg);
-        --roadmap-node: 50px;
-        display: grid;
-        row-gap: var(--roadmap-gap);
+        --roadmap-gap: var(--space-2xl);
+        --roadmap-node: 48px;
     }
 
     .roadmap__node::after {
@@ -409,13 +286,7 @@ const openingColors = PALETTE.slice(0, 3);
     }
 
     .roadmap__step[data-status='next'] .roadmap__node {
-        background-color: var(--color-bg-signal);
-        color: var(--color-text-on-signal);
-    }
-
-    .roadmap__step[data-status='next'] .roadmap__status {
-        background-color: var(--color-bg-signal);
-        border-color: var(--color-border-selected);
+        background-color: var(--color-signal);
         color: var(--color-text-on-signal);
     }
 

@@ -1,32 +1,32 @@
 <aside
-    class="toaster"
+    class="toaster z-300"
     aria-label="Notifications"
     popover="manual"
     transition:persist
 >
     <ol
-        class="toaster__list flex flex-col items-center gap-(--space-2xs) list-none"
+        class="toaster__list flex flex-col items-center w-full gap-(--space-2xs) list-none"
         aria-live="polite"
         data-toast-list
     />
     <template data-toast-item>
-        <li class="toast">
+        <li class="toast flex items-stretch min-h-(--control-size) pe-(--space-2xs) border-2 border-border-strong bg-toast-bg text-toast-text pointer-events-auto">
             <span
-                class="toast__badge"
+                class="toast__badge flex items-center justify-center shrink-0 w-(--control-size) font-bold font-mono leading-none bg-(--toast-tone) text-(--toast-glyph-tone)"
                 aria-hidden="true"
             />
             <span class="toast__body flex flex-1 flex-col justify-center min-w-0 gap-(--space-3xs) pe-(--space-xs) ps-(--space-md) py-(--space-sm)">
                 <span
-                    class="toast__label font-bold font-mono leading-[1.2] text-xs tracking-[0.06em] uppercase wrap-anywhere"
+                    class="label toast__label wrap-anywhere"
                     data-toast-label
                 />
                 <span
-                    class="toast__message min-w-0 font-sans leading-[1.45] text-sm wrap-anywhere"
+                    class="toast__message min-w-0 font-sans text-base wrap-anywhere"
                     data-toast-message
                 />
             </span>
             <button
-                class="toast__close active:translate-y-px hover:text-toast-action inline-flex items-center justify-center self-center shrink-0 h-12 w-12 me-(--space-2xs) leading-none text-xl text-inherit transition-[color,transform]"
+                class="toast__close active:translate-y-px hover:text-toast-action inline-flex items-center justify-center self-center shrink-0 h-(--control-size) w-(--control-size) leading-none text-xl text-inherit transition-[color,translate]"
                 data-toast-close
                 type="button"
             >
@@ -43,27 +43,14 @@
         --toast-glyph: '\0069';
         --toast-glyph-tone: var(--color-text);
         --toast-tone: var(--color-bg-page);
-        align-items: stretch;
         animation: var(--duration-slow) var(--motion-ease-entrance) both toast__rise;
-        background: var(--color-toast-bg);
-        border: 2px solid var(--color-border-strong);
-        color: var(--color-toast-text);
-        display: flex;
-        min-height: 64px;
-        pointer-events: auto;
-        width: min(92vw, 520px);
+        width: min(var(--container-xl), 100%);
     }
 
     .toast--error {
         --toast-glyph: '\0021';
         --toast-glyph-tone: var(--color-on-error);
         --toast-tone: var(--color-error);
-    }
-
-    .toast--info {
-        --toast-glyph: '\0069';
-        --toast-glyph-tone: var(--color-text);
-        --toast-tone: var(--color-bg-page);
     }
 
     .toast--success {
@@ -73,17 +60,7 @@
     }
 
     .toast__badge {
-        align-items: center;
-        background: var(--toast-tone);
-        color: var(--toast-glyph-tone);
-        display: flex;
-        flex-shrink: 0;
-        font-family: var(--font-mono);
         font-size: var(--text-xl);
-        font-weight: 700;
-        justify-content: center;
-        line-height: 1;
-        width: 56px;
     }
 
     .toast__badge::before {
@@ -98,21 +75,20 @@
         flex-direction: column;
         gap: var(--space-2xs);
         height: auto;
-        inset-block: auto var(--space-md);
-        inset-inline: 0;
+        inset-block: auto var(--space-lg);
+        inset-inline: var(--shell-pad) calc(var(--launcher-size) + var(--lift));
         margin: 0;
         overflow: visible;
         padding: 0;
         pointer-events: none;
         position: fixed;
         width: auto;
-        z-index: var(--z-toast);
     }
 
     @keyframes toast__rise {
         from {
             opacity: 0;
-            transform: translateY(12px);
+            transform: translateY(var(--space-xs));
         }
     }
 </style>
@@ -121,7 +97,7 @@
     import { TOAST_TOPIC } from '@lib/ui/toasts';
     import { setText } from '@lib/shared/utils';
 
-    const TOAST_DISMISS_MS = 5_000;
+    const TOAST_DISMISS_MILLISECONDS = 5_000;
 
     const TOAST_LABELS: Record<ToastTone, string> = {
         error: 'Error',
@@ -143,9 +119,9 @@
     }
 
     function handleToast(event: WindowEventMap['apa:toast']) {
-        const { message, tone } = event.detail;
         const aside = document.querySelector<HTMLElement>('.toaster');
         const list = document.querySelector<HTMLElement>('[data-toast-list]');
+        const { message, tone } = event.detail;
         const template = document.querySelector<HTMLTemplateElement>('[data-toast-item]');
 
         if (!aside || !list || !template) return;
@@ -162,7 +138,7 @@
         fragment.querySelector('[data-toast-close]')?.addEventListener('click', () => dismissToast(item));
         list.append(fragment);
         raiseToaster(aside);
-        timers.set(item, window.setTimeout(() => dismissToast(item), TOAST_DISMISS_MS));
+        timers.set(item, window.setTimeout(() => dismissToast(item), TOAST_DISMISS_MILLISECONDS));
         trimToasts(list);
     }
 

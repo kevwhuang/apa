@@ -2,38 +2,19 @@ import austinCommunityCollege from '@images/brand/sponsor_acc.png';
 import stationAustin from '@images/brand/sponsor_station_austin.svg';
 
 const ARTIST_NAME_MAX_LENGTH = 50;
-const ASSET_KINDS = ['brochure', 'document', 'logo-kit', 'photo-pack', 'press-kit', 'sample-pack', 'slides', 'stems', 'video'] as const;
+const ASSET_KINDS = ['audio', 'bash', 'brochure', 'media', 'official'] as const;
 
 const ASSET_KIND_LABELS: Record<AssetKind, string> = {
-    'brochure': 'Brochure',
-    'document': 'Document',
-    'logo-kit': 'Logo kit',
-    'photo-pack': 'Photo pack',
-    'press-kit': 'Press kit',
-    'sample-pack': 'Sample pack',
-    'slides': 'Slides',
-    'stems': 'Stems',
-    'video': 'Video',
+    audio: 'Audio',
+    bash: 'Bash',
+    brochure: 'Brochures',
+    media: 'Media',
+    official: 'Official',
 };
 
 const BASIS_POINTS_DIVISOR = 10_000;
 const BYTES_PER_KILOBYTE = 1_024;
 const BYTES_PER_MEGABYTE = 1_048_576;
-
-const MAX_AVATAR_MEGABYTES = 5;
-
-const AVATAR = {
-    acceptAttribute: '.jpeg,.jpg,.png,.webp,image/jpeg,image/png,image/webp',
-    aliasExtensions: ['jpeg'],
-    extensions: ['jpg', 'png', 'webp'],
-    fallbackType: 'image/jpeg',
-    maxDataUrlLength: 200_000,
-    maxFileBytes: MAX_AVATAR_MEGABYTES * BYTES_PER_MEGABYTE,
-    minEdgePixels: 200,
-    renderPixels: 512,
-    renderQuality: 0.82,
-    renderType: 'image/webp',
-} as const;
 
 const CANONICAL = {
     mission: 'We bring Austin\'s music producers together. Through meetups, workshops, and collaborations, producers of every genre and experience level find their people, sharpen their craft, and support one another. Our goal is a lasting community for those behind the city\'s sound.',
@@ -41,7 +22,7 @@ const CANONICAL = {
 } as const;
 
 const CENTS_PER_DOLLAR = 100;
-const CHECKOUT_STEPS = ['01 Review', '02 Shipping', '03 Payment'] as const;
+const CHECKOUT_STEPS = ['1 Review', '2 Shipping', '3 Payment'] as const;
 
 const COMMERCE = {
     discountBasisPoints: 1_000,
@@ -50,25 +31,12 @@ const COMMERCE = {
     taxBasisPoints: 825,
 } as const;
 
-const EMAIL_MAX_LENGTH = 254;
-
-const CONTACT_LIMITS = {
-    email: EMAIL_MAX_LENGTH,
-    message: 2_000,
-    messageMin: 10,
-    name: 50,
-} as const;
-
-const PARTNER_INQUIRY_TOPIC = 'Partnership inquiry';
-
-const CONTACT_TOPICS = ['Booking', 'Membership', PARTNER_INQUIRY_TOPIC, 'Press', 'Something else'] as const;
-const CONTENT_DIR = 'src/content';
-
 const DEMO_CREDENTIALS = {
     takenEmail: 'taken@austinproduceralliance.com',
     wrongPassword: 'wrongpassword',
 } as const;
 
+const EMAIL_MAX_LENGTH = 254;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const EVENT_CADENCES = ['monthly', 'quarterly', 'biannually', 'annually'] as const;
 
@@ -85,7 +53,7 @@ const EVENT_PROGRAMS: Record<EventType, EventProgram> = {
         name: 'Bash',
         shortName: 'Bash',
         state: 'active',
-        summary: 'An afternoon of producing against the clock at Austin Community College, sparked by a prompt and capped by a final showdown.',
+        summary: 'An afternoon of producing against the clock at ACC Highland Campus, sparked by a prompt and capped by a final showdown.',
     },
     'camp': {
         cadence: 'biannually',
@@ -98,8 +66,8 @@ const EVENT_PROGRAMS: Record<EventType, EventProgram> = {
         cadence: 'monthly',
         name: 'Hangout',
         shortName: 'Hangout',
-        state: 'planned',
-        summary: 'A pop-up social for connecting beyond the music, landing midway between assemblies.',
+        state: 'active',
+        summary: 'A pop-up social for track feedback and conversation, landing midway between Assemblies.',
     },
     'open-decks': {
         cadence: 'quarterly',
@@ -133,30 +101,41 @@ const EVENT_PROGRAMS: Record<EventType, EventProgram> = {
 
 const EVENT_TYPES = ['assembly', 'bash', 'camp', 'hangout', 'open-decks', 'studio-tour', 'the-royale', 'the-annual'] as const;
 
-const FIELD_LIMITS = {
-    address: 100,
-    card: 19,
-    code: 20,
-    csc: 4,
-    email: EMAIL_MAX_LENGTH,
-    expiry: 7,
-    name: 50,
-} as const;
+const GENRES = [
+    'afrobeats',
+    'ambient',
+    'disco',
+    'drum & bass',
+    'dubstep',
+    'experimental',
+    'folk',
+    'funk',
+    'hip-hop',
+    'house',
+    'indie',
+    'jazz',
+    'Latin',
+    'lo-fi',
+    'pop',
+    'R&B',
+    'rock',
+    'soul',
+    'techno',
+    'trap',
+    'urbano',
+] as const;
 
-const GENRES = ['afrobeats', 'ambient', 'disco', 'drum & bass', 'dubstep', 'experimental', 'folk', 'funk', 'hip-hop', 'house', 'indie', 'jazz', 'Latin', 'lo-fi', 'pop', 'R&B', 'reggaeton', 'rock', 'soul', 'techno', 'trap'] as const;
 const JOIN_ROUTE = '/contact#contact-topic';
 
 const KIND_COLORS: Record<AssetKind, string> = {
-    'brochure': 'var(--color-chart-2)',
-    'document': 'var(--color-chart-5)',
-    'logo-kit': 'var(--color-chart-4)',
-    'photo-pack': 'var(--color-chart-3)',
-    'press-kit': 'var(--color-link)',
-    'sample-pack': 'var(--color-success-text)',
-    'slides': 'var(--color-info-text)',
-    'stems': 'var(--color-chart-1)',
-    'video': 'var(--color-warning-text)',
+    audio: 'var(--color-chart-3)',
+    bash: 'var(--color-marker-cobalt)',
+    brochure: 'var(--color-text-secondary)',
+    media: 'var(--color-signal)',
+    official: 'var(--color-marker-cobalt)',
 };
+
+const LAUNCHER_SIZE = 48;
 
 const LINKS = {
     aephonics: 'https://instagram.com/aephonics',
@@ -170,23 +149,22 @@ const LINKS = {
     spotify: 'https://open.spotify.com/user/31uvopo4bn7six3qvkkbkjxu2bwe',
 } as const;
 
+const MAX_AVATAR_MEGABYTES = 10;
 const MAX_DECODE_MEGABYTES = 25;
-const MAX_FILE_MEGABYTES = 50;
-const MAX_SPOTLIGHT_MEGABYTES = 20;
-const MAX_TOTAL_MEGABYTES = 150;
+const MAX_FILE_MEGABYTES = 100;
 const MEMBER_ROLES = ['artist', 'engineer', 'fan', 'producer'] as const;
 const MILLISECONDS_PER_DAY = 86_400_000;
 const MILLISECONDS_PER_HOUR = 3_600_000;
-const MOCK_LATENCY_MS = 400;
+const MOBILE_WIDTH = 768;
+const MOCK_LATENCY_MILLISECONDS = 400;
 
 const NAV_GROUPS = [
     {
         id: 'events',
         items: [
-            { href: '/events', label: 'All events' },
-            { href: '/assembly', label: 'Assembly' },
-            { href: '/bash', label: 'Bash' },
-            { href: '/hangout', label: 'Hangout' },
+            { href: '/assemblies', label: 'Assemblies' },
+            { href: '/bashes', label: 'Bashes' },
+            { href: '/hangouts', label: 'Hangouts' },
         ],
         label: 'Events',
     },
@@ -221,12 +199,12 @@ const NAV_GROUPS = [
 const ONBOARDING_ROUTE = '/onboarding';
 
 const ONBOARDING_STEPS = [
-    { blurb: 'Name, sound, and what you do.', name: 'Basics' },
-    { blurb: 'What the account carries.', name: 'Why an account' },
-    { blurb: 'A guided lap around the room.', name: 'The tour' },
+    { name: 'Basics' },
+    { name: 'Why an account' },
+    { name: 'The tour' },
 ] as const;
 
-const ONBOARDING_TOKEN_PARAM = 't';
+const ONBOARDING_TOKEN_PARAMETER = 't';
 const ONBOARDING_TOKEN_TTL_HOURS = 24;
 
 const ORDER_ID = {
@@ -236,102 +214,38 @@ const ORDER_ID = {
 } as const;
 
 const PALETTE = [
-    { bg: 'var(--color-avatar-1-bg)', text: 'var(--color-avatar-1-text)' },
-    { bg: 'var(--color-avatar-2-bg)', text: 'var(--color-avatar-2-text)' },
-    { bg: 'var(--color-avatar-3-bg)', text: 'var(--color-avatar-3-text)' },
-    { bg: 'var(--color-avatar-4-bg)', text: 'var(--color-avatar-4-text)' },
-    { bg: 'var(--color-avatar-5-bg)', text: 'var(--color-avatar-5-text)' },
-    { bg: 'var(--color-avatar-6-bg)', text: 'var(--color-avatar-6-text)' },
+    { background: 'var(--color-avatar-1-bg)', text: 'var(--color-avatar-1-text)' },
+    { background: 'var(--color-avatar-2-bg)', text: 'var(--color-avatar-2-text)' },
+    { background: 'var(--color-avatar-3-bg)', text: 'var(--color-avatar-3-text)' },
+    { background: 'var(--color-avatar-4-bg)', text: 'var(--color-avatar-4-text)' },
+    { background: 'var(--color-avatar-5-bg)', text: 'var(--color-avatar-5-text)' },
+    { background: 'var(--color-avatar-6-bg)', text: 'var(--color-avatar-6-text)' },
 ] as const;
-
-const CARD_COLORS = PALETTE.slice(0, 4);
 
 const PARTNERS = [
     { logo: austinCommunityCollege, name: 'Austin Community College' },
     { logo: stationAustin, name: 'STATION Austin' },
 ] as const;
 
+const PARTNER_INQUIRY_TOPIC = 'Partnerships';
 const PARTNER_LOGO_WIDTH = 640;
 const PASSWORD_MIN_LENGTH = 12;
-
-const PLATFORMS = [
-    { blurb: 'Recaps, announcements, and work from across the roster.', href: LINKS.instagram, label: 'Instagram' },
-    { blurb: 'Event listings and RSVPs for every meet on the calendar.', href: LINKS.meetup, label: 'Meetup' },
-    { blurb: 'The day-to-day room where the community actually talks.', href: LINKS.discord, label: 'Discord' },
-] as const;
-
 const POINTER_COARSE_QUERY = '(pointer: coarse)';
-const PRODUCT_CATEGORIES = ['accessory', 'apparel', 'music'] as const;
+const PRODUCT_CATEGORIES = ['apparel', 'accessories', 'audio', 'tickets'] as const;
 const PRODUCT_SIZES = ['S', 'M', 'L', 'XL'] as const;
-
-const PROFILE_FIELDS = {
-    artistName: {
-        autocomplete: 'nickname',
-        help: `Up to ${ARTIST_NAME_MAX_LENGTH} characters. This is what the roster shows \u2014 it cannot be used to sign in.`,
-        label: 'Artist name',
-        maxLength: ARTIST_NAME_MAX_LENGTH,
-    },
-    bio: {
-        help: 'A line or two on what you make and how you make it.',
-        label: 'Bio',
-        maxLength: 280,
-    },
-    city: {
-        autocomplete: 'address-level2',
-        label: 'City',
-        message: 'Name the city you work out of.',
-        required: true,
-    },
-    genres: {
-        label: 'What you make',
-        max: 5,
-        message: 'Pick five at most.',
-        qualifier: 'pick up to five',
-    },
-    portrait: {
-        label: 'Portrait',
-        picker: 'Choose an image',
-    },
-    role: {
-        label: 'What do you do?',
-        qualifier: 'pick one',
-    },
-    state: {
-        autocomplete: 'address-level1',
-        label: 'State',
-        required: true,
-    },
-} as const;
-
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
 const ROLES = [
-    { description: 'Runs the Alliance \u2014 programs, money, and this site.', id: 'admin' },
-    { description: 'Opens the room, runs check-in, and keeps events moving.', id: 'host' },
-    { description: 'Makes tracks.', id: 'producer' },
-    { description: 'Mixes, masters, and runs sound.', id: 'engineer' },
-    { description: 'Performs and releases under their own name.', id: 'artist' },
-    { description: 'Here for the music. Every account starts here.', id: 'fan' },
+    { description: 'Runs the Alliance: programs, money, and this site.', id: 'admin', label: 'Admin' },
+    { description: 'Opens the room, runs check-in, and keeps events moving.', id: 'host', label: 'Host' },
+    { description: 'Makes tracks.', id: 'producer', label: 'Producer' },
+    { description: 'Mixes, masters, and runs sound.', id: 'engineer', label: 'Engineer' },
+    { description: 'Performs and releases under their own name.', id: 'artist', label: 'Artist' },
+    { description: 'Here for the music. Every account starts here.', id: 'fan', label: 'Fan' },
 ] as const;
 
-const PROFILE_ROLES = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.id));
-
-const ROUTES = [
-    { href: '/', label: 'Home' },
-    ...NAV_GROUPS.flatMap<{ href: string; label: string }>(group => ('href' in group ? [{ href: group.href, label: group.label }] : group.items)),
-] as const;
-
-const SECOND_ENTRY = 2;
 const SESSION_TTL_DAYS = 14;
-const SITE_UPDATED = '2026-11-08T00:00:00-06:00';
-
-const SPOTLIGHT = {
-    acceptAttribute: '.mp3,audio/mpeg',
-    extensions: ['mp3'],
-    maxFileBytes: MAX_SPOTLIGHT_MEGABYTES * BYTES_PER_MEGABYTE,
-} as const;
-
-const SPOTLIGHT_EXTENSIONS_LABEL = SPOTLIGHT.extensions.map(extension => extension.toUpperCase()).join(', ');
+const SITE_UPDATED = '2026-11-11T00:00:00-06:00';
 
 const STORAGE = {
     adminProds: { key: 'apa.admin-prods', scope: 'local', topic: 'apa:admin-prods-changed' },
@@ -351,8 +265,8 @@ const STORAGE = {
 
 const TOUR_STOPS = [
     {
-        blurb: 'Events, the directory, the gallery, the store.',
-        body: 'Everything lives here \u2014 events, the directory, the gallery, the store.',
+        blurb: 'Events, community, resources, the store, the rack.',
+        body: 'Everything lives here: events, community, resources, the store, and the rack.',
         name: 'The nav',
         selectors: ['.site-nav', '.nav-toggle'],
     },
@@ -363,39 +277,27 @@ const TOUR_STOPS = [
         selectors: ['.account', '.cart-link'],
     },
     {
-        blurb: 'Ask it anything about the Alliance.',
-        body: 'Ask the assistant anything \u2014 programs, events, Prods.',
-        name: 'The assistant',
-        selectors: ['[data-ai-launcher]'],
+        blurb: 'It keeps playing, page to page.',
+        body: 'The track player follows you from page to page.',
+        name: 'The player',
+        selectors: ['[data-player-launcher]'],
     },
     {
         blurb: 'The member room, one tap away.',
-        body: 'The member room \u2014 talk to the Alliance.',
+        body: 'The member room. Talk to the Alliance.',
         name: 'Member chat',
         selectors: ['[data-chat-launcher]'],
     },
     {
-        blurb: 'It keeps playing, page to page.',
-        body: 'The floating player follows you from page to page.',
-        name: 'The player',
-        selectors: ['[data-player-launcher]'],
+        blurb: 'Ask it anything about the Alliance.',
+        body: 'Ask the assistant anything: programs, events, Prods.',
+        name: 'The assistant',
+        selectors: ['[data-ai-launcher]'],
     },
 ] as const;
 
 const TRACK_PLAY_TOPIC = 'apa:track-play';
 const TRACK_STATE_TOPIC = 'apa:track-state';
-
-const UPLOAD = {
-    acceptAttribute: '.aif,.aiff,.flac,.mp3,.wav,audio/aiff,audio/flac,audio/mpeg,audio/wav,audio/x-aiff,audio/x-wav',
-    extensions: ['aif', 'aiff', 'flac', 'mp3', 'wav'],
-    failureTrigger: 'fail',
-    maxDecodeBytes: MAX_DECODE_MEGABYTES * BYTES_PER_MEGABYTE,
-    maxFileBytes: MAX_FILE_MEGABYTES * BYTES_PER_MEGABYTE,
-    maxFiles: 5,
-    maxTotalBytes: MAX_TOTAL_MEGABYTES * BYTES_PER_MEGABYTE,
-} as const;
-
-const UPLOAD_EXTENSIONS_LABEL = UPLOAD.extensions.map(extension => extension.toUpperCase()).join(', ');
 
 const US_STATES = [
     { code: 'AL', name: 'Alabama' },
@@ -452,6 +354,105 @@ const US_STATES = [
 ] as const;
 
 const WELCOME_PRODS = 1;
+const WINDOW_MARGINS = 48;
+
+const AVATAR = {
+    acceptAttribute: '.jpeg,.jpg,.png,image/jpeg,image/png',
+    aliasExtensions: ['jpeg'],
+    extensions: ['jpg', 'png'],
+    fallbackType: 'image/jpeg',
+    maxDataUrlLength: 200_000,
+    maxFileBytes: MAX_AVATAR_MEGABYTES * BYTES_PER_MEGABYTE,
+    minEdgePixels: 500,
+    renderPixels: 512,
+    renderQuality: 0.82,
+    renderType: 'image/webp',
+} as const;
+
+const CARD_COLORS = PALETTE.slice(0, 4);
+
+const CONTACT_LIMITS = {
+    email: EMAIL_MAX_LENGTH,
+    message: 2_000,
+    messageMin: 10,
+    name: 50,
+} as const;
+
+const CONTACT_TOPICS = [
+    'Accounts',
+    'Bug report',
+    'Events',
+    PARTNER_INQUIRY_TOPIC,
+    'Store orders',
+    'Something else',
+] as const;
+
+const FIELD_LIMITS = {
+    address: 100,
+    card: 19,
+    code: 20,
+    csc: 4,
+    email: EMAIL_MAX_LENGTH,
+    expiry: 7,
+    name: 50,
+    zip: 10,
+} as const;
+
+const PLATFORMS = [
+    { blurb: 'Recaps, announcements, and work from across the roster.', href: LINKS.instagram, label: 'Instagram' },
+    { blurb: 'Event listings and RSVPs for every meet on the calendar.', href: LINKS.meetup, label: 'Meetup' },
+    { blurb: 'The day-to-day room where the community actually talks.', href: LINKS.discord, label: 'Discord' },
+] as const;
+
+const PROFILE_FIELDS = {
+    artistName: {
+        autocomplete: 'nickname',
+        label: 'Artist name',
+        maxLength: ARTIST_NAME_MAX_LENGTH,
+        message: `Use ${ARTIST_NAME_MAX_LENGTH} characters or fewer.`,
+    },
+    bio: {
+        label: 'Bio',
+        maxLength: 400,
+    },
+    city: {
+        autocomplete: 'address-level2',
+        label: 'City',
+        message: 'Name the city you work out of.',
+        required: true,
+    },
+    genres: {
+        label: 'What you make',
+    },
+    portrait: {
+        label: 'Portrait',
+        picker: 'Choose an image',
+    },
+    role: {
+        label: 'What do you do?',
+        qualifier: 'pick one',
+    },
+    state: {
+        autocomplete: 'address-level1',
+        label: 'State',
+        required: true,
+    },
+} as const;
+
+const PROFILE_ROLES = ROLES.filter(role => MEMBER_ROLES.some(member => member === role.id));
+
+const ROUTES = [
+    { href: '/', label: 'Home' },
+    ...NAV_GROUPS.flatMap<{ href: string; label: string }>(group => ('href' in group ? [{ href: group.href, label: group.label }] : group.items)),
+] as const;
+
+const UPLOAD = {
+    acceptAttribute: '.mp3,.wav,audio/mpeg,audio/wav,audio/x-wav',
+    extensions: ['mp3', 'wav'],
+    failureTrigger: 'fail',
+    maxDecodeBytes: MAX_DECODE_MEGABYTES * BYTES_PER_MEGABYTE,
+    maxFileBytes: MAX_FILE_MEGABYTES * BYTES_PER_MEGABYTE,
+} as const;
 
 export {
     ASSET_KINDS,
@@ -467,7 +468,6 @@ export {
     COMMERCE,
     CONTACT_LIMITS,
     CONTACT_TOPICS,
-    CONTENT_DIR,
     DEMO_CREDENTIALS,
     EMAIL_MAX_LENGTH,
     EMAIL_PATTERN,
@@ -478,15 +478,17 @@ export {
     GENRES,
     JOIN_ROUTE,
     KIND_COLORS,
+    LAUNCHER_SIZE,
     LINKS,
     MEMBER_ROLES,
     MILLISECONDS_PER_DAY,
     MILLISECONDS_PER_HOUR,
-    MOCK_LATENCY_MS,
+    MOBILE_WIDTH,
+    MOCK_LATENCY_MILLISECONDS,
     NAV_GROUPS,
     ONBOARDING_ROUTE,
     ONBOARDING_STEPS,
-    ONBOARDING_TOKEN_PARAM,
+    ONBOARDING_TOKEN_PARAMETER,
     ONBOARDING_TOKEN_TTL_HOURS,
     ORDER_ID,
     PALETTE,
@@ -503,17 +505,14 @@ export {
     REDUCED_MOTION_QUERY,
     ROLES,
     ROUTES,
-    SECOND_ENTRY,
     SESSION_TTL_DAYS,
     SITE_UPDATED,
-    SPOTLIGHT,
-    SPOTLIGHT_EXTENSIONS_LABEL,
     STORAGE,
     TOUR_STOPS,
     TRACK_PLAY_TOPIC,
     TRACK_STATE_TOPIC,
     UPLOAD,
-    UPLOAD_EXTENSIONS_LABEL,
     US_STATES,
     WELCOME_PRODS,
+    WINDOW_MARGINS,
 };

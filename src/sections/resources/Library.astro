@@ -2,20 +2,29 @@
 import { getCollection } from 'astro:content';
 
 import IconArrow from '@components/icons/Arrow.astro';
-import PageHead from '@components/shared/PageHead.astro';
 import SearchField from '@components/shared/SearchField.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { ASSET_KIND_LABELS, KIND_COLORS } from '@lib/shared/constants';
-import { formatDate, formatTime, mergeAssets, toIsoDate } from '@lib/shared/utils';
+import { formatDateStamp, mergeAssets, toIsoDate } from '@lib/shared/utils';
 import { isDownload, toAvailability } from '@lib/resources/unlocks';
 
-const assets = mergeAssets(await getCollection('downloads'), await getCollection('docs'))
-    .map(asset => ({
-        ...asset,
-        availability: toAvailability(asset.data),
-        isDownload: isDownload(asset.data),
-        search: [asset.data.title, asset.data.description, ASSET_KIND_LABELS[asset.data.kind], asset.data.format].join(' ').toLowerCase(),
-    }));
+const downloads = await getCollection('downloads', entry => entry.data.kind !== 'bash');
+
+const titles = new Map(downloads.map(entry => [entry.id, entry.data.title]));
+
+const assets = mergeAssets(downloads, await getCollection('docs'))
+    .map((asset) => {
+        const title = titles.get(asset.id) ?? asset.data.title;
+
+        return {
+            ...asset,
+            availability: toAvailability(asset.data),
+            isDownload: isDownload(asset.data),
+            search: [title, asset.data.description, ASSET_KIND_LABELS[asset.data.kind], asset.data.format].join(' ').toLowerCase(),
+            title,
+        };
+    })
+    .sort((a, b) => ASSET_KIND_LABELS[a.data.kind].localeCompare(ASSET_KIND_LABELS[b.data.kind]) || a.title.localeCompare(b.title));
 
 const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
     .map(kind => ({ count: assets.filter(asset => asset.data.kind === kind).length, kind, label: ASSET_KIND_LABELS[kind] }))
@@ -23,35 +32,15 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-border-strong"
-    aria-labelledby="resources-title"
->
-    <div>
-        <PageHead
-            class="max-w-3xl mb-6 text-4xl md:text-7xl sm:text-5xl"
-            eyebrow="Downloads & press kit"
-            headingId="resources-title"
-        >
-            Take what you need.
-        </PageHead>
-        <p
-            class="max-w-2xl text-lg text-text-secondary"
-            data-motion="blur"
-        >
-            Everything the Alliance hands out in one place &mdash; press material, brand assets,
-            event packs, and the working documents behind how the community runs.
-        </p>
-    </div>
-</section>
-
-<section
-    class="stage stage--tight border-b-2 border-border-strong"
+    class="stage stage--tight"
     aria-labelledby="library-title"
 >
+    <h1 class="sr-only">
+        Resources
+    </h1>
     <div>
         <SectionHead
             class="text-3xl"
-            eyebrow={`Library, ${assets.length} assets`}
             headingId="library-title"
         >
             Asset library
@@ -63,13 +52,13 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             placeholder={'Search assets\u2026'}
         />
         <div
-            class="flex flex-wrap gap-2 mb-6"
+            class="flex flex-wrap gap-3 mb-6"
             aria-label="Filter by asset kind"
             data-motion="rise"
             role="group"
         >
             <button
-                class="chip is-active resources__chip active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse gap-(--space-3xs)"
+                class="chip is-active resources__chip hover:bg-bg-hover gap-(--space-3xs)"
                 aria-pressed="true"
                 data-kind=""
                 type="button"
@@ -78,7 +67,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             </button>
             {kinds.map(entry => (
                 <button
-                    class="chip resources__chip active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse gap-(--space-3xs)"
+                    class="chip resources__chip hover:bg-bg-hover gap-(--space-3xs)"
                     aria-pressed="false"
                     data-kind={entry.kind}
                     style={`--kind-color: ${KIND_COLORS[entry.kind]}`}
@@ -98,11 +87,10 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             data-motion="stamp"
             data-resources-status
         >
-            Showing all {assets.length} assets.
+            Showing all {assets.length} assets
         </p>
         <ul
             class="resources__grid list-none"
-            data-motion-from="center"
             data-motion-stagger="flip"
         >
             {assets.map(asset => (
@@ -113,54 +101,43 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                     data-search={asset.search}
                     style={`--kind-color: ${KIND_COLORS[asset.data.kind]}`}
                 >
-                    <article class="resources__card slab slab--card slab--hover">
-                        <header class="flex flex-wrap items-start justify-between gap-2">
-                            <p class="label inline-flex items-center gap-(--space-3xs) px-(--space-2xs) py-(--space-3xs) border-2 border-(--kind-color) text-text">
+                    <article class="resources__card slab slab--card slab--still">
+                        <header class="flex items-start pb-(--space-md)">
+                            <p class="label inline-flex items-center gap-(--space-3xs) px-(--space-2xs) py-(--space-3xs) border-(--kind-color) border-2 text-text">
                                 <span
                                     class="flex-none size-2 bg-(--kind-color)"
                                     aria-hidden="true"
                                 />
                                 {ASSET_KIND_LABELS[asset.data.kind]}
                             </p>
-                            {asset.data.available && (
-                                <p class="label px-2 py-1 bg-bg-signal text-text-on-signal">
-                                    Published
-                                </p>
-                            )}
                         </header>
-                        <div class="flex flex-col gap-3">
-                            <h3 class="text-xl">
-                                {asset.data.title}
+                        <div class="flex flex-col gap-(--space-2xs) pb-(--space-2xs)">
+                            <h3 class="text-balance text-xl">
+                                {asset.title}
                             </h3>
-                            <p class="leading-relaxed text-sm text-text-secondary">
+                            <p class="text-base text-text-secondary">
                                 {asset.data.description}
                             </p>
                         </div>
-                        <dl class="flex flex-col gap-(--space-3xs) pt-(--space-xs) border-t border-border-subtle">
+                        <dl class="flex flex-col gap-(--space-3xs) pb-(--space-md) pt-(--space-xs) border-border-subtle border-t">
                             <div class="flex justify-between gap-(--space-xs)">
                                 <dt class="label text-text-secondary">Format</dt>
-                                <dd class="font-mono text-xs">{asset.data.format}</dd>
+                                <dd class="font-mono text-base">{asset.data.format}</dd>
                             </div>
                             <div class="flex justify-between gap-(--space-xs)">
                                 <dt class="label text-text-secondary">Size</dt>
                                 <dd
-                                    class="font-mono text-xs"
+                                    class="font-mono text-base"
                                     data-placeholder={asset.data.available ? undefined : ''}
                                 >
                                     {asset.data.size}
                                 </dd>
                             </div>
-                            <div class="flex justify-between gap-(--space-xs)">
-                                <dt class="label text-text-secondary">Updated</dt>
-                                <dd class="font-mono text-xs">
-                                    <time datetime={toIsoDate(asset.data.date)}>{formatDate(asset.data.date)}</time>
-                                </dd>
-                            </div>
-                            {asset.data.unlocksAt && (
+                            {asset.availability === 'open' && (
                                 <div class="flex justify-between gap-(--space-xs)">
-                                    <dt class="label text-text-secondary">Unlocks</dt>
-                                    <dd class="font-mono text-xs">
-                                        <time datetime={asset.data.unlocksAt.toISOString()}>{formatDate(asset.data.unlocksAt)} &middot; {formatTime(asset.data.unlocksAt)}</time>
+                                    <dt class="label text-text-secondary">Date</dt>
+                                    <dd class="font-mono text-base">
+                                        <time datetime={toIsoDate(asset.data.date)}>{formatDateStamp(asset.data.date)}</time>
                                     </dd>
                                 </div>
                             )}
@@ -168,11 +145,11 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                         {asset.availability === 'open' && (
                             <a
                                 class="btn btn--primary"
-                                aria-label={asset.isDownload ? `Download ${asset.data.title}` : undefined}
+                                aria-label={asset.isDownload ? `Download ${asset.title}` : undefined}
                                 download={asset.isDownload ? '' : undefined}
                                 href={asset.data.href}
                             >
-                                {asset.isDownload ? 'Download' : `Open ${asset.data.title}`} <IconArrow />
+                                {asset.isDownload ? 'Download' : 'View product'} <IconArrow />
                             </a>
                         )}
                         {asset.availability === 'scheduled' && (
@@ -181,29 +158,28 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                                 data-unlocks-at={asset.data.unlocksAt?.toISOString()}
                             >
                                 <p
-                                    class="label resources__countdown flex items-center gap-2 min-h-(--control-size) px-4"
+                                    class="halftone label resources__blocked flex items-center justify-center min-h-(--control-size) px-4 text-text-secondary"
                                     data-unlock-locked
                                 >
-                                    <span>Unlocks in</span>
-                                    <span data-unlock-remaining>&hellip;</span>
+                                    <span>Coming soon</span>
                                 </p>
                                 {asset.data.href && (
                                     <a
                                         class="btn btn--primary"
-                                        aria-label={asset.isDownload ? `Download ${asset.data.title}` : undefined}
+                                        aria-label={asset.isDownload ? `Download ${asset.title}` : undefined}
                                         data-unlock-ready
                                         download={asset.isDownload ? '' : undefined}
                                         hidden
                                         href={asset.data.href}
                                     >
-                                        {asset.isDownload ? 'Download' : `Open ${asset.data.title}`} <IconArrow />
+                                        {asset.isDownload ? 'Download' : 'View product'} <IconArrow />
                                     </a>
                                 )}
                             </div>
                         )}
                         {asset.availability === 'pending' && (
-                            <p class="label resources__blocked flex items-center min-h-(--control-size) px-4 text-text-secondary">
-                                Not published yet
+                            <p class="halftone label resources__blocked flex items-center justify-center min-h-(--control-size) px-4 text-text-secondary">
+                                <span>Coming soon</span>
                             </p>
                         )}
                     </article>
@@ -211,14 +187,17 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             ))}
         </ul>
         <div
-            class="slab slab--sunk flex flex-col items-start max-w-(--measure-form) w-full gap-4 mx-auto"
+            class="slab slab--empty slab--sunk max-w-(--measure-form) w-full mx-auto"
             data-resources-empty
             hidden
         >
-            <p class="font-bold font-sans text-xl tracking-tight">No matches.</p>
-            <p class="text-sm text-text-secondary">
-                Nothing in the library answers to &ldquo;<span class="font-mono wrap-anywhere" data-search-echo />&rdquo;.
-            </p>
+            <div class="flex flex-col gap-(--space-2xs)">
+                <p class="font-bold font-sans text-2xl text-balance tracking-tight">No matches.</p>
+                <p class="text-base text-text-secondary">
+                    Nothing in the library matches
+                    &ldquo;<span class="font-mono wrap-anywhere" data-search-echo />&rdquo;.
+                </p>
+            </div>
             <button
                 class="btn"
                 data-search-clear
@@ -232,8 +211,11 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
 
 <style>
     .resources__blocked {
-        background-image: repeating-linear-gradient(135deg, var(--color-bg-sunken) 0 6px, transparent 6px 12px);
         border: 2px dashed var(--color-border-subtle);
+    }
+
+    .resources__blocked > span {
+        background-color: var(--slab-fill);
     }
 
     .resources__card {
@@ -248,20 +230,14 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
         grid-row: span 4;
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
-        row-gap: var(--space-sm);
-    }
-
-    .resources__countdown {
-        background-image: repeating-linear-gradient(135deg, var(--color-bg-sunken) 0 6px, transparent 6px 12px);
-        border: 2px dashed var(--color-link);
-        color: var(--color-link);
+        row-gap: 0;
     }
 
     .resources__grid {
+        column-gap: var(--space-lg);
         display: grid;
-        gap: var(--space-lg);
-        grid-auto-rows: auto;
         grid-template-columns: repeat(3, minmax(0, 1fr));
+        row-gap: var(--space-2xl);
     }
 
     .resources__grid > * {
@@ -289,10 +265,10 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
     import { initFilterGroup, initSearchField, registerPageScript } from '@lib/shared/utils';
     import { initUnlocks } from '@lib/resources/unlocks';
 
-    function describeAssets(shown: number, total: number, kind: string, query: string) {
-        if (query) return `Showing ${shown} of ${total} assets for \u201c${query}\u201d.`;
+    function describeAssets(shown: number, total: number, isFiltered: boolean, query: string) {
+        if (query) return `Showing ${shown} of ${total} assets for \u201c${query}\u201d`;
 
-        return kind ? `Showing ${shown} of ${total} assets.` : `Showing all ${total} assets.`;
+        return isFiltered ? `Showing ${shown} of ${total} assets` : `Showing all ${total} assets`;
     }
 
     function initResourcesLibrary(signal: AbortSignal) {
@@ -304,12 +280,15 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
         const searchElement = document.querySelector<HTMLInputElement>('[data-search-input]');
 
         initFilterGroup({
-            buttons,
             cards,
-            dataKey: 'kind',
             emptyElement: document.querySelector<HTMLElement>('[data-resources-empty]'),
-            initial: '',
-            matches: (card, kind) => !kind || card.dataset.kind === kind,
+            filters: [
+                {
+                    buttons,
+                    dataKey: 'kind',
+                    matches: (card, active) => active.has(card.dataset.kind ?? ''),
+                },
+            ],
             searchElement,
             signal,
             status: describeAssets,

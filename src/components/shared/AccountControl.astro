@@ -29,11 +29,13 @@ import IconUser from '@components/icons/User.astro';
             >
                 Account
             </span>
-            <IconChevron />
+            <span class="account__chevron">
+                <IconChevron />
+            </span>
         </button>
         <ul
             id="account-menu"
-            class="account__menu list-none"
+            class="account__menu [&_svg]:flex-none [&_svg]:size-5 z-1 list-none"
             aria-labelledby="account-trigger"
             data-nav-menu
             hidden
@@ -89,8 +91,13 @@ import IconUser from '@components/icons/User.astro';
         position: relative;
     }
 
+    .account__chevron {
+        display: flex;
+        transition: rotate var(--duration-fast) var(--motion-ease-ui);
+    }
+
     .account__in {
-        display: none;
+        display: var(--session-in-only, block);
     }
 
     .account__item {
@@ -100,8 +107,9 @@ import IconUser from '@components/icons/User.astro';
         font-size: var(--text-sm);
         gap: var(--space-sm);
         justify-content: space-between;
-        letter-spacing: 0.04em;
-        min-height: 50px;
+        letter-spacing: 0.06em;
+        line-height: 1;
+        min-height: var(--control-size);
         padding-inline: var(--space-sm);
         text-transform: uppercase;
         transition:
@@ -110,12 +118,6 @@ import IconUser from '@components/icons/User.astro';
             transform var(--duration-fast) var(--motion-ease-ui);
         white-space: nowrap;
         width: 100%;
-    }
-
-    .account__item :global(svg) {
-        flex: none;
-        height: 18px;
-        width: 18px;
     }
 
     .account__item:active {
@@ -135,16 +137,10 @@ import IconUser from '@components/icons/User.astro';
         display: flex;
         flex-direction: column;
         gap: 2px;
-        inset: calc(100% + 6px) 0 auto auto;
+        inset: calc(100% + var(--space-2xs)) 0 auto auto;
         min-width: 220px;
-        opacity: 1;
         padding: var(--space-2xs);
         position: absolute;
-        transition:
-            opacity var(--duration-fast) var(--motion-ease-ui),
-            translate var(--duration-fast) var(--motion-ease-ui);
-        translate: 0 0;
-        z-index: var(--z-header);
     }
 
     .account__menu::before {
@@ -154,15 +150,8 @@ import IconUser from '@components/icons/User.astro';
         margin-bottom: var(--space-3xs);
     }
 
-    @starting-style {
-        .account__menu {
-            opacity: 0;
-            translate: 0 -4px;
-        }
-    }
-
     .account__moon {
-        display: flex;
+        display: var(--light-only, flex);
     }
 
     .account__out {
@@ -170,49 +159,45 @@ import IconUser from '@components/icons/User.astro';
         background: var(--color-btn-primary-bg);
         border: 2px solid var(--color-btn-primary-bg);
         color: var(--color-btn-primary-text);
-        display: inline-flex;
+        display: var(--session-out-only, inline-flex);
         font-family: var(--font-mono);
         font-size: var(--text-sm);
-        letter-spacing: 0.04em;
-        min-height: 50px;
-        padding-inline: var(--space-sm);
+        font-weight: 700;
+        letter-spacing: 0.025em;
+        line-height: var(--text-sm--line-height);
+        min-height: var(--control-size);
+        padding-inline: round(clamp(4px, 1.25vw, 16px), 4px);
         text-transform: uppercase;
-        transition:
-            background var(--duration-fast) var(--motion-ease-ui),
-            border-color var(--duration-fast) var(--motion-ease-ui),
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
+        transition: transform var(--duration-fast) var(--motion-ease-ui);
         white-space: nowrap;
     }
 
     .account__out:active {
+        background: var(--color-btn-primary-bg-active);
+        border-color: var(--color-btn-primary-bg-active);
+        color: var(--color-btn-primary-text-active);
         transform: translateY(1px);
     }
 
-    .account__out:hover {
+    .account__out:hover:not(:active) {
         background: var(--color-btn-primary-bg-hover);
-        border-color: var(--color-btn-primary-bg-hover);
         color: var(--color-btn-primary-text);
     }
 
     .account__sun {
-        display: none;
+        display: var(--dark-only, flex);
     }
 
     .account__toggle {
         align-items: center;
         display: flex;
         gap: 2px;
-        height: 50px;
+        height: var(--control-size);
         justify-content: center;
         transition:
             color var(--duration-fast) var(--motion-ease-ui),
             transform var(--duration-fast) var(--motion-ease-ui);
-        width: 50px;
-    }
-
-    .account__toggle :global(svg:last-of-type) {
-        transition: rotate var(--duration-fast) var(--motion-ease-ui);
+        width: var(--control-size);
     }
 
     .account__toggle:active {
@@ -227,24 +212,8 @@ import IconUser from '@components/icons/User.astro';
         color: var(--color-link);
     }
 
-    .account__toggle[aria-expanded='true'] :global(svg:last-of-type) {
+    .account__toggle[aria-expanded='true'] .account__chevron {
         rotate: 180deg;
-    }
-
-    :global([data-session='in']) .account__in {
-        display: block;
-    }
-
-    :global([data-session='in']) .account__out {
-        display: none;
-    }
-
-    :global(html[data-theme='dark']) .account__moon {
-        display: none;
-    }
-
-    :global(html[data-theme='dark']) .account__sun {
-        display: flex;
     }
 
     @media (max-width: 768px) {
@@ -253,12 +222,8 @@ import IconUser from '@components/icons/User.astro';
         }
 
         .account__menu {
-            inset: calc(100% + 6px) var(--shell-pad) auto auto;
+            inset: calc(100% + var(--space-2xs)) var(--shell-pad) auto auto;
             min-width: 0;
-        }
-
-        .account__out {
-            padding-inline: var(--space-3xs);
         }
     }
 </style>

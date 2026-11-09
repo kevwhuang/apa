@@ -1,4 +1,4 @@
-import { MIDI_A4, SEMITONES_PER_OCTAVE, TUNING_HERTZ, noteHertz } from '@lib/audio/player';
+import { MIDI_A4, SEMITONES_PER_OCTAVE, TUNING_HERTZ, toHertz } from '@lib/audio/player';
 
 const ANALYSER_FFT = 2_048;
 const CENTS_PER_OCTAVE = 1_200;
@@ -36,6 +36,7 @@ const GATE_RELEASE = 0.08;
 const GATE_THRESHOLD_DEFAULT = -45;
 const HIGHPASS_CUTOFF_DEFAULT = 120;
 const HIGHPASS_RESONANCE_DEFAULT = 1;
+const IMPULSE_CHANNELS = 2;
 const IMPULSE_SHAPE = 3;
 const LIMITER_ATTACK = 0.001;
 const LIMITER_RATIO = 20;
@@ -113,7 +114,7 @@ function buildChorus(context: AudioContext) {
         },
         input,
         output,
-        setParam(name: string, value: number): void {
+        setParameter(name: string, value: number) {
             if (name === 'rate') smooth(context, lfo.frequency, value);
 
             if (name === 'depth') {
@@ -137,7 +138,7 @@ function buildCompressor(context: AudioContext) {
         dispose: () => node.disconnect(),
         input: node,
         output: node,
-        setParam(name: string, value: number): void {
+        setParameter(name: string, value: number) {
             if (name === 'ratio') smooth(context, node.ratio, value);
             if (name === 'threshold') smooth(context, node.threshold, value);
         },
@@ -164,7 +165,7 @@ function buildDelay(context: AudioContext) {
         dispose: () => [delay, dry, feedback, input, output, wet].forEach(node => node.disconnect()),
         input,
         output,
-        setParam(name: string, value: number): void {
+        setParameter(name: string, value: number) {
             if (name === 'feedback') smooth(context, feedback.gain, Math.min(value, FEEDBACK_CAP));
             if (name === 'time') smooth(context, delay.delayTime, value);
         },
@@ -180,8 +181,8 @@ function buildDistortion(context: AudioContext) {
     let pending = DISTORTION_DRIVE_DEFAULT;
     let reshape = 0;
 
-    makeup.gain.value = distortionMakeupFor(built);
-    shaper.curve = distortionCurve(built);
+    makeup.gain.value = getDistortionMakeup(built);
+    shaper.curve = createDistortionCurve(built);
     shaper.oversample = '4x';
     tone.type = 'lowpass';
     tone.frequency.value = DISTORTION_TONE_DEFAULT;
@@ -193,7 +194,7 @@ function buildDistortion(context: AudioContext) {
         if (pending === built) return;
 
         built = pending;
-        shaper.curve = distortionCurve(built);
+        shaper.curve = createDistortionCurve(built);
     }
 
     return {
@@ -203,7 +204,7 @@ function buildDistortion(context: AudioContext) {
         },
         input: shaper,
         output: makeup,
-        setParam(name: string, value: number): void {
+        setParameter(name: string, value: number) {
             if (name === 'tone') smooth(context, tone.frequency, value);
 
             if (name === 'drive') {
@@ -211,7 +212,7 @@ function buildDistortion(context: AudioContext) {
 
                 if (pending !== built && reshape === 0) reshape = requestAnimationFrame(rebuildCurve);
 
-                smooth(context, makeup.gain, distortionMakeupFor(value));
+                smooth(context, makeup.gain, getDistortionMakeup(value));
             }
         },
     };
@@ -237,7 +238,7 @@ function buildEq(context: AudioContext) {
         dispose: () => [high, low, mid].forEach(node => node.disconnect()),
         input: low,
         output: high,
-        setParam(name: string, value: number): void {
+        setParameter(name: string, value: number) {
             if (name === 'high') smooth(context, high.gain, value);
             if (name === 'low') smooth(context, low.gain, value);
             if (name === 'mid') smooth(context, mid.gain, value);
@@ -256,7 +257,7 @@ function buildFilter(context: AudioContext) {
         dispose: () => node.disconnect(),
         input: node,
         output: node,
-        setParam(name: string, value: number): void {
+        setParameter(name: string, value: number) {
             if (name === 'cutoff') smooth(context, node.frequency, value);
             if (name === 'resonance') smooth(context, node.Q, value);
         },
@@ -272,7 +273,7 @@ function buildGate(context: AudioContext) {
 
     const data = new Float32Array(analyser.fftSize);
 
-    let open = false;
+    let isOpen = false;
     let threshold = GATE_THRESHOLD_DEFAULT;
 
     gate.gain.value = 0;
@@ -283,21 +284,21 @@ function buildGate(context: AudioContext) {
         dispose: () => [analyser, gate, input].forEach(node => node.disconnect()),
         input,
         output: gate,
-        setParam(name: string, value: number): void {
+        setParameter(name: string, value: number) {
             if (name === 'threshold') threshold = value;
         },
-        state: () => (open ? 'Gate open' : 'Gate closed'),
+        state: () => (isOpen ? 'Gate open' : 'Gate closed'),
         tick(): void {
             analyser.getFloatTimeDomainData(data);
 
-            const decibels = DECIBEL_SCALE * Math.log10(Math.max(rootMeanSquare(data), GATE_FLOOR));
+            const decibels = DECIBEL_SCALE * Math.log10(Math.max(getRootMeanSquare(data), GATE_FLOOR));
 
-            const next = decibels > threshold;
+            const shouldOpen = decibels > threshold;
 
-            if (next === open) return;
+            if (shouldOpen === isOpen) return;
 
-            open = next;
-            gate.gain.setTargetAtTime(next ? 1 : 0, context.currentTime, next ? GATE_ATTACK : GATE_RELEASE);
+            isOpen = shouldOpen;
+            gate.gain.setTargetAtTime(shouldOpen ? 1 : 0, context.currentTime, shouldOpen ? GATE_ATTACK : GATE_RELEASE);
         },
     };
 }
@@ -313,7 +314,7 @@ function buildHighpass(context: AudioContext) {
         dispose: () => node.disconnect(),
         input: node,
         output: node,
-        setParam(name: string, value: number): void {
+        setParameter(name: string, value: number) {
             if (name === 'cutoff') smooth(context, node.frequency, value);
             if (name === 'resonance') smooth(context, node.Q, value);
         },
@@ -333,10 +334,10 @@ function buildLimiter(context: AudioContext) {
         dispose: () => node.disconnect(),
         input: node,
         output: node,
-        setParam(name: string, value: number): void {
+        setParameter(name: string, value: number) {
             if (name === 'threshold') smooth(context, node.threshold, value);
         },
-        state: () => `Ceiling ${node.threshold.value.toFixed(1)} dB \u00b7 GR ${node.reduction.toFixed(1)} dB`,
+        state: () => `GR ${node.reduction.toFixed(1)} dB`,
     };
 }
 
@@ -350,7 +351,7 @@ function buildMeter(context: AudioContext) {
         dispose: () => analyser.disconnect(),
         input: analyser,
         output: analyser,
-        setParam: () => undefined,
+        setParameter: () => undefined,
     };
 }
 
@@ -363,7 +364,7 @@ function buildPan(context: AudioContext) {
         dispose: () => node.disconnect(),
         input: node,
         output: node,
-        setParam(name: string, value: number): void {
+        setParameter(name: string, value: number) {
             if (name === 'position') smooth(context, node.pan, value);
         },
     };
@@ -380,7 +381,7 @@ function buildReverb(context: AudioContext) {
     let pending = REVERB_DECAY_DEFAULT;
     let rebuild = 0;
 
-    convolver.buffer = impulse(context, built);
+    convolver.buffer = createImpulse(context, built);
     dry.gain.value = 1 - REVERB_WET_DEFAULT;
     wet.gain.value = REVERB_WET_DEFAULT;
     input.connect(dry).connect(output);
@@ -392,7 +393,7 @@ function buildReverb(context: AudioContext) {
         if (pending === built) return;
 
         built = pending;
-        convolver.buffer = impulse(context, built);
+        convolver.buffer = createImpulse(context, built);
     }
 
     return {
@@ -402,7 +403,7 @@ function buildReverb(context: AudioContext) {
         },
         input,
         output,
-        setParam(name: string, value: number): void {
+        setParameter(name: string, value: number) {
             if (name === 'decay') {
                 pending = value;
 
@@ -426,8 +427,8 @@ function buildSaturator(context: AudioContext) {
     let pending = SATURATOR_DRIVE_DEFAULT;
     let reshape = 0;
 
-    makeup.gain.value = saturationMakeupFor(built);
-    shaper.curve = saturationCurve(built);
+    makeup.gain.value = getSaturationMakeup(built);
+    shaper.curve = createSaturationCurve(built);
     shaper.oversample = '4x';
     input.connect(shaper).connect(makeup);
 
@@ -437,7 +438,7 @@ function buildSaturator(context: AudioContext) {
         if (pending === built) return;
 
         built = pending;
-        shaper.curve = saturationCurve(built);
+        shaper.curve = createSaturationCurve(built);
     }
 
     return {
@@ -447,14 +448,14 @@ function buildSaturator(context: AudioContext) {
         },
         input,
         output: makeup,
-        setParam(name: string, value: number): void {
+        setParameter(name: string, value: number) {
             if (name !== 'drive') return;
 
             pending = value;
 
             if (pending !== built && reshape === 0) reshape = requestAnimationFrame(rebuildCurve);
 
-            smooth(context, makeup.gain, saturationMakeupFor(value));
+            smooth(context, makeup.gain, getSaturationMakeup(value));
         },
     };
 }
@@ -477,7 +478,7 @@ function buildTremolo(context: AudioContext) {
         },
         input,
         output: input,
-        setParam(name: string, value: number): void {
+        setParameter(name: string, value: number) {
             if (name === 'rate') smooth(context, lfo.frequency, value);
 
             if (name === 'depth') {
@@ -497,7 +498,7 @@ function buildTrim(context: AudioContext) {
         dispose: () => node.disconnect(),
         input: node,
         output: node,
-        setParam(name: string, value: number): void {
+        setParameter(name: string, value: number) {
             if (name === 'gain') smooth(context, node.gain, decibelsToGain(value));
         },
     };
@@ -518,7 +519,7 @@ function buildTuner(context: AudioContext) {
         dispose: () => analyser.disconnect(),
         input: analyser,
         output: analyser,
-        setParam: () => undefined,
+        setParameter: () => undefined,
         state: () => display,
         tick(): void {
             phase = (phase + 1) % TICK_INTERVAL;
@@ -532,6 +533,47 @@ function buildTuner(context: AudioContext) {
             display = hertz > 0 ? formatPitch(hertz) : '\u2014';
         },
     };
+}
+
+function createDistortionCurve(drive: number) {
+    const samples = new Float32Array(CURVE_LENGTH);
+
+    for (let index = 0; index < CURVE_LENGTH; index += 1) {
+        const x = (index / (CURVE_LENGTH - 1)) * 2 - 1;
+
+        samples[index] = Math.max(-1, Math.min(1, drive * x));
+    }
+
+    return samples;
+}
+
+function createImpulse(context: AudioContext, seconds: number) {
+    const length = Math.max(1, Math.floor(context.sampleRate * seconds));
+
+    const buffer = context.createBuffer(IMPULSE_CHANNELS, length, context.sampleRate);
+
+    for (let channel = 0; channel < buffer.numberOfChannels; channel += 1) {
+        const samples = buffer.getChannelData(channel);
+
+        for (let index = 0; index < length; index += 1) {
+            samples[index] = (Math.random() * 2 - 1) * Math.exp(-IMPULSE_SHAPE * index / length);
+        }
+    }
+
+    return buffer;
+}
+
+function createSaturationCurve(drive: number) {
+    const samples = new Float32Array(CURVE_LENGTH);
+    const scale = Math.tanh(drive);
+
+    for (let index = 0; index < CURVE_LENGTH; index += 1) {
+        const x = (index / (CURVE_LENGTH - 1)) * 2 - 1;
+
+        samples[index] = Math.tanh(drive * x) / scale;
+    }
+
+    return samples;
 }
 
 function decibelsToGain(decibels: number) {
@@ -567,50 +609,22 @@ function detectPitch(data: Float32Array, sampleRate: number) {
     return bestCorrelation > PITCH_MIN_CORRELATION && bestLag > 0 ? sampleRate / bestLag : 0;
 }
 
-function distortionCurve(drive: number) {
-    const samples = new Float32Array(CURVE_LENGTH);
-
-    for (let index = 0; index < CURVE_LENGTH; index += 1) {
-        const x = (index / (CURVE_LENGTH - 1)) * 2 - 1;
-
-        samples[index] = Math.max(-1, Math.min(1, drive * x));
-    }
-
-    return samples;
-}
-
-function distortionMakeupFor(drive: number) {
-    return Math.min(1, 1 / Math.sqrt(drive));
-}
-
 function formatPitch(hertz: number) {
     const midi = Math.round(MIDI_A4 + SEMITONES_PER_OCTAVE * Math.log2(hertz / TUNING_HERTZ));
 
-    const target = noteHertz(midi);
+    const note = `${NOTE_NAMES[((midi % SEMITONES_PER_OCTAVE) + SEMITONES_PER_OCTAVE) % SEMITONES_PER_OCTAVE]}${Math.floor(midi / SEMITONES_PER_OCTAVE) - MIDI_OCTAVE_OFFSET}`;
+    const target = toHertz(midi);
 
     const cents = Math.round(CENTS_PER_OCTAVE * Math.log2(hertz / target));
-    const note = `${NOTE_NAMES[((midi % SEMITONES_PER_OCTAVE) + SEMITONES_PER_OCTAVE) % SEMITONES_PER_OCTAVE]}${Math.floor(midi / SEMITONES_PER_OCTAVE) - MIDI_OCTAVE_OFFSET}`;
 
     return `${hertz.toFixed(1)} Hz \u00b7 ${note} ${cents >= 0 ? '+' : ''}${cents}`;
 }
 
-function impulse(context: AudioContext, seconds: number) {
-    const length = Math.max(1, Math.floor(context.sampleRate * seconds));
-
-    const buffer = context.createBuffer(2, length, context.sampleRate);
-
-    for (let channel = 0; channel < buffer.numberOfChannels; channel += 1) {
-        const samples = buffer.getChannelData(channel);
-
-        for (let index = 0; index < length; index += 1) {
-            samples[index] = (Math.random() * 2 - 1) * Math.exp(-IMPULSE_SHAPE * index / length);
-        }
-    }
-
-    return buffer;
+function getDistortionMakeup(drive: number) {
+    return Math.min(1, 1 / Math.sqrt(drive));
 }
 
-function rootMeanSquare(data: Float32Array) {
+function getRootMeanSquare(data: Float32Array) {
     let power = 0;
 
     for (let index = 0; index < data.length; index += 1) power += data[index] * data[index];
@@ -618,20 +632,7 @@ function rootMeanSquare(data: Float32Array) {
     return Math.sqrt(power / data.length);
 }
 
-function saturationCurve(drive: number) {
-    const samples = new Float32Array(CURVE_LENGTH);
-    const scale = Math.tanh(drive);
-
-    for (let index = 0; index < CURVE_LENGTH; index += 1) {
-        const x = (index / (CURVE_LENGTH - 1)) * 2 - 1;
-
-        samples[index] = Math.tanh(drive * x) / scale;
-    }
-
-    return samples;
-}
-
-function saturationMakeupFor(drive: number) {
+function getSaturationMakeup(drive: number) {
     return Math.tanh(drive) / drive;
 }
 
@@ -648,7 +649,6 @@ export {
     DELAY_FEEDBACK_DEFAULT,
     DELAY_TIME_DEFAULT,
     DISTORTION_DRIVE_DEFAULT,
-    DISTORTION_TONE_DEFAULT,
     EQ_HIGH_GAIN_DEFAULT,
     EQ_LOW_GAIN_DEFAULT,
     EQ_MID_GAIN_DEFAULT,

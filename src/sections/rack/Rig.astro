@@ -31,17 +31,17 @@ import {
 import { MODULE_NAMES } from '@lib/rack/rack';
 import { RACK_EXTENSION_LIST, RACK_MAX_BYTES } from '@lib/rack/loader';
 import { UPLOAD } from '@lib/shared/constants';
-import { formatBytes } from '@lib/shared/utils';
+import { formatBytes, formatEntry } from '@lib/shared/utils';
 
 interface Module {
     blurb: string;
+    featured?: boolean;
     id: string;
     kind: keyof typeof MODULE_NAMES;
     readout?: string;
     role: string;
     sliders: ModuleSlider[];
-    viz?: 'canvas' | 'readout';
-    well?: boolean;
+    visualization?: 'canvas' | 'readout';
 }
 
 interface ModuleSlider {
@@ -49,7 +49,7 @@ interface ModuleSlider {
     label: string;
     max: number;
     min: number;
-    param: string;
+    parameter: string;
     step: number;
     value: number;
 }
@@ -65,17 +65,17 @@ const MODULES: Module[] = [
         kind: 'trim',
         role: 'Input trim',
         sliders: [
-            { display: '+0.0 dB', label: 'Gain', max: 12, min: -24, param: 'gain', step: 0.5, value: TRIM_GAIN_DEFAULT },
+            { display: '+0.0 dB', label: 'Gain', max: 12, min: -24, parameter: 'gain', step: 0.5, value: TRIM_GAIN_DEFAULT },
         ],
     },
     {
-        blurb: 'A resonant low-pass \u2014 everything above the corner falls away. Sweep the cutoff against a running loop and raise Q until the corner sings.',
+        blurb: 'A resonant low-pass: everything above the corner falls away. Sweep the cutoff against a running loop and raise Q until the corner sings.',
         id: 'sieve',
         kind: 'filter',
         role: 'Low-pass filter',
         sliders: [
-            { display: '1.15 kHz', label: 'Cutoff', max: 1, min: 0, param: 'cutoff', step: 0.001, value: FILTER_CUTOFF_POSITION },
-            { display: 'Q 4.0', label: 'Reso', max: 18, min: 0.5, param: 'resonance', step: 0.1, value: FILTER_RESONANCE_DEFAULT },
+            { display: '1.15 kHz', label: 'Cutoff', max: 1, min: 0, parameter: 'cutoff', step: 0.001, value: FILTER_CUTOFF_POSITION },
+            { display: 'Q 4.0', label: 'Reso', max: 18, min: 0.5, parameter: 'resonance', step: 0.1, value: FILTER_RESONANCE_DEFAULT },
         ],
     },
     {
@@ -84,21 +84,21 @@ const MODULES: Module[] = [
         kind: 'highpass',
         role: 'High-pass filter',
         sliders: [
-            { display: '120 Hz', label: 'Cutoff', max: 1, min: 0, param: 'cutoff', step: 0.001, value: HIGHPASS_CUTOFF_POSITION },
-            { display: 'Q 1.0', label: 'Reso', max: 12, min: 0.5, param: 'resonance', step: 0.1, value: HIGHPASS_RESONANCE_DEFAULT },
+            { display: '120 Hz', label: 'Cutoff', max: 1, min: 0, parameter: 'cutoff', step: 0.001, value: HIGHPASS_CUTOFF_POSITION },
+            { display: 'Q 1.0', label: 'Reso', max: 12, min: 0.5, parameter: 'resonance', step: 0.1, value: HIGHPASS_RESONANCE_DEFAULT },
         ],
     },
     {
-        blurb: 'Three bands \u2014 a low shelf, a peaking mid, and a high shelf. Boost or cut any of them and the tilt lands on the chain immediately.',
+        blurb: 'Three bands: a low shelf, a peaking mid, and a high shelf. Boost or cut any of them and the tilt lands on the chain immediately.',
+        featured: true,
         id: 'ledger',
         kind: 'eq',
         role: 'Equalizer',
         sliders: [
-            { display: '+4.0 dB', label: 'Low', max: 12, min: -12, param: 'low', step: 0.5, value: EQ_LOW_GAIN_DEFAULT },
-            { display: '+0.0 dB', label: 'Mid', max: 12, min: -12, param: 'mid', step: 0.5, value: EQ_MID_GAIN_DEFAULT },
-            { display: '+3.0 dB', label: 'High', max: 12, min: -12, param: 'high', step: 0.5, value: EQ_HIGH_GAIN_DEFAULT },
+            { display: '+4.0 dB', label: 'Low', max: 12, min: -12, parameter: 'low', step: 0.5, value: EQ_LOW_GAIN_DEFAULT },
+            { display: '+0.0 dB', label: 'Mid', max: 12, min: -12, parameter: 'mid', step: 0.5, value: EQ_MID_GAIN_DEFAULT },
+            { display: '+3.0 dB', label: 'High', max: 12, min: -12, parameter: 'high', step: 0.5, value: EQ_HIGH_GAIN_DEFAULT },
         ],
-        well: true,
     },
     {
         blurb: 'An RMS watcher opens and closes a gain stage with fast ramps. Set the threshold above the noise floor and below the hits.',
@@ -107,40 +107,40 @@ const MODULES: Module[] = [
         readout: 'Gate closed',
         role: 'Noise gate',
         sliders: [
-            { display: '-45 dB', label: 'Thresh', max: -10, min: -70, param: 'threshold', step: 1, value: GATE_THRESHOLD_DEFAULT },
+            { display: '-45 dB', label: 'Thresh', max: -10, min: -70, parameter: 'threshold', step: 1, value: GATE_THRESHOLD_DEFAULT },
         ],
-        viz: 'readout',
+        visualization: 'readout',
     },
     {
         blurb: 'Pull the threshold down until the gain-reduction readout moves, then set how hard it leans once the signal crosses the line.',
+        featured: true,
         id: 'clamp',
         kind: 'compressor',
         readout: 'GR 0.0 dB',
         role: 'Compressor',
         sliders: [
-            { display: '-28 dB', label: 'Thresh', max: 0, min: -60, param: 'threshold', step: 1, value: COMPRESSOR_THRESHOLD_DEFAULT },
-            { display: '4.0:1', label: 'Ratio', max: 20, min: 1, param: 'ratio', step: 0.5, value: COMPRESSOR_RATIO_DEFAULT },
+            { display: '-28 dB', label: 'Thresh', max: 0, min: -60, parameter: 'threshold', step: 1, value: COMPRESSOR_THRESHOLD_DEFAULT },
+            { display: '4.0:1', label: 'Ratio', max: 20, min: 1, parameter: 'ratio', step: 0.5, value: COMPRESSOR_RATIO_DEFAULT },
         ],
-        viz: 'readout',
-        well: true,
+        visualization: 'readout',
     },
     {
-        blurb: 'Hard clipping, harder-edged than the saturator that follows \u2014 the curve shears flat at the rails instead of rounding into them, so the harmonics come out brittle and loud. The tone control is a low-pass that tames the fizz clipping throws off.',
+        blurb: 'Hard clipping, harder-edged than the saturator that follows. The curve shears flat at the rails instead of rounding into them, so the harmonics come out brittle and loud. The tone control is a low-pass that tames the fizz clipping throws off.',
         id: 'scorch',
         kind: 'distortion',
         role: 'Distortion',
         sliders: [
-            { display: '8.0', label: 'Drive', max: 30, min: 1, param: 'drive', step: 0.5, value: DISTORTION_DRIVE_DEFAULT },
-            { display: '6.00 kHz', label: 'Tone', max: 1, min: 0, param: 'tone', step: 0.001, value: DISTORTION_TONE_POSITION },
+            { display: '8.0', label: 'Drive', max: 30, min: 1, parameter: 'drive', step: 0.5, value: DISTORTION_DRIVE_DEFAULT },
+            { display: '6.00 kHz', label: 'Tone', max: 1, min: 0, parameter: 'tone', step: 0.001, value: DISTORTION_TONE_POSITION },
         ],
     },
     {
-        blurb: 'A tanh drive curve, oversampled 4x, and makeup gain that holds the level steady as drive rises. Soft knees, no hard edges \u2014 it sits ahead of the time effects, so the repeats inherit the dirt.',
+        blurb: 'A tanh drive curve, oversampled 4x, and makeup gain that holds the level steady as drive rises. Soft knees, no hard edges. It sits ahead of the time effects, so the repeats inherit the dirt.',
         id: 'grit',
         kind: 'saturator',
         role: 'Saturator',
         sliders: [
-            { display: '3.0', label: 'Drive', max: 10, min: 1, param: 'drive', step: 0.1, value: SATURATOR_DRIVE_DEFAULT },
+            { display: '3.0', label: 'Drive', max: 10, min: 1, parameter: 'drive', step: 0.1, value: SATURATOR_DRIVE_DEFAULT },
         ],
     },
     {
@@ -149,18 +149,18 @@ const MODULES: Module[] = [
         kind: 'chorus',
         role: 'Chorus',
         sliders: [
-            { display: '1.20 Hz', label: 'Rate', max: 5, min: 0.1, param: 'rate', step: 0.05, value: CHORUS_RATE_DEFAULT },
-            { display: '50%', label: 'Depth', max: 1, min: 0, param: 'depth', step: 0.01, value: CHORUS_DEPTH_DEFAULT },
+            { display: '1.20 Hz', label: 'Rate', max: 5, min: 0.1, parameter: 'rate', step: 0.05, value: CHORUS_RATE_DEFAULT },
+            { display: '50%', label: 'Depth', max: 1, min: 0, parameter: 'depth', step: 0.01, value: CHORUS_DEPTH_DEFAULT },
         ],
     },
     {
-        blurb: 'One LFO on one gain stage \u2014 amplitude modulation, nothing more. Rate is the speed of the pulse, depth is how far each dip falls.',
+        blurb: 'One LFO on one gain stage: amplitude modulation, nothing more. Rate is the speed of the pulse, depth is how far each dip falls.',
         id: 'pulse',
         kind: 'tremolo',
         role: 'Tremolo',
         sliders: [
-            { display: '4.5 Hz', label: 'Rate', max: 12, min: 0.1, param: 'rate', step: 0.1, value: TREMOLO_RATE_DEFAULT },
-            { display: '60%', label: 'Depth', max: 1, min: 0, param: 'depth', step: 0.01, value: TREMOLO_DEPTH_DEFAULT },
+            { display: '4.5 Hz', label: 'Rate', max: 12, min: 0.1, parameter: 'rate', step: 0.1, value: TREMOLO_RATE_DEFAULT },
+            { display: '60%', label: 'Depth', max: 1, min: 0, parameter: 'depth', step: 0.01, value: TREMOLO_DEPTH_DEFAULT },
         ],
     },
     {
@@ -169,20 +169,20 @@ const MODULES: Module[] = [
         kind: 'delay',
         role: 'Delay',
         sliders: [
-            { display: '0.35 s', label: 'Time', max: 1, min: 0.05, param: 'time', step: 0.01, value: DELAY_TIME_DEFAULT },
-            { display: '45%', label: 'Feedback', max: 0.85, min: 0, param: 'feedback', step: 0.01, value: DELAY_FEEDBACK_DEFAULT },
+            { display: '0.35 s', label: 'Time', max: 1, min: 0.05, parameter: 'time', step: 0.01, value: DELAY_TIME_DEFAULT },
+            { display: '45%', label: 'Feedback', max: 0.85, min: 0, parameter: 'feedback', step: 0.01, value: DELAY_FEEDBACK_DEFAULT },
         ],
     },
     {
         blurb: 'Convolution against a noise impulse that regenerates whenever the decay changes. Wet sets how much of the room reaches the output.',
+        featured: true,
         id: 'chamber',
         kind: 'reverb',
         role: 'Reverb',
         sliders: [
-            { display: '2.4 s', label: 'Decay', max: 6, min: 0.2, param: 'decay', step: 0.1, value: REVERB_DECAY_DEFAULT },
-            { display: '40%', label: 'Wet', max: 1, min: 0, param: 'wet', step: 0.01, value: REVERB_WET_DEFAULT },
+            { display: '2.4 s', label: 'Decay', max: 6, min: 0.2, parameter: 'decay', step: 0.1, value: REVERB_DECAY_DEFAULT },
+            { display: '40%', label: 'Wet', max: 1, min: 0, parameter: 'wet', step: 0.01, value: REVERB_WET_DEFAULT },
         ],
-        well: true,
     },
     {
         blurb: 'A stereo panner across the field. Center is dead ahead, and either edge leaves you with a single speaker.',
@@ -190,19 +190,19 @@ const MODULES: Module[] = [
         kind: 'pan',
         role: 'Stereo panner',
         sliders: [
-            { display: 'Center', label: 'Position', max: 1, min: -1, param: 'position', step: 0.01, value: PAN_POSITION_DEFAULT },
+            { display: 'Center', label: 'Position', max: 1, min: -1, parameter: 'position', step: 0.01, value: PAN_POSITION_DEFAULT },
         ],
     },
     {
-        blurb: 'A 20:1 brickwall with a 1 ms attack, sitting last before the analysis stages. Drag the ceiling down and the readout catches every peak.',
+        blurb: 'A 20:1 brickwall with a 1 ms attack, sitting last before the analysis stages. Drag the ceiling down and the gain-reduction readout shows how many decibels it pulls off the peaks.',
         id: 'ceiling',
         kind: 'limiter',
-        readout: 'Ceiling -12.0 dB \u00b7 GR 0.0 dB',
+        readout: 'GR 0.0 dB',
         role: 'Limiter',
         sliders: [
-            { display: '-12.0 dB', label: 'Ceiling', max: 0, min: -30, param: 'threshold', step: 0.5, value: LIMITER_THRESHOLD_DEFAULT },
+            { display: '-12.0 dB', label: 'Ceiling', max: 0, min: -30, parameter: 'threshold', step: 0.5, value: LIMITER_THRESHOLD_DEFAULT },
         ],
-        viz: 'readout',
+        visualization: 'readout',
     },
     {
         blurb: 'A passthrough level meter reading whatever reaches it. The bars run while the rack plays and rest the moment it stops.',
@@ -210,20 +210,18 @@ const MODULES: Module[] = [
         kind: 'meter',
         role: 'Metering',
         sliders: [],
-        viz: 'canvas',
+        visualization: 'canvas',
     },
     {
-        blurb: 'Autocorrelation on the signal at this point in the chain: hertz, nearest note, cents off. Feed it something monophonic \u2014 chords read as nonsense.',
+        blurb: 'Autocorrelation on the signal at this point in the chain: hertz, nearest note, cents off. Feed it something monophonic. Chords read as nonsense.',
         id: 'pitchfork',
         kind: 'tuner',
         readout: '\u2014',
         role: 'Tuner',
         sliders: [],
-        viz: 'readout',
+        visualization: 'readout',
     },
 ];
-
-const PAD_LENGTH = 2;
 ---
 
 <section
@@ -233,26 +231,23 @@ const PAD_LENGTH = 2;
     <div
         class="rack__scene stage__item--full absolute inset-0 pointer-events-none"
         aria-hidden="true"
-    />
-    <div
-        class="rack__veil stage__item--full absolute pointer-events-none"
-        aria-hidden="true"
-    />
+    >
+        <canvas class="rack__canvas" hidden />
+    </div>
     <div class="flex flex-col relative gap-6">
         <PageHead
-            class="max-w-4xl text-5xl md:text-8xl"
-            eyebrow="Plugin rack"
+            class="max-w-4xl text-7xl max-md:text-5xl"
             headingId="rig-title"
         >
-            One rack, live.
+            One live rack
         </PageHead>
         <p
             class="max-w-2xl text-lg text-text-secondary"
             data-motion="blur"
         >
-            Sixteen Web Audio processors wired as a single chain in your browser &mdash; no
-            install, no license server. Load one file at the top, switch modules in and out of the
-            signal path, and hear the rack change under you.
+            Sixteen Web Audio processors run as a single chain in your browser, with nothing to
+            install. Load one file, switch modules in and out of the signal path, and hear the
+            change as it plays.
         </p>
     </div>
     <dl
@@ -271,15 +266,15 @@ const PAD_LENGTH = 2;
         </div>
         <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
             <dt class="label mb-(--space-3xs) text-text-secondary">Formats</dt>
-            <dd class="font-mono text-sm">{RACK_EXTENSION_LIST}</dd>
+            <dd class="font-mono text-base">{RACK_EXTENSION_LIST}</dd>
         </div>
         <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
             <dt class="label mb-(--space-3xs) text-text-secondary">Ceiling</dt>
-            <dd class="font-mono text-sm">{formatBytes(RACK_MAX_BYTES)} per file</dd>
+            <dd class="font-mono text-base">{formatBytes(RACK_MAX_BYTES)} per file</dd>
         </div>
         <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
             <dt class="label mb-(--space-3xs) text-text-secondary">Output</dt>
-            <dd class="font-mono text-sm">Plays through the site player</dd>
+            <dd class="font-mono text-base">Plays through the site player</dd>
         </div>
     </dl>
 </section>
@@ -295,29 +290,28 @@ const PAD_LENGTH = 2;
     >
         <SectionHead
             class="text-2xl text-balance"
-            eyebrow="Master, one source"
             headingId="rack-title"
             tone="dark"
         >
-            Load a file. Build the chain.
+            Load a file and build the chain
         </SectionHead>
         <div class="rack__body">
             <label
-                class="rack__drop"
+                class="halftone rack__drop"
                 data-rack-drop
                 for="rack-file"
             >
                 <IconUpload />
-                <span class="action-text">Drop audio or browse</span>
-                <span class="font-mono text-xs text-text-inverse">
-                    {RACK_EXTENSION_LIST} up to {formatBytes(RACK_MAX_BYTES)}
+                <span class="action-text transition-colors">Drop or choose audio</span>
+                <span class="font-mono text-base text-text-inverse">
+                    {RACK_EXTENSION_LIST} only. Up to {formatBytes(RACK_MAX_BYTES)}.
                 </span>
                 <input
                     id="rack-file"
                     class="sr-only"
                     accept={UPLOAD.acceptAttribute}
                     aria-describedby="rack-error"
-                    aria-label="Load an audio file into the rack"
+                    aria-label="Drop or choose audio"
                     data-rack-input
                     type="file"
                 />
@@ -341,12 +335,12 @@ const PAD_LENGTH = 2;
                         class="sr-only"
                         data-rack-toggle-label
                     >
-                        Play the rack
+                        Play rack
                     </span>
                 </button>
                 <div class="min-w-0">
                     <p
-                        class="rack__meta flex items-center gap-(--space-2xs) font-mono text-sm"
+                        class="rack__meta flex items-center gap-(--space-2xs) text-base"
                         aria-live="polite"
                         data-rack-meta
                     >
@@ -360,33 +354,30 @@ const PAD_LENGTH = 2;
                             class="truncate"
                             data-rack-meta-text
                         >
-                            No file loaded.
+                            No file loaded
                         </span>
                     </p>
                     <p
                         id="rack-error"
-                        class="empty:hidden font-mono text-xs text-error-text-on-inverse"
+                        class="empty:hidden text-base text-error-text-on-inverse"
                         aria-live="polite"
                         data-rack-error
                     />
                 </div>
             </div>
-            <div class="col-span-full">
-                <p class="label mb-(--space-2xs) text-text-inverse-secondary">Signal path</p>
-                <ol
-                    class="flex flex-wrap items-center gap-(--space-sm) list-none"
-                    data-rack-path
+            <ol
+                class="col-span-full flex flex-wrap items-center gap-(--space-sm) list-none"
+                data-rack-path
+            >
+                <li class="rack__node">In</li>
+                <li
+                    class="rack__node rack__node--idle"
+                    data-rack-idle
                 >
-                    <li class="rack__node">In</li>
-                    <li
-                        class="rack__node rack__node--idle"
-                        data-rack-idle
-                    >
-                        Straight through
-                    </li>
-                    <li class="rack__node">Out</li>
-                </ol>
-            </div>
+                    Straight through
+                </li>
+                <li class="rack__node">Out</li>
+            </ol>
             <template data-rack-chip>
                 <li
                     class="rack__node rack__node--plug"
@@ -403,15 +394,13 @@ const PAD_LENGTH = 2;
 >
     <div>
         <SectionHead
-            class="text-2xl text-balance md:text-3xl"
-            eyebrow={`Rack, ${MODULES.length} modules`}
+            class="text-3xl text-balance"
             headingId="modules-title"
         >
             The modules, in signal order
         </SectionHead>
         <ul
             class="rack__grid rank list-none"
-            data-motion-from="center"
             data-motion-stagger="flip"
         >
             {MODULES.map((module, index) => (
@@ -419,13 +408,13 @@ const PAD_LENGTH = 2;
                     <article
                         id={module.id}
                         class:list={[
-                            'module slab slab--card grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-[1/span_5] space-y-(--space-xs)',
-                            module.well && 'module--well slab--well',
+                            'module slab slab--card slab--still grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-[1/span_5] space-y-(--space-xs)',
+                            module.featured && 'module--featured',
                         ]}
                         data-module={module.kind}
                     >
                         <p class="label flex flex-wrap items-baseline row-1 gap-(--space-2xs)">
-                            <span class="text-(--module-accent)">{String(index + 1).padStart(PAD_LENGTH, '0')}</span>
+                            <span class="text-(--module-accent)">{formatEntry(index + 1)}</span>
                             <span>{module.role}</span>
                         </p>
                         <div class="flex flex-wrap items-center justify-between row-2 gap-(--space-2xs)">
@@ -445,18 +434,18 @@ const PAD_LENGTH = 2;
                                 <span class="sr-only">{MODULE_NAMES[module.kind]} active</span>
                             </button>
                         </div>
-                        <p class="row-3 leading-relaxed text-sm text-(--module-mute)">
+                        <p class="row-3 text-base text-(--module-mute)">
                             {module.blurb}
                         </p>
                         {module.sliders.length > 0 && (
                             <div class="flex flex-col row-4">
                                 {module.sliders.map(slider => (
-                                    <label class="grid grid-cols-[72px_minmax(0,1fr)_76px] items-center min-h-(--control-size) gap-(--space-2xs)">
+                                    <label class="grid grid-cols-[80px_minmax(0,1fr)_76px] items-center min-h-(--control-size) gap-(--space-2xs) max-lg:grid-cols-[72px_minmax(0,1fr)_76px]">
                                         <span class="label whitespace-nowrap text-(--module-mute)">{slider.label}</span>
                                         <input
-                                            class="module__range"
+                                            class="range h-(--control-size)"
                                             aria-valuetext={slider.display}
-                                            data-module-param={slider.param}
+                                            data-module-parameter={slider.parameter}
                                             max={slider.max}
                                             min={slider.min}
                                             step={slider.step}
@@ -464,8 +453,8 @@ const PAD_LENGTH = 2;
                                             value={slider.value}
                                         />
                                         <output
-                                            class="font-mono text-xs select-none"
-                                            data-module-value={slider.param}
+                                            class="font-mono text-sm select-none"
+                                            data-module-value={slider.parameter}
                                         >
                                             {slider.display}
                                         </output>
@@ -473,10 +462,10 @@ const PAD_LENGTH = 2;
                                 ))}
                             </div>
                         )}
-                        {module.viz === 'canvas' && (
+                        {module.visualization === 'canvas' && (
                             <div class="row-5">
                                 <canvas
-                                    class="block min-h-20 w-full border-2 border-(--module-line) bg-(--module-fill)"
+                                    class="block min-h-20 w-full border-(--module-line) border-2 bg-(--module-fill)"
                                     aria-label={`${MODULE_NAMES[module.kind]} level meter`}
                                     data-module-canvas
                                     height="80"
@@ -485,10 +474,10 @@ const PAD_LENGTH = 2;
                                 />
                             </div>
                         )}
-                        {module.viz === 'readout' && (
+                        {module.visualization === 'readout' && (
                             <div class="row-5">
                                 <p
-                                    class="flex items-center justify-center min-h-(--control-size) px-(--space-xs) py-(--space-2xs) border-2 border-(--module-line) font-mono text-center text-lg bg-(--module-fill)"
+                                    class="flex items-center justify-center min-h-(--control-size) px-(--space-xs) py-(--space-2xs) border-(--module-line) border-2 font-mono text-center text-lg bg-(--module-fill) select-none"
                                     data-module-readout
                                 >
                                     {module.readout}
@@ -512,28 +501,16 @@ const PAD_LENGTH = 2;
         --module-mute: var(--color-text-secondary);
     }
 
-    .module :focus-visible {
-        outline-color: var(--color-focus-ring);
-    }
-
     .module--engaged::before {
-        background-color: var(--color-bg-signal);
+        background-color: var(--color-signal);
         content: '';
         inset: 0 auto 0 0;
         position: absolute;
-        width: var(--lift);
+        width: var(--space-3xs);
     }
 
-    .module--well {
-        --module-accent: var(--color-link-on-inverse);
-        --module-contrast: var(--color-text);
-        --module-fill: var(--color-bg-inverse-raised);
-        --module-invert: var(--color-bg-page);
-        --module-line: currentColor;
-        --module-mute: var(--color-text-inverse-secondary);
-        --slab-level: var(--z-card);
-        --slab-line: var(--color-border-strong);
-        --slab-rule: 2px;
+    .module--featured {
+        --slab-line: var(--color-signal);
     }
 
     .module__active {
@@ -542,11 +519,7 @@ const PAD_LENGTH = 2;
         flex: 0 0 auto;
         height: var(--control-size);
         padding: 0;
-        transition:
-            background var(--duration-fast) var(--motion-ease-ui),
-            border-color var(--duration-fast) var(--motion-ease-ui),
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
+        transition: transform var(--duration-fast) var(--motion-ease-ui);
         width: var(--control-size);
     }
 
@@ -572,60 +545,6 @@ const PAD_LENGTH = 2;
         color: var(--color-btn-primary-text);
     }
 
-    .module__range {
-        appearance: none;
-        background: transparent;
-        cursor: pointer;
-        height: var(--control-size);
-        min-width: 0;
-        width: 100%;
-    }
-
-    .module__range:focus-visible {
-        outline: 2px solid var(--color-focus-ring);
-        outline-offset: 2px;
-    }
-
-    .module__range::-moz-range-thumb {
-        background: var(--color-control-checked-bg);
-        border: 2px solid var(--module-line);
-        border-radius: 0;
-        height: 20px;
-        transition: background var(--duration-fast) var(--motion-ease-ui);
-        width: 20px;
-    }
-
-    .module__range::-moz-range-track {
-        background: var(--module-line);
-        height: 2px;
-    }
-
-    .module__range::-webkit-slider-runnable-track {
-        background: var(--module-line);
-        height: 2px;
-        translate: 0 9px;
-    }
-
-    .module__range::-webkit-slider-thumb {
-        appearance: none;
-        background: var(--color-control-checked-bg);
-        border: 2px solid var(--module-line);
-        height: 20px;
-        transition: background var(--duration-fast) var(--motion-ease-ui);
-        translate: 0 -9px;
-        width: 20px;
-    }
-
-    .module__range:active::-moz-range-thumb,
-    .module__range:hover::-moz-range-thumb {
-        background: var(--color-control-checked-bg-hover);
-    }
-
-    .module__range:active::-webkit-slider-thumb,
-    .module__range:hover::-webkit-slider-thumb {
-        background: var(--color-control-checked-bg-hover);
-    }
-
     .rack .action-text:hover {
         color: var(--color-link-on-inverse);
     }
@@ -640,6 +559,13 @@ const PAD_LENGTH = 2;
         grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
     }
 
+    .rack__canvas {
+        display: block;
+        height: 100%;
+        transition: opacity var(--duration-cinematic) var(--motion-ease-entrance);
+        width: 100%;
+    }
+
     .rack__cell--flag {
         background-color: var(--color-bg-inverse);
         color: var(--color-text-inverse);
@@ -647,13 +573,13 @@ const PAD_LENGTH = 2;
     }
 
     .rack__drop {
+        --halftone-ink: var(--color-text-secondary);
         align-items: center;
         background-color: var(--color-bg-inverse-raised);
-        background-image: repeating-linear-gradient(135deg, var(--color-border-inverse-subtle) 0 6px, transparent 6px 12px);
         border: 2px dashed currentColor;
         display: flex;
         flex-direction: column;
-        gap: var(--space-3xs);
+        gap: var(--space-xs);
         justify-content: center;
         min-height: 132px;
         padding: var(--space-sm);
@@ -666,6 +592,12 @@ const PAD_LENGTH = 2;
 
     .rack__drop > span {
         background-color: var(--color-bg-inverse-raised);
+    }
+
+    .rack__drop.is-dragging {
+        background-image: none;
+        border-color: var(--color-border-selected);
+        border-style: solid;
     }
 
     .rack__drop:active {
@@ -682,16 +614,10 @@ const PAD_LENGTH = 2;
         border-color: var(--color-border-selected);
     }
 
-    .rack__drop.is-dragging {
-        background-image: none;
-        border-color: var(--color-border-selected);
-        border-style: solid;
-    }
-
     .rack__grid {
         --rank-cols: repeat(2, minmax(0, 1fr));
         column-gap: var(--space-lg);
-        grid-auto-rows: auto;
+        margin-bottom: calc(-1 * var(--space-2xl));
         row-gap: 0;
     }
 
@@ -709,8 +635,9 @@ const PAD_LENGTH = 2;
         color: var(--color-text-inverse-secondary);
         display: inline-flex;
         font-family: var(--font-mono);
-        font-size: var(--text-xs);
+        font-size: var(--text-sm);
         letter-spacing: 0.06em;
+        line-height: 1;
         min-height: 36px;
         padding: 0 var(--space-2xs);
         position: relative;
@@ -718,10 +645,16 @@ const PAD_LENGTH = 2;
     }
 
     .rack__node + .rack__node::before {
-        color: var(--color-text-inverse-secondary);
-        content: '\2192';
+        background-color: var(--color-text-inverse-secondary);
+        content: '';
+        height: 8px;
         inset: auto calc(100% + var(--space-3xs)) auto auto;
+        mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='59' height='50' viewBox='0 0 59 50'><path d='M6 25h44M34 6l19 19-19 19' fill='none' stroke='currentColor' stroke-linecap='square' stroke-width='8'/></svg>");
+        mask-position: center;
+        mask-repeat: no-repeat;
+        mask-size: contain;
         position: absolute;
+        width: 8px;
     }
 
     .rack__node--idle {
@@ -729,10 +662,9 @@ const PAD_LENGTH = 2;
     }
 
     .rack__node--plug {
-        background-color: var(--color-bg-signal);
-        border-color: var(--color-bg-signal);
+        background-color: var(--color-signal);
+        border-color: var(--color-signal);
         color: var(--color-text-on-signal);
-        font-weight: 700;
     }
 
     .rack__play {
@@ -759,8 +691,7 @@ const PAD_LENGTH = 2;
     .rack__play:disabled {
         background-color: transparent;
         border-color: currentColor;
-        color: var(--color-text-inverse-secondary);
-        opacity: 0.55;
+        color: var(--color-text-inverse-disabled);
     }
 
     .rack__play:hover:not(:disabled) {
@@ -769,22 +700,15 @@ const PAD_LENGTH = 2;
     }
 
     .rack__play[aria-pressed='true'] {
-        background-color: var(--color-bg-page);
-        border-color: var(--color-bg-page);
-        color: var(--color-text);
+        background-color: var(--color-text-inverse);
+        border-color: var(--color-text-inverse);
+        color: var(--color-bg-inverse);
     }
 
     .rack__play[aria-pressed='true']:hover {
         background-color: var(--color-bg-hover);
         border-color: var(--color-border-selected);
-    }
-
-    .rack__scene > :global(.rack__canvas) {
-        display: block;
-        height: 100%;
-        mask-image: linear-gradient(to bottom, currentColor 78%, transparent);
-        transition: opacity var(--duration-cinematic) var(--motion-ease-entrance);
-        width: 100%;
+        color: var(--color-text);
     }
 
     .rack__tile {
@@ -798,12 +722,7 @@ const PAD_LENGTH = 2;
         content: '';
         display: block;
         grid-row: 6;
-        height: var(--space-lg);
-    }
-
-    .rack__veil {
-        background-image: linear-gradient(to bottom, var(--color-bg-page), color-mix(in srgb, var(--color-bg-page) 74%, transparent) 38%, transparent 68%);
-        inset: 0;
+        height: var(--space-2xl);
     }
 
     @media (max-width: 1024px) {
@@ -833,10 +752,6 @@ const PAD_LENGTH = 2;
         .rack__ledger {
             grid-template-columns: minmax(0, 1fr);
         }
-
-        .rack__veil {
-            background-image: linear-gradient(to bottom, var(--color-bg-page), color-mix(in srgb, var(--color-bg-page) 80%, transparent) 56%, transparent 92%);
-        }
     }
 </style>
 
@@ -851,18 +766,21 @@ const PAD_LENGTH = 2;
         loadRackFile,
         onRackChange,
         setModuleActive,
-        setRackParam,
+        setRackParameter,
         toggleRack,
     } from '@lib/rack/rack';
     import { STORAGE } from '@lib/shared/constants';
     import { formatDuration, preventNavigation, registerPageScript, setHidden, setText } from '@lib/shared/utils';
     import { initRig } from '@lib/motion/rig';
+    import { readColorToken } from '@lib/motion/tokens';
     import { validateRackFile } from '@lib/rack/loader';
 
     interface MeterView {
         accent: string;
         height: number;
         ink: string;
+        unlit: string;
+        unlitAccent: string;
         width: number;
     }
 
@@ -884,12 +802,13 @@ const PAD_LENGTH = 2;
     const HERTZ_PER_KILOHERTZ = 1_000;
     const HIGHPASS_MAX = 2_000;
     const HIGHPASS_MIN = 20;
+    const METER_GAP = 2;
+    const METER_INSET = 4;
     const METER_SEGMENTS = 24;
     const PERCENT = 100;
     const PIXEL_RATIO_MAX = 2;
-    const UNLIT_ALPHA = 0.15;
 
-    const PARAM_FORMATS: Record<string, (value: number) => string> = {
+    const PARAMETER_FORMATS: Record<string, (value: number) => string> = {
         'chorus:depth': value => `${Math.round(value * PERCENT)}%`,
         'chorus:rate': value => `${value.toFixed(2)} Hz`,
         'compressor:ratio': value => `${value.toFixed(1)}:1`,
@@ -898,9 +817,9 @@ const PAD_LENGTH = 2;
         'delay:time': value => `${value.toFixed(2)} s`,
         'distortion:drive': value => value.toFixed(1),
         'distortion:tone': formatHertz,
-        'eq:high': signedDecibels,
-        'eq:low': signedDecibels,
-        'eq:mid': signedDecibels,
+        'eq:high': formatSignedDecibels,
+        'eq:low': formatSignedDecibels,
+        'eq:mid': formatSignedDecibels,
         'filter:cutoff': formatHertz,
         'filter:resonance': value => `Q ${value.toFixed(1)}`,
         'gate:threshold': value => `${Math.round(value)} dB`,
@@ -913,10 +832,10 @@ const PAD_LENGTH = 2;
         'saturator:drive': value => value.toFixed(1),
         'tremolo:depth': value => `${Math.round(value * PERCENT)}%`,
         'tremolo:rate': value => `${value.toFixed(1)} Hz`,
-        'trim:gain': signedDecibels,
+        'trim:gain': formatSignedDecibels,
     };
 
-    const PARAM_SCALES: Record<string, (value: number) => number> = {
+    const PARAMETER_SCALES: Record<string, (value: number) => number> = {
         'distortion:tone': value => DISTORTION_TONE_MIN * (DISTORTION_TONE_MAX / DISTORTION_TONE_MIN) ** value,
         'filter:cutoff': value => CUTOFF_MIN * (CUTOFF_MAX / CUTOFF_MIN) ** value,
         'highpass:cutoff': value => HIGHPASS_MIN * (HIGHPASS_MAX / HIGHPASS_MIN) ** value,
@@ -930,23 +849,23 @@ const PAD_LENGTH = 2;
     let unsubscribe: (() => void) | undefined;
     let views: ModuleView[] = [];
 
-    function applyParam(view: ModuleView, range: HTMLInputElement) {
-        const param = range.dataset.moduleParam ?? '';
+    function applyParameter(view: ModuleView, range: HTMLInputElement) {
+        const parameter = range.dataset.moduleParameter ?? '';
 
-        const key = `${view.kind}:${param}`;
+        const key = `${view.kind}:${parameter}`;
 
-        const mapped = (PARAM_SCALES[key] ?? (value => value))(Number(range.value));
+        const mapped = (PARAMETER_SCALES[key] ?? (value => value))(Number(range.value));
 
-        const text = (PARAM_FORMATS[key] ?? String)(mapped);
+        const text = (PARAMETER_FORMATS[key] ?? String)(mapped);
 
         range.ariaValueText = text;
-        setRackParam(view.kind, param, mapped);
-        setText(view.card.querySelector(`[data-module-value="${param}"]`), text);
+        setRackParameter(view.kind, parameter, mapped);
+        setText(view.card.querySelector(`[data-module-value="${parameter}"]`), text);
     }
 
-    function bindParam(view: ModuleView, range: HTMLInputElement, signal: AbortSignal) {
-        range.addEventListener('input', () => applyParam(view, range), { signal });
-        applyParam(view, range);
+    function bindParameter(view: ModuleView, range: HTMLInputElement, signal: AbortSignal) {
+        range.addEventListener('input', () => applyParameter(view, range), { signal });
+        applyParameter(view, range);
     }
 
     function buildView(card: HTMLElement, signal: AbortSignal) {
@@ -968,8 +887,8 @@ const PAD_LENGTH = 2;
             toggle,
         };
 
-        toggle.addEventListener('click', () => handleActiveClick(view), { signal });
-        card.querySelectorAll<HTMLInputElement>('[data-module-param]').forEach(range => bindParam(view, range, signal));
+        toggle.addEventListener('click', () => setModuleActive(view.kind, view.toggle.getAttribute('aria-pressed') !== 'true'), { signal });
+        card.querySelectorAll<HTMLInputElement>('[data-module-parameter]').forEach(range => bindParameter(view, range, signal));
 
         return view;
     }
@@ -987,21 +906,23 @@ const PAD_LENGTH = 2;
     }
 
     function createMeterView(canvas: HTMLCanvasElement) {
-        const rect = canvas.getBoundingClientRect();
+        const bounds = canvas.getBoundingClientRect();
+        const ratio = Math.min(PIXEL_RATIO_MAX, Math.max(1, window.devicePixelRatio || 1));
         const styles = getComputedStyle(canvas);
 
-        const height = Math.round(rect.height) || canvas.height;
-        const ratio = Math.min(PIXEL_RATIO_MAX, Math.max(1, window.devicePixelRatio || 1));
-        const width = Math.round(rect.width) || canvas.width;
+        const height = Math.round(bounds.height) || canvas.height;
+        const width = Math.round(bounds.width) || canvas.width;
 
         canvas.height = Math.round(height * ratio);
         canvas.width = Math.round(width * ratio);
         canvas.getContext('2d')?.setTransform(ratio, 0, 0, ratio, 0, 0);
 
         return {
-            accent: styles.getPropertyValue('--color-chart-1').trim(),
+            accent: readColorToken(styles, '--color-chart-1'),
             height,
-            ink: styles.getPropertyValue('--module-line').trim(),
+            ink: readColorToken(styles, '--module-line'),
+            unlit: readColorToken(styles, '--color-unlit'),
+            unlitAccent: readColorToken(styles, '--color-unlit-accent'),
             width,
         };
     }
@@ -1031,12 +952,14 @@ const PAD_LENGTH = 2;
         const lit = Math.round(level * METER_SEGMENTS);
 
         for (let index = 0; index < METER_SEGMENTS; index += 1) {
-            surface.fillStyle = index >= METER_SEGMENTS - ACCENT_SEGMENTS ? view.accent : view.ink;
-            surface.globalAlpha = index < lit ? 1 : UNLIT_ALPHA;
-            surface.fillRect(index * width + 1, 4, width - 2, view.height - 8);
-        }
+            const isAccented = index >= METER_SEGMENTS - ACCENT_SEGMENTS;
 
-        surface.globalAlpha = 1;
+            const litColor = isAccented ? view.accent : view.ink;
+            const unlitColor = isAccented ? view.unlitAccent : view.unlit;
+
+            surface.fillStyle = index < lit ? litColor : unlitColor;
+            surface.fillRect(index * width + METER_GAP / 2, METER_INSET, width - METER_GAP, view.height - 2 * METER_INSET);
+        }
     }
 
     function formatHertz(value: number) {
@@ -1045,8 +968,8 @@ const PAD_LENGTH = 2;
         return `${Math.round(value)} Hz`;
     }
 
-    function handleActiveClick(view: ModuleView) {
-        setModuleActive(view.kind, view.toggle.getAttribute('aria-pressed') !== 'true');
+    function formatSignedDecibels(value: number) {
+        return `${value >= 0 ? '+' : ''}${value.toFixed(1)} dB`;
     }
 
     function handleDragEnter(event: DragEvent, zone: HTMLElement) {
@@ -1167,12 +1090,18 @@ const PAD_LENGTH = 2;
 
         if (!meta || !toggle) return;
 
+        meta.classList.toggle('font-mono', state.fileName !== null);
         meta.title = state.fileName ?? '';
         toggle.disabled = state.fileName === null;
         setHidden(document.querySelector<HTMLElement>('[data-rack-icon-pause]'), !state.playing);
         setHidden(document.querySelector<HTMLElement>('[data-rack-icon-play]'), state.playing);
-        setText(document.querySelector('[data-rack-meta-text]'), state.fileName === null ? 'No file loaded.' : `${state.fileName} \u00b7 ${formatDuration(state.durationSeconds)}`);
-        setText(document.querySelector('[data-rack-toggle-label]'), state.playing ? 'Pause the rack' : 'Play the rack');
+
+        setText(
+            document.querySelector('[data-rack-meta-text]'),
+            state.fileName === null ? 'No file loaded' : `${state.fileName} \u00b7 ${formatDuration(state.durationSeconds)}`,
+        );
+
+        setText(document.querySelector('[data-rack-toggle-label]'), state.playing ? 'Pause rack' : 'Play rack');
         toggle.setAttribute('aria-pressed', String(state.playing));
     }
 
@@ -1201,37 +1130,31 @@ const PAD_LENGTH = 2;
     }
 
     function renderView(view: ModuleView, state: RackState) {
-        const active = state.activeKinds.includes(view.kind);
+        const isActive = state.activeKinds.includes(view.kind);
 
-        view.card.classList.toggle('module--engaged', active);
-        view.toggle.setAttribute('aria-pressed', String(active));
+        view.card.classList.toggle('module--engaged', isActive);
+        view.toggle.setAttribute('aria-pressed', String(isActive));
 
-        if (!active || !state.playing) resetView(view);
-    }
+        if (isActive && state.playing) return;
 
-    function resetView(view: ModuleView) {
         if (view.canvas && view.meter) drawMeter(view.canvas, undefined, view.meter);
         if (view.readout) setText(view.readout, view.idle);
     }
 
-    function setDecoding(active: boolean) {
+    function setDecoding(isActive: boolean) {
         const master = document.querySelector<HTMLElement>('[data-rack-master]');
         const zone = document.querySelector<HTMLElement>('[data-rack-drop]');
 
-        master?.classList.toggle('is-decoding', active);
-        setHidden(document.querySelector<HTMLElement>('[data-rack-spinner]'), !active);
+        master?.classList.toggle('is-decoding', isActive);
+        setHidden(document.querySelector<HTMLElement>('[data-rack-spinner]'), !isActive);
 
-        if (active) zone?.setAttribute('aria-busy', 'true');
+        if (isActive) zone?.setAttribute('aria-busy', 'true');
         else zone?.removeAttribute('aria-busy');
     }
 
     function setDragDepth(zone: HTMLElement, next: number) {
         depth = Math.max(0, next);
         zone.classList.toggle('is-dragging', depth > 0);
-    }
-
-    function signedDecibels(value: number) {
-        return `${value >= 0 ? '+' : ''}${value.toFixed(1)} dB`;
     }
 
     function teardown() {

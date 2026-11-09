@@ -4,43 +4,37 @@ import PageHead from '@components/shared/PageHead.astro';
 
 interface Props {
     code: string;
-    eyebrow: string;
     headingId: string;
     lede: string;
 }
 
-const MARK_HEIGHT = 140;
-
 const ROUTES = [
     { href: '/', label: 'Home', primary: true },
-    { href: '/events', label: 'Events', primary: false },
     { href: '/directory', label: 'Directory', primary: false },
     { href: '/resources', label: 'Resources', primary: false },
 ];
 
-const { code, eyebrow, headingId, lede } = Astro.props;
+const { code, headingId, lede } = Astro.props;
 ---
 
 <section
     class="stage stage--tight"
     aria-labelledby={headingId}
 >
-    <div class="mark rank rank--2 items-center">
+    <div class="rank rank--2 items-center">
         <div class="flex flex-col gap-6">
             <PageHead
-                class="text-5xl md:text-8xl lg:text-10xl"
-                eyebrow={eyebrow}
-                eyebrowMotion="rule"
+                class="text-9xl max-lg:text-8xl max-md:text-5xl"
                 headingId={headingId}
             >
                 {code}
             </PageHead>
             <hr
-                class="border-0 border-t-2 border-border-strong"
+                class="border-0 border-border-strong border-t-2"
                 data-motion="rule"
             />
             <p
-                class="max-w-md leading-relaxed text-lg text-text-secondary"
+                class="max-w-md text-lg text-text-secondary"
                 data-motion="blur"
             >
                 {lede}
@@ -63,18 +57,11 @@ const { code, eyebrow, headingId, lede } = Astro.props;
                 </ul>
             </nav>
         </div>
-        <div
-            class="error__frame tilt"
-            data-motion="wipe"
-        >
-            <div class="error__plate slab slab--bare slab--lift flex items-center justify-center overflow-hidden relative">
-                <div
-                    class="halftone absolute inset-0"
-                    aria-hidden="true"
-                />
+        <div class="error__frame">
+            <div class="error__plate slab slab--bare slab--lift flex items-center justify-center">
                 <BrandMark
-                    class="error__mark relative text-logo-on-signal"
-                    height={MARK_HEIGHT}
+                    class="h-auto w-7/10 max-md:w-11/20"
+                    mono
                 />
             </div>
         </div>
@@ -83,28 +70,19 @@ const { code, eyebrow, headingId, lede } = Astro.props;
 
 <style>
     .error__frame {
-        --plate-drop: calc(var(--z-lift) * var(--lift));
+        --plate-drop: var(--lift);
         padding-block-end: var(--plate-drop);
         padding-inline-end: var(--plate-drop);
     }
 
     .error__plate {
-        --slab-fill: var(--color-bg-signal);
+        --slab-fill: var(--color-signal);
         aspect-ratio: 1;
-    }
-
-    .mark {
-        --mark-offset: calc(var(--z-lift) * var(--lift) + var(--space-2xs));
     }
 
     @media (max-width: 768px) {
         .error__plate {
             aspect-ratio: 2;
-        }
-
-        .error__plate :global(.error__mark) {
-            height: auto;
-            width: 55%;
         }
     }
 </style>

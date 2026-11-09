@@ -1,215 +1,426 @@
 ---
 import { getCollection } from 'astro:content';
 
-import PageHead from '@components/shared/PageHead.astro';
+import BackLink from '@components/shared/BackLink.astro';
 import { CHECKOUT_STEPS, COMMERCE, FIELD_LIMITS, US_STATES } from '@lib/shared/constants';
-import { photoKey } from '@lib/commerce/cart';
-import { toCatalog } from '@lib/shared/utils';
-import { toImageSources, toVariationSlug, toVariations } from '@lib/commerce/products';
-
-type FieldInputMode = 'numeric';
-type FieldKind = 'select' | 'text';
-type FieldType = 'email' | 'text';
+import { toCatalog, toImageSources } from '@lib/commerce/products';
 
 interface CheckoutField {
     autocomplete: string;
     column: string;
-    inputmode?: FieldInputMode;
-    kind?: FieldKind;
+    inputmode?: 'numeric';
+    kind?: 'select' | 'text';
     label: string;
     maxlength?: number;
     name: string;
+    optional?: boolean;
     pattern?: string;
     placeholder?: string;
-    type?: FieldType;
+    type?: 'email' | 'text';
 }
 
 const PAYMENT_FIELDS: CheckoutField[] = [
-    { autocomplete: 'off', column: 'md:col-span-6', inputmode: 'numeric', label: 'Card number', maxlength: FIELD_LIMITS.card, name: 'cc-number', pattern: '[0-9 ]{13,19}' },
-    { autocomplete: 'off', column: 'md:col-span-3', inputmode: 'numeric', label: 'Expiration date', maxlength: FIELD_LIMITS.expiry, name: 'cc-exp', pattern: '(0[1-9]|1[0-2]) ?/ ?[0-9]{2}', placeholder: 'MM / YY' },
-    { autocomplete: 'off', column: 'md:col-span-3', inputmode: 'numeric', label: 'Security code', maxlength: FIELD_LIMITS.csc, name: 'cc-csc', pattern: '[0-9]{3,4}' },
-    { autocomplete: 'off', column: 'md:col-span-6', label: 'Name on card', maxlength: FIELD_LIMITS.name, name: 'cc-name' },
+    { autocomplete: 'off', column: 'col-span-6 max-md:col-auto', inputmode: 'numeric', label: 'Card number', maxlength: FIELD_LIMITS.card, name: 'cc-number', pattern: '[0-9 ]{13,19}' },
+    { autocomplete: 'off', column: 'col-span-3 max-md:col-auto', inputmode: 'numeric', label: 'Expiration date', maxlength: FIELD_LIMITS.expiry, name: 'cc-exp', pattern: '(0[1-9]|1[0-2]) ?/ ?[0-9]{2}', placeholder: 'MM / YY' },
+    { autocomplete: 'off', column: 'col-span-3 max-md:col-auto', inputmode: 'numeric', label: 'CCV', maxlength: FIELD_LIMITS.csc, name: 'cc-csc', pattern: '[0-9]{3,4}' },
+    { autocomplete: 'off', column: 'col-span-3 max-md:col-auto', label: 'Name on card', maxlength: FIELD_LIMITS.name, name: 'cc-name' },
+    { autocomplete: 'billing postal-code', column: 'col-span-3 max-md:col-auto', inputmode: 'numeric', label: 'Billing ZIP code', maxlength: FIELD_LIMITS.zip, name: 'cc-zip', pattern: '[0-9]{5}(-[0-9]{4})?' },
 ];
 
 const SHIPPING_FIELDS: CheckoutField[] = [
-    { autocomplete: 'given-name', column: 'md:col-span-6', label: 'First name', maxlength: FIELD_LIMITS.name, name: 'given-name' },
-    { autocomplete: 'family-name', column: 'md:col-span-6', label: 'Last name', maxlength: FIELD_LIMITS.name, name: 'family-name' },
-    { autocomplete: 'email', column: 'md:col-span-12', label: 'Email', maxlength: FIELD_LIMITS.email, name: 'email', type: 'email' },
-    { autocomplete: 'street-address', column: 'md:col-span-12', label: 'Street address', maxlength: FIELD_LIMITS.address, name: 'address' },
-    { autocomplete: 'address-level2', column: 'md:col-span-12', label: 'City', maxlength: FIELD_LIMITS.name, name: 'city' },
-    { autocomplete: 'address-level1', column: 'lg:col-span-7 md:col-span-12', kind: 'select', label: 'State', name: 'state' },
-    { autocomplete: 'postal-code', column: 'lg:col-span-5 md:col-span-12', inputmode: 'numeric', label: 'ZIP code', name: 'zip', pattern: '[0-9]{5}(-[0-9]{4})?' },
+    { autocomplete: 'given-name', column: 'col-span-6 max-md:col-auto', label: 'First name', maxlength: FIELD_LIMITS.name, name: 'given-name' },
+    { autocomplete: 'family-name', column: 'col-span-6 max-md:col-auto', label: 'Last name', maxlength: FIELD_LIMITS.name, name: 'family-name' },
+    { autocomplete: 'email', column: 'col-span-12 max-md:col-auto', label: 'Email', maxlength: FIELD_LIMITS.email, name: 'email', type: 'email' },
+    { autocomplete: 'address-line1', column: 'col-span-12 max-md:col-auto', label: 'Address line 1', maxlength: FIELD_LIMITS.address, name: 'address-line1' },
+    { autocomplete: 'address-line2', column: 'col-span-12 max-md:col-auto', label: 'Address line 2 (optional)', maxlength: FIELD_LIMITS.address, name: 'address-line2', optional: true },
+    { autocomplete: 'address-level2', column: 'col-span-12 max-md:col-auto', label: 'City', maxlength: FIELD_LIMITS.name, name: 'city' },
+    { autocomplete: 'address-level1', column: 'col-span-7 max-lg:col-span-12 max-md:col-auto', kind: 'select', label: 'State', name: 'state' },
+    { autocomplete: 'postal-code', column: 'col-span-5 max-lg:col-span-12 max-md:col-auto', inputmode: 'numeric', label: 'ZIP code', maxlength: FIELD_LIMITS.zip, name: 'zip', pattern: '[0-9]{5}(-[0-9]{4})?' },
 ];
 
-const products = await getCollection('products');
-
-const catalog = toCatalog(products);
-
+const catalog = toCatalog(await getCollection('products'));
 const images = await toImageSources();
-
-const variants = Object.fromEntries(products
-    .flatMap(product => toVariations(product.data).map(variation => [photoKey(product.id, variation), `${product.data.sku}_${toVariationSlug(variation)}`]))
-    .filter(([, key]) => key in images));
 ---
 
-<section
-    class="stage stage--tight border-b-2 border-border-strong"
-    aria-labelledby="checkout-title"
->
-    <div>
-        <PageHead
-            class="mb-6 text-5xl md:text-7xl"
-            eyebrow="Checkout"
-            headingId="checkout-title"
-        >
-            Lock it in.
-        </PageHead>
-        <p
-            class="max-w-2xl mb-10 text-lg text-text-secondary"
-            data-motion="rise"
-        >
-            Review, shipping, payment &mdash; three steps, and nothing places until you confirm the last one.
-        </p>
-        <ol
-            class="flex border-2 border-border-strong"
-            aria-label="Checkout steps"
-            data-motion="rule"
-        >
-            {CHECKOUT_STEPS.map((step, index) => (
-                <li
-                    class:list={[
-                        'step flex-1 p-4 font-bold font-mono text-xs tracking-[0.06em] uppercase',
-                        index === 0 ? 'slab--well' : 'bg-bg-page',
-                        index > 0 && 'border-l-2 border-border-strong',
-                    ]}
-                    aria-current={index === 0 ? 'step' : undefined}
-                >
-                    {step}
-                </li>
-            ))}
-        </ol>
-    </div>
-</section>
+<BackLink
+    href="/store/cart"
+    label="Back to cart"
+/>
 
 <section
     class="stage stage--tight"
-    aria-label="Checkout form"
+    aria-labelledby="checkout-title"
     data-catalog={JSON.stringify(catalog)}
     data-images={JSON.stringify(images)}
-    data-variants={JSON.stringify(variants)}
 >
-    <div
-        class="slab slab--card flex flex-col items-start max-w-(--measure-form) w-full gap-4 mx-auto"
-        data-checkout-empty
-        hidden
-    >
-        <p class="label text-text-secondary">Empty</p>
-        <p class="font-bold font-sans text-2xl text-balance">There is nothing to check out.</p>
-        <a
-            class="btn btn--primary"
-            href="/store"
+    <div>
+        <h1
+            id="checkout-title"
+            class="mb-12 text-4xl text-balance max-lg:text-3xl"
+            data-motion="strike"
         >
-            Browse the store
-        </a>
-    </div>
-    <div
-        class="checkout__body checkout__body--solo gap-12"
-        data-checkout-body
-    >
-        <form
-            class="flex flex-col gap-6"
-            data-checkout-form
-            data-motion="unfold"
+            Checkout
+        </h1>
+        <div class="checkout__empty slab slab--card slab--empty max-w-(--measure-form) w-full mx-auto">
+            <p class="font-bold font-sans text-2xl text-balance tracking-tight">There is nothing to check out.</p>
+            <a
+                class="btn btn--primary"
+                href="/store"
+            >
+                Browse store
+            </a>
+        </div>
+        <div
+            class="checkout__body checkout__body--solo gap-12"
+            data-checkout-body
         >
-            <aside
-                class="checkout__notice slab slab--card flex flex-col gap-4"
-                aria-label="Cart changes"
-                data-checkout-notice
-                hidden
-                role="status"
+            <form
+                class="flex flex-col gap-6"
+                data-checkout-form
+                data-motion="unfold"
             >
-                <p class="label text-warning-text">Your cart changed</p>
-                <ul
-                    class="flex flex-col gap-(--space-3xs) list-none"
-                    data-checkout-issues
-                />
-            </aside>
-            <fieldset
-                class="slab slab--card step-pane min-w-0"
-                aria-labelledby="checkout-review-title"
-                data-step="0"
-            >
-                <h2
-                    id="checkout-review-title"
-                    class="mb-6 text-2xl"
-                    tabindex="-1"
+                <ol
+                    class="grid grid-cols-[repeat(3,minmax(max-content,1fr))] border-2 border-border-strong"
+                    aria-label="Checkout steps"
                 >
-                    Review
-                </h2>
-                <ul
-                    class="mb-(--space-lg) border-2 border-border-strong list-none"
-                    data-review-list
-                />
-                <div class="flex flex-col gap-2 mb-(--space-lg)">
-                    <div
-                        class="checkout__code-entry flex items-end gap-4"
-                        data-code-entry
-                    >
-                        <label class="flex flex-1 flex-col min-w-0 gap-2">
-                            <span class="label text-text-secondary">Discount code</span>
-                            <input
-                                id="checkout-code"
-                                class="input font-mono uppercase"
-                                aria-describedby="checkout-code-error"
-                                aria-invalid="false"
-                                autocomplete="off"
-                                maxlength={FIELD_LIMITS.code}
-                                name="code"
-                                placeholder="Enter a code"
-                                type="text"
-                            />
-                        </label>
-                        <button
-                            class="btn shrink-0"
-                            data-code-apply
-                            disabled
-                            type="button"
+                    {CHECKOUT_STEPS.map((step, index) => (
+                        <li
+                            class:list={[
+                                'label step p-4 whitespace-nowrap max-lg:px-1 max-lg:text-center',
+                                index === 0 ? 'is-active' : 'bg-bg-page',
+                                index > 0 && 'border-border-strong border-l-2',
+                            ]}
+                            aria-current={index === 0 ? 'step' : undefined}
                         >
-                            Apply
-                        </button>
-                    </div>
-                    <p
-                        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 border-2 border-border-strong"
-                        data-code-tag
-                        hidden
-                    >
-                        <span
-                            class="label"
-                            data-code-label
-                        />
-                        <button
-                            class="action-text min-h-(--control-size) text-text-secondary transition-[color,transform]"
-                            aria-label="Remove the discount code"
-                            data-code-remove
-                            type="button"
-                        >
-                            Remove
-                        </button>
-                    </p>
-                    <p
-                        id="checkout-code-error"
-                        class="action-text text-error-text"
-                        data-field-error
-                        hidden
+                            {step}
+                        </li>
+                    ))}
+                </ol>
+                <aside
+                    class="checkout__notice slab slab--card flex flex-col gap-4"
+                    aria-label="Cart changes"
+                    data-checkout-notice
+                    hidden
+                    role="status"
+                >
+                    <p class="label text-warning-text">Your cart changed</p>
+                    <ul
+                        class="flex flex-col gap-(--space-3xs) list-none"
+                        data-checkout-issues
                     />
+                </aside>
+                <fieldset
+                    class="slab slab--card step-pane min-w-0"
+                    aria-labelledby="checkout-review-title"
+                    data-step="0"
+                >
+                    <h2
+                        id="checkout-review-title"
+                        class="mb-6 text-2xl"
+                        tabindex="-1"
+                    >
+                        Review
+                    </h2>
+                    <ul
+                        class="mb-(--space-lg) border-2 border-border-strong list-none"
+                        data-review-list
+                    />
+                    <div class="flex flex-col gap-2 mb-(--space-lg)">
+                        <div
+                            class="checkout__code-entry flex items-end gap-4"
+                            data-code-entry
+                        >
+                            <label class="flex flex-1 flex-col min-w-0 gap-2">
+                                <span class="label text-text-secondary">Discount code</span>
+                                <input
+                                    id="checkout-code"
+                                    class="input font-mono"
+                                    aria-describedby="checkout-code-error"
+                                    aria-invalid="false"
+                                    autocomplete="off"
+                                    maxlength={FIELD_LIMITS.code}
+                                    name="code"
+                                    placeholder="Enter a code"
+                                    type="text"
+                                />
+                            </label>
+                            <button
+                                class="btn shrink-0"
+                                data-code-apply
+                                disabled
+                                type="button"
+                            >
+                                Apply
+                            </button>
+                        </div>
+                        <p
+                            class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 border-2 border-border-strong"
+                            data-code-tag
+                            hidden
+                        >
+                            <span
+                                class="label"
+                                data-code-label
+                            />
+                            <button
+                                class="action-text min-h-(--control-size) text-text-secondary transition-[color,transform]"
+                                aria-label="Remove discount code"
+                                data-code-remove
+                                type="button"
+                            >
+                                Remove
+                            </button>
+                        </p>
+                        <p
+                            id="checkout-code-error"
+                            class="text-error-text"
+                            data-field-error
+                            hidden
+                        />
+                    </div>
+                    <dl class="flex flex-col gap-(--space-2xs) pt-(--space-sm) border-border-strong border-t-2 font-mono text-base">
+                        <div class="flex justify-between gap-(--space-sm)">
+                            <dt>Subtotal</dt>
+                            <dd data-subtotal>$0.00</dd>
+                        </div>
+                        <div
+                            class="flex justify-between gap-(--space-sm)"
+                            data-promo-row
+                            hidden
+                        >
+                            <dt>Discount ({COMMERCE.discountCode})</dt>
+                            <dd
+                                class="whitespace-nowrap"
+                                data-promo
+                            >
+                                $0.00
+                            </dd>
+                        </div>
+                        <div
+                            class="flex justify-between gap-(--space-sm)"
+                            data-discount-row
+                            hidden
+                        >
+                            <dt>Prods credit</dt>
+                            <dd data-discount>$0.00</dd>
+                        </div>
+                        <div class="flex justify-between gap-(--space-sm)">
+                            <dt>Shipping</dt>
+                            <dd data-shipping>$0.00</dd>
+                        </div>
+                        <div class="flex justify-between gap-(--space-sm) mb-(--space-2xs)">
+                            <dt>Tax</dt>
+                            <dd data-tax>$0.00</dd>
+                        </div>
+                        <div class="flex justify-between gap-(--space-sm) pt-(--space-2xs) border-border-strong border-t-2 text-lg">
+                            <dt>Total</dt>
+                            <dd
+                                aria-live="polite"
+                                data-total
+                            >
+                                $0.00
+                            </dd>
+                        </div>
+                    </dl>
+                </fieldset>
+                <fieldset
+                    class="slab slab--card step-pane hidden min-w-0"
+                    aria-labelledby="checkout-shipping-title"
+                    data-step="1"
+                    disabled
+                >
+                    <h2
+                        id="checkout-shipping-title"
+                        class="mb-6 text-2xl"
+                        tabindex="-1"
+                    >
+                        Shipping
+                    </h2>
+                    <div class="grid grid-cols-12 gap-x-(--space-sm) gap-y-(--space-md) max-md:grid-cols-1">
+                        {SHIPPING_FIELDS.map(field => (
+                            <div class:list={['flex flex-col gap-2', field.column]}>
+                                <label class="flex flex-col gap-2">
+                                    <span class="label text-text-secondary">{field.label}</span>
+                                    {field.kind === 'select'
+                                        ? (
+                                                <span class="select">
+                                                    <select
+                                                        id={`checkout-${field.name}`}
+                                                        class="input"
+                                                        aria-describedby={`checkout-${field.name}-error`}
+                                                        aria-invalid="false"
+                                                        autocomplete={field.autocomplete}
+                                                        name={field.name}
+                                                        required
+                                                    >
+                                                        <option value="">Choose&hellip;</option>
+                                                        {US_STATES.map(state => (
+                                                            <option value={state.code}>{state.name}</option>
+                                                        ))}
+                                                    </select>
+                                                </span>
+                                            )
+                                        : (
+                                                <input
+                                                    id={`checkout-${field.name}`}
+                                                    class="input"
+                                                    aria-describedby={`checkout-${field.name}-error`}
+                                                    aria-invalid="false"
+                                                    autocomplete={field.autocomplete}
+                                                    inputmode={field.inputmode}
+                                                    maxlength={field.maxlength}
+                                                    name={field.name}
+                                                    pattern={field.pattern}
+                                                    placeholder={field.placeholder}
+                                                    required={!field.optional}
+                                                    type={field.type ?? 'text'}
+                                                />
+                                            )}
+                                </label>
+                                <p
+                                    id={`checkout-${field.name}-error`}
+                                    class="text-error-text"
+                                    data-field-error
+                                    hidden
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </fieldset>
+                <fieldset
+                    class="slab slab--card step-pane hidden min-w-0"
+                    aria-labelledby="checkout-payment-title"
+                    data-step="2"
+                    disabled
+                >
+                    <h2
+                        id="checkout-payment-title"
+                        class="mb-6 text-2xl"
+                        tabindex="-1"
+                    >
+                        Payment
+                    </h2>
+                    <div
+                        class="checkout__prods mb-(--space-lg)"
+                        data-prods-field
+                        hidden
+                    >
+                        <label class="checkout__check">
+                            <input
+                                id="checkout-prods"
+                                class="box"
+                                name="prods"
+                                type="checkbox"
+                            />
+                            <span>Pay with Prods</span>
+                        </label>
+                        <p
+                            class="font-mono leading-none text-base tracking-[0.06em] uppercase"
+                            data-prods-balance
+                        />
+                    </div>
+                    <fieldset
+                        class="checkout__card-fields mb-(--space-lg)"
+                        data-card-fields
+                    >
+                        <legend class="sr-only">Card details</legend>
+                        <div class="grid grid-cols-6 gap-x-(--space-sm) gap-y-(--space-md) max-md:grid-cols-1">
+                            {PAYMENT_FIELDS.map(field => (
+                                <div class:list={['flex flex-col gap-2', field.column]}>
+                                    <label class="flex flex-col gap-2">
+                                        <span class="label text-text-secondary">{field.label}</span>
+                                        <input
+                                            id={`checkout-${field.name}`}
+                                            class="input font-mono"
+                                            aria-describedby={`checkout-${field.name}-error`}
+                                            aria-invalid="false"
+                                            autocomplete={field.autocomplete}
+                                            inputmode={field.inputmode}
+                                            maxlength={field.maxlength}
+                                            name={field.name}
+                                            pattern={field.pattern}
+                                            placeholder={field.placeholder}
+                                            required
+                                            type="text"
+                                        />
+                                    </label>
+                                    <p
+                                        id={`checkout-${field.name}-error`}
+                                        class="text-error-text"
+                                        data-field-error
+                                        hidden
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </fieldset>
+                    <div class="flex flex-col gap-(--space-3xs)">
+                        <label class="checkout__check">
+                            <input
+                                id="checkout-terms"
+                                class="box"
+                                aria-describedby="checkout-terms-error"
+                                aria-invalid="false"
+                                name="terms"
+                                required
+                                type="checkbox"
+                            />
+                            <span>
+                                I accept the&#32;
+                                <a
+                                    class="active:translate-y-px hover:text-link inline-block font-mono underline underline-offset-4 transition-[color,translate]"
+                                    href="/terms"
+                                >
+                                    terms of service
+                                </a>.
+                            </span>
+                        </label>
+                        <p
+                            id="checkout-terms-error"
+                            class="text-error-text"
+                            data-field-error
+                            hidden
+                        />
+                    </div>
+                </fieldset>
+                <div class="flex flex-wrap justify-between gap-4">
+                    <button
+                        class="btn checkout-back invisible"
+                        type="button"
+                    >
+                        Back
+                    </button>
+                    <button
+                        class="btn btn--primary checkout-next"
+                        type="submit"
+                    >
+                        Continue
+                    </button>
                 </div>
-                <dl class="flex flex-col gap-(--space-2xs) pt-(--space-sm) border-t-2 border-border-strong font-mono">
-                    <div class="flex justify-between gap-(--space-sm)">
+                <p
+                    class="sr-only"
+                    aria-live="polite"
+                    data-checkout-announce
+                />
+            </form>
+            <aside
+                class="checkout__aside slab slab--sunk self-start"
+                aria-label="Order summary"
+                data-checkout-aside
+                hidden
+            >
+                <h2 class="label mb-4 text-text-secondary">Summary</h2>
+                <ul
+                    class="checkout__summary scroll-slot mb-4 list-none text-base"
+                    data-summary-list
+                />
+                <dl class="flex flex-col gap-2 pt-4 border-border-strong border-t-2 font-mono text-base">
+                    <div class="flex justify-between gap-3">
                         <dt>Subtotal</dt>
                         <dd data-subtotal>$0.00</dd>
                     </div>
                     <div
-                        class="flex justify-between gap-(--space-sm)"
+                        class="flex justify-between gap-3"
                         data-promo-row
                         hidden
                     >
@@ -222,22 +433,22 @@ const variants = Object.fromEntries(products
                         </dd>
                     </div>
                     <div
-                        class="flex justify-between gap-(--space-sm)"
+                        class="flex justify-between gap-3"
                         data-discount-row
                         hidden
                     >
                         <dt>Prods credit</dt>
                         <dd data-discount>$0.00</dd>
                     </div>
-                    <div class="flex justify-between gap-(--space-sm)">
+                    <div class="flex justify-between gap-3">
                         <dt>Shipping</dt>
                         <dd data-shipping>$0.00</dd>
                     </div>
-                    <div class="flex justify-between gap-(--space-sm)">
+                    <div class="flex justify-between gap-3 mb-2">
                         <dt>Tax</dt>
                         <dd data-tax>$0.00</dd>
                     </div>
-                    <div class="flex justify-between gap-(--space-sm) pt-(--space-sm) border-t-2 border-border-strong font-bold font-sans leading-normal text-2xl tracking-tight">
+                    <div class="flex justify-between gap-3 pt-2 border-border-strong border-t-2 text-lg">
                         <dt>Total</dt>
                         <dd
                             aria-live="polite"
@@ -247,252 +458,11 @@ const variants = Object.fromEntries(products
                         </dd>
                     </div>
                 </dl>
-            </fieldset>
-            <fieldset
-                class="slab slab--card step-pane hidden min-w-0"
-                aria-labelledby="checkout-shipping-title"
-                data-step="1"
-                disabled
-            >
-                <h2
-                    id="checkout-shipping-title"
-                    class="mb-6 text-2xl"
-                    tabindex="-1"
-                >
-                    Shipping
-                </h2>
-                <div class="grid grid-cols-1 gap-x-(--space-sm) gap-y-(--space-md) md:grid-cols-12">
-                    {SHIPPING_FIELDS.map(field => (
-                        <div class:list={['flex flex-col gap-2', field.column]}>
-                            <label class="flex flex-col gap-2">
-                                <span class="label text-text-secondary">{field.label}</span>
-                                {field.kind === 'select'
-                                    ? (
-                                            <span class="select">
-                                                <select
-                                                    id={`checkout-${field.name}`}
-                                                    class="input"
-                                                    aria-describedby={`checkout-${field.name}-error`}
-                                                    aria-invalid="false"
-                                                    autocomplete={field.autocomplete}
-                                                    name={field.name}
-                                                    required
-                                                >
-                                                    <option value="">Choose&hellip;</option>
-                                                    {US_STATES.map(state => (
-                                                        <option value={state.code}>{state.name}</option>
-                                                    ))}
-                                                </select>
-                                            </span>
-                                        )
-                                    : (
-                                            <input
-                                                id={`checkout-${field.name}`}
-                                                class="input"
-                                                aria-describedby={`checkout-${field.name}-error`}
-                                                aria-invalid="false"
-                                                autocomplete={field.autocomplete}
-                                                inputmode={field.inputmode}
-                                                maxlength={field.maxlength}
-                                                name={field.name}
-                                                pattern={field.pattern}
-                                                placeholder={field.placeholder}
-                                                required
-                                                type={field.type ?? 'text'}
-                                            />
-                                        )}
-                            </label>
-                            <p
-                                id={`checkout-${field.name}-error`}
-                                class="action-text text-error-text"
-                                data-field-error
-                                hidden
-                            />
-                        </div>
-                    ))}
-                </div>
-            </fieldset>
-            <fieldset
-                class="slab slab--card step-pane hidden min-w-0"
-                aria-labelledby="checkout-payment-title"
-                data-step="2"
-                disabled
-            >
-                <h2
-                    id="checkout-payment-title"
-                    class="mb-6 text-2xl"
-                    tabindex="-1"
-                >
-                    Payment
-                </h2>
-                <div
-                    class="checkout__prods mb-(--space-lg)"
-                    data-prods-field
-                    hidden
-                >
-                    <label class="checkout__check">
-                        <input
-                            id="checkout-prods"
-                            class="box"
-                            name="prods"
-                            type="checkbox"
-                        />
-                        <span>Pay with Prods</span>
-                    </label>
-                    <p class="flex flex-col gap-(--space-3xs)">
-                        <span
-                            class="label"
-                            data-prods-balance
-                        />
-                        <span
-                            class="leading-normal text-sm text-text-secondary"
-                            data-prods-note
-                        />
-                    </p>
-                </div>
-                <fieldset
-                    class="checkout__card-fields mb-(--space-lg)"
-                    data-card-fields
-                >
-                    <legend class="sr-only">Card details</legend>
-                    <div class="grid grid-cols-1 gap-x-(--space-sm) gap-y-(--space-md) md:grid-cols-6">
-                        {PAYMENT_FIELDS.map(field => (
-                            <div class:list={['flex flex-col gap-2', field.column]}>
-                                <label class="flex flex-col gap-2">
-                                    <span class="label text-text-secondary">{field.label}</span>
-                                    <input
-                                        id={`checkout-${field.name}`}
-                                        class="input font-mono text-sm"
-                                        aria-describedby={`checkout-${field.name}-error`}
-                                        aria-invalid="false"
-                                        autocomplete={field.autocomplete}
-                                        inputmode={field.inputmode}
-                                        maxlength={field.maxlength}
-                                        name={field.name}
-                                        pattern={field.pattern}
-                                        placeholder={field.placeholder}
-                                        required
-                                        type="text"
-                                    />
-                                </label>
-                                <p
-                                    id={`checkout-${field.name}-error`}
-                                    class="action-text text-error-text"
-                                    data-field-error
-                                    hidden
-                                />
-                            </div>
-                        ))}
-                    </div>
-                </fieldset>
-                <div class="flex flex-col gap-(--space-3xs)">
-                    <label class="checkout__check">
-                        <input
-                            id="checkout-terms"
-                            class="box"
-                            aria-describedby="checkout-terms-error"
-                            aria-invalid="false"
-                            name="terms"
-                            required
-                            type="checkbox"
-                        />
-                        <span>
-                            I accept the&#32;
-                            <a
-                                class="hover:text-link decoration-2 decoration-text-brand font-bold underline underline-offset-4"
-                                href="/terms"
-                            >
-                                terms of service
-                            </a>.
-                        </span>
-                    </label>
-                    <p
-                        id="checkout-terms-error"
-                        class="action-text text-error-text"
-                        data-field-error
-                        hidden
-                    />
-                </div>
-            </fieldset>
-            <div class="flex flex-wrap justify-between gap-4">
-                <button
-                    class="btn checkout-back invisible"
-                    type="button"
-                >
-                    Back
-                </button>
-                <button
-                    class="btn btn--primary checkout-next"
-                    type="submit"
-                >
-                    Continue
-                </button>
-            </div>
-            <p
-                class="sr-only"
-                aria-live="polite"
-                data-checkout-announce
-            />
-        </form>
-        <aside
-            class="checkout__aside slab slab--sunk self-start"
-            aria-label="Order summary"
-            data-checkout-aside
-            hidden
-        >
-            <h2 class="label mb-4 text-text-secondary">Summary</h2>
-            <ul
-                class="checkout__summary scroll-slot mb-4 list-none text-sm"
-                data-summary-list
-            />
-            <dl class="flex flex-col gap-2 pt-4 border-t-2 border-border-strong font-mono text-sm">
-                <div class="flex justify-between gap-3">
-                    <dt>Subtotal</dt>
-                    <dd data-subtotal>$0.00</dd>
-                </div>
-                <div
-                    class="flex justify-between gap-3"
-                    data-promo-row
-                    hidden
-                >
-                    <dt>Discount ({COMMERCE.discountCode})</dt>
-                    <dd
-                        class="whitespace-nowrap"
-                        data-promo
-                    >
-                        $0.00
-                    </dd>
-                </div>
-                <div
-                    class="flex justify-between gap-3"
-                    data-discount-row
-                    hidden
-                >
-                    <dt>Prods credit</dt>
-                    <dd data-discount>$0.00</dd>
-                </div>
-                <div class="flex justify-between gap-3">
-                    <dt>Shipping</dt>
-                    <dd data-shipping>$0.00</dd>
-                </div>
-                <div class="flex justify-between gap-3 mb-2">
-                    <dt>Tax</dt>
-                    <dd data-tax>$0.00</dd>
-                </div>
-                <div class="flex justify-between gap-3 pt-2 border-t-2 border-border-strong font-bold font-sans text-lg">
-                    <dt>Total</dt>
-                    <dd
-                        aria-live="polite"
-                        data-total
-                    >
-                        $0.00
-                    </dd>
-                </div>
-            </dl>
-        </aside>
+            </aside>
+        </div>
     </div>
     <template data-issue-row>
-        <li class="flex gap-2 text-sm text-text-secondary">
+        <li class="flex gap-2 text-base text-text-secondary">
             <span
                 class="font-bold text-warning-text"
                 aria-hidden="true"
@@ -506,7 +476,7 @@ const variants = Object.fromEntries(products
         </li>
     </template>
     <template data-review-row>
-        <li class="first:border-t-0 flex flex-wrap items-baseline justify-between gap-(--space-sm) p-(--space-md) border-t-2 border-border-strong">
+        <li class="first:border-t-0 flex flex-wrap items-baseline justify-between gap-(--space-sm) p-(--space-md) border-border-strong border-t-2">
             <span class="block self-center shrink-0 h-14 w-14 border-2 border-border-strong bg-bg-inverse">
                 <img
                     class="block object-cover h-full w-full"
@@ -517,9 +487,9 @@ const variants = Object.fromEntries(products
                 />
             </span>
             <div class="flex flex-[1_1_88px] flex-col min-w-0 gap-(--space-2xs)">
-                <p class="font-bold font-sans text-base md:text-lg">
+                <p class="font-bold font-sans leading-(--text-xl) text-lg tracking-tight max-md:leading-(--text-lg) max-md:text-base">
                     <a
-                        class="hover:text-link hover:underline underline-offset-4 transition-colors"
+                        class="active:translate-y-px hover:text-link hover:underline inline-block underline-offset-4 wrap-anywhere transition-[color,translate]"
                         data-review-title
                         href="/store"
                     >
@@ -528,17 +498,17 @@ const variants = Object.fromEntries(products
                 </p>
                 <p class="flex flex-wrap items-center gap-(--space-2xs)">
                     <span
-                        class="label min-w-0 text-text-secondary"
+                        class="min-w-0 font-mono leading-none text-base tracking-[0.06em] uppercase text-text-secondary"
                         data-review-variant
                     />
                     <span
-                        class="label px-(--space-2xs) py-(--space-3xs) border border-border-subtle font-bold"
+                        class="px-(--space-2xs) py-(--space-3xs) border border-border-subtle font-mono leading-none text-base tracking-[0.06em] uppercase"
                         data-review-qty
                     />
                 </p>
             </div>
             <p
-                class="ms-auto font-bold font-mono text-lg whitespace-nowrap"
+                class="ms-auto font-mono text-base whitespace-nowrap"
                 data-review-price
             />
         </li>
@@ -557,7 +527,7 @@ const variants = Object.fromEntries(products
                 </span>
                 <span class="min-w-0">
                     <a
-                        class="hover:text-link hover:underline underline-offset-4 transition-colors"
+                        class="active:translate-y-px hover:text-link hover:underline inline-block underline-offset-4 wrap-anywhere transition-[color,translate]"
                         data-summary-title
                         href="/store"
                     >
@@ -566,7 +536,7 @@ const variants = Object.fromEntries(products
                 </span>
             </span>
             <span
-                class="font-bold font-mono"
+                class="font-mono text-base"
                 data-summary-price
             />
         </li>
@@ -574,6 +544,14 @@ const variants = Object.fromEntries(products
 </section>
 
 <style>
+    html[data-cart='empty'] .checkout__body {
+        display: none;
+    }
+
+    html[data-cart='filled'] .checkout__empty {
+        display: none;
+    }
+
     .checkout__aside {
         position: sticky;
         top: calc(var(--header-height) + var(--space-md));
@@ -588,12 +566,8 @@ const variants = Object.fromEntries(products
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .checkout__card-fields:disabled {
-        opacity: 0.55;
-    }
-
-    .checkout__card-fields:disabled .input {
-        opacity: 1;
+    .checkout__card-fields:disabled .label {
+        color: var(--color-text-disabled);
     }
 
     .checkout__check {
@@ -602,6 +576,7 @@ const variants = Object.fromEntries(products
         display: flex;
         font-size: var(--text-sm);
         gap: var(--space-xs);
+        line-height: var(--text-sm--line-height);
         min-height: var(--control-size);
         padding-block: var(--space-2xs);
     }
@@ -668,7 +643,8 @@ const variants = Object.fromEntries(products
     import { CHECKOUT_STEPS, COMMERCE, EMAIL_PATTERN, FIELD_LIMITS } from '@lib/shared/constants';
     import { clearFieldErrors, focusFirstError, isValidationBypassed, renderIssueList, setFieldErrors, validateFields } from '@lib/ui/forms';
     import { formatPrice, formatProds, formatVariant, parseCatalog, parseImageSources, registerPageScript, setPending, setProductImage, setText, setTitleLink } from '@lib/shared/utils';
-    import { getItems, isPromoCode, photoKey, prodsForCents, prodsToCents, reconcile, totals } from '@lib/commerce/cart';
+    import { getItems, getTotals, isPromoCode, reconcile, toCatalogItem, toProds } from '@lib/commerce/cart';
+    import { getProdsBalance as readProdsBalance } from '@lib/account/prods';
     import { getSession } from '@lib/account/session';
     import { placeOrder } from '@lib/commerce/checkout';
     import { toast } from '@lib/ui/toasts';
@@ -685,7 +661,7 @@ const variants = Object.fromEntries(products
 
     const ADDRESS_MIN = 5;
     const BASIS_POINTS_PER_PERCENT = 100;
-    const CARD_FIELDS = ['cc-csc', 'cc-exp', 'cc-name', 'cc-number'];
+    const CARD_FIELDS = ['cc-csc', 'cc-exp', 'cc-name', 'cc-number', 'cc-zip'];
     const CARD_PATTERN = /^\d{13,19}$/;
     const CENTURY = 2_000;
     const CITY_MIN = 2;
@@ -698,16 +674,18 @@ const variants = Object.fromEntries(products
     const ZIP_PATTERN = /^\d{5}(-\d{4})?$/;
 
     const CARD_RULES: Record<string, FieldRule> = {
-        'cc-csc': { message: 'Enter the three or four digit security code.', pattern: CSC_PATTERN, required: true },
+        'cc-csc': { message: 'Enter the three- or four-digit CCV.', pattern: CSC_PATTERN, required: true },
         'cc-exp': { message: 'Use MM / YY, this month or later.', required: true, validate: isFutureExpiry },
         'cc-name': { max: FIELD_LIMITS.name, message: 'Enter the name on the card.', required: true },
-        'cc-number': { message: 'Enter the digits on your card.', required: true, validate: isCardFormat },
+        'cc-number': { message: 'Enter the digits on your card.', required: true, validate: value => CARD_PATTERN.test(value.replace(/\s/g, '')) },
+        'cc-zip': { message: 'Enter a five-digit billing ZIP code.', pattern: ZIP_PATTERN, required: true },
     };
 
     const STEP_RULES: Record<string, FieldRule>[] = [
         {},
         {
-            'address': { max: FIELD_LIMITS.address, message: 'Enter your street address.', min: ADDRESS_MIN, required: true },
+            'address-line1': { max: FIELD_LIMITS.address, message: 'Enter your street address.', min: ADDRESS_MIN, required: true },
+            'address-line2': { max: FIELD_LIMITS.address, message: 'Shorten the second address line.' },
             'city': { max: FIELD_LIMITS.name, message: 'Enter your city.', min: CITY_MIN, required: true },
             'email': { max: FIELD_LIMITS.email, message: 'Enter a valid email address.', pattern: EMAIL_PATTERN, required: true },
             'family-name': { max: FIELD_LIMITS.name, message: 'Enter your last name.', required: true },
@@ -720,13 +698,12 @@ const variants = Object.fromEntries(products
         },
     ];
 
-    let blocked = false;
     let catalog: CatalogEntry[] = [];
     let images: ImageSources = {};
+    let isBlocked = false;
     let orderItems: CartItem[] = [];
     let promoCode = '';
     let step = REVIEW_STEP;
-    let variants: ImageSources = {};
 
     function clearCardFields(form: HTMLFormElement) {
         CARD_FIELDS.forEach((name) => {
@@ -734,17 +711,6 @@ const variants = Object.fromEntries(products
 
             if (field instanceof HTMLInputElement) field.value = '';
         });
-    }
-
-    function describeProds(balance: number, charge: number) {
-        if (balance === 0) return 'No Prods yet \u2014 earn them at events and on orders.';
-        if (isFullyCovered()) return 'Covers this order in full.';
-
-        return `Applies ${formatPrice(prodsToCents(charge))} toward this order \u2014 your card covers the rest.`;
-    }
-
-    function discountPercent() {
-        return COMMERCE.discountBasisPoints / BASIS_POINTS_PER_PERCENT;
     }
 
     function fillReviewRow(fragment: DocumentFragment, item: CartItem) {
@@ -758,7 +724,13 @@ const variants = Object.fromEntries(products
     function fillSummaryRow(fragment: DocumentFragment, item: CartItem) {
         setProductImage(fragment.querySelector<HTMLImageElement>('[data-summary-photo]'), images, item);
         setText(fragment.querySelector('[data-summary-price]'), formatPrice(item.priceCents * item.quantity));
-        setTitleLink(fragment.querySelector('[data-summary-title]'), catalog, item, `${item.quantity} \u00d7 ${item.title} \u2014 ${formatVariant(item)}`);
+
+        setTitleLink(
+            fragment.querySelector('[data-summary-title]'),
+            catalog,
+            item,
+            `${item.quantity} \u00d7 ${item.title} \u00b7 ${formatVariant(item)}`,
+        );
     }
 
     function focusPane(pane: HTMLFieldSetElement | undefined) {
@@ -771,36 +743,38 @@ const variants = Object.fromEntries(products
         (control ?? pane.querySelector<HTMLElement>('[tabindex="-1"]'))?.focus();
     }
 
+    function getDiscountPercent() {
+        return COMMERCE.discountBasisPoints / BASIS_POINTS_PER_PERCENT;
+    }
+
     function getProdsApplied(form: HTMLFormElement) {
         return isProdsEngaged(form) ? getProdsCharge() : 0;
     }
 
     function getProdsBalance() {
-        return getSession()?.prods ?? 0;
+        const session = getSession();
+
+        return session ? readProdsBalance(session.email, session.createdAt) : 0;
     }
 
     function getProdsCharge() {
-        return Math.min(getProdsBalance(), prodsForCents(totals(getItems(), 0, promoCode).totalCents));
+        return Math.min(getProdsBalance(), toProds(getTotals(getItems(), 0, promoCode).totalCents));
     }
 
     function getStepRules(form: HTMLFormElement) {
-        if (step !== LAST_STEP || isCardWaived(form)) return STEP_RULES[step];
+        if (isCardWaived(form) || step !== LAST_STEP) return STEP_RULES[step];
 
         return { ...CARD_RULES, ...STEP_RULES[step] };
     }
 
     function handleBackClick(controls: CheckoutControls) {
-        if (blocked) {
-            blocked = false;
+        if (isBlocked) {
+            isBlocked = false;
             renderIssues([]);
         }
 
         step = Math.max(REVIEW_STEP, step - 1);
         updateSteps(controls, true);
-    }
-
-    function handleCardInput(input: HTMLInputElement) {
-        input.value = input.value.replace(/[^\d ]/g, '');
     }
 
     function handleCodeApply(form: HTMLFormElement) {
@@ -819,7 +793,7 @@ const variants = Object.fromEntries(products
         input.value = '';
         promoCode = COMMERCE.discountCode;
         renderOrder(form);
-        toast(`${COMMERCE.discountCode} applied \u2014 ${discountPercent()}% off your subtotal.`, 'success');
+        toast(`${COMMERCE.discountCode} applied: ${getDiscountPercent()}% off your subtotal.`, 'success');
         form.querySelector<HTMLButtonElement>('[data-code-remove]')?.focus();
     }
 
@@ -852,15 +826,15 @@ const variants = Object.fromEntries(products
     async function handleFormSubmit(event: SubmitEvent, controls: CheckoutControls) {
         event.preventDefault();
 
-        const bypass = isValidationBypassed();
+        const shouldBypass = isValidationBypassed();
 
-        if (blocked && !bypass) {
+        if (!shouldBypass && isBlocked) {
             await navigate('/store/cart');
 
             return;
         }
 
-        blocked = false;
+        isBlocked = false;
 
         const errors = validateFields(controls.form, getStepRules(controls.form));
 
@@ -881,7 +855,7 @@ const variants = Object.fromEntries(products
             return;
         }
 
-        await submitOrder(controls, bypass);
+        await submitOrder(controls, shouldBypass);
     }
 
     function handleProdsToggle(form: HTMLFormElement) {
@@ -894,7 +868,6 @@ const variants = Object.fromEntries(products
         const aside = document.querySelector<HTMLElement>('[data-checkout-aside]');
         const backButton = document.querySelector<HTMLButtonElement>('.checkout-back');
         const body = document.querySelector<HTMLElement>('[data-checkout-body]');
-        const empty = document.querySelector<HTMLElement>('[data-checkout-empty]');
         const form = document.querySelector<HTMLFormElement>('[data-checkout-form]');
         const nextButton = document.querySelector<HTMLButtonElement>('.checkout-next');
         const source = document.querySelector<HTMLElement>('[data-catalog]');
@@ -913,20 +886,19 @@ const variants = Object.fromEntries(products
             steps: document.querySelectorAll<HTMLElement>('.step'),
         };
 
-        blocked = false;
         catalog = parseCatalog(source?.dataset.catalog);
         images = parseImageSources(source?.dataset.images);
+        isBlocked = false;
         promoCode = '';
         step = REVIEW_STEP;
-        variants = parseImageSources(source?.dataset.variants);
         form.noValidate = true;
+        renderIssues(reconcile(catalog));
 
-        if (getItems().length === 0) {
-            body.setAttribute('hidden', '');
-            empty?.removeAttribute('hidden');
+        const hasItems = getItems().length > 0;
 
-            return;
-        }
+        document.documentElement.dataset.cart = hasItems ? 'filled' : 'empty';
+
+        if (!hasItems) return;
 
         updateSteps(controls, false);
         backButton.addEventListener('click', () => handleBackClick(controls), { signal });
@@ -934,7 +906,9 @@ const variants = Object.fromEntries(products
         signal.addEventListener('abort', () => clearCardFields(form), { once: true });
 
         form.querySelectorAll<HTMLInputElement>('[name="cc-number"], [name="cc-csc"]').forEach((input) => {
-            input.addEventListener('input', () => handleCardInput(input), { signal });
+            input.addEventListener('input', () => {
+                input.value = input.value.replace(/[^\d ]/g, '');
+            }, { signal });
         });
 
         codeInput?.addEventListener('input', () => handleCodeInput(form), { signal });
@@ -944,10 +918,6 @@ const variants = Object.fromEntries(products
         form.querySelector<HTMLInputElement>('[name="prods"]')?.addEventListener('change', () => handleProdsToggle(form), { signal });
     }
 
-    function isCardFormat(value: string) {
-        return CARD_PATTERN.test(value.replace(/\s/g, ''));
-    }
-
     function isCardWaived(form: HTMLFormElement) {
         return isProdsEngaged(form) && isFullyCovered();
     }
@@ -955,7 +925,7 @@ const variants = Object.fromEntries(products
     function isFullyCovered() {
         const charge = getProdsCharge();
 
-        return charge > 0 && totals(getItems(), charge, promoCode).totalCents === 0;
+        return charge > 0 && getTotals(getItems(), charge, promoCode).totalCents === 0;
     }
 
     function isFutureExpiry(value: string) {
@@ -963,12 +933,12 @@ const variants = Object.fromEntries(products
 
         if (!match) return false;
 
-        const now = new Date();
         const expiry = new Date(CENTURY + Number(match[2]), Number(match[1]), 1);
+        const now = new Date();
 
         const limit = new Date(now.getFullYear() + MAX_EXPIRY_YEARS, now.getMonth(), 1);
 
-        return expiry > now && expiry <= limit;
+        return expiry <= limit && expiry > now;
     }
 
     function isProdsEngaged(form: HTMLFormElement) {
@@ -999,12 +969,12 @@ const variants = Object.fromEntries(products
 
         if (!apply || !entry || !input || !tag) return;
 
-        const applied = promoCode.length > 0;
+        const isApplied = promoCode.length > 0;
 
         apply.disabled = input.value.trim().length === 0;
-        entry.toggleAttribute('hidden', applied);
-        tag.toggleAttribute('hidden', !applied);
-        setText(form.querySelector('[data-code-label]'), applied ? `${promoCode} \u00b7 ${discountPercent()}% off` : '');
+        entry.toggleAttribute('hidden', isApplied);
+        tag.toggleAttribute('hidden', !isApplied);
+        setText(form.querySelector('[data-code-label]'), isApplied ? `${promoCode} \u00b7 ${getDiscountPercent()}% off` : '');
     }
 
     function renderIssues(issues: CartIssue[]) {
@@ -1022,6 +992,7 @@ const variants = Object.fromEntries(products
             document.querySelector<HTMLTemplateElement>('[data-review-row]'),
             fillReviewRow,
         );
+
         renderList(
             document.querySelector<HTMLElement>('[data-summary-list]'),
             document.querySelector<HTMLTemplateElement>('[data-summary-row]'),
@@ -1043,7 +1014,7 @@ const variants = Object.fromEntries(products
     }
 
     function renderOrder(form: HTMLFormElement) {
-        orderItems = getItems().map(toPhotoItem);
+        orderItems = getItems().map(item => toCatalogItem(catalog, item));
         renderCode(form);
         renderProds(form);
         renderCardFields(form);
@@ -1058,19 +1029,17 @@ const variants = Object.fromEntries(products
         if (!checkbox || !field) return;
 
         const balance = getProdsBalance();
-        const charge = getProdsCharge();
 
         field.toggleAttribute('hidden', getSession() === null);
         checkbox.disabled = balance === 0;
 
         if (checkbox.disabled) checkbox.checked = false;
 
-        setText(field.querySelector('[data-prods-balance]'), `${formatProds(balance)} \u00b7 ${formatPrice(prodsToCents(balance))}`);
-        setText(field.querySelector('[data-prods-note]'), describeProds(balance, charge));
+        setText(field.querySelector('[data-prods-balance]'), formatProds(balance));
     }
 
     function renderTotals(form: HTMLFormElement) {
-        const summary = totals(getItems(), getProdsApplied(form), promoCode);
+        const summary = getTotals(getItems(), getProdsApplied(form), promoCode);
 
         const prodsCents = summary.discountCents - summary.promoCents;
 
@@ -1094,11 +1063,11 @@ const variants = Object.fromEntries(products
         document.querySelectorAll(selector).forEach(element => setText(element, value));
     }
 
-    async function submitOrder(controls: CheckoutControls, bypass: boolean) {
+    async function submitOrder(controls: CheckoutControls, shouldBypass: boolean) {
         const issues = reconcile(catalog);
 
-        if (!bypass && issues.length > 0) {
-            blocked = true;
+        if (!shouldBypass && issues.length > 0) {
+            isBlocked = true;
             renderIssues(issues);
             renderOrder(controls.form);
             controls.nextButton.textContent = 'Back to cart';
@@ -1119,7 +1088,7 @@ const variants = Object.fromEntries(products
         setPending(controls.nextButton, false);
 
         if (!result.ok) {
-            blocked = true;
+            isBlocked = true;
             controls.nextButton.textContent = 'Back to cart';
             toast(result.message, 'error');
 
@@ -1131,15 +1100,9 @@ const variants = Object.fromEntries(products
         await navigate('/store/orders');
     }
 
-    function toPhotoItem(item: CartItem) {
-        const image = variants[photoKey(item.productSlug, item.variation)];
-
-        return image ? { ...item, image } : item;
-    }
-
-    function updateSteps(controls: CheckoutControls, moveFocus: boolean) {
+    function updateSteps(controls: CheckoutControls, shouldMoveFocus: boolean) {
         controls.steps.forEach((item, index) => {
-            item.classList.toggle('slab--well', index === step);
+            item.classList.toggle('is-active', index === step);
             item.classList.toggle('step--done', index < step);
             item.classList.toggle('bg-bg-page', index > step);
 
@@ -1158,7 +1121,7 @@ const variants = Object.fromEntries(products
         controls.nextButton.textContent = step === LAST_STEP ? 'Place order' : 'Continue';
         renderOrder(controls.form);
 
-        if (!moveFocus) return;
+        if (!shouldMoveFocus) return;
 
         setText(document.querySelector('[data-checkout-announce]'), `Step ${step + 1} of ${CHECKOUT_STEPS.length}, ${CHECKOUT_STEPS[step]}.`);
         focusPane(controls.panes[step]);

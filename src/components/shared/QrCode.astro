@@ -13,20 +13,31 @@ interface Props {
 }
 
 const ALIGNMENT_CENTER = 22;
+const ALIGNMENT_RADIUS = 2;
+const DARK_MODULE_OFFSET = 8;
+const DARK_PROBABILITY = 0.5;
+const FINDER_CENTER = 3;
+const FINDER_EDGE = 6;
+const FINDER_LIGHT_RING = 2;
 const FINDER_SIZE = 7;
 const HASH_OFFSET = 2_166_136_261;
 const HASH_PRIME = 16_777_619;
 const MODULE_COUNT = 29;
 const QUIET_ZONE = 4;
+const RANDOM_INCREMENT = 0x6d2b_79f5;
+const RANDOM_MIX = 61;
+const RANDOM_RANGE = 4_294_967_296;
+const RANDOM_SHIFT_FIRST = 15;
+const RANDOM_SHIFT_SECOND = 7;
+const RANDOM_SHIFT_THIRD = 14;
 const TIMING_INDEX = 6;
 
 const { caption, class: qrClass, data, label } = Astro.props;
+const viewSize = MODULE_COUNT + QUIET_ZONE * 2;
 
 const runs = toRuns(buildModules(data));
 
-const viewSize = MODULE_COUNT + QUIET_ZONE * 2;
-
-function buildModules(seed: string): boolean[][] {
+function buildModules(seed: string) {
     const grid: boolean[][] = [];
     const random = createRandom(hashSeed(seed));
 
@@ -34,9 +45,9 @@ function buildModules(seed: string): boolean[][] {
         const row: boolean[] = [];
 
         for (let x = 0; x < MODULE_COUNT; x += 1) {
-            const fixed = fixedModule(x, y);
+            const fixed = getFixedModule(x, y);
 
-            row.push(fixed === null ? random() < 0.5 : fixed);
+            row.push(fixed === null ? random() < DARK_PROBABILITY : fixed);
         }
 
         grid.push(row);
@@ -45,21 +56,21 @@ function buildModules(seed: string): boolean[][] {
     return grid;
 }
 
-function createRandom(seed: number): () => number {
+function createRandom(seed: number) {
     let state = seed >>> 0;
 
     return () => {
-        state = (state + 0x6d2b79f5) >>> 0;
+        state = (state + RANDOM_INCREMENT) >>> 0;
 
-        let value = Math.imul(state ^ (state >>> 15), state | 1);
+        let value = Math.imul(state ^ (state >>> RANDOM_SHIFT_FIRST), state | 1);
 
-        value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+        value ^= value + Math.imul(value ^ (value >>> RANDOM_SHIFT_SECOND), value | RANDOM_MIX);
 
-        return ((value ^ (value >>> 14)) >>> 0) / 4_294_967_296;
+        return ((value ^ (value >>> RANDOM_SHIFT_THIRD)) >>> 0) / RANDOM_RANGE;
     };
 }
 
-function fixedModule(x: number, y: number): boolean | null {
+function getFixedModule(x: number, y: number) {
     const finderOrigins = [[0, 0], [MODULE_COUNT - FINDER_SIZE, 0], [0, MODULE_COUNT - FINDER_SIZE]];
 
     for (const [originX, originY] of finderOrigins) {
@@ -68,9 +79,9 @@ function fixedModule(x: number, y: number): boolean | null {
 
         if (finderX < -1 || finderX > FINDER_SIZE || finderY < -1 || finderY > FINDER_SIZE) continue;
 
-        if (finderX < 0 || finderX > 6 || finderY < 0 || finderY > 6) return false;
+        if (finderX < 0 || finderX > FINDER_EDGE || finderY < 0 || finderY > FINDER_EDGE) return false;
 
-        return Math.max(Math.abs(finderX - 3), Math.abs(finderY - 3)) !== 2;
+        return Math.max(Math.abs(finderX - FINDER_CENTER), Math.abs(finderY - FINDER_CENTER)) !== FINDER_LIGHT_RING;
     }
 
     if (x === TIMING_INDEX || y === TIMING_INDEX) return (x + y) % 2 === 0;
@@ -78,16 +89,16 @@ function fixedModule(x: number, y: number): boolean | null {
     const alignmentX = x - ALIGNMENT_CENTER;
     const alignmentY = y - ALIGNMENT_CENTER;
 
-    if (Math.abs(alignmentX) <= 2 && Math.abs(alignmentY) <= 2) {
+    if (Math.abs(alignmentX) <= ALIGNMENT_RADIUS && Math.abs(alignmentY) <= ALIGNMENT_RADIUS) {
         return Math.max(Math.abs(alignmentX), Math.abs(alignmentY)) !== 1;
     }
 
-    if (x === 8 && y === MODULE_COUNT - 8) return true;
+    if (x === DARK_MODULE_OFFSET && y === MODULE_COUNT - DARK_MODULE_OFFSET) return true;
 
     return null;
 }
 
-function hashSeed(value: string): number {
+function hashSeed(value: string) {
     let hash = HASH_OFFSET;
 
     for (let index = 0; index < value.length; index += 1) {
@@ -97,7 +108,7 @@ function hashSeed(value: string): number {
     return hash >>> 0;
 }
 
-function toRuns(grid: boolean[][]): ModuleRun[] {
+function toRuns(grid: boolean[][]) {
     const runs: ModuleRun[] = [];
 
     grid.forEach((row, y) => {

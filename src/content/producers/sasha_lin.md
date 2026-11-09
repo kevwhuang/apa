@@ -1,5 +1,6 @@
 ---
 name: Sasha Lin
+producerId: '000005'
 genres: [disco, funk, house]
 location: Austin, TX
 joined: 2023-01-12T00:00:00-06:00

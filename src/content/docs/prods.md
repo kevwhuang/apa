@@ -18,23 +18,27 @@ Behind the scenes, we track everything through our platform and backend, keeping
 
 ## Inventory
 
-| Item        | Price |
-| ----------- | ----- |
-| Stickers    | $8    |
-| Shirts      | $35   |
+| Item               | Price |
+| ------------------ | ----- |
+| Alliance Sticker   | $1    |
+| Alliance Samples I | $5    |
+| Legacy Tee         | $10   |
+| Alliance Tee       | $30   |
+| Alliance Cap       | $40   |
+| Alliance Hoodie    | $100  |
 
-## How to Earn
+## How to earn
 
 Prods reward the things that make our community thrive. Here's how members earn them across everything we do.
 
-### A. General Meet
+### A. General meet
 
-| Action                      | Prods |
-| --------------------------- | ----- |
-| Attend the meet             | 1     |
-| Submit a track for feedback | 1     |
-| Give a lightning talk       | 3     |
-| Lead a workshop             | 20    |
+| Action                | Prods |
+| --------------------- | ----- |
+| Attend the meet       | 1     |
+| Queue a demo          | 1     |
+| Give a lightning talk | 3     |
+| Lead a workshop       | 20    |
 
 ### B. Bash
 
@@ -45,7 +49,7 @@ Prods reward the things that make our community thrive. Here's how members earn 
 | Get a sample accepted | 2     |
 | Win the competition   | 10    |
 
-### C. Social Media
+### C. Social media
 
 | Action               | Prods |
 | -------------------- | ----- |

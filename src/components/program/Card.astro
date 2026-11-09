@@ -1,0 +1,93 @@
+---
+import IconChevron from '@components/icons/Chevron.astro';
+import { formatDateStamp, formatVenue } from '@lib/shared/utils';
+
+interface Props {
+    credit?: string;
+    date: Date;
+    group: string;
+    heading: string;
+    isStill: boolean;
+    location: string;
+    notes: { label: string; paragraphs: string[] }[];
+    program: keyof typeof BANDS;
+    text: string;
+}
+
+const BANDS = {
+    assembly: 'bg-event-assembly',
+    bash: 'bg-event-bash',
+    hangout: 'bg-event-hangout',
+};
+
+const { credit, date, group, heading, isStill, location, notes, program, text } = Astro.props;
+---
+
+<article class:list={['slab slab--bare slab--card', isStill && 'slab--still', 'content-start grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-span-3']}>
+    <div class="flex flex-col">
+        <div
+            class:list={['h-(--space-xs) border-b-2 border-border-strong', BANDS[program]]}
+            aria-hidden="true"
+        />
+        <div class="flex flex-1 flex-col px-(--space-md)">
+            <div class="content-center flex flex-1 flex-wrap items-baseline justify-between min-h-(--control-size) gap-x-(--space-sm) gap-y-(--space-3xs) py-(--space-2xs) border-b border-border-subtle font-mono text-base max-lg:flex-col max-lg:flex-nowrap max-lg:items-start max-lg:justify-center">
+                <time datetime={date.toISOString()}>{formatDateStamp(date)}</time>
+                <address class="not-italic wrap-anywhere text-text-secondary">{formatVenue(location)}</address>
+            </div>
+        </div>
+    </div>
+    <div class="p-(--space-md)">
+        <hgroup class="flex flex-col gap-(--space-2xs) mb-(--space-xs)">
+            {credit && (
+                <p class="font-bold font-sans leading-(--text-xl) text-lg tracking-tight">
+                    {credit}
+                </p>
+            )}
+            <h3 class="font-display text-balance text-xl max-lg:text-lg">
+                {heading}
+            </h3>
+        </hgroup>
+        <p class="text-base text-text-secondary">
+            {text}
+        </p>
+    </div>
+    {notes.length > 0 && (
+        <div class="px-(--space-md)">
+            {notes.map(note => (
+                <details
+                    class="program-card__notes border-border-subtle border-t"
+                    name={group}
+                >
+                    <summary class="action-text program-card__summary [&::-webkit-details-marker]:hidden hover:text-link flex items-center justify-between min-h-(--control-size) gap-2 transition-[color,transform]">
+                        {note.label}
+                        <span class="program-card__chevron">
+                            <IconChevron />
+                        </span>
+                    </summary>
+                    <div class="flex flex-col gap-(--space-sm) pb-(--space-md)">
+                        {note.paragraphs.map(paragraph => (
+                            <p class="text-base text-text-secondary">
+                                {paragraph}
+                            </p>
+                        ))}
+                    </div>
+                </details>
+            ))}
+        </div>
+    )}
+</article>
+
+<style>
+    .program-card__chevron {
+        display: flex;
+        transition: rotate var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .program-card__notes[open] .program-card__chevron {
+        rotate: 180deg;
+    }
+
+    .program-card__notes[open] .program-card__summary {
+        color: var(--color-link);
+    }
+</style>

@@ -1,36 +1,129 @@
 ---
-import IconCheck from '@components/icons/Check.astro';
+import { getCollection } from 'astro:content';
+
+import BackLink from '@components/shared/BackLink.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { COMMERCE } from '@lib/shared/constants';
-import { toImageSources } from '@lib/commerce/products';
+import { formatPrice } from '@lib/shared/utils';
+import { toCatalog, toImageSources } from '@lib/commerce/products';
+import { getTotals } from '@lib/commerce/cart';
 
+interface OrderSeed {
+    email: string;
+    id: string;
+    items: Parameters<typeof getTotals>[0];
+    placedAt: string;
+    prodsApplied?: number;
+    promoCode?: string;
+}
+
+const PAST_ORDER_SEEDS: OrderSeed[] = [
+    {
+        email: 'p\u2022\u2022\u2022\u2022\u2022\u2022@example.com',
+        id: 'APA-04217',
+        items: [
+            { image: '02000_digital', priceCents: 500, productSlug: 'alliance_samples_i', quantity: 1, sku: '02000', title: 'Alliance Samples I', variation: 'Digital' },
+            { image: '01001_symbol', priceCents: 100, productSlug: 'alliance_sticker', quantity: 2, sku: '01001', title: 'Alliance Sticker', variation: 'Symbol' },
+            { image: '00010_bone', priceCents: 3_000, productSlug: 'alliance_tee', quantity: 1, size: 'M', sku: '00010', title: 'Alliance Tee', variation: 'Bone' },
+        ],
+        placedAt: '2026-07-28T16:42:00-05:00',
+    },
+    {
+        email: 'd\u2022\u2022\u2022\u2022\u2022\u2022\u2022@example.com',
+        id: 'APA-04106',
+        items: [
+            { image: '02000_digital', priceCents: 500, productSlug: 'alliance_samples_i', quantity: 1, sku: '02000', title: 'Alliance Samples I', variation: 'Digital' },
+            { image: '00001_navy', priceCents: 1_000, productSlug: 'legacy_tee', quantity: 1, size: 'L', sku: '00001', title: 'Legacy Tee', variation: 'Navy' },
+        ],
+        placedAt: '2026-07-04T11:15:00-05:00',
+        promoCode: COMMERCE.discountCode,
+    },
+    {
+        email: 'j\u2022\u2022\u2022\u2022@example.com',
+        id: 'APA-03994',
+        items: [
+            { image: '00020_charcoal', priceCents: 10_000, productSlug: 'alliance_hoodie', quantity: 1, size: 'L', sku: '00020', title: 'Alliance Hoodie', variation: 'Charcoal' },
+        ],
+        placedAt: '2026-06-13T18:20:00-05:00',
+        prodsApplied: 15,
+    },
+    {
+        email: 'i\u2022\u2022\u2022\u2022\u2022@example.com',
+        id: 'APA-03871',
+        items: [
+            { image: '00031_bone', priceCents: 4_000, productSlug: 'alliance_cap', quantity: 1, sku: '00031', title: 'Alliance Cap', variation: 'Bone' },
+            { image: '01001_symbol', priceCents: 100, productSlug: 'alliance_sticker', quantity: 1, sku: '01001', title: 'Alliance Sticker', variation: 'Symbol' },
+            { image: '00000_cotton', priceCents: 1_000, productSlug: 'legacy_tee', quantity: 1, size: 'M', sku: '00000', title: 'Legacy Tee', variation: 'Cotton' },
+        ],
+        placedAt: '2026-05-22T09:05:00-05:00',
+        prodsApplied: 24,
+        promoCode: COMMERCE.discountCode,
+    },
+    {
+        email: 's\u2022\u2022\u2022\u2022\u2022\u2022@example.com',
+        id: 'APA-03742',
+        items: [
+            { image: '02000_digital', priceCents: 500, productSlug: 'alliance_samples_i', quantity: 1, sku: '02000', title: 'Alliance Samples I', variation: 'Digital' },
+            { image: '00013_lime', priceCents: 3_000, productSlug: 'alliance_tee', quantity: 1, size: 'S', sku: '00013', title: 'Alliance Tee', variation: 'Lime' },
+        ],
+        placedAt: '2026-04-18T14:30:00-05:00',
+    },
+    {
+        email: 'r\u2022\u2022\u2022\u2022\u2022@example.com',
+        id: 'APA-03586',
+        items: [
+            { image: '00030_black', priceCents: 4_000, productSlug: 'alliance_cap', quantity: 1, sku: '00030', title: 'Alliance Cap', variation: 'Black' },
+            { image: '01001_symbol', priceCents: 100, productSlug: 'alliance_sticker', quantity: 2, sku: '01001', title: 'Alliance Sticker', variation: 'Symbol' },
+        ],
+        placedAt: '2026-03-09T12:48:00-05:00',
+    },
+    {
+        email: 'm\u2022\u2022\u2022\u2022@example.com',
+        id: 'APA-03581',
+        items: [
+            { image: '00021_smoke', priceCents: 10_000, productSlug: 'alliance_hoodie', quantity: 1, size: 'XL', sku: '00021', title: 'Alliance Hoodie', variation: 'Smoke' },
+            { image: '01001_symbol', priceCents: 100, productSlug: 'alliance_sticker', quantity: 1, sku: '01001', title: 'Alliance Sticker', variation: 'Symbol' },
+        ],
+        placedAt: '2026-02-14T15:10:00-06:00',
+    },
+];
+
+const catalog = toCatalog(await getCollection('products'));
 const images = await toImageSources();
+
+const pastOrders = PAST_ORDER_SEEDS.map(seed => ({
+    email: seed.email,
+    id: seed.id,
+    items: seed.items,
+    placedAt: Date.parse(seed.placedAt),
+    totals: getTotals(seed.items, seed.prodsApplied ?? 0, seed.promoCode ?? ''),
+}));
+
+const receipt = pastOrders[0];
 ---
+
+<BackLink
+    href="/store"
+    label="Back to store"
+/>
 
 <section
     class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="order-title"
+    data-catalog={JSON.stringify(catalog)}
     data-images={JSON.stringify(images)}
+    data-order-seed={JSON.stringify(pastOrders)}
 >
     <div class="text-center">
-        <div
-            class="slab slab--accent slab--bare inline-flex items-center justify-center h-16 w-16 mb-8"
-            aria-hidden="true"
-            data-order-mark
-            hidden
-        >
-            <IconCheck />
-        </div>
         <PageHead
-            class="mb-6 text-5xl md:text-7xl"
-            eyebrow="Your orders"
+            class="mb-6 text-7xl max-md:text-4xl"
             headingId="order-title"
         >
-            <span data-order-heading>Your receipts.</span>
+            <span data-order-heading>Your receipts</span>
         </PageHead>
         <p
-            class="font-mono text-xs text-text-secondary"
+            class="min-h-lh font-mono text-base text-text-secondary"
             data-motion="stamp"
             data-order-number
             data-placeholder
@@ -44,15 +137,24 @@ const images = await toImageSources();
         <ul
             class="order__list scroll-slot border-2 border-border-strong list-none"
             data-order-list
-        />
-        <dl class="slab slab--sunk flex flex-col gap-2 font-mono text-sm">
+        >
+            {receipt.items.map(() => (
+                <li
+                    class="first:border-t-0 p-4 border-border-strong border-t-2"
+                    aria-hidden="true"
+                >
+                    <span class="block h-14" />
+                </li>
+            ))}
+        </ul>
+        <dl class="slab slab--sunk flex flex-col gap-2 font-mono text-base">
             <div class="flex justify-between gap-3">
                 <dt>Subtotal</dt>
                 <dd
                     class="min-w-0 wrap-break-word"
                     data-order-subtotal
                 >
-                    $0.00
+                    {formatPrice(receipt.totals.subtotalCents)}
                 </dd>
             </div>
             <div
@@ -87,7 +189,7 @@ const images = await toImageSources();
                     class="min-w-0 wrap-break-word"
                     data-order-shipping
                 >
-                    $0.00
+                    {formatPrice(receipt.totals.shippingCents)}
                 </dd>
             </div>
             <div class="flex justify-between gap-3 mb-2">
@@ -96,16 +198,16 @@ const images = await toImageSources();
                     class="min-w-0 wrap-break-word"
                     data-order-tax
                 >
-                    $0.00
+                    {formatPrice(receipt.totals.taxCents)}
                 </dd>
             </div>
-            <div class="flex justify-between gap-3 pt-2 border-t-2 border-border-strong font-bold font-sans text-lg">
+            <div class="flex justify-between gap-3 pt-2 border-border-strong border-t-2 text-lg">
                 <dt>Total</dt>
                 <dd
                     class="min-w-0 wrap-break-word"
                     data-order-total
                 >
-                    $0.00
+                    {formatPrice(receipt.totals.totalCents)}
                 </dd>
             </div>
         </dl>
@@ -114,18 +216,18 @@ const images = await toImageSources();
                 class="btn btn--primary"
                 href="/store"
             >
-                Back to the store
+                Browse store
             </a>
             <a
                 class="btn"
                 href="/store/cart"
             >
-                Go to the cart
+                Go to cart
             </a>
         </div>
     </div>
     <template data-order-row>
-        <li class="first:border-t-0 flex items-center gap-4 p-4 border-t-2 border-border-strong">
+        <li class="first:border-t-0 flex items-center gap-4 p-4 border-border-strong border-t-2">
             <span class="block shrink-0 h-14 w-14 border-2 border-border-strong bg-bg-inverse">
                 <img
                     class="block object-cover h-full w-full"
@@ -135,18 +237,18 @@ const images = await toImageSources();
                     loading="lazy"
                 />
             </span>
-            <div class="flex-1 min-w-0">
+            <div class="flex flex-1 flex-col min-w-0 gap-1">
                 <p
-                    class="font-bold font-sans"
+                    class="font-bold font-sans leading-(--text-lg) tracking-tight"
                     data-row-title
                 />
                 <p
-                    class="label text-text-secondary"
+                    class="font-mono leading-none text-base tracking-[0.06em] uppercase text-text-secondary"
                     data-row-variant
                 />
             </div>
             <p
-                class="font-bold font-mono"
+                class="font-mono text-base"
                 data-row-price
             />
         </li>
@@ -160,27 +262,26 @@ const images = await toImageSources();
     <div>
         <SectionHead
             class="text-3xl"
-            eyebrow="Store ledger"
             headingId="order-ledger-title"
         >
             Order history
         </SectionHead>
         <div data-motion="unfold">
             <p
-                class="slab slab--card max-w-(--measure-form) w-full mx-auto leading-relaxed text-text-secondary"
+                class="slab slab--card slab--empty max-w-(--measure-form) w-full mx-auto text-base text-text-secondary"
                 data-order-empty
+                hidden
             >
-                No orders yet &mdash; receipts from the store land here.
+                No orders on file. Receipts from the store appear here.
             </p>
             <div
                 class="order__scroller scroll-slot overflow-x-auto border-2 border-border-strong"
                 data-order-ledger
-                hidden
             >
                 <table class="order__table">
-                    <caption class="sr-only">Orders with date, items, and total &mdash; pick a row to load its receipt</caption>
+                    <caption class="sr-only">Orders with date, items, and total. Pick a row to load its receipt</caption>
                     <thead>
-                        <tr class="font-bold font-mono text-xs tracking-[0.06em] uppercase text-text-secondary">
+                        <tr class="label text-text-secondary">
                             <th
                                 class="order__cell text-left"
                                 scope="col"
@@ -208,7 +309,7 @@ const images = await toImageSources();
                         </tr>
                     </thead>
                     <tbody
-                        class="divide-y divide-border-strong"
+                        class="divide-border-strong divide-y"
                         data-order-ledger-body
                     />
                 </table>
@@ -221,25 +322,27 @@ const images = await toImageSources();
             data-order-index
         >
             <th
-                class="order__cell text-left"
+                class="order__cell font-normal text-left"
                 scope="row"
             >
                 <button
-                    class="order__pick font-mono text-xs whitespace-nowrap"
+                    class="order__pick font-mono text-base whitespace-nowrap"
                     data-cell="id"
                     type="button"
                 />
-                <time class="order__stamp font-mono text-xs text-text-secondary" />
+                <time class="order__stamp font-mono text-base text-text-secondary" />
             </th>
-            <td class="order__cell order__date font-mono text-xs whitespace-nowrap text-text-secondary">
+            <td class="order__cell order__date font-mono text-base whitespace-nowrap text-text-secondary">
                 <time data-cell="date" />
             </td>
+            <td class="order__cell text-base wrap-anywhere">
+                <span
+                    class="line-clamp-1"
+                    data-cell="items"
+                />
+            </td>
             <td
-                class="order__cell text-sm wrap-anywhere"
-                data-cell="items"
-            />
-            <td
-                class="order__cell font-bold font-mono text-right text-xs whitespace-nowrap"
+                class="order__cell font-mono text-base text-right whitespace-nowrap"
                 data-cell="total"
             />
         </tr>
@@ -248,7 +351,7 @@ const images = await toImageSources();
 
 <style>
     .order__cell {
-        padding: var(--space-sm);
+        padding: var(--space-sm) round(clamp(8px, calc(5.333px + 0.8333vw), 16px), 4px);
     }
 
     .order__list {
@@ -259,14 +362,8 @@ const images = await toImageSources();
         align-items: center;
         display: flex;
         min-height: var(--space-md);
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            font-weight var(--duration-fast) var(--motion-ease-ui);
+        transition: color var(--duration-fast) var(--motion-ease-ui);
         width: 100%;
-    }
-
-    .order__pick:active {
-        font-weight: 700;
     }
 
     .order__pick:focus-visible {
@@ -279,7 +376,6 @@ const images = await toImageSources();
 
     .order__pick[aria-current] {
         color: var(--color-link);
-        font-weight: 700;
     }
 
     .order__row {
@@ -302,7 +398,8 @@ const images = await toImageSources();
     }
 
     .order__scroller {
-        --scroll-slot-max: calc(52px + 5 * (33px + var(--space-md)));
+        --scroll-slot-max: calc(40px + var(--text-sm) + 5 * (32px + max(var(--space-md), var(--text-base--line-height))));
+        min-height: var(--scroll-slot-max);
     }
 
     .order__stamp {
@@ -324,10 +421,6 @@ const images = await toImageSources();
     }
 
     @media (max-width: 768px) {
-        .order__cell {
-            padding: var(--space-sm) var(--space-2xs);
-        }
-
         .order__date {
             display: none;
         }
@@ -337,7 +430,7 @@ const images = await toImageSources();
         }
 
         .order__scroller {
-            --scroll-slot-max: calc(52px + 5 * (53.5px + var(--space-md)));
+            --scroll-slot-max: calc(40px + var(--text-sm) + 5 * (32px + max(var(--space-md), var(--text-base--line-height)) + var(--space-3xs) + var(--text-base--line-height)));
         }
 
         .order__stamp {
@@ -348,102 +441,12 @@ const images = await toImageSources();
 </style>
 
 <script>
-    import { COMMERCE } from '@lib/shared/constants';
-    import { formatDateStamp, formatPrice, formatVariant, parseImageSources, registerPageScript, setProductImage, setText, toIsoDate } from '@lib/shared/utils';
-    import { getLastOrder } from '@lib/commerce/checkout';
-    import { totals } from '@lib/commerce/cart';
-
-    interface OrderSeed {
-        email: string;
-        id: string;
-        items: CartItem[];
-        placedAt: string;
-        prodsApplied?: number;
-        promoCode?: string;
-    }
-
-    const PAST_ORDER_SEEDS: OrderSeed[] = [
-        {
-            email: 'p\u2022\u2022\u2022\u2022\u2022\u2022@example.com',
-            id: 'APA-04217',
-            items: [
-                { image: '639158247_assorted', priceCents: 800, productSlug: 'sticker_pack', quantity: 2, title: 'Sticker Pack', variation: 'Assorted' },
-                { image: '725841936_bone', priceCents: 3_500, productSlug: 'tick_tee', quantity: 1, size: 'M', title: 'Tick Tee', variation: 'Bone' },
-                { image: '843207156_natural', priceCents: 2_200, productSlug: 'tote_bag', quantity: 1, title: 'Tote Bag', variation: 'Natural' },
-            ],
-            placedAt: '2026-07-28T16:42:00-05:00',
-        },
-        {
-            email: 'd\u2022\u2022\u2022\u2022\u2022\u2022\u2022@example.com',
-            id: 'APA-04106',
-            items: [
-                { image: '214837905_orange', priceCents: 1_800, productSlug: 'assembly_tape', quantity: 1, title: 'Assembly Sessions Tape', variation: 'Orange' },
-                { image: '421960583_translucent', priceCents: 2_500, productSlug: 'compilation', quantity: 1, title: 'Compilation LP', variation: 'Translucent' },
-            ],
-            placedAt: '2026-07-04T11:15:00-05:00',
-            promoCode: COMMERCE.discountCode,
-        },
-        {
-            email: 'j\u2022\u2022\u2022\u2022@example.com',
-            id: 'APA-03994',
-            items: [
-                { image: '358214679_charcoal', priceCents: 7_800, productSlug: 'bash_hoodie', quantity: 1, size: 'L', title: 'Bash Hoodie', variation: 'Charcoal' },
-            ],
-            placedAt: '2026-06-13T18:20:00-05:00',
-            prodsApplied: 15,
-        },
-        {
-            email: 'i\u2022\u2022\u2022\u2022\u2022@example.com',
-            id: 'APA-03871',
-            items: [
-                { image: '514372860_bone', priceCents: 4_000, productSlug: 'monogram_cap', quantity: 1, title: 'Monogram Cap', variation: 'Bone' },
-                { image: '639158247_assorted', priceCents: 800, productSlug: 'sticker_pack', quantity: 1, title: 'Sticker Pack', variation: 'Assorted' },
-                { image: '918465302_cotton', priceCents: 4_800, productSlug: 'waveform_longsleeve', quantity: 1, size: 'M', title: 'Waveform Longsleeve', variation: 'Cotton' },
-            ],
-            placedAt: '2026-05-22T09:05:00-05:00',
-            prodsApplied: 24,
-            promoCode: COMMERCE.discountCode,
-        },
-        {
-            email: 's\u2022\u2022\u2022\u2022\u2022\u2022@example.com',
-            id: 'APA-03742',
-            items: [
-                { image: '421960583_mint', priceCents: 2_500, productSlug: 'compilation', quantity: 1, title: 'Compilation LP', variation: 'Mint' },
-                { image: '725841936_lime', priceCents: 3_500, productSlug: 'tick_tee', quantity: 1, size: 'S', title: 'Tick Tee', variation: 'Lime' },
-            ],
-            placedAt: '2026-04-18T14:30:00-05:00',
-        },
-        {
-            email: 'r\u2022\u2022\u2022\u2022\u2022@example.com',
-            id: 'APA-03586',
-            items: [
-                { image: '639158247_assorted', priceCents: 800, productSlug: 'sticker_pack', quantity: 2, title: 'Sticker Pack', variation: 'Assorted' },
-                { image: '843207156_natural', priceCents: 2_200, productSlug: 'tote_bag', quantity: 1, title: 'Tote Bag', variation: 'Natural' },
-            ],
-            placedAt: '2026-03-09T12:48:00-05:00',
-        },
-        {
-            email: 'm\u2022\u2022\u2022\u2022@example.com',
-            id: 'APA-03581',
-            items: [
-                { image: '358214679_charcoal', priceCents: 7_800, productSlug: 'bash_hoodie', quantity: 1, size: 'XL', title: 'Bash Hoodie', variation: 'Charcoal' },
-                { image: '639158247_assorted', priceCents: 800, productSlug: 'sticker_pack', quantity: 1, title: 'Sticker Pack', variation: 'Assorted' },
-            ],
-            placedAt: '2026-02-14T15:10:00-06:00',
-        },
-    ];
-
-    const PAST_ORDERS: Order[] = PAST_ORDER_SEEDS.map(toPastOrder);
-
-    const RECEIPT_FRESH_MS = 120_000;
+    import { formatDateStamp, formatPrice, formatVariant, parseCatalog, parseImageSources, registerPageScript, setProductImage, setText, toIsoDate } from '@lib/shared/utils';
+    import { reconcileOrder } from '@lib/commerce/checkout';
 
     let images: ImageSources = {};
     let orders: Order[] = [];
-    let placedId: string | null = null;
-
-    function formatItemsSummary(items: CartItem[]) {
-        return items.map(item => `${item.quantity} \u00d7 ${item.title}`).join(', ');
-    }
+    let placedId: null | string = null;
 
     function handleLedgerClick(event: MouseEvent) {
         const row = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-order-index]') : null;
@@ -456,12 +459,13 @@ const images = await toImageSources();
     function initOrderHistory(signal: AbortSignal) {
         const body = document.querySelector<HTMLElement>('[data-order-ledger-body]');
         const detail = document.querySelector<HTMLElement>('[data-order-detail]');
-        const heading = document.querySelector<HTMLElement>('#order-title');
-        const placed = getLastOrder();
-        const source = document.querySelector<HTMLElement>('[data-images]');
+        const heading = document.querySelector<HTMLElement>('[data-order-heading]')?.closest('h1');
+        const source = document.querySelector<HTMLElement>('[data-catalog]');
+
+        const placed = reconcileOrder(parseCatalog(source?.dataset.catalog));
 
         images = parseImageSources(source?.dataset.images);
-        orders = placed ? [placed, ...PAST_ORDERS] : [...PAST_ORDERS];
+        orders = placed ? [placed, ...readSeed()] : readSeed();
         placedId = placed?.id ?? null;
 
         if (heading) heading.tabIndex = -1;
@@ -472,9 +476,18 @@ const images = await toImageSources();
         body?.addEventListener('click', handleLedgerClick, { signal });
     }
 
-    function renderHeading(order: Order, fresh: boolean) {
-        document.querySelector<HTMLElement>('[data-order-mark]')?.toggleAttribute('hidden', !fresh);
-        setText(document.querySelector('[data-order-heading]'), fresh ? 'Order received.' : 'Your receipts.');
+    function readSeed() {
+        const raw = document.querySelector<HTMLElement>('[data-order-seed]')?.dataset.orderSeed;
+
+        try {
+            return JSON.parse(raw ?? '[]') as Order[];
+        } catch {
+            return [];
+        }
+    }
+
+    function renderHeading(order: Order, isFresh: boolean) {
+        setText(document.querySelector('[data-order-heading]'), isFresh ? 'Order received' : 'Your receipts');
         setText(document.querySelector('[data-order-number]'), `Order ${order.id} \u00b7 ${formatDateStamp(new Date(order.placedAt))}`);
     }
 
@@ -493,7 +506,7 @@ const images = await toImageSources();
             setProductImage(fragment.querySelector<HTMLImageElement>('[data-row-photo]'), images, item);
             setText(fragment.querySelector('[data-row-price]'), formatPrice(item.priceCents * item.quantity));
             setText(fragment.querySelector('[data-row-title]'), item.title);
-            setText(fragment.querySelector('[data-row-variant]'), [variant, `\u00d7 ${item.quantity}`].filter(Boolean).join(' / '));
+            setText(fragment.querySelector('[data-row-variant]'), [variant, `\u00d7\u00a0${item.quantity}`].filter(Boolean).join(' / '));
             list.append(fragment);
         });
     }
@@ -510,9 +523,9 @@ const images = await toImageSources();
 
         orders.forEach((order, index) => {
             const fragment = template.content.cloneNode(true) as DocumentFragment;
+            const placedDate = new Date(order.placedAt);
 
             const pick = fragment.querySelector('[data-cell="id"]');
-            const placedDate = new Date(order.placedAt);
             const row = fragment.querySelector('[data-order-index]');
             const stamps = fragment.querySelectorAll('time');
 
@@ -524,7 +537,7 @@ const images = await toImageSources();
                 setText(stamp, formatDateStamp(placedDate));
             });
 
-            setText(fragment.querySelector('[data-cell="items"]'), formatItemsSummary(order.items));
+            setText(fragment.querySelector('[data-cell="items"]'), summarizeItems(order.items));
             setText(fragment.querySelector('[data-cell="total"]'), formatPrice(order.totals.totalCents));
             setText(pick, order.id);
             body.append(fragment);
@@ -549,12 +562,12 @@ const images = await toImageSources();
         setText(document.querySelector('[data-order-total]'), formatPrice(summary.totalCents));
     }
 
-    function selectOrder(index: number, moveFocus: boolean) {
+    function selectOrder(index: number, shouldMoveFocus: boolean) {
         const order = orders[index];
 
         if (!order) return;
 
-        const fresh = order.id === placedId && Date.now() - order.placedAt < RECEIPT_FRESH_MS;
+        const isFresh = document.documentElement.dataset.receipt === 'fresh' && order.id === placedId;
 
         document.querySelectorAll<HTMLElement>('[data-order-index]').forEach((row) => {
             const pick = row.querySelector('[data-cell="id"]');
@@ -563,23 +576,21 @@ const images = await toImageSources();
             else pick?.removeAttribute('aria-current');
         });
 
-        renderHeading(order, fresh);
+        renderHeading(order, isFresh);
         renderItems(order);
         renderTotals(order.totals);
 
-        if (!moveFocus) return;
+        if (!shouldMoveFocus) return;
 
-        document.querySelector<HTMLElement>('#order-title')?.focus();
+        document.querySelector<HTMLElement>('[data-order-heading]')?.closest('h1')?.focus();
     }
 
-    function toPastOrder(seed: OrderSeed) {
-        return {
-            email: seed.email,
-            id: seed.id,
-            items: seed.items,
-            placedAt: Date.parse(seed.placedAt),
-            totals: totals(seed.items, seed.prodsApplied ?? 0, seed.promoCode ?? ''),
-        };
+    function summarizeItems(items: CartItem[]) {
+        const counts = new Map<string, number>();
+
+        items.forEach(item => counts.set(item.title, (counts.get(item.title) ?? 0) + item.quantity));
+
+        return Array.from(counts, ([title, quantity]) => `${quantity} \u00d7 ${title}`).join(', ');
     }
 
     registerPageScript(initOrderHistory);

@@ -1,8 +1,7 @@
-import { BYTES_PER_KILOBYTE, BYTES_PER_MEGABYTE, CENTS_PER_DOLLAR, EVENT_PROGRAMS, PALETTE } from '@lib/shared/constants';
+import { BYTES_PER_KILOBYTE, BYTES_PER_MEGABYTE, CENTS_PER_DOLLAR, EVENT_PROGRAMS, PALETTE, ROLES } from '@lib/shared/constants';
+import { revealTarget } from '@lib/motion/entrances';
 
 import type { CollectionEntry } from 'astro:content';
-
-type ProgramEvent = CalendarEvent;
 
 interface Calendar {
     past: CalendarEvent[];
@@ -10,16 +9,19 @@ interface Calendar {
 }
 
 interface FilterGroupOptions {
-    buttons: NodeListOf<HTMLButtonElement>;
     cards: NodeListOf<HTMLElement>;
-    dataKey: string;
     emptyElement?: HTMLElement | null;
-    initial: string;
-    matches: (card: HTMLElement, active: string) => boolean;
+    filters: FilterOptions[];
     searchElement?: HTMLInputElement | null;
     signal: AbortSignal;
-    status?: (shown: number, total: number, active: string, query: string) => string;
-    statusElement?: HTMLElement | null;
+    status: (shown: number, total: number, isFiltered: boolean, query: string) => string;
+    statusElement: HTMLElement | null;
+}
+
+interface FilterOptions {
+    buttons: NodeListOf<HTMLButtonElement>;
+    dataKey: string;
+    matches: (card: HTMLElement, active: Set<string>) => boolean;
 }
 
 interface PanelResizeOptions {
@@ -38,9 +40,11 @@ interface SearchFieldOptions {
     signal: AbortSignal;
 }
 
-const EMPTY_TILE_COLOR: TileColor = { bg: 'var(--color-bg-inverse)', text: 'var(--color-text-inverse-secondary)' };
+const CLOCK_DIGITS = 2;
+const DETAIL_SEPARATOR = ' \u00b7 ';
+const EMPTY_TILE_COLOR: TileColor = { background: 'var(--color-ink)', text: 'var(--color-text-inverse-secondary)' };
 const ENTRY_PAD = 2;
-const FLOAT_WINDOW_BASE_Z = 70;
+const FLOAT_WINDOW_TOPIC = 'apa:float-window';
 const ISO_DATE_LENGTH = 10;
 const MAX_INITIALS = 2;
 const MILLISECONDS_PER_MINUTE = 60_000;
@@ -49,10 +53,16 @@ const PANEL_NARROW_VIEWPORT = 480;
 const PANEL_RESIZE_STEP = 16;
 const PANEL_WIDE_DIVISOR = 2;
 const PANEL_WIDE_VIEWPORT = 1_024;
+const PARAGRAPH_SEPARATOR = '\n\n';
 const SECONDS_PER_MINUTE = 60;
 const SLOW_CORE_COUNT = 4;
+const WINNER_MEDALS: Record<string, string | undefined> = { 'First place': '\u{1F947}', 'Second place': '\u{1F948}', 'Third place': '\u{1F949}' };
 
 const panelWidths = new Map<string, number>();
+
+function claimFloatWindow(panel: HTMLElement): void {
+    window.dispatchEvent(new CustomEvent(FLOAT_WINDOW_TOPIC, { detail: { panel } }));
+}
 
 function delay(milliseconds: number): Promise<void> {
     return new Promise((resolve) => {
@@ -63,13 +73,9 @@ function delay(milliseconds: number): Promise<void> {
 function describeCartIssue(issue: CartIssue): string {
     if (issue.kind === 'out-of-stock') return `${issue.title} sold out and was removed.`;
     if (issue.kind === 'price-changed') return `${issue.title} is now ${formatPrice(issue.to ?? 0)}, previously ${formatPrice(issue.from ?? 0)}.`;
-    if (issue.kind === 'quantity-reduced') return `${issue.title} was reduced to ${issue.to ?? 0} \u2014 that is all we have left.`;
+    if (issue.kind === 'quantity-reduced') return `${issue.title} was reduced to ${issue.to ?? 0}. That is all we have left.`;
 
     return `${issue.title} is no longer in the store and was removed.`;
-}
-
-function floatWindowBase(): number {
-    return toLevel(getComputedStyle(document.documentElement).getPropertyValue('--z-drawer'), FLOAT_WINDOW_BASE_Z);
 }
 
 function formatBytes(bytes: number): string {
@@ -96,14 +102,8 @@ function formatCalendarMonth(date: Date): string {
     });
 }
 
-function formatDate(date: Date): string {
-    return date.toLocaleDateString('en-US', {
-        day: 'numeric',
-        month: 'short',
-        timeZone: 'America/Chicago',
-        weekday: 'short',
-        year: 'numeric',
-    });
+function formatCredit(title: string): string {
+    return title.split(DETAIL_SEPARATOR).slice(1).join(DETAIL_SEPARATOR);
 }
 
 function formatDateStamp(date: Date): string {
@@ -119,25 +119,11 @@ function formatDuration(seconds: number): string {
     const minutes = Math.floor(seconds / SECONDS_PER_MINUTE);
     const remainder = Math.floor(seconds % SECONDS_PER_MINUTE);
 
-    return `${minutes}:${String(remainder).padStart(2, '0')}`;
+    return `${minutes}:${String(remainder).padStart(CLOCK_DIGITS, '0')}`;
 }
 
 function formatEntry(value: number): string {
     return String(value).padStart(ENTRY_PAD, '0');
-}
-
-function formatMonth(date: Date): string {
-    return date.toLocaleDateString('en-US', {
-        month: 'long',
-        timeZone: 'America/Chicago',
-    });
-}
-
-function formatMonthNumber(date: Date): string {
-    return date.toLocaleDateString('en-US', {
-        month: '2-digit',
-        timeZone: 'America/Chicago',
-    });
 }
 
 function formatPrice(cents: number): string {
@@ -148,6 +134,14 @@ function formatProds(prods: number): string {
     const count = Math.max(0, Math.trunc(prods) || 0);
 
     return count === 1 ? '1 Prod' : `${count} Prods`;
+}
+
+function formatRole(role: string): string {
+    return ROLES.find(entry => entry.id === role)?.label ?? role;
+}
+
+function formatSku(sku: string): string {
+    return `SKU-${sku}`;
 }
 
 function formatTime(date: Date): string {
@@ -168,11 +162,8 @@ function formatVariant(item: CartItem): string {
     return parts.length > 0 ? parts.join(' / ') : 'Base';
 }
 
-function formatWeekday(date: Date): string {
-    return date.toLocaleDateString('en-US', {
-        timeZone: 'America/Chicago',
-        weekday: 'long',
-    });
+function formatVenue(location: string): string {
+    return location.split(DETAIL_SEPARATOR)[0];
 }
 
 function getInitials(name: string): string {
@@ -181,21 +172,36 @@ function getInitials(name: string): string {
     return words.slice(0, MAX_INITIALS).map(word => word.charAt(0).toUpperCase()).join('');
 }
 
+function getMaxPanelWidth(viewportWidth: number, reservedRight: number) {
+    const narrowMax = PANEL_NARROW_VIEWPORT - reservedRight;
+    const wideMax = PANEL_WIDE_VIEWPORT / PANEL_WIDE_DIVISOR;
+
+    if (viewportWidth <= PANEL_NARROW_VIEWPORT) return viewportWidth - reservedRight;
+    if (viewportWidth >= PANEL_WIDE_VIEWPORT) return viewportWidth / PANEL_WIDE_DIVISOR;
+
+    const ratio = (viewportWidth - PANEL_NARROW_VIEWPORT) / (PANEL_WIDE_VIEWPORT - PANEL_NARROW_VIEWPORT);
+
+    return narrowMax + (wideMax - narrowMax) * ratio;
+}
+
+function getProductHref(catalog: CatalogEntry[], item: CartItem) {
+    const sku = catalog.find(entry => entry.slug === item.productSlug)?.sku;
+
+    if (!sku) return '';
+
+    if (!item.variation) return `/store/${sku}`;
+
+    return `/store/${sku}?variation=${encodeURIComponent(item.variation.toLowerCase())}`;
+}
+
 function getProgram(type: EventType): EventProgram {
     return EVENT_PROGRAMS[type];
 }
 
-function getStanding(balance: number): string {
-    if (balance < 0) return 'In review';
-    if (balance === 0) return 'Settled';
-
-    return 'Good standing';
-}
-
-function getStockLabel(stock: number, inStockLabel = ''): string {
+function getStockLabel(stock: number): string {
     if (stock === 0) return 'Sold out';
 
-    return inStockLabel;
+    return '';
 }
 
 function handleRovingKeydown(event: KeyboardEvent, buttons: HTMLButtonElement[], index: number) {
@@ -211,55 +217,61 @@ function handleRovingKeydown(event: KeyboardEvent, buttons: HTMLButtonElement[],
 }
 
 function initFilterGroup(options: FilterGroupOptions): void {
-    const { buttons, cards, dataKey, emptyElement, initial, matches, searchElement, signal, status, statusElement } = options;
+    const { cards, emptyElement, filters, searchElement, signal, status, statusElement } = options;
 
-    let active = initial;
+    const groups = filters.map(filter => ({ ...filter, active: new Set<string>() }));
 
-    function apply() {
+    function apply(shouldReveal: boolean) {
         const query = (searchElement?.value ?? '').trim();
 
         const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
 
         let shown = 0;
 
-        buttons.forEach((button) => {
-            const on = (button.dataset[dataKey] ?? '') === active;
-
-            button.classList.toggle('is-active', on);
-            button.setAttribute('aria-pressed', String(on));
-        });
+        groups.forEach(({ active, buttons, dataKey }) => paintFilterButtons(buttons, dataKey, active));
 
         cards.forEach((card) => {
             const haystack = card.dataset.search ?? '';
 
-            const on = matches(card, active) && tokens.every(token => haystack.includes(token));
+            const isMatch = groups.every(({ active, matches }) => !active.size || matches(card, active))
+                && tokens.every(token => haystack.includes(token));
 
-            if (on) shown += 1;
+            if (isMatch) shown += 1;
 
-            card.classList.toggle('hidden', !on);
+            card.classList.toggle('hidden', !isMatch);
+
+            if (isMatch && shouldReveal) revealTarget(card);
         });
 
         if (emptyElement) {
             setText(emptyElement.querySelector('[data-search-echo]'), query);
+            setHidden(emptyElement.querySelector<HTMLElement>('[data-empty-query]'), !query);
+            setHidden(emptyElement.querySelector<HTMLElement>('[data-empty-filters]'), Boolean(query));
             setHidden(emptyElement, shown > 0);
         }
 
-        if (statusElement && status) statusElement.textContent = status(shown, cards.length, active, query);
+        setText(statusElement, status(shown, cards.length, groups.some(({ active }) => active.size > 0), query));
     }
 
-    function handleClick(button: HTMLButtonElement) {
-        active = button.dataset[dataKey] ?? initial;
-        apply();
+    function handleClick(active: Set<string>, value: string) {
+        if (!value) active.clear();
+        else if (active.has(value)) active.delete(value);
+        else active.add(value);
+
+        apply(true);
     }
 
-    apply();
-    rovingFocus(buttons, signal);
+    apply(false);
 
-    buttons.forEach((button) => {
-        button.addEventListener('click', () => handleClick(button), { signal });
+    groups.forEach(({ active, buttons, dataKey }) => {
+        initRovingFocus(buttons, signal);
+
+        buttons.forEach((button) => {
+            button.addEventListener('click', () => handleClick(active, button.dataset[dataKey] ?? ''), { signal });
+        });
     });
 
-    searchElement?.addEventListener('input', apply, { signal });
+    searchElement?.addEventListener('input', () => apply(true), { signal });
 }
 
 function initPanelResize(options: PanelResizeOptions): void {
@@ -268,7 +280,7 @@ function initPanelResize(options: PanelResizeOptions): void {
     let pointer: number | undefined;
 
     function apply(width: number) {
-        const { max, min } = bounds();
+        const { max, min } = getBounds();
 
         const next = Math.round(Math.min(Math.max(width, min), max));
 
@@ -279,13 +291,13 @@ function initPanelResize(options: PanelResizeOptions): void {
         panelWidths.set(property, next);
     }
 
-    function bounds() {
-        const max = maxPanelWidth(window.innerWidth, reservedRight);
+    function getBounds() {
+        const min = Math.min(minWidth, Number.parseFloat(getComputedStyle(panel).maxWidth));
 
-        return { max, min: Math.min(minWidth, max) };
+        return { max: Math.max(getMaxPanelWidth(window.innerWidth, reservedRight), min), min };
     }
 
-    function current() {
+    function getCurrentWidth() {
         const stored = panelWidths.get(property);
 
         if (stored !== undefined) return stored;
@@ -295,8 +307,19 @@ function initPanelResize(options: PanelResizeOptions): void {
         return measured > 0 ? measured : minWidth;
     }
 
+    function getKeyWidth(key: string) {
+        const { max, min } = getBounds();
+
+        if (key === 'ArrowLeft') return getCurrentWidth() + PANEL_RESIZE_STEP;
+        if (key === 'ArrowRight') return getCurrentWidth() - PANEL_RESIZE_STEP;
+        if (key === 'End') return max;
+        if (key === 'Home') return min;
+
+        return undefined;
+    }
+
     function handleKeydown(event: KeyboardEvent) {
-        const next = keyWidth(event.key);
+        const next = getKeyWidth(event.key);
 
         if (next === undefined) return;
 
@@ -325,21 +348,10 @@ function initPanelResize(options: PanelResizeOptions): void {
     }
 
     function handleResize() {
-        apply(current());
+        apply(getCurrentWidth());
     }
 
-    function keyWidth(key: string) {
-        const { max, min } = bounds();
-
-        if (key === 'ArrowLeft') return current() + PANEL_RESIZE_STEP;
-        if (key === 'ArrowRight') return current() - PANEL_RESIZE_STEP;
-        if (key === 'End') return max;
-        if (key === 'Home') return min;
-
-        return undefined;
-    }
-
-    apply(current());
+    apply(getCurrentWidth());
     handle.setAttribute('aria-label', label);
     handle.setAttribute('aria-orientation', 'vertical');
     handle.setAttribute('role', 'separator');
@@ -350,6 +362,14 @@ function initPanelResize(options: PanelResizeOptions): void {
     handle.addEventListener('pointermove', handlePointerMove, { signal });
     handle.addEventListener('pointerup', handlePointerUp, { signal });
     window.addEventListener('resize', handleResize, { signal });
+}
+
+function initRovingFocus(buttons: NodeListOf<HTMLButtonElement>, signal?: AbortSignal): void {
+    const all = Array.from(buttons);
+
+    all.forEach((button, index) => {
+        button.addEventListener('keydown', event => handleRovingKeydown(event, all, index), { signal });
+    });
 }
 
 function initSearchField(options: SearchFieldOptions): void {
@@ -364,10 +384,10 @@ function initSearchField(options: SearchFieldOptions): void {
     }
 
     function sync(input: HTMLInputElement) {
-        const empty = input.value.length === 0;
+        const isEmpty = input.value.length === 0;
 
         clearElements.forEach((button) => {
-            button.hidden = empty;
+            button.hidden = isEmpty;
         });
     }
 
@@ -379,48 +399,40 @@ function initSearchField(options: SearchFieldOptions): void {
     });
 }
 
+function isOutsideBox(event: MouseEvent, box: Element | null): boolean {
+    if (!box || event.target !== event.currentTarget) return false;
+
+    const { bottom, left, right, top } = box.getBoundingClientRect();
+
+    return event.clientX < left || event.clientX > right || event.clientY < top || event.clientY > bottom;
+}
+
 function isSlowDevice(): boolean {
     const { connection } = navigator as Navigator & { connection?: { saveData?: boolean } };
 
-    return connection?.saveData === true || (navigator.hardwareConcurrency ?? 0) <= SLOW_CORE_COUNT;
-}
-
-function isTopFloatWindow(target: HTMLElement): boolean {
-    const base = floatWindowBase();
-    const visible = Array.from(document.querySelectorAll<HTMLElement>('[data-float-window]')).filter(element => element.checkVisibility());
-
-    const top = visible.reduce<HTMLElement | undefined>(
-        (best, element) => (best && toLevel(best.style.zIndex, base) > toLevel(element.style.zIndex, base) ? best : element),
-        undefined,
-    );
-
-    return top === target;
+    return (navigator.hardwareConcurrency ?? 0) <= SLOW_CORE_COUNT || connection?.saveData === true;
 }
 
 function isUpcoming(end: Date): boolean {
     return end.getTime() >= Date.now();
 }
 
-function mapWorkshopLines(events: CollectionEntry<'events'>[]): Map<string, string> {
-    return new Map(events.flatMap(({ data, id }) => (data.workshop ? [[id, data.workshop] as const] : [])));
-}
-
-function maxPanelWidth(viewportWidth: number, reservedRight: number): number {
-    const narrowMax = PANEL_NARROW_VIEWPORT - reservedRight;
-    const wideMax = PANEL_WIDE_VIEWPORT / PANEL_WIDE_DIVISOR;
-
-    if (viewportWidth <= PANEL_NARROW_VIEWPORT) return viewportWidth - reservedRight;
-    if (viewportWidth >= PANEL_WIDE_VIEWPORT) return viewportWidth / PANEL_WIDE_DIVISOR;
-
-    const ratio = (viewportWidth - PANEL_NARROW_VIEWPORT) / (PANEL_WIDE_VIEWPORT - PANEL_NARROW_VIEWPORT);
-
-    return narrowMax + (wideMax - narrowMax) * ratio;
-}
-
 function mergeAssets(downloads: CollectionEntry<'downloads'>[], docs: CollectionEntry<'docs'>[]): CollectionEntry<'downloads'>[] {
-    return downloads
-        .map(entry => toAsset(entry, docs))
-        .toSorted((a, b) => Number(b.data.available) - Number(a.data.available) || a.data.title.localeCompare(b.data.title));
+    return downloads.map((entry) => {
+        const doc = docs.find(candidate => candidate.id === entry.data.doc?.id);
+
+        if (!doc) return entry;
+
+        return {
+            ...entry,
+            data: {
+                ...entry.data,
+                date: doc.data.updated,
+                description: doc.data.description,
+                title: doc.data.title,
+            },
+        };
+    });
 }
 
 function mergeCalendar(events: CollectionEntry<'events'>[], bashEditions: CollectionEntry<'bash'>[]): Calendar {
@@ -434,6 +446,25 @@ function mergeCalendar(events: CollectionEntry<'events'>[], bashEditions: Collec
             .filter(event => isUpcoming(event.end))
             .sort((a, b) => +a.date - +b.date),
     };
+}
+
+function onFloatWindowClaim(panel: HTMLElement, close: () => void, signal: AbortSignal): void {
+    window.addEventListener(FLOAT_WINDOW_TOPIC, (event) => {
+        if (event.detail.panel !== panel && panel.checkVisibility()) close();
+    }, { signal });
+}
+
+function paintFilterButtons(buttons: NodeListOf<HTMLButtonElement>, key: string, active: Set<string>): void {
+    buttons.forEach((button) => {
+        const value = button.dataset[key] ?? '';
+
+        const isActive = value ? active.has(value) : !active.size;
+
+        if (button.classList.contains('is-active') === isActive) return;
+
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+    });
 }
 
 function parseCatalog(raw: string | undefined): CatalogEntry[] {
@@ -466,28 +497,6 @@ function preventNavigation(event: DragEvent): void {
     event.preventDefault();
 }
 
-function productHref(catalog: CatalogEntry[], item: CartItem): string {
-    const sku = catalog.find(entry => entry.slug === item.productSlug)?.sku;
-
-    if (!sku) return '';
-
-    if (!item.variation) return `/store/${sku}`;
-
-    return `/store/${sku}?variation=${encodeURIComponent(item.variation.toLowerCase())}`;
-}
-
-function raiseWindow(target: HTMLElement): void {
-    const base = floatWindowBase();
-
-    const ordered = Array.from(document.querySelectorAll<HTMLElement>('[data-float-window]'))
-        .filter(element => element !== target)
-        .toSorted((a, b) => toLevel(a.style.zIndex, base) - toLevel(b.style.zIndex, base));
-
-    [...ordered, target].forEach((element, position) => {
-        element.style.zIndex = String(base + position + 1);
-    });
-}
-
 function registerPageScript(init: (signal: AbortSignal) => void): void {
     let controller: AbortController | undefined;
 
@@ -505,14 +514,6 @@ function registerPageScript(init: (signal: AbortSignal) => void): void {
     document.addEventListener('astro:page-load', handlePageLoad);
 }
 
-function rovingFocus(buttons: NodeListOf<HTMLButtonElement>, signal?: AbortSignal): void {
-    const all = Array.from(buttons);
-
-    all.forEach((button, index) => {
-        button.addEventListener('keydown', event => handleRovingKeydown(event, all, index), { signal });
-    });
-}
-
 function setAvatarImage(image: HTMLImageElement | null, avatar: string): void {
     if (!image) return;
 
@@ -522,10 +523,10 @@ function setAvatarImage(image: HTMLImageElement | null, avatar: string): void {
     image.hidden = avatar.length === 0;
 }
 
-function setHidden(element: HTMLElement | null, hidden: boolean): void {
+function setHidden(element: HTMLElement | null, isHidden: boolean): void {
     if (!element) return;
 
-    element.hidden = hidden;
+    element.hidden = isHidden;
 }
 
 function setMessage(element: HTMLElement | null, message: string): void {
@@ -535,12 +536,12 @@ function setMessage(element: HTMLElement | null, message: string): void {
     element.toggleAttribute('hidden', message.length === 0);
 }
 
-function setPending(control: HTMLButtonElement | null, pending: boolean): void {
+function setPending(control: HTMLButtonElement | null, isPending: boolean): void {
     if (!control) return;
 
-    control.disabled = pending;
+    control.disabled = isPending;
 
-    if (pending) control.setAttribute('aria-busy', 'true');
+    if (isPending) control.setAttribute('aria-busy', 'true');
     else control.removeAttribute('aria-busy');
 }
 
@@ -552,7 +553,6 @@ function setProductImage(image: HTMLImageElement | null, sources: ImageSources, 
     if (source) image.src = source;
     else image.removeAttribute('src');
 
-    image.alt = source ? `${item.title} \u2014 ${formatVariant(item)}` : '';
     image.hidden = !source;
 }
 
@@ -563,7 +563,7 @@ function setText(element: Element | null, value: string): void {
 function setTitleLink(element: Element | null, catalog: CatalogEntry[], item: CartItem, text: string): void {
     if (!(element instanceof HTMLAnchorElement)) return;
 
-    const href = productHref(catalog, item);
+    const href = getProductHref(catalog, item);
 
     if (href.length === 0) {
         element.replaceWith(text);
@@ -573,22 +573,6 @@ function setTitleLink(element: Element | null, catalog: CatalogEntry[], item: Ca
 
     element.href = href;
     setText(element, text);
-}
-
-function toAsset(entry: CollectionEntry<'downloads'>, docs: CollectionEntry<'docs'>[]) {
-    const doc = docs.find(candidate => candidate.id === entry.data.doc?.id);
-
-    if (!doc) return entry;
-
-    return {
-        ...entry,
-        data: {
-            ...entry.data,
-            date: doc.data.updated,
-            description: doc.data.description,
-            title: doc.data.title,
-        },
-    };
 }
 
 function toAustinIso(date: Date): string {
@@ -619,8 +603,8 @@ function toAustinIso(date: Date): string {
     const magnitude = Math.abs(offsetMinutes);
     const sign = offsetMinutes < 0 ? '-' : '+';
 
-    const hours = String(Math.floor(magnitude / MINUTES_PER_HOUR)).padStart(2, '0');
-    const minutes = String(magnitude % MINUTES_PER_HOUR).padStart(2, '0');
+    const hours = String(Math.floor(magnitude / MINUTES_PER_HOUR)).padStart(CLOCK_DIGITS, '0');
+    const minutes = String(magnitude % MINUTES_PER_HOUR).padStart(CLOCK_DIGITS, '0');
 
     return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}${sign}${hours}:${minutes}`;
 }
@@ -649,33 +633,16 @@ function toCalendarEvent(entry: CollectionEntry<'events'>) {
     };
 }
 
-function toCatalog(products: CollectionEntry<'products'>[]): CatalogEntry[] {
-    return products.map(product => ({
-        priceCents: product.data.priceCents,
-        sku: product.data.sku,
-        slug: product.id,
-        stock: product.data.stock,
-        title: product.data.title,
-    }));
-}
-
 function toIsoDate(date: Date): string {
     return date.toISOString().slice(0, ISO_DATE_LENGTH);
 }
 
-function toLevel(value: string, fallback: number): number {
-    const parsed = Number.parseInt(value, 10);
-
-    return Number.isFinite(parsed) ? parsed : fallback;
-}
-
 function toProducerRecord(producer: CollectionEntry<'producers'>): ProducerRecord {
     return {
-        avatar: producer.data.avatar ?? null,
         bio: producer.data.bio,
         featured: producer.data.featured,
         genres: producer.data.genres,
-        id: producer.id,
+        id: producer.data.producerId,
         joined: toIsoDate(producer.data.joined),
         links: producer.data.links,
         location: producer.data.location,
@@ -685,44 +652,98 @@ function toProducerRecord(producer: CollectionEntry<'producers'>): ProducerRecor
     };
 }
 
+function toProgramBashCard(entry: CollectionEntry<'bash'>) {
+    const { sponsors, winners } = entry.data;
+
+    return {
+        date: entry.data.date,
+        end: entry.data.end,
+        heading: entry.data.edition,
+        id: entry.id,
+        location: entry.data.location,
+        notes: [
+            {
+                label: sponsors.length > 1 ? 'Sponsors' : 'Sponsor',
+                paragraphs: sponsors.flatMap(({ description, name }) => description?.split(PARAGRAPH_SEPARATOR) ?? [name]),
+            },
+            {
+                label: winners.length > 1 ? 'Winners' : 'Winner',
+                paragraphs: winners.length > 0
+                    ? [entry.data.recap, ...winners.map(({ name, place }) => `${WINNER_MEDALS[place] ?? place} ${name}`)]
+                    : [],
+            },
+        ].filter(note => note.paragraphs.length > 0),
+        text: entry.data.prompt,
+    };
+}
+
+function toProgramCard(entry: CollectionEntry<'events'>) {
+    const bios = entry.data.speakers.flatMap(({ bio }) => (bio ? [bio] : []));
+
+    return {
+        credit: entry.data.workshop ? formatCredit(entry.data.title) : '',
+        date: entry.data.date,
+        end: entry.data.end,
+        heading: entry.data.workshop ?? entry.data.title,
+        id: entry.id,
+        location: entry.data.location,
+        notes: [
+            {
+                label: bios.length > 1 ? 'Presenters' : 'Presenter',
+                paragraphs: bios,
+            },
+            {
+                label: 'Workshop',
+                paragraphs: entry.data.description && entry.data.workshop ? entry.data.description.split(PARAGRAPH_SEPARATOR) : [],
+            },
+        ].filter(note => note.paragraphs.length > 0),
+        text: entry.data.excerpt,
+    };
+}
+
+function toRoster(producers: CollectionEntry<'producers'>[]): CollectionEntry<'producers'>[] {
+    if (new Set(producers.map(producer => producer.data.producerId)).size !== producers.length) throw new Error('Each producer needs its own ID.');
+
+    return producers;
+}
+
 export {
+    claimFloatWindow,
     delay,
     describeCartIssue,
     formatBytes,
     formatCalendarDay,
     formatCalendarMonth,
-    formatDate,
+    formatCredit,
     formatDateStamp,
     formatDuration,
     formatEntry,
-    formatMonth,
-    formatMonthNumber,
     formatPrice,
     formatProds,
+    formatRole,
+    formatSku,
     formatTime,
     formatTimeRange,
     formatVariant,
-    formatWeekday,
+    formatVenue,
     getInitials,
     getProgram,
-    getStanding,
     getStockLabel,
     initFilterGroup,
     initPanelResize,
+    initRovingFocus,
     initSearchField,
+    isOutsideBox,
     isSlowDevice,
-    isTopFloatWindow,
     isUpcoming,
-    mapWorkshopLines,
     mergeAssets,
     mergeCalendar,
+    onFloatWindowClaim,
     parseCatalog,
     parseImageSources,
     pickTileColor,
     preventNavigation,
-    raiseWindow,
     registerPageScript,
-    rovingFocus,
     setAvatarImage,
     setHidden,
     setMessage,
@@ -731,9 +752,9 @@ export {
     setText,
     setTitleLink,
     toAustinIso,
-    toCatalog,
     toIsoDate,
     toProducerRecord,
+    toProgramBashCard,
+    toProgramCard,
+    toRoster,
 };
-
-export type { ProgramEvent };

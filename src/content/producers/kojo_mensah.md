@@ -1,5 +1,6 @@
 ---
 name: Kojo Mensah
+producerId: '000006'
 genres: [afrobeats, hip-hop, R&B]
 location: Austin, TX
 joined: 2023-06-20T00:00:00-05:00

@@ -6,7 +6,7 @@ import PageHead from '@components/shared/PageHead.astro';
 import QrCode from '@components/shared/QrCode.astro';
 import Schedule from '@components/program/Schedule.astro';
 import { EMAIL_MAX_LENGTH } from '@lib/shared/constants';
-import { formatDate, formatTime, mergeCalendar } from '@lib/shared/utils';
+import { formatDateStamp, formatTime, formatVenue, getProgram, mergeCalendar } from '@lib/shared/utils';
 
 const DOOR_HOST = 'austinproduceralliance.com';
 const DOOR_PATH = 'here';
@@ -25,11 +25,10 @@ const { upcoming } = mergeCalendar(events, bashEditions);
 >
     <div class="flex flex-col gap-6">
         <PageHead
-            class="max-w-3xl text-5xl text-balance md:text-7xl"
-            eyebrow="Event check-in"
+            class="max-w-3xl text-7xl text-balance max-md:text-5xl"
             headingId="checkin-title"
         >
-            You made it.
+            You made it
         </PageHead>
         <p
             class="max-w-2xl text-lg text-text-secondary"
@@ -51,46 +50,45 @@ const { upcoming } = mergeCalendar(events, bashEditions);
             aria-label="What you scanned"
             data-motion="wipe"
         >
-            <div class="door-pass__panel slab slab--well flex flex-col h-full gap-6">
-                <div class="flex flex-col gap-6 mb-auto">
-                    <p class="label text-link-on-inverse">Door pass</p>
-                    <p class="font-mono text-sm wrap-break-word text-link-on-inverse md:text-lg">
+            <div class="door-pass__panel slab slab--well flex flex-col h-full gap-(--space-lg)">
+                <div class="flex flex-col gap-(--space-lg) mb-auto">
+                    <p class="font-mono text-lg wrap-break-word text-link-on-inverse max-md:text-base">
                         {DOOR_HOST}/<wbr />{DOOR_PATH}
                     </p>
                     {upcoming.map((event, index) => (
                         <dl
-                            class="door-pass__rows"
+                            class="door-pass__rows flex flex-col pt-(--space-md) bg-repeat-x bg-top-left"
                             data-event-end={event.end.toISOString()}
                             data-event-group="door"
                             data-event-role="next"
-                            data-event-title={event.title}
+                            data-event-title={`${getProgram(event.type).name} on ${formatDateStamp(event.date)}`}
                             hidden={index > 0}
                         >
-                            <div class="last:border-b-0 grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-inverse-subtle">
-                                <dt class="label text-text-inverse-secondary">Event</dt>
-                                <dd class="text-sm">
-                                    {event.title}
+                            <div class="last:border-b-0 grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-inverse-subtle">
+                                <dt class="label text-text-inverse-secondary">Program</dt>
+                                <dd class="text-base">
+                                    {getProgram(event.type).name}
                                 </dd>
                             </div>
-                            <div class="last:border-b-0 grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-inverse-subtle">
+                            <div class="last:border-b-0 grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-inverse-subtle">
                                 <dt class="label text-text-inverse-secondary">When</dt>
-                                <dd class="text-sm">
+                                <dd class="font-mono text-base">
                                     <time datetime={event.date.toISOString()}>
-                                        {formatDate(event.date)}, {formatTime(event.date)}
+                                        {formatDateStamp(event.date)}, {formatTime(event.date)}
                                     </time>
                                 </dd>
                             </div>
-                            <div class="last:border-b-0 grid grid-cols-[64px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-inverse-subtle">
+                            <div class="last:border-b-0 grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-inverse-subtle">
                                 <dt class="label text-text-inverse-secondary">Where</dt>
-                                <dd class="text-sm">
-                                    {event.location}
+                                <dd class="font-mono text-base">
+                                    {formatVenue(event.location)}
                                 </dd>
                             </div>
                         </dl>
                     ))}
                 </div>
-                <div class="door-pass__foot">
-                    <p class="action-text door-pass__stamp">Checked</p>
+                <div class="door-pass__foot flex flex-wrap items-center justify-between gap-(--space-xs) pt-(--space-md) bg-repeat-x bg-top-left">
+                    <p class="door-pass__stamp label px-(--space-2xs) py-(--space-3xs) border-2 border-link-on-inverse text-link-on-inverse">Checked</p>
                     <p class="label text-text-inverse-secondary">1 Prod on arrival</p>
                 </div>
             </div>
@@ -100,7 +98,7 @@ const { upcoming } = mergeCalendar(events, bashEditions);
             data-motion="rise"
         >
             <QrCode
-                caption={`Scan to check in \u00b7 ${doorUrl}`}
+                caption="Scan to check in"
                 data={doorUrl}
                 label={`QR code for ${doorUrl}`}
             />
@@ -113,26 +111,22 @@ const { upcoming } = mergeCalendar(events, bashEditions);
     aria-label="Check in"
 >
     <form
-        class="checkin-form slab slab--card flex flex-col max-w-(--measure-form) w-full gap-6 mx-auto"
+        class="checkin-form slab slab--card flex flex-col max-w-(--measure-form) w-full gap-(--space-lg) mx-auto"
         data-checkin-form
         data-motion="unfold"
     >
-        <div class="flex flex-wrap items-center justify-between gap-(--space-xs) pb-(--space-xs) border-b-2 border-border-strong">
-            <p class="label text-link">Check-in</p>
-            <p class="label text-text-secondary">Door 01</p>
-        </div>
         <h2 class="text-2xl">
             Check in
         </h2>
-        <div class="flex flex-col gap-2">
-            <label class="flex flex-col gap-2">
+        <div class="flex flex-col gap-(--space-2xs)">
+            <label class="flex flex-col gap-(--space-2xs)">
                 <span class="label flex flex-wrap items-baseline text-text">
-                    <span class="pr-(--space-2xs) text-link">01</span>
+                    <span class="pr-(--space-2xs) text-link">1</span>
                     Email
                 </span>
                 <input
                     id="checkin-email"
-                    class="input font-mono text-sm"
+                    class="input font-mono"
                     aria-describedby="checkin-email-error"
                     aria-invalid="false"
                     autocomplete="email"
@@ -144,46 +138,46 @@ const { upcoming } = mergeCalendar(events, bashEditions);
             </label>
             <p
                 id="checkin-email-error"
-                class="action-text text-error-text"
+                class="text-error-text"
                 data-field-error
                 hidden
             />
         </div>
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-(--space-2xs)">
             <p class="label flex flex-wrap items-baseline text-text">
-                <span class="pr-(--space-2xs) text-link">02</span>
+                <span class="pr-(--space-2xs) text-link">2</span>
                 Terms
             </p>
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-                <label class="checkin__check">
-                    <input
-                        id="checkin-terms"
-                        class="box"
-                        aria-describedby="checkin-terms-error"
-                        aria-invalid="false"
-                        name="terms"
-                        required
-                        type="checkbox"
-                    />
-                    I accept the terms
-                </label>
-                <a
-                    class="active:translate-y-px hover:text-link inline-flex items-center min-h-(--control-size) px-(--space-3xs) text-sm underline transition-[color,transform]"
-                    href="/terms"
-                >
-                    Read them first
-                </a>
-            </div>
+            <label class="checkin__check">
+                <input
+                    id="checkin-terms"
+                    class="box"
+                    aria-describedby="checkin-terms-error"
+                    aria-invalid="false"
+                    name="terms"
+                    required
+                    type="checkbox"
+                />
+                <span>
+                    I accept the&#32;
+                    <a
+                        class="active:translate-y-px hover:text-link inline-block font-mono underline underline-offset-4 transition-[color,translate]"
+                        href="/terms"
+                    >
+                        terms
+                    </a>
+                </span>
+            </label>
             <p
                 id="checkin-terms-error"
-                class="action-text text-error-text"
+                class="text-error-text"
                 data-field-error
                 hidden
             />
         </div>
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-(--space-2xs)">
             <p class="label flex flex-wrap items-baseline text-text">
-                <span class="pr-(--space-2xs) text-link">03</span>
+                <span class="pr-(--space-2xs) text-link">3</span>
                 Newsletter
             </p>
             <label class="checkin__check">
@@ -197,116 +191,114 @@ const { upcoming } = mergeCalendar(events, bashEditions);
                 Add me to the seasonal newsletter
             </label>
         </div>
-        <div class="flex flex-wrap items-center gap-(--space-sm) pt-(--space-md) border-t-2 border-border-strong">
-            <button
-                class="btn btn--primary checkin-form__submit"
-                type="submit"
-            >
-                Check in <IconArrow />
-            </button>
-        </div>
+        <button
+            class="btn btn--primary checkin-form__submit w-full"
+            type="submit"
+        >
+            Check in <IconArrow />
+        </button>
     </form>
     <div
-        class="flex flex-col max-w-(--measure-form) w-full gap-6 mx-auto"
+        class="flex flex-col max-w-(--measure-form) w-full gap-(--space-lg) mx-auto"
         data-checkin-done
         hidden
     >
-        <div class="checkin__receipt slab slab--card flex flex-col gap-4">
-            <div class="flex flex-wrap items-center justify-between gap-(--space-xs) pb-(--space-xs) border-b-2 border-border-strong">
-                <p class="label text-link">Arrival receipt</p>
-                <p class="label text-text-secondary">Door 01</p>
-            </div>
-            <h2
-                class="text-3xl"
-                data-checkin-heading
-                tabindex="-1"
-            >
-                You are checked in.
-            </h2>
-            <p class="text-lg text-text-secondary">
-                An account is open for&#32;
-                <span
-                    class="font-mono text-sm wrap-anywhere"
-                    data-checkin-email
-                />&#32;
-                with&#32;
-                <span
-                    class="font-mono text-sm"
-                    data-checkin-prods
-                />&#32;
-                on it.&#32;
-                <span data-checkin-newsletter />
-            </p>
-            <p class="action-text px-3 py-3 bg-bg-signal text-text-on-signal">
+        <div class="checkin__receipt slab slab--card flex flex-col gap-(--space-lg)">
+            <hgroup class="flex flex-col gap-(--space-xs)">
+                <h2
+                    class="font-display text-3xl"
+                    data-checkin-heading
+                    tabindex="-1"
+                >
+                    You are checked in
+                </h2>
+                <p class="text-lg text-text-secondary">
+                    An account is open for&#32;
+                    <span
+                        class="font-mono text-base wrap-anywhere"
+                        data-checkin-email
+                    />&#32;
+                    with&#32;
+                    <span
+                        class="font-mono text-base"
+                        data-checkin-prods
+                    />&#32;
+                    on it.&#32;
+                    <span data-checkin-newsletter />
+                </p>
+            </hgroup>
+            <p class="p-3 bg-signal text-text-on-signal">
                 Your welcome email is below.
             </p>
-            <button
-                class="btn self-start"
-                data-checkin-again
-                type="button"
-            >
-                Check in another address
-            </button>
+            <div class="flex flex-wrap gap-3 pt-(--space-md) border-border-strong border-t-2">
+                <button
+                    class="btn"
+                    data-checkin-again
+                    type="button"
+                >
+                    Check in another address
+                </button>
+            </div>
         </div>
         <article
-            class="mail slab slab--lift flex flex-col gap-4"
+            class="mail slab slab--lift flex flex-col gap-(--space-lg)"
             aria-label="Welcome email"
         >
             <div class="flex flex-wrap items-center justify-between gap-(--space-xs) pb-(--space-xs) border-b-2 border-border-strong">
                 <p class="label text-link">Welcome email</p>
-                <p class="action-text mail__stamp">Sent</p>
+                <p class="label mail__stamp px-(--space-2xs) py-(--space-3xs) border-2 border-link text-link">Sent</p>
             </div>
             <dl class="flex flex-col">
-                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-subtle">
+                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-subtle">
                     <dt class="label text-text-secondary">From</dt>
                     <dd
-                        class="font-mono text-sm wrap-anywhere"
+                        class="font-mono text-base wrap-anywhere"
                         data-mail-from
                     />
                 </div>
-                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-subtle">
+                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-subtle">
                     <dt class="label text-text-secondary">To</dt>
                     <dd
-                        class="font-mono text-sm wrap-anywhere"
+                        class="font-mono text-base wrap-anywhere"
                         data-mail-to
                     />
                 </div>
-                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-subtle">
+                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-subtle">
                     <dt class="label text-text-secondary">Reply to</dt>
                     <dd
-                        class="font-mono text-sm wrap-anywhere"
+                        class="font-mono text-base wrap-anywhere"
                         data-mail-reply
                     />
                 </div>
-                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-sm) py-(--space-2xs) border-b border-border-subtle">
+                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-subtle">
                     <dt class="label text-text-secondary">Subject</dt>
                     <dd
-                        class="font-bold font-sans text-lg"
+                        class="font-bold font-sans leading-(--text-xl) text-lg"
                         data-mail-subject
                     />
                 </div>
             </dl>
             <p
-                class="text-sm text-text-secondary"
+                class="text-base text-text-secondary"
                 data-mail-preheader
             />
             <div
-                class="flex flex-col gap-4"
+                class="flex flex-col gap-(--space-sm)"
                 data-mail-body
             />
-            <div class="mail__actions">
+            <div class="mail__actions flex flex-wrap items-center gap-(--space-xs) pt-(--space-md) bg-repeat-x bg-top-left">
                 <a
                     class="btn btn--accent"
                     data-mail-action
                     href="/onboarding"
                 >
-                    Finish your profile
+                    Finish profile
                 </a>
-                <p class="action-text text-text-secondary">Link lasts 24 hours</p>
+                <p class="label text-text-secondary">Link lasts 24 hours</p>
             </div>
         </article>
         <template data-mail-template>
-            <p class="leading-relaxed" />
+            <p />
         </template>
     </div>
 </section>
@@ -328,62 +320,20 @@ const { upcoming } = mergeCalendar(events, bashEditions);
         display: flex;
         font-size: var(--text-sm);
         gap: var(--space-xs);
+        line-height: var(--text-sm--line-height);
         min-height: var(--control-size);
         padding-block: var(--space-2xs);
     }
 
     .door-pass__foot,
     .door-pass__rows {
-        background-image: repeating-linear-gradient(90deg, var(--color-border) 0 8px, transparent 8px 16px);
-        background-position: top left;
-        background-repeat: no-repeat;
-        background-size: 100% 1px;
-        padding-top: var(--space-md);
-    }
-
-    .door-pass__foot {
-        align-items: center;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-xs);
-        justify-content: space-between;
-    }
-
-    .door-pass__rows {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .door-pass__stamp {
-        border: 2px solid var(--color-link-on-inverse);
-        color: var(--color-link-on-inverse);
-        padding: var(--space-3xs) var(--space-2xs);
-        rotate: calc(var(--tilt-unit) * -4);
+        background-image: radial-gradient(circle, var(--color-border) 1px, transparent 1px);
+        background-size: var(--halftone-pitch) 2px;
     }
 
     .mail__actions {
-        align-items: center;
-        background-image: repeating-linear-gradient(90deg, var(--color-border-subtle) 0 8px, transparent 8px 16px);
-        background-position: top left;
-        background-repeat: no-repeat;
-        background-size: 100% 1px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-sm);
-        padding-top: var(--space-md);
-    }
-
-    .mail__stamp {
-        border: 2px solid var(--color-link);
-        color: var(--color-link);
-        padding: var(--space-3xs) var(--space-2xs);
-        rotate: calc(var(--tilt-unit) * -3);
-    }
-
-    @media (max-width: 768px) {
-        .checkin-form__submit {
-            width: 100%;
-        }
+        background-image: radial-gradient(circle, var(--color-border-subtle) 1px, transparent 1px);
+        background-size: var(--halftone-pitch) 2px;
     }
 </style>
 
@@ -403,14 +353,14 @@ const { upcoming } = mergeCalendar(events, bashEditions);
     function handleCheckInAgain(form: HTMLFormElement, done: HTMLElement) {
         done.setAttribute('hidden', '');
         form.removeAttribute('hidden');
-        form.querySelector<HTMLInputElement>('#checkin-email')?.focus();
+        form.querySelector<HTMLInputElement>('[name="email"]')?.focus();
     }
 
     async function handleCheckInSubmit(event: SubmitEvent, form: HTMLFormElement) {
         event.preventDefault();
 
-        const values = new FormData(form);
         const errors = validateFields(form, RULES);
+        const values = new FormData(form);
 
         clearFieldErrors(form);
 
@@ -466,12 +416,14 @@ const { upcoming } = mergeCalendar(events, bashEditions);
         });
     }
 
-    function renderCheckIn(form: HTMLFormElement, session: Session, newsletter: boolean) {
+    function renderCheckIn(form: HTMLFormElement, session: Session, isSubscribed: boolean) {
         const body = document.querySelector<HTMLElement>('[data-mail-body]');
         const done = document.querySelector<HTMLElement>('[data-checkin-done]');
         const template = document.querySelector<HTMLTemplateElement>('[data-mail-template]');
 
         if (!body || !done || !template) return;
+
+        const action = document.querySelector<HTMLAnchorElement>('[data-mail-action]');
 
         const message = composeOnboardingEmail({
             email: session.email,
@@ -480,15 +432,13 @@ const { upcoming } = mergeCalendar(events, bashEditions);
             token: createOnboardingToken(session.email),
         });
 
-        const action = document.querySelector<HTMLAnchorElement>('[data-mail-action]');
-
         form.setAttribute('hidden', '');
         done.removeAttribute('hidden');
         setText(document.querySelector<HTMLElement>('[data-checkin-email]'), session.email);
 
         setText(
             document.querySelector<HTMLElement>('[data-checkin-newsletter]'),
-            newsletter ? 'You are on the seasonal newsletter too.' : 'You are not on the newsletter.',
+            isSubscribed ? 'You are on the seasonal newsletter too.' : 'You are not on the newsletter.',
         );
 
         setText(document.querySelector<HTMLElement>('[data-checkin-prods]'), formatProds(session.prods));

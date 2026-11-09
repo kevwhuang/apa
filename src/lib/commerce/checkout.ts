@@ -1,5 +1,6 @@
-import { MOCK_LATENCY_MS, ORDER_ID, STORAGE } from '@lib/shared/constants';
-import { clampQuantity, clear, getItems, prodsForCents, totals } from '@lib/commerce/cart';
+import { MOCK_LATENCY_MILLISECONDS, ORDER_ID, STORAGE } from '@lib/shared/constants';
+import { addProdsEntry, getProdsBalance } from '@lib/account/prods';
+import { clampQuantity, clear, compareItems, getItems, getTotals, toCatalogItem, toProds } from '@lib/commerce/cart';
 import { createStore } from '@lib/shared/state';
 import { delay } from '@lib/shared/utils';
 import { getSession, updateSession } from '@lib/account/session';
@@ -9,7 +10,7 @@ const MAX_ORDER_CENTS = 100_000_000;
 const MESSAGES: Record<PaymentErrorCode, string> = {
     'cart-changed': 'Your cart changed while you were checking out. Review it and try again.',
     'empty-cart': 'There is nothing in your cart.',
-    'storage-full': 'Your order was not placed \u2014 your browser storage is full. Clear some space and try again.',
+    'storage-full': 'Your order was not placed because your browser storage is full. Clear some space and try again.',
 };
 
 const store = createStore<Order | null>({
@@ -26,10 +27,6 @@ function createOrderId() {
     crypto.getRandomValues(buffer);
 
     return `${ORDER_ID.prefix}${String(buffer[0] % ORDER_ID.range).padStart(ORDER_ID.digits, '0')}`;
-}
-
-function getLastOrder(): Order | null {
-    return store.get();
 }
 
 function isStored(order: Order | null) {
@@ -61,7 +58,15 @@ function normalizeOrder(value: Order | null) {
     return {
         email: String(value.email ?? ''),
         id: value.id,
-        items: value.items.map(item => ({ ...item, priceCents: normalizeCents(item.priceCents), quantity: clampQuantity(Number(item.quantity)) })),
+        items: value.items
+            .map(item => ({
+                ...item,
+                priceCents: normalizeCents(item.priceCents),
+                quantity: clampQuantity(Number(item.quantity)),
+                sku: String(item.sku ?? ''),
+                title: String(item.title ?? ''),
+            }))
+            .sort(compareItems),
         placedAt: Number(value.placedAt) || 0,
         totals: {
             discountCents: normalizeCents(value.totals.discountCents),
@@ -75,23 +80,24 @@ function normalizeOrder(value: Order | null) {
 }
 
 async function placeOrder(input: OrderInput): Promise<OrderResult> {
-    await delay(MOCK_LATENCY_MS);
+    await delay(MOCK_LATENCY_MILLISECONDS);
 
     if (input.items.length === 0) return reject('empty-cart');
     if (!matchesCart(input.items)) return reject('cart-changed');
 
+    const requested = Math.max(0, Math.trunc(input.prodsApplied) || 0);
     const session = getSession();
 
-    const requested = Math.max(0, Math.trunc(input.prodsApplied) || 0);
+    const balance = session ? getProdsBalance(session.email, session.createdAt) : 0;
 
-    const prodsApplied = Math.min(requested, session?.prods ?? 0, prodsForCents(totals(input.items, 0, input.promoCode).totalCents));
+    const prodsApplied = Math.min(requested, balance, toProds(getTotals(input.items, 0, input.promoCode).totalCents));
 
     const order: Order = {
         email: input.email,
         id: createOrderId(),
         items: input.items,
         placedAt: Date.now(),
-        totals: totals(input.items, prodsApplied, input.promoCode),
+        totals: getTotals(input.items, prodsApplied, input.promoCode),
     };
 
     const stored = store.set(order);
@@ -100,13 +106,33 @@ async function placeOrder(input: OrderInput): Promise<OrderResult> {
 
     clear();
 
-    if (session && prodsApplied > 0) await updateSession({ prods: session.prods - prodsApplied });
+    if (prodsApplied > 0 && session) {
+        const titles = new Set(stored.items.map(item => item.title));
+
+        const reason = `Redeemed \u00b7 ${titles.size === 1 ? stored.items[0].title : `Order ${stored.id}`}`;
+
+        addProdsEntry(session.email, { amount: -prodsApplied, date: new Date(stored.placedAt).toISOString(), reason });
+
+        await updateSession({ prods: getProdsBalance(session.email, session.createdAt) });
+    }
 
     return { ok: true, order: stored };
+}
+
+function reconcileOrder(catalog: CatalogEntry[]): Order | null {
+    const order = store.get();
+
+    if (!order) return null;
+
+    const items = order.items.map(item => toCatalogItem(catalog, item));
+
+    const isStale = items.some((line, index) => line.image !== order.items[index].image || line.sku !== order.items[index].sku);
+
+    return isStale ? store.set({ ...order, items }) : order;
 }
 
 function reject(code: PaymentErrorCode) {
     return { code, message: MESSAGES[code], ok: false as const };
 }
 
-export { getLastOrder, placeOrder };
+export { placeOrder, reconcileOrder };

@@ -6,10 +6,11 @@ import IconMeetup from '@components/icons/Meetup.astro';
 import IconSoundCloud from '@components/icons/SoundCloud.astro';
 import IconSpotify from '@components/icons/Spotify.astro';
 import { BRAND } from '@lib/shared/brand';
-import { LINKS, NAV_GROUPS, SITE_UPDATED } from '@lib/shared/constants';
+import { LINKS, NAV_GROUPS, ONBOARDING_ROUTE, SITE_UPDATED } from '@lib/shared/constants';
 import { formatDateStamp } from '@lib/shared/utils';
 
 const ACCOUNT_LINKS = [
+    { href: ONBOARDING_ROUTE, label: 'Onboarding' },
     { href: '/here', label: 'Here' },
     { href: '/store/cart', label: 'Cart' },
     { href: '/store/orders', label: 'Orders' },
@@ -25,6 +26,8 @@ const SOCIALS = [
     { Icon: IconSoundCloud, href: LINKS.soundcloud, label: 'SoundCloud' },
     { Icon: IconLinktree, href: LINKS.linktree, label: 'Linktree' },
 ];
+
+const SOCIAL_ICON_SIZE = 32;
 
 const columns = [
     ...NAV_GROUPS.flatMap(group => ('items' in group ? [{ head: group.label, items: [...group.items] }] : [])),
@@ -48,7 +51,7 @@ const year = new Date().getFullYear();
 ---
 
 <footer
-    class="border-t-2 border-border-strong bg-bg-sunken"
+    class="slab--well border-border-strong border-t-2"
     aria-label="Site footer"
 >
     <div class="stage stage--tight">
@@ -58,12 +61,13 @@ const year = new Date().getFullYear();
         >
             {columns.map(column => (
                 <div>
-                    <h2 class="footer__head label mb-(--space-2xs) text-text-secondary">{column.head}</h2>
-                    <ul class="list-none">
+                    <h2 class="footer__head label mb-(--space-sm) text-text-inverse-secondary">{column.head}</h2>
+                    <ul class="flex flex-col gap-(--space-2xs) list-none">
                         {column.items.map(item => (
                             <li>
                                 <a
-                                    class="footer__link active:translate-y-px hover:text-link inline-flex items-center min-h-9 leading-normal text-sm transition-[color,transform]"
+                                    class="footer__link active:translate-y-px hover:text-link-on-inverse inline-flex items-center min-h-9 text-base transition-[color,translate]"
+                                    data-footer-onboarding={item.href === ONBOARDING_ROUTE ? '' : undefined}
                                     href={item.href}
                                 >
                                     {item.label}
@@ -75,9 +79,43 @@ const year = new Date().getFullYear();
             ))}
         </div>
     </div>
-    <div class="stage stage--flush border-t-2 border-border-strong">
+    <div class="stage stage--flush border-border-inverse-strong border-t-2">
         <div class="footer__row footer__sign">
-            <ul class="footer__socials [grid-area:socials] flex gap-(--space-2xs) list-none">
+            <div class="footer__meta">
+                <p class="footer__copy text-balance">
+                    &copy; {year}&#32;
+                    <span class="footer__owner">
+                        <a
+                            class="footer__home"
+                            href="/"
+                        >
+                            {BRAND.name}
+                        </a>
+                    </span>
+                </p>
+                <p class="footer__stamp">
+                    <span class="footer__credit whitespace-nowrap">
+                        Made by&#32;
+                        <a
+                            class="footer__credit-link"
+                            href={LINKS.aephonics}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                        >
+                            Aephonics
+                            <span class="sr-only">&nbsp;(opens in a new tab)</span>
+                        </a>
+                    </span>
+                    <span
+                        class="max-lg:hidden"
+                        aria-hidden="true"
+                    >
+                        &middot;
+                    </span>
+                    <span class="footer__updated whitespace-nowrap">Updated <time datetime={SITE_UPDATED}>{formatDateStamp(updated)}</time></span>
+                </p>
+            </div>
+            <ul class="footer__socials flex gap-(--space-2xs) list-none">
                 {SOCIALS.map(({ Icon, href, label }) => (
                     <li>
                         <a
@@ -86,19 +124,12 @@ const year = new Date().getFullYear();
                             rel="noopener noreferrer"
                             target="_blank"
                         >
-                            <Icon />
+                            <Icon size={SOCIAL_ICON_SIZE} />
                             <span class="sr-only">{label} (opens in a new tab)</span>
                         </a>
                     </li>
                 ))}
             </ul>
-            <div class="footer__meta">
-                <p class="footer__copy text-balance">&copy; {year} <span class="footer__owner whitespace-nowrap"><a class="footer__home" href="/">{BRAND.name}</a>.</span> All rights reserved.</p>
-                <p class="footer__stamp">
-                    <span class="footer__credit whitespace-nowrap">Made by <a class="footer__credit-link" href={LINKS.aephonics} rel="noopener noreferrer" target="_blank">Aephonics<span class="sr-only">&nbsp;(opens in a new tab)</span></a>.</span>
-                    <span class="footer__updated whitespace-nowrap">Updated <time datetime={SITE_UPDATED}>{formatDateStamp(updated)}</time>.</span>
-                </p>
-            </div>
         </div>
     </div>
 </footer>
@@ -106,11 +137,11 @@ const year = new Date().getFullYear();
 <style>
     .footer__credit-link,
     .footer__home {
-        color: var(--color-link);
+        color: var(--color-link-on-inverse);
         display: inline-block;
         text-decoration-color: transparent;
         text-decoration-line: underline;
-        text-underline-offset: 3px;
+        text-underline-offset: 4px;
         transition:
             color var(--duration-fast) var(--motion-ease-ui),
             text-decoration-color var(--duration-fast) var(--motion-ease-ui),
@@ -124,7 +155,6 @@ const year = new Date().getFullYear();
 
     .footer__credit-link:hover,
     .footer__home:hover {
-        color: var(--color-link-hover);
         text-decoration-color: currentcolor;
     }
 
@@ -133,40 +163,43 @@ const year = new Date().getFullYear();
         display: grid;
         grid-template-columns: repeat(var(--footer-cols), max-content);
         justify-content: space-between;
-        padding-inline-end: var(--space-2xl);
+        padding-inline-end: max(0px, var(--launcher-size) + var(--space-2xs) - var(--shell-pad));
         row-gap: var(--space-2xl);
     }
 
+    .footer__head {
+        font-size: var(--text-lg);
+    }
+
     .footer__meta {
-        align-items: flex-end;
         display: flex;
         flex-direction: column;
-        gap: var(--space-3xs);
-        grid-area: meta;
-        text-align: right;
+        gap: var(--space-2xs);
     }
 
     .footer__row {
         align-items: center;
-        color: var(--color-text-secondary);
+        color: var(--color-text-inverse-secondary);
         font-family: var(--font-mono);
-        font-size: var(--text-xs);
+        font-size: var(--text-base);
         gap: var(--space-sm);
         letter-spacing: 0.04em;
-        min-height: calc(var(--control-size) + 2 * var(--space-2xs));
-        padding-block: var(--space-2xs);
+        line-height: var(--text-base--line-height);
+        min-height: calc(var(--control-size) + 2 * var(--space-lg));
+        padding-block: var(--space-lg);
     }
 
     .footer__sign {
         --footer-social: 56px;
         display: grid;
-        grid-template-areas: 'socials meta';
         grid-template-columns: auto auto;
         justify-content: space-between;
+        padding-inline-end: max(0px, var(--launcher-size) + var(--space-2xs) - var(--shell-pad));
     }
 
     .footer__social {
         align-items: center;
+        color: var(--color-text-inverse);
         display: inline-flex;
         height: var(--footer-social);
         justify-content: center;
@@ -176,24 +209,24 @@ const year = new Date().getFullYear();
         width: var(--footer-social);
     }
 
-    .footer__social :global(svg) {
-        height: 32px;
-        width: 32px;
-    }
-
     .footer__social:active {
         transform: translateY(1px);
     }
 
     .footer__social:hover {
-        color: var(--color-link);
+        color: var(--color-link-on-inverse);
     }
 
     .footer__stamp {
         display: flex;
         flex-wrap: wrap;
         gap: var(--space-2xs);
-        justify-content: flex-end;
+    }
+
+    @media (max-width: 1024px) {
+        .footer__stamp {
+            flex-direction: column;
+        }
     }
 
     @media (max-width: 768px) {
@@ -201,26 +234,39 @@ const year = new Date().getFullYear();
             grid-template-columns: repeat(2, max-content);
         }
 
-        .footer__meta {
-            align-items: center;
-            text-align: center;
-        }
-
         .footer__sign {
-            grid-template-areas:
-                'socials'
-                'meta';
             grid-template-columns: minmax(0, 1fr);
-            justify-items: center;
         }
 
         .footer__socials {
             flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .footer__stamp {
-            justify-content: center;
         }
     }
 </style>
+
+<script>
+    import { ONBOARDING_ROUTE } from '@lib/shared/constants';
+    import { getOnboardingHref } from '@lib/account/onboarding';
+    import { getSession, onSessionChange } from '@lib/account/session';
+    import { registerPageScript } from '@lib/shared/utils';
+
+    let unsubscribe: (() => void) | undefined;
+
+    function initFooter(signal: AbortSignal) {
+        renderOnboarding();
+        unsubscribe?.();
+        unsubscribe = onSessionChange(renderOnboarding);
+        signal.addEventListener('abort', () => unsubscribe?.(), { once: true });
+    }
+
+    function renderOnboarding() {
+        const link = document.querySelector<HTMLAnchorElement>('[data-footer-onboarding]');
+        const session = getSession();
+
+        if (!link) return;
+
+        link.href = session ? getOnboardingHref(session.email) : ONBOARDING_ROUTE;
+    }
+
+    registerPageScript(initFooter);
+</script>

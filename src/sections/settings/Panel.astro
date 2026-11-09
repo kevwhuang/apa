@@ -2,20 +2,12 @@
 import IconArrow from '@components/icons/Arrow.astro';
 import IconEye from '@components/icons/Eye.astro';
 import IconEyeOff from '@components/icons/EyeOff.astro';
-import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import { AVATAR, GENRES, PASSWORD_MIN_LENGTH, PROFILE_FIELDS, PROFILE_ROLES, SPOTLIGHT, SPOTLIGHT_EXTENSIONS_LABEL, US_STATES } from '@lib/shared/constants';
+import { AVATAR, GENRES, PASSWORD_MIN_LENGTH, PROFILE_FIELDS, PROFILE_ROLES, UPLOAD, US_STATES } from '@lib/shared/constants';
 import { AVATAR_EXTENSIONS_OR_LIST } from '@lib/account/images';
-import { formatBytes, formatDateStamp, formatProds, getInitials, getStanding, pickTileColor } from '@lib/shared/utils';
-
-const ATTENDANCE = [
-    { date: '2026-07-25T13:30:00-05:00', event: '2026 July \u00b7 Bash' },
-    { date: '2026-07-09T18:00:00-05:00', event: '2026 July \u00b7 Assembly \u00b7 dk darkly' },
-    { date: '2026-06-11T18:00:00-05:00', event: '2026 June \u00b7 Assembly \u00b7 Alex LaCroix' },
-    { date: '2026-04-25T13:30:00-05:00', event: '2026 April \u00b7 Bash' },
-    { date: '2025-10-25T13:30:00-05:00', event: '2025 October \u00b7 Bash' },
-    { date: '2024-03-20T19:00:00-05:00', event: '2024 March \u00b7 Assembly \u00b7 Den Zuko' },
-];
+import { UPLOAD_EXTENSIONS_OR_LIST } from '@lib/audio/uploads';
+import { formatBytes, formatDateStamp, formatProds, formatRole, getInitials, pickTileColor } from '@lib/shared/utils';
+import { getProdsAttendance, getProdsBalance } from '@lib/account/prods';
 
 const DEMO_PROFILE = {
     artistName: 'Nightshift',
@@ -30,7 +22,6 @@ const DEMO_PROFILE = {
         spotify: 'https://open.spotify.com/artist/4kZ1nightshift',
         youtube: 'https://youtube.com/@nightshift',
     },
-    prods: 8,
     role: 'producer',
     state: 'TX',
     track: { name: 'Untitled Sketch 09.mp3' },
@@ -44,146 +35,100 @@ const LINK_FIELDS = [
     { label: 'SoundCloud', name: 'soundcloud', placeholder: 'https://soundcloud.com/\u2026', value: DEMO_PROFILE.links.soundcloud },
     { label: 'YouTube', name: 'youtube', placeholder: 'https://youtube.com/@\u2026', value: DEMO_PROFILE.links.youtube },
 ];
-
-const PRODS_LEDGER = [
-    { amount: 1, date: '2024-03-12T13:00:00-05:00', reason: 'Welcome Prod' },
-    { amount: 1, date: '2024-03-20T19:00:00-05:00', reason: 'Attended 2024 March \u00b7 Assembly \u00b7 Den Zuko' },
-    { amount: 1, date: '2025-10-25T13:30:00-05:00', reason: 'Attended 2025 October \u00b7 Bash' },
-    { amount: 1, date: '2026-04-25T13:30:00-05:00', reason: 'Attended 2026 April \u00b7 Bash' },
-    { amount: 2, date: '2026-04-25T17:00:00-05:00', reason: 'Finished a Bash track' },
-    { amount: -1, date: '2026-05-02T09:00:00-05:00', reason: 'Redeemed \u2014 Store credit' },
-    { amount: 1, date: '2026-06-11T18:00:00-05:00', reason: 'Attended 2026 June \u00b7 Assembly \u00b7 Alex LaCroix' },
-    { amount: 1, date: '2026-07-09T18:00:00-05:00', reason: 'Attended 2026 July \u00b7 Assembly \u00b7 dk darkly' },
-    { amount: 1, date: '2026-07-25T13:30:00-05:00', reason: 'Attended 2026 July \u00b7 Bash' },
-];
-
-const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
-    ...entry,
-    balance: PRODS_LEDGER.slice(0, index + 1).reduce((total, item) => total + item.amount, 0),
-    change: entry.amount > 0 ? `+${entry.amount}` : `\u2212${Math.abs(entry.amount)}`,
-})).toReversed();
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-border-strong"
+    class="stage stage--tight"
     aria-labelledby="settings-title"
 >
-    <div class="flex flex-col gap-6">
-        <PageHead
-            class="max-w-4xl text-5xl md:text-7xl"
-            eyebrow="Account settings"
-            headingId="settings-title"
-        >
-            Tune your card.
-        </PageHead>
-        <p
-            class="max-w-2xl text-lg text-text-secondary"
-            data-motion="rise"
-        >
-            Everything your roster card carries: the name people read, the portrait behind it, a
-            short bio, what you make, where you are based, where else you live online, and the
-            spotlight track that plays on the card.
-        </p>
-    </div>
-</section>
-
-<section
-    class="stage stage--tight"
-    aria-label="Account and profile"
->
+    <h1
+        id="settings-title"
+        class="sr-only"
+    >
+        Settings
+    </h1>
     <div
         class="flex flex-col gap-(--space-2xl)"
         data-motion-stagger="rise"
     >
-        <div class="flex flex-col gap-5">
-            <div class="settings__overview slab slab--bare slab--card grid gap-px">
-                <div class="p-(--space-md) bg-bg-raised">
-                    <p class="label mb-4 text-text-secondary">Your card</p>
-                    <div class="flex flex-wrap gap-5">
-                        <PlaceholderTile
-                            class="settings__tile self-start shrink-0 aspect-square w-[104px] border-2 border-border-strong"
-                            color={DEMO_TILE.bg}
-                            label={getInitials(DEMO_PROFILE.artistName)}
-                            labelClass="settings__initials leading-none text-[32cqw]"
-                            labelColor={DEMO_TILE.text}
-                        >
-                            <img
-                                class="absolute inset-0 object-cover h-full w-full"
-                                alt=""
-                                data-settings-avatar
-                                hidden
-                            />
-                        </PlaceholderTile>
-                        <div class="flex-[1_1_200px]">
-                            <p
-                                class="mb-2 font-bold font-sans text-xl tracking-tight wrap-break-word"
-                                data-settings-name
-                            >
-                                {DEMO_PROFILE.artistName}
-                            </p>
-                            <p class="mb-3">
-                                <span
-                                    class="chip settings__role"
-                                    data-settings-role
-                                >
-                                    {DEMO_PROFILE.role}
-                                </span>
-                            </p>
-                            <p class="mb-3 font-mono text-xs text-text-secondary">
-                                <span
-                                    class="capitalize"
-                                    data-settings-role
-                                >
-                                    {DEMO_PROFILE.role}
-                                </span> &mdash; {DEMO_PROFILE.city}, {DEMO_PROFILE.state}
-                            </p>
-                            <ul class="flex flex-wrap gap-2 list-none">
-                                {DEMO_PROFILE.genres.map(genre => (
-                                    <li class="inline-flex items-center h-6 px-2 border-2 border-border-strong font-bold font-mono text-xs tracking-[0.06em] uppercase">{genre}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <dl
-                    class="settings__stats grid gap-px"
-                    aria-label="Account standing"
+        <div class="flex flex-col gap-(--space-md)">
+            <div class="settings__overview slab slab--bare slab--card grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-px max-lg:grid-cols-2 max-md:grid-cols-1">
+                <section
+                    class="bg-bg-raised"
+                    aria-label="Your card"
                 >
-                    <div class="p-(--space-md) bg-bg-raised">
-                        <dt class="label mb-2 text-text-secondary">Prods balance</dt>
+                    <PlaceholderTile
+                        class="settings__tile aspect-square"
+                        color={DEMO_TILE.background}
+                        label={getInitials(DEMO_PROFILE.artistName)}
+                        labelClass="settings__initials leading-none text-6xl"
+                        labelColor={DEMO_TILE.text}
+                    >
+                        <img
+                            class="absolute inset-0 object-cover h-full w-full"
+                            alt=""
+                            data-settings-avatar
+                            hidden
+                        />
+                        <p
+                            class="label absolute left-0 top-0 p-(--space-xs) border-b-2 border-border-strong border-r-2 bg-bg-page text-text"
+                            data-settings-role
+                        >
+                            {formatRole(DEMO_PROFILE.role)}
+                        </p>
+                    </PlaceholderTile>
+                    <div class="p-(--space-md)">
+                        <p
+                            class="mb-3 font-bold font-sans text-2xl tracking-tight wrap-break-word"
+                            data-settings-name
+                        >
+                            {DEMO_PROFILE.artistName}
+                        </p>
+                        <p class="mb-6 font-mono text-base wrap-anywhere text-text-secondary">
+                            {DEMO_PROFILE.city}, {DEMO_PROFILE.state}
+                        </p>
+                        <ul class="flex flex-wrap gap-2 list-none">
+                            {DEMO_PROFILE.genres.map(genre => (
+                                <li class="label inline-flex items-center h-6 px-2 border-2 border-border-strong">{genre}</li>
+                            ))}
+                        </ul>
+                    </div>
+                </section>
+                <dl
+                    class="settings__stats grid grid-cols-2 gap-px max-lg:grid-cols-1"
+                    aria-label="Account summary"
+                >
+                    <div class="flex flex-col justify-center p-(--space-md) bg-bg-raised">
+                        <dt class="label mb-2 text-text-secondary">Balance</dt>
                         <dd
-                            class="font-bold font-display text-3xl tracking-[-0.02em]"
+                            class="font-bold font-sans text-xl"
                             data-settings-prods
                         >
-                            {formatProds(DEMO_PROFILE.prods)}
+                            {formatProds(getProdsBalance(DEMO_PROFILE.email))}
                         </dd>
                     </div>
-                    <div class="p-(--space-md) bg-bg-raised">
-                        <dt class="label mb-2 text-text-secondary">Events attended</dt>
-                        <dd class="font-bold font-display text-3xl tracking-[-0.02em]">{ATTENDANCE.length}</dd>
-                    </div>
-                    <div class="p-(--space-md) bg-bg-raised">
-                        <dt class="label mb-2 text-text-secondary">Standing</dt>
+                    <div class="flex flex-col justify-center p-(--space-md) bg-bg-raised">
+                        <dt class="label mb-2 text-text-secondary">Attended</dt>
                         <dd
-                            class="label"
-                            data-settings-standing
+                            class="font-bold font-sans text-xl"
+                            data-settings-attended
                         >
-                            {getStanding(DEMO_PROFILE.prods)}
+                            {getProdsAttendance(DEMO_PROFILE.email).length}
                         </dd>
                     </div>
-                    <div class="p-(--space-md) bg-bg-raised">
+                    <div class="col-span-full flex flex-col justify-center p-(--space-md) bg-bg-raised">
                         <dt class="label mb-2 text-text-secondary">Member since</dt>
                         <dd
-                            class="font-mono text-sm"
+                            class="font-bold font-sans text-xl"
                             data-settings-since
                         >
                             {formatDateStamp(DEMO_PROFILE.joined)}
                         </dd>
                     </div>
-                    <div class="col-span-full p-(--space-md) bg-bg-raised">
+                    <div class="col-span-full flex flex-col justify-center p-(--space-md) bg-bg-raised">
                         <dt class="label mb-2 text-text-secondary">Email</dt>
                         <dd
-                            class="font-mono text-sm wrap-break-word"
+                            class="font-bold font-sans text-xl wrap-anywhere"
                             data-settings-email
                         >
                             {DEMO_PROFILE.email}
@@ -192,12 +137,12 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                 </dl>
             </div>
             <a
-                class="action-text hover:text-link inline-flex items-center self-start min-h-(--control-size) gap-(--space-2xs) px-(--space-3xs) underline transition-colors"
+                class="action-text hover:text-link inline-flex items-center self-start min-h-(--control-size) gap-2 px-(--space-3xs) underline transition-[color,transform]"
                 data-settings-onboarding
                 hidden
                 href="/onboarding"
             >
-                Finish your profile <IconArrow />
+                Finish profile <IconArrow />
             </a>
         </div>
         <form
@@ -207,10 +152,10 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
             <h2 class="text-2xl">
                 Profile
             </h2>
-            <div class="flex flex-col gap-2">
-                <p class="label mb-1 text-text-secondary">{PROFILE_FIELDS.portrait.label}</p>
+            <div class="flex flex-col gap-(--space-2xs)">
+                <p class="label text-text-secondary">{PROFILE_FIELDS.portrait.label}</p>
                 <div class="settings__track aria-busy:cursor-progress aria-busy:opacity-60 flex flex-wrap items-center gap-(--space-md)">
-                    <label class="settings__pick">
+                    <label class="halftone settings__pick">
                         <span class="label">{PROFILE_FIELDS.portrait.picker}</span>
                         <input
                             id="settings-portrait"
@@ -224,7 +169,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                         />
                     </label>
                     <div
-                        class="settings__staged settings__staged--portrait slab slab--sunk"
+                        class="settings__staged slab slab--sunk"
                         data-portrait-staged
                         hidden
                     >
@@ -234,7 +179,8 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                             data-portrait-preview
                         />
                         <button
-                            class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-colors"
+                            class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-[color,transform]"
+                            aria-label="Remove portrait"
                             data-portrait-remove
                             type="button"
                         >
@@ -244,24 +190,24 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                 </div>
                 <p
                     id="settings-portrait-error"
-                    class="action-text text-error-text"
+                    class="text-error-text"
                     data-field-error
                     hidden
                 />
                 <p
                     id="settings-portrait-help"
-                    class="text-sm text-text-secondary"
+                    class="text-base text-text-secondary"
                 >
                     {AVATAR_EXTENSIONS_OR_LIST}. Up to {formatBytes(AVATAR.maxFileBytes)}, at least {AVATAR.minEdgePixels}px on each side.
                 </p>
             </div>
-            <div class="flex flex-col gap-2">
-                <label class="block">
-                    <span class="label block mb-2 text-text-secondary">{PROFILE_FIELDS.artistName.label}</span>
+            <div class="flex flex-col gap-(--space-2xs)">
+                <label class="flex flex-col gap-(--space-2xs)">
+                    <span class="label text-text-secondary">{PROFILE_FIELDS.artistName.label}</span>
                     <input
                         id="settings-name"
                         class="input font-sans"
-                        aria-describedby="settings-name-error settings-name-help"
+                        aria-describedby="settings-name-error"
                         aria-invalid="false"
                         autocomplete={PROFILE_FIELDS.artistName.autocomplete}
                         maxlength={PROFILE_FIELDS.artistName.maxLength}
@@ -272,24 +218,18 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                 </label>
                 <p
                     id="settings-name-error"
-                    class="action-text text-error-text"
+                    class="text-error-text"
                     data-field-error
                     hidden
                 />
-                <p
-                    id="settings-name-help"
-                    class="text-sm text-text-secondary"
-                >
-                    {PROFILE_FIELDS.artistName.help}
-                </p>
             </div>
-            <div class="flex flex-col gap-2">
-                <label class="block">
-                    <span class="label block mb-2 text-text-secondary">{PROFILE_FIELDS.bio.label}</span>
+            <div class="flex flex-col gap-(--space-2xs)">
+                <label class="flex flex-col gap-(--space-2xs)">
+                    <span class="label text-text-secondary">{PROFILE_FIELDS.bio.label}</span>
                     <textarea
                         id="settings-bio"
                         class="input input--area font-sans"
-                        aria-describedby="settings-bio-error settings-bio-help"
+                        aria-describedby="settings-bio-error settings-bio-count"
                         aria-invalid="false"
                         maxlength={PROFILE_FIELDS.bio.maxLength}
                         name="bio"
@@ -299,29 +239,27 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                 </label>
                 <p
                     id="settings-bio-error"
-                    class="action-text text-error-text"
+                    class="text-error-text"
                     data-field-error
                     hidden
                 />
                 <p
-                    id="settings-bio-help"
-                    class="text-sm text-text-secondary"
+                    id="settings-bio-count"
+                    class="font-mono tabular-nums text-sm text-text-secondary"
+                    aria-live="polite"
                 >
-                    <span data-bio-count>{DEMO_PROFILE.bio.length}</span> of {PROFILE_FIELDS.bio.maxLength} characters.
-                    {PROFILE_FIELDS.bio.help}
+                    <span data-bio-count>{DEMO_PROFILE.bio.length}</span> / {PROFILE_FIELDS.bio.maxLength}<span class="sr-only">&#32;characters</span>
                 </p>
             </div>
-            <fieldset class="flex flex-col gap-3">
-                <legend class="label mb-1 text-text-secondary">
-                    {PROFILE_FIELDS.genres.label} <span class="text-text-secondary">({PROFILE_FIELDS.genres.qualifier})</span>
+            <fieldset class="flex flex-col gap-(--space-2xs)">
+                <legend class="label mb-(--space-2xs) text-text-secondary">
+                    {PROFILE_FIELDS.genres.label}
                 </legend>
                 <div class="flex flex-wrap gap-2">
                     {GENRES.map(genre => (
                         <label class="settings__chip">
                             <input
                                 class="box"
-                                aria-describedby="settings-genres-error"
-                                aria-invalid="false"
                                 checked={DEMO_PROFILE.genres.includes(genre)}
                                 name="genres"
                                 type="checkbox"
@@ -331,15 +269,9 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                         </label>
                     ))}
                 </div>
-                <p
-                    id="settings-genres-error"
-                    class="action-text text-error-text"
-                    data-field-error
-                    hidden
-                />
             </fieldset>
-            <fieldset class="flex flex-col gap-3">
-                <legend class="label mb-1 text-text-secondary">
+            <fieldset class="flex flex-col gap-(--space-2xs)">
+                <legend class="label mb-(--space-2xs) text-text-secondary">
                     {PROFILE_FIELDS.role.label} <span class="text-text-secondary">({PROFILE_FIELDS.role.qualifier})</span>
                 </legend>
                 <div class="flex flex-wrap gap-2">
@@ -352,15 +284,15 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                                 type="radio"
                                 value={role.id}
                             />
-                            {role.id}
+                            {role.label}
                         </label>
                     ))}
                 </div>
             </fieldset>
-            <div class="settings__pair">
-                <div class="flex flex-col gap-2">
-                    <label class="block">
-                        <span class="label block mb-2 text-text-secondary">{PROFILE_FIELDS.city.label}</span>
+            <div class="grid grid-cols-2 gap-(--space-lg) max-md:grid-cols-1">
+                <div class="flex flex-col gap-(--space-2xs)">
+                    <label class="flex flex-col gap-(--space-2xs)">
+                        <span class="label text-text-secondary">{PROFILE_FIELDS.city.label}</span>
                         <input
                             id="settings-city"
                             class="input font-sans"
@@ -375,14 +307,14 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                     </label>
                     <p
                         id="settings-city-error"
-                        class="action-text text-error-text"
+                        class="text-error-text"
                         data-field-error
                         hidden
                     />
                 </div>
-                <div class="flex flex-col gap-2">
-                    <label class="block">
-                        <span class="label block mb-2 text-text-secondary">{PROFILE_FIELDS.state.label}</span>
+                <div class="flex flex-col gap-(--space-2xs)">
+                    <label class="flex flex-col gap-(--space-2xs)">
+                        <span class="label text-text-secondary">{PROFILE_FIELDS.state.label}</span>
                         <span class="select">
                             <select
                                 id="settings-state"
@@ -406,7 +338,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                     </label>
                     <p
                         id="settings-state-error"
-                        class="action-text text-error-text"
+                        class="text-error-text"
                         data-field-error
                         hidden
                     />
@@ -423,20 +355,22 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
             class="settings__form slab slab--card"
             data-links-form
         >
-            <h2 class="text-2xl">
-                Links
-            </h2>
-            <p class="max-w-2xl text-sm text-text-secondary">
-                Where else you live online. Every field is optional, and whatever you fill in shows
-                up on your roster card.
-            </p>
+            <hgroup class="flex flex-col gap-(--space-xs)">
+                <h2 class="text-2xl">
+                    Links
+                </h2>
+                <p class="max-w-2xl text-lg text-text-secondary">
+                    Where else you live online. Every field is optional, and whatever you fill in shows
+                    up on your roster card.
+                </p>
+            </hgroup>
             {LINK_FIELDS.map(field => (
-                <div class="flex flex-col gap-2">
-                    <label class="block">
-                        <span class="label block mb-2 text-text-secondary">{field.label}</span>
+                <div class="flex flex-col gap-(--space-2xs)">
+                    <label class="flex flex-col gap-(--space-2xs)">
+                        <span class="label text-text-secondary">{field.label}</span>
                         <input
                             id={`settings-${field.name}`}
-                            class="input font-mono text-sm"
+                            class="input font-mono"
                             aria-describedby={`settings-${field.name}-error`}
                             aria-invalid="false"
                             inputmode="url"
@@ -449,7 +383,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                     </label>
                     <p
                         id={`settings-${field.name}-error`}
-                        class="action-text text-error-text"
+                        class="text-error-text"
                         data-field-error
                         hidden
                     />
@@ -464,14 +398,120 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
         </form>
         <form
             class="settings__form slab slab--card"
+            data-track-form
+        >
+            <hgroup class="flex flex-col gap-(--space-xs)">
+                <h2 class="text-2xl">
+                    Spotlight
+                </h2>
+                <p class="max-w-2xl text-lg text-text-secondary">
+                    One file, and it is the one that plays on your roster card. Swap it whenever the
+                    better take arrives.
+                </p>
+            </hgroup>
+            <div class="flex flex-col gap-(--space-2xs)">
+                <div class="settings__track aria-busy:cursor-progress aria-busy:opacity-60 grid gap-(--space-md)">
+                    <label class="halftone settings__pick">
+                        <span class="label">Choose an audio file</span>
+                        <input
+                            id="settings-track"
+                            class="settings__file sr-only"
+                            accept={UPLOAD.acceptAttribute}
+                            aria-describedby="settings-track-error settings-track-help"
+                            aria-invalid="false"
+                            data-track-input
+                            name="track"
+                            type="file"
+                        />
+                    </label>
+                    <div
+                        class="settings__staged slab slab--sunk"
+                        data-track-staged
+                    >
+                        <p
+                            class="min-w-0 font-bold font-sans wrap-anywhere"
+                            data-track-name
+                        >
+                            {DEMO_PROFILE.track.name}
+                        </p>
+                        <button
+                            class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-[color,transform]"
+                            aria-label="Remove track"
+                            data-track-remove
+                            type="button"
+                        >
+                            Remove
+                        </button>
+                    </div>
+                </div>
+                <p
+                    id="settings-track-error"
+                    class="text-error-text"
+                    data-field-error
+                    hidden
+                />
+                <p
+                    id="settings-track-help"
+                    class="text-base text-text-secondary"
+                >
+                    {UPLOAD_EXTENSIONS_OR_LIST} only. Up to {formatBytes(UPLOAD.maxFileBytes)}.
+                </p>
+            </div>
+            <button
+                class="btn btn--primary self-start"
+                type="submit"
+            >
+                Save track
+            </button>
+        </form>
+        <form
+            class="settings__form slab slab--card"
             data-password-form
         >
             <h2 class="text-2xl">
                 Password
             </h2>
-            <div class="flex flex-col gap-2">
-                <label class="block">
-                    <span class="label block mb-2 text-text-secondary">New password</span>
+            <div class="flex flex-col gap-(--space-2xs)">
+                <label class="flex flex-col gap-(--space-2xs)">
+                    <span class="label text-text-secondary">Current password</span>
+                    <span class="block relative">
+                        <input
+                            id="settings-current"
+                            class="input pr-12 font-sans"
+                            aria-describedby="settings-current-error"
+                            aria-invalid="false"
+                            autocomplete="current-password"
+                            minlength={PASSWORD_MIN_LENGTH}
+                            name="current"
+                            required
+                            type="password"
+                        />
+                        <button
+                            class="settings__reveal"
+                            aria-label="Show password"
+                            aria-pressed="false"
+                            data-reveal="settings-current"
+                            type="button"
+                        >
+                            <span class="settings__glyph--show flex items-center">
+                                <IconEye />
+                            </span>
+                            <span class="settings__glyph--hide flex items-center">
+                                <IconEyeOff />
+                            </span>
+                        </button>
+                    </span>
+                </label>
+                <p
+                    id="settings-current-error"
+                    class="text-error-text"
+                    data-field-error
+                    hidden
+                />
+            </div>
+            <div class="flex flex-col gap-(--space-2xs)">
+                <label class="flex flex-col gap-(--space-2xs)">
+                    <span class="label text-text-secondary">New password</span>
                     <span class="block relative">
                         <input
                             id="settings-password"
@@ -502,17 +542,17 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                 </label>
                 <p
                     id="settings-password-error"
-                    class="action-text text-error-text"
+                    class="text-error-text"
                     data-field-error
                     hidden
                 />
-                <p class="text-sm text-text-secondary">
+                <p class="text-base text-text-secondary">
                     At least {PASSWORD_MIN_LENGTH} characters with a letter and a digit.
                 </p>
             </div>
-            <div class="flex flex-col gap-2">
-                <label class="block">
-                    <span class="label block mb-2 text-text-secondary">Confirm new password</span>
+            <div class="flex flex-col gap-(--space-2xs)">
+                <label class="flex flex-col gap-(--space-2xs)">
+                    <span class="label text-text-secondary">Confirm new password</span>
                     <span class="block relative">
                         <input
                             id="settings-confirm"
@@ -542,7 +582,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                 </label>
                 <p
                     id="settings-confirm-error"
-                    class="action-text text-error-text"
+                    class="text-error-text"
                     data-field-error
                     hidden
                 />
@@ -554,186 +594,154 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
                 Update password
             </button>
         </form>
-        <form
-            class="settings__form settings__form--full slab slab--card"
-            data-track-form
-        >
-            <h2 class="text-2xl">
-                Spotlight
-            </h2>
-            <p class="max-w-2xl text-sm text-text-secondary">
-                One file, and it is the one that plays on your roster card. Swap it whenever the
-                better take arrives.
-            </p>
-            <div class="settings__track aria-busy:cursor-progress aria-busy:opacity-60 flex flex-wrap items-center gap-(--space-md)">
-                <label class="settings__pick">
-                    <span class="label">Choose an audio file</span>
-                    <input
-                        id="settings-track"
-                        class="settings__file sr-only"
-                        accept={SPOTLIGHT.acceptAttribute}
-                        aria-describedby="settings-track-error settings-track-help"
-                        aria-invalid="false"
-                        data-track-input
-                        name="track"
-                        type="file"
-                    />
-                </label>
-                <p
-                    class="flex-[1_1_200px] text-sm text-text-secondary"
-                    data-track-empty
-                    hidden
-                >
-                    Nothing staged yet.
-                </p>
-                <div
-                    class="settings__staged slab slab--sunk"
-                    data-track-staged
-                >
-                    <p
-                        class="min-w-0 font-bold font-sans wrap-anywhere"
-                        data-track-name
-                    >
-                        {DEMO_PROFILE.track.name}
-                    </p>
-                    <button
-                        class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-colors"
-                        data-track-remove
-                        type="button"
-                    >
-                        Remove
-                    </button>
-                </div>
-            </div>
-            <p
-                id="settings-track-error"
-                class="action-text text-error-text"
-                data-field-error
-                hidden
-            />
-            <p
-                id="settings-track-help"
-                class="text-sm text-text-secondary"
-            >
-                {SPOTLIGHT_EXTENSIONS_LABEL} only. Up to {formatBytes(SPOTLIGHT.maxFileBytes)}.
-            </p>
-            <button
-                class="btn btn--primary self-start"
-                type="submit"
-            >
-                Save track
-            </button>
-        </form>
         <section
             class="settings__panel slab slab--card"
             aria-labelledby="settings-attendance-title"
         >
-            <h2
-                id="settings-attendance-title"
-                class="text-2xl"
+            <hgroup class="flex flex-col gap-(--space-xs)">
+                <h2
+                    id="settings-attendance-title"
+                    class="text-2xl"
+                >
+                    Attendance
+                </h2>
+                <p class="max-w-2xl text-lg text-text-secondary">
+                    Every event you have checked in to since you joined, newest first.
+                </p>
+            </hgroup>
+            <p
+                class="slab slab--empty slab--sunk text-base text-text-secondary"
+                data-settings-attendance-empty
+                hidden
             >
-                Attendance
-            </h2>
-            <p class="max-w-2xl text-sm text-text-secondary">
-                Every event you have checked in to since you joined, newest first.
+                No check-ins on file. Events you check in to appear here.
             </p>
             <div class="scroll-slot settings__scroller--attendance overflow-x-auto border-2 border-border-strong">
                 <table class="settings__table">
                     <caption class="sr-only">Events you checked in to, with the date of each check-in</caption>
                     <thead>
-                        <tr class="font-bold font-mono text-xs tracking-[0.06em] uppercase text-text-secondary">
+                        <tr class="label text-text-secondary">
                             <th
-                                class="px-4 py-3 text-left"
+                                class="w-full px-(--space-sm) py-(--space-xs) text-left whitespace-nowrap max-md:px-(--space-2xs)"
                                 scope="col"
                             >
                                 Event
                             </th>
                             <th
-                                class="px-4 py-3 text-right"
+                                class="px-(--space-sm) py-(--space-xs) text-right whitespace-nowrap max-md:hidden"
                                 scope="col"
                             >
                                 Date
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-border-strong">
-                        {ATTENDANCE.map(entry => (
-                            <tr>
-                                <th
-                                    class="px-4 py-4 font-bold font-sans text-left whitespace-nowrap"
-                                    scope="row"
-                                >
-                                    {entry.event}
-                                </th>
-                                <td class="px-4 py-4 font-mono text-right text-xs whitespace-nowrap text-text-secondary">
-                                    <time datetime={entry.date}>{formatDateStamp(new Date(entry.date))}</time>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
+                    <tbody
+                        class="divide-border-strong divide-y"
+                        data-settings-attendance
+                    />
                 </table>
+                <template data-settings-attendance-row>
+                    <tr>
+                        <th
+                            class="px-(--space-sm) py-(--space-sm) font-bold font-sans text-left wrap-anywhere max-md:px-(--space-2xs)"
+                            scope="row"
+                        >
+                            <div class="grid gap-(--space-3xs)">
+                                <span data-cell="event" />
+                                <time
+                                    class="hidden font-mono font-normal text-base whitespace-nowrap text-text-secondary max-md:block"
+                                    data-cell="date"
+                                />
+                            </div>
+                        </th>
+                        <td class="px-(--space-sm) py-(--space-sm) font-mono text-base text-right whitespace-nowrap text-text-secondary max-md:hidden">
+                            <time data-cell="date" />
+                        </td>
+                    </tr>
+                </template>
             </div>
         </section>
         <section
             class="settings__panel slab slab--card"
             aria-labelledby="settings-ledger-title"
         >
-            <h2
-                id="settings-ledger-title"
-                class="text-2xl"
-            >
-                Prods ledger
-            </h2>
-            <p class="max-w-2xl text-sm text-text-secondary">
-                Every Prod earned or spent since you joined, newest first, with the balance that
-                stood after each entry.
-            </p>
+            <hgroup class="flex flex-col gap-(--space-xs)">
+                <h2
+                    id="settings-ledger-title"
+                    class="text-2xl"
+                >
+                    Prods ledger
+                </h2>
+                <p class="max-w-2xl text-lg text-text-secondary">
+                    Every Prod earned or spent since you joined, newest first, with the balance that
+                    stood after each entry.
+                </p>
+            </hgroup>
             <div class="scroll-slot settings__scroller--ledger overflow-x-auto border-2 border-border-strong">
-                <table class="settings__table min-w-[520px]">
+                <table class="settings__table">
                     <caption class="sr-only">Dated ledger entries with reason, change, and running balance</caption>
                     <thead>
-                        <tr class="font-bold font-mono text-xs tracking-[0.06em] uppercase text-text-secondary">
+                        <tr class="label text-text-secondary">
                             <th
-                                class="px-4 py-3 text-left"
+                                class="px-(--space-sm) py-(--space-xs) text-left whitespace-nowrap max-md:hidden"
                                 scope="col"
                             >
                                 Date
                             </th>
                             <th
-                                class="px-4 py-3 text-left"
+                                class="w-full px-(--space-sm) py-(--space-xs) text-left whitespace-nowrap max-md:px-(--space-2xs)"
                                 scope="col"
                             >
                                 Reason
                             </th>
                             <th
-                                class="px-4 py-3 text-right"
+                                class="px-(--space-sm) py-(--space-xs) text-right whitespace-nowrap max-md:hidden"
                                 scope="col"
                             >
                                 Change
                             </th>
                             <th
-                                class="px-4 py-3 text-right"
+                                class="px-(--space-sm) py-(--space-xs) text-right whitespace-nowrap max-md:px-(--space-2xs)"
                                 scope="col"
                             >
                                 Balance
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-border-strong">
-                        {PRODS_ROWS.map(row => (
-                            <tr>
-                                <td class="px-4 py-4 font-mono text-xs whitespace-nowrap text-text-secondary">
-                                    <time datetime={row.date}>{formatDateStamp(new Date(row.date))}</time>
-                                </td>
-                                <td class="px-4 py-4 text-sm">{row.reason}</td>
-                                <td class:list={['px-4 py-4 font-mono text-right text-xs', row.amount < 0 && 'text-error-text']}>
-                                    {row.change}
-                                </td>
-                                <td class="px-4 py-4 font-mono text-right text-xs">{row.balance}</td>
-                            </tr>
-                        ))}
-                    </tbody>
+                    <tbody
+                        class="divide-border-strong divide-y"
+                        data-settings-ledger
+                    />
                 </table>
+                <template data-settings-ledger-row>
+                    <tr>
+                        <td class="px-(--space-sm) py-(--space-sm) font-mono text-base whitespace-nowrap text-text-secondary max-md:hidden">
+                            <time data-cell="date" />
+                        </td>
+                        <td class="px-(--space-sm) py-(--space-sm) text-base wrap-anywhere max-md:px-(--space-2xs)">
+                            <div class="grid gap-(--space-3xs)">
+                                <span data-cell="reason" />
+                                <time
+                                    class="hidden font-mono whitespace-nowrap text-text-secondary max-md:block"
+                                    data-cell="date"
+                                />
+                            </div>
+                        </td>
+                        <td
+                            class="px-(--space-sm) py-(--space-sm) font-mono text-base text-right whitespace-nowrap max-md:hidden"
+                            data-cell="change"
+                        />
+                        <td class="px-(--space-sm) py-(--space-sm) font-mono text-base text-right whitespace-nowrap max-md:px-(--space-2xs)">
+                            <div class="grid gap-(--space-3xs)">
+                                <span data-cell="balance" />
+                                <span
+                                    class="hidden max-md:block"
+                                    data-cell="change"
+                                />
+                            </div>
+                        </td>
+                    </tr>
+                </template>
             </div>
         </section>
     </div>
@@ -745,9 +753,10 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
         border: 2px solid var(--color-border-strong);
         display: flex;
         font-family: var(--font-mono);
-        font-size: var(--text-xs);
+        font-size: var(--text-sm);
         gap: var(--space-2xs);
-        letter-spacing: 0.025em;
+        letter-spacing: 0.06em;
+        line-height: 1;
         min-height: var(--control-size);
         padding: var(--space-2xs) var(--space-sm);
         text-transform: uppercase;
@@ -770,48 +779,38 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
     .settings__form {
         margin-inline: auto;
         max-width: var(--measure-form);
-        padding: var(--space-lg);
         width: 100%;
-    }
-
-    .settings__form--full {
-        max-width: none;
     }
 
     .settings__form,
     .settings__panel {
         display: flex;
         flex-direction: column;
-        gap: var(--space-md);
+        gap: var(--space-lg);
+        padding: var(--space-lg);
     }
 
     .settings__overview {
         --slab-fill: var(--color-border-strong);
-        grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-    }
-
-    .settings__pair {
-        display: grid;
-        gap: var(--space-md);
-        grid-template-columns: minmax(0, 1fr) minmax(0, 220px);
     }
 
     .settings__pick {
         align-items: center;
         background-color: var(--color-bg-page);
-        background-image: repeating-linear-gradient(135deg, var(--color-border-subtle) 0 6px, transparent 6px 12px);
         border: 2px dashed var(--color-border-strong);
         display: flex;
         flex: 1 1 220px;
-        justify-content: center;
         min-height: var(--control-size);
         padding: var(--space-2xs) var(--space-sm);
         position: relative;
-        text-align: center;
         transition:
             background-color var(--duration-fast) var(--motion-ease-ui),
             border-color var(--duration-fast) var(--motion-ease-ui),
             box-shadow var(--duration-fast) var(--motion-ease-ui);
+    }
+
+    .settings__pick > span {
+        background-color: inherit;
     }
 
     .settings__pick:active {
@@ -819,14 +818,14 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
         border-color: var(--color-border-selected);
     }
 
-    .settings__pick:has(.settings__file:focus) {
+    .settings__pick:has(.settings__file:focus-visible) {
         border-color: var(--color-border-selected);
         border-style: solid;
     }
 
     .settings__pick:has(.settings__file[aria-invalid='true']) {
         border-color: var(--color-border-invalid);
-        box-shadow: 3px 3px 0 0 var(--color-error-surface);
+        box-shadow: var(--lift) var(--lift) 0 0 var(--color-border-strong);
     }
 
     .settings__pick:hover {
@@ -850,16 +849,6 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
         width: 48px;
     }
 
-    .settings__reveal::after {
-        content: '';
-        height: 48px;
-        position: absolute;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 48px;
-    }
-
     .settings__reveal:active {
         transform: translateY(1px);
     }
@@ -872,22 +861,27 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
         color: var(--color-link);
     }
 
+    .settings__reveal::after {
+        content: '';
+        height: 48px;
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 48px;
+    }
+
     .settings__reveal[aria-pressed='false'] .settings__glyph--hide,
     .settings__reveal[aria-pressed='true'] .settings__glyph--show {
         display: none;
     }
 
-    .settings__role {
-        min-height: var(--space-lg);
-        text-transform: capitalize;
-    }
-
     .settings__scroller--attendance {
-        --scroll-slot-max: calc(44px + 5 * (33px + 24px));
+        --scroll-slot-max: calc(2 * 2px + 2 * var(--space-xs) + var(--text-sm) + 5 * (2 * var(--space-sm) + var(--text-base--line-height) + 1px));
     }
 
     .settings__scroller--ledger {
-        --scroll-slot-max: calc(44px + 5 * (33px + 10 * var(--text-sm) / 7));
+        --scroll-slot-max: calc(2 * 2px + 2 * var(--space-xs) + var(--text-sm) + 5 * (2 * var(--space-sm) + var(--text-base--line-height) + 1px));
     }
 
     .settings__staged {
@@ -897,16 +891,8 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
         flex: 1 1 260px;
         flex-wrap: wrap;
         justify-content: space-between;
-        padding: 0 var(--space-sm);
+        padding: var(--space-2xs) var(--space-sm);
         row-gap: var(--space-3xs);
-    }
-
-    .settings__staged--portrait {
-        padding-block: var(--space-2xs);
-    }
-
-    .settings__stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .settings__table {
@@ -923,61 +909,57 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
         z-index: var(--z-page);
     }
 
-    @media (max-width: 1024px) {
-        .settings__overview {
-            grid-template-columns: minmax(0, 1fr);
-        }
-    }
-
     @media (max-width: 768px) {
-        .settings__pair,
-        .settings__stats {
-            grid-template-columns: minmax(0, 1fr);
+        .settings__scroller--attendance,
+        .settings__scroller--ledger {
+            --scroll-slot-max: calc(2 * 2px + 2 * var(--space-xs) + var(--text-sm) + 5 * (2 * var(--space-sm) + 2 * var(--text-base--line-height) + var(--space-3xs) + 1px));
         }
     }
 </style>
 
 <script>
-    import { MOCK_LATENCY_MS, PROFILE_FIELDS, SPOTLIGHT, SPOTLIGHT_EXTENSIONS_LABEL } from '@lib/shared/constants';
-    import { clearFieldErrors, confirmRule, focusFirstError, handleReveal, isValidationBypassed, passwordRule, setFieldErrors, setRole, validateFields } from '@lib/ui/forms';
-    import { delay, formatDateStamp, formatProds, getInitials, getStanding, pickTileColor, registerPageScript, setAvatarImage, setPending, setText } from '@lib/shared/utils';
-    import { getExtension, getSizeError, releaseAudioContext, uploadSubmission } from '@lib/audio/uploads';
+    import { MOCK_LATENCY_MILLISECONDS, PROFILE_FIELDS, UPLOAD } from '@lib/shared/constants';
+    import { clearFieldErrors, focusFirstError, getConfirmRule, getPasswordRule, handleReveal, isValidationBypassed, setFieldErrors, setRole, validateFields } from '@lib/ui/forms';
+    import { delay, formatDateStamp, formatProds, formatRole, getInitials, pickTileColor, registerPageScript, setAvatarImage, setPending, setText } from '@lib/shared/utils';
+    import { getProdsAttendance, getProdsBalance, getProdsRows, onProdsChange } from '@lib/account/prods';
+    import { observeRowWindow } from '@lib/account/ledger';
+    import { UPLOAD_EXTENSIONS_OR_LIST, getExtension, getSizeError, releaseAudioContext, uploadSubmission } from '@lib/audio/uploads';
     import { getOnboardingHref } from '@lib/account/onboarding';
     import { getSession, onSessionChange, saveSession } from '@lib/account/session';
     import { stageAvatar } from '@lib/account/images';
     import { toast } from '@lib/ui/toasts';
 
+    const CURRENT_PASSWORD_MESSAGE = 'Enter your current password.';
     const INVALID_MESSAGE = 'Check the fields.';
     const LINK_MESSAGE = 'Enter a full https:// address.';
     const LINK_NAMES = ['instagram', 'spotify', 'soundcloud', 'youtube'];
     const LINK_PATTERN = /^https?:\/\/\S+\.\S+$/i;
+
+    const PROFILE_RULES: Record<string, FieldRule> = {
+        artistName: { max: PROFILE_FIELDS.artistName.maxLength, message: PROFILE_FIELDS.artistName.message },
+        city: { message: PROFILE_FIELDS.city.message, required: PROFILE_FIELDS.city.required },
+    };
+
+    const SIGNED_OUT_MESSAGE = 'Sign in to save changes.';
+    const STORAGE_MESSAGE = 'Nothing was saved because your browser storage is full. Clear some space and try again.';
+    const TRACK_MISSING_MESSAGE = 'Stage an audio file before you save.';
 
     const LINK_RULES: Record<string, FieldRule> = Object.fromEntries(
         LINK_NAMES.map(name => [name, { message: LINK_MESSAGE, pattern: LINK_PATTERN }]),
     );
 
     const PASSWORD_RULES: Record<string, FieldRule> = {
-        confirm: confirmRule(),
-        password: passwordRule(),
+        confirm: getConfirmRule(),
+        current: { ...getPasswordRule(), message: CURRENT_PASSWORD_MESSAGE },
+        password: getPasswordRule(),
     };
 
-    const PROFILE_RULES: Record<string, FieldRule> = {
-        city: { message: PROFILE_FIELDS.city.message, required: PROFILE_FIELDS.city.required },
-    };
-
-    const SIGNED_OUT_MESSAGE = 'Sign in to save changes.';
-    const STORAGE_MESSAGE = 'Nothing was saved \u2014 your browser storage is full. Clear some space and try again.';
-    const TRACK_MISSING_MESSAGE = 'Stage an audio file before you save.';
-
-    let demoSummary = { email: '', name: '', prods: '', role: '', since: '', standing: '' };
-    let reading = false;
+    let demoSummary = { email: '', name: '', role: '', since: '' };
+    let isReading = false;
+    let isStaging = false;
     let stagedAvatar = '';
-    let staging = false;
     let unsubscribe: (() => void) | undefined;
-
-    function handleBioInput(field: HTMLTextAreaElement) {
-        setText(document.querySelector('[data-bio-count]'), String(field.value.length));
-    }
+    let unsubscribeProds: (() => void) | undefined;
 
     async function handleLinksSubmit(event: SubmitEvent, form: HTMLFormElement) {
         event.preventDefault();
@@ -998,7 +980,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
 
         setPending(button, true);
 
-        await delay(MOCK_LATENCY_MS);
+        await delay(MOCK_LATENCY_MILLISECONDS);
 
         setPending(button, false);
         toast('Links saved.', 'success');
@@ -1023,7 +1005,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
 
         setPending(button, true);
 
-        await delay(MOCK_LATENCY_MS);
+        await delay(MOCK_LATENCY_MILLISECONDS);
 
         setPending(button, false);
 
@@ -1043,9 +1025,9 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
 
         input.value = '';
 
-        if (staging || !file) return;
+        if (!file || isStaging) return;
 
-        staging = true;
+        isStaging = true;
 
         try {
             const staged = await stageAvatar(file);
@@ -1063,19 +1045,17 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
             renderPortrait(form);
             toast('Portrait staged.', 'success');
         } finally {
-            staging = false;
+            isStaging = false;
         }
     }
 
     async function handleProfileSubmit(event: SubmitEvent, form: HTMLFormElement) {
         event.preventDefault();
 
-        if (staging) return;
+        if (isStaging) return;
 
-        const values = new FormData(form);
         const errors = validateFields(form, PROFILE_RULES);
-
-        if (!isValidationBypassed() && values.getAll('genres').length > PROFILE_FIELDS.genres.max) errors.genres = PROFILE_FIELDS.genres.message;
+        const values = new FormData(form);
 
         clearFieldErrors(form);
 
@@ -1125,7 +1105,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
 
         input.value = '';
 
-        if (reading || !file) return;
+        if (!file || isReading) return;
 
         const error = validateTrack(file);
 
@@ -1138,7 +1118,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
             return;
         }
 
-        reading = true;
+        isReading = true;
         setBusy(form, true);
 
         try {
@@ -1156,7 +1136,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
             stageTrack(form, file.name);
             toast('Track staged.', 'success');
         } finally {
-            reading = false;
+            isReading = false;
             setBusy(form, false);
         }
     }
@@ -1179,7 +1159,7 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
 
         setPending(button, true);
 
-        await delay(MOCK_LATENCY_MS);
+        await delay(MOCK_LATENCY_MILLISECONDS);
 
         setPending(button, false);
         toast('Track saved.', 'success');
@@ -1200,10 +1180,8 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
         demoSummary = {
             email: readText('[data-settings-email]'),
             name: readText('[data-settings-name]'),
-            prods: readText('[data-settings-prods]'),
             role: readText('[data-settings-role]'),
             since: readText('[data-settings-since]'),
-            standing: readText('[data-settings-standing]'),
         };
 
         links.noValidate = true;
@@ -1212,7 +1190,9 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
         track.noValidate = true;
         unsubscribe?.();
         unsubscribe = onSessionChange(renderSession);
-        bio?.addEventListener('input', () => handleBioInput(bio), { signal });
+        unsubscribeProds?.();
+        unsubscribeProds = onProdsChange(renderSession);
+        bio?.addEventListener('input', () => setText(document.querySelector('[data-bio-count]'), String(bio.value.length)), { signal });
         file?.addEventListener('change', () => void handleTrackChange(track, file, signal), { signal });
         links.addEventListener('submit', event => void handleLinksSubmit(event, links), { signal });
         password.addEventListener('submit', event => void handlePasswordSubmit(event, password), { signal });
@@ -1226,9 +1206,15 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
         profile.querySelector<HTMLButtonElement>('[data-portrait-remove]')?.addEventListener('click', () => removePortrait(profile), { signal });
         signal.addEventListener('abort', releaseAudioContext, { once: true });
         signal.addEventListener('abort', () => unsubscribe?.(), { once: true });
+        signal.addEventListener('abort', () => unsubscribeProds?.(), { once: true });
         track.addEventListener('submit', event => void handleTrackSubmit(event, track), { signal });
         track.querySelector<HTMLButtonElement>('[data-track-remove]')?.addEventListener('click', () => removeTrack(track), { signal });
-        reading = false;
+
+        document.querySelectorAll<HTMLElement>('.settings__scroller--attendance, .settings__scroller--ledger').forEach((scroller) => {
+            observeRowWindow(scroller, signal);
+        });
+
+        isReading = false;
         stagedAvatar = getSession()?.avatar ?? '';
         prefillProfile(profile);
         renderPortrait(profile);
@@ -1259,15 +1245,69 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
     }
 
     function removeTrack(form: HTMLFormElement) {
-        const empty = form.querySelector<HTMLElement>('[data-track-empty]');
         const staged = form.querySelector<HTMLElement>('[data-track-staged]');
 
         clearFieldErrors(form);
         setText(form.querySelector('[data-track-name]'), '');
-        empty?.removeAttribute('hidden');
         staged?.setAttribute('hidden', '');
         form.querySelector<HTMLInputElement>('[data-track-input]')?.focus();
         toast('Track removed.', 'info');
+    }
+
+    function renderAttendance(email: string, joined?: number) {
+        const body = document.querySelector<HTMLElement>('[data-settings-attendance]');
+        const empty = document.querySelector<HTMLElement>('[data-settings-attendance-empty]');
+        const scroller = document.querySelector<HTMLElement>('.settings__scroller--attendance');
+        const template = document.querySelector<HTMLTemplateElement>('[data-settings-attendance-row]');
+
+        if (!body || !empty || !scroller || !template) return;
+
+        const entries = getProdsAttendance(email, joined);
+
+        body.replaceChildren();
+
+        entries.toReversed().forEach((entry) => {
+            const fragment = template.content.cloneNode(true) as DocumentFragment;
+
+            fragment.querySelectorAll<HTMLTimeElement>('[data-cell="date"]').forEach((date) => {
+                date.setAttribute('datetime', entry.date);
+                setText(date, formatDateStamp(new Date(entry.date)));
+            });
+
+            setText(fragment.querySelector<HTMLElement>('[data-cell="event"]'), entry.event);
+            body.append(fragment);
+        });
+
+        setText(document.querySelector('[data-settings-attended]'), String(entries.length));
+        empty.toggleAttribute('hidden', entries.length > 0);
+        scroller.toggleAttribute('hidden', entries.length === 0);
+    }
+
+    function renderLedger(email: string, joined?: number) {
+        const body = document.querySelector<HTMLElement>('[data-settings-ledger]');
+        const template = document.querySelector<HTMLTemplateElement>('[data-settings-ledger-row]');
+
+        if (!body || !template) return;
+
+        body.replaceChildren();
+
+        getProdsRows(email, joined).toReversed().forEach((row) => {
+            const fragment = template.content.cloneNode(true) as DocumentFragment;
+
+            fragment.querySelectorAll<HTMLElement>('[data-cell="change"]').forEach((change) => {
+                change.classList.toggle('text-error-text', row.amount < 0);
+                setText(change, row.amount > 0 ? `+${row.amount}` : `\u2212${Math.abs(row.amount)}`);
+            });
+
+            fragment.querySelectorAll<HTMLTimeElement>('[data-cell="date"]').forEach((date) => {
+                date.setAttribute('datetime', row.date);
+                setText(date, formatDateStamp(new Date(row.date)));
+            });
+
+            setText(fragment.querySelector<HTMLElement>('[data-cell="reason"]'), row.reason);
+            setText(fragment.querySelector<HTMLElement>('[data-cell="balance"]'), String(row.total));
+            body.append(fragment);
+        });
     }
 
     function renderPortrait(form: HTMLFormElement) {
@@ -1284,21 +1324,32 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
 
         const name = session ? session.artistName || session.email : demoSummary.name;
         const role = session ? session.role : demoSummary.role;
+
         const tileColor = pickTileColor(name);
 
         if (tile) {
-            tile.style.background = tileColor.bg;
+            tile.style.background = tileColor.background;
             tile.style.color = tileColor.text;
         }
 
-        document.querySelectorAll<HTMLElement>('[data-settings-role]').forEach(element => setText(element, role));
+        document.querySelectorAll<HTMLElement>('[data-settings-role]').forEach(element => setText(element, formatRole(role)));
         setAvatarImage(document.querySelector<HTMLImageElement>('[data-settings-avatar]'), session?.avatar ?? '');
         setText(document.querySelector('.settings__initials'), getInitials(name));
         setText(document.querySelector('[data-settings-email]'), session?.email ?? demoSummary.email);
         setText(document.querySelector('[data-settings-name]'), name);
-        setText(document.querySelector('[data-settings-prods]'), session ? formatProds(session.prods) : demoSummary.prods);
-        setText(document.querySelector('[data-settings-since]'), session?.createdAt ? formatDateStamp(new Date(session.createdAt)) : demoSummary.since);
-        setText(document.querySelector('[data-settings-standing]'), session ? getStanding(session.prods) : demoSummary.standing);
+
+        setText(
+            document.querySelector('[data-settings-prods]'),
+            formatProds(getProdsBalance(session?.email ?? demoSummary.email, session?.createdAt)),
+        );
+
+        renderAttendance(session?.email ?? demoSummary.email, session?.createdAt);
+        renderLedger(session?.email ?? demoSummary.email, session?.createdAt);
+
+        setText(
+            document.querySelector('[data-settings-since]'),
+            session?.createdAt ? formatDateStamp(new Date(session.createdAt)) : demoSummary.since,
+        );
 
         if (!link) return;
 
@@ -1309,30 +1360,28 @@ const PRODS_ROWS = PRODS_LEDGER.map((entry, index) => ({
         link.href = getOnboardingHref(session.email);
     }
 
-    function setBusy(form: HTMLFormElement, busy: boolean) {
+    function setBusy(form: HTMLFormElement, isBusy: boolean) {
         const zone = form.querySelector<HTMLElement>('.settings__track');
 
-        if (busy) zone?.setAttribute('aria-busy', 'true');
+        if (isBusy) zone?.setAttribute('aria-busy', 'true');
         else zone?.removeAttribute('aria-busy');
     }
 
     function stageTrack(form: HTMLFormElement, name: string) {
-        const empty = form.querySelector<HTMLElement>('[data-track-empty]');
         const staged = form.querySelector<HTMLElement>('[data-track-staged]');
 
         setText(form.querySelector('[data-track-name]'), name);
-        empty?.setAttribute('hidden', '');
         staged?.removeAttribute('hidden');
     }
 
     function validateTrack(file: File) {
         const extension = getExtension(file.name);
 
-        if (!SPOTLIGHT.extensions.some(allowed => allowed === extension)) {
-            return `That is a .${extension || 'file'} \u2014 the spotlight track takes ${SPOTLIGHT_EXTENSIONS_LABEL} only.`;
+        if (!UPLOAD.extensions.some(allowed => allowed === extension)) {
+            return `That is a .${extension || 'file'}. We take ${UPLOAD_EXTENSIONS_OR_LIST}.`;
         }
 
-        return getSizeError(file, SPOTLIGHT.maxFileBytes);
+        return getSizeError(file, UPLOAD.maxFileBytes);
     }
 
     registerPageScript(initSettings);

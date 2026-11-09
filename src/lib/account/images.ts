@@ -14,29 +14,29 @@ async function decodeImage(file: File) {
     }
 }
 
-function normalizeAvatar(value: string): string {
-    return value.startsWith('data:image/') && value.length <= AVATAR.maxDataUrlLength ? value : '';
-}
-
-function rejectionReason(file: File) {
+function getRejectionReason(file: File) {
     const extension = getExtension(file.name);
 
     if (!AVATAR_EXTENSIONS.some(allowed => allowed === extension)) {
-        return `That is a .${extension || 'file'} \u2014 we take ${AVATAR_EXTENSIONS_OR_LIST}.`;
+        return `That is a .${extension || 'file'}. We take ${AVATAR_EXTENSIONS_OR_LIST}.`;
     }
 
-    if (file.type.length > 0 && !file.type.startsWith('image/') && !AVATAR.acceptAttribute.includes(file.type)) {
+    if (!AVATAR.acceptAttribute.includes(file.type) && !file.type.startsWith('image/') && file.type.length > 0) {
         return 'That does not look like an image file.';
     }
 
     return getSizeError(file, AVATAR.maxFileBytes) ?? '';
 }
 
+function normalizeAvatar(value: string): string {
+    return value.length <= AVATAR.maxDataUrlLength && value.startsWith('data:image/') ? value : '';
+}
+
 function renderAvatar(image: ImageBitmap) {
     const canvas = document.createElement('canvas');
+    const edge = Math.min(image.height, image.width);
 
     const context = canvas.getContext('2d');
-    const edge = Math.min(image.height, image.width);
 
     if (!context) return '';
 
@@ -50,7 +50,7 @@ function renderAvatar(image: ImageBitmap) {
 }
 
 async function stageAvatar(file: File): Promise<AvatarResult> {
-    const rejection = rejectionReason(file);
+    const rejection = getRejectionReason(file);
 
     if (rejection) return { message: rejection, ok: false };
 
@@ -63,7 +63,7 @@ async function stageAvatar(file: File): Promise<AvatarResult> {
     if (Math.min(height, width) < AVATAR.minEdgePixels) {
         image.close();
 
-        return { message: `That image is ${width}\u00d7${height} \u2014 it needs at least ${AVATAR.minEdgePixels}px on each side.`, ok: false };
+        return { message: `That image is ${width}\u00d7${height}. It needs at least ${AVATAR.minEdgePixels}px on each side.`, ok: false };
     }
 
     const dataUrl = renderAvatar(image);

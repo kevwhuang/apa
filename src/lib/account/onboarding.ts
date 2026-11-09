@@ -1,7 +1,7 @@
 import {
     MILLISECONDS_PER_HOUR,
     ONBOARDING_ROUTE,
-    ONBOARDING_TOKEN_PARAM,
+    ONBOARDING_TOKEN_PARAMETER,
     ONBOARDING_TOKEN_TTL_HOURS,
     STORAGE,
 } from '@lib/shared/constants';
@@ -62,7 +62,7 @@ function decodeToken(value: string): OnboardingToken | null {
     }
 }
 
-function encodeToken(token: OnboardingToken): string {
+function encodeToken(token: OnboardingToken) {
     const bytes = new TextEncoder().encode(JSON.stringify(token));
 
     const binary = Array.from(bytes, byte => String.fromCharCode(byte)).join('');
@@ -75,7 +75,7 @@ function getOnboardingDraft(): OnboardingDraft {
 }
 
 function getOnboardingHref(email: string): string {
-    return `${ONBOARDING_ROUTE}?${ONBOARDING_TOKEN_PARAM}=${createOnboardingToken(email)}`;
+    return `${ONBOARDING_ROUTE}?${ONBOARDING_TOKEN_PARAMETER}=${createOnboardingToken(email)}`;
 }
 
 function normalizeDraft(value: OnboardingDraft): OnboardingDraft {
@@ -98,7 +98,7 @@ function saveOnboardingDraft(patch: Partial<OnboardingDraft>): OnboardingSave {
     return { draft: next, persisted: store.persisted() };
 }
 
-function verifyOnboardingToken(token: string | null): OnboardingGate {
+function verifyOnboardingToken(token: null | string): OnboardingGate {
     if (!token) return { reason: 'missing', state: 'rejected' };
 
     const decoded = decodeToken(token);

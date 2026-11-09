@@ -3,12 +3,13 @@ import { getCollection } from 'astro:content';
 
 import IconPause from '@components/icons/Pause.astro';
 import IconPlay from '@components/icons/Play.astro';
-import { formatDuration } from '@lib/shared/utils';
+import { formatDuration, toRoster } from '@lib/shared/utils';
 
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
     class?: string;
+    hasWave?: boolean;
     producerId: string;
     track: CollectionEntry<'producers'>['data']['tracks'][number];
 }
@@ -20,20 +21,29 @@ const WAVE_MAX_SPAN = 72;
 const WAVE_MIN_HEIGHT = 24;
 const WAVE_PHASE_STEP = 1.7;
 
-const { class: rowClass, producerId, track } = Astro.props;
+const { class: rowClass, hasWave = true, producerId, track } = Astro.props;
 
-const producers = await getCollection('producers');
+const producers = toRoster(await getCollection('producers'));
 
-const artist = producers.find(entry => entry.id === producerId)?.data.name ?? '';
+const producer = producers.find(entry => entry.data.producerId === producerId);
 
-const seed = [...`${producerId}:${track.title}`].reduce((total, character) => (total * WAVE_HASH_MULTIPLIER + character.charCodeAt(0)) % WAVE_HASH_MODULUS, 0);
+const artist = producer?.data.name ?? '';
+const seedKey = producer?.id ?? '';
 
-const waveHeights = Array.from({ length: WAVE_BAR_COUNT }, (_, index) => Math.round(WAVE_MIN_HEIGHT + Math.abs(Math.sin(seed + index * WAVE_PHASE_STEP)) * WAVE_MAX_SPAN));
+const seed = [...`${seedKey}:${track.title}`].reduce(
+    (total, character) => (total * WAVE_HASH_MULTIPLIER + character.charCodeAt(0)) % WAVE_HASH_MODULUS,
+    0,
+);
+
+const waveHeights = Array.from(
+    { length: WAVE_BAR_COUNT },
+    (_, index) => Math.round(WAVE_MIN_HEIGHT + Math.abs(Math.sin(seed + index * WAVE_PHASE_STEP)) * WAVE_MAX_SPAN),
+);
 ---
 
 <button
     class:list={[
-        'producer-track group aria-pressed:bg-btn-primary-bg aria-pressed:text-btn-primary-text hover:bg-bg-raised-hover flex items-center min-h-(--control-size) w-full gap-3 px-3 py-2 border-2 border-border-strong text-left transition-colors',
+        'producer-track aria-pressed:bg-btn-primary-bg aria-pressed:text-btn-primary-text group hover:bg-bg-raised-hover flex items-center min-h-(--control-size) w-full gap-3 p-3 border-2 border-border-strong text-left',
         rowClass,
     ]}
     aria-pressed="false"
@@ -41,6 +51,7 @@ const waveHeights = Array.from({ length: WAVE_BAR_COUNT }, (_, index) => Math.ro
     data-track-duration={track.durationSeconds}
     data-track-file={track.file}
     data-track-id={producerId}
+    data-track-seed={seedKey}
     data-track-title={track.title}
     type="button"
 >
@@ -57,24 +68,26 @@ const waveHeights = Array.from({ length: WAVE_BAR_COUNT }, (_, index) => Math.ro
         Play
     </span>
     <span
-        class="flex-1 min-w-0 font-bold font-mono text-sm truncate"
+        class="flex-1 min-w-0 font-mono text-balance text-base wrap-anywhere"
         data-placeholder
     >
         {track.title}
     </span>
+    {hasWave && (
+        <span
+            class="producer-track__wave"
+            aria-hidden="true"
+        >
+            {waveHeights.map(height => (
+                <span
+                    class="producer-track__bar min-h-0.5 w-(--producer-track-bar-width,2px) bg-text-secondary"
+                    style={`height: ${height}%;`}
+                />
+            ))}
+        </span>
+    )}
     <span
-        class="producer-track__wave"
-        aria-hidden="true"
-    >
-        {waveHeights.map(height => (
-            <span
-                class="producer-track__bar"
-                style={`height: ${height}%;`}
-            />
-        ))}
-    </span>
-    <span
-        class="group-aria-pressed:text-btn-primary-text shrink-0 font-mono tabular-nums text-xs text-text-secondary"
+        class="group-aria-pressed:text-btn-primary-text group-hover:text-text shrink-0 font-mono tabular-nums text-sm text-text-secondary"
         data-placeholder
     >
         {formatDuration(track.durationSeconds)}
@@ -83,10 +96,7 @@ const waveHeights = Array.from({ length: WAVE_BAR_COUNT }, (_, index) => Math.ro
 
 <style>
     .producer-track {
-        transition:
-            background-color var(--duration-fast) var(--motion-ease-ui),
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
+        transition: transform var(--duration-fast) var(--motion-ease-ui);
         user-select: none;
     }
 
@@ -99,14 +109,7 @@ const waveHeights = Array.from({ length: WAVE_BAR_COUNT }, (_, index) => Math.ro
     }
 
     .producer-track[aria-pressed='true'] .producer-track__bar {
-        opacity: 0.75;
-    }
-
-    .producer-track__bar {
         background: currentColor;
-        min-height: 2px;
-        opacity: 0.3;
-        width: 2px;
     }
 
     .producer-track__wave {

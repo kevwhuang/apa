@@ -2,7 +2,7 @@ import {
     DEMO_CREDENTIALS,
     EMAIL_PATTERN,
     MILLISECONDS_PER_DAY,
-    MOCK_LATENCY_MS,
+    MOCK_LATENCY_MILLISECONDS,
     PASSWORD_MIN_LENGTH,
     SESSION_TTL_DAYS,
     STORAGE,
@@ -23,7 +23,7 @@ const MESSAGES: Record<SessionErrorCode, string> = {
     'already-registered': 'That address is already registered. Sign in instead.',
     'invalid-credentials': 'That email and password do not match.',
     'invalid-email': 'Enter a valid email address.',
-    'storage-full': 'You are not signed in \u2014 your browser storage is full. Clear some space and try again.',
+    'storage-full': 'You are not signed in because your browser storage is full. Clear some space and try again.',
     'weak-password': `Use at least ${PASSWORD_MIN_LENGTH} characters.`,
 };
 
@@ -44,13 +44,9 @@ const store = createStore<Session | null>({
 });
 
 async function endSession(): Promise<void> {
-    await delay(MOCK_LATENCY_MS);
+    await delay(MOCK_LATENCY_MILLISECONDS);
 
     store.remove();
-}
-
-function getProfile(email: string): Profile | null {
-    return profiles.get()[email] ?? null;
 }
 
 function getSession(): Session | null {
@@ -67,17 +63,13 @@ function getSession(): Session | null {
     return session;
 }
 
-function handleStorageEvent(event: StorageEvent, callback: (session: Session | null) => void): void {
-    if (event.key !== null && event.key !== STORAGE.session.key) return;
+function handleStorageEvent(event: StorageEvent, callback: (session: Session | null) => void) {
+    if (event.key !== STORAGE.session.key && event.key !== null) return;
 
     callback(getSession());
 }
 
-function isSignedIn(): boolean {
-    return getSession() !== null;
-}
-
-function isStored(session: Session | null): boolean {
+function isStored(session: Session | null) {
     return JSON.stringify(store.get()) === JSON.stringify(session);
 }
 
@@ -95,7 +87,7 @@ function normalizeProfile(value: Profile): Profile {
 function normalizeProfiles(value: Record<string, Profile>): Record<string, Profile> {
     if (typeof value !== 'object' || value === null) return {};
 
-    const entries = Object.entries(value).filter(([email, profile]) => email.length > 0 && typeof profile === 'object' && profile !== null);
+    const entries = Object.entries(value).filter(([email, profile]) => email.length > 0 && profile !== null && typeof profile === 'object');
 
     return Object.fromEntries(entries.map(([email, profile]) => [email, normalizeProfile(profile)]));
 }
@@ -135,7 +127,7 @@ function reject(code: SessionErrorCode): SessionResult {
     return { code, message: MESSAGES[code], ok: false };
 }
 
-function saveProfile(session: Session): boolean {
+function saveProfile(session: Session) {
     const profile: Profile = {
         artistName: session.artistName,
         avatar: session.avatar,
@@ -151,7 +143,7 @@ function saveProfile(session: Session): boolean {
 }
 
 async function saveSession(patch: Partial<Session>): Promise<SessionSave> {
-    await delay(MOCK_LATENCY_MS);
+    await delay(MOCK_LATENCY_MILLISECONDS);
 
     const session = getSession();
 
@@ -161,27 +153,27 @@ async function saveSession(patch: Partial<Session>): Promise<SessionSave> {
 
     if (!next) return { persisted: false, session: null };
 
-    const stored = store.persisted() && isStored(next);
-    const profiled = saveProfile(next);
+    const isSessionStored = isStored(next) && store.persisted();
+    const isProfileSaved = saveProfile(next);
 
-    return { persisted: stored && profiled, session: next };
+    return { persisted: isProfileSaved && isSessionStored, session: next };
 }
 
 async function startSession(draft: SessionDraft): Promise<SessionResult> {
     const email = draft.email.trim().toLowerCase();
     const password = draft.password ?? '';
 
-    await delay(MOCK_LATENCY_MS);
+    await delay(MOCK_LATENCY_MILLISECONDS);
 
     if (!EMAIL_PATTERN.test(email)) return reject('invalid-email');
     if (email === DEMO_CREDENTIALS.takenEmail) return reject('already-registered');
     if (password === DEMO_CREDENTIALS.wrongPassword) return reject('invalid-credentials');
-    if (password.length > 0 && password.length < PASSWORD_MIN_LENGTH) return reject('weak-password');
+    if (password.length < PASSWORD_MIN_LENGTH && password.length > 0) return reject('weak-password');
 
     const existing = getSession();
     const now = Date.now();
 
-    const profile: Profile | null = existing?.email === email ? existing : getProfile(email);
+    const profile: Profile | null = existing?.email === email ? existing : profiles.get()[email] ?? null;
 
     const session: Session = {
         artistName: draft.artistName || profile?.artistName || toDisplayName(email),
@@ -198,10 +190,10 @@ async function startSession(draft: SessionDraft): Promise<SessionResult> {
 
     if (!next) return reject('storage-full');
 
-    const stored = store.persisted() && isStored(next);
-    const profiled = saveProfile(next);
+    const isSessionStored = isStored(next) && store.persisted();
+    const isProfileSaved = saveProfile(next);
 
-    if (!stored || !profiled) return reject('storage-full');
+    if (!isProfileSaved || !isSessionStored) return reject('storage-full');
 
     return { ok: true, session: next };
 }
@@ -209,10 +201,10 @@ async function startSession(draft: SessionDraft): Promise<SessionResult> {
 function syncSessionAttribute(): void {
     if (typeof document === 'undefined') return;
 
-    document.documentElement.dataset.session = isSignedIn() ? 'in' : 'out';
+    document.documentElement.dataset.session = getSession() !== null ? 'in' : 'out';
 }
 
-function toDisplayName(email: string): string {
+function toDisplayName(email: string) {
     const words = email.split('@')[0].split(/[+._-]+/).filter(Boolean);
 
     return words.map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');

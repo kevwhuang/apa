@@ -4,7 +4,7 @@ import { createStore } from '@lib/shared/state';
 const store = createStore<boolean>({
     fallback: false,
     key: STORAGE.tour.key,
-    normalize: normalizeArmed,
+    normalize: value => value === true,
     scope: STORAGE.tour.scope,
     topic: STORAGE.tour.topic,
 });
@@ -19,10 +19,6 @@ function disarmTour(): void {
 
 function isTourArmed(): boolean {
     return store.get();
-}
-
-function normalizeArmed(value: boolean): boolean {
-    return value === true;
 }
 
 export { armTour, disarmTour, isTourArmed };

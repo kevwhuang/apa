@@ -45,11 +45,11 @@ const RACK_ORDER: RackKind[] = [
     'tuner',
 ];
 
-const REBUILD_DELAY_MS = 20;
-const SETTLE_DELAY_MS = 60;
+const REBUILD_DELAY_MILLISECONDS = 20;
+const SETTLE_DELAY_MILLISECONDS = 60;
 
 const blocks = new Map<RackKind, RackBlock>();
-const params = new Map<string, number>();
+const parameters = new Map<string, number>();
 
 const store = createStore<RackState>({
     fallback: { activeKinds: [], durationSeconds: 0, fileName: null, playing: false },
@@ -80,11 +80,10 @@ function attachChain() {
 }
 
 function connectChain() {
-    const { context, input: head, master } = ensureRackAudio();
     const chain = [...store.get().activeKinds].sort((left, right) => RACK_ORDER.indexOf(left) - RACK_ORDER.indexOf(right));
+    const { context, input: head, master } = ensureRackAudio();
 
     input = head;
-
     blocks.forEach(block => block.output.disconnect());
     head.disconnect();
 
@@ -108,10 +107,10 @@ function ensureBlock(kind: RackKind, context: AudioContext) {
 
     const block = buildBlock(kind, context);
 
-    params.forEach((value, key) => {
+    parameters.forEach((value, key) => {
         const [target, name] = key.split(':');
 
-        if (target === kind) block.setParam(name, value);
+        if (target === kind) block.setParameter(name, value);
     });
 
     blocks.set(kind, block);
@@ -145,7 +144,7 @@ function getRackAnalyser(kind: RackKind): AnalyserNode | undefined {
 function getRackPosition(): number {
     const { durationSeconds, playing } = store.get();
 
-    if (!playing || !input || durationSeconds === 0) return pausedPosition;
+    if (durationSeconds === 0 || !input || !playing) return pausedPosition;
 
     return (input.context.currentTime - startedAt) % durationSeconds;
 }
@@ -158,16 +157,8 @@ function getRackState(): RackState {
     return store.get();
 }
 
-function handlePlayerChange(state: PlayerState) {
-    if (state.playing) pauseRack();
-}
-
 function hasFeed() {
     return Boolean(source) || hasChainFeed();
-}
-
-function isModuleActive(kind: RackKind): boolean {
-    return store.get().activeKinds.includes(kind);
 }
 
 async function loadRackFile(file: File): Promise<RackLoadResult> {
@@ -200,7 +191,7 @@ function pauseRack(): void {
     stopSource(CROSSFADE_SECONDS);
     store.set({ ...state, playing: false });
     rebuild = undefined;
-    settle = setTimeout(suspendRackAudio, SETTLE_DELAY_MS);
+    settle = setTimeout(suspendRackAudio, SETTLE_DELAY_MILLISECONDS);
 }
 
 function playRack(): void {
@@ -236,7 +227,7 @@ function scheduleRebuild() {
 
     clearTimeout(rebuild);
     fade(input, 0);
-    rebuild = setTimeout(applyRebuild, REBUILD_DELAY_MS);
+    rebuild = setTimeout(applyRebuild, REBUILD_DELAY_MILLISECONDS);
 }
 
 function seekRack(seconds: number): void {
@@ -255,20 +246,20 @@ function seekRack(seconds: number): void {
     store.set({ ...state });
 }
 
-function setModuleActive(kind: RackKind, active: boolean): void {
+function setModuleActive(kind: RackKind, isActive: boolean): void {
     const state = store.get();
 
-    if (state.activeKinds.includes(kind) === active) return;
+    if (state.activeKinds.includes(kind) === isActive) return;
 
-    const activeKinds = active ? [...state.activeKinds, kind] : state.activeKinds.filter(entry => entry !== kind);
+    const activeKinds = isActive ? [...state.activeKinds, kind] : state.activeKinds.filter(entry => entry !== kind);
 
     store.set({ ...state, activeKinds });
     scheduleRebuild();
 }
 
-function setRackParam(kind: RackKind, name: string, value: number): void {
-    blocks.get(kind)?.setParam(name, value);
-    params.set(`${kind}:${name}`, value);
+function setRackParameter(kind: RackKind, name: string, value: number): void {
+    blocks.get(kind)?.setParameter(name, value);
+    parameters.set(`${kind}:${name}`, value);
 }
 
 function startSource(offset: number) {
@@ -339,7 +330,10 @@ function toggleRack(): void {
     playRack();
 }
 
-onPlayerChange(handlePlayerChange);
+onPlayerChange((state) => {
+    if (state.playing) pauseRack();
+});
+
 setRackChainBuilder(attachChain);
 
 export {
@@ -349,13 +343,10 @@ export {
     getRackPosition,
     getRackReadout,
     getRackState,
-    isModuleActive,
     loadRackFile,
     onRackChange,
-    pauseRack,
-    playRack,
     seekRack,
     setModuleActive,
-    setRackParam,
+    setRackParameter,
     toggleRack,
 };

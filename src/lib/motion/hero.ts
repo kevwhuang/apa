@@ -1,11 +1,13 @@
 import gsap from 'gsap';
 
+import { MOBILE_WIDTH } from '@lib/shared/constants';
 import { STEP_COUNT, stepDuration } from '@lib/motion/pattern';
 import { getMotionTokens, readColorToken } from '@lib/motion/tokens';
 import { isSlowDevice } from '@lib/shared/utils';
 
 interface FieldOptions {
     accentColor: string;
+    canvas: HTMLCanvasElement;
     holder: HTMLElement;
     inkColor: string;
     signal: AbortSignal;
@@ -18,6 +20,7 @@ const BED_LEVEL = 0.12;
 const BUDGET_BREACH_LIMIT = 12;
 const BUDGET_MILLISECONDS = 6;
 const BUDGET_WINDOW = 30;
+const CANVAS_SELECTOR = '.hero__canvas';
 const DOT_RATIO = 0.42;
 const DRIFT_PERIOD = 21;
 const FIELD_SELECTOR = '.hero__field';
@@ -29,7 +32,6 @@ const HASH_SCALE = 43_758.5453;
 const MAX_PIXEL_RATIO = 2;
 const MILLISECONDS_PER_SECOND = 1_000;
 const MOBILE_PITCH_SCALE = 1.5;
-const MOBILE_WIDTH = 768;
 const PLAYHEAD_END = 100;
 const PLAYHEAD_SELECTOR = '.hero__playhead';
 const PLAYHEAD_START = 0;
@@ -43,7 +45,7 @@ const QUALITY_STEPS = [
 const RIPPLE_CYCLES = 0.7;
 const RIPPLE_PERIOD = 17;
 const SPRITE_LEVELS = 10;
-const SWEEP_SLOWDOWN = 2;
+const SWEEP_BEATS_PER_MINUTE = 128;
 const SWELL_CYCLES = 1.2;
 const SWELL_FLOOR = 0.3;
 const SWELL_PERIOD = 26;
@@ -52,7 +54,7 @@ const SWELL_WEIGHT = 0.6;
 const TAU = Math.PI * 2;
 const VERTICAL_FLOOR = 0.2;
 
-function buildSprites(color: string, pitch: number, ratio: number): HTMLCanvasElement | undefined {
+function buildSprites(color: string, pitch: number, ratio: number) {
     const cell = Math.ceil(pitch * ratio);
     const sheet = document.createElement('canvas');
 
@@ -82,15 +84,16 @@ function initHeroField(signal: AbortSignal, still: boolean): void {
     const holder = document.querySelector<HTMLElement>(FIELD_SELECTOR);
     const styles = getComputedStyle(document.documentElement);
 
-    const accentColor = readColorToken(styles, '--color-text-brand');
-    const inkColor = readColorToken(styles, '--color-text');
+    const accentColor = readColorToken(styles, '--color-unlit-accent');
+    const canvas = holder?.querySelector<HTMLCanvasElement>(CANVAS_SELECTOR);
+    const inkColor = readColorToken(styles, '--color-unlit');
 
-    if (!holder || !accentColor || !inkColor) return;
+    if (!accentColor || !canvas || !holder || !inkColor) return;
 
-    mountField({ accentColor, holder, inkColor, signal, still });
+    mountField({ accentColor, canvas, holder, inkColor, signal, still });
 }
 
-function initPlayhead(signal: AbortSignal, still: boolean): void {
+function initPlayhead(signal: AbortSignal, still: boolean) {
     const playhead = document.querySelector<HTMLElement>(PLAYHEAD_SELECTOR);
 
     if (!playhead || still) return;
@@ -98,7 +101,7 @@ function initPlayhead(signal: AbortSignal, still: boolean): void {
     const tokens = getMotionTokens();
 
     const sweep = gsap.fromTo(playhead, { xPercent: PLAYHEAD_START }, {
-        duration: STEP_COUNT * stepDuration() * SWEEP_SLOWDOWN,
+        duration: STEP_COUNT * stepDuration(SWEEP_BEATS_PER_MINUTE),
         ease: tokens.ease.linear,
         repeat: -1,
         xPercent: PLAYHEAD_END,
@@ -111,16 +114,13 @@ function initPlayhead(signal: AbortSignal, still: boolean): void {
     signal.addEventListener('abort', () => observer.disconnect());
 }
 
-function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptions): void {
-    const canvas = document.createElement('canvas');
-
+function mountField({ accentColor, canvas, holder, inkColor, signal, still }: FieldOptions) {
     const context = canvas.getContext('2d');
 
     if (!context) return;
 
-    const mobile = window.innerWidth <= MOBILE_WIDTH;
+    const isMobile = window.innerWidth <= MOBILE_WIDTH;
     const ratio = Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO);
-    const tokens = getMotionTokens();
 
     let accentSheet: HTMLCanvasElement | undefined;
     let bed = new Float32Array(0);
@@ -130,23 +130,22 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
     let frames = 0;
     let handle = 0;
     let inkSheet: HTMLCanvasElement | undefined;
+    let isRunning = false;
     let last = 0;
-    let quality = mobile || isSlowDevice() ? 1 : 0;
+    let quality = isMobile || isSlowDevice() ? 1 : 0;
     let rows = 0;
-    let running = false;
 
     function draw(elapsed: number) {
         if (!context || !inkSheet) return;
 
         const drift = 0.5 + 0.5 * Math.sin(TAU * (elapsed / DRIFT_PERIOD));
-        const pitch = QUALITY_STEPS[quality].pitch * (mobile ? MOBILE_PITCH_SCALE : 1);
+        const pitch = QUALITY_STEPS[quality].pitch * (isMobile ? MOBILE_PITCH_SCALE : 1);
         const ripplePhase = elapsed / RIPPLE_PERIOD;
         const swellPhase = elapsed / SWELL_PERIOD;
 
         const cell = Math.ceil(pitch * ratio);
 
         context.clearRect(0, 0, canvas.width, canvas.height);
-        context.globalAlpha = tokens.alphaMax;
 
         for (let row = 0; row < rows; row += 1) {
             const depth = (row + 0.5) / rows;
@@ -180,8 +179,13 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
         }
     }
 
-    function frame(now: number) {
-        handle = requestAnimationFrame(frame);
+    function redraw() {
+        resize();
+        draw(0);
+    }
+
+    function renderFrame(now: number) {
+        handle = requestAnimationFrame(renderFrame);
 
         const elapsed = now / MILLISECONDS_PER_SECOND;
         const interval = 1 / QUALITY_STEPS[quality].fps;
@@ -196,17 +200,12 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
         watch(performance.now() - started);
     }
 
-    function redraw() {
-        resize();
-        draw(0);
-    }
-
     function resize() {
         const height = holder.clientHeight;
-        const pitch = QUALITY_STEPS[quality].pitch * (mobile ? MOBILE_PITCH_SCALE : 1);
+        const pitch = QUALITY_STEPS[quality].pitch * (isMobile ? MOBILE_PITCH_SCALE : 1);
         const width = holder.clientWidth;
 
-        if (!width || !height) return;
+        if (!height || !width) return;
 
         canvas.height = Math.ceil(height * ratio);
         canvas.width = Math.ceil(width * ratio);
@@ -222,21 +221,27 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
             }
         }
 
-        accentSheet = mobile ? undefined : buildSprites(accentColor, pitch, ratio);
+        accentSheet = isMobile ? undefined : buildSprites(accentColor, pitch, ratio);
         inkSheet = buildSprites(inkColor, pitch, ratio);
     }
 
     function start() {
-        if (running || still) return;
+        if (isRunning || still) return;
 
-        handle = requestAnimationFrame(frame);
+        handle = requestAnimationFrame(renderFrame);
         last = performance.now() / MILLISECONDS_PER_SECOND;
-        running = true;
+        isRunning = true;
     }
 
     function stop() {
-        running = false;
+        isRunning = false;
         cancelAnimationFrame(handle);
+    }
+
+    function teardown() {
+        stop();
+        observer.disconnect();
+        canvas.hidden = true;
     }
 
     function watch(duration: number) {
@@ -263,15 +268,15 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
         resize();
     }
 
-    canvas.className = 'hero__canvas';
     canvas.style.opacity = '0';
-    holder.append(canvas);
+    void canvas.offsetHeight;
+    canvas.hidden = false;
     requestAnimationFrame(() => (canvas.style.opacity = '1'));
     resize();
 
     if (still) {
         draw(0);
-        signal.addEventListener('abort', () => canvas.remove());
+        signal.addEventListener('abort', () => (canvas.hidden = true));
         window.addEventListener('resize', redraw, { signal });
 
         return;
@@ -281,11 +286,7 @@ function mountField({ accentColor, holder, inkColor, signal, still }: FieldOptio
 
     observer.observe(holder);
     document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()), { signal });
-    signal.addEventListener('abort', () => {
-        stop();
-        observer.disconnect();
-        canvas.remove();
-    });
+    signal.addEventListener('abort', teardown);
     window.addEventListener('resize', resize, { signal });
 }
 

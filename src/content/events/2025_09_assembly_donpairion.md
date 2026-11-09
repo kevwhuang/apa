@@ -1,18 +1,18 @@
 ---
-title: 2025 September · Assembly · DONPAIRION
+title: September 2025 Assembly · DONPAIRION
 date: 2025-09-11T18:30:00-05:00
 end: 2025-09-11T21:30:00-05:00
-location: STATION Austin · 701 Brazos St
+location: Capital Factory · 701 Brazos St
 room: Antone's on the 16th floor
 speaker: DONPAIRION
 workshop: 'Groove Mechanics: Kick & Bass for House Producers'
-excerpt: DONPAIRION moved from rigid patterns to dynamic swing, covering the kick and bass essentials of house production and expanding a loop into a full song structure.
+excerpt: Kick and bass in house production were the focus, with swing, MIDI velocity, layered drums, sidechained bass, and a loop expanded into a full song structure.
 description: |-
-  Aimed at breaking through writer's block and unlocking creativity, the workshop moved from rigid patterns to dynamic swing while exploring the essentials of kick and bass for house production. It covered how to select drums with intention, shape sounds in audio files, use velocity in MIDI, and apply swing to bring grooves to life.
+  DONPAIRION led a workshop on the kick and bass in house production, aimed at breaking through writer's block. It moved from rigid patterns to swing and covered how to select drums with intention, shape sounds in audio files, use velocity in MIDI, and apply swing to bring a groove to life.
 
-  The session also dove into techniques for using EQ and envelopes to layer drums, shape and sidechain bass, and balance mix levels across kick, claps, hats, and bass. Finally, it guided attendees through expanding a drum and bass loop into a full song structure.
+  He then went through using EQ and envelopes to layer drums, shaping and sidechaining bass, and balancing mix levels across the kick, claps, hats, and bass. To finish, he took attendees through expanding a drum and bass loop into a full song structure.
 speakers:
   - name: DONPAIRION
-    bio: DONPAIRION is a melodic and tech house producer with six years of experience crafting immersive grooves and mentoring emerging artists. He discovered his passion for house and techno while immersed in the vibrant EDM scenes of Austin and Los Angeles, where the energy of the dance floor sparked a deep dive into DJing, production, and creative direction. The DONPAIRION moniker emerged in the early 2020s, and his 2021 move to LA accelerated his study of the EDM ecosystem, from mix engineering to artist branding. Back in Texas, he leads PH7 Records and the Finding Balance in EDM podcast, guiding workshops and showcases that prioritize music, community, and creative sustainability.
+    bio: DONPAIRION is a melodic and tech house producer with six years of experience making grooves and mentoring emerging artists. He found house and techno in the EDM scenes of Austin and Los Angeles, where the dance floor led him into DJing, production, and creative direction. The DONPAIRION name dates from the early 2020s, and his 2021 move to LA sped up his study of the EDM ecosystem, from mix engineering to artist branding. Back in Texas, he leads PH7 Records and the Finding Balance in EDM podcast and runs workshops and showcases that put music, community, and creative sustainability first.
 type: assembly
 ---

@@ -3,14 +3,19 @@ import { getCollection } from 'astro:content';
 
 import IconArrow from '@components/icons/Arrow.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { ASSET_KIND_LABELS } from '@lib/shared/constants';
-import { getProgram } from '@lib/shared/utils';
+import { toAvailability } from '@lib/resources/unlocks';
 
-const downloads = await getCollection('downloads');
+const KIT_ORDER = ['bash_starter_guide', 'bash_sample_kit'];
 
-const program = getProgram('bash');
+const assets = (await getCollection('downloads', asset => asset.data.kind === 'bash'))
+    .toSorted((a, b) => getKitRank(a.id) - getKitRank(b.id) || a.data.title.localeCompare(b.data.title))
+    .map(asset => ({ ...asset, availability: toAvailability(asset.data) }));
 
-const assets = downloads.filter(asset => asset.data.title.includes(program.name)).toSorted((a, b) => +b.data.date - +a.data.date);
+function getKitRank(id: string): number {
+    const rank = KIT_ORDER.indexOf(id);
+
+    return rank === -1 ? KIT_ORDER.length : rank;
+}
 ---
 
 <section
@@ -20,53 +25,66 @@ const assets = downloads.filter(asset => asset.data.title.includes(program.name)
     <div>
         <SectionHead
             class="text-4xl"
-            eyebrow={`${program.shortName} resources`}
             headingId="bash-assets-title"
         >
-            Take the room home
+            The kit
+            <a
+                class="action-text hover:text-link inline-flex items-center min-h-(--control-size) gap-2 whitespace-nowrap transition-[color,transform] max-md:hidden"
+                href="/resources"
+                slot="cta"
+            >
+                Browse resources <IconArrow />
+            </a>
         </SectionHead>
-        <div class="grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-            <ul
-                class="flex flex-col list-none"
-                data-motion-stagger="rise"
-            >
-                {assets.map(asset => (
-                    <li class="first:border-t-0 flex flex-wrap items-baseline justify-between gap-(--space-sm) py-(--space-md) border-t border-border-subtle">
-                        <div class="flex flex-col gap-1">
-                            <a
-                                class="active:translate-y-px hover:text-link inline-block self-start py-(--space-sm) decoration-2 decoration-text-brand font-bold font-sans underline underline-offset-4 transition-[color,transform]"
-                                href={`/resources#${asset.id}`}
-                            >
-                                {asset.data.title}
-                            </a>
-                            <p class="text-sm text-text-secondary">{asset.data.description}</p>
-                        </div>
-                        <p
-                            class="label shrink-0 text-text-secondary"
-                            data-placeholder
-                        >
-                            {ASSET_KIND_LABELS[asset.data.kind]} &middot; {asset.data.format} &middot; {asset.data.size}
+        <ul
+            class="grid grid-cols-2 gap-x-(--space-lg) gap-y-(--space-2xl) list-none max-md:grid-cols-1 max-md:mb-(--space-md)"
+            data-motion-stagger="rise"
+        >
+            {assets.map(asset => (
+                <li class="bash-kit__card slab slab--card slab--still grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-span-3 gap-y-(--space-sm)">
+                    <h3 class="font-display text-2xl text-balance">
+                        {asset.data.title}
+                    </h3>
+                    <p class="text-text-secondary">
+                        {asset.data.description}
+                    </p>
+                    <div class="flex flex-wrap items-center justify-between gap-x-(--space-md) pt-(--space-xs) border-border-subtle border-t">
+                        <p class="font-mono text-base text-text-secondary">
+                            {asset.data.format} &middot; {asset.data.size}
                         </p>
-                    </li>
-                ))}
-            </ul>
-            <aside
-                class="slab slab--sunk flex flex-col self-start gap-4"
-                aria-label="About the resource library"
-                data-motion="unfold"
+                        {asset.availability === 'open' && (
+                            <a
+                                class="action-text inline-flex items-center min-h-(--control-size) transition-[color,transform]"
+                                aria-label={`Download ${asset.data.title}`}
+                                download
+                                href={asset.data.href}
+                            >
+                                Download
+                            </a>
+                        )}
+                        {asset.availability !== 'open' && (
+                            <span class="action-text inline-flex items-center min-h-(--control-size) whitespace-nowrap text-text-secondary">Coming soon</span>
+                        )}
+                    </div>
+                </li>
+            ))}
+        </ul>
+        <p
+            class="hidden max-md:block"
+            data-motion="rise"
+        >
+            <a
+                class="action-text hover:text-link inline-flex items-center min-h-(--control-size) gap-2 underline underline-offset-4 transition-[color,transform]"
+                href="/resources"
             >
-                <p class="text-text-secondary">
-                    Every asset the Alliance publishes &mdash; press material, event packs, and the working
-                    documents behind how it all runs &mdash; is listed in one place, each with its
-                    format, size, and publication state.
-                </p>
-                <a
-                    class="btn btn--primary self-start"
-                    href="/resources"
-                >
-                    Open the resource library <IconArrow />
-                </a>
-            </aside>
-        </div>
+                Browse resources <IconArrow />
+            </a>
+        </p>
     </div>
 </section>
+
+<style>
+    .bash-kit__card {
+        padding: var(--space-lg);
+    }
+</style>

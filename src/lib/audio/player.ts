@@ -14,7 +14,7 @@ const HAT_RELEASE = 0.055;
 const LEAD_LEVEL = 0.16;
 const LEAD_RELEASE = 0.34;
 const LEAD_THRESHOLD = 0.55;
-const LOOKAHEAD_MS = 25;
+const LOOKAHEAD_MILLISECONDS = 25;
 const MIDI_A4 = 69;
 const MINIMUM_GAIN = 0.0001;
 const NOISE_SECONDS = 1;
@@ -48,11 +48,11 @@ const store = createStore<PlayerState>({
 let context: AudioContext | undefined;
 let current: PlayerTrack | undefined;
 let element: HTMLAudioElement | undefined;
+let isRouted = false;
 let mix: GainNode | undefined;
 let muted = false;
 let noise: AudioBuffer | undefined;
 let route: MediaElementAudioSourceNode | undefined;
-let routed = false;
 let scheduler: Timer | undefined;
 let startedAt = 0;
 let stepCursor = 0;
@@ -70,22 +70,18 @@ function announceTrackState(): void {
     window.dispatchEvent(new CustomEvent(TRACK_STATE_TOPIC, { detail }));
 }
 
-function beatSeconds(track: PlayerTrack): number {
-    return SECONDS_PER_MINUTE / tempo(track);
-}
-
 function closePlayer(): void {
     store.set({ ...store.get(), open: false });
 }
 
-function endPlayback(position: number): void {
+function endPlayback(position: number) {
     stopVoices();
     closeRackChain();
     store.set({ ...store.get(), playing: false, position });
     announceTrackState();
 }
 
-function ensureAudio(): RackAudio | undefined {
+function ensureAudio() {
     if (typeof AudioContext === 'undefined') return undefined;
 
     const audio = openRackChain();
@@ -110,7 +106,7 @@ function ensureAudio(): RackAudio | undefined {
     return audio;
 }
 
-function ensureElement(): HTMLAudioElement | undefined {
+function ensureElement() {
     if (element) return element;
     if (typeof Audio === 'undefined') return undefined;
 
@@ -139,6 +135,14 @@ function getPosition(): number {
     return Math.min(context.currentTime - startedAt, track.durationSeconds);
 }
 
+function getRandom(seed: number) {
+    return ((seed * RANDOM_MULTIPLIER + RANDOM_ADDEND) % RANDOM_MODULUS) / RANDOM_MODULUS;
+}
+
+function getStepSeconds(track: PlayerTrack) {
+    return SECONDS_PER_MINUTE / (TEMPO_BASE + (hash(track.seed) % TEMPO_SPREAD) * TEMPO_STEP) / STEPS_PER_BEAT;
+}
+
 function getTrack(): PlayerTrack | undefined {
     return current;
 }
@@ -147,7 +151,13 @@ function getVolume(): number {
     return volume;
 }
 
-function hash(value: string): number {
+function handlePlayRejection(error: unknown) {
+    if (error instanceof DOMException && error.name === 'AbortError') return;
+
+    pausePlayback();
+}
+
+function hash(value: string) {
     let total = 0;
 
     for (let index = 0; index < value.length; index += 1) {
@@ -161,10 +171,6 @@ function isMuted(): boolean {
     return muted;
 }
 
-function noteHertz(midi: number): number {
-    return TUNING_HERTZ * 2 ** ((midi - MIDI_A4) / SEMITONES_PER_OCTAVE);
-}
-
 function onPlayerChange(callback: (state: PlayerState) => void): () => void {
     return store.onChange(callback);
 }
@@ -173,7 +179,7 @@ function openPlayer(): void {
     store.set({ ...store.get(), open: true });
 }
 
-function pausePlayback(): void {
+function pausePlayback() {
     endPlayback(getPosition());
 }
 
@@ -184,7 +190,7 @@ function playTrack(track: PlayerTrack): void {
     resumePlayback();
 }
 
-function pluck(track: PlayerTrack, at: number, midi: number, level: number, release: number, kind: OscillatorType): void {
+function pluck(track: PlayerTrack, at: number, midi: number, level: number, release: number, kind: OscillatorType) {
     if (!context || !mix) return;
 
     const gain = context.createGain();
@@ -192,27 +198,24 @@ function pluck(track: PlayerTrack, at: number, midi: number, level: number, rele
 
     oscillator.type = kind;
     gain.gain.setValueAtTime(MINIMUM_GAIN, at);
-    gain.gain.exponentialRampToValueAtTime(level, at + stepSeconds(track) / ATTACK_DIVISOR);
+    gain.gain.exponentialRampToValueAtTime(level, at + getStepSeconds(track) / ATTACK_DIVISOR);
     gain.gain.exponentialRampToValueAtTime(MINIMUM_GAIN, at + release);
     oscillator.connect(gain).connect(mix);
-    oscillator.frequency.setValueAtTime(noteHertz(midi), at);
+    oscillator.frequency.setValueAtTime(toHertz(midi), at);
     oscillator.start(at);
     oscillator.stop(at + release);
     registerVoice(oscillator);
 }
 
-function random(seed: number): number {
-    return ((seed * RANDOM_MULTIPLIER + RANDOM_ADDEND) % RANDOM_MODULUS) / RANDOM_MODULUS;
-}
-
-function registerVoice(voice: AudioScheduledSourceNode): void {
+function registerVoice(voice: AudioScheduledSourceNode) {
     voices.push(voice);
+
     voice.addEventListener('ended', () => {
         voices = voices.filter(entry => entry !== voice);
     }, { once: true });
 }
 
-function resumeFile(file: string, from: number, state: PlayerState): void {
+function resumeFile(file: string, from: number, state: PlayerState) {
     const media = ensureElement();
 
     if (!media) return;
@@ -227,10 +230,10 @@ function resumeFile(file: string, from: number, state: PlayerState): void {
     media.currentTime = from;
     store.set({ ...state, open: true, playing: true, position: from });
     announceTrackState();
-    media.play().catch(pausePlayback);
+    media.play().catch(handlePlayRejection);
 }
 
-function resumePlayback(): void {
+function resumePlayback() {
     const state = store.get();
     const track = current;
 
@@ -249,16 +252,15 @@ function resumePlayback(): void {
     if (!audio) return;
 
     stopVoices();
-
-    scheduler = setInterval(tick, LOOKAHEAD_MS);
-    stepCursor = Math.floor(from / stepSeconds(track));
+    scheduler = setInterval(tick, LOOKAHEAD_MILLISECONDS);
+    stepCursor = Math.floor(from / getStepSeconds(track));
     stepTime = audio.context.currentTime + START_PADDING;
-    startedAt = stepTime - stepCursor * stepSeconds(track);
+    startedAt = stepTime - stepCursor * getStepSeconds(track);
     store.set({ ...state, open: true, playing: true, position: from });
     announceTrackState();
 }
 
-function routeElement(media: HTMLAudioElement): void {
+function routeElement(media: HTMLAudioElement) {
     const audio = ensureAudio();
 
     if (!audio) return;
@@ -272,24 +274,25 @@ function routeElement(media: HTMLAudioElement): void {
 
         media.muted = false;
         media.volume = 1;
-        routed = true;
+        isRouted = true;
     }
 
     route.connect(audio.input);
 }
 
-function scheduleStep(track: PlayerTrack, step: number, at: number): void {
-    const seed = hash(track.id);
-
-    const root = ROOT_MIDI + (seed % SEMITONES_PER_OCTAVE);
+function scheduleStep(track: PlayerTrack, step: number, at: number) {
     const beat = step % (STEPS_PER_BEAT * BEATS_PER_BAR);
-    const roll = random(seed + step);
+    const seed = hash(track.seed);
+
+    const roll = getRandom(seed + step);
+    const root = ROOT_MIDI + (seed % SEMITONES_PER_OCTAVE);
 
     if (BASS_STEPS.includes(beat)) pluck(track, at, root, BASS_LEVEL, BASS_RELEASE, 'triangle');
     if (step % 2 === 1) whisper(at);
+
     if (roll < LEAD_THRESHOLD) return;
 
-    const degree = PENTATONIC[Math.floor(random(seed + step * SCALE_SALT) * PENTATONIC.length)];
+    const degree = PENTATONIC[Math.floor(getRandom(seed + step * SCALE_SALT) * PENTATONIC.length)];
     const octave = roll > OCTAVE_THRESHOLD ? 2 : 1;
 
     pluck(track, at, root + degree + octave * SEMITONES_PER_OCTAVE, LEAD_LEVEL, LEAD_RELEASE, 'sawtooth');
@@ -305,32 +308,36 @@ function seekTo(seconds: number): void {
 
     store.set({ ...state, position });
 
-    if (state.playing) resumePlayback();
+    if (!state.playing) return;
+
+    if (position >= track.durationSeconds) {
+        stopPlayback();
+
+        return;
+    }
+
+    resumePlayback();
 }
 
-function setMuted(next: boolean): void {
-    muted = next;
-    setRackMuted(next);
+function setMuted(shouldMute: boolean): void {
+    muted = shouldMute;
+    setRackMuted(shouldMute);
 
-    if (element && !routed) element.muted = next;
+    if (!isRouted && element) element.muted = shouldMute;
 }
 
 function setVolume(fraction: number): void {
     volume = Math.min(Math.max(0, fraction), 1);
     setRackVolume(volume);
 
-    if (element && !routed) element.volume = volume;
+    if (!isRouted && element) element.volume = volume;
 }
 
-function stepSeconds(track: PlayerTrack): number {
-    return beatSeconds(track) / STEPS_PER_BEAT;
-}
-
-function stopPlayback(): void {
+function stopPlayback() {
     endPlayback(0);
 }
 
-function stopVoices(): void {
+function stopVoices() {
     clearInterval(scheduler);
     element?.pause();
 
@@ -346,11 +353,7 @@ function stopVoices(): void {
     voices = [];
 }
 
-function tempo(track: PlayerTrack): number {
-    return TEMPO_BASE + (hash(track.id) % TEMPO_SPREAD) * TEMPO_STEP;
-}
-
-function tick(): void {
+function tick() {
     const track = current;
 
     if (!context || !track) return;
@@ -363,9 +366,13 @@ function tick(): void {
 
     while (stepTime < context.currentTime + SCHEDULE_AHEAD) {
         scheduleStep(track, stepCursor, stepTime);
-        stepTime += stepSeconds(track);
         stepCursor += 1;
+        stepTime += getStepSeconds(track);
     }
+}
+
+function toHertz(midi: number): number {
+    return TUNING_HERTZ * 2 ** ((midi - MIDI_A4) / SEMITONES_PER_OCTAVE);
 }
 
 function togglePlayback(): void {
@@ -378,7 +385,7 @@ function togglePlayback(): void {
     resumePlayback();
 }
 
-function whisper(at: number): void {
+function whisper(at: number) {
     if (!context || !mix || !noise) return;
 
     const filter = context.createBiquadFilter();
@@ -407,12 +414,12 @@ export {
     getTrack,
     getVolume,
     isMuted,
-    noteHertz,
     onPlayerChange,
     openPlayer,
     playTrack,
     seekTo,
     setMuted,
     setVolume,
+    toHertz,
     togglePlayback,
 };

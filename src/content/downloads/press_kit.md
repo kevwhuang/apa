@@ -1,6 +1,6 @@
 ---
 title: Press Kit
-kind: press-kit
+kind: official
 format: ZIP
 size: 2.9 MB
 date: 2026-11-08T00:00:00-06:00

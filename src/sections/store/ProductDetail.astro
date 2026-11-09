@@ -1,10 +1,10 @@
 ---
 import { Image } from 'astro:assets';
 
-import IconArrow from '@components/icons/Arrow.astro';
+import BackLink from '@components/shared/BackLink.astro';
 import { COMMERCE } from '@lib/shared/constants';
-import { formatPrice } from '@lib/shared/utils';
-import { getVariationImage, toVariationSlug, toVariations } from '@lib/commerce/products';
+import { formatPrice, formatSku, getStockLabel } from '@lib/shared/utils';
+import { getBaseVariation, getVariationImage, getVariationPrice, toImageKey } from '@lib/commerce/products';
 
 import type { CollectionEntry } from 'astro:content';
 
@@ -18,33 +18,24 @@ const THUMB_IMAGE_WIDTH = 140;
 
 const { product, slug } = Astro.props;
 
+const baseVariation = getBaseVariation(product);
 const ceiling = Math.min(product.stock, COMMERCE.maxQuantityPerItem);
-const inStock = product.stock > 0;
-const swatches = [...product.variations].toSorted((a, b) => a.name.localeCompare(b.name));
-const variations = toVariations(product);
+const gallery = product.variations.map(variation => ({ image: getVariationImage(variation), variation: variation.name }));
+const isInStock = product.stock > 0;
 
-const gallery = variations.map(variation => ({ image: getVariationImage(product.sku, variation), variation }));
+const priceCents = getVariationPrice(product, baseVariation);
 ---
 
-<nav
-    class="stage stage--strip border-b-2 border-border-strong"
-    aria-label="Breadcrumb"
->
-    <div data-motion="stamp">
-        <a
-            class="active:translate-y-px hover:text-link inline-flex items-center min-h-(--control-size) gap-(--space-2xs) font-bold font-mono text-sm tracking-wide uppercase text-text-secondary transition-[color,transform]"
-            href="/store"
-        >
-            <IconArrow left /> All products
-        </a>
-    </div>
-</nav>
+<BackLink
+    href="/store"
+    label="Back to store"
+/>
 
 <section
     class="stage stage--tight"
     aria-labelledby="product-title"
 >
-    <div class="grid grid-cols-1 gap-12 md:grid-cols-2">
+    <div class="grid grid-cols-2 gap-12 max-md:grid-cols-1">
         <div
             class="flex flex-col gap-5"
             data-motion="unfold"
@@ -52,32 +43,42 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
             <div class="product-gallery__frame slab slab--bare slab--lift">
                 {gallery.map(({ image, variation }) => image && (
                     <Image
-                        class:list={['product-gallery__photo', variation === product.base && 'is-current']}
-                        alt={`${product.title} \u2014 ${variation}`}
+                        class:list={['product-gallery__photo absolute inset-0 object-cover size-full opacity-0 pointer-events-none', variation === product.base && 'is-current']}
+                        alt={`${product.title}, ${variation}`}
                         data-gallery-photo={variation}
+                        decoding="sync"
                         densities={[1, 2]}
                         draggable="false"
                         src={image}
                         width={FRAME_IMAGE_WIDTH}
                     />
                 ))}
+                {getStockLabel(product.stock) && (
+                    <span
+                        class="absolute left-0 top-0 p-(--space-xs) border-b-2 border-border-strong border-r-2 font-mono leading-none text-base tracking-[0.06em] uppercase bg-bg-page text-text"
+                        data-placeholder
+                    >
+                        {getStockLabel(product.stock)}
+                    </span>
+                )}
             </div>
             <ul
-                class="grid grid-cols-4 gap-4 list-none"
+                class="product-gallery__thumbs grid grid-cols-5 list-none"
                 aria-label="Product views"
                 data-gallery-thumbs
             >
                 {gallery.map(({ image, variation }) => (
                     <li>
                         <button
-                            class="product-gallery__thumb"
-                            aria-label={`Show the ${variation} view`}
+                            class="product-gallery__thumb block relative aspect-square w-full p-0 border-2 border-border"
+                            aria-label={`Show ${variation} view`}
                             aria-pressed={variation === product.base ? 'true' : 'false'}
                             data-gallery-thumb={variation}
                             type="button"
                         >
                             {image && (
                                 <Image
+                                    class="product-gallery__thumb-image"
                                     alt=""
                                     densities={[1, 2]}
                                     draggable="false"
@@ -90,42 +91,37 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
                 ))}
             </ul>
         </div>
-        <div class="self-start space-y-8 md:sticky md:top-28">
-            <div data-motion="rise">
-                <div class="flex flex-wrap items-baseline justify-between gap-x-4 mb-2">
-                    <p class="label text-link">{product.category}</p>
-                    <p
-                        class="font-mono text-xs text-text-secondary"
-                        data-placeholder
-                    >
-                        SKU-{product.sku}
-                    </p>
-                </div>
+        <div class="self-start sticky top-28 space-y-8 max-md:static">
+            <div>
                 <h1
                     id="product-title"
-                    class="mb-3 text-3xl text-balance xl:text-4xl"
+                    class="mb-3 text-4xl text-balance max-lg:text-3xl"
+                    data-motion="strike"
                 >
                     {product.title}
                 </h1>
                 <p
-                    class="font-bold font-mono text-2xl"
+                    class="font-mono text-2xl"
+                    data-motion="rise"
                     data-placeholder
+                    data-price-output
                 >
-                    {formatPrice(product.priceCents)}
+                    {formatPrice(priceCents)}
                 </p>
             </div>
             <p
-                class="leading-relaxed text-base text-text-secondary"
+                class="text-lg text-text-secondary"
                 data-motion="blur"
             >
                 {product.description}
             </p>
             <form
                 class="add-form space-y-6"
-                data-image={`${product.sku}_${toVariationSlug(product.base)}`}
+                data-image={toImageKey(baseVariation)}
                 data-max={ceiling}
                 data-motion="rise"
-                data-price-cents={product.priceCents}
+                data-price-cents={priceCents}
+                data-sku={baseVariation.sku}
                 data-slug={slug}
                 data-stock={product.stock}
                 data-title={product.title}
@@ -139,12 +135,16 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
                         aria-label="Variation options"
                         role="group"
                     >
-                        {swatches.map(variation => (
+                        {product.variations.map(variation => (
                             <button
                                 class="product__swatch active:border-border-strong aria-pressed:border-border-strong hover:border-border-strong h-10 w-10 border-2 border-border"
                                 aria-label={variation.name}
                                 aria-pressed={variation.name === product.base ? 'true' : 'false'}
-                                data-image={`${product.sku}_${toVariationSlug(variation.name)}`}
+                                data-image={toImageKey(variation)}
+                                data-price-cents={getVariationPrice(product, variation)}
+                                data-price-label={formatPrice(getVariationPrice(product, variation))}
+                                data-sku={variation.sku}
+                                data-sku-label={formatSku(variation.sku)}
                                 data-variation={variation.name}
                                 style={`background: ${variation.hex};`}
                                 type="button"
@@ -163,7 +163,7 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
                             {product.sizes.map((size, index) => (
                                 <button
                                     class:list={[
-                                        'active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse h-(--control-size) min-w-(--control-size) px-3 border-2 border-border-strong font-bold font-mono text-xs uppercase transition-colors select-none',
+                                        'chip hover:bg-bg-hover h-(--control-size) min-w-(--control-size)',
                                         index === 0 && 'is-active',
                                     ]}
                                     aria-pressed={index === 0 ? 'true' : 'false'}
@@ -178,17 +178,17 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
                 )}
                 <div>
                     <p class="label mb-3 text-text-secondary">
-                        {inStock && 'Quantity'}
-                        {!inStock && (
+                        {isInStock && 'Quantity'}
+                        {!isInStock && (
                             <Fragment>
                                 <s>Quantity</s>
                                 <span class="text-link"> (out of stock)</span>
                             </Fragment>
                         )}
                     </p>
-                    <div class:list={['inline-flex items-center border-2', inStock ? 'border-border-strong' : 'border-border-disabled opacity-55']}>
+                    <div class:list={['inline-flex items-center border-2', isInStock ? 'border-border-strong' : 'border-border-disabled text-text-disabled']}>
                         <button
-                            class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-bg-hover h-(--control-size) w-(--control-size) font-bold text-lg transition-colors"
+                            class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text-disabled aria-disabled:hover:bg-transparent aria-disabled:text-text-disabled hover:bg-bg-hover h-(--control-size) w-(--control-size) font-bold font-mono text-lg"
                             aria-disabled="true"
                             aria-label="Decrease quantity"
                             data-quantity="-1"
@@ -197,15 +197,15 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
                             &minus;
                         </button>
                         <span
-                            class:list={['w-12 font-bold font-mono text-center select-none', !inStock && 'line-through text-text-secondary']}
+                            class:list={['w-12 font-bold font-mono', !isInStock && 'line-through', 'text-center', !isInStock && 'text-text-secondary', 'select-none']}
                             aria-live="polite"
                             data-quantity-output
                         >
                             1
                         </span>
                         <button
-                            class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-bg-hover h-(--control-size) w-(--control-size) font-bold text-lg transition-colors"
-                            aria-disabled={!inStock || ceiling <= 1}
+                            class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text-disabled aria-disabled:hover:bg-transparent aria-disabled:text-text-disabled hover:bg-bg-hover h-(--control-size) w-(--control-size) font-bold font-mono text-lg"
+                            aria-disabled={!isInStock || ceiling <= 1}
                             aria-label="Increase quantity"
                             data-quantity="+1"
                             type="button"
@@ -216,23 +216,23 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
                 </div>
                 <button
                     class="btn btn--primary w-full"
-                    disabled={!inStock}
+                    disabled={!isInStock}
                     type="submit"
                 >
-                    {inStock ? 'Add to cart' : 'Sold out'}
+                    {isInStock ? 'Add to cart' : 'Sold out'}
                 </button>
             </form>
-            {product.details.length > 0 && (
-                <div
-                    class="pt-5 border-t-2 border-border-strong"
-                    data-motion="unfold"
-                >
-                    <p class="label mb-4 text-text-secondary">Details</p>
+            <div
+                class="flex flex-col gap-4 pt-5 border-border-strong border-t-2"
+                data-motion="unfold"
+            >
+                <p class="label text-text-secondary">Details</p>
+                {product.details.length > 0 && (
                     <ul class="space-y-2 list-none text-text-secondary">
                         {product.details.map(detail => (
                             <li class="flex gap-3">
                                 <span
-                                    class="font-bold text-marker"
+                                    class="font-bold text-text-brand"
                                     aria-hidden="true"
                                 >
                                     &middot;
@@ -241,30 +241,62 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
                             </li>
                         ))}
                     </ul>
+                )}
+                <div class="flex flex-wrap items-baseline justify-between gap-x-4 font-mono text-sm text-text-secondary">
+                    <p class="first-letter:uppercase">{product.category}</p>
+                    <p
+                        data-placeholder
+                        data-sku-output
+                    >
+                        {formatSku(baseVariation.sku)}
+                    </p>
                 </div>
-            )}
+            </div>
         </div>
     </div>
 </section>
+
+<script
+    data-astro-rerun
+    is:inline
+>
+    function initVariationQuery() {
+        const requested = new URLSearchParams(globalThis.location.search).get('variation')?.trim().toLowerCase();
+        const swatches = Array.from(document.querySelectorAll('[data-variation]'));
+
+        const match = requested ? swatches.find(swatch => swatch.dataset.variation.toLowerCase() === requested) : undefined;
+
+        if (!match) return;
+
+        const variation = match.dataset.variation;
+
+        document.querySelectorAll('[data-gallery-photo]').forEach((photo) => {
+            photo.classList.toggle('is-current', photo.dataset.galleryPhoto === variation);
+        });
+
+        document.querySelectorAll('[data-gallery-thumb]').forEach((thumb) => {
+            thumb.setAttribute('aria-pressed', String(thumb.dataset.galleryThumb === variation));
+        });
+
+        swatches.forEach((swatch) => {
+            swatch.setAttribute('aria-pressed', String(swatch === match));
+        });
+
+        document.querySelector('[data-price-output]').textContent = match.dataset.priceLabel;
+        document.querySelector('[data-sku-output]').textContent = match.dataset.skuLabel;
+        document.querySelector('[data-variation-output]').textContent = variation;
+    }
+
+    initVariationQuery();
+</script>
 
 <style>
     .product-gallery__frame {
         aspect-ratio: 1;
         background-color: var(--color-bg-sunken);
-        margin-bottom: calc(var(--z-lift) * var(--lift));
+        margin-bottom: var(--lift);
         overflow: hidden;
         position: relative;
-    }
-
-    .product-gallery__photo {
-        height: 100%;
-        inset: 0;
-        object-fit: cover;
-        opacity: 0;
-        pointer-events: none;
-        position: absolute;
-        transition: opacity var(--duration-slow) var(--motion-ease-ui);
-        width: 100%;
     }
 
     .product-gallery__photo.is-current {
@@ -273,23 +305,7 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
     }
 
     .product-gallery__thumb {
-        aspect-ratio: 1;
-        border: 2px solid var(--color-border);
-        display: block;
-        overflow: hidden;
-        padding: 0;
-        transition:
-            border-color var(--duration-fast) var(--motion-ease-ui),
-            box-shadow var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-        width: 100%;
-    }
-
-    .product-gallery__thumb :global(img) {
-        display: block;
-        height: 100%;
-        object-fit: cover;
-        width: 100%;
+        transition: transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .product-gallery__thumb:active {
@@ -300,15 +316,26 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
         border-color: var(--color-link);
     }
 
+    .product-gallery__thumb::after {
+        content: '';
+        inset: min(0px, calc(50% - var(--control-size) / 2));
+        position: absolute;
+    }
+
     .product-gallery__thumb[aria-pressed='true'] {
         border-color: var(--color-border-strong);
         box-shadow: var(--lift) var(--lift) 0 0 var(--color-border-strong);
     }
 
-    .product__swatch {
-        transition:
-            border-color var(--duration-fast) var(--motion-ease-ui),
-            box-shadow var(--duration-fast) var(--motion-ease-ui);
+    .product-gallery__thumb-image {
+        display: block;
+        height: 100%;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    .product-gallery__thumbs {
+        gap: calc(var(--lift) + var(--space-xs));
     }
 
     .product__swatch[aria-pressed='true'] {
@@ -334,55 +361,50 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
     import { registerPageScript } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
 
-    const STORAGE_MESSAGE = 'Nothing was added \u2014 your browser storage is full. Clear some space and try again.';
+    const STORAGE_MESSAGE = 'Nothing was added because your browser storage is full. Clear some space and try again.';
 
     let maxQuantity = 1;
     let quantity = 1;
     let stock = 0;
 
-    function applyVariationFromQuery(swatches: NodeListOf<HTMLButtonElement>) {
-        const requested = new URLSearchParams(window.location.search).get('variation')?.trim().toLowerCase();
-
-        if (!requested) return;
-
-        const match = Array.from(swatches).find(swatch => swatch.dataset.variation?.toLowerCase() === requested);
-
-        if (!match) return;
-
-        selectVariation(match.dataset.variation ?? '');
-    }
-
     function countInCart(slug: string, variation: string | undefined, size: string | undefined) {
-        const line = getItems().find(item => item.productSlug === slug
-            && (item.size ?? '') === (size ?? '')
-            && (item.variation ?? '') === (variation ?? ''));
+        const line = getItems().find(item => (item.size ?? '') === (size ?? '')
+            && (item.variation ?? '') === (variation ?? '')
+            && item.productSlug === slug);
 
         return line?.quantity ?? 0;
+    }
+
+    function getLimitMessage() {
+        return stock > COMMERCE.maxQuantityPerItem ? 'Five per order is the limit.' : 'That\'s all we have.';
     }
 
     function handleAddSubmit(event: SubmitEvent, form: HTMLFormElement) {
         event.preventDefault();
 
         const pressed = form.querySelector<HTMLButtonElement>('[data-variation][aria-pressed="true"]');
-
-        const image = pressed?.dataset.image ?? form.dataset.image ?? '';
         const size = form.querySelector<HTMLButtonElement>('[data-size][aria-pressed="true"]')?.dataset.size;
         const slug = form.dataset.slug ?? '';
         const title = form.dataset.title ?? '';
+
+        const image = pressed?.dataset.image ?? form.dataset.image ?? '';
+        const priceCents = Number(pressed?.dataset.priceCents ?? form.dataset.priceCents);
+        const sku = pressed?.dataset.sku ?? form.dataset.sku ?? '';
         const variation = pressed?.dataset.variation;
 
         if (countInCart(slug, variation, size) >= maxQuantity) {
-            toast(`Already at the maximum \u2014 ${maxQuantity} \u00d7 ${title} is all we can hold for you.`, 'error');
+            toast(`Already at the maximum. ${maxQuantity} \u00d7 ${title} is the limit per order.`, 'error');
 
             return;
         }
 
         const persisted = add({
             image,
-            priceCents: Number(form.dataset.priceCents),
+            priceCents,
             productSlug: slug,
             quantity,
             size,
+            sku,
             title,
             variation,
         }, maxQuantity);
@@ -404,13 +426,17 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
         quantity = Math.min(maxQuantity, Math.max(1, quantity + step));
         updateQuantity(decrease, increase, output);
 
-        if (quantity >= maxQuantity && step > 0) toast(limitMessage(), 'info');
+        if (quantity >= maxQuantity && step > 0) toast(getLimitMessage(), 'info');
     }
 
     function handleSizeClick(button: HTMLButtonElement, sizeButtons: NodeListOf<HTMLButtonElement>) {
         sizeButtons.forEach((sizeButton) => {
-            sizeButton.classList.toggle('is-active', sizeButton === button);
-            sizeButton.setAttribute('aria-pressed', String(sizeButton === button));
+            const isActive = sizeButton === button;
+
+            if (sizeButton.classList.contains('is-active') === isActive) return;
+
+            sizeButton.classList.toggle('is-active', isActive);
+            sizeButton.setAttribute('aria-pressed', String(isActive));
         });
     }
 
@@ -429,8 +455,6 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
         maxQuantity = Math.max(1, Math.min(Number(form.dataset.max) || 1, COMMERCE.maxQuantityPerItem));
         quantity = 1;
         stock = Number(form.dataset.stock) || 0;
-
-        applyVariationFromQuery(swatches);
 
         if (decrease && increase && quantityOutput) {
             updateQuantity(decrease, increase, quantityOutput);
@@ -453,14 +477,12 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
         });
     }
 
-    function limitMessage() {
-        return stock > COMMERCE.maxQuantityPerItem ? 'Five per order is the limit.' : 'That\'s all we have.';
-    }
-
     function selectVariation(variation: string) {
         if (!variation) return;
 
         const output = document.querySelector<HTMLElement>('[data-variation-output]');
+        const priceOutput = document.querySelector<HTMLElement>('[data-price-output]');
+        const skuOutput = document.querySelector<HTMLElement>('[data-sku-output]');
 
         document.querySelectorAll<HTMLElement>('[data-gallery-photo]').forEach((photo) => {
             photo.classList.toggle('is-current', photo.dataset.galleryPhoto === variation);
@@ -471,7 +493,12 @@ const gallery = variations.map(variation => ({ image: getVariationImage(product.
         });
 
         document.querySelectorAll<HTMLButtonElement>('[data-variation]').forEach((swatch) => {
-            swatch.setAttribute('aria-pressed', String(swatch.dataset.variation === variation));
+            const isSelected = swatch.dataset.variation === variation;
+
+            swatch.setAttribute('aria-pressed', String(isSelected));
+
+            if (isSelected && priceOutput && swatch.dataset.priceLabel) priceOutput.textContent = swatch.dataset.priceLabel;
+            if (isSelected && skuOutput && swatch.dataset.skuLabel) skuOutput.textContent = swatch.dataset.skuLabel;
         });
 
         if (output) output.textContent = variation;

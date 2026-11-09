@@ -55,7 +55,6 @@ Austin Producer Alliance (APA) is an organization of music producers in Austin, 
 
 ### Executive
 
-- [ ] Conduct organizer onboarding
 - [ ] Fill all role openings
 - [ ] Collaborate with music tech companies
 

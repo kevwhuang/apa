@@ -4,17 +4,15 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ENTRANCE_PRESETS, FOLDED_PROPERTIES, GUARDED_PRESET, PRESET_NAMES, REST_PROPERTIES, VISIBLE_PRESETS, buildStagger, resolvePreset } from '@lib/motion/presets';
 import { getMotionTokens } from '@lib/motion/tokens';
 
-const BOOT_PRESETS: MotionPresetName[] = ['rule', 'strike', 'wipe'];
-const INTERACTIVE_SELECTOR = 'a[href], button, input, select, summary, textarea, [tabindex]';
+const INTERACTIVE_SELECTOR = 'a[href], button, input, select, summary, textarea, [tabindex]:not([tabindex="-1"])';
 const MOTION_SELECTOR = '[data-motion], [data-motion-stagger] > *';
-const STAGGER_ORIGINS: MotionStaggerOrigin[] = ['center', 'end', 'start'];
 const STAGGER_SELECTOR = '[data-motion-stagger]';
-const TRIGGER_START = 'top 88%';
-const WILL_CHANGE = 'transform, filter';
+const TRIGGER_START = 'top 85%';
+const WILL_CHANGE = 'transform';
 
 const effective = new WeakMap<Element, MotionPresetName>();
-const origins = new WeakMap<Element, MotionStaggerOrigin>();
 const revealed = new WeakSet<Element>();
+const waiting = new Set<Element>();
 
 function buildEntrances(): void {
     const batches = new Map<MotionPresetName, Element[]>();
@@ -22,37 +20,40 @@ function buildEntrances(): void {
     const stranded = new Set<Element>();
     const tokens = getMotionTokens();
 
+    waiting.clear();
+
     for (const container of document.querySelectorAll<HTMLElement>(STAGGER_SELECTOR)) {
-        const preset = resolvePreset(container.dataset.motionStagger);
         const nested = container.parentElement?.closest(STAGGER_SELECTOR);
+        const preset = resolvePreset(container.dataset.motionStagger);
         const targets = Array.from(container.children);
 
-        if (!preset || nested || !targets.length) {
+        if (nested || !preset || !targets.length) {
             for (const target of targets) stranded.add(target);
 
             continue;
         }
 
-        roots.push({ from: resolveOrigin(container.dataset.motionFrom), preset, targets });
+        roots.push({ preset, targets });
     }
 
     for (const element of document.querySelectorAll<HTMLElement>('[data-motion]')) {
         const preset = resolvePreset(element.dataset.motion);
 
-        if (!preset || element.closest(STAGGER_SELECTOR)) {
+        if (element.closest(STAGGER_SELECTOR) || !preset) {
             stranded.add(element);
 
             continue;
         }
 
-        roots.push({ from: resolveOrigin(element.dataset.motionFrom), preset, targets: [element] });
+        roots.push({ preset, targets: [element] });
     }
 
     for (const root of roots) {
         for (const target of root.targets) {
             const preset = resolveEffective(root.preset, target);
 
-            stranded.delete(target);
+            if (preset) stranded.delete(target);
+            else stranded.add(target);
 
             if (!preset || revealed.has(target)) continue;
 
@@ -61,9 +62,8 @@ function buildEntrances(): void {
             batch.push(target);
             batches.set(preset, batch);
             effective.set(target, preset);
-            origins.set(target, root.from);
 
-            if (BOOT_PRESETS.includes(preset)) gsap.set(target, ENTRANCE_PRESETS[preset].from(tokens));
+            if (VISIBLE_PRESETS.includes(preset)) gsap.set(target, ENTRANCE_PRESETS[preset].from(tokens));
         }
     }
 
@@ -82,7 +82,7 @@ function buildEntrances(): void {
     }
 }
 
-function clearRest(targets: Element[], properties: string): void {
+function clearRest(targets: Element[], properties: string) {
     gsap.set(targets, { clearProps: properties });
 
     for (const target of targets) {
@@ -92,64 +92,66 @@ function clearRest(targets: Element[], properties: string): void {
     }
 }
 
-function isGuarded(target: Element): boolean {
-    return target.matches(INTERACTIVE_SELECTOR);
+function markStarted(this: gsap.core.Tween) {
+    for (const target of this.targets<Element>()) waiting.delete(target);
 }
 
-function motionTargets(): Element[] {
-    return Array.from(document.querySelectorAll(MOTION_SELECTOR));
-}
+function playEntrance(entering: Element[]) {
+    const groups = new Map<MotionPresetName, MotionGroup>();
+    const names = new Set(entering.map(target => effective.get(target)));
 
-function playEntrance(entering: Element[]): void {
-    const groups = new Map<string, MotionGroup>();
-
-    for (const target of entering) {
+    for (const target of new Set([...waiting, ...entering])) {
         const name = effective.get(target);
 
-        if (!name || revealed.has(target)) continue;
+        if (!name || !names.has(name) || revealed.has(target)) continue;
 
-        const from = origins.get(target) ?? 'start';
-
-        const key = `${name}:${from}`;
-
-        const group = groups.get(key) ?? { from, name, targets: [] };
+        const group = groups.get(name) ?? { name, targets: [] };
 
         group.targets.push(target);
-        groups.set(key, group);
+        groups.set(name, group);
     }
 
     for (const group of groups.values()) playPreset(group);
 }
 
-function playPreset({ from, name, targets }: MotionGroup): void {
+function playPreset({ name, targets }: MotionGroup) {
     const preset = ENTRANCE_PRESETS[name];
     const tokens = getMotionTokens();
 
-    const toVars: gsap.TweenVars = {
-        ...preset.to(),
-        duration: tokens.duration[preset.duration],
-        ease: tokens.ease[preset.ease],
-        onComplete: () => clearRest(targets, REST_PROPERTIES),
+    targets.sort((first, second) => (first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
+
+    for (const target of targets) {
+        if (waiting.has(target)) gsap.killTweensOf(target);
+    }
+
+    for (const target of targets) waiting.add(target);
+
+    const offset = gsap.utils.distribute(buildStagger(targets.length, preset.stagger));
+
+    const timeline = gsap.timeline({
+        onComplete: () => clearRest(targets.filter(target => !waiting.has(target)), REST_PROPERTIES),
         onStart: () => gsap.set(targets, { willChange: WILL_CHANGE }),
         onUpdate: () => restoreRevealed(targets),
-        overwrite: 'auto',
-        stagger: buildStagger(targets.length, preset.stagger, from),
-    };
+    });
 
-    gsap.fromTo(targets, preset.from(tokens), toVars);
+    targets.forEach((target, index) => {
+        timeline.fromTo(target, preset.from(tokens), {
+            ...preset.to(),
+            duration: tokens.duration[preset.duration],
+            ease: tokens.ease[preset.ease],
+            onStart: markStarted,
+            overwrite: 'auto',
+        }, offset(index, target, targets));
+    });
 }
 
-function resolveEffective(preset: MotionPresetName, target: Element): MotionPresetName | undefined {
-    if (!isGuarded(target)) return preset;
+function resolveEffective(preset: MotionPresetName, target: Element) {
+    if (!target.matches(INTERACTIVE_SELECTOR)) return preset;
 
     return VISIBLE_PRESETS.includes(preset) ? undefined : GUARDED_PRESET;
 }
 
-function resolveOrigin(value: string | undefined): MotionStaggerOrigin {
-    return STAGGER_ORIGINS.find(origin => origin === value) ?? 'start';
-}
-
-function restoreRevealed(targets: Element[]): void {
+function restoreRevealed(targets: Element[]) {
     const pending = targets.filter(target => revealed.has(target));
 
     if (!pending.length) return;
@@ -159,7 +161,7 @@ function restoreRevealed(targets: Element[]): void {
 }
 
 function revealAll(): void {
-    const targets = motionTargets();
+    const targets = Array.from(document.querySelectorAll(MOTION_SELECTOR));
 
     if (!targets.length) return;
 
@@ -167,7 +169,8 @@ function revealAll(): void {
     clearRest(targets, `${REST_PROPERTIES},opacity`);
 }
 
-function revealElement(target: Element): void {
+function revealElement(target: Element) {
+    waiting.delete(target);
     gsap.killTweensOf(target);
     clearRest([target], REST_PROPERTIES);
     gsap.set(target, { opacity: 1 });

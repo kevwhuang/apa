@@ -1,21 +1,19 @@
 ---
 import { getCollection } from 'astro:content';
 
-import IconArrow from '@components/icons/Arrow.astro';
-import IconChevron from '@components/icons/Chevron.astro';
+import ProgramCard from '@components/program/Card.astro';
 import Schedule from '@components/program/Schedule.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { formatDate, isUpcoming, mapWorkshopLines } from '@lib/shared/utils';
-
-const CLASS_SPEAKER_LINK = 'active:translate-y-px hover:text-link flex items-center self-start min-h-(--control-size) font-mono text-sm underline underline-offset-4 wrap-anywhere transition-[color,transform]';
+import { isUpcoming, toProgramCard } from '@lib/shared/utils';
 
 const events = await getCollection('events');
 
 const archive = events
     .filter(event => event.data.type === 'assembly')
-    .sort((a, b) => +b.data.date - +a.data.date);
+    .sort((a, b) => +b.data.date - +a.data.date)
+    .map(entry => toProgramCard(entry));
 
-const workshopById = mapWorkshopLines(archive);
+const isStill = archive.some(card => card.notes.length > 0);
 ---
 
 <section
@@ -24,147 +22,39 @@ const workshopById = mapWorkshopLines(archive);
 >
     <div>
         <SectionHead
-            class="text-4xl text-balance"
-            eyebrow="Archive"
+            class="text-4xl text-balance max-md:text-2xl"
             headingId="assembly-past-title"
         >
-            Minutes from past sessions
+            Past Assemblies
         </SectionHead>
         <ol
-            class="assembly-archive list-none"
+            class="grid grid-cols-2 -mb-(--space-2xl) gap-x-(--space-lg) gap-y-0 list-none max-md:grid-cols-1"
             data-motion-stagger="flip"
         >
-            {archive.map(event => (
+            {archive.map(card => (
                 <li
-                    data-event-end={event.data.end.toISOString()}
+                    id={isUpcoming(card.end) ? undefined : card.id}
+                    class="grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-span-3 pb-(--space-2xl)"
+                    data-event-end={card.end.toISOString()}
+                    data-event-id={card.id}
                     data-event-role="past"
-                    hidden={isUpcoming(event.data.end)}
+                    hidden={isUpcoming(card.end)}
                 >
-                    <article
-                        id={isUpcoming(event.data.end) ? undefined : event.id}
-                        class="assembly-archive__card pt-4 border-t-2 border-border-strong"
-                        data-event-id={event.id}
-                    >
-                        <p class="label mb-2 text-text-secondary">
-                            <time datetime={event.data.date.toISOString()}>{formatDate(event.data.date)}</time>
-                        </p>
-                        <hgroup class="flex flex-col gap-1 mb-1">
-                            <h3 class="text-lg">
-                                {event.data.title}
-                            </h3>
-                            {workshopById.has(event.id) && (
-                                <p class="font-bold font-sans text-sm">
-                                    {workshopById.get(event.id)}
-                                </p>
-                            )}
-                        </hgroup>
-                        <address class="mb-3 font-mono not-italic text-xs text-text-secondary">
-                            {event.data.location}
-                        </address>
-                        <p class="leading-relaxed text-sm text-text-secondary">
-                            {event.data.excerpt}
-                        </p>
-                        {(event.data.description || event.data.speakers.some(speaker => speaker.bio)) && (
-                            <details
-                                class="assembly-archive__notes"
-                                name="assembly-archive"
-                            >
-                                <summary class="action-text assembly-archive__summary [&::-webkit-details-marker]:hidden hover:text-link inline-flex items-center gap-2 min-h-(--control-size) transition-[color,transform] cursor-pointer">
-                                    Session notes
-                                    <IconChevron />
-                                </summary>
-                                <div class="flex flex-col gap-(--space-sm) pb-(--space-sm)">
-                                    {event.data.description && event.data.description.split('\n\n').map(paragraph => (
-                                        <p class="leading-relaxed text-sm text-text-secondary">
-                                            {paragraph}
-                                        </p>
-                                    ))}
-                                    {event.data.speakers.length > 0 && (
-                                        <ul class="flex flex-col gap-(--space-sm) list-none">
-                                            {event.data.speakers.map(speaker => (
-                                                <li class="flex flex-col gap-1">
-                                                    <p class="font-bold font-sans text-sm">{speaker.name}</p>
-                                                    {speaker.bio && (
-                                                        <p class="leading-relaxed text-sm text-text-secondary">
-                                                            {speaker.bio}
-                                                        </p>
-                                                    )}
-                                                    {speaker.website && (
-                                                        <a
-                                                            class={CLASS_SPEAKER_LINK}
-                                                            href={speaker.website}
-                                                            rel="noopener noreferrer"
-                                                            target="_blank"
-                                                        >
-                                                            <span>{speaker.website.replace('https://', '')}</span>
-                                                            <span class="sr-only">&nbsp;(opens in a new tab)</span>
-                                                        </a>
-                                                    )}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
-                                </div>
-                            </details>
-                        )}
-                    </article>
+                    <ProgramCard
+                        credit={card.credit}
+                        date={card.date}
+                        group="assembly-archive"
+                        heading={card.heading}
+                        isStill={isStill}
+                        location={card.location}
+                        notes={card.notes}
+                        program="assembly"
+                        text={card.text}
+                    />
                 </li>
             ))}
         </ol>
-        <p data-motion="rise">
-            <a
-                class="action-text hover:text-link inline-flex items-center gap-2 min-h-(--control-size) transition-colors"
-                href="/events#past-title"
-            >
-                The full archive, every program <IconArrow />
-            </a>
-        </p>
     </div>
 </section>
 
 <Schedule />
-
-<style>
-    .assembly-archive {
-        column-gap: var(--space-2xl);
-        display: grid;
-        grid-auto-rows: auto;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        margin-bottom: calc(48px - var(--space-lg));
-        row-gap: 0;
-    }
-
-    .assembly-archive > li {
-        display: grid;
-        grid-row: span 5;
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: subgrid;
-        padding-bottom: var(--space-lg);
-    }
-
-    .assembly-archive__card {
-        align-content: start;
-        display: grid;
-        grid-row: span 5;
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: subgrid;
-    }
-
-    .assembly-archive__notes[open] .assembly-archive__summary {
-        color: var(--color-link);
-    }
-
-    .assembly-archive__notes[open] :global(svg) {
-        rotate: 180deg;
-    }
-
-    .assembly-archive__summary :global(svg) {
-        transition: rotate var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    @media (max-width: 768px) {
-        .assembly-archive {
-            grid-template-columns: minmax(0, 1fr);
-        }
-    }
-</style>

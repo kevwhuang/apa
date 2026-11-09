@@ -1,132 +1,127 @@
 ---
 import { getCollection } from 'astro:content';
 
+import BackLink from '@components/shared/BackLink.astro';
 import IconTrash from '@components/icons/Trash.astro';
-import PageHead from '@components/shared/PageHead.astro';
-import { toCatalog } from '@lib/shared/utils';
-import { toImageSources } from '@lib/commerce/products';
+import { SEED_ROWS } from '@lib/commerce/cart';
+import { toCatalog, toImageSources } from '@lib/commerce/products';
+
+const REMOVE_ICON_SIZE = 24;
 
 const catalog = toCatalog(await getCollection('products'));
 const images = await toImageSources();
 ---
 
-<section
-    class="stage stage--tight border-b-2 border-border-strong"
-    aria-labelledby="cart-title"
->
-    <div>
-        <PageHead
-            class="mb-6 text-5xl md:text-7xl"
-            eyebrow="Your cart"
-            headingId="cart-title"
-        >
-            Line by line.
-        </PageHead>
-        <p
-            class="max-w-2xl text-lg text-text-secondary"
-            data-motion="rise"
-        >
-            Every line updates as you change it. Head to checkout when it reads right.
-        </p>
-    </div>
-</section>
+<BackLink
+    href="/store"
+    label="Back to store"
+/>
 
 <section
     class="stage stage--tight"
-    aria-label="Cart contents"
+    aria-labelledby="cart-title"
     data-catalog={JSON.stringify(catalog)}
     data-images={JSON.stringify(images)}
 >
-    <div class="cart__grid grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-        <div class="cart__main flex flex-col gap-6">
-            <aside
-                class="cart__notice slab slab--card flex flex-col max-w-(--measure-form) w-full gap-4 mx-auto"
-                aria-label="Cart changes"
-                data-cart-notice
-                hidden
-                role="status"
-            >
-                <p class="label text-warning-text">Your cart changed</p>
-                <ul
-                    class="flex flex-col gap-(--space-3xs) list-none"
-                    data-cart-issues
-                />
-                <button
-                    class="btn self-start"
-                    data-cart-dismiss
-                    type="button"
-                >
-                    Got it
-                </button>
-            </aside>
-            <div
-                class="slab slab--card flex flex-col items-start max-w-(--measure-form) w-full gap-4 mx-auto"
-                data-cart-empty
-                data-motion="rise"
-                tabindex="-1"
-            >
-                <p class="label text-text-secondary">Empty</p>
-                <p class="font-bold font-sans text-2xl text-balance">Nothing in the cart yet.</p>
-                <a
-                    class="btn btn--primary"
-                    href="/store"
-                >
-                    Browse the store
-                </a>
-            </div>
-            <ul
-                class="empty:hidden flex flex-col gap-(--space-lg) list-none"
-                data-cart-list
-            />
-            <p
-                class="sr-only"
-                aria-live="polite"
-                data-cart-status
-            />
-        </div>
-        <aside
-            class="cart__summary slab slab--sunk"
-            aria-label="Order summary"
-            data-cart-summary
-            data-motion="wipe"
+    <div>
+        <h1
+            id="cart-title"
+            class="mb-12 text-4xl text-balance max-lg:text-3xl"
+            data-motion="strike"
         >
-            <h2 class="label mb-4 text-text-secondary">Summary</h2>
-            <dl class="flex flex-col gap-2 mb-4 font-mono text-sm">
-                <div class="flex justify-between gap-3">
-                    <dt>Subtotal</dt>
-                    <dd data-subtotal>$0.00</dd>
-                </div>
-                <div class="flex justify-between gap-3">
-                    <dt>Shipping</dt>
-                    <dd data-shipping>$0.00</dd>
-                </div>
-                <div class="flex justify-between gap-3">
-                    <dt>Estimated tax</dt>
-                    <dd data-tax>$0.00</dd>
-                </div>
-                <div class="flex justify-between gap-3 pt-3 border-t-2 border-border-strong font-bold font-sans text-lg">
-                    <dt>Total</dt>
-                    <dd
-                        aria-live="polite"
-                        data-total
+            Your cart
+        </h1>
+        <div class="cart__grid grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] gap-12 max-md:grid-cols-1">
+            <div class="cart__main flex flex-col gap-6">
+                <aside
+                    class="cart__notice slab slab--card flex flex-col max-w-(--measure-form) w-full gap-4 mx-auto"
+                    aria-label="Cart changes"
+                    data-cart-notice
+                    hidden
+                    role="status"
+                >
+                    <p class="label text-warning-text">Your cart changed</p>
+                    <ul
+                        class="flex flex-col gap-(--space-3xs) list-none"
+                        data-cart-issues
+                    />
+                    <button
+                        class="btn self-start"
+                        data-cart-dismiss
+                        type="button"
                     >
-                        $0.00
-                    </dd>
+                        Dismiss
+                    </button>
+                </aside>
+                <div
+                    class="cart__empty slab slab--card slab--empty max-w-(--measure-form) w-full mx-auto"
+                    data-cart-empty
+                    data-motion="rise"
+                    tabindex="-1"
+                >
+                    <p class="font-bold font-sans text-2xl text-balance tracking-tight">Nothing in the cart.</p>
+                    <a
+                        class="btn btn--primary"
+                        href="/store"
+                    >
+                        Browse store
+                    </a>
                 </div>
-            </dl>
-            <a
-                class="btn btn--primary cart-checkout w-full"
-                aria-disabled="true"
-                href="/store/checkout"
+                <ul
+                    class="cart__list empty:hidden flex flex-col gap-(--space-2xl) list-none"
+                    data-cart-list
+                    style={`--cart-seed-rows: ${SEED_ROWS}`}
+                />
+                <p
+                    class="sr-only"
+                    aria-live="polite"
+                    data-cart-status
+                />
+            </div>
+            <aside
+                class="cart__summary slab slab--sunk"
+                aria-label="Order summary"
+                data-cart-summary
+                data-motion="wipe"
             >
-                Checkout
-            </a>
-        </aside>
+                <h2 class="label mb-4 text-text-secondary">Summary</h2>
+                <dl class="flex flex-col gap-2 mb-4 font-mono text-base">
+                    <div class="flex justify-between gap-3">
+                        <dt>Subtotal</dt>
+                        <dd data-subtotal>$0.00</dd>
+                    </div>
+                    <div class="flex justify-between gap-3">
+                        <dt>Shipping</dt>
+                        <dd data-shipping>$0.00</dd>
+                    </div>
+                    <div class="flex justify-between gap-3 mb-2">
+                        <dt>Estimated tax</dt>
+                        <dd data-tax>$0.00</dd>
+                    </div>
+                    <div class="flex justify-between gap-3 pt-2 border-border-strong border-t-2 text-lg">
+                        <dt>Total</dt>
+                        <dd
+                            aria-live="polite"
+                            data-total
+                        >
+                            $0.00
+                        </dd>
+                    </div>
+                </dl>
+                <a
+                    class="btn btn--primary cart-checkout w-full"
+                    aria-disabled="true"
+                    href="/store/checkout"
+                >
+                    Check out
+                </a>
+            </aside>
+        </div>
     </div>
     <template data-cart-row>
-        <li class="cart-items__row slab slab--bare slab--card">
+        <li class="cart-items__row slab slab--bare slab--card slab--still">
             <div
-                class="@container flex items-center justify-center self-start overflow-hidden relative aspect-square"
+                class="flex items-center justify-center overflow-hidden relative self-start aspect-square"
                 data-row-tile
             >
                 <div
@@ -134,7 +129,7 @@ const images = await toImageSources();
                     aria-hidden="true"
                 />
                 <span
-                    class="font-bold font-display text-[length:10cqi] uppercase select-none"
+                    class="font-bold font-display leading-none text-sm tracking-[-0.02em] select-none"
                     aria-hidden="true"
                     data-row-initial
                 />
@@ -149,9 +144,9 @@ const images = await toImageSources();
             <div class="cart-items__body flex flex-col">
                 <div class="flex flex-col gap-1 mb-3">
                     <div class="cart-items__heading flex items-start gap-3">
-                        <p class="min-w-0 font-bold font-sans">
+                        <p class="min-w-0 font-bold font-sans leading-(--text-lg) tracking-tight">
                             <a
-                                class="hover:text-link hover:underline underline-offset-4 transition-colors"
+                                class="active:translate-y-px hover:text-link hover:underline inline-block underline-offset-4 wrap-anywhere transition-[color,translate]"
                                 data-row-title
                                 href="/store"
                             >
@@ -159,45 +154,47 @@ const images = await toImageSources();
                             </a>
                         </p>
                         <p
-                            class="shrink-0 ml-auto font-mono text-xs text-text-secondary"
+                            class="shrink-0 ml-auto font-mono text-sm text-text-secondary"
                             data-row-sku
                         />
                     </div>
                     <p
-                        class="label text-text-secondary"
+                        class="font-mono leading-none text-base tracking-[0.06em] uppercase text-text-secondary"
                         data-row-variant
                     />
                 </div>
                 <div class="flex flex-wrap items-center gap-x-(--space-md) gap-y-(--space-2xs)">
-                    <div class="inline-flex items-center border-2 border-border-strong">
+                    <div class="flex items-center">
+                        <div class="inline-flex items-center border-2 border-border-strong">
+                            <button
+                                class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text-disabled aria-disabled:hover:bg-transparent aria-disabled:text-text-disabled hover:bg-bg-raised-hover h-(--control-size) w-(--control-size) font-bold font-mono"
+                                data-row-decrease
+                                type="button"
+                            >
+                                &minus;
+                            </button>
+                            <span
+                                class="w-10 font-bold font-mono text-center select-none"
+                                data-row-quantity
+                            />
+                            <button
+                                class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text-disabled aria-disabled:hover:bg-transparent aria-disabled:text-text-disabled hover:bg-bg-raised-hover h-(--control-size) w-(--control-size) font-bold font-mono"
+                                data-row-increase
+                                type="button"
+                            >
+                                +
+                            </button>
+                        </div>
                         <button
-                            class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-bg-raised-hover h-(--control-size) w-(--control-size) font-bold transition-colors"
-                            data-row-decrease
+                            class="cart-items__remove active:translate-y-px hover:text-link inline-flex items-center justify-center shrink-0 h-(--control-size) w-(--control-size) text-text-secondary transition-[color,translate]"
+                            data-row-remove
                             type="button"
                         >
-                            &minus;
-                        </button>
-                        <span
-                            class="w-10 font-bold font-mono text-center select-none"
-                            data-row-quantity
-                        />
-                        <button
-                            class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text aria-disabled:hover:bg-transparent aria-disabled:opacity-55 hover:bg-bg-raised-hover h-(--control-size) w-(--control-size) font-bold transition-colors"
-                            data-row-increase
-                            type="button"
-                        >
-                            +
+                            <IconTrash size={REMOVE_ICON_SIZE} />
                         </button>
                     </div>
-                    <button
-                        class="cart-items__remove active:translate-y-px hover:text-link inline-flex items-center justify-center shrink-0 h-(--control-size) w-(--control-size) text-text-secondary transition-[color,transform]"
-                        data-row-remove
-                        type="button"
-                    >
-                        <IconTrash />
-                    </button>
                     <p
-                        class="ml-auto font-bold font-mono text-base md:text-lg"
+                        class="ml-auto font-mono text-base"
                         data-row-price
                     />
                 </div>
@@ -205,7 +202,7 @@ const images = await toImageSources();
         </li>
     </template>
     <template data-cart-issue>
-        <li class="flex gap-2 text-sm text-text-secondary">
+        <li class="flex gap-2 text-base text-text-secondary">
             <span
                 class="font-bold text-warning-text"
                 aria-hidden="true"
@@ -221,41 +218,38 @@ const images = await toImageSources();
 </section>
 
 <style>
-    .cart-checkout {
-        transition:
-            background var(--duration-fast) var(--motion-ease-ui),
-            border-color var(--duration-fast) var(--motion-ease-ui),
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
+    html[data-cart='empty'] .cart__main {
+        grid-column: 1 / -1;
+    }
+
+    html[data-cart='empty'] .cart__summary {
+        display: none;
+    }
+
+    html[data-cart='filled'] .cart__empty {
+        display: none;
+    }
+
+    html[data-cart='filled'] .cart__list:empty {
+        display: flex;
+        min-height: calc(var(--row-count) * var(--row-height) + (var(--row-count) - 1) * var(--space-2xl));
     }
 
     .cart-checkout[aria-disabled='true'] {
-        background: transparent;
-        border-color: var(--color-border);
-        color: var(--color-text-secondary);
+        background: var(--color-btn-disabled-bg);
+        border-color: var(--color-btn-disabled-border);
+        color: var(--color-btn-disabled-text);
         cursor: not-allowed;
-        opacity: 1;
     }
 
     .cart-checkout[aria-disabled='true']:active {
         transform: none;
     }
 
-    .cart-checkout[aria-disabled='true']:hover {
-        background: transparent;
-        border-color: var(--color-border);
-        color: var(--color-text-secondary);
-    }
-
     .cart-items__body {
         align-self: start;
         gap: var(--space-sm);
-        padding: var(--space-lg);
-    }
-
-    .cart-items__remove :global(svg) {
-        height: 24px;
-        width: 24px;
+        padding: var(--row-pad);
     }
 
     .cart-items__remove:focus-visible {
@@ -266,11 +260,13 @@ const images = await toImageSources();
         --row-tile: clamp(72px, calc(42.667px + 9.1667vw), 160px);
         display: grid;
         grid-template-columns: var(--row-square, var(--row-tile)) minmax(0, 1fr);
-        transition-property: none;
     }
 
-    .cart__grid:has([data-cart-summary][hidden]) > .cart__main {
-        grid-column: 1 / -1;
+    .cart__list {
+        --row-controls: calc(var(--control-size) + 4px);
+        --row-count: var(--cart-rows, var(--cart-seed-rows));
+        --row-height: calc(2 * var(--row-pad) + var(--text-lg) + var(--text-base) + 4 * var(--spacing) + var(--space-sm) + var(--row-controls) + 4px);
+        --row-pad: round(clamp(16px, calc(9.333px + 2.0833vw), 36px), 4px);
     }
 
     .cart__notice {
@@ -284,10 +280,6 @@ const images = await toImageSources();
     }
 
     @media (max-width: 768px) {
-        .cart-items__body {
-            padding: var(--space-sm);
-        }
-
         .cart-items__heading {
             align-items: flex-end;
             flex-wrap: wrap-reverse;
@@ -296,13 +288,17 @@ const images = await toImageSources();
         .cart-items__row {
             grid-template-columns: var(--row-tile) minmax(0, 1fr);
         }
+
+        .cart__list {
+            --row-controls: calc(var(--control-size) + 4px + var(--space-2xs) + var(--text-base--line-height));
+        }
     }
 </style>
 
 <script>
-    import { CARD_COLORS, COMMERCE } from '@lib/shared/constants';
-    import { formatPrice, formatVariant, parseCatalog, parseImageSources, registerPageScript, setProductImage, setText, setTitleLink } from '@lib/shared/utils';
-    import { getItems, onCartChange, reconcile, remove, setQuantity, totals } from '@lib/commerce/cart';
+    import { CARD_COLORS, COMMERCE, MOBILE_WIDTH } from '@lib/shared/constants';
+    import { formatPrice, formatSku, formatVariant, parseCatalog, parseImageSources, registerPageScript, setProductImage, setText, setTitleLink } from '@lib/shared/utils';
+    import { getItems, getTotals, onCartChange, reconcile, remove, setQuantity } from '@lib/commerce/cart';
     import { isValidationBypassed, renderIssueList } from '@lib/ui/forms';
     import { toast } from '@lib/ui/toasts';
 
@@ -312,12 +308,11 @@ const images = await toImageSources();
         index: number;
     }
 
-    const MOBILE_WIDTH = 768;
     const ROW_CONTROLS = ['[data-row-decrease]', '[data-row-increase]', '[data-row-remove]'];
     const SQUARE_PASSES = 6;
     const SQUARE_RATIO = 0.6;
     const SQUARE_TOLERANCE = 0.5;
-    const STORAGE_MESSAGE = 'Nothing was removed \u2014 your browser storage is full. Clear some space and try again.';
+    const STORAGE_MESSAGE = 'Nothing was removed because your browser storage is full. Clear some space and try again.';
 
     let catalog: CatalogEntry[] = [];
     let images: ImageSources = {};
@@ -325,10 +320,6 @@ const images = await toImageSources();
 
     function announce(message: string) {
         setText(document.querySelector('[data-cart-status]'), message);
-    }
-
-    function bodyHeight(row: HTMLElement) {
-        return row.querySelector<HTMLElement>('.cart-items__body')?.getBoundingClientRect().height ?? 0;
     }
 
     function captureFocus(list: HTMLElement) {
@@ -344,7 +335,7 @@ const images = await toImageSources();
         return { control, count: list.children.length, index: Array.from(list.children).indexOf(row) };
     }
 
-    function ceilingFor(slug: string) {
+    function getCeiling(slug: string) {
         const entry = catalog.find(item => item.slug === slug);
 
         return Math.max(1, Math.min(entry?.stock ?? COMMERCE.maxQuantityPerItem, COMMERCE.maxQuantityPerItem));
@@ -402,8 +393,8 @@ const images = await toImageSources();
         signal.addEventListener('abort', () => stopSquares(observer), { once: true });
     }
 
-    function isSquareFilled(row: HTMLElement) {
-        return bodyHeight(row) <= squareOf(row) + SQUARE_TOLERANCE;
+    function measureBodyHeight(row: HTMLElement) {
+        return row.querySelector<HTMLElement>('.cart-items__body')?.getBoundingClientRect().height ?? 0;
     }
 
     function measureSquares(list: HTMLElement) {
@@ -414,27 +405,30 @@ const images = await toImageSources();
         if (window.innerWidth <= MOBILE_WIDTH) return;
 
         for (let pass = 0; pass < SQUARE_PASSES; pass += 1) {
-            const sides = rows.map(squareFor);
+            const sides = rows.map(row => Math.min(measureBodyHeight(row), row.getBoundingClientRect().width * SQUARE_RATIO));
 
-            if (sides.every((side, index) => Math.abs(side - squareOf(rows[index])) < SQUARE_TOLERANCE)) break;
+            if (sides.every((side, index) => Math.abs(side - readSquare(rows[index])) < SQUARE_TOLERANCE)) break;
 
             rows.forEach((row, index) => row.style.setProperty('--row-square', `${sides[index]}px`));
         }
 
-        if (!rows.every(isSquareFilled)) resetSquares(rows);
+        if (!rows.every(row => measureBodyHeight(row) <= readSquare(row) + SQUARE_TOLERANCE)) resetSquares(rows);
+    }
+
+    function readSquare(row: HTMLElement) {
+        return Number.parseFloat(row.style.getPropertyValue('--row-square')) || 0;
     }
 
     function renderCart(checkout: HTMLElement, list: HTMLElement, signal: AbortSignal) {
         const empty = document.querySelector<HTMLElement>('[data-cart-empty]');
         const items = getItems();
         const mark = captureFocus(list);
-        const summary = document.querySelector<HTMLElement>('[data-cart-summary]');
         const template = document.querySelector<HTMLTemplateElement>('[data-cart-row]');
 
         checkout.setAttribute('aria-disabled', String(items.length === 0));
+        document.documentElement.dataset.cart = items.length > 0 ? 'filled' : 'empty';
         empty?.toggleAttribute('hidden', items.length > 0);
         list.replaceChildren();
-        summary?.toggleAttribute('hidden', items.length === 0);
 
         if (template) items.forEach((item, index) => list.append(renderRow(template, item, index, signal)));
 
@@ -444,7 +438,7 @@ const images = await toImageSources();
     }
 
     function renderRow(template: HTMLTemplateElement, item: CartItem, index: number, signal: AbortSignal) {
-        const ceiling = ceilingFor(item.productSlug);
+        const ceiling = getCeiling(item.productSlug);
         const fragment = template.content.cloneNode(true) as DocumentFragment;
 
         const decrease = fragment.querySelector<HTMLButtonElement>('[data-row-decrease]');
@@ -457,14 +451,14 @@ const images = await toImageSources();
         setText(fragment.querySelector('[data-row-initial]'), item.title.split(' ')[0]);
         setText(fragment.querySelector('[data-row-price]'), formatPrice(item.priceCents * item.quantity));
         setText(fragment.querySelector('[data-row-quantity]'), String(item.quantity));
-        setText(fragment.querySelector('[data-row-sku]'), skuFor(item));
+        setText(fragment.querySelector('[data-row-sku]'), item.sku ? formatSku(item.sku) : '');
         setTitleLink(fragment.querySelector('[data-row-title]'), catalog, item, item.title);
         setText(fragment.querySelector('[data-row-variant]'), formatVariant(item));
 
         if (tile) {
             const color = CARD_COLORS[index % CARD_COLORS.length];
 
-            tile.style.background = color.bg;
+            tile.style.background = color.background;
             tile.style.color = color.text;
         }
 
@@ -481,7 +475,7 @@ const images = await toImageSources();
         }
 
         if (removeButton) {
-            removeButton.setAttribute('aria-label', `Remove ${item.title} from your cart`);
+            removeButton.setAttribute('aria-label', `Remove ${item.title} from cart`);
             removeButton.addEventListener('click', () => handleRemoveClick(index, item), { signal });
         }
 
@@ -489,7 +483,7 @@ const images = await toImageSources();
     }
 
     function renderSummary(items: CartItem[]) {
-        const summary = totals(items);
+        const summary = getTotals(items);
 
         setText(document.querySelector('[data-shipping]'), formatPrice(summary.shippingCents));
         setText(document.querySelector('[data-subtotal]'), formatPrice(summary.subtotalCents));
@@ -524,20 +518,6 @@ const images = await toImageSources();
     function scheduleSquares(list: HTMLElement) {
         cancelAnimationFrame(squareFrame);
         squareFrame = requestAnimationFrame(() => measureSquares(list));
-    }
-
-    function skuFor(item: CartItem) {
-        const sku = catalog.find(entry => entry.slug === item.productSlug)?.sku;
-
-        return sku ? `SKU-${sku}` : '';
-    }
-
-    function squareFor(row: HTMLElement) {
-        return Math.min(bodyHeight(row), row.getBoundingClientRect().width * SQUARE_RATIO);
-    }
-
-    function squareOf(row: HTMLElement) {
-        return Number.parseFloat(row.style.getPropertyValue('--row-square')) || 0;
     }
 
     function stopSquares(observer: ResizeObserver) {

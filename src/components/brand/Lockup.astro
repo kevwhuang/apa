@@ -8,6 +8,7 @@ interface Props {
 }
 
 const { class: lockupClass, height = BRAND_SIZES.lockupPreview, label } = Astro.props;
+
 const LockupDark = BRAND_LOGOS.lockupDark;
 const LockupLight = BRAND_LOGOS.lockupLight;
 ---
@@ -29,14 +30,10 @@ const LockupLight = BRAND_LOGOS.lockupLight;
 
 <style>
     .lockup--dark {
-        display: none;
+        display: var(--dark-only, block);
     }
 
-    :global(html[data-theme='dark']) .lockup--light {
-        display: none;
-    }
-
-    :global(html[data-theme='dark']) .lockup--dark {
-        display: block;
+    .lockup--light {
+        display: var(--light-only, block);
     }
 </style>

@@ -4,7 +4,7 @@ import { registerPageScript } from '@lib/shared/utils';
 
 const TRACK_BUTTON_SELECTOR = 'button[data-track-id]';
 
-let registered = false;
+let isRegistered = false;
 
 function handleTrackClick(button: HTMLButtonElement) {
     if (getTrack()?.id === button.dataset.trackId) {
@@ -20,21 +20,21 @@ function handleTrackState(event: CustomEvent<TrackState>, buttons: NodeListOf<HT
     const { playing, trackId } = event.detail;
 
     buttons.forEach((button) => {
-        button.setAttribute('aria-pressed', String(playing && button.dataset.trackId === trackId));
+        button.setAttribute('aria-pressed', String(button.dataset.trackId === trackId && playing));
     });
 }
 
 function initTracks(): void {
-    if (registered) return;
+    if (isRegistered) return;
 
-    registered = true;
+    isRegistered = true;
     registerPageScript(start);
 }
 
 function readTrack(button: HTMLButtonElement) {
-    const { trackArtist = '', trackDuration = '0', trackFile, trackId = '', trackTitle = '' } = button.dataset;
+    const { trackArtist = '', trackDuration = '0', trackFile, trackId = '', trackSeed = '', trackTitle = '' } = button.dataset;
 
-    return { artist: trackArtist, durationSeconds: Number(trackDuration), file: trackFile, id: trackId, title: trackTitle };
+    return { artist: trackArtist, durationSeconds: Number(trackDuration), file: trackFile, id: trackId, seed: trackSeed, title: trackTitle };
 }
 
 function start(signal: AbortSignal) {

@@ -1,6 +1,6 @@
 const TOAST_TOPIC = 'apa:toast';
 
-function toast(message: string, tone: ToastTone = 'info'): void {
+function toast(message: string, tone: ToastTone): void {
     if (typeof window === 'undefined') return;
 
     window.dispatchEvent(new CustomEvent(TOAST_TOPIC, { detail: { message, tone } }));

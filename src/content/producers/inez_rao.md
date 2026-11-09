@@ -1,5 +1,6 @@
 ---
 name: Inez Rao
+producerId: '000003'
 genres: [ambient, experimental]
 location: Austin, TX
 joined: 2022-09-14T00:00:00-05:00

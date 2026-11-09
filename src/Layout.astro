@@ -11,7 +11,7 @@ import Navbar from '@sections/shared/Navbar.astro';
 import Player from '@sections/shared/Player.astro';
 import Toaster from '@sections/shared/Toaster.astro';
 import Tour from '@sections/shared/Tour.astro';
-import bootstrap from '@lib/raw/bootstrap.ts?raw';
+import init from '@lib/raw/init.ts?raw';
 import { BRAND, BRAND_ICONS, BRAND_OG } from '@lib/shared/brand';
 import { LINKS, ROUTES, STORAGE } from '@lib/shared/constants';
 
@@ -22,10 +22,16 @@ interface Props {
     title: string;
 }
 
-const bootstrapScript = bootstrap.replace('__THEME_KEY__', STORAGE.theme.key).replace('__SESSION_KEY__', STORAGE.session.key);
 const canonicalUrl = new URL(Astro.routePattern.replace(/\[(\w+)\]/g, (_match, key) => Astro.params[key] ?? ''), Astro.site);
 const currentRoute = ROUTES.find(route => route.href === Astro.routePattern);
 const { description, hasHero, noindex, title } = Astro.props;
+
+const initScript = init
+    .replace('__THEME_KEY__', STORAGE.theme.key)
+    .replace('__SESSION_KEY__', STORAGE.session.key)
+    .replace('__CART_KEY__', STORAGE.cart.key)
+    .replace('__ORDER_KEY__', STORAGE.order.key);
+
 const logoUrl = new URL(BRAND_ICONS.logo, Astro.site).href;
 const ogImageUrl = new URL(BRAND_ICONS.og, Astro.site).href;
 
@@ -94,14 +100,13 @@ const structuredData = {
         <meta content={ogImageUrl} name="twitter:image" />
         <meta content={title} name="twitter:title" />
         <script is:inline set:html={JSON.stringify(structuredData)} type="application/ld+json" />
-        <script is:inline set:html={bootstrapScript} />
+        <script is:inline set:html={initScript} />
         <Font cssVariable="--font-bricolage-grotesque" preload />
         <Font cssVariable="--font-space-mono" preload />
         <Font cssVariable="--font-unbounded" preload />
         <ClientRouter />
     </head>
-    <body class="antialiased bg-bg-page text-text">
-        <div class="grain" aria-hidden="true" />
+    <body class="antialiased text-base bg-bg-page text-text">
         <div class="flex flex-col overflow-x-clip min-h-svh">
             <Navbar hasHero={hasHero} />
             <main class="flex flex-1 flex-col">

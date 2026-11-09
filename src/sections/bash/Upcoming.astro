@@ -1,106 +1,62 @@
 ---
 import { getCollection } from 'astro:content';
 
-import IconArrow from '@components/icons/Arrow.astro';
+import ProgramCard from '@components/program/Card.astro';
 import Schedule from '@components/program/Schedule.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { LINKS } from '@lib/shared/constants';
-import { formatDate, formatTimeRange, getProgram, isUpcoming } from '@lib/shared/utils';
+import { isUpcoming, toProgramBashCard } from '@lib/shared/utils';
 
 const editions = await getCollection('bash');
 
-const program = getProgram('bash');
-
-const upcoming = editions
+const later = editions
     .filter(edition => isUpcoming(edition.data.end))
-    .sort((a, b) => +a.data.date - +b.data.date);
+    .sort((a, b) => +a.data.date - +b.data.date)
+    .slice(1)
+    .map(entry => toProgramBashCard(entry));
+
+const isStill = later.some(card => card.notes.length > 0);
 ---
 
 <section
-    class="stage stage--bash stage--tight border-b-2 border-border-strong"
-    aria-labelledby="next-editions-title"
+    class="stage stage--tight border-b-2 border-border-strong"
+    aria-labelledby="bash-upcoming-title"
+    data-event-group="bash-upcoming"
+    data-event-role="many"
+    hidden={later.length === 0}
 >
     <div>
         <SectionHead
-            class="text-4xl"
-            eyebrow={`${program.shortName}, ${program.cadence}`}
-            headingId="next-editions-title"
+            class="text-4xl text-balance max-md:text-2xl"
+            headingId="bash-upcoming-title"
         >
-            Next up
+            Upcoming Bashes
         </SectionHead>
-        {upcoming.length > 0 && (
-            <ul
-                class="rake mb-8 list-none"
-                data-event-group="bash-upcoming"
-                data-event-role="some"
-                data-motion-stagger="tilt"
-            >
-                {upcoming.map(edition => (
-                    <li
-                        class="rake__item rake__item--flush"
-                        data-event-end={edition.data.end.toISOString()}
-                        data-event-group="bash-upcoming"
-                        data-event-role="upcoming"
-                    >
-                        <article
-                            id={edition.id}
-                            class="slab slab--cut slab--lift grid grid-cols-12 items-start gap-x-2 gap-y-4 md:gap-x-6"
-                            data-event-id={edition.id}
-                        >
-                            <div class="col-span-12 md:col-span-3 lg:col-span-4">
-                                <p class="font-bold font-sans text-2xl text-balance">
-                                    <time datetime={edition.data.date.toISOString()}>{formatDate(edition.data.date)}</time>
-                                </p>
-                                <p class="font-mono text-xs text-text-secondary">
-                                    {formatTimeRange(edition.data.date, edition.data.end)}
-                                </p>
-                            </div>
-                            <div class="col-span-12 md:col-span-9 lg:col-span-8">
-                                <span class="label inline-block mb-3 px-2 py-1 bg-event-bash text-event-bash-text">
-                                    {edition.data.edition} edition
-                                </span>
-                                <h3 class="mb-2 font-display text-3xl">
-                                    {edition.data.title}
-                                </h3>
-                                <address class="mb-3 font-mono not-italic text-xs text-text-secondary">
-                                    {edition.data.location}
-                                </address>
-                                <p class="max-w-2xl mb-4 text-text-secondary">
-                                    {edition.data.prompt}
-                                </p>
-                                <p>
-                                    <a
-                                        class="action-text hover:text-link inline-flex items-center gap-(--space-2xs) min-h-(--control-size) underline underline-offset-4 transition-colors"
-                                        href={LINKS.meetup}
-                                        rel="noopener noreferrer"
-                                        target="_blank"
-                                    >
-                                        RSVP for the {edition.data.edition} edition on Meetup <IconArrow />
-                                    </a>
-                                </p>
-                            </div>
-                        </article>
-                    </li>
-                ))}
-            </ul>
-        )}
-        <p
-            class="max-w-(--measure-form) mb-8 text-text-secondary"
-            data-event-group="bash-upcoming"
-            data-event-role="none"
-            data-motion="rise"
-            hidden={upcoming.length > 0}
+        <ol
+            class="grid grid-cols-2 -mb-(--space-2xl) gap-x-(--space-lg) gap-y-0 list-none max-md:grid-cols-1"
+            data-motion-stagger="flip"
         >
-            No edition on the calendar right now &mdash; the next one goes up as soon as the room is booked.
-        </p>
-        <p data-motion="rise">
-            <a
-                class="action-text hover:text-link inline-flex items-center gap-(--space-2xs) min-h-(--control-size) underline underline-offset-4 transition-colors"
-                href="/events"
-            >
-                See the full calendar <IconArrow />
-            </a>
-        </p>
+            {later.map(card => (
+                <li
+                    id={card.id}
+                    class="grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-span-3 pb-(--space-2xl)"
+                    data-event-end={card.end.toISOString()}
+                    data-event-group="bash-upcoming"
+                    data-event-id={card.id}
+                    data-event-role="later"
+                >
+                    <ProgramCard
+                        date={card.date}
+                        group="bash-upcoming"
+                        heading={card.heading}
+                        isStill={isStill}
+                        location={card.location}
+                        notes={card.notes}
+                        program="bash"
+                        text={card.text}
+                    />
+                </li>
+            ))}
+        </ol>
     </div>
 </section>
 

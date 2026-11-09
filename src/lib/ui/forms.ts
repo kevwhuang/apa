@@ -1,11 +1,11 @@
 import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
 import { describeCartIssue, setText } from '@lib/shared/utils';
 
-const BYPASS_WINDOW_MS = 0;
+const BYPASS_WINDOW_MILLISECONDS = 0;
 const PLACEHOLDER_EMAIL = 'you@studio.fm';
 
 let bypassTimer: Timer | undefined;
-let bypassing = false;
+let isBypassing = false;
 
 function clearFieldErrors(form: HTMLFormElement): void {
     form.querySelectorAll('[aria-invalid]').forEach((control) => {
@@ -18,10 +18,6 @@ function clearFieldErrors(form: HTMLFormElement): void {
     });
 }
 
-function confirmRule(): FieldRule {
-    return { message: 'Both passwords must match.', required: true, validate: (value, values) => value === values.get('password') };
-}
-
 function focusFirstError(form: HTMLFormElement, errors: FieldErrors): void {
     const names = Object.keys(errors);
 
@@ -30,6 +26,10 @@ function focusFirstError(form: HTMLFormElement, errors: FieldErrors): void {
     const control = Array.from(form.elements).find(element => names.includes(getControlName(element)));
 
     if (control instanceof HTMLElement) control.focus();
+}
+
+function getConfirmRule(): FieldRule {
+    return { message: 'Both passwords must match.', required: true, validate: (value, values) => value === values.get('password') };
 }
 
 function getControlName(element: Element) {
@@ -50,42 +50,37 @@ function getErrorElement(form: HTMLFormElement, name: string) {
     return null;
 }
 
-function getValue(values: FormData, name: string) {
-    const value = values.get(name);
-
-    return typeof value === 'string' ? value : '';
+function getPasswordRule(): FieldRule {
+    return {
+        message: `Use at least ${PASSWORD_MIN_LENGTH} characters, including a letter and a digit.`,
+        min: PASSWORD_MIN_LENGTH,
+        required: true,
+        validate: value => /[a-z]/i.test(value) && /\d/.test(value),
+    };
 }
 
-function handleBypassClick(event: MouseEvent): void {
-    bypassing = event.metaKey;
+function handleBypassClick(event: MouseEvent) {
+    isBypassing = event.metaKey;
 
-    if (!bypassing) return;
+    if (!isBypassing) return;
 
     clearTimeout(bypassTimer);
-    bypassTimer = setTimeout(releaseBypass, BYPASS_WINDOW_MS);
+    bypassTimer = setTimeout(releaseBypass, BYPASS_WINDOW_MILLISECONDS);
 }
 
 function handleReveal(button: HTMLButtonElement): void {
     const input = document.getElementById(button.dataset.reveal ?? '');
-    const shown = button.getAttribute('aria-pressed') === 'true';
+    const isShown = button.getAttribute('aria-pressed') === 'true';
 
     if (!(input instanceof HTMLInputElement)) return;
 
-    button.setAttribute('aria-label', shown ? 'Show password' : 'Hide password');
-    button.setAttribute('aria-pressed', shown ? 'false' : 'true');
-    input.type = shown ? 'password' : 'text';
-}
-
-function hasLetterAndDigit(value: string): boolean {
-    return /[a-z]/i.test(value) && /\d/.test(value);
+    button.setAttribute('aria-label', isShown ? 'Show password' : 'Hide password');
+    button.setAttribute('aria-pressed', isShown ? 'false' : 'true');
+    input.type = isShown ? 'password' : 'text';
 }
 
 function isValidationBypassed(): boolean {
-    return bypassing;
-}
-
-function passwordRule(): FieldRule {
-    return { message: `Use at least ${PASSWORD_MIN_LENGTH} characters, including a letter and a digit.`, min: PASSWORD_MIN_LENGTH, required: true, validate: hasLetterAndDigit };
+    return isBypassing;
 }
 
 function readEmail(values: FormData): string {
@@ -96,8 +91,8 @@ function readEmail(values: FormData): string {
     return PLACEHOLDER_EMAIL;
 }
 
-function releaseBypass(): void {
-    bypassing = false;
+function releaseBypass() {
+    isBypassing = false;
     bypassTimer = undefined;
 }
 
@@ -136,14 +131,16 @@ function setRole(form: HTMLFormElement, value: string): void {
     if (match) match.checked = true;
 }
 
-function validateFields(form: HTMLFormElement, rules: Record<string, FieldRule>): FieldErrors {
-    if (isValidationBypassed()) return {};
+function validateFields(form: HTMLFormElement, rules: Record<string, FieldRule>, strict = false): FieldErrors {
+    if (isValidationBypassed() && !strict) return {};
 
     const errors: FieldErrors = {};
     const values = new FormData(form);
 
     Object.entries(rules).forEach(([name, rule]) => {
-        if (!violates(rule, getValue(values, name).trim(), values)) return;
+        const value = values.get(name);
+
+        if (!violates(rule, (typeof value === 'string' ? value : '').trim(), values)) return;
 
         errors[name] = rule.message;
     });
@@ -167,12 +164,11 @@ if (typeof document !== 'undefined') document.addEventListener('click', handleBy
 
 export {
     clearFieldErrors,
-    confirmRule,
     focusFirstError,
+    getConfirmRule,
+    getPasswordRule,
     handleReveal,
-    hasLetterAndDigit,
     isValidationBypassed,
-    passwordRule,
     readEmail,
     renderIssueList,
     setFieldErrors,

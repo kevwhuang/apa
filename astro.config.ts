@@ -23,7 +23,7 @@ export default defineConfig({
             provider: fontProviders.fontsource(),
             styles: ['normal'],
             subsets: ['latin'],
-            weights: ['200 800'],
+            weights: ['400 700'],
         },
         {
             cssVariable: '--font-space-mono',
@@ -42,7 +42,7 @@ export default defineConfig({
             provider: fontProviders.fontsource(),
             styles: ['normal'],
             subsets: ['latin'],
-            weights: ['200 900'],
+            weights: [700],
         },
     ],
     integrations: [

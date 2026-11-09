@@ -1,8 +1,12 @@
 ---
 import IconUpload from '@components/icons/Upload.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { UPLOAD, UPLOAD_EXTENSIONS_LABEL } from '@lib/shared/constants';
+import { BOARD_PAGE_SIZE } from '@lib/programs/submissions';
+import { UPLOAD } from '@lib/shared/constants';
+import { UPLOAD_EXTENSIONS_OR_LIST } from '@lib/audio/uploads';
 import { formatBytes } from '@lib/shared/utils';
+
+const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
 ---
 
 <section
@@ -12,133 +16,131 @@ import { formatBytes } from '@lib/shared/utils';
     <div>
         <SectionHead
             class="text-4xl"
-            eyebrow="Feedback at every Assembly"
             headingId="feedback-title"
         >
-            Put a track on the list
+            Queue a demo
         </SectionHead>
-        <div class="grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+        <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-12 mb-(--space-2xl) max-md:grid-cols-1">
             <div
                 class="flex flex-col gap-4"
                 data-motion-stagger="blur"
             >
-                <p class="text-base text-text-secondary">
-                    Every Assembly holds space for work in progress. Put a track on the list and
-                    it gets played out loud at the next one, then talked through in the room while
-                    it is still ringing.
+                <p class="text-lg text-text-secondary">
+                    Every Assembly sets aside time for demos. Queue a track here and it plays out
+                    loud for the room at the next one, then gets talked through together.
                 </p>
                 <p class="text-text-secondary">
-                    A streaming or download link works, and so does a bounce straight out of your
-                    session. Unfinished is fine &mdash; rough mixes get the most useful
-                    conversation.
-                </p>
-                <p class="text-sm text-text-secondary">
-                    Bring the same link or bounce with you on the night.
+                    A SoundCloud or Spotify link works, and so does an MP3 or WAV straight out of
+                    your session. Unfinished is fine, and rough mixes often get the most useful
+                    feedback.
                 </p>
             </div>
-            <div class="flex flex-col gap-5">
-                <div
-                    class="flex flex-wrap gap-4"
-                    aria-label="How to hand over your track"
-                    data-motion="stamp"
-                    role="group"
-                >
-                    <button
-                        class="chip feedback__mode is-active active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse h-(--control-size)"
-                        aria-controls="feedback-panel-link"
-                        aria-pressed="true"
-                        data-mode="link"
-                        type="button"
+            <div class="flex flex-col gap-(--space-2xl)">
+                <div class="flex flex-col gap-(--space-md)">
+                    <div
+                        class="flex flex-wrap gap-4"
+                        aria-label="How to hand over your track"
+                        data-motion="stamp"
+                        role="group"
                     >
-                        Paste a link
-                    </button>
-                    <button
-                        class="chip feedback__mode active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse h-(--control-size)"
-                        aria-controls="feedback-panel-file"
-                        aria-pressed="false"
-                        data-mode="file"
-                        type="button"
+                        <button
+                            class="chip feedback__mode is-active hover:bg-bg-hover h-(--control-size)"
+                            aria-controls="feedback-panel-link"
+                            aria-pressed="true"
+                            data-mode="link"
+                            type="button"
+                        >
+                            Paste a link
+                        </button>
+                        <button
+                            class="chip feedback__mode hover:bg-bg-hover h-(--control-size)"
+                            aria-controls="feedback-panel-file"
+                            aria-pressed="false"
+                            data-mode="file"
+                            type="button"
+                        >
+                            Drop a file
+                        </button>
+                    </div>
+                    <form
+                        id="feedback-panel-link"
+                        class="slab slab--card slab--still flex flex-col gap-3"
+                        data-feedback-panel="link"
+                        data-motion="unfold"
                     >
-                        Drop a file
-                    </button>
-                </div>
-                <form
-                    id="feedback-panel-link"
-                    class="slab slab--card flex flex-col gap-3"
-                    data-feedback-panel="link"
-                    data-motion="unfold"
-                >
-                    <label class="flex flex-col gap-2">
-                        <span class="label text-text-secondary">Track link</span>
-                        <input
-                            id="feedback-link"
-                            class="input font-mono text-sm"
-                            aria-describedby="feedback-link-help feedback-link-error"
-                            aria-invalid="false"
-                            autocomplete="off"
-                            name="link"
-                            placeholder="https://soundcloud.com/you/rough-mix"
-                            spellcheck="false"
-                            type="url"
+                        <label class="flex flex-col gap-2">
+                            <span class="label text-text-secondary">Track link</span>
+                            <input
+                                id="feedback-link"
+                                class="input font-mono"
+                                aria-describedby="feedback-link-help feedback-link-error"
+                                aria-invalid="false"
+                                autocomplete="off"
+                                data-feedback-link
+                                name="link"
+                                placeholder="https://soundcloud.com/you/rough-mix"
+                                spellcheck="false"
+                                type="url"
+                            />
+                        </label>
+                        <p
+                            id="feedback-link-help"
+                            class="text-base text-text-secondary"
+                        >
+                            SoundCloud or Spotify links only.
+                        </p>
+                        <p
+                            id="feedback-link-error"
+                            class="text-error-text"
+                            data-link-error
+                            hidden
                         />
-                    </label>
-                    <p
-                        id="feedback-link-help"
-                        class="text-sm text-text-secondary"
-                    >
-                        SoundCloud, Dropbox, Drive &mdash; anywhere the room can press play.
-                    </p>
-                    <p
-                        id="feedback-link-error"
-                        class="action-text text-error-text"
-                        data-link-error
+                        <button
+                            class="btn btn--primary self-start"
+                            type="submit"
+                        >
+                            Add to queue
+                        </button>
+                    </form>
+                    <div
+                        id="feedback-panel-file"
+                        class="slab slab--card slab--still flex flex-col gap-3"
+                        data-feedback-panel="file"
+                        data-motion="unfold"
                         hidden
-                    />
-                    <button
-                        class="btn btn--primary self-start"
-                        type="submit"
                     >
-                        Queue the link
-                    </button>
-                </form>
-                <div
-                    id="feedback-panel-file"
-                    data-feedback-panel="file"
-                    data-motion="unfold"
-                    hidden
-                >
-                    <label
-                        class="dropzone slab slab--card flex flex-col items-center justify-center gap-3 mb-3 text-center"
-                        data-dropzone
-                        for="feedback-input"
-                    >
-                        <IconUpload />
-                        <span class="font-bold font-sans text-2xl tracking-tight">
-                            Drop your bounce here
-                        </span>
-                        <span class="label text-text">or choose a file</span>
-                        <input
-                            id="feedback-input"
-                            class="dropzone__input sr-only"
-                            accept={UPLOAD.acceptAttribute}
-                            aria-describedby="feedback-file-help"
-                            data-dropzone-input
-                            multiple
-                            name="feedback"
-                            type="file"
-                        />
-                    </label>
-                    <p
-                        id="feedback-file-help"
-                        class="text-sm text-text-secondary"
-                        data-placeholder
-                    >
-                        {UPLOAD_EXTENSIONS_LABEL}. Up to {formatBytes(UPLOAD.maxFileBytes)} each; the list
-                        holds {UPLOAD.maxFiles} tracks, links included.
-                    </p>
+                        <label
+                            class="dropzone halftone flex flex-col items-center justify-center relative min-h-[220px] gap-3 p-(--space-lg) border-2 border-border-strong border-dashed text-center bg-bg-page"
+                            data-dropzone
+                            for="feedback-input"
+                        >
+                            <IconUpload />
+                            <span class="font-bold font-sans text-2xl tracking-tight">
+                                Drop your track here
+                            </span>
+                            <span class="label text-text">or choose a file</span>
+                            <input
+                                id="feedback-input"
+                                class="dropzone__input sr-only"
+                                accept={UPLOAD.acceptAttribute}
+                                aria-describedby="feedback-file-help"
+                                data-dropzone-input
+                                multiple
+                                name="feedback"
+                                type="file"
+                            />
+                        </label>
+                        <p
+                            id="feedback-file-help"
+                            class="text-base text-text-secondary"
+                            data-placeholder
+                        >
+                            {UPLOAD_EXTENSIONS_OR_LIST} only. Up to {formatBytes(UPLOAD.maxFileBytes)} each.
+                        </p>
+                    </div>
                 </div>
                 <ol
-                    class="empty:hidden flex flex-col gap-(--space-sm) list-none"
+                    class="empty:hidden flex flex-col gap-(--space-2xl) list-none"
                     aria-label="Queued for the next Assembly"
                     data-feedback-list
                 />
@@ -149,29 +151,129 @@ import { formatBytes } from '@lib/shared/utils';
                 />
             </div>
         </div>
+        <div>
+            <div class="flex flex-wrap items-baseline justify-between gap-3 mb-6">
+                <h3
+                    class="text-2xl"
+                    data-motion="rise"
+                >
+                    The demo board
+                </h3>
+                <p
+                    class="label flex items-center gap-2 text-text-secondary"
+                    data-board-refresh
+                    hidden
+                >
+                    <span class="spinner" aria-hidden="true" />
+                    <span data-board-refresh-text />
+                </p>
+            </div>
+            <div
+                class="overflow-x-auto mb-5"
+                data-motion="unfold"
+            >
+                <table
+                    class="board__table table-fixed border-2 border-border-strong"
+                    data-placeholder
+                >
+                    <caption class="sr-only">Demos submitted at the last Assembly</caption>
+                    <colgroup>
+                        <col class="w-16 max-md:w-10" />
+                        <col class="w-80 max-lg:w-64 max-md:w-auto" />
+                        <col class="max-md:hidden" />
+                        <col class="w-32 max-md:w-24" />
+                    </colgroup>
+                    <thead>
+                        <tr class="label border-b-2 border-border-strong text-text-secondary">
+                            <th
+                                class="px-4 py-3 text-left max-md:px-2"
+                                scope="col"
+                            >
+                                #
+                            </th>
+                            <th
+                                class="px-4 py-3 text-left max-md:px-2"
+                                scope="col"
+                            >
+                                Producer
+                            </th>
+                            <th
+                                class="px-4 py-3 text-left max-md:hidden"
+                                scope="col"
+                            >
+                                Source
+                            </th>
+                            <th
+                                class="px-4 py-3 text-right max-md:px-2"
+                                scope="col"
+                            >
+                                Submitted
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody
+                        class="divide-border-strong divide-y"
+                        data-board-body
+                    >
+                        <tr class="h-14 max-md:h-18">
+                            <td
+                                class="label px-4 text-text-secondary max-md:px-2"
+                                colspan="4"
+                            >
+                                <span class="flex items-center gap-2">
+                                    <span class="spinner" aria-hidden="true" />
+                                    Pulling up the board&hellip;
+                                </span>
+                            </td>
+                        </tr>
+                        {fillerRows.map(() => (
+                            <tr
+                                class="h-14 max-md:h-18"
+                                aria-hidden="true"
+                            >
+                                <td colspan="4" />
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-x-(--space-md) gap-y-3">
+                <nav
+                    class="flex flex-wrap gap-2"
+                    aria-label="Demo board pages"
+                    data-board-pager
+                />
+                <p
+                    class="label text-text-secondary"
+                    aria-live="polite"
+                    data-board-status
+                    data-motion="stamp"
+                />
+            </div>
+        </div>
     </div>
     <template data-feedback-row-link>
-        <li class="slab slab--card flex flex-col gap-2">
-            <div class="flex flex-wrap items-baseline justify-between gap-3">
+        <li class="slab slab--card slab--still flex flex-col gap-3">
+            <div class="flex flex-wrap items-baseline gap-3">
                 <p class="label px-2 py-1 bg-bg-inverse text-text-inverse">Link</p>
                 <p
-                    class="label min-w-0 wrap-anywhere text-text-secondary"
+                    class="font-bold font-sans wrap-anywhere"
                     data-row-host
                 />
             </div>
-            <a
-                class="active:translate-y-px hover:text-link flex items-center min-h-(--control-size) font-mono text-sm underline underline-offset-4 wrap-anywhere transition-[color,transform]"
-                data-row-href
-                href="/assembly"
-                rel="noopener noreferrer"
-                target="_blank"
-            >
-                <span data-row-label>Queued link</span>
-                <span class="sr-only">&nbsp;(opens in a new tab)</span>
-            </a>
-            <div class="flex justify-end">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <a
+                    class="active:translate-y-px hover:text-link flex flex-[1_1_140px] items-center min-h-(--control-size) min-w-0 font-mono text-base underline underline-offset-4 wrap-anywhere transition-[color,translate]"
+                    data-row-href
+                    href="/assemblies"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                >
+                    <span data-row-label>Queued link</span>
+                    <span class="sr-only">&nbsp;(opens in a new tab)</span>
+                </a>
                 <button
-                    class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-colors"
+                    class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-[color,transform]"
                     data-row-remove
                     type="button"
                 >
@@ -181,7 +283,7 @@ import { formatBytes } from '@lib/shared/utils';
         </li>
     </template>
     <template data-feedback-row-file>
-        <li class="slab slab--card flex flex-col gap-3">
+        <li class="slab slab--card slab--still flex flex-col gap-3">
             <div class="flex flex-wrap items-baseline justify-between gap-3">
                 <div class="flex flex-wrap items-baseline gap-3">
                     <p class="label px-2 py-1 bg-bg-inverse text-text-inverse">File</p>
@@ -204,13 +306,13 @@ import { formatBytes } from '@lib/shared/utils';
                 width="640"
             />
             <p
-                class="action-text text-error-text"
+                class="text-error-text"
                 data-row-error
                 hidden
             />
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <progress
-                    class="flex-[1_1_140px] h-3 min-w-0 accent-native-accent"
+                    class="progress flex-[1_1_140px] h-3 min-w-0"
                     data-row-progress
                     max="100"
                     value="0"
@@ -220,7 +322,7 @@ import { formatBytes } from '@lib/shared/utils';
                     data-row-percent
                 />
                 <button
-                    class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-colors"
+                    class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-[color,transform]"
                     data-row-cancel
                     type="button"
                 >
@@ -229,76 +331,79 @@ import { formatBytes } from '@lib/shared/utils';
             </div>
         </li>
     </template>
+    <template data-board-row>
+        <tr class="h-14 max-md:h-18">
+            <td
+                class="px-4 font-mono text-base text-text-secondary max-md:px-2"
+                data-cell-index
+            />
+            <td class="px-4 max-md:px-2">
+                <span
+                    class="block font-bold font-sans truncate"
+                    data-cell-producer
+                />
+                <span
+                    class="hidden font-mono text-base truncate text-text-secondary max-md:block"
+                    data-cell-source
+                />
+            </td>
+            <td
+                class="px-4 font-mono text-base truncate max-md:hidden"
+                data-cell-source
+            />
+            <td
+                class="px-4 font-mono text-right text-sm whitespace-nowrap text-text-secondary max-md:px-2"
+                data-cell-submitted
+            />
+        </tr>
+    </template>
+    <template data-board-filler>
+        <tr
+            class="h-14 max-md:h-18"
+            aria-hidden="true"
+        >
+            <td />
+            <td />
+            <td class="max-md:hidden" />
+            <td />
+        </tr>
+    </template>
+    <template data-board-page>
+        <button
+            class="chip hover:bg-bg-hover min-w-(--control-size)"
+            type="button"
+        />
+    </template>
 </section>
 
-<style>
-    .dropzone {
-        --slab-fill: var(--color-bg-sunken);
-        background-image: repeating-linear-gradient(135deg, var(--color-border-subtle) 0 6px, transparent 6px 12px);
-        border-style: dashed;
-        min-height: 220px;
-        padding: var(--space-2xl);
-        position: relative;
-        transition:
-            background var(--duration-fast) var(--motion-ease-ui),
-            border-color var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .dropzone:active {
-        --slab-fill: var(--color-bg-raised);
-        border-color: var(--color-border-selected);
-    }
-
-    .dropzone:has(.dropzone__input:focus-visible) {
-        border-color: var(--color-border-selected);
-        border-style: solid;
-    }
-
-    .dropzone:hover {
-        border-color: var(--color-border-selected);
-    }
-
-    .dropzone.is-dragging {
-        --slab-fill: var(--color-bg-raised);
-        border-color: var(--color-border-selected);
-        border-style: solid;
-    }
-
-    .dropzone__input {
-        clip-path: inset(50%);
-        height: 100%;
-        inset: 0;
-        margin: 0;
-        width: 100%;
-    }
-</style>
-
 <script>
-    import { UPLOAD } from '@lib/shared/constants';
+    import { ASSEMBLY_DEMOS, parseTrackLink } from '@lib/programs/feedback';
+    import { BOARD_PAGE_SIZE } from '@lib/programs/submissions';
+    import { LINKS, MOCK_LATENCY_MILLISECONDS } from '@lib/shared/constants';
     import { createDropzone, nextFocusTarget } from '@lib/audio/dropzone';
+    import { delay, formatEntry, formatTime, initRovingFocus, registerPageScript, setHidden, setMessage, setText } from '@lib/shared/utils';
     import { isValidationBypassed } from '@lib/ui/forms';
-    import { parseTrackLink } from '@lib/programs/feedback';
-    import { registerPageScript, rovingFocus, setMessage, setText } from '@lib/shared/utils';
 
-    type FeedbackMode = 'file' | 'link';
+    interface BoardElements {
+        body: HTMLElement;
+        chipTemplate: HTMLTemplateElement;
+        fillerTemplate: HTMLTemplateElement;
+        pager: HTMLElement;
+        refresh: HTMLElement;
+        refreshText: HTMLElement;
+        rowTemplate: HTMLTemplateElement;
+        status: HTMLElement;
+    }
 
     interface QueuedLink {
         link: TrackLink;
         row: HTMLElement;
     }
 
-    const LIST_FULL_MESSAGE = `The list is full \u2014 ${UPLOAD.maxFiles} tracks per Assembly.`;
-    const STUB_LINK = 'https://example.com/track';
-
     let linkQueue: QueuedLink[] = [];
-    let queuedFiles = 0;
 
     function announce(message: string) {
         setText(document.querySelector('[data-feedback-status]'), message);
-    }
-
-    function capacity() {
-        return UPLOAD.maxFiles - queuedFiles - linkQueue.length;
     }
 
     function clearLinkError(input: HTMLInputElement) {
@@ -306,8 +411,15 @@ import { formatBytes } from '@lib/shared/utils';
         setMessage(document.querySelector<HTMLElement>('[data-link-error]'), '');
     }
 
+    function fillCells(row: HTMLElement, selector: string, value: string) {
+        row.querySelectorAll<HTMLElement>(selector).forEach((cell) => {
+            cell.textContent = value;
+            cell.title = value;
+        });
+    }
+
     function handleLinkRemove(link: TrackLink, row: HTMLElement) {
-        const target = nextFocusTarget(row, '#feedback-link');
+        const target = nextFocusTarget(row, '[data-feedback-link]');
 
         linkQueue = linkQueue.filter(item => item.link.id !== link.id);
         row.remove();
@@ -317,12 +429,6 @@ import { formatBytes } from '@lib/shared/utils';
 
     function handleLinkSubmit(event: SubmitEvent, form: HTMLFormElement, input: HTMLInputElement, list: HTMLElement, signal: AbortSignal) {
         event.preventDefault();
-
-        if (!isValidationBypassed() && capacity() <= 0) {
-            setLinkError(input, LIST_FULL_MESSAGE);
-
-            return;
-        }
 
         const parsed = resolveLink(input.value);
 
@@ -351,22 +457,16 @@ import { formatBytes } from '@lib/shared/utils';
 
     function initAssemblyFeedback(signal: AbortSignal) {
         const form = document.querySelector<HTMLFormElement>('[data-feedback-panel="link"]');
-        const linkInput = document.querySelector<HTMLInputElement>('#feedback-link');
+        const linkInput = document.querySelector<HTMLInputElement>('[data-feedback-link]');
         const list = document.querySelector<HTMLElement>('[data-feedback-list]');
         const modes = document.querySelectorAll<HTMLButtonElement>('.feedback__mode');
 
         if (!form || !linkInput || !list) return;
 
         linkQueue = [];
-        queuedFiles = 0;
         setMode('link');
 
         createDropzone({
-            capacity,
-            messages: { full: () => LIST_FULL_MESSAGE },
-            onQueueChange: (entries) => {
-                queuedFiles = entries.length;
-            },
             selectors: {
                 list: '[data-feedback-list]',
                 row: '[data-feedback-row-file]',
@@ -378,11 +478,26 @@ import { formatBytes } from '@lib/shared/utils';
         form.noValidate = true;
         form.addEventListener('submit', event => handleLinkSubmit(event, form, linkInput, list, signal), { signal });
         linkInput.addEventListener('input', () => clearLinkError(linkInput), { signal });
-        rovingFocus(modes, signal);
+        initRovingFocus(modes, signal);
 
         modes.forEach((button) => {
             button.addEventListener('click', () => setMode(button.dataset.mode === 'file' ? 'file' : 'link'), { signal });
         });
+    }
+
+    function initDemoBoard(signal: AbortSignal) {
+        const body = document.querySelector<HTMLElement>('[data-board-body]');
+        const chipTemplate = document.querySelector<HTMLTemplateElement>('[data-board-page]');
+        const fillerTemplate = document.querySelector<HTMLTemplateElement>('[data-board-filler]');
+        const pager = document.querySelector<HTMLElement>('[data-board-pager]');
+        const refresh = document.querySelector<HTMLElement>('[data-board-refresh]');
+        const refreshText = document.querySelector<HTMLElement>('[data-board-refresh-text]');
+        const rowTemplate = document.querySelector<HTMLTemplateElement>('[data-board-row]');
+        const status = document.querySelector<HTMLElement>('[data-board-status]');
+
+        if (!body || !chipTemplate || !fillerTemplate || !pager || !refresh || !refreshText || !rowTemplate || !status) return;
+
+        startBoard({ body, chipTemplate, fillerTemplate, pager, refresh, refreshText, rowTemplate, status }, signal);
     }
 
     function renderLinkRow(link: TrackLink, list: HTMLElement, signal: AbortSignal) {
@@ -406,7 +521,7 @@ import { formatBytes } from '@lib/shared/utils';
             setText(anchor.querySelector('[data-row-label]'), link.href);
         }
 
-        remove?.setAttribute('aria-label', `Remove the ${link.host} link`);
+        remove?.setAttribute('aria-label', `Remove ${link.host} link`);
         remove?.addEventListener('click', () => handleLinkRemove(link, row), { signal });
         list.append(fragment);
 
@@ -416,9 +531,9 @@ import { formatBytes } from '@lib/shared/utils';
     function resolveLink(raw: string) {
         const parsed = parseTrackLink(raw);
 
-        if (parsed.ok || !isValidationBypassed()) return parsed;
+        if (!isValidationBypassed() || parsed.ok) return parsed;
 
-        return parseTrackLink(STUB_LINK);
+        return parseTrackLink(LINKS.soundcloud);
     }
 
     function setLinkError(input: HTMLInputElement, message: string) {
@@ -427,12 +542,12 @@ import { formatBytes } from '@lib/shared/utils';
         announce(message);
     }
 
-    function setMode(next: FeedbackMode) {
+    function setMode(next: 'file' | 'link') {
         document.querySelectorAll<HTMLButtonElement>('.feedback__mode').forEach((button) => {
-            const on = button.dataset.mode === next;
+            const isActive = button.dataset.mode === next;
 
-            button.classList.toggle('is-active', on);
-            button.setAttribute('aria-pressed', String(on));
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-pressed', String(isActive));
         });
 
         document.querySelectorAll<HTMLElement>('[data-feedback-panel]').forEach((panel) => {
@@ -440,5 +555,108 @@ import { formatBytes } from '@lib/shared/utils';
         });
     }
 
+    function startBoard(elements: BoardElements, signal: AbortSignal) {
+        const { body, chipTemplate, fillerTemplate, pager, refresh, refreshText, rowTemplate, status } = elements;
+        const rows = ASSEMBLY_DEMOS.toSorted((a, b) => +new Date(a.submittedAt) - +new Date(b.submittedAt));
+
+        let page = 1;
+
+        function buildPager() {
+            pager.replaceChildren();
+
+            for (let index = 1; index <= Math.max(1, Math.ceil(rows.length / BOARD_PAGE_SIZE)); index += 1) {
+                const fragment = chipTemplate.content.cloneNode(true) as DocumentFragment;
+
+                const chip = fragment.querySelector('button');
+
+                if (!chip) continue;
+
+                chip.addEventListener('click', () => setPage(index), { signal });
+                chip.setAttribute('aria-label', `Page ${index}`);
+                chip.textContent = String(index);
+                pager.append(fragment);
+            }
+
+            initRovingFocus(pager.querySelectorAll('button'), signal);
+        }
+
+        async function load() {
+            await delay(MOCK_LATENCY_MILLISECONDS);
+
+            if (signal.aborted) return;
+
+            buildPager();
+            render();
+            setHidden(refresh, true);
+            setText(refreshText, '');
+        }
+
+        function render() {
+            renderRows();
+            updatePager();
+            updateStatus();
+        }
+
+        function renderRows() {
+            const start = (page - 1) * BOARD_PAGE_SIZE;
+
+            const visible = rows.slice(start, start + BOARD_PAGE_SIZE);
+
+            body.replaceChildren();
+
+            visible.forEach((entry, index) => {
+                const fragment = rowTemplate.content.cloneNode(true) as DocumentFragment;
+
+                const row = fragment.querySelector('tr');
+
+                if (!row) return;
+
+                const stamp = document.createElement('time');
+
+                stamp.dateTime = entry.submittedAt;
+                stamp.textContent = formatTime(new Date(entry.submittedAt));
+                setText(row.querySelector('[data-cell-index]'), formatEntry(start + index + 1));
+                fillCells(row, '[data-cell-producer]', entry.producer);
+                fillCells(row, '[data-cell-source]', entry.source);
+                row.querySelector('[data-cell-submitted]')?.append(stamp);
+                body.append(fragment);
+            });
+
+            for (let index = visible.length; index < BOARD_PAGE_SIZE; index += 1) {
+                body.append(fillerTemplate.content.cloneNode(true));
+            }
+        }
+
+        function setPage(next: number) {
+            if (next === page) return;
+
+            page = next;
+            render();
+        }
+
+        function updatePager() {
+            pager.querySelectorAll('button').forEach((chip, index) => {
+                const isActive = index + 1 === page;
+
+                chip.classList.toggle('is-active', isActive);
+
+                if (isActive) chip.setAttribute('aria-current', 'page');
+                else chip.removeAttribute('aria-current');
+            });
+        }
+
+        function updateStatus() {
+            const first = (page - 1) * BOARD_PAGE_SIZE + 1;
+            const last = Math.min(rows.length, page * BOARD_PAGE_SIZE);
+
+            setText(status, `Showing ${first}\u2013${last} of ${rows.length}`);
+        }
+
+        setHidden(refresh, false);
+        setText(refreshText, 'Loading\u2026');
+        void load();
+    }
+
     registerPageScript(initAssemblyFeedback);
+    registerPageScript(initDemoBoard);
 </script>

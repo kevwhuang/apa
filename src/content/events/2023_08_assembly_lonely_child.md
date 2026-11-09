@@ -1,16 +1,16 @@
 ---
-title: 2023 August · Assembly · Lonely Child
+title: August 2023 Assembly · Lonely Child
 date: 2023-08-14T19:00:00-05:00
 end: 2023-08-14T21:00:00-05:00
-location: STATION Austin · 701 Brazos St
+location: Capital Factory · 701 Brazos St
 room: Antone's on the 16th floor
 speaker: Lonely Child
 workshop: Making Music on Commission
-excerpt: Lonely Child broke down the process of making music on commission for clients who were not musicians.
-description: 'The presentation addressed why making music on commission was challenging: the client was probably not a musician, and it could be hard to know where to even start. Lonely Child broke down the process of delivering a great track to someone whose needs seemed hard to meet and covered how a producer could take control of any situation in the studio.'
+excerpt: Music made to order for a client who is probably not a musician is hard work, and the talk broke down how to deliver it and take control in the studio.
+description: 'Lonely Child presented on making music on commission and why it is hard work: the client is probably not a musician, and it can be difficult to know where to even start. He broke down the process of delivering a great track to someone whose needs seem hard to meet. He also covered how a producer can take control of any situation in the studio. A commission is music made to order for a client rather than for the producer''s own release.'
 speakers:
   - name: Lonely Child
-    bio: Lonely Child is the alias of Austin, Texas-based producer, songwriter, mixer, and musician Bryan Ray. His original songwriting, productions, and mixes have garnered tens of millions of streams and multiple placements across TV and film (Fox, Netflix, etc). He has been twice nominated for Producer of the Year in the Austin Music Awards (2017, 2018).
+    bio: Lonely Child is the alias of Bryan Ray, a producer, songwriter, mixer, and musician based in Austin, Texas. His original songwriting, productions, and mixes have drawn tens of millions of streams and multiple placements across TV and film, including Fox and Netflix. He was nominated twice for Producer of the Year at the Austin Music Awards, in 2017 and 2018.
     credits: Daddy NAT, Jefferson Clay, Middlespoon
     realName: Bryan Ray
     website: https://www.lonelychildmusic.com

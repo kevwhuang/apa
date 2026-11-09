@@ -1,0 +1,27 @@
+---
+import IconArrow from '@components/icons/Arrow.astro';
+
+interface Props {
+    href: string;
+    label: string;
+}
+
+const { href, label } = Astro.props;
+---
+
+<nav
+    class="stage stage--strip border-b-2 border-border-strong"
+    aria-label="Breadcrumb"
+>
+    <div data-motion="stamp">
+        <a
+            class="group active:translate-y-px focus-visible:text-link hover:text-link inline-flex items-center min-h-(--control-size) gap-(--space-xs) font-bold font-sans text-xl tracking-tight transition-[color,translate]"
+            href={href}
+        >
+            <span class="group-focus-visible:-translate-x-(--space-3xs) group-hover:-translate-x-(--space-3xs) inline-flex transition-[translate]">
+                <IconArrow left />
+            </span>
+            {label}
+        </a>
+    </div>
+</nav>

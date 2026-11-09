@@ -4,25 +4,20 @@ declare module 'eslint-plugin-jsx-a11y';
 
 type AssetKind = (typeof import('@lib/shared/constants').ASSET_KINDS)[number];
 type AvatarResult = { dataUrl: string; ok: true } | { message: string; ok: false };
-type CartIssueKind = 'out-of-stock' | 'price-changed' | 'quantity-reduced' | 'removed';
-type EventCadence = (typeof import('@lib/shared/constants').EVENT_CADENCES)[number];
 type EventType = (typeof import('@lib/shared/constants').EVENT_TYPES)[number];
 type FieldErrors = Record<string, string>;
 type ImageSources = Record<string, string>;
 type MotionBezier = [number, number, number, number];
 type MotionDurationToken = 'base' | 'cinematic' | 'fast' | 'slow' | 'slower' | 'slowest';
-type MotionEase = (progress: number) => number;
-type MotionEaseToken = 'entrance' | 'linear' | 'mechanical' | 'snap' | 'standard';
+type MotionEaseToken = 'entrance' | 'linear' | 'mechanical' | 'snap';
 type MotionPresetName = 'blur' | 'flip' | 'rise' | 'rule' | 'stamp' | 'strike' | 'tilt' | 'unfold' | 'wipe';
-type MotionScrubName = 'drift' | 'float';
-type MotionStaggerOrigin = 'center' | 'end' | 'start';
+type MotionScrubName = 'drift';
+type MotionStaggerOrigin = 'end' | 'start';
 type MotionStaggerToken = 'base' | 'tight';
 type OnboardingGate = { email: string; state: 'granted'; token: OnboardingToken } | { reason: OnboardingRejection; state: 'rejected' };
 type OnboardingRejection = 'expired' | 'malformed' | 'missing';
 type OrderResult = { code: PaymentErrorCode; message: string; ok: false } | { ok: true; order: Order };
 type PaymentErrorCode = 'cart-changed' | 'empty-cart' | 'storage-full';
-type ProductCategory = (typeof import('@lib/shared/constants').PRODUCT_CATEGORIES)[number];
-type ProgramState = 'active' | 'planned';
 type RackKind = 'chorus' | 'compressor' | 'delay' | 'distortion' | 'eq' | 'filter' | 'gate' | 'highpass' | 'limiter' | 'meter' | 'pan' | 'reverb' | 'saturator' | 'tremolo' | 'trim' | 'tuner';
 type RackLoadResult = { buffer: AudioBuffer; ok: true } | { message: string; ok: false };
 type SessionErrorCode = 'already-registered' | 'invalid-credentials' | 'invalid-email' | 'storage-full' | 'weak-password';
@@ -33,13 +28,11 @@ type Timer = ReturnType<typeof setInterval>;
 type ToastTone = 'error' | 'info' | 'success';
 type TrackLinkResult = { link: TrackLink; ok: true } | { message: string; ok: false };
 type UploadResult = { entry: UploadEntry; ok: true } | { message: string; ok: false };
-type UploadStatus = 'failed' | 'queued' | 'reading' | 'ready' | 'rejected';
 
 interface BashSubmission {
-    edition: string;
+    file: string;
     producer: string;
     submittedAt: string;
-    title: string;
 }
 
 interface CalendarEvent {
@@ -54,7 +47,7 @@ interface CalendarEvent {
 
 interface CartIssue {
     from?: number;
-    kind: CartIssueKind;
+    kind: 'out-of-stock' | 'price-changed' | 'quantity-reduced' | 'removed';
     title: string;
     to?: number;
 }
@@ -65,6 +58,7 @@ interface CartItem {
     productSlug: string;
     quantity: number;
     size?: string;
+    sku: string;
     title: string;
     variation?: string;
 }
@@ -80,10 +74,18 @@ interface CartTotals {
 
 interface CatalogEntry {
     priceCents: number;
-    sku: number;
+    sku: string;
     slug: string;
     stock: number;
     title: string;
+    variations: CatalogVariation[];
+}
+
+interface CatalogVariation {
+    image: string;
+    name: string;
+    priceCents: number;
+    sku: string;
 }
 
 interface ChatMessage {
@@ -106,10 +108,10 @@ interface ContactEmailInput {
 }
 
 interface EventProgram {
-    cadence: EventCadence;
+    cadence: (typeof import('@lib/shared/constants').EVENT_CADENCES)[number];
     name: string;
     shortName: string;
-    state: ProgramState;
+    state: 'active' | 'planned';
     summary: string;
 }
 
@@ -147,7 +149,6 @@ interface MotionBridge {
 }
 
 interface MotionGroup {
-    from: MotionStaggerOrigin;
     name: MotionPresetName;
     targets: Element[];
 }
@@ -161,7 +162,6 @@ interface MotionPreset {
 }
 
 interface MotionRoot {
-    from: MotionStaggerOrigin;
     preset: MotionPresetName;
     targets: Element[];
 }
@@ -173,14 +173,11 @@ interface MotionScrubPreset {
 }
 
 interface MotionTokens {
-    alphaMax: number;
     duration: Record<MotionDurationToken, number>;
-    ease: Record<MotionEaseToken, MotionEase>;
+    ease: Record<MotionEaseToken, (progress: number) => number>;
     stagger: Record<MotionStaggerToken, number>;
     staggerMaxTotal: number;
     travel: number;
-    travelLarge: number;
-    velocityCap: number;
 }
 
 interface OnboardingDraft {
@@ -233,11 +230,11 @@ interface PlayerTrack {
     durationSeconds: number;
     file?: string;
     id: string;
+    seed: string;
     title: string;
 }
 
-interface ProducerRecord extends Omit<import('astro:content').CollectionEntry<'producers'>['data'], 'avatar' | 'joined'> {
-    avatar: string | null;
+interface ProducerRecord extends Omit<import('astro:content').CollectionEntry<'producers'>['data'], 'joined' | 'producerId'> {
     id: string;
     joined: string;
 }
@@ -262,7 +259,7 @@ interface RackBlock {
     dispose(): void;
     input: AudioNode;
     output: AudioNode;
-    setParam(name: string, value: number): void;
+    setParameter(name: string, value: number): void;
     state?(): string;
     tick?(): void;
 }
@@ -270,7 +267,7 @@ interface RackBlock {
 interface RackState {
     activeKinds: RackKind[];
     durationSeconds: number;
-    fileName: string | null;
+    fileName: null | string;
     playing: boolean;
 }
 
@@ -308,13 +305,8 @@ interface StoreOptions<T> {
 }
 
 interface TileColor {
-    bg: string;
+    background: string;
     text: string;
-}
-
-interface ToastDetail {
-    message: string;
-    tone: ToastTone;
 }
 
 interface TrackLink {
@@ -335,7 +327,7 @@ interface UploadEntry {
     id: string;
     loadedBytes: number;
     peaks?: Float32Array;
-    status: UploadStatus;
+    status: 'failed' | 'queued' | 'reading' | 'ready' | 'rejected';
     totalBytes: number;
 }
 
@@ -349,8 +341,9 @@ interface Window {
 }
 
 interface WindowEventMap {
+    'apa:float-window': CustomEvent<{ panel: HTMLElement }>;
     'apa:theme-changed': Event;
-    'apa:toast': CustomEvent<ToastDetail>;
+    'apa:toast': CustomEvent<{ message: string; tone: ToastTone }>;
     'apa:track-play': CustomEvent<{ track: PlayerTrack }>;
     'apa:track-state': CustomEvent<TrackState>;
 }

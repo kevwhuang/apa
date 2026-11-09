@@ -1,5 +1,6 @@
 ---
 name: Marcus Hale
+producerId: '000004'
 genres: [drum & bass]
 location: Austin, TX
 joined: 2022-11-03T00:00:00-05:00

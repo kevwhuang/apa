@@ -2,6 +2,12 @@
 import PageHead from '@components/shared/PageHead.astro';
 import { getProgram } from '@lib/shared/utils';
 
+const FORMAT_STEPS = [
+    { name: 'Get the prompt', note: 'Everyone works from the same prompt and the same samples.' },
+    { name: 'Beat the clock', note: 'Make a 60 to 90 second track before the clock runs out.' },
+    { name: 'Win the room', note: 'The crowd picks its top two, and they go head-to-head.' },
+] as const;
+
 const program = getProgram('bash');
 ---
 
@@ -10,26 +16,64 @@ const program = getProgram('bash');
     aria-labelledby="bash-title"
 >
     <div
-        class="halftone--accent stage__item--full absolute -inset-y-[8%] inset-x-0 pointer-events-none"
+        class="halftone--accent stage__item--full absolute bottom-0 inset-x-0 h-(--space-lg) pointer-events-none"
         aria-hidden="true"
         data-scrub="drift"
     />
     <div class="flex flex-col relative gap-6">
         <PageHead
-            class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl"
-            eyebrow={`${program.shortName}, ${program.cadence}`}
+            class="text-7xl max-lg:text-6xl max-md:text-3xl"
             headingId="bash-title"
             tone="dark"
         >
-            One prompt.<br />
-            <span class="text-text-brand">One afternoon.</span><br />
-            One <span class="whitespace-nowrap">showdown.</span>
+            One prompt,<br />
+            <span class="text-text-brand">one afternoon,</span><br />
+            one <span class="whitespace-nowrap">showdown</span>
         </PageHead>
-        <p
-            class="max-w-2xl leading-relaxed text-lg text-text-inverse-secondary"
-            data-motion="blur"
-        >
-            {program.summary}
-        </p>
+        <div class="flex flex-col gap-(--space-lg) mb-(--space-lg)">
+            <div class="flex flex-col gap-5">
+                <p
+                    class="max-w-2xl text-lg text-text-inverse-secondary"
+                    data-motion="blur"
+                >
+                    {program.summary}
+                </p>
+                <p
+                    class="max-w-2xl text-text-inverse-secondary"
+                    data-motion="rise"
+                >
+                    Bashes run four times a year on a Saturday afternoon, open to every experience
+                    level and genre.
+                </p>
+            </div>
+            <aside
+                class="slab slab--bare slab--card overflow-clip"
+                aria-labelledby="bash-format-title"
+                data-motion="unfold"
+            >
+                <div class="p-(--space-lg) bg-event-bash text-event-bash-text">
+                    <h2
+                        id="bash-format-title"
+                        class="mb-(--space-md) font-display text-2xl"
+                    >
+                        How a Bash runs
+                    </h2>
+                    <ol class="grid grid-cols-3 gap-(--space-lg) list-none max-lg:gap-(--space-md) max-lg:grid-cols-[auto_minmax(0,1fr)]">
+                        {FORMAT_STEPS.map((step, index) => (
+                            <li class="content-start grid grid-cols-[auto_minmax(0,1fr)] gap-x-(--space-md) gap-y-(--space-3xs) pt-(--space-sm) border-event-bash-text border-t-2 max-lg:col-span-2 max-lg:grid-cols-subgrid">
+                                <span
+                                    class="row-span-2 font-display text-4xl"
+                                    aria-hidden="true"
+                                >
+                                    {index + 1}
+                                </span>
+                                <p class="font-bold font-sans leading-(--text-lg) text-lg tracking-tight">{step.name}</p>
+                                <p class="text-base text-pretty">{step.note}</p>
+                            </li>
+                        ))}
+                    </ol>
+                </div>
+            </aside>
+        </div>
     </div>
 </section>

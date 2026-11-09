@@ -11,24 +11,14 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
     aria-labelledby="signin-title"
 >
     <div class="flex flex-col gap-8">
-        <div class="flex flex-col gap-6">
-            <PageHead
-                class="text-4xl text-center"
-                eyebrow="Account"
-                eyebrowClass="mb-4 text-center"
-                headingId="signin-title"
-            >
-                Let's get you in.
-            </PageHead>
-            <p
-                class="max-w-2xl mx-auto text-center text-lg text-text-secondary"
-                data-motion="rise"
-            >
-                One address, one password &mdash; the same account at the door, the store, and your settings.
-            </p>
-        </div>
+        <PageHead
+            class="text-4xl text-center"
+            headingId="signin-title"
+        >
+            Let's get you in
+        </PageHead>
         <div
-            class="signin slab slab--bare slab--card max-w-(--measure-form) w-full mx-auto"
+            class="signin slab slab--bare slab--card max-w-xl w-full mx-auto"
             data-motion="unfold"
         >
             <fieldset class="grid grid-cols-2 min-w-0 border-b-2 border-border-strong">
@@ -65,7 +55,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                         <span class="label block mb-2 text-text-secondary">Email</span>
                         <input
                             id="signin-email"
-                            class="input font-mono text-sm"
+                            class="input font-mono"
                             aria-describedby="signin-email-error"
                             aria-invalid="false"
                             autocomplete="email"
@@ -76,7 +66,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                     </label>
                     <p
                         id="signin-email-error"
-                        class="action-text text-error-text"
+                        class="text-error-text"
                         data-field-error
                         hidden
                     />
@@ -113,7 +103,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                     </label>
                     <p
                         id="signin-password-error"
-                        class="action-text text-error-text"
+                        class="text-error-text"
                         data-field-error
                         hidden
                     />
@@ -122,7 +112,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                     class="btn btn--primary self-start"
                     type="submit"
                 >
-                    Come in <IconArrow />
+                    Sign in <IconArrow />
                 </button>
             </form>
             <form
@@ -137,7 +127,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                         <span class="label block mb-2 text-text-secondary">Email</span>
                         <input
                             id="signup-email"
-                            class="input font-mono text-sm"
+                            class="input font-mono"
                             aria-describedby="signup-email-error"
                             aria-invalid="false"
                             autocomplete="email"
@@ -148,7 +138,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                     </label>
                     <p
                         id="signup-email-error"
-                        class="action-text text-error-text"
+                        class="text-error-text"
                         data-field-error
                         hidden
                     />
@@ -186,7 +176,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                     </label>
                     <p
                         id="signup-password-error"
-                        class="action-text text-error-text"
+                        class="text-error-text"
                         data-field-error
                         hidden
                     />
@@ -223,7 +213,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                     </label>
                     <p
                         id="signup-confirm-error"
-                        class="action-text text-error-text"
+                        class="text-error-text"
                         data-field-error
                         hidden
                     />
@@ -232,7 +222,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                     class="btn btn--primary self-start"
                     type="submit"
                 >
-                    Open your account <IconArrow />
+                    Create account <IconArrow />
                 </button>
             </form>
         </div>
@@ -240,6 +230,10 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
 </section>
 
 <style>
+    .signin-stage {
+        display: var(--session-out-only, grid);
+    }
+
     .signin:has(#mode-signup:checked) .signin__panel--in {
         display: none;
     }
@@ -273,16 +267,6 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
         width: 48px;
     }
 
-    .signin__reveal::after {
-        content: '';
-        height: 48px;
-        position: absolute;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 48px;
-    }
-
     .signin__reveal:active {
         transform: translateY(1px);
     }
@@ -293,6 +277,16 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
 
     .signin__reveal:hover {
         color: var(--color-link);
+    }
+
+    .signin__reveal::after {
+        content: '';
+        height: 48px;
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 48px;
     }
 
     .signin__reveal[aria-pressed='false'] .signin__glyph--hide,
@@ -308,12 +302,10 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
         display: flex;
         justify-content: center;
         min-height: 52px;
-        padding: var(--space-2xs) var(--space-sm);
+        padding: var(--space-2xs);
         text-align: center;
-        transition:
-            background-color var(--duration-fast) var(--motion-ease-ui),
-            color var(--duration-fast) var(--motion-ease-ui);
         user-select: none;
+        white-space: nowrap;
     }
 
     .signin__tab + .signin__tab {
@@ -339,16 +331,12 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
         background-color: var(--color-bg-hover);
         color: var(--color-tab-text-hover);
     }
-
-    :global([data-session='in']) .signin-stage {
-        display: none;
-    }
 </style>
 
 <script>
     import { navigate } from 'astro:transitions/client';
 
-    import { clearFieldErrors, confirmRule, focusFirstError, handleReveal, passwordRule, readEmail, setFieldErrors, validateFields } from '@lib/ui/forms';
+    import { clearFieldErrors, focusFirstError, getConfirmRule, getPasswordRule, handleReveal, readEmail, setFieldErrors, validateFields } from '@lib/ui/forms';
     import { getSession, onSessionChange, startSession } from '@lib/account/session';
     import { registerPageScript, setPending } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
@@ -367,24 +355,21 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
     };
 
     const SIGNUP_RULES: Record<string, FieldRule> = {
-        confirm: confirmRule(),
+        confirm: getConfirmRule(),
         email: { message: 'Enter your email address.', required: true },
-        password: passwordRule(),
+        password: getPasswordRule(),
     };
 
+    let isSubmitting = false;
     let unsubscribe: (() => void) | undefined;
-
-    function handleSessionChange(session: Session | null) {
-        if (session) void navigate('/settings');
-    }
 
     async function handleSubmit(event: SubmitEvent, form: HTMLFormElement) {
         event.preventDefault();
 
-        const signup = form.dataset.authForm === 'signup';
-
-        const rules = signup ? SIGNUP_RULES : SIGNIN_RULES;
+        const isSignup = form.dataset.authForm === 'signup';
         const values = new FormData(form);
+
+        const rules = isSignup ? SIGNUP_RULES : SIGNIN_RULES;
 
         const errors = validateFields(form, rules);
 
@@ -401,12 +386,14 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
         const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
 
         setPending(button, true);
+        isSubmitting = true;
 
         const result = await startSession({
             email: readEmail(values),
             password: String(values.get('password') ?? ''),
         });
 
+        isSubmitting = false;
         setPending(button, false);
 
         if (!result.ok) {
@@ -418,7 +405,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
             return;
         }
 
-        const message = signup ? 'Account created. You are signed in.' : `Signed in as ${sessionLabel(result.session)}.`;
+        const message = isSignup ? 'Account created. You are signed in.' : `Signed in as ${result.session.artistName || result.session.email}.`;
 
         form.reset();
         toast(message, 'success');
@@ -439,7 +426,11 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
         }
 
         unsubscribe?.();
-        unsubscribe = onSessionChange(handleSessionChange);
+
+        unsubscribe = onSessionChange((session) => {
+            if (!isSubmitting && session) void navigate('/settings');
+        });
+
         signal.addEventListener('abort', () => unsubscribe?.(), { once: true });
 
         forms.forEach((form) => {
@@ -450,10 +441,6 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
         reveals.forEach((button) => {
             button.addEventListener('click', () => handleReveal(button), { signal });
         });
-    }
-
-    function sessionLabel(session: Session) {
-        return session.artistName || session.email;
     }
 
     registerPageScript(initSignInForm);

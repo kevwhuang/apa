@@ -2,20 +2,21 @@
 import { getCollection } from 'astro:content';
 
 import IconArrow from '@components/icons/Arrow.astro';
-import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import ProducerLinks from '@components/producer/Links.astro';
+import ProducerPortrait from '@components/producer/Portrait.astro';
 import ProducerTrack from '@components/producer/Track.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { PALETTE } from '@lib/shared/constants';
-import { formatCalendarMonth, getInitials, toIsoDate } from '@lib/shared/utils';
+import { formatCalendarMonth, formatRole, toIsoDate, toRoster } from '@lib/shared/utils';
 
+const GENRE_LIMIT = 2;
 const STRIP_LIMIT = 4;
 
-const producers = await getCollection('producers');
+const producers = toRoster(await getCollection('producers'));
 
 const featured = producers.find(producer => producer.data.featured);
 
-const roster = producers.filter(producer => producer.id !== featured?.id);
+const roster = producers.filter(producer => producer.data.producerId !== featured?.data.producerId);
 const track = featured?.data.tracks[0];
 ---
 
@@ -25,16 +26,14 @@ const track = featured?.data.tracks[0];
         aria-labelledby="featured-producer-title"
     >
         <div
-            class="halftone--accent stage__item--full absolute -inset-y-[8%] inset-x-0 pointer-events-none"
+            class="halftone--accent stage__item--full absolute bottom-0 inset-x-0 h-(--space-lg) pointer-events-none"
             aria-hidden="true"
             data-scrub="drift"
         />
         <div class="relative">
             <SectionHead
-                class="text-3xl md:text-7xl lg:text-8xl"
-                eyebrow="Spotlight producer"
+                class="text-8xl max-lg:text-7xl max-md:text-3xl"
                 headingId="featured-producer-title"
-                tone="dark"
             >
                 {featured.data.name}
             </SectionHead>
@@ -44,19 +43,20 @@ const track = featured?.data.tracks[0];
                         class="producer-feature__portrait mb-6"
                         data-motion="wipe"
                     >
-                        <PlaceholderTile
+                        <ProducerPortrait
                             class="slab slab--bare slab--card aspect-square"
-                            color={PALETTE[0].bg}
-                            label={getInitials(featured.data.name)}
+                            color={PALETTE[0].background}
                             labelClass="leading-none text-8xl"
                             labelColor={PALETTE[0].text}
+                            name={featured.data.name}
+                            producerId={featured.data.producerId}
                         />
                     </div>
                     <p
-                        class:list={['font-mono text-xs text-text-inverse-secondary', featured.data.links.length > 0 && 'mb-4']}
+                        class:list={[featured.data.links.length > 0 && 'mb-4', 'font-mono text-base text-text-inverse-secondary']}
                         data-placeholder
                     >
-                        On the roster since <time datetime={toIsoDate(featured.data.joined)}>{formatCalendarMonth(featured.data.joined)}</time>
+                        Since <time datetime={toIsoDate(featured.data.joined)}>{formatCalendarMonth(featured.data.joined)}</time>
                     </p>
                     <ProducerLinks
                         linkClass="hover:text-link-on-inverse"
@@ -65,29 +65,29 @@ const track = featured?.data.tracks[0];
                 </div>
                 <div data-motion-stagger="rise">
                     <p
-                        class="mb-6 font-mono text-xs text-text-inverse-secondary"
+                        class="mb-6 font-mono text-base text-text-inverse-secondary"
                         data-placeholder
                     >
                         {featured.data.roles.length > 0
-                            ? <Fragment><span class="capitalize">{featured.data.roles.join(' \u00b7 ')}</span> &mdash; {featured.data.location}</Fragment>
+                            ? <Fragment>{featured.data.roles.map(formatRole).join(' \u00b7 ')} &middot; {featured.data.location}</Fragment>
                             : featured.data.location}
                     </p>
                     <p
-                        class="max-w-xl mb-6 leading-relaxed text-lg text-text-inverse-secondary"
+                        class="max-w-xl mb-6 text-lg text-text-inverse-secondary"
                         data-placeholder
                     >
                         {featured.data.bio}
                     </p>
-                    <ul class:list={['flex flex-wrap gap-2 list-none', track && 'mb-8']}>
+                    <ul class:list={['flex flex-wrap gap-2', track && 'mb-8', 'list-none']}>
                         {featured.data.genres.map(genre => (
-                            <li class="inline-flex items-center h-6 px-2 border-2 border-current font-bold font-mono text-xs tracking-[0.06em] uppercase">{genre}</li>
+                            <li class="label inline-flex items-center h-6 px-2 border-2 border-current">{genre}</li>
                         ))}
                     </ul>
                     {track && (
-                        <div class="producer-feature__track slab slab--bare slab--card text-text">
-                            <p class="label pb-2 pt-3 px-3 text-link">Spotlight</p>
+                        <div class="producer-feature__track slab slab--card slab--still text-text">
+                            <p class="label mb-3 text-link">Spotlight</p>
                             <ProducerTrack
-                                producerId={featured.id}
+                                producerId={featured.data.producerId}
                                 track={track}
                             />
                         </div>
@@ -104,58 +104,57 @@ const track = featured?.data.tracks[0];
 >
     <div>
         <SectionHead
-            class="text-5xl text-balance"
-            eyebrow="The roster"
+            class="text-5xl text-balance max-md:text-3xl"
             headingId="producers-title"
         >
-            Every genre. One scene.
+            Producers of every genre
             <a
-                class="action-text hover:text-link hidden items-center gap-2 min-h-(--control-size) whitespace-nowrap transition-colors md:inline-flex"
+                class="action-text hover:text-link inline-flex items-center min-h-(--control-size) gap-2 whitespace-nowrap transition-[color,transform] max-md:hidden"
                 href="/directory"
                 slot="cta"
             >
-                Full roster <IconArrow />
+                All producers <IconArrow />
             </a>
         </SectionHead>
         <ul
-            class="producer-strip grid grid-cols-1 gap-6 mb-10 list-none lg:gap-8 lg:grid-cols-4 md:grid-cols-2 md:mb-0"
-            data-motion-from="center"
+            class="producer-strip grid grid-cols-4 gap-x-(--space-lg) gap-y-(--space-2xl) list-none max-lg:grid-cols-2 max-md:grid-cols-1 max-md:mb-10"
             data-motion-stagger="flip"
             data-producer-strip
         >
             {roster.map((producer, index) => (
                 <li class:list={[index >= STRIP_LIMIT && 'hidden']}>
                     <a
-                        class="slab slab--bare slab--card slab--hover"
-                        href={`/directory#${producer.id}`}
+                        class="slab slab--bare slab--card slab--still"
+                        href={`/directory#${producer.data.producerId}`}
                     >
-                        <PlaceholderTile
+                        <ProducerPortrait
                             class="aspect-square border-b-2 border-border-strong"
-                            color={PALETTE[(index + 1) % PALETTE.length].bg}
-                            label={getInitials(producer.data.name)}
+                            color={PALETTE[(index + 1) % PALETTE.length].background}
                             labelClass="leading-none text-5xl"
                             labelColor={PALETTE[(index + 1) % PALETTE.length].text}
+                            name={producer.data.name}
+                            producerId={producer.data.producerId}
                         />
                         <h3
-                            class="mb-1 pt-4 px-4 text-lg"
+                            class="mb-1 pt-(--space-md) px-(--space-md) text-balance text-lg"
                             data-placeholder
                         >
                             {producer.data.name}
                         </h3>
-                        <p class="label pb-4 px-4 text-text-secondary">{producer.data.genres.slice(0, 2).join(' / ')}</p>
+                        <p class="label pb-(--space-md) px-(--space-md) text-text-secondary">{producer.data.genres.slice(0, GENRE_LIMIT).join(' / ')}</p>
                     </a>
                 </li>
             ))}
         </ul>
         <div
-            class="md:hidden"
+            class="hidden max-md:block"
             data-motion="rise"
         >
             <a
                 class="btn"
                 href="/directory"
             >
-                Full roster
+                All producers
             </a>
         </div>
     </div>
@@ -163,18 +162,13 @@ const track = featured?.data.tracks[0];
 
 <style>
     .producer-feature__portrait {
-        --plate-drop: calc(var(--z-card) * var(--lift));
+        --plate-drop: var(--lift);
         padding-block-end: var(--plate-drop);
         padding-inline-end: var(--plate-drop);
-        rotate: calc(var(--tilt-unit) * -2 * var(--drift-gate));
     }
 
-    .producer-feature__track :global(.producer-track__bar) {
-        width: 6px;
-    }
-
-    .producer-strip {
-        grid-auto-rows: auto;
+    .producer-feature__track {
+        --producer-track-bar-width: 6px;
     }
 
     .producer-strip > li:not(.hidden),
@@ -197,29 +191,31 @@ const track = featured?.data.tracks[0];
     import { registerPageScript } from '@lib/shared/utils';
 
     const HIDDEN_CLASS = 'hidden';
-    const ROTATE_INTERVAL_MS = 10_000;
-    const ROTATE_TRAVEL_FACTOR = 2;
+    const ROTATE_INTERVAL_MILLISECONDS = 10_000;
+    const ROTATE_TRAVEL_FACTOR = 3;
     const STRIP_LIMIT = 4;
 
+    let isRotating = false;
+    let isVisible = true;
     let rotateTimer: Timer | undefined;
-    let rotating = false;
-    let visible = true;
 
     function enterCards(leaving: HTMLElement[], entering: HTMLElement[], tokens: MotionTokens) {
         swapCards(leaving, entering);
 
-        gsap.fromTo(entering, { opacity: 0, x: tokens.travelLarge * ROTATE_TRAVEL_FACTOR, y: 0 }, {
+        gsap.fromTo(entering, { opacity: 0, x: tokens.travel * ROTATE_TRAVEL_FACTOR, y: 0 }, {
             duration: tokens.duration.slower,
             ease: tokens.ease.entrance,
-            onComplete: () => {
-                rotating = false;
-                gsap.set(entering, { clearProps: 'transform' });
-            },
+            onComplete: () => finishRotation(entering),
             opacity: 1,
             overwrite: 'auto',
             stagger: tokens.stagger.base,
             x: 0,
         });
+    }
+
+    function finishRotation(entering: HTMLElement[]) {
+        isRotating = false;
+        gsap.set(entering, { clearProps: 'transform' });
     }
 
     function initRosterRotation(signal: AbortSignal) {
@@ -231,27 +227,21 @@ const track = featured?.data.tracks[0];
 
         if (cards.length <= STRIP_LIMIT) return;
 
-        rotating = false;
-        visible = true;
+        isRotating = false;
+        isVisible = true;
 
         const observer = new IntersectionObserver((entries) => {
-            visible = entries[0]?.isIntersecting ?? false;
+            isVisible = entries[0]?.isIntersecting ?? false;
         });
 
         clearInterval(rotateTimer);
         observer.observe(strip);
-        rotateTimer = setInterval(() => rotateStrip(strip, cards), ROTATE_INTERVAL_MS);
-
-        signal.addEventListener('abort', () => {
-            clearInterval(rotateTimer);
-            gsap.killTweensOf(cards);
-            observer.disconnect();
-            rotateTimer = undefined;
-        }, { once: true });
+        rotateTimer = setInterval(() => rotateStrip(strip, cards), ROTATE_INTERVAL_MILLISECONDS);
+        signal.addEventListener('abort', () => stopRotation(cards, observer), { once: true });
     }
 
     function rotateStrip(strip: HTMLElement, cards: HTMLElement[]) {
-        if (document.hidden || rotating || !visible) return;
+        if (!isVisible || document.hidden || isRotating) return;
         if (strip.contains(document.activeElement) || strip.matches(':hover')) return;
 
         const entering = sampleCards(cards);
@@ -265,7 +255,7 @@ const track = featured?.data.tracks[0];
 
         const tokens = getMotionTokens();
 
-        rotating = true;
+        isRotating = true;
 
         gsap.to(leaving, {
             duration: tokens.duration.slower,
@@ -274,7 +264,7 @@ const track = featured?.data.tracks[0];
             opacity: 0,
             overwrite: 'auto',
             stagger: tokens.stagger.base,
-            y: tokens.travelLarge * ROTATE_TRAVEL_FACTOR,
+            y: tokens.travel * ROTATE_TRAVEL_FACTOR,
         });
     }
 
@@ -296,6 +286,13 @@ const track = featured?.data.tracks[0];
         }
 
         return draw.toSorted((a, b) => cards.indexOf(a) - cards.indexOf(b));
+    }
+
+    function stopRotation(cards: HTMLElement[], observer: IntersectionObserver) {
+        clearInterval(rotateTimer);
+        gsap.killTweensOf(cards);
+        observer.disconnect();
+        rotateTimer = undefined;
     }
 
     function swapCards(leaving: HTMLElement[], entering: HTMLElement[]) {

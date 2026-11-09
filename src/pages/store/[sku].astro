@@ -6,7 +6,7 @@ import ProductDetail from '@sections/store/ProductDetail.astro';
 import { brandTitle } from '@lib/shared/brand';
 
 const DESCRIPTION_MAX = 160;
-const DESCRIPTION_SUFFIX = ' From the official Austin Producer Alliance store.';
+const DESCRIPTION_SUFFIX = ' Order it from the Austin Producer Alliance store.';
 
 const { product, slug } = Astro.props;
 
@@ -14,7 +14,7 @@ export async function getStaticPaths() {
     const products = await getCollection('products');
 
     return products.map(product => ({
-        params: { sku: String(product.data.sku) },
+        params: { sku: product.data.sku },
         props: { product: product.data, slug: product.id },
     }));
 }
@@ -40,7 +40,7 @@ function toDescription(text: string) {
 
 <Layout
     description={toDescription(product.description)}
-    title={brandTitle(product.title)}
+    title={brandTitle(product.title, 'Store')}
 >
     <ProductDetail
         product={product}

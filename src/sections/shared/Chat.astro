@@ -9,7 +9,7 @@ import IconClose from '@components/icons/Close.astro';
     transition:persist
 >
     <button
-        class="chat__launcher"
+        class="chat__launcher z-(--z-drawer)"
         aria-controls="chat-window"
         aria-expanded="false"
         data-chat-launcher
@@ -20,13 +20,12 @@ import IconClose from '@components/icons/Close.astro';
     </button>
     <dialog
         id="chat-window"
-        class="chat__window"
+        class="chat__window z-(--z-drawer)"
         aria-labelledby="chat-title"
         data-chat-window
-        data-float-window
     >
         <div
-            class="grip"
+            class="grip z-1"
             data-chat-grip
         />
         <div class="chat__head flex items-center justify-between shrink-0 gap-(--space-2xs) pl-(--space-sm) border-b border-border-subtle">
@@ -37,7 +36,7 @@ import IconClose from '@components/icons/Close.astro';
                 >
                     Global
                 </h2>
-                <p class="chat__tally flex items-center shrink-0 font-mono leading-none text-xs tracking-[0.06em] uppercase text-text-secondary">
+                <p class="chat__tally label flex items-center shrink-0 text-text-secondary select-none">
                     <span data-chat-online>0 online</span>
                 </p>
             </div>
@@ -51,7 +50,7 @@ import IconClose from '@components/icons/Close.astro';
             </button>
         </div>
         <ol
-            class="chat__log flex flex-1 flex-col overflow-y-auto overscroll-contain min-h-0 gap-(--space-2xs) p-(--space-sm) list-none"
+            class="chat__log scroll-slot flex flex-1 flex-col min-h-0 gap-(--space-2xs) p-(--space-sm) list-none"
             aria-live="polite"
             data-chat-log
         />
@@ -61,7 +60,7 @@ import IconClose from '@components/icons/Close.astro';
         >
             <input
                 id="chat-message"
-                class="input flex-1 min-w-0 text-sm"
+                class="input flex-1 min-w-0"
                 aria-label="Message"
                 autocomplete="off"
                 data-chat-field
@@ -85,16 +84,16 @@ import IconClose from '@components/icons/Close.astro';
                 />
                 <span class="chat__meta [grid-area:meta] flex flex-wrap items-baseline min-w-0 gap-x-(--space-2xs)">
                     <span
-                        class="chat__author min-w-0 font-bold leading-[1.2] text-sm wrap-anywhere"
+                        class="chat__author min-w-0 font-bold leading-(--text-lg) text-base wrap-anywhere"
                         data-chat-author
                     />
                     <span
-                        class="chat__time font-mono text-xs text-text-secondary"
+                        class="chat__time font-mono text-sm text-text-secondary"
                         data-chat-time
                     />
                 </span>
                 <span
-                    class="chat__body [grid-area:body] leading-[1.45] text-sm wrap-anywhere"
+                    class="chat__body [grid-area:body] text-base wrap-anywhere"
                     data-chat-text
                 />
             </li>
@@ -129,7 +128,7 @@ import IconClose from '@components/icons/Close.astro';
         border: 2px solid var(--color-border-strong);
         display: flex;
         font-family: var(--font-mono);
-        font-size: var(--text-xs);
+        font-size: var(--text-sm);
         font-weight: 700;
         grid-area: avatar;
         height: 30px;
@@ -145,12 +144,12 @@ import IconClose from '@components/icons/Close.astro';
         align-items: center;
         display: inline-flex;
         flex-shrink: 0;
-        height: 50px;
+        height: var(--control-size);
         justify-content: center;
         transition:
             color var(--duration-fast) var(--motion-ease-ui),
             transform var(--duration-fast) var(--motion-ease-ui);
-        width: 50px;
+        width: var(--control-size);
     }
 
     .chat__close:active {
@@ -169,7 +168,7 @@ import IconClose from '@components/icons/Close.astro';
         --color-focus-ring: var(--color-focus-ring-offset);
         align-items: center;
         background: var(--color-bg-inverse);
-        border: 2px solid var(--color-border-strong);
+        border: 2px solid currentColor;
         border-right: 0;
         color: var(--color-text-inverse);
         display: inline-flex;
@@ -177,12 +176,8 @@ import IconClose from '@components/icons/Close.astro';
         inset: auto 0 var(--chat-offset) auto;
         justify-content: center;
         position: fixed;
-        transition:
-            background var(--duration-fast) var(--motion-ease-ui),
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
+        transition: transform var(--duration-fast) var(--motion-ease-ui);
         width: var(--launcher-size);
-        z-index: var(--z-drawer);
     }
 
     .chat__launcher:active {
@@ -190,12 +185,16 @@ import IconClose from '@components/icons/Close.astro';
     }
 
     .chat__launcher:focus-visible {
-        outline-offset: -2px;
+        outline-offset: -4px;
     }
 
     .chat__launcher:hover {
         background: var(--color-btn-primary-bg);
         color: var(--color-btn-primary-text);
+    }
+
+    .chat__log:focus-visible {
+        outline-offset: -2px;
     }
 
     .chat__message {
@@ -228,11 +227,11 @@ import IconClose from '@components/icons/Close.astro';
         color: var(--color-text);
         height: min(600px, calc(100dvh - var(--header-height) - var(--space-md) - var(--chat-offset)));
         inset: auto calc(var(--launcher-size) + var(--lift)) var(--chat-offset) auto;
+        max-width: calc(100vw - var(--launcher-size) - var(--lift) - var(--shell-pad));
         overflow: hidden;
         padding: 0;
         position: fixed;
         width: var(--chat-width, min(340px, calc(100vw - var(--launcher-size) - 2 * var(--space-md))));
-        z-index: var(--z-drawer);
     }
 
     .chat__window[open] {
@@ -242,20 +241,18 @@ import IconClose from '@components/icons/Close.astro';
 </style>
 
 <script>
-    import { PALETTE, POINTER_COARSE_QUERY } from '@lib/shared/constants';
+    import { LAUNCHER_SIZE, PALETTE, POINTER_COARSE_QUERY, WINDOW_MARGINS } from '@lib/shared/constants';
     import { ROOM_MEMBERS, closeChat, getChatState, getMessages, getOnlineCount, onChatChange, openChat, seedRoom, sendChatMessage } from '@lib/chat/chat';
-    import { formatTime, getInitials, initPanelResize, isTopFloatWindow, raiseWindow, registerPageScript, setText } from '@lib/shared/utils';
+    import { claimFloatWindow, formatTime, getInitials, initPanelResize, onFloatWindowClaim, registerPageScript, setText } from '@lib/shared/utils';
 
     const CHAT_MIN_WIDTH = 340;
-    const GROUP_WINDOW_MS = 300_000;
-    const LAUNCHER_SIZE = 50;
+    const GROUP_WINDOW_MILLISECONDS = 300_000;
     const LIVE_RESET_DELAY = 200;
     const MEMBER_COLORS = new Map<string, TileColor>(ROOM_MEMBERS.map((member, index) => [member.name, PALETTE[(index + 1) % PALETTE.length]]));
-    const RECEIVE_HAPTICS_MS = [60, 90, 110];
+    const RECEIVE_HAPTICS_MILLISECONDS = [60, 90, 110];
     const RESIZE_LABEL = 'Resize member chat';
     const SELF_COLOR = PALETTE[PALETTE.length - 1];
-    const TALLY_INTERVAL_MS = 60_000;
-    const WINDOW_MARGINS = 48;
+    const TALLY_INTERVAL_MILLISECONDS = 60_000;
 
     let liveTimer: number | undefined;
     let tallyTimer: number | undefined;
@@ -273,15 +270,15 @@ import IconClose from '@components/icons/Close.astro';
 
         if (!avatar || !item) return null;
 
-        const grouped = previous !== undefined && previous.name === message.name && message.sentAt - previous.sentAt < GROUP_WINDOW_MS;
+        const isGrouped = previous !== undefined && previous.name === message.name && message.sentAt - previous.sentAt < GROUP_WINDOW_MILLISECONDS;
         const tone = message.self ? SELF_COLOR : (MEMBER_COLORS.get(message.name) ?? SELF_COLOR);
 
-        item.classList.toggle('chat__message--grouped', grouped);
+        item.classList.toggle('chat__message--grouped', isGrouped);
         setText(avatar, getInitials(message.name));
         setText(fragment.querySelector('[data-chat-author]'), message.name);
         setText(fragment.querySelector('[data-chat-text]'), message.body);
         setText(fragment.querySelector('[data-chat-time]'), formatTime(new Date(message.sentAt)));
-        avatar.style.background = tone.bg;
+        avatar.style.background = tone.background;
         avatar.style.color = tone.text;
 
         return item;
@@ -303,12 +300,12 @@ import IconClose from '@components/icons/Close.astro';
         const active = document.activeElement;
         const launcher = document.querySelector<HTMLElement>('[data-chat-launcher]');
 
-        const held = active === null || active === document.body || (dialog?.contains(active) ?? false);
+        const isHeld = (dialog?.contains(active) ?? false) || active === document.body || active === null;
 
         closeChat();
         launcher?.setAttribute('aria-expanded', 'false');
 
-        if (held) launcher?.focus();
+        if (isHeld) launcher?.focus();
     }
 
     function handleKeydown(event: KeyboardEvent) {
@@ -323,17 +320,9 @@ import IconClose from '@components/icons/Close.astro';
     }
 
     function handleLaunch() {
-        const dialog = document.querySelector<HTMLDialogElement>('[data-chat-window]');
-
         if (!getChatState().open) {
             openChat();
             openWindow(true);
-
-            return;
-        }
-
-        if (dialog?.open && !isTopFloatWindow(dialog)) {
-            raiseWindow(dialog);
 
             return;
         }
@@ -386,16 +375,17 @@ import IconClose from '@components/icons/Close.astro';
         document.querySelector<HTMLElement>('[data-chat-close]')?.addEventListener('click', closeWindow, { signal });
         form.addEventListener('submit', event => void handleSubmit(event), { signal });
         launcher.addEventListener('click', handleLaunch, { signal });
+        onFloatWindowClaim(dialog, closeWindow, signal);
         seedRoom();
         window.clearInterval(tallyTimer);
-        tallyTimer = window.setInterval(renderTally, TALLY_INTERVAL_MS);
+        tallyTimer = window.setInterval(renderTally, TALLY_INTERVAL_MILLISECONDS);
 
-        if (getChatState().open && !dialog.open) closeChat();
+        if (!dialog.open && getChatState().open) closeChat();
 
         render();
     }
 
-    function openWindow(moveFocus: boolean) {
+    function openWindow(shouldMoveFocus: boolean) {
         const dialog = document.querySelector<HTMLDialogElement>('[data-chat-window]');
         const field = document.querySelector<HTMLInputElement>('[data-chat-field]');
         const previous = document.activeElement;
@@ -404,9 +394,9 @@ import IconClose from '@components/icons/Close.astro';
 
         dialog.show();
         document.querySelector<HTMLElement>('[data-chat-launcher]')?.setAttribute('aria-expanded', 'true');
-        raiseWindow(dialog);
+        claimFloatWindow(dialog);
 
-        if (moveFocus) {
+        if (shouldMoveFocus) {
             const close = dialog.querySelector<HTMLElement>('[data-chat-close]');
 
             (window.matchMedia(POINTER_COARSE_QUERY).matches ? close : (field ?? close))?.focus();
@@ -414,7 +404,7 @@ import IconClose from '@components/icons/Close.astro';
             return;
         }
 
-        if (previous instanceof HTMLElement && previous !== document.body) {
+        if (previous !== document.body && previous instanceof HTMLElement) {
             previous.focus();
         } else if (document.activeElement instanceof HTMLElement) {
             document.activeElement.blur();
@@ -431,7 +421,7 @@ import IconClose from '@components/icons/Close.astro';
         if (navigator.userActivation?.hasBeenActive === false) return;
 
         if (canVibrate) {
-            navigator.vibrate(RECEIVE_HAPTICS_MS);
+            navigator.vibrate(RECEIVE_HAPTICS_MILLISECONDS);
 
             return;
         }
@@ -448,9 +438,9 @@ import IconClose from '@components/icons/Close.astro';
     }
 
     function renderLog(log: HTMLElement, messages: ChatMessage[]) {
-        const stale = !log.children.length || log.children.length > messages.length;
+        const isStale = !log.children.length || log.children.length > messages.length;
 
-        if (stale) {
+        if (isStale) {
             log.setAttribute('aria-live', 'off');
             log.replaceChildren();
             window.clearTimeout(liveTimer);
@@ -458,6 +448,7 @@ import IconClose from '@components/icons/Close.astro';
         }
 
         const start = log.children.length;
+
         const fresh = messages.slice(start);
 
         fresh.forEach((message, offset) => {
@@ -466,7 +457,7 @@ import IconClose from '@components/icons/Close.astro';
             if (item) log.append(item);
         });
 
-        if (!stale && start > 0 && fresh.some(message => !message.self)) pulseReceive();
+        if (!isStale && fresh.some(message => !message.self) && start > 0) pulseReceive();
 
         log.scrollTop = log.scrollHeight;
     }

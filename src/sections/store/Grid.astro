@@ -5,23 +5,21 @@ import { getCollection } from 'astro:content';
 import PageHead from '@components/shared/PageHead.astro';
 import { PRODUCT_CATEGORIES } from '@lib/shared/constants';
 import { formatPrice, getStockLabel } from '@lib/shared/utils';
-import { getVariationImage, toVariations } from '@lib/commerce/products';
+import { getBaseVariation, getVariationImage, getVariationPrice } from '@lib/commerce/products';
 
 const CARD_IMAGE_WIDTH = 420;
-const CATEGORIES = ['all', ...PRODUCT_CATEGORIES] as const;
 
-const products = await getCollection('products');
+const products = (await getCollection('products')).toSorted((a, b) => a.data.sku.localeCompare(b.data.sku));
 
-const cards = products.map((product) => {
-    const variations = [product.data.base, ...toVariations(product.data).filter(variation => variation !== product.data.base)];
+const cards = products.map(product => ({
+    isInStock: product.data.stock > 0,
+    photos: product.data.variations.map(variation => ({ image: getVariationImage(variation), isBase: variation.name === product.data.base })),
+    priceCents: getVariationPrice(product.data, getBaseVariation(product.data)),
+    product,
+    swatches: product.data.variations.map(variation => variation.hex),
+}));
 
-    return {
-        inStock: product.data.stock > 0,
-        photos: variations.map(variation => getVariationImage(product.data.sku, variation)),
-        product,
-        variationCount: variations.length,
-    };
-});
+const categories = PRODUCT_CATEGORIES.filter(category => products.some(product => product.data.category === category));
 ---
 
 <section
@@ -30,33 +28,37 @@ const cards = products.map((product) => {
 >
     <div>
         <PageHead
-            class="mb-6 text-5xl md:text-7xl"
-            eyebrow={`Store, ${products.length} items`}
+            class="mb-6 text-7xl max-md:text-4xl"
             headingId="store-title"
         >
-            Wear the Alliance.
+            Wear the Alliance
         </PageHead>
         <p
             class="max-w-2xl mb-10 text-lg text-text-secondary"
             data-motion="blur"
         >
-            Every order goes back into the calendar &mdash; room hire, gear for the Bash, and
-            keeping Assembly free to attend. Runs are small and printed in Austin; collect at
-            the next Assembly or have it shipped.
+            Every order helps pay for room hire, gear for the Bash, and keeping Assembly free to
+            attend. Runs are small and printed in Austin. Orders placed at least two weeks before
+            the next Assembly are brought there for pickup.
         </p>
         <div
-            class="flex flex-wrap gap-2 mb-6"
+            class="flex flex-wrap gap-3 mb-6"
             aria-label="Filter by category"
             data-motion="rise"
             role="group"
         >
-            {CATEGORIES.map((category, index) => (
+            <button
+                class="category-btn chip is-active hover:bg-bg-hover h-(--control-size)"
+                aria-pressed="true"
+                data-category=""
+                type="button"
+            >
+                All
+            </button>
+            {categories.map(category => (
                 <button
-                    class:list={[
-                        'category-btn chip active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse h-(--control-size)',
-                        { 'is-active': index === 0 },
-                    ]}
-                    aria-pressed={index === 0 ? 'true' : 'false'}
+                    class="category-btn chip hover:bg-bg-hover h-(--control-size)"
+                    aria-pressed="false"
                     data-category={category}
                     type="button"
                 >
@@ -70,7 +72,7 @@ const cards = products.map((product) => {
             data-motion="stamp"
             data-store-status
         >
-            Showing all {products.length} products.
+            Showing all {products.length} products
         </p>
     </div>
 </section>
@@ -87,36 +89,36 @@ const cards = products.map((product) => {
     </h2>
     <ul
         class="store__grid list-none"
-        data-motion-from="center"
         data-motion-stagger="flip"
     >
-        {cards.map(({ inStock, photos, product, variationCount }) => (
+        {cards.map(({ isInStock, photos, priceCents, product, swatches }) => (
             <li
                 class="product-card"
                 data-category={product.data.category}
             >
                 <a
-                    class:list={['product-card__link slab slab--bare slab--card', inStock && 'slab--hover']}
-                    aria-disabled={inStock ? undefined : 'true'}
+                    class:list={['product-card__link slab slab--bare slab--card', isInStock && 'slab--still']}
+                    aria-disabled={isInStock ? undefined : 'true'}
                     data-product-link
                     href={`/store/${product.data.sku}`}
                 >
                     <span
                         class="product-card__frame block overflow-hidden relative aspect-square border-b-2 border-border-strong bg-bg-sunken"
-                        data-product-frame={inStock && photos.length > 1 ? 'loop' : undefined}
+                        data-product-frame={isInStock && photos.length > 1 ? 'loop' : undefined}
                     >
-                        {photos.map((photo, index) => photo && (
+                        {photos.map(({ image, isBase }) => image && (
                             <Image
-                                class:list={['product-card__photo', index === 0 && 'is-current']}
+                                class:list={['product-card__photo', isBase && 'is-current']}
                                 alt=""
+                                data-product-photo={isBase ? 'base' : undefined}
                                 densities={[1, 2]}
-                                src={photo}
+                                src={image}
                                 width={CARD_IMAGE_WIDTH}
                             />
                         ))}
                         {getStockLabel(product.data.stock) && (
                             <span
-                                class="label absolute left-0 top-0 px-2 py-2 border-b-2 border-r-2 border-border-strong bg-bg-inverse text-text-inverse"
+                                class="absolute left-0 top-0 p-(--space-xs) border-b-2 border-border-strong border-r-2 font-mono leading-none text-base tracking-[0.06em] uppercase bg-bg-page text-text"
                                 data-placeholder
                             >
                                 {getStockLabel(product.data.stock)}
@@ -124,16 +126,23 @@ const cards = products.map((product) => {
                         )}
                     </span>
                     <span class="block pb-(--space-2xs) pt-(--space-md) px-(--space-md)">
-                        <span class="flex flex-wrap items-baseline justify-between gap-x-4 mb-2">
+                        <span class="flex flex-wrap items-center justify-between gap-x-4 mb-2">
                             <span class="label text-text-secondary">
                                 {product.data.category}
                             </span>
-                            {variationCount > 1 && (
+                            {swatches.length > 1 && (
                                 <span
-                                    class="product-card__variations font-mono text-xs uppercase text-text-secondary"
+                                    class="flex gap-1.5"
+                                    aria-label={`${swatches.length} variations`}
                                     data-placeholder
+                                    role="img"
                                 >
-                                    {variationCount} variations
+                                    {swatches.map(hex => (
+                                        <span
+                                            class="size-3.5 border-2 border-border"
+                                            style={`background: ${hex};`}
+                                        />
+                                    ))}
                                 </span>
                             )}
                         </span>
@@ -142,10 +151,10 @@ const cards = products.map((product) => {
                         </span>
                     </span>
                     <span
-                        class="block pb-(--space-md) px-(--space-md) font-bold font-mono text-lg"
+                        class="block pb-(--space-md) px-(--space-md) font-mono text-lg"
                         data-placeholder
                     >
-                        {formatPrice(product.data.priceCents)}
+                        {formatPrice(priceCents)}
                     </span>
                 </a>
             </li>
@@ -154,25 +163,16 @@ const cards = products.map((product) => {
 </section>
 
 <style>
+    .product-card:not(.hidden) {
+        padding-bottom: var(--space-2xl);
+    }
+
     .product-card:not(.hidden),
     .product-card__link {
         display: grid;
         grid-row: span 3;
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
-    }
-
-    .product-card:not(.hidden) {
-        padding-bottom: var(--space-2xl);
-    }
-
-    .product-card__link[aria-disabled='true'] .product-card__photo {
-        filter: grayscale(1);
-    }
-
-    .product-card__link[aria-disabled='true'] .product-card__photo.is-current,
-    .product-card__link[aria-disabled='true'] .product-card__variations {
-        opacity: 0.65;
     }
 
     .product-card__photo {
@@ -192,7 +192,6 @@ const cards = products.map((product) => {
     .store__grid {
         column-gap: var(--space-lg);
         display: grid;
-        grid-auto-rows: auto;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         margin-bottom: calc(-1 * var(--space-2xl));
         row-gap: 0;
@@ -221,7 +220,7 @@ const cards = products.map((product) => {
     import { isValidationBypassed } from '@lib/ui/forms';
 
     const HOVER_QUERY = '(hover: hover)';
-    const SLIDESHOW_INTERVAL_MS = 1_000;
+    const SLIDESHOW_INTERVAL_MILLISECONDS = 1_000;
 
     let slideshowTimer: Timer | undefined;
 
@@ -244,12 +243,16 @@ const cards = products.map((product) => {
         if (!window.matchMedia(HOVER_QUERY).matches || window.matchMedia(REDUCED_MOTION_QUERY).matches) return;
 
         clearInterval(slideshowTimer);
-        slideshowTimer = setInterval(() => advanceSlideshow(frame), SLIDESHOW_INTERVAL_MS);
+        slideshowTimer = setInterval(() => advanceSlideshow(frame), SLIDESHOW_INTERVAL_MILLISECONDS);
     }
 
     function handleLinkLeave(frame: HTMLElement) {
         clearInterval(slideshowTimer);
-        resetSlideshow(frame);
+
+        frame.querySelectorAll<HTMLElement>('.product-card__photo').forEach((photo) => {
+            photo.classList.toggle('is-current', photo.dataset.productPhoto === 'base');
+        });
+
         slideshowTimer = undefined;
     }
 
@@ -260,13 +263,16 @@ const cards = products.map((product) => {
         if (!buttons.length || !cards.length) return;
 
         initFilterGroup({
-            buttons,
             cards,
-            dataKey: 'category',
-            initial: 'all',
-            matches: (card, category) => category === 'all' || card.dataset.category === category,
+            filters: [
+                {
+                    buttons,
+                    dataKey: 'category',
+                    matches: (card, active) => active.has(card.dataset.category ?? ''),
+                },
+            ],
             signal,
-            status: (shown, total, category) => (category === 'all' ? `Showing all ${total} products.` : `Showing ${shown} of ${total} products.`),
+            status: (shown, total, isFiltered) => (isFiltered ? `Showing ${shown} of ${total} products` : `Showing all ${total} products`),
             statusElement: document.querySelector<HTMLElement>('[data-store-status]'),
         });
 
@@ -281,12 +287,6 @@ const cards = products.map((product) => {
 
             link.addEventListener('pointerenter', () => handleLinkEnter(frame), { signal });
             link.addEventListener('pointerleave', () => handleLinkLeave(frame), { signal });
-        });
-    }
-
-    function resetSlideshow(frame: HTMLElement) {
-        frame.querySelectorAll<HTMLElement>('.product-card__photo').forEach((photo, index) => {
-            photo.classList.toggle('is-current', index === 0);
         });
     }
 

@@ -1,0 +1,51 @@
+---
+import { Image } from 'astro:assets';
+
+import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
+import { getInitials } from '@lib/shared/utils';
+
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+    class?: string;
+    color: string;
+    labelClass: string;
+    labelColor: string;
+    name: string;
+    producerId: string;
+}
+
+const PORTRAIT_SIZES = '(max-width: 768px) calc(92.5vw - 16px), (max-width: 1024px) calc(46vw - 20px), 362px';
+const PORTRAIT_WIDTH = 500;
+
+const { class: tileClass, color, labelClass, labelColor, name, producerId } = Astro.props;
+const portraits = import.meta.glob<{ default: ImageMetadata }>('/src/images/producers/*.webp', { eager: true });
+
+const portrait = portraits[`/src/images/producers/${producerId}.webp`]?.default;
+---
+
+{portrait
+    ? (
+            <div class:list={['overflow-hidden relative', tileClass]}>
+                <Image
+                    class="block object-cover h-full w-full"
+                    alt={`Portrait of ${name}`}
+                    sizes={PORTRAIT_SIZES}
+                    src={portrait}
+                    width={PORTRAIT_WIDTH}
+                    widths={[PORTRAIT_WIDTH, PORTRAIT_WIDTH * 2]}
+                />
+                <slot />
+            </div>
+        )
+    : (
+            <PlaceholderTile
+                class={tileClass}
+                color={color}
+                label={getInitials(name)}
+                labelClass={labelClass}
+                labelColor={labelColor}
+            >
+                <slot />
+            </PlaceholderTile>
+        )}

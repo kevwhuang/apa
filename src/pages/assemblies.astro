@@ -1,0 +1,22 @@
+---
+import AssemblyArchive from '@sections/assembly/Archive.astro';
+import AssemblyFeedback from '@sections/assembly/Feedback.astro';
+import AssemblyHero from '@sections/assembly/Hero.astro';
+import AssemblyNext from '@sections/assembly/Next.astro';
+import AssemblyUpcoming from '@sections/assembly/Upcoming.astro';
+import AssemblyWorkshop from '@sections/assembly/Workshop.astro';
+import Layout from '@/Layout.astro';
+import { brandTitle } from '@lib/shared/brand';
+---
+
+<Layout
+    description="Assembly is the Austin Producer Alliance's monthly evening for music producers at STATION Austin, with networking, demos, a workshop, and a mingle."
+    title={brandTitle('Assemblies')}
+>
+    <AssemblyHero />
+    <AssemblyNext />
+    <AssemblyWorkshop />
+    <AssemblyFeedback />
+    <AssemblyUpcoming />
+    <AssemblyArchive />
+</Layout>

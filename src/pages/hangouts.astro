@@ -1,0 +1,16 @@
+---
+import HangoutArchive from '@sections/hangout/Archive.astro';
+import HangoutHero from '@sections/hangout/Hero.astro';
+import HangoutUpcoming from '@sections/hangout/Upcoming.astro';
+import Layout from '@/Layout.astro';
+import { brandTitle } from '@lib/shared/brand';
+---
+
+<Layout
+    description="Hangout is the Austin Producer Alliance's monthly social for music producers on the fourth Tuesday, built around one-on-one track feedback. RSVP on meetup.com."
+    title={brandTitle('Hangouts')}
+>
+    <HangoutHero />
+    <HangoutUpcoming />
+    <HangoutArchive />
+</Layout>

@@ -5,8 +5,8 @@ interface PersistentStore<T> extends Store<T> {
 function createStore<T>(options: StoreOptions<T>): PersistentStore<T> {
     const { fallback, key, normalize, scope, topic } = options;
 
+    let isWritten = true;
     let memoryValue: T | undefined;
-    let written = true;
 
     function get(): T {
         if (scope === 'memory') return normalizeValue(memoryValue ?? fallback);
@@ -33,7 +33,7 @@ function createStore<T>(options: StoreOptions<T>): PersistentStore<T> {
     }
 
     function onChange(callback: (value: T) => void): () => void {
-        if (typeof window === 'undefined') return unsubscribed;
+        if (typeof window === 'undefined') return () => undefined;
 
         const handler = () => callback(get());
 
@@ -43,13 +43,12 @@ function createStore<T>(options: StoreOptions<T>): PersistentStore<T> {
     }
 
     function persisted(): boolean {
-        return written;
+        return isWritten;
     }
 
     function remove(): void {
         memoryValue = undefined;
-        written = scope === 'memory' || removeRaw(key, scope);
-
+        isWritten = scope === 'memory' || removeRaw(key, scope);
         notify(topic);
     }
 
@@ -58,9 +57,9 @@ function createStore<T>(options: StoreOptions<T>): PersistentStore<T> {
 
         if (scope === 'memory') {
             memoryValue = next;
-            written = true;
+            isWritten = true;
         } else {
-            written = writeRaw(key, scope, JSON.stringify(next));
+            isWritten = writeRaw(key, scope, JSON.stringify(next));
         }
 
         notify(topic);
@@ -75,17 +74,17 @@ function createStore<T>(options: StoreOptions<T>): PersistentStore<T> {
     return { get, onChange, persisted, remove, set, update };
 }
 
-function getStorage(scope: StorageScope): Storage | null {
+function getStorage(scope: StorageScope) {
     return scope === 'local' && typeof localStorage !== 'undefined' ? localStorage : null;
 }
 
-function notify(topic: string): void {
+function notify(topic: string) {
     if (typeof window === 'undefined') return;
 
     window.dispatchEvent(new Event(topic));
 }
 
-function readRaw(key: string, scope: StorageScope): string | null {
+function readRaw(key: string, scope: StorageScope) {
     const storage = getStorage(scope);
 
     if (!storage) return null;
@@ -97,7 +96,7 @@ function readRaw(key: string, scope: StorageScope): string | null {
     }
 }
 
-function removeRaw(key: string, scope: StorageScope): boolean {
+function removeRaw(key: string, scope: StorageScope) {
     const storage = getStorage(scope);
 
     if (!storage) return false;
@@ -111,11 +110,7 @@ function removeRaw(key: string, scope: StorageScope): boolean {
     }
 }
 
-function unsubscribed(): void {
-    return undefined;
-}
-
-function writeRaw(key: string, scope: StorageScope, raw: string): boolean {
+function writeRaw(key: string, scope: StorageScope, raw: string) {
     const storage = getStorage(scope);
 
     if (!storage) return false;

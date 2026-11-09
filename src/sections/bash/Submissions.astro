@@ -1,10 +1,12 @@
 ---
 import IconUpload from '@components/icons/Upload.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { UPLOAD, UPLOAD_EXTENSIONS_LABEL } from '@lib/shared/constants';
-import { formatBytes, getProgram } from '@lib/shared/utils';
+import { BOARD_PAGE_SIZE } from '@lib/programs/submissions';
+import { UPLOAD } from '@lib/shared/constants';
+import { UPLOAD_EXTENSIONS_OR_LIST } from '@lib/audio/uploads';
+import { formatBytes } from '@lib/shared/utils';
 
-const program = getProgram('bash');
+const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
 ---
 
 <section
@@ -14,33 +16,17 @@ const program = getProgram('bash');
     <div>
         <SectionHead
             class="text-4xl text-balance"
-            eyebrow={`${program.shortName} submissions`}
             headingId="submissions-title"
         >
             Submit your track
         </SectionHead>
-        <div class="grid grid-cols-1 gap-12 mb-(--space-2xl) md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-            <div
-                class="flex flex-col gap-4"
-                data-motion-stagger="blur"
-            >
-                <p class="text-base text-text-secondary">
-                    Bounce what you made on the clock and drop it here.
-                </p>
-                <p
-                    class="text-text-secondary"
-                    data-placeholder
-                >
-                    Five minutes of stereo WAV runs close to the {formatBytes(UPLOAD.maxFileBytes)} ceiling,
-                    so bounce to FLAC if yours is bigger.
-                </p>
-            </div>
-            <div
-                class="flex flex-col gap-5"
-                data-motion="unfold"
-            >
+        <div
+            class="flex flex-col gap-(--space-2xl) mb-(--space-2xl)"
+            data-motion="unfold"
+        >
+            <div class="slab slab--card slab--still flex flex-col gap-3">
                 <label
-                    class="dropzone slab slab--card flex flex-col items-center justify-center gap-3 text-center"
+                    class="dropzone halftone flex flex-col items-center justify-center relative min-h-[220px] gap-3 p-(--space-lg) border-2 border-border-strong border-dashed text-center bg-bg-page"
                     data-dropzone
                     for="submissions-input"
                 >
@@ -62,26 +48,25 @@ const program = getProgram('bash');
                 </label>
                 <p
                     id="submissions-help"
-                    class="text-sm text-text-secondary"
+                    class="text-base text-text-secondary"
                     data-placeholder
                 >
-                    {UPLOAD_EXTENSIONS_LABEL}. Up to {formatBytes(UPLOAD.maxFileBytes)} each, {UPLOAD.maxFiles} files,{' '}
-                    {formatBytes(UPLOAD.maxTotalBytes)} in total.
+                    {UPLOAD_EXTENSIONS_OR_LIST} only. Up to {formatBytes(UPLOAD.maxFileBytes)} each.
                 </p>
-                <ul
-                    class="empty:hidden flex flex-col gap-(--space-sm) list-none"
-                    aria-label="Selected files"
-                    data-dropzone-list
-                />
-                <p
-                    class="sr-only"
-                    aria-live="polite"
-                    data-dropzone-status
-                />
             </div>
+            <ul
+                class="empty:hidden flex flex-col gap-(--space-2xl) list-none"
+                aria-label="Selected files"
+                data-dropzone-list
+            />
+            <p
+                class="sr-only"
+                aria-live="polite"
+                data-dropzone-status
+            />
         </div>
         <div>
-            <div class="flex flex-wrap items-baseline justify-between gap-3 mb-3">
+            <div class="flex flex-wrap items-baseline justify-between gap-3 mb-6">
                 <h3
                     class="text-2xl"
                     data-motion="rise"
@@ -97,50 +82,43 @@ const program = getProgram('bash');
                     <span data-board-refresh-text />
                 </p>
             </div>
-            <p
-                class="max-w-2xl mb-6 text-text-secondary"
-                data-motion="rise"
-            >
-                Every track turned in across past editions, oldest first &mdash; the running
-                record of afternoons spent on the clock.
-            </p>
             <div
                 class="overflow-x-auto mb-5"
-                data-motion="rise"
+                data-motion="unfold"
             >
                 <table
-                    class="board__table border-2 border-border-strong"
+                    class="board__table table-fixed border-2 border-border-strong"
                     data-placeholder
                 >
-                    <caption class="sr-only">Tracks submitted at past Bash editions</caption>
+                    <caption class="sr-only">Tracks submitted at the last Bash</caption>
+                    <colgroup>
+                        <col class="w-16 max-md:w-10" />
+                        <col class="w-80 max-lg:w-64 max-md:w-auto" />
+                        <col class="max-md:hidden" />
+                        <col class="w-32 max-md:w-24" />
+                    </colgroup>
                     <thead>
-                        <tr class="border-b-2 border-border-strong font-bold font-mono text-xs tracking-[0.06em] uppercase text-text-secondary">
+                        <tr class="label border-b-2 border-border-strong text-text-secondary">
                             <th
-                                class="px-4 py-3 text-left"
+                                class="px-4 py-3 text-left max-md:px-2"
                                 scope="col"
                             >
                                 #
                             </th>
                             <th
-                                class="px-4 py-3 text-left"
+                                class="px-4 py-3 text-left max-md:px-2"
                                 scope="col"
                             >
                                 Producer
                             </th>
                             <th
-                                class="px-4 py-3 text-left"
+                                class="px-4 py-3 text-left max-md:hidden"
                                 scope="col"
                             >
                                 Track
                             </th>
                             <th
-                                class="px-4 py-3 text-left"
-                                scope="col"
-                            >
-                                Edition
-                            </th>
-                            <th
-                                class="px-4 py-3 text-left"
+                                class="px-4 py-3 text-right max-md:px-2"
                                 scope="col"
                             >
                                 Submitted
@@ -148,13 +126,13 @@ const program = getProgram('bash');
                         </tr>
                     </thead>
                     <tbody
-                        class="divide-y divide-border-strong"
+                        class="divide-border-strong divide-y"
                         data-board-body
                     >
-                        <tr>
+                        <tr class="h-14 max-md:h-18">
                             <td
-                                class="px-4 py-4 font-mono text-xs uppercase text-text-secondary"
-                                colspan="5"
+                                class="label px-4 text-text-secondary max-md:px-2"
+                                colspan="4"
                             >
                                 <span class="flex items-center gap-2">
                                     <span class="spinner" aria-hidden="true" />
@@ -162,24 +140,34 @@ const program = getProgram('bash');
                                 </span>
                             </td>
                         </tr>
+                        {fillerRows.map(() => (
+                            <tr
+                                class="h-14 max-md:h-18"
+                                aria-hidden="true"
+                            >
+                                <td colspan="4" />
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>
-            <nav
-                class="flex flex-wrap gap-2 mb-4"
-                aria-label="Submission board pages"
-                data-board-pager
-            />
-            <p
-                class="label text-text-secondary"
-                aria-live="polite"
-                data-board-status
-                data-motion="stamp"
-            />
+            <div class="flex flex-wrap items-center justify-between gap-x-(--space-md) gap-y-3">
+                <nav
+                    class="flex flex-wrap gap-2"
+                    aria-label="Submission board pages"
+                    data-board-pager
+                />
+                <p
+                    class="label text-text-secondary"
+                    aria-live="polite"
+                    data-board-status
+                    data-motion="stamp"
+                />
+            </div>
         </div>
     </div>
     <template data-dropzone-row>
-        <li class="slab slab--card flex flex-col gap-3">
+        <li class="slab slab--card slab--still flex flex-col gap-3">
             <div class="flex flex-wrap items-baseline justify-between gap-3">
                 <p
                     class="font-bold font-sans wrap-anywhere"
@@ -199,13 +187,13 @@ const program = getProgram('bash');
                 width="640"
             />
             <p
-                class="action-text text-error-text"
+                class="text-error-text"
                 data-row-error
                 hidden
             />
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <progress
-                    class="flex-[1_1_140px] h-3 min-w-0 accent-native-accent"
+                    class="progress flex-[1_1_140px] h-3 min-w-0"
                     data-row-progress
                     max="100"
                     value="0"
@@ -215,7 +203,7 @@ const program = getProgram('bash');
                     data-row-percent
                 />
                 <button
-                    class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-colors"
+                    class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-[color,transform]"
                     data-row-cancel
                     type="button"
                 >
@@ -225,95 +213,61 @@ const program = getProgram('bash');
         </li>
     </template>
     <template data-board-row>
-        <tr>
+        <tr class="h-14 max-md:h-18">
             <td
-                class="px-4 py-3 font-mono text-xs text-text-secondary"
+                class="px-4 font-mono text-base text-text-secondary max-md:px-2"
                 data-cell-index
             />
+            <td class="px-4 max-md:px-2">
+                <span
+                    class="block font-bold font-sans truncate"
+                    data-cell-producer
+                />
+                <span
+                    class="hidden font-mono text-base truncate text-text-secondary max-md:block"
+                    data-cell-file
+                />
+            </td>
             <td
-                class="px-4 py-3 font-bold font-sans"
-                data-cell-producer
+                class="px-4 font-mono text-base truncate max-md:hidden"
+                data-cell-file
             />
             <td
-                class="px-4 py-3"
-                data-cell-title
-            />
-            <td
-                class="px-4 py-3 font-mono text-xs whitespace-nowrap text-text-secondary"
-                data-cell-edition
-            />
-            <td
-                class="px-4 py-3 font-mono text-xs whitespace-nowrap text-text-secondary"
+                class="px-4 font-mono text-right text-sm whitespace-nowrap text-text-secondary max-md:px-2"
                 data-cell-submitted
             />
         </tr>
     </template>
+    <template data-board-filler>
+        <tr
+            class="h-14 max-md:h-18"
+            aria-hidden="true"
+        >
+            <td />
+            <td />
+            <td class="max-md:hidden" />
+            <td />
+        </tr>
+    </template>
     <template data-board-page>
         <button
-            class="chip active:bg-bg-inverse active:text-text-inverse hover:bg-bg-inverse hover:text-text-inverse min-w-(--control-size)"
+            class="chip hover:bg-bg-hover min-w-(--control-size)"
             type="button"
         />
     </template>
 </section>
 
-<style>
-    .board__table {
-        display: table;
-        overflow-x: visible;
-        width: 100%;
-    }
-
-    .dropzone {
-        --slab-fill: var(--color-bg-sunken);
-        background-image: repeating-linear-gradient(135deg, var(--color-border-subtle) 0 6px, transparent 6px 12px);
-        border-style: dashed;
-        min-height: 220px;
-        padding: var(--space-2xl);
-        position: relative;
-        transition:
-            background var(--duration-fast) var(--motion-ease-ui),
-            border-color var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .dropzone:active {
-        --slab-fill: var(--color-bg-raised);
-        border-color: var(--color-border-selected);
-    }
-
-    .dropzone:has(.dropzone__input:focus-visible) {
-        border-color: var(--color-border-selected);
-        border-style: solid;
-    }
-
-    .dropzone:hover {
-        border-color: var(--color-border-selected);
-    }
-
-    .dropzone.is-dragging {
-        --slab-fill: var(--color-bg-raised);
-        border-color: var(--color-border-selected);
-        border-style: solid;
-    }
-
-    .dropzone__input {
-        clip-path: inset(50%);
-        height: 100%;
-        inset: 0;
-        margin: 0;
-        width: 100%;
-    }
-</style>
-
 <script>
-    import { BASH_SUBMISSIONS } from '@lib/programs/submissions';
-    import { MOCK_LATENCY_MS, STORAGE } from '@lib/shared/constants';
+    import { BASH_SUBMISSIONS, BOARD_PAGE_SIZE } from '@lib/programs/submissions';
+    import { MOCK_LATENCY_MILLISECONDS, STORAGE } from '@lib/shared/constants';
     import { createDropzone } from '@lib/audio/dropzone';
     import { createStore } from '@lib/shared/state';
-    import { delay, formatDateStamp, formatTime, registerPageScript, rovingFocus, setHidden, setText } from '@lib/shared/utils';
+    import { delay, formatEntry, formatTime, initRovingFocus, registerPageScript, setHidden, setText } from '@lib/shared/utils';
 
     interface BoardElements {
         body: HTMLElement;
         chipTemplate: HTMLTemplateElement;
+        fillerTemplate: HTMLTemplateElement;
         pager: HTMLElement;
         refresh: HTMLElement;
         refreshText: HTMLElement;
@@ -321,24 +275,19 @@ const program = getProgram('bash');
         status: HTMLElement;
     }
 
-    const PAGE_SIZE = 10;
-
     const board = createStore<BashSubmission[]>({
         fallback: [],
         key: STORAGE.bashBoard.key,
-        normalize: value => (Array.isArray(value) ? value.toSorted(bySubmittedAt) : []),
+        normalize: value => (Array.isArray(value) ? value.toSorted((a, b) => +new Date(a.submittedAt) - +new Date(b.submittedAt)) : []),
         scope: STORAGE.bashBoard.scope,
         topic: STORAGE.bashBoard.topic,
     });
 
-    function bySubmittedAt(a: BashSubmission, b: BashSubmission) {
-        return +new Date(a.submittedAt) - +new Date(b.submittedAt);
-    }
-
-    function formatStamp(iso: string) {
-        const date = new Date(iso);
-
-        return `${formatDateStamp(date)} \u00b7 ${formatTime(date)}`;
+    function fillCells(row: HTMLElement, selector: string, value: string) {
+        row.querySelectorAll<HTMLElement>(selector).forEach((cell) => {
+            cell.textContent = value;
+            cell.title = value;
+        });
     }
 
     function initBashSubmissions(signal: AbortSignal) {
@@ -348,19 +297,20 @@ const program = getProgram('bash');
     function initSubmissionBoard(signal: AbortSignal) {
         const body = document.querySelector<HTMLElement>('[data-board-body]');
         const chipTemplate = document.querySelector<HTMLTemplateElement>('[data-board-page]');
+        const fillerTemplate = document.querySelector<HTMLTemplateElement>('[data-board-filler]');
         const pager = document.querySelector<HTMLElement>('[data-board-pager]');
         const refresh = document.querySelector<HTMLElement>('[data-board-refresh]');
         const refreshText = document.querySelector<HTMLElement>('[data-board-refresh-text]');
         const rowTemplate = document.querySelector<HTMLTemplateElement>('[data-board-row]');
         const status = document.querySelector<HTMLElement>('[data-board-status]');
 
-        if (!body || !chipTemplate || !pager || !refresh || !refreshText || !rowTemplate || !status) return;
+        if (!body || !chipTemplate || !fillerTemplate || !pager || !refresh || !refreshText || !rowTemplate || !status) return;
 
-        startBoard({ body, chipTemplate, pager, refresh, refreshText, rowTemplate, status }, signal);
+        startBoard({ body, chipTemplate, fillerTemplate, pager, refresh, refreshText, rowTemplate, status }, signal);
     }
 
     function startBoard(elements: BoardElements, signal: AbortSignal) {
-        const { body, chipTemplate, pager, refresh, refreshText, rowTemplate, status } = elements;
+        const { body, chipTemplate, fillerTemplate, pager, refresh, refreshText, rowTemplate, status } = elements;
 
         let page = 1;
         let rows = board.get();
@@ -368,7 +318,7 @@ const program = getProgram('bash');
         function buildPager() {
             pager.replaceChildren();
 
-            for (let index = 1; index <= pageCount(); index += 1) {
+            for (let index = 1; index <= getPageCount(); index += 1) {
                 const fragment = chipTemplate.content.cloneNode(true) as DocumentFragment;
 
                 const chip = fragment.querySelector('button');
@@ -381,15 +331,15 @@ const program = getProgram('bash');
                 pager.append(fragment);
             }
 
-            rovingFocus(pager.querySelectorAll('button'), signal);
+            initRovingFocus(pager.querySelectorAll('button'), signal);
         }
 
-        function pageCount() {
-            return Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+        function getPageCount() {
+            return Math.max(1, Math.ceil(rows.length / BOARD_PAGE_SIZE));
         }
 
         function render() {
-            if (pager.querySelectorAll('button').length !== pageCount()) buildPager();
+            if (pager.querySelectorAll('button').length !== getPageCount()) buildPager();
 
             renderRows();
             updatePager();
@@ -397,11 +347,13 @@ const program = getProgram('bash');
         }
 
         function renderRows() {
-            const start = (page - 1) * PAGE_SIZE;
+            const start = (page - 1) * BOARD_PAGE_SIZE;
+
+            const visible = rows.slice(start, start + BOARD_PAGE_SIZE);
 
             body.replaceChildren();
 
-            rows.slice(start, start + PAGE_SIZE).forEach((entry, index) => {
+            visible.forEach((entry, index) => {
                 const fragment = rowTemplate.content.cloneNode(true) as DocumentFragment;
 
                 const row = fragment.querySelector('tr');
@@ -411,24 +363,26 @@ const program = getProgram('bash');
                 const stamp = document.createElement('time');
 
                 stamp.dateTime = entry.submittedAt;
-                stamp.textContent = formatStamp(entry.submittedAt);
-
-                setText(row.querySelector('[data-cell-edition]'), entry.edition);
-                setText(row.querySelector('[data-cell-index]'), String(start + index + 1).padStart(2, '0'));
-                setText(row.querySelector('[data-cell-producer]'), entry.producer);
-                setText(row.querySelector('[data-cell-title]'), entry.title);
+                stamp.textContent = formatTime(new Date(entry.submittedAt));
+                fillCells(row, '[data-cell-file]', entry.file);
+                setText(row.querySelector('[data-cell-index]'), formatEntry(start + index + 1));
+                fillCells(row, '[data-cell-producer]', entry.producer);
                 row.querySelector('[data-cell-submitted]')?.append(stamp);
                 body.append(fragment);
             });
+
+            for (let index = visible.length; index < BOARD_PAGE_SIZE; index += 1) {
+                body.append(fillerTemplate.content.cloneNode(true));
+            }
         }
 
         async function revalidate() {
-            await delay(MOCK_LATENCY_MS);
+            await delay(MOCK_LATENCY_MILLISECONDS);
 
             if (signal.aborted) return;
 
             rows = board.set([...BASH_SUBMISSIONS]);
-            page = Math.min(page, pageCount());
+            page = Math.min(page, getPageCount());
             render();
             setRefresh('');
         }
@@ -449,20 +403,20 @@ const program = getProgram('bash');
 
         function updatePager() {
             pager.querySelectorAll('button').forEach((chip, index) => {
-                const on = index + 1 === page;
+                const isActive = index + 1 === page;
 
-                chip.classList.toggle('is-active', on);
+                chip.classList.toggle('is-active', isActive);
 
-                if (on) chip.setAttribute('aria-current', 'page');
+                if (isActive) chip.setAttribute('aria-current', 'page');
                 else chip.removeAttribute('aria-current');
             });
         }
 
         function updateStatus() {
-            const first = (page - 1) * PAGE_SIZE + 1;
-            const last = Math.min(rows.length, page * PAGE_SIZE);
+            const first = (page - 1) * BOARD_PAGE_SIZE + 1;
+            const last = Math.min(rows.length, page * BOARD_PAGE_SIZE);
 
-            setText(status, `Showing ${first}\u2013${last} of ${rows.length} \u00b7 Page ${page} of ${pageCount()}.`);
+            setText(status, `Showing ${first}\u2013${last} of ${rows.length}`);
         }
 
         if (rows.length > 0) render();

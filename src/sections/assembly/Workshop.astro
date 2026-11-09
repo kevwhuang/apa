@@ -6,19 +6,17 @@ import IconArrow from '@components/icons/Arrow.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import Schedule from '@components/program/Schedule.astro';
 import { PALETTE } from '@lib/shared/constants';
-import { formatMonth, formatMonthNumber, isUpcoming } from '@lib/shared/utils';
+import { getInitials, isUpcoming } from '@lib/shared/utils';
 
 import type { ImageMetadata } from 'astro';
 
-const CLASS_FILE_LINK = 'active:translate-y-px hover:text-link inline-block self-start py-(--space-sm) decoration-2 decoration-text-brand font-bold font-sans underline underline-offset-4 transition-[color,transform]';
-const INDEX_PAD = 2;
-const PORTRAIT_WIDTH = 360;
+const PORTRAIT_SIZES = '(max-width: 768px) calc(81.5vw - 78px), (max-width: 1024px) calc(35.7vw - 76px), 373px';
+const PORTRAIT_WIDTH = 500;
 
 const SESSION_EXTRAS = {
     files: [
-        { description: 'Every phrasing and beatmatching chart from the lab, annotated after the fact.', meta: 'PDF · 24 pages', title: 'Workshop slides' },
-        { description: 'The EQ, filter and loop moves from the demos, written out blend by blend.', meta: 'PDF · 6 sheets', title: 'Transition cue sheets' },
-        { description: 'Two tracks prepared to mix cleanly, split out for rehearsing each blend.', meta: 'ZIP · 210 MB', title: 'Practice stems' },
+        { description: 'Two tracks prepared to mix cleanly, split out for rehearsing each blend.', meta: 'ZIP \u00b7 210 MB', title: 'Practice Stems' },
+        { description: 'Every phrasing and beatmatching chart from the lab, annotated after the fact.', meta: 'PDF \u00b7 24 pages', title: 'Workshop Slides' },
     ],
     id: '2026_11_assembly_alt_slauson',
     role: 'Electronic music producer',
@@ -34,15 +32,11 @@ const sessions = events
 
 const cards = sessions.map((session, index) => ({
     bios: session.data.speakers.flatMap(({ bio }) => (bio ? [bio] : [])),
-    date: session.data.date.toISOString(),
     description: session.data.description,
     end: session.data.end.toISOString(),
     extras: session.id === SESSION_EXTRAS.id ? SESSION_EXTRAS : undefined,
-    headingId: index === 0 ? 'workshop-title' : `workshop-title-${index + 1}`,
-    monthName: formatMonth(session.data.date),
-    monthNumber: formatMonthNumber(session.data.date),
+    headingId: index === 0 ? 'workshop-title' : `workshop-${index + 1}-title`,
     portrait: portraits[`/src/images/speakers/${session.data.speakers[0].name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}.webp`]?.default,
-    portraitAlt: session.data.speakers[0].name,
     speaker: session.data.speaker ?? session.data.speakers.map(speaker => speaker.name).join(' & '),
     workshop: session.data.workshop,
 }));
@@ -58,30 +52,24 @@ const cards = sessions.map((session, index) => ({
         hidden={index > 0}
     >
         <div
-            class="slab slab--cut slab--roomy workshop"
+            class="slab slab--roomy workshop"
             data-motion="unfold"
         >
-            <div
-                class="mark slab slab--accent workshop__marker flex flex-wrap items-center justify-between gap-x-(--space-md) gap-y-(--space-sm) mb-(--space-lg)"
-                data-motion="stamp"
-            >
-                <p class="label inline-block px-2 py-1 bg-bg-inverse text-text-inverse">
-                    Next workshop
+            <hgroup>
+                <p
+                    class="mark slab workshop__marker mb-(--space-lg) font-mono text-4xl max-md:text-2xl"
+                    data-motion="stamp"
+                >
+                    Upcoming workshop
                 </p>
-                <p class="label font-bold">
-                    Workshop {card.monthNumber}
-                </p>
-                <p class="workshop__stamp font-bold font-mono leading-none text-4xl">
-                    <time datetime={card.date}>{card.monthName}</time>
-                </p>
-            </div>
-            <h2
-                id={card.headingId}
-                class="mb-(--space-lg) text-4xl text-balance md:text-5xl"
-            >
-                {card.workshop}
-            </h2>
-            <div class="grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+                <h2
+                    id={card.headingId}
+                    class="mb-(--space-lg) font-display text-5xl text-balance max-md:text-xl"
+                >
+                    {card.workshop}
+                </h2>
+            </hgroup>
+            <div class="grid grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-12 max-md:grid-cols-1">
                 <div class="flex flex-col self-start gap-(--space-md)">
                     <div class="slab slab--card">
                         <div
@@ -92,82 +80,73 @@ const cards = sessions.map((session, index) => ({
                                 ? (
                                         <Image
                                             class="slab slab--bare slab--card block aspect-square h-auto w-full"
-                                            alt={card.portraitAlt}
-                                            densities={[1, 2]}
+                                            alt="Portrait of the workshop presenter"
+                                            sizes={PORTRAIT_SIZES}
                                             src={card.portrait}
                                             width={PORTRAIT_WIDTH}
+                                            widths={[PORTRAIT_WIDTH, PORTRAIT_WIDTH * 2]}
                                         />
                                     )
                                 : (
                                         <PlaceholderTile
                                             class="slab slab--bare slab--card aspect-square"
-                                            color={PALETTE[0].bg}
-                                            label={card.monthNumber}
-                                            labelClass="leading-none text-8xl"
+                                            color={PALETTE[0].background}
+                                            label={getInitials(card.speaker)}
+                                            labelClass="leading-none text-6xl"
                                             labelColor={PALETTE[0].text}
                                         />
                                     )}
                         </div>
-                        <p class="label mb-2 text-link">Presented by</p>
+                        <p class="label mb-2 text-text-secondary">Presented by</p>
                         <p class:list={[card.extras ? 'mb-1' : 'mb-3', 'font-bold font-sans text-xl tracking-tight']}>
                             {card.speaker}
                         </p>
                         {card.extras && (
-                            <p class="mb-3 font-mono text-xs text-text-secondary">
+                            <p class="mb-3 font-mono text-base text-text-secondary">
                                 {card.extras.role}
                             </p>
                         )}
                         <div class="flex flex-col gap-3">
                             {card.bios.map(bio => (
-                                <p class="leading-relaxed text-sm text-text-secondary">{bio}</p>
+                                <p class="text-base text-text-secondary">{bio}</p>
                             ))}
                         </div>
                     </div>
                 </div>
                 <div>
                     {card.description && (
-                        <p class:list={[card.extras && 'mb-10', 'leading-relaxed text-lg text-text-secondary']}>
+                        <p class:list={[card.extras && 'mb-10', 'text-lg text-text-secondary']}>
                             {card.description}
                         </p>
                     )}
                     {card.extras && (
                         <div>
-                            <p class="label mb-2 text-text-secondary">Session files</p>
+                            <h3 class="mb-(--space-md) font-display text-2xl">Workshop files</h3>
                             <ul
                                 class="flex flex-col list-none"
                                 data-motion-stagger="rise"
                             >
-                                {card.extras.files.map((file, index) => (
-                                    <li class="workshop__row">
-                                        <p
-                                            class="label font-bold text-link"
-                                            aria-hidden="true"
-                                        >
-                                            {String(index + 1).padStart(INDEX_PAD, '0')}
-                                        </p>
-                                        <div class="flex flex-col gap-1">
-                                            <a
-                                                class={CLASS_FILE_LINK}
-                                                href="/resources"
-                                            >
-                                                {file.title}
-                                            </a>
-                                            <p class="text-sm text-text-secondary">{file.description}</p>
+                                {card.extras.files.map(file => (
+                                    <li class="workshop__row grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-(--space-sm) gap-y-(--space-3xs) py-(--space-xs) border-t border-t-border-subtle">
+                                        <div class="[grid-area:body] flex flex-col gap-1">
+                                            <p class="py-(--space-sm) font-mono">{file.title}</p>
+                                            <p class="text-base text-text-secondary">{file.description}</p>
                                         </div>
                                         <p
-                                            class="label workshop__meta text-text-secondary"
+                                            class="[grid-area:meta] font-mono text-base text-text-secondary"
                                             data-placeholder
                                         >
                                             {file.meta}
                                         </p>
+                                        <p class="label [grid-area:status] text-text-secondary">Coming soon</p>
                                     </li>
                                 ))}
                             </ul>
                             <a
-                                class="action-text hover:text-link inline-flex items-center gap-2 min-h-(--control-size) transition-colors"
+                                class="action-text hover:text-link inline-flex items-center min-h-(--control-size) gap-2 transition-[color,transform]"
                                 href="/resources"
                             >
-                                Everything lands in the resource library <IconArrow />
+                                Browse resources <IconArrow />
                             </a>
                         </div>
                     )}
@@ -187,23 +166,22 @@ const cards = sessions.map((session, index) => ({
     }
 
     .workshop__marker {
+        --slab-fill: var(--color-event-assembly);
         --slab-level: var(--z-ground);
         --slab-rule: 2px;
+        color: var(--color-event-assembly-text);
     }
 
     .workshop__plate {
-        --plate-drop: calc(var(--z-card) * var(--lift));
+        --plate-drop: var(--lift);
         padding-block-end: var(--plate-drop);
         padding-inline-end: var(--plate-drop);
     }
 
     .workshop__row {
-        align-items: baseline;
-        border-top: 1px solid var(--color-border-subtle);
-        display: grid;
-        gap: var(--space-2xs) var(--space-sm);
-        grid-template-columns: auto minmax(0, 1fr) auto;
-        padding-block: var(--space-xs);
+        grid-template-areas:
+            'body status'
+            'meta status';
     }
 
     .workshop__row:first-child {
@@ -211,19 +189,11 @@ const cards = sessions.map((session, index) => ({
         padding-top: 0;
     }
 
-    .workshop__stamp {
-        flex-basis: 100%;
-        rotate: calc(var(--tilt-unit) * -3);
-        transform-origin: 0 50%;
-    }
-
-    @media (max-width: 768px) {
-        .workshop__meta {
-            grid-column: 2;
-        }
-
+    @media (max-width: 1024px) {
         .workshop__row {
-            grid-template-columns: auto minmax(0, 1fr);
+            grid-template-areas:
+                'body body'
+                'meta status';
         }
     }
 </style>

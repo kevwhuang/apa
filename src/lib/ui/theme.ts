@@ -1,18 +1,14 @@
+import { BRAND_THEME_COLORS } from '@lib/shared/brand';
 import { STORAGE } from '@lib/shared/constants';
 import { createStore } from '@lib/shared/state';
 
 const DEFAULT_THEME: Theme = 'light';
 const META_SELECTOR = 'meta[name="theme-color"]';
 
-const THEME_COLORS: Record<Theme, string> = {
-    dark: '#171310',
-    light: '#f6f1e4',
-};
-
 const store = createStore<Theme | null>({
     fallback: null,
     key: STORAGE.theme.key,
-    normalize: normalizeTheme,
+    normalize: value => (value === 'dark' || value === 'light' ? value : null),
     scope: STORAGE.theme.scope,
     topic: STORAGE.theme.topic,
 });
@@ -21,21 +17,27 @@ function getTheme(): Theme {
     return store.get() ?? DEFAULT_THEME;
 }
 
-function normalizeTheme(value: Theme | null): Theme | null {
-    return value === 'dark' || value === 'light' ? value : null;
+function listThemeTransitions(runningAnimations: Set<Animation>) {
+    return document.getAnimations().filter(animation => !runningAnimations.has(animation)
+        && animation instanceof CSSTransition
+        && animation.playState !== 'finished');
 }
 
-function setTheme(theme: Theme): void {
-    stampTheme(theme);
-    store.set(theme);
+function settleThemeTransitions(runningAnimations: Set<Animation>) {
+    let transitions = listThemeTransitions(runningAnimations);
+
+    while (transitions.length) {
+        transitions.forEach(animation => animation.finish());
+        transitions = listThemeTransitions(runningAnimations);
+    }
 }
 
-function stampTheme(theme: Theme): void {
+function stampTheme(theme: Theme) {
     const meta = document.querySelector<HTMLMetaElement>(META_SELECTOR);
 
     document.documentElement.dataset.theme = theme;
 
-    if (meta) meta.content = THEME_COLORS[theme];
+    if (meta) meta.content = BRAND_THEME_COLORS[theme];
 }
 
 function syncThemeAttribute(): void {
@@ -46,10 +48,13 @@ function syncThemeAttribute(): void {
 
 function toggleTheme(): Theme {
     const next = getTheme() === 'dark' ? 'light' : 'dark';
+    const runningAnimations = new Set(document.getAnimations());
 
-    setTheme(next);
+    stampTheme(next);
+    store.set(next);
+    settleThemeTransitions(runningAnimations);
 
     return next;
 }
 
-export { getTheme, setTheme, syncThemeAttribute, toggleTheme };
+export { getTheme, syncThemeAttribute, toggleTheme };

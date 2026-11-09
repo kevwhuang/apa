@@ -9,10 +9,10 @@ interface Endpoint {
 }
 
 const ENDPOINTS: Endpoint[] = [
-    { blurb: 'Every Assembly and Bash date in one chronological list; Bash editions carry their edition, prompt, and recap.', path: '/api/events' },
-    { blurb: 'The full roster with genres, role, links, location, and spotlight tracks.', path: '/api/producers' },
+    { blurb: 'Every event date in one chronological list; Bash editions carry their edition, prompt, recap, sponsors, and winners.', path: '/api/events' },
+    { blurb: 'The full roster, ordered by six-digit string ID, with genres, role, links, location, and spotlight tracks.', path: '/api/producers' },
     { blurb: 'The asset library with formats, sizes, publication state, and unlock times.', path: '/api/resources' },
-    { blurb: 'The store catalog with numeric SKUs, variations, sizes, prices, and stock.', path: '/api/store' },
+    { blurb: 'The store catalog with five-digit string SKUs, variations and their prices, sizes, and stock.', path: '/api/store' },
 ];
 ---
 
@@ -22,19 +22,17 @@ const ENDPOINTS: Endpoint[] = [
 >
     <div class="flex flex-col gap-6">
         <PageHead
-            class="max-w-4xl text-5xl md:text-8xl"
-            eyebrow="Content API"
+            class="max-w-4xl text-7xl max-md:text-5xl"
             headingId="api-title"
         >
-            Read the data.
+            Read the data
         </PageHead>
         <p
             class="max-w-2xl text-lg text-text-secondary"
             data-motion="blur"
         >
-            Everything the site publishes &mdash; the calendar, the roster, the store catalog, and
-            the asset library &mdash; is readable as JSON. No keys, no writes: point a GET at an
-            endpoint and the current content comes back.
+            Everything the site publishes is readable as JSON: the calendar, the roster, the store
+            catalog, and the asset library. The API needs no key and answers GET requests only.
         </p>
     </div>
     <dl
@@ -53,15 +51,15 @@ const ENDPOINTS: Endpoint[] = [
         </div>
         <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
             <dt class="label mb-(--space-3xs) text-text-secondary">Methods</dt>
-            <dd class="font-mono text-sm">GET</dd>
+            <dd class="font-mono text-base">GET</dd>
         </div>
         <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
             <dt class="label mb-(--space-3xs) text-text-secondary">Format</dt>
-            <dd class="font-mono text-sm">JSON</dd>
+            <dd class="font-mono text-base">JSON</dd>
         </div>
         <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
             <dt class="label mb-(--space-3xs) text-text-secondary">Caching</dt>
-            <dd class="font-mono text-sm">no-store</dd>
+            <dd class="font-mono text-base">no-store</dd>
         </div>
     </dl>
 </section>
@@ -73,7 +71,6 @@ const ENDPOINTS: Endpoint[] = [
     <div>
         <SectionHead
             class="text-3xl"
-            eyebrow="API reference"
             headingId="endpoints-title"
         >
             Endpoints
@@ -85,7 +82,7 @@ const ENDPOINTS: Endpoint[] = [
             <table class="api__table border-2 border-border-strong">
                 <caption class="sr-only">API endpoints, the payload each returns, and a link to open each one</caption>
                 <thead>
-                    <tr class="border-b-2 border-border-strong font-bold font-mono text-xs tracking-[0.06em] uppercase text-text-secondary">
+                    <tr class="label border-b-2 border-border-strong text-text-secondary">
                         <th
                             class="px-4 py-3 text-left"
                             scope="col"
@@ -106,20 +103,21 @@ const ENDPOINTS: Endpoint[] = [
                         </th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-border-strong">
+                <tbody class="divide-border-strong divide-y">
                     {ENDPOINTS.map(endpoint => (
-                        <tr class="hover:bg-bg-hover transition-colors">
+                        <tr>
                             <th
-                                class="px-4 py-4 text-left whitespace-nowrap"
+                                class="px-4 py-4 font-normal text-left whitespace-nowrap"
                                 scope="row"
                             >
                                 <span class="label mr-2 px-2 py-1 bg-bg-inverse text-text-inverse">GET</span>
-                                <code class="font-bold font-mono text-sm">{endpoint.path}</code>
+                                <code class="font-bold font-mono text-base">{endpoint.path}</code>
                             </th>
-                            <td class="min-w-[320px] px-4 py-4 leading-relaxed text-sm text-text-secondary">{endpoint.blurb}</td>
+                            <td class="min-w-[320px] px-4 py-4 text-base text-text-secondary">{endpoint.blurb}</td>
                             <td class="px-4 py-4 text-right">
                                 <a
-                                    class="action-text api__open inline-flex items-center min-h-(--control-size) gap-(--space-2xs) transition-[color,transform]"
+                                    class="action-text api__open inline-flex items-center min-h-(--control-size) gap-2 transition-[color,transform]"
+                                    aria-label={`Open ${endpoint.path}`}
                                     href={endpoint.path}
                                 >
                                     Open <IconArrow />
@@ -146,10 +144,6 @@ const ENDPOINTS: Endpoint[] = [
         display: grid;
         gap: 2px;
         grid-template-columns: minmax(200px, 0.62fr) repeat(3, minmax(0, 1fr));
-    }
-
-    .api__open:active {
-        transform: translateY(1px);
     }
 
     .api__table {

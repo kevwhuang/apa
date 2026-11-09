@@ -1,4 +1,4 @@
-import { MOCK_LATENCY_MS, STORAGE } from '@lib/shared/constants';
+import { MOCK_LATENCY_MILLISECONDS, STORAGE } from '@lib/shared/constants';
 import { createStore } from '@lib/shared/state';
 import { delay } from '@lib/shared/utils';
 import { getSession } from '@lib/account/session';
@@ -11,7 +11,7 @@ const CHAT_REPLIES = [
 ];
 
 const FALLBACK: ChatState = { messages: [], open: false };
-const ONLINE_WINDOW_MS = 900_000;
+const ONLINE_WINDOW_MILLISECONDS = 900_000;
 
 const ROOM_MEMBERS = [
     { line: 'Anyone got stems to trade this week? I have a beat that needs a second pair of hands on it.', name: 'Devon Park' },
@@ -19,7 +19,7 @@ const ROOM_MEMBERS = [
     { line: 'I have a session booked Thursday and a spare pair of ears going. Open invite to the room.', name: 'June Castillo' },
 ] as const;
 
-const SEED_OFFSETS_MS = [780_000, 540_000, 240_000];
+const SEED_OFFSETS_MILLISECONDS = [780_000, 540_000, 240_000];
 const SELF_NAME = 'You';
 
 const store = createStore<ChatState>({
@@ -42,8 +42,8 @@ function getMessages(): ChatMessage[] {
     return store.get().messages;
 }
 
-function getOnlineCount(nowMs: number): number {
-    const cutoff = nowMs - ONLINE_WINDOW_MS;
+function getOnlineCount(now: number): number {
+    const cutoff = now - ONLINE_WINDOW_MILLISECONDS;
     const names = new Set<string>();
 
     for (const message of store.get().messages) {
@@ -90,7 +90,7 @@ function seedRoom(): void {
             body: member.line,
             name: member.name,
             self: false,
-            sentAt: now - SEED_OFFSETS_MS[index],
+            sentAt: now - SEED_OFFSETS_MILLISECONDS[index],
         })),
     });
 }
@@ -106,7 +106,7 @@ async function sendChatMessage(body: string): Promise<ChatMessage | null> {
 
     const turn = getMessages().filter(message => message.self).length - 1;
 
-    await delay(MOCK_LATENCY_MS);
+    await delay(MOCK_LATENCY_MILLISECONDS);
 
     const reply: ChatMessage = {
         body: CHAT_REPLIES[turn % CHAT_REPLIES.length],

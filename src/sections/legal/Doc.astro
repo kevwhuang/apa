@@ -2,56 +2,64 @@
 import { LINKS, SESSION_TTL_DAYS, SITE_UPDATED, STORAGE } from '@lib/shared/constants';
 import { formatDateStamp } from '@lib/shared/utils';
 
+type Inline =
+    | { attributes: Record<string, string>; kind: 'link'; label: string }
+    | { code: string; kind: 'code' }
+    | { kind: 'text'; text: string };
+
 interface Props {
     kind: 'privacy' | 'terms';
 }
+
+const ATTRIBUTE_PATTERN = /([a-z]+)="([^"]*)"/g;
+const INLINE_PATTERN = /<a ([^>]+)>(.*?)<\/a>|<code>(.*?)<\/code>/g;
 
 const SECTIONS: Record<Props['kind'], { body: string[]; heading: string }[]> = {
     privacy: [
         {
             body: [
-                'Nothing, on our side. This site has no database, and the only code it runs on a server serves a read-only content <a href="/api">API</a> and its error page. Every interactive surface \u2014 the contact and newsletter forms, the event check-in, the sign-in, onboarding, and settings, the store checkout, the member chat, the track-feedback and Bash uploaders, the rack, the admin console, the AI assistant \u2014 is a demonstration that runs entirely in your browser. Submitting them sends nothing anywhere. The <a href="/terms">terms of service</a> describe how the demonstrations behave; this page covers the little they keep, all of it on your device.',
+                'Nothing, on our side. This site has no database, and the only code it runs on a server serves a read-only content <a href="/api">API</a> and its error page. Every interactive surface is a demonstration that runs entirely in your browser: the contact and newsletter forms, the event check-in, the sign-in, onboarding, and settings, the store checkout, the member chat, the demo and Bash uploaders, the rack, the admin console, and the AI assistant. Submitting them sends nothing anywhere. The <a href="/terms">terms of service</a> describe how the demonstrations behave; this page covers the little they keep, all of it on your device.',
                 'The specifics people reasonably worry about. The contact form composes a message in your own mail app through a mailto link, and nothing is sent unless you press send there. Files handed to an uploader or the rack are read locally to draw waveforms and meters, then go nowhere; the one picture that stays is a portrait you choose for your profile, which is kept in your browser\'s own storage and listed below. Passwords are checked while the page is open and then dropped, never stored. Checkout checks only that the card details are the right shape and unexpired, charges nothing, and never keeps them; the receipt it saves holds the order number, the line items, the totals, a timestamp, and the email you entered. The AI assistant matches keywords against canned answers written into the page and makes no requests.',
             ],
             heading: 'What we collect',
         },
         {
             body: [
-                'A few features remember things between pages or visits, using your browser\'s built-in storage \u2014 twelve keys in all, every one of them in localStorage on your device and none transmitted to us or anyone else.',
-                `Seven of them: <code>${STORAGE.adminProds.key}</code>, Prods adjustments made in the admin console; <code>${STORAGE.cart.key}</code>, your demonstration cart; <code>apa.cart-seeded</code>, a marker that the cart was pre-filled once, so it does not refill after you empty it; <code>${STORAGE.newsletter.key}</code>, the address you gave the newsletter form, kept so it does not ask twice; <code>${STORAGE.profiles.key}</code>, the demo roster profile for each address that has signed in (artist name, the portrait image you chose, role, join date, onboarding state, and Prods balance); <code>${STORAGE.session.key}</code>, the demo sign-in session \u2014 email, artist name, portrait, role, join stamp, onboarding state, Prods balance, and an expiry stamp that retires it on its own after ${SESSION_TTL_DAYS} days; and <code>${STORAGE.theme.key}</code>, your theme choice.`,
+                'A few features remember things between pages or visits, using your browser\'s built-in storage: twelve keys in all, every one of them in localStorage on your device and none transmitted to us or anyone else.',
+                `Seven of them: <code>${STORAGE.adminProds.key}</code>, Prods adjustments made in the admin console; <code>${STORAGE.cart.key}</code>, your demonstration cart; <code>apa.cart-seeded</code>, a marker that the cart was pre-filled once, so it does not refill after you empty it; <code>${STORAGE.newsletter.key}</code>, the address you gave the newsletter form, kept so it does not ask twice; <code>${STORAGE.profiles.key}</code>, the demo roster profile for each address that has signed in (artist name, the portrait image you chose, role, join date, onboarding state, and Prods balance); <code>${STORAGE.session.key}</code>, the demo sign-in session (email, artist name, portrait, role, join stamp, onboarding state, Prods balance, and an expiry stamp that retires it on its own after ${SESSION_TTL_DAYS} days); and <code>${STORAGE.theme.key}</code>, your theme choice.`,
                 `The remaining five sit alongside them, and keep what they hold just the same: <code>${STORAGE.bashBoard.key}</code>, the sample Bash submission board; <code>${STORAGE.chat.key}</code>, the demo member chat, meaning its seeded producers and whatever you have typed back, plus whether the panel was open; <code>${STORAGE.onboardingDraft.key}</code>, an in-progress onboarding draft (artist name, portrait, email, location, genres, roles, and the step you reached); <code>${STORAGE.order.key}</code>, the receipt from your most recent demonstration checkout; and <code>${STORAGE.tour.key}</code>, a flag set when you choose the guided tour at the end of onboarding and cleared when the home page picks it up to start the tour.`,
-                'The rack, the track player, and the AI assistant keep their state in page memory only, so leaving the page ends it. The sign-in session is the one key that runs down a clock; every other key sits there until you clear it or a demonstration clears it for you \u2014 placing a demo order empties the cart on the spot. Clearing site data for this domain removes all twelve keys at once and ends the demo session with them, and signing out clears the session while leaving your profile in place on purpose.',
+                'The rack, the track player, and the AI assistant keep their state in page memory only, so leaving the page ends it. The sign-in session is the one key that runs down a clock; every other key sits there until you clear it or a demonstration clears it for you. Placing a demo order empties the cart on the spot. Clearing site data for this domain removes all twelve keys at once and ends the demo session with them, and signing out clears the session while leaving your profile in place on purpose.',
             ],
             heading: 'Data stored in your browser',
         },
         {
             body: [
-                'This site sets no cookies and runs no analytics \u2014 no tracking pixels, no ad networks, and no third-party scripts, fonts, or frames. Do Not Track and Global Privacy Control change nothing here because there is nothing to switch off; consider the signal honored on arrival.',
+                'This site sets no cookies and runs no analytics: no tracking pixels, no ad networks, and no third-party scripts, fonts, or frames. Do Not Track and Global Privacy Control change nothing here because there is nothing to switch off; consider the signal honored on arrival.',
             ],
             heading: 'Cookies & tracking',
         },
         {
             body: [
-                'The site is served by Netlify, which keeps standard server access logs \u2014 IP address, requested page, timestamp, browser \u2014 as part of operating its network. Those logs live with Netlify, not with us, and its <a href="https://netlify.com/privacy/" rel="noopener noreferrer" target="_blank">privacy policy</a> covers them.',
+                'The site is served by Netlify, which keeps standard server access logs (IP address, requested page, timestamp, browser) as part of operating its network. Those logs live with Netlify, not with us, and its <a href="https://netlify.com/privacy/" rel="noopener noreferrer" target="_blank">privacy policy</a> covers them.',
                 `The Alliance also organizes on <a href="${LINKS.instagram}" rel="noopener noreferrer" target="_blank">Instagram</a>, <a href="${LINKS.meetup}" rel="noopener noreferrer" target="_blank">Meetup</a>, <a href="${LINKS.discord}" rel="noopener noreferrer" target="_blank">Discord</a>, <a href="${LINKS.spotify}" rel="noopener noreferrer" target="_blank">Spotify</a>, <a href="${LINKS.soundcloud}" rel="noopener noreferrer" target="_blank">SoundCloud</a>, and <a href="${LINKS.linktree}" rel="noopener noreferrer" target="_blank">Linktree</a>. Following those links takes you off this site and onto each service's own terms and privacy practices.`,
             ],
             heading: 'Hosting & third parties',
         },
         {
             body: [
-                `Write to <a href="mailto:${LINKS.email}">${LINKS.email}</a> and we receive your address and whatever you chose to say. We use them to reply and for nothing else \u2014 no lists, no sharing, no automated processing. Mail sits in an ordinary mailbox; ask us to delete a thread and we will.`,
+                `Write to <a href="mailto:${LINKS.email}">${LINKS.email}</a> and we receive your address and whatever you chose to say. We use them to reply and for nothing else: no lists, no sharing, no automated processing. Mail sits in an ordinary mailbox; ask us to delete a thread and we delete it.`,
             ],
             heading: 'Email',
         },
         {
             body: [
-                'This site is not directed at children under 13, and nothing anyone enters here \u2014 child or adult \u2014 ever reaches us; what the demonstrations keep stays in your own browser. The <a href="/terms#eligibility">terms of service</a> draw the same line for membership. If you believe a child has emailed us personal information, write to us and we will delete it.',
+                'This site is not directed at children under 13, and nothing anyone enters here, child or adult, ever reaches us; what the demonstrations keep stays in your own browser. The <a href="/terms#eligibility">terms of service</a> draw the same line for membership. If you believe a child has emailed us personal information, write to us and we delete it.',
             ],
             heading: 'Children',
         },
         {
             body: [
-                'If the site gains real infrastructure \u2014 a live store, member accounts, a mailing list \u2014 this policy will be rewritten to say what changed before it ships. The date at the top marks the current version.',
+                'This policy describes the site as built: a demonstration with no live store, no server-side accounts, and no mailing list. The date at the top marks the current version.',
             ],
             heading: 'Changes to this policy',
         },
@@ -59,61 +67,61 @@ const SECTIONS: Record<Props['kind'], { body: string[]; heading: string }[]> = {
     terms: [
         {
             body: [
-                'You need to be 13 or older to use this site \u2014 the same floor our <a href="/privacy#children">privacy policy</a> draws \u2014 and membership starts at the same age. Venues set event ages: where a room is 18+ or 21+, the venue\'s rule holds over anything written here, so read the listing before you plan around it.',
+                'You need to be 13 or older to use this site (the same floor our <a href="/privacy#children">privacy policy</a> draws), and membership starts at the same age. Venues set event ages: where a room is 18+ or 21+, the venue\'s rule holds over anything written here, so read the listing before you plan around it.',
             ],
             heading: 'Eligibility',
         },
         {
             body: [
                 'Membership is open to anyone making music in or around Austin. No dues, no auditions; it is personal and non-transferable. One standing rule travels with it: treat the room the way you want the scene to be. Harassment, discrimination, and gatekeeping have no home here, in person or in the Discord.',
-                'Leaving is simple \u2014 stop coming, leave the Discord, and you are no longer a member; there is no account to cancel. The other direction belongs to the organizers, who may warn, turn away, or remove anyone who makes the community worse, with no notice when the safety of the room is the reason, and whose call is final. Removal changes nothing about what you own: your tracks, samples, and name stay yours.',
+                'Leaving is simple: stop coming and leave the Discord, and you are no longer a member. The account on this site is a demonstration kept in your browser, and clearing site data removes it. The other direction belongs to the organizers, who may warn, turn away, or remove anyone who makes the community worse, with no notice when the safety of the room is the reason, and whose call is final. Removal changes nothing about what you own: your tracks, samples, and name stay yours.',
             ],
             heading: 'Membership & conduct',
         },
         {
             body: [
-                `Events happen in rooms our venue sponsors lend us, and attending means following the house rules of whichever space we are in. RSVPs run through <a href="${LINKS.meetup}" rel="noopener noreferrer" target="_blank">Meetup</a> and some rooms cap attendance \u2014 an RSVP is a plan, not a contract, but tell us if yours changes.`,
-                'Most events are photographed and some are filmed for recaps, and attending means consenting to that coverage. Tell an organizer at check-in and we will keep you out of frame; email us and a published photo of you comes down.',
+                `Events happen in rooms our venue sponsors lend us, and attending means following the house rules of whichever space we are in. RSVPs run through <a href="${LINKS.meetup}" rel="noopener noreferrer" target="_blank">Meetup</a> and some rooms cap attendance. An RSVP is a plan, not a contract, but tell us if yours changes.`,
+                'Most events are photographed and some are filmed for recaps, and attending means consenting to that coverage. Tell an organizer at check-in and we keep you out of frame; email us and a published photo of you comes down.',
             ],
             heading: 'Events & photography',
         },
         {
             body: [
-                'Feedback at an Assembly is opinion, offered producer to producer \u2014 not professional, legal, or A&R advice. Playing a work-in-progress for the room is not publication and gives nobody in it any rights, and recording someone else\'s unreleased work without asking is a conduct violation.',
-                'Submitting to the <a href="/bash">Bash</a> transfers no ownership. You grant only what the event needs: permission to play submissions at the Bash, to feature them in recaps, and to include them, with credit, in a community compilation. Submit only material you have the rights to share \u2014 uncleared work comes down, and the clearance stays your responsibility.',
-                'The uploaders and the member chat on this site are demonstrations: files and messages stay in your browser and reach no one, so bring your track with you on the night, and clear site data when you want the chat gone.',
+                'Feedback at an Assembly is opinion, offered producer to producer, not professional, legal, or A&R advice. Playing a work-in-progress for the room is not publication and gives nobody in it any rights, and recording someone else\'s unreleased work without asking is a conduct violation.',
+                'Submitting to the <a href="/bashes">Bash</a> transfers no ownership. You grant only what the event needs: permission to play submissions at the Bash, to feature them in recaps, and to include them, with credit, in a community compilation. Submit only material you have the rights to share. Uncleared work comes down, and the clearance stays your responsibility.',
+                'The uploaders and the member chat on this site are demonstrations: files and messages stay in your browser and reach no one. Clear site data when you want the chat gone.',
             ],
             heading: 'Your work',
         },
         {
             body: [
-                'The store is a demonstration. Checkout checks the card details for shape and expiry and nothing more, no payment is collected or processed, and no order placed today obligates anyone to anything. Your cart and receipt exist only in your browser \u2014 the <a href="/privacy#data-stored-in-your-browser">privacy policy</a> lists exactly where. These terms will be updated before any real money moves.',
-                'Prods are the Alliance\'s planned participation currency: once the program launches, members will earn them for showing up and contributing, and each will be worth $1.00 of credit toward items in our inventory, redeemed in person. The balances and redemptions shown on this site today are a demonstration. Prods are not money \u2014 no cash value, no buying, selling, or transferring \u2014 and the program may change or wind down as the Alliance evolves.',
+                'The store is a demonstration. Checkout checks the card details for shape and expiry and nothing more, no payment is collected or processed, and no order placed today obligates anyone to anything. Your cart and receipt exist only in your browser. The <a href="/privacy#data-stored-in-your-browser">privacy policy</a> lists exactly where. No real money moves through this site.',
+                'Prods are the Alliance\'s participation currency: members earn them for showing up and contributing, and each is worth $1.00 of credit toward any item in the store, applied at checkout. The balances and redemptions shown on this site today are a demonstration. Prods are not money: they have no cash value and cannot be bought, sold, or transferred, and the program can change or wind down as the Alliance evolves.',
             ],
             heading: 'Store & Prods',
         },
         {
             body: [
-                'Use the site as a visitor, not a target. Do not probe or disrupt it, harvest it for spam lists, impersonate the Alliance or its members, or present its demonstration surfaces to anyone as the real thing. The <a href="/rack">rack</a> does real work in your browser \u2014 load only audio you have the right to load, and watch your levels.',
+                'Use the site as a visitor, not a target. Do not probe or disrupt it, harvest it for spam lists, impersonate the Alliance or its members, or present its demonstration surfaces to anyone as the real thing. The <a href="/rack">rack</a> does real work in your browser. Load only audio you have the right to load, and watch your levels.',
             ],
             heading: 'Acceptable use',
         },
         {
             body: [
-                'The Alliance name, the tick mark, and the writing and design of this site belong to the Austin Producer Alliance. Press and partners are welcome to the brand assets in our <a href="/resources">resources library</a>; ask before reusing anything else. Producer work shown here belongs to the producers who made it, and nothing on this site grants you a license to any of it.',
+                'The Alliance name, the symbol, and the writing and design of this site belong to the Austin Producer Alliance. Press and partners are welcome to the brand assets in our <a href="/resources">resource library</a>; ask before reusing anything else. Producer work shown here belongs to the producers who made it, and nothing on this site grants you a license to any of it.',
             ],
             heading: 'Intellectual property',
         },
         {
             body: [
                 'This site and everything the Alliance runs are provided as-is by a volunteer community organization, without warranties of any kind. To the fullest extent the law allows, the Alliance and its organizers are not liable for indirect or consequential damages arising from the site or attendance at events; nothing here limits liability that cannot lawfully be limited.',
-                `Texas law governs these terms, and disputes belong in the state or federal courts of Travis County. If a court strikes part of these terms, the rest stands. These terms and the <a href="/privacy">privacy policy</a> are the entire agreement between you and the Alliance about this site and its events, and a term we do not enforce today stays enforceable tomorrow. Before any of that, write to <a href="mailto:${LINKS.email}">${LINKS.email}</a> \u2014 a volunteer organization and a filing fee are a poor match.`,
+                `Texas law governs these terms, and disputes belong in the state or federal courts of Travis County. If a court strikes part of these terms, the rest stands. These terms and the <a href="/privacy">privacy policy</a> are the entire agreement between you and the Alliance about this site and its events, and a term we do not enforce today stays enforceable tomorrow. Before any of that, write to <a href="mailto:${LINKS.email}">${LINKS.email}</a>. A volunteer organization and a filing fee are a poor match.`,
             ],
             heading: 'Liability & law',
         },
         {
             body: [
-                'These terms will grow as the Alliance does \u2014 a live store, the Prods rollout, and new programs will each land here before they launch. The date at the top marks the current version, and continuing to use the site or attend events after a change means the new terms apply.',
+                'These terms cover the site and the events as they run today. The date at the top marks the current version, and continuing to use the site or attend events after a change means the new terms apply.',
             ],
             heading: 'Changes to these terms',
         },
@@ -121,6 +129,7 @@ const SECTIONS: Record<Props['kind'], { body: string[]; heading: string }[]> = {
 };
 
 const { kind } = Astro.props;
+const updated = new Date(SITE_UPDATED);
 
 const crossLink = kind === 'privacy'
     ? { href: '/terms', label: 'terms of service' }
@@ -128,7 +137,28 @@ const crossLink = kind === 'privacy'
 
 const title = kind === 'privacy' ? 'Privacy policy' : 'Terms of service';
 
-const updated = new Date(SITE_UPDATED);
+function parseAttributes(source: string) {
+    return Object.fromEntries(Array.from(source.matchAll(ATTRIBUTE_PATTERN), ([, name, value]) => [name, value]));
+}
+
+function parseInline(html: string) {
+    const segments: Inline[] = [];
+
+    let cursor = 0;
+
+    for (const match of html.matchAll(INLINE_PATTERN)) {
+        const [whole, attributes, label, code] = match;
+
+        if (match.index > cursor) segments.push({ kind: 'text', text: html.slice(cursor, match.index) });
+
+        segments.push(code === undefined ? { attributes: parseAttributes(attributes), kind: 'link', label } : { code, kind: 'code' });
+        cursor = match.index + whole.length;
+    }
+
+    if (cursor < html.length) segments.push({ kind: 'text', text: html.slice(cursor) });
+
+    return segments;
+}
 
 function slugify(heading: string) {
     return heading
@@ -143,7 +173,7 @@ function slugify(heading: string) {
     class="stage stage--tight"
     aria-labelledby={`${kind}-title`}
 >
-    <div class="max-w-(--measure-prose) mx-auto wrap-break-word">
+    <div>
         <p
             class="label mb-4 text-link"
             data-motion="stamp"
@@ -152,13 +182,13 @@ function slugify(heading: string) {
         </p>
         <h1
             id={`${kind}-title`}
-            class="mb-10 text-5xl md:text-7xl"
+            class="mb-10 text-7xl max-md:text-4xl"
             data-motion="strike"
         >
             {title}
         </h1>
         <div
-            class="legal__body space-y-6 leading-[1.7] text-base"
+            class="legal__body space-y-6 text-base"
             data-motion="rise"
         >
             {SECTIONS[kind].map(section => (
@@ -169,7 +199,16 @@ function slugify(heading: string) {
                     >
                         {section.heading}
                     </h2>
-                    {section.body.map(paragraph => <p set:html={paragraph} />)}
+                    {section.body.map(paragraph => (
+                        <p>
+                            {parseInline(paragraph).map((segment) => {
+                                if (segment.kind === 'code') return <code>{segment.code}</code>;
+                                if (segment.kind === 'text') return segment.text;
+
+                                return <a {...segment.attributes}>{segment.label}</a>;
+                            })}
+                        </p>
+                    ))}
                 </>
             ))}
             <h2
@@ -186,32 +225,31 @@ function slugify(heading: string) {
 </section>
 
 <style>
-    .legal__body :global(a) {
+    .legal__body a {
         display: inline-block;
+        font-family: var(--font-mono);
         max-width: 100%;
-        text-decoration-color: var(--color-text-brand);
+        overflow-wrap: anywhere;
         text-decoration-line: underline;
-        text-decoration-thickness: 2px;
         text-underline-offset: 4px;
         transition:
             color var(--duration-fast) var(--motion-ease-ui),
             transform var(--duration-fast) var(--motion-ease-ui);
     }
 
-    .legal__body :global(a:active) {
+    .legal__body a:active {
         transform: translateY(1px);
     }
 
-    .legal__body :global(a:hover) {
+    .legal__body a:hover {
         color: var(--color-link);
     }
 
-    .legal__body :global(code) {
+    .legal__body code {
         background-color: var(--color-code-bg);
         border: 1px solid var(--color-border-subtle);
         font-family: var(--font-mono);
-        font-size: var(--text-sm);
-        padding: 1px 6px;
+        padding: 1px 4px;
         white-space: nowrap;
     }
 </style>

@@ -1,6 +1,6 @@
 ---
 title: Logo Kit
-kind: logo-kit
+kind: official
 format: ZIP
 size: 1.6 MB
 date: 2026-11-08T00:00:00-06:00

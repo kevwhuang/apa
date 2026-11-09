@@ -1,0 +1,22 @@
+---
+import BashArchive from '@sections/bash/Archive.astro';
+import BashDownloads from '@sections/bash/Downloads.astro';
+import BashFeature from '@sections/bash/Feature.astro';
+import BashNext from '@sections/bash/Next.astro';
+import BashSubmissions from '@sections/bash/Submissions.astro';
+import BashUpcoming from '@sections/bash/Upcoming.astro';
+import Layout from '@/Layout.astro';
+import { brandTitle } from '@lib/shared/brand';
+---
+
+<Layout
+    description="The Bash is the Austin Producer Alliance's quarterly production sprint for music producers. Get the kit, beat the clock on one prompt, and submit your track."
+    title={brandTitle('Bashes')}
+>
+    <BashFeature />
+    <BashNext />
+    <BashDownloads />
+    <BashSubmissions />
+    <BashUpcoming />
+    <BashArchive />
+</Layout>

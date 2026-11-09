@@ -1,39 +1,38 @@
 ---
 import { Image, getImage } from 'astro:assets';
 
-import IconClose from '@components/icons/Close.astro';
 import PageHead from '@components/shared/PageHead.astro';
 
 import type { ImageMetadata } from 'astro';
 
-const CLASS_VIEWER_PHOTO = 'block object-contain aspect-(--wall-ratio) h-auto min-h-0 w-full border-2 border-current cursor-default pointer-events-auto select-none';
+const CLASS_VIEWER_PHOTO = 'block box-content object-contain aspect-(--wall-ratio) h-auto min-h-0 w-[calc(100%-4px)] border-2 border-current cursor-default pointer-events-auto select-none';
 
 const FIGURES = [
-    { alt: 'Nine people gather around a round black metal table on a covered dock, two seated and seven standing, with a lake and a bright cloud-filled sky behind them', label: '2026 October \u00b7 CAMP', slug: '2026_10_camp_river_oaks' },
-    { alt: 'Six people stand in a row in front of a vivid blue and purple painted mural with large block letters, red velvet ropes strung behind them', label: '2026 July \u00b7 Bash', slug: '2026_07_bash' },
-    { alt: 'About twenty people pose for a group photo against a dark wall, some kneeling in front and throwing up peace signs, with folded T-shirts stacked on a table at right', label: '2026 June \u00b7 Assembly \u00b7 Alex LaCroix', slug: '2026_06_assembly_alex_lacroix' },
-    { alt: 'A yellow waveform and plugin window glow on a projected wall above a wooden cabinet as a speaker sits at a desk alongside and attendees follow on laptops', label: '2026 May \u00b7 Assembly \u00b7 VonRyk', slug: '2026_05_assembly_vonryk' },
-    { alt: 'Thirteen people pose behind gray tables in front of a teal Ableton banner, four crouching in the front row', label: '2026 April \u00b7 Bash', slug: '2026_04_bash' },
-    { alt: 'Attendees seated at tables on both sides of a concrete aisle look toward the camera, while one person in a yellow jacket stands near the dark back wall', label: '2025 November \u00b7 Assembly \u00b7 Asher Nu & Uncharted Waters', slug: '2025_11_assembly_asher_nu_uncharted_waters' },
-    { alt: 'A speaker in a dark blazer gestures mid-sentence between two wall screens showing a Final Tips slide, with a handwritten note on the whiteboard behind', label: '2025 August \u00b7 Assembly \u00b7 Austin Breckenridge', slug: '2025_08_assembly_austin_breckenridge' },
-    { alt: 'Attendees spread across rows of white tables face the front, with a MIDI keyboard and laptop on the table at right and a red lettered wall panel on the left', label: '2025 July \u00b7 Assembly \u00b7 Justin M', slug: '2025_07_assembly_justin_m' },
-    { alt: 'Seen from the front of the room over a laptop, two studio monitors and printed QR code sheets, attendees sit at tables on both sides of a concrete aisle', label: '2025 May \u00b7 Assembly \u00b7 Jonathan Bolton & Saratonin', slug: '2025_05_assembly_jonathan_bolton_saratonin' },
-    { alt: 'Two people stand at the front of the room beside a title slide, talking with attendees seated at tables around them, word-covered panels lining the wall behind', label: '2025 April \u00b7 Assembly \u00b7 Alt Slauson', slug: '2025_04_assembly_alt_slauson' },
-    { alt: 'Attendees fill a long room at tables and laptops, facing a speaker between two wall screens of music software in the distance', label: '2025 March \u00b7 Assembly \u00b7 DREAMSHIFT', slug: '2025_03_assembly_dreamshift' },
-    { alt: 'A speaker at a laptop stands between two wall screens showing the same blue software window, with attendees following along on laptops at rows of tables', label: '2025 February \u00b7 Assembly \u00b7 Shane Hazleton', slug: '2025_02_assembly_shane_hazleton' },
-    { alt: 'Participants sit in office chairs around a central table of laptops and small keyboards in a lab with blue accent lighting, sports bottles lined up on a counter in the foreground', label: '2025 February \u00b7 Bash', slug: '2025_02_bash' },
-    { alt: 'A speaker stands smiling beside a laptop and studio monitor as attendees chat at tables across a wide room with a line-art mural on the far wall', label: '2025 January \u00b7 Assembly \u00b7 Boomchii & Asher Nu', slug: '2025_01_assembly_boomchii_asher_nu' },
-    { alt: 'Seen from the front of the room over a laptop and studio monitor, attendees sit on both sides of a concrete aisle with a white line-art mural on the far wall', label: '2024 December \u00b7 Assembly \u00b7 Justin M', slug: '2024_12_assembly_justin_m' },
-    { alt: 'Attendees sit at white tables under foil-wrapped ceiling ducts, several smiling toward the camera, with a red water bottle and a phone on the table in the foreground', label: '2024 October \u00b7 Assembly', slug: '2024_10_assembly' },
-    { alt: 'Attendees sit at rows of white tables with laptops and water bottles, a black wall on the left and a blue star mural at the far end', label: '2024 September \u00b7 Assembly', slug: '2024_09_assembly' },
-    { alt: 'Attendees listen from rows of white tables, one leaning back with both hands behind the head, with a red water bottle and cooler bag in the foreground and a blue star mural on the back wall', label: '2024 August \u00b7 Assembly', slug: '2024_08_assembly' },
-    { alt: 'A smiling speaker in a cap stands at a rolling desk with a laptop and two small studio monitors beside a projected slide titled Tips to Get Started in Sync', label: '2024 June \u00b7 Assembly \u00b7 Will Evans', slug: '2024_06_assembly_will_evans' },
-    { alt: 'A speaker stands beside a DJ controller and a pair of studio monitors, talking to attendees seated at tables in front of tall windows looking out on a lit street', label: '2024 May \u00b7 Assembly \u00b7 Kai Castro', slug: '2024_05_assembly_kai_castro' },
-    { alt: 'Attendees at rows of white tables face a speaker seated at a laptop as a video page is projected on the wall behind', label: '2024 April \u00b7 Assembly \u00b7 Justin M', slug: '2024_04_assembly_justin_m' },
-    { alt: 'A speaker with headphones around the neck stands behind a laptop and studio monitors as attendees at rows of tables watch a music session projected between two flags', label: '2024 March \u00b7 Assembly \u00b7 Den Zuko', slug: '2024_03_assembly_den_zuko' },
-    { alt: 'Attendees work heads-down with pens and laptops around a U of white tables, beneath a Cisco DevNet sign on a black wall', label: '2024 February \u00b7 Assembly \u00b7 Henyx', slug: '2024_02_assembly_henyx' },
-    { alt: 'Producers in headphones work at laptops and MIDI keyboards around a long central table in a computer lab with green accent lighting on the walls', label: '2023 August \u00b7 Bash', slug: '2023_08_bash' },
-    { alt: 'A speaker stands between two wall screens showing the same colorful track arrangement and addresses attendees seated at rows of white tables', label: '2023 August \u00b7 Assembly \u00b7 Lonely Child', slug: '2023_08_assembly_lonely_child' },
+    { alt: 'Nine people gather around a round black metal table on a covered dock, two seated and seven standing, with a lake and a bright cloud-filled sky behind them', label: 'October 2026 CAMP', slug: '2026_10_camp_river_oaks' },
+    { alt: 'Sixteen people pose beneath a projected Meetup page for the Austin Producer Alliance, three kneeling in the front row, with a handwritten track list on a whiteboard at left', label: 'Fall 2026 Bash', slug: '2026_07_bash' },
+    { alt: 'About twenty people pose for a group photo against a dark wall, some kneeling in front and throwing up peace signs, with folded T-shirts stacked on a table at right', label: 'June 2026 Assembly \u00b7 Alex LaCroix', slug: '2026_06_assembly_alex_lacroix' },
+    { alt: 'A yellow waveform and plugin window glow on a projected wall above a wooden cabinet as a speaker sits at a desk alongside and attendees follow on laptops', label: 'May 2026 Assembly \u00b7 VonRyk', slug: '2026_05_assembly_vonryk' },
+    { alt: 'Thirteen people pose behind gray tables in front of a teal Ableton banner, four crouching in the front row', label: 'Summer 2026 Bash', slug: '2026_04_bash' },
+    { alt: 'Attendees seated at tables on both sides of a concrete aisle look toward the camera, while one person in a yellow jacket stands near the dark back wall', label: 'November 2025 Assembly \u00b7 Uncharted Waters', slug: '2025_11_assembly_asher_nu_uncharted_waters' },
+    { alt: 'A speaker in a dark blazer gestures mid-sentence between two wall screens showing a Final Tips slide, with a handwritten note on the whiteboard behind', label: 'August 2025 Assembly \u00b7 Austin Breckenridge', slug: '2025_08_assembly_austin_breckenridge' },
+    { alt: 'Attendees spread across rows of white tables face the front, with a MIDI keyboard and laptop on the table at right and a red lettered wall panel on the left', label: 'July 2025 Assembly \u00b7 Justin M', slug: '2025_07_assembly_justin_m' },
+    { alt: 'Seen from the front of the room over a laptop, two studio monitors and printed QR code sheets, attendees sit at tables on both sides of a concrete aisle', label: 'May 2025 Assembly \u00b7 Jonathan Bolton', slug: '2025_05_assembly_jonathan_bolton_saratonin' },
+    { alt: 'Two people stand at the front of the room beside a title slide, talking with attendees seated at tables around them, word-covered panels lining the wall behind', label: 'April 2025 Assembly \u00b7 Alt Slauson', slug: '2025_04_assembly_alt_slauson' },
+    { alt: 'Attendees fill a long room at tables and laptops, facing a speaker between two wall screens of music software in the distance', label: 'March 2025 Assembly \u00b7 DREAMSHIFT', slug: '2025_03_assembly_dreamshift' },
+    { alt: 'A speaker at a laptop stands between two wall screens showing the same blue software window, with attendees following along on laptops at rows of tables', label: 'February 2025 Assembly \u00b7 Shane Hazleton', slug: '2025_02_assembly_shane_hazleton' },
+    { alt: 'Participants sit in office chairs around a central table of laptops and small keyboards in a lab with blue accent lighting, sports bottles lined up on a counter in the foreground', label: 'Spring 2025 Bash', slug: '2025_02_bash' },
+    { alt: 'A speaker stands smiling beside a laptop and studio monitor as attendees chat at tables across a wide room with a line-art mural on the far wall', label: 'January 2025 Assembly \u00b7 Boomchii', slug: '2025_01_assembly_boomchii_asher_nu' },
+    { alt: 'Seen from the front of the room over a laptop and studio monitor, attendees sit on both sides of a concrete aisle with a white line-art mural on the far wall', label: 'December 2024 Assembly \u00b7 Justin M', slug: '2024_12_assembly_justin_m' },
+    { alt: 'Attendees sit at white tables under foil-wrapped ceiling ducts, several smiling toward the camera, with a red water bottle and a phone on the table in the foreground', label: 'October 2024 Assembly', slug: '2024_10_assembly' },
+    { alt: 'Attendees sit at rows of white tables with laptops and water bottles, a black wall on the left and a blue star mural at the far end', label: 'September 2024 Assembly', slug: '2024_09_assembly' },
+    { alt: 'Attendees listen from rows of white tables, one leaning back with both hands behind the head, with a red water bottle and cooler bag in the foreground and a blue star mural on the back wall', label: 'August 2024 Assembly', slug: '2024_08_assembly' },
+    { alt: 'A smiling speaker in a cap stands at a rolling desk with a laptop and two small studio monitors beside a projected slide titled Tips to Get Started in Sync', label: 'June 2024 Assembly \u00b7 Will Evans', slug: '2024_06_assembly_will_evans' },
+    { alt: 'A speaker stands beside a DJ controller and a pair of studio monitors, talking to attendees seated at tables in front of tall windows looking out on a lit street', label: 'May 2024 Assembly \u00b7 Kai Castro', slug: '2024_05_assembly_kai_castro' },
+    { alt: 'Attendees at rows of white tables face a speaker seated at a laptop as a video page is projected on the wall behind', label: 'April 2024 Assembly \u00b7 Justin M', slug: '2024_04_assembly_justin_m' },
+    { alt: 'A speaker with headphones around the neck stands behind a laptop and studio monitors as attendees at rows of tables watch a music session projected between two flags', label: 'March 2024 Assembly \u00b7 Den Zuko', slug: '2024_03_assembly_den_zuko' },
+    { alt: 'Attendees work heads-down with pens and laptops around a U of white tables, beneath a Cisco DevNet sign on a black wall', label: 'February 2024 Assembly \u00b7 Henyx', slug: '2024_02_assembly_henyx' },
+    { alt: 'Producers in headphones work at laptops and MIDI keyboards around a long central table in a computer lab with green accent lighting on the walls', label: 'Fall II 2023 Bash', slug: '2023_08_bash' },
+    { alt: 'A speaker stands between two wall screens showing the same colorful track arrangement and addresses attendees seated at rows of white tables', label: 'August 2023 Assembly \u00b7 Lonely Child', slug: '2023_08_assembly_lonely_child' },
 ] as const;
 
 const IMAGE_DENSITY = 2;
@@ -66,19 +65,17 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
 >
     <div>
         <PageHead
-            class="max-w-3xl mb-6 text-5xl md:text-7xl"
-            eyebrow={`Gallery, ${FIGURES.length} shots`}
+            class="max-w-3xl mb-6 text-7xl max-md:text-5xl"
             headingId="gallery-title"
         >
-            The wall.
+            The wall
         </PageHead>
         <p
             class="max-w-2xl text-lg text-text-secondary"
             data-motion="blur"
         >
-            Assembly nights, Bash sets, and whatever the studio looked like
-            that week &mdash; shot by members. Open any frame to fill
-            the screen, then close it and keep walking the wall.
+            These photos come from Assembly nights, Bash afternoons, and CAMP weekends.
+            Open any photo to view it full screen.
         </p>
     </div>
 </section>
@@ -98,16 +95,17 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
             >
                 <figure class="flex flex-col gap-3">
                     <button
-                        class="slab slab--bare slab--card slab--hover wall__frame block overflow-hidden w-full mb-[calc(var(--z-card)*var(--lift))]"
+                        class="slab slab--bare slab--card slab--still wall__frame block overflow-hidden w-full mb-(--lift)"
                         aria-label={`View ${figure.label}`}
                         data-wall-alt={figure.alt}
                         data-wall-label={figure.label}
                         data-wall-ratio={figure.ratio}
                         data-wall-source={figure.source}
+                        data-wall-width={`${figure.image.width}px`}
                         type="button"
                     >
                         <Image
-                            class="wall__image block h-auto w-full select-none"
+                            class="block h-auto w-full select-none"
                             alt={figure.alt}
                             densities={[1, IMAGE_DENSITY]}
                             draggable="false"
@@ -121,12 +119,9 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
             </li>
         ))}
     </ul>
-    <div
-        class="wall__viewer fixed grid inset-0 place-items-center cursor-zoom-out"
-        aria-hidden="true"
+    <dialog
+        class="wall__viewer fixed grid inset-0 overflow-visible place-items-center z-(--z-overlay) h-auto max-h-none max-w-none w-auto cursor-zoom-out"
         aria-labelledby="wall-viewer-title"
-        aria-modal="true"
-        role="dialog"
     >
         <h2
             id="wall-viewer-title"
@@ -135,17 +130,8 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
         >
             Gallery viewer
         </h2>
-        <button
-            class="wall__close"
-            aria-label="Close the viewer"
-            data-wall-close
-            type="button"
-        >
-            <IconClose />
-        </button>
         <div
             class="wall__stack flex flex-col relative"
-            data-wall-stack
             tabindex="-1"
         >
             <img
@@ -154,76 +140,29 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
                 data-wall-photo
                 draggable="false"
             />
-            <p
-                class="label shrink-0"
-                data-wall-caption
-            />
+            <div class="flex items-baseline justify-between shrink-0 h-(--text-sm) gap-(--wall-gap)">
+                <p
+                    class="label"
+                    data-wall-caption
+                />
+                <button
+                    class="label active:translate-y-px focus-visible:not-sr-only sr-only transition-[translate]"
+                    aria-label="Close viewer"
+                    data-wall-close
+                    type="button"
+                >
+                    Close
+                </button>
+            </div>
             <span
                 class="spinner"
                 aria-hidden="true"
             />
         </div>
-    </div>
+    </dialog>
 </section>
 
 <style>
-    .wall__close {
-        --close-border: 2px;
-        --close-hit: 48px;
-        --close-inset: calc((var(--wall-gutter) - var(--close-size)) / 2);
-        --close-size: 40px;
-        align-items: center;
-        background-color: transparent;
-        border: var(--close-border) solid var(--color-btn-on-brand-border);
-        color: var(--color-btn-on-brand-text);
-        display: flex;
-        height: var(--close-size);
-        inset: var(--close-inset) var(--close-inset) auto auto;
-        justify-content: center;
-        position: absolute;
-        transition:
-            background-color var(--duration-fast) var(--motion-ease-ui),
-            border-color var(--duration-fast) var(--motion-ease-ui),
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-        width: var(--close-size);
-        z-index: var(--z-lift);
-    }
-
-    .wall__close::after {
-        content: '';
-        inset: calc((var(--close-size) - var(--close-hit)) / 2 - var(--close-border));
-        position: absolute;
-    }
-
-    .wall__close:active {
-        transform: translateY(1px);
-    }
-
-    .wall__close:focus-visible,
-    .wall__close:hover {
-        background-color: var(--color-btn-on-brand-bg-hover);
-        border-color: var(--color-link-on-brand);
-        color: var(--color-link-on-brand);
-    }
-
-    .wall__frame:active .wall__image {
-        filter: none;
-        transform: scale(1);
-    }
-
-    .wall__frame:focus-visible:not(:active) .wall__image,
-    .wall__frame:hover:not(:active) .wall__image {
-        filter: contrast(1.06) saturate(1.06);
-        transform: scale(1.03);
-    }
-
-    .wall__image {
-        transition:
-            filter var(--duration-slow) var(--motion-ease-ui),
-            transform var(--duration-slower) var(--motion-ease-ui);
-    }
-
     .wall__item {
         flex-basis: calc(var(--figure-ratio) * var(--wall-row) + 4px);
     }
@@ -241,11 +180,9 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
     .wall__stack {
         gap: var(--wall-gap);
         max-height: 100%;
+        padding-top: var(--wall-meta);
         pointer-events: none;
-        transform: scale(0.97);
-        transition: transform var(--duration-fast) var(--motion-ease-ui);
-        width: min(100%, calc(var(--wall-frame) * var(--wall-ratio)));
-        z-index: var(--z-page);
+        width: min(calc(var(--wall-width) + 4px), 100%, calc(var(--wall-frame) * var(--wall-ratio) + 4px));
     }
 
     .wall__stack .spinner {
@@ -258,20 +195,19 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
 
     .wall__viewer {
         --color-focus-ring: var(--color-focus-ring-on-brand);
-        --wall-frame: calc(100dvh - 2 * var(--wall-gutter) - var(--wall-meta));
+        --wall-frame: calc(100dvh - 2 * var(--shell-pad) - 2 * var(--wall-meta) - 4px);
         --wall-gap: var(--space-xs);
-        --wall-gutter: clamp(56px, 7vmin, 88px);
-        --wall-meta: calc(var(--wall-gap) + var(--text-xs));
+        --wall-meta: calc(var(--wall-gap) + var(--text-sm));
         --wall-ratio: 1;
-        background-color: var(--color-bg-overlay-strong);
+        --wall-width: 100%;
+        background-color: transparent;
         color: var(--color-text-on-brand);
         opacity: 0;
-        padding: var(--wall-gutter);
+        padding: var(--shell-pad);
         transition:
             opacity var(--duration-fast) var(--motion-ease-ui),
             visibility 0s var(--duration-fast);
         visibility: hidden;
-        z-index: calc(var(--z-toast) + 1);
     }
 
     .wall__viewer .spinner {
@@ -283,14 +219,10 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
         display: inline-block;
     }
 
-    .wall__viewer[data-open] {
+    .wall__viewer[open] {
         opacity: 1;
         transition: opacity var(--duration-fast) var(--motion-ease-ui);
         visibility: visible;
-    }
-
-    .wall__viewer[data-open] .wall__stack {
-        transform: scale(1);
     }
 
     @media (max-width: 768px) {
@@ -298,70 +230,69 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
             flex-basis: 100%;
         }
     }
-
-    @media (prefers-reduced-motion: reduce) {
-        .wall__stack {
-            transform: none;
-        }
-    }
 </style>
 
 <script>
-    import { REDUCED_MOTION_QUERY } from '@lib/shared/constants';
-    import { registerPageScript } from '@lib/shared/utils';
+    import { isOutsideBox, registerPageScript } from '@lib/shared/utils';
 
+    let isBackdropPress = false;
     let trigger: HTMLButtonElement | null = null;
-    let viewer: HTMLElement | null = null;
+    let viewer: HTMLDialogElement | null = null;
     let viewerCaption: HTMLElement | null = null;
     let viewerClose: HTMLButtonElement | null = null;
     let viewerPhoto: HTMLImageElement | null = null;
     let viewerTitle: HTMLElement | null = null;
 
     function closeViewer() {
-        if (!viewer?.hasAttribute('data-open')) return;
+        if (!viewer?.open) return;
 
         document.documentElement.style.overflow = '';
-        viewer.removeAttribute('data-open');
-        viewer.setAttribute('aria-hidden', 'true');
-        trigger?.focus({ preventScroll: true });
-        trigger?.scrollIntoView({ behavior: window.matchMedia(REDUCED_MOTION_QUERY).matches ? 'auto' : 'smooth', block: 'center' });
+        viewer.close();
+        trigger?.focus();
+    }
+
+    function handleViewerCancel(event: Event) {
+        event.preventDefault();
+        closeViewer();
+    }
+
+    function handleViewerClick(event: MouseEvent) {
+        if (isBackdropPress && isOutsideBox(event, viewerPhoto)) closeViewer();
+
+        isBackdropPress = false;
     }
 
     function handleViewerKeydown(event: KeyboardEvent) {
-        if (!viewer?.hasAttribute('data-open')) return;
+        if (!viewer?.open || event.key !== 'Tab') return;
 
-        if (event.key === 'Escape') {
-            closeViewer();
-        } else if (event.key === 'Tab') {
-            event.preventDefault();
-            viewerClose?.focus();
-        }
+        event.preventDefault();
+        viewerClose?.focus();
+    }
+
+    function handleViewerPointerdown(event: PointerEvent) {
+        isBackdropPress = isOutsideBox(event, viewerPhoto);
     }
 
     function initWall(signal: AbortSignal) {
         const frames = Array.from(document.querySelectorAll<HTMLButtonElement>('.wall__frame'));
 
+        isBackdropPress = false;
         trigger = null;
-        viewer = document.querySelector<HTMLElement>('.wall__viewer');
+        viewer = document.querySelector<HTMLDialogElement>('.wall__viewer');
         viewerCaption = null;
         viewerClose = null;
         viewerPhoto = null;
         viewerTitle = null;
-
-        signal.addEventListener('abort', () => {
-            document.documentElement.style.overflow = '';
-        }, { once: true });
+        signal.addEventListener('abort', teardown, { once: true });
 
         if (!frames.length || !viewer) return;
-
-        const stack = viewer.querySelector<HTMLElement>('[data-wall-stack]');
 
         viewerCaption = viewer.querySelector<HTMLElement>('[data-wall-caption]');
         viewerClose = viewer.querySelector<HTMLButtonElement>('[data-wall-close]');
         viewerPhoto = viewer.querySelector<HTMLImageElement>('[data-wall-photo]');
         viewerTitle = viewer.querySelector<HTMLElement>('[data-wall-title]');
 
-        if (!stack || !viewerCaption || !viewerClose || !viewerPhoto || !viewerTitle) return;
+        if (!viewerCaption || !viewerClose || !viewerPhoto || !viewerTitle) return;
 
         document.addEventListener('keydown', handleViewerKeydown, { signal });
 
@@ -369,8 +300,9 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
             frame.addEventListener('click', () => openViewer(frame), { signal });
         });
 
-        stack.addEventListener('click', event => event.stopPropagation(), { signal });
-        viewer.addEventListener('click', closeViewer, { signal });
+        viewer.addEventListener('cancel', handleViewerCancel, { signal });
+        viewer.addEventListener('click', handleViewerClick, { signal });
+        viewer.addEventListener('pointerdown', handleViewerPointerdown, { signal });
         viewerClose.addEventListener('click', closeViewer, { signal });
         viewerPhoto.addEventListener('error', showViewerPhoto, { signal });
         viewerPhoto.addEventListener('load', showViewerPhoto, { signal });
@@ -379,7 +311,7 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
     function openViewer(frame: HTMLButtonElement) {
         if (!viewer || !viewerCaption || !viewerClose || !viewerPhoto || !viewerTitle) return;
 
-        const { wallAlt = '', wallLabel = '', wallRatio = '1', wallSource = '' } = frame.dataset;
+        const { wallAlt = '', wallLabel = '', wallRatio = '1', wallSource = '', wallWidth = '100%' } = frame.dataset;
 
         if (viewerPhoto.getAttribute('src') !== wallSource) {
             viewer.setAttribute('data-loading', '');
@@ -388,9 +320,9 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
 
         document.documentElement.style.overflow = 'hidden';
         trigger = frame;
-        viewer.removeAttribute('aria-hidden');
-        viewer.setAttribute('data-open', '');
         viewer.style.setProperty('--wall-ratio', wallRatio);
+        viewer.style.setProperty('--wall-width', wallWidth);
+        viewer.showModal();
         viewerCaption.textContent = wallLabel;
         viewerPhoto.alt = wallAlt;
         viewerPhoto.src = wallSource;
@@ -401,6 +333,11 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
     function showViewerPhoto() {
         viewer?.removeAttribute('data-loading');
         viewerPhoto?.style.removeProperty('visibility');
+    }
+
+    function teardown() {
+        document.documentElement.style.overflow = '';
+        viewer?.close();
     }
 
     registerPageScript(initWall);

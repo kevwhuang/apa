@@ -3,28 +3,33 @@ interface Props {
     'class'?: string;
     'color': string;
     'data-motion'?: string;
-    'label': string;
+    'label'?: string;
     'labelClass'?: string;
-    'labelColor': string;
+    'labelColor'?: string;
+    'numeric'?: boolean;
 }
 
-const { class: tileClass, color, 'data-motion': motion, label, labelClass, labelColor } = Astro.props;
+const { class: tileClass, color, 'data-motion': motion, label, labelClass, labelColor, numeric } = Astro.props;
+
+const style = labelColor ? `background: ${color}; color: ${labelColor};` : `background: ${color};`;
 ---
 
 <div
-    class:list={['tile @container flex items-center justify-center overflow-hidden relative', tileClass]}
+    class:list={['tile flex items-center justify-center overflow-hidden relative', tileClass]}
     data-motion={motion}
-    style={`background: ${color}; color: ${labelColor};`}
+    style={style}
 >
     <div
         class="halftone absolute inset-0"
         aria-hidden="true"
     />
-    <span
-        class:list={['font-bold font-display select-none', labelClass]}
-        aria-hidden="true"
-    >
-        {label}
-    </span>
+    {label && (
+        <span
+            class:list={['relative font-bold select-none', numeric ? 'font-display tracking-[-0.02em]' : 'font-sans tracking-[-0.025em]', labelClass]}
+            aria-hidden="true"
+        >
+            {label}
+        </span>
+    )}
     <slot />
 </div>

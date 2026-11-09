@@ -18,8 +18,8 @@ const STEPS_PER_BEAT = 4;
 
 const STEP_COUNT = PATTERN.length;
 
-function stepDuration(): number {
-    return SECONDS_PER_MINUTE / (BEATS_PER_MINUTE * STEPS_PER_BEAT);
+function stepDuration(beatsPerMinute: number = BEATS_PER_MINUTE): number {
+    return SECONDS_PER_MINUTE / (beatsPerMinute * STEPS_PER_BEAT);
 }
 
 function stepEnergy(step: number): number {
