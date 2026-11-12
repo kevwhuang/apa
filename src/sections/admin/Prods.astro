@@ -4,6 +4,8 @@ import SearchField from '@components/shared/SearchField.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { PRODS_MEMBERS as MEMBERS } from '@lib/account/prods';
 import { formatDateStamp } from '@lib/shared/utils';
+
+const CLASS_MEMBER_ROW = 'active:translate-y-px hover:bg-bg-hover grid min-h-(--control-size) w-full gap-1 px-(--space-md) py-4 text-left wrap-anywhere transition-[translate]';
 ---
 
 <section
@@ -12,7 +14,7 @@ import { formatDateStamp } from '@lib/shared/utils';
 >
     <div>
         <SectionHead
-            class="text-3xl max-md:text-2xl"
+            class="text-2xl-3xl"
             headingId="admin-prods-title"
         >
             Prods management
@@ -36,7 +38,7 @@ import { formatDateStamp } from '@lib/shared/utils';
                 {MEMBERS.map(member => (
                     <li>
                         <button
-                            class="active:translate-y-px hover:bg-bg-hover grid min-h-(--control-size) w-full gap-(--space-3xs) px-(--space-md) py-(--space-sm) text-left wrap-anywhere transition-[translate]"
+                            class={CLASS_MEMBER_ROW}
                             aria-controls="prods-modal"
                             aria-haspopup="dialog"
                             data-member-email={member.email}
@@ -44,7 +46,7 @@ import { formatDateStamp } from '@lib/shared/utils';
                             data-member-name={member.artistName}
                             type="button"
                         >
-                            <span class="font-bold font-sans leading-(--text-xl) text-lg tracking-tight">{member.artistName}</span>
+                            <span class="font-bold leading-(--text-xl) text-lg tracking-tight">{member.artistName}</span>
                             <span class="font-mono text-base text-text-secondary">{member.email}</span>
                         </button>
                     </li>
@@ -63,8 +65,8 @@ import { formatDateStamp } from '@lib/shared/utils';
             aria-labelledby="prods-modal-title"
             data-prods-modal
         >
-            <div class="flex items-start justify-between gap-(--space-sm) p-(--space-md) border-b-2 border-border-strong">
-                <div class="flex flex-col min-w-0 gap-(--space-2xs) wrap-anywhere">
+            <div class="flex items-start justify-between gap-4 p-(--space-md) border-b-2 border-border-strong">
+                <div class="flex flex-col min-w-0 gap-2 wrap-anywhere">
                     <h3
                         id="prods-modal-title"
                         class="text-2xl text-balance"
@@ -91,19 +93,19 @@ import { formatDateStamp } from '@lib/shared/utils';
                     <div class="p-(--space-md) bg-bg-raised">
                         <dt class="label mb-2 text-text-secondary">Balance</dt>
                         <dd
-                            class="font-bold font-sans text-xl"
+                            class="font-bold text-xl"
                             data-prods-balance
                         />
                     </div>
                     <div class="p-(--space-md) bg-bg-raised">
                         <dt class="label mb-2 text-text-secondary">Member since</dt>
                         <dd
-                            class="font-bold font-sans text-xl"
+                            class="font-bold text-xl"
                             data-prods-since
                         />
                     </div>
                 </dl>
-                <div class="flex flex-col gap-(--space-2xs)">
+                <div class="flex flex-col gap-2">
                     <p class="label text-text-secondary">Ledger</p>
                     <div class="prods__scroller scroll-slot overflow-x-auto border-2 border-border-strong">
                         <table class="prods__table">
@@ -111,25 +113,25 @@ import { formatDateStamp } from '@lib/shared/utils';
                             <thead>
                                 <tr class="label text-text-secondary">
                                     <th
-                                        class="px-(--space-sm) py-(--space-xs) text-left whitespace-nowrap max-md:hidden"
+                                        class="px-4 py-3 text-left whitespace-nowrap max-md:hidden"
                                         scope="col"
                                     >
                                         Date
                                     </th>
                                     <th
-                                        class="w-full px-(--space-sm) py-(--space-xs) text-left whitespace-nowrap max-md:px-(--space-2xs)"
+                                        class="w-full px-4 py-3 text-left whitespace-nowrap max-md:px-2"
                                         scope="col"
                                     >
                                         Reason
                                     </th>
                                     <th
-                                        class="px-(--space-sm) py-(--space-xs) text-right whitespace-nowrap max-md:hidden"
+                                        class="px-4 py-3 text-right whitespace-nowrap max-md:hidden"
                                         scope="col"
                                     >
                                         Change
                                     </th>
                                     <th
-                                        class="px-(--space-sm) py-(--space-xs) text-right whitespace-nowrap max-md:px-(--space-2xs)"
+                                        class="px-4 py-3 text-right whitespace-nowrap max-md:px-2"
                                         scope="col"
                                     >
                                         Balance
@@ -145,11 +147,11 @@ import { formatDateStamp } from '@lib/shared/utils';
                 </div>
                 <template data-prods-row>
                     <tr>
-                        <td class="px-(--space-sm) py-(--space-sm) font-mono text-base whitespace-nowrap text-text-secondary max-md:hidden">
+                        <td class="px-4 py-4 font-mono text-base whitespace-nowrap text-text-secondary max-md:hidden">
                             <time data-cell="date" />
                         </td>
-                        <td class="px-(--space-sm) py-(--space-sm) text-base wrap-anywhere max-md:px-(--space-2xs)">
-                            <div class="grid gap-(--space-3xs)">
+                        <td class="px-4 py-4 text-base wrap-anywhere max-md:px-2">
+                            <div class="grid gap-1">
                                 <span data-cell="reason" />
                                 <time
                                     class="hidden font-mono whitespace-nowrap text-text-secondary max-md:block"
@@ -158,11 +160,11 @@ import { formatDateStamp } from '@lib/shared/utils';
                             </div>
                         </td>
                         <td
-                            class="px-(--space-sm) py-(--space-sm) font-mono text-base text-right whitespace-nowrap max-md:hidden"
+                            class="px-4 py-4 font-mono text-base text-right whitespace-nowrap max-md:hidden"
                             data-cell="change"
                         />
-                        <td class="px-(--space-sm) py-(--space-sm) font-mono text-base text-right whitespace-nowrap max-md:px-(--space-2xs)">
-                            <div class="grid gap-(--space-3xs)">
+                        <td class="px-4 py-4 font-mono text-base text-right whitespace-nowrap max-md:px-2">
+                            <div class="grid gap-1">
                                 <span data-cell="balance" />
                                 <span
                                     class="hidden max-md:block"
@@ -178,8 +180,8 @@ import { formatDateStamp } from '@lib/shared/utils';
                     data-prods-form
                 >
                     <div class="grid grid-cols-2 gap-(--space-lg) max-md:grid-cols-1">
-                        <div class="flex flex-col gap-(--space-2xs)">
-                            <label class="flex flex-col gap-(--space-2xs)">
+                        <div class="flex flex-col gap-2">
+                            <label class="flex flex-col gap-2">
                                 <span class="label text-text-secondary">Amount</span>
                                 <input
                                     class="input aria-invalid:shadow-none font-mono"
@@ -201,11 +203,11 @@ import { formatDateStamp } from '@lib/shared/utils';
                                 hidden
                             />
                         </div>
-                        <div class="flex flex-col gap-(--space-2xs)">
-                            <label class="flex flex-col gap-(--space-2xs)">
+                        <div class="flex flex-col gap-2">
+                            <label class="flex flex-col gap-2">
                                 <span class="label text-text-secondary">Reason</span>
                                 <input
-                                    class="input aria-invalid:shadow-none font-sans"
+                                    class="input aria-invalid:shadow-none"
                                     aria-describedby="prods-reason-error"
                                     aria-invalid="false"
                                     autocomplete="off"
@@ -243,7 +245,9 @@ import { formatDateStamp } from '@lib/shared/utils';
         flex-shrink: 0;
         height: var(--control-size);
         justify-content: center;
-        transition: transform var(--duration-fast) var(--motion-ease-ui);
+        transition:
+            color var(--duration-fast) var(--motion-ease-ui),
+            transform var(--duration-fast) var(--motion-ease-ui);
         width: var(--control-size);
     }
 
@@ -256,7 +260,7 @@ import { formatDateStamp } from '@lib/shared/utils';
     }
 
     .prods__members {
-        --scroll-slot-max: calc(2 * 2px + 5 * (2 * var(--space-sm) + var(--space-3xs) + var(--text-xl) + var(--text-base--line-height) + 1px));
+        --scroll-slot-max: calc(2 * 2px + 5 * (2 * 16px + 4px + var(--text-xl) + var(--text-base--line-height) + 1px));
     }
 
     .prods__modal {
@@ -287,14 +291,8 @@ import { formatDateStamp } from '@lib/shared/utils';
     }
 
     .prods__scroller {
-        --scroll-slot-max: calc(2 * 2px + 2 * var(--space-xs) + var(--text-sm) + 5 * (2 * var(--space-sm) + var(--text-base--line-height) + 1px));
+        --scroll-slot-max: calc(2 * 2px + 2 * 12px + var(--text-sm) + 5 * (2 * 16px + var(--text-base--line-height) + 1px));
         overscroll-behavior: auto;
-    }
-
-    .prods__table {
-        display: table;
-        overflow-x: visible;
-        width: 100%;
     }
 
     .prods__table thead th {
@@ -307,7 +305,7 @@ import { formatDateStamp } from '@lib/shared/utils';
 
     @media (max-width: 768px) {
         .prods__scroller {
-            --scroll-slot-max: calc(2 * 2px + 2 * var(--space-xs) + var(--text-sm) + 5 * (2 * var(--space-sm) + 2 * var(--text-base--line-height) + var(--space-3xs) + 1px));
+            --scroll-slot-max: calc(2 * 2px + 2 * 12px + var(--text-sm) + 5 * (2 * 16px + 2 * var(--text-base--line-height) + 4px + 1px));
         }
     }
 </style>

@@ -1,3 +1,9 @@
+---
+const CLASS_TOAST = 'toast flex items-stretch max-w-xl min-h-(--control-size) w-full pe-2 border-2 border-border-strong bg-toast-bg text-toast-text pointer-events-auto';
+const CLASS_TOAST_BADGE = 'toast__badge flex items-center justify-center shrink-0 w-(--control-size) font-bold font-mono leading-none text-xl bg-(--toast-tone) text-(--toast-glyph-tone)';
+const CLASS_TOAST_CLOSE = 'toast__close active:translate-y-px hover:text-toast-action inline-flex items-center justify-center self-center shrink-0 size-(--control-size) leading-none text-xl text-inherit transition-[color,translate]';
+---
+
 <aside
     class="toaster z-300"
     aria-label="Notifications"
@@ -5,28 +11,28 @@
     transition:persist
 >
     <ol
-        class="toaster__list flex flex-col items-center w-full gap-(--space-2xs) list-none"
+        class="toaster__list flex flex-col items-center w-full gap-2 list-none"
         aria-live="polite"
         data-toast-list
     />
     <template data-toast-item>
-        <li class="toast flex items-stretch min-h-(--control-size) pe-(--space-2xs) border-2 border-border-strong bg-toast-bg text-toast-text pointer-events-auto">
+        <li class={CLASS_TOAST}>
             <span
-                class="toast__badge flex items-center justify-center shrink-0 w-(--control-size) font-bold font-mono leading-none bg-(--toast-tone) text-(--toast-glyph-tone)"
+                class={CLASS_TOAST_BADGE}
                 aria-hidden="true"
             />
-            <span class="toast__body flex flex-1 flex-col justify-center min-w-0 gap-(--space-3xs) pe-(--space-xs) ps-(--space-md) py-(--space-sm)">
+            <span class="toast__body flex flex-1 flex-col justify-center min-w-0 gap-1 pe-3 ps-(--space-md) py-4">
                 <span
                     class="label toast__label wrap-anywhere"
                     data-toast-label
                 />
                 <span
-                    class="toast__message min-w-0 font-sans text-base wrap-anywhere"
+                    class="toast__message min-w-0 text-base wrap-anywhere"
                     data-toast-message
                 />
             </span>
             <button
-                class="toast__close active:translate-y-px hover:text-toast-action inline-flex items-center justify-center self-center shrink-0 h-(--control-size) w-(--control-size) leading-none text-xl text-inherit transition-[color,translate]"
+                class={CLASS_TOAST_CLOSE}
                 data-toast-close
                 type="button"
             >
@@ -44,7 +50,6 @@
         --toast-glyph-tone: var(--color-text);
         --toast-tone: var(--color-bg-page);
         animation: var(--duration-slow) var(--motion-ease-entrance) both toast__rise;
-        width: min(var(--container-xl), 100%);
     }
 
     .toast--error {
@@ -59,27 +64,17 @@
         --toast-tone: var(--color-success);
     }
 
-    .toast__badge {
-        font-size: var(--text-xl);
-    }
-
     .toast__badge::before {
         content: var(--toast-glyph);
     }
 
     .toaster {
-        align-items: center;
         background: transparent;
-        border: 0;
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2xs);
+        display: block;
         height: auto;
         inset-block: auto var(--space-lg);
-        inset-inline: var(--shell-pad) calc(var(--launcher-size) + var(--lift));
-        margin: 0;
+        inset-inline: var(--shell-pad) calc(var(--control-size) + var(--lift));
         overflow: visible;
-        padding: 0;
         pointer-events: none;
         position: fixed;
         width: auto;
@@ -88,7 +83,7 @@
     @keyframes toast__rise {
         from {
             opacity: 0;
-            transform: translateY(var(--space-xs));
+            transform: translateY(12px);
         }
     }
 </style>

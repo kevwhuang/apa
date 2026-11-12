@@ -58,7 +58,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             role="group"
         >
             <button
-                class="chip is-active resources__chip hover:bg-bg-hover gap-(--space-3xs)"
+                class="chip is-active resources__chip hover:bg-bg-hover gap-1"
                 aria-pressed="true"
                 data-kind=""
                 type="button"
@@ -67,14 +67,14 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             </button>
             {kinds.map(entry => (
                 <button
-                    class="chip resources__chip hover:bg-bg-hover gap-(--space-3xs)"
+                    class="chip resources__chip hover:bg-bg-hover gap-1"
                     aria-pressed="false"
                     data-kind={entry.kind}
                     style={`--kind-color: ${KIND_COLORS[entry.kind]}`}
                     type="button"
                 >
                     <span
-                        class="resources__swatch--chip flex-none size-2 bg-(--kind-color)"
+                        class="flex-none size-2 outline outline-bg-page bg-(--kind-color)"
                         aria-hidden="true"
                     />
                     {entry.label} {entry.count}
@@ -90,12 +90,11 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             Showing all {assets.length} assets
         </p>
         <ul
-            class="resources__grid list-none"
+            class="resources__grid grid grid-cols-3 gap-x-(--space-lg) gap-y-(--space-2xl) max-lg:grid-cols-2 max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))]"
             data-motion-stagger="flip"
         >
             {assets.map(asset => (
                 <li
-                    id={asset.id}
                     class="resource-card"
                     data-kind={asset.data.kind}
                     data-search={asset.search}
@@ -103,7 +102,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                 >
                     <article class="resources__card slab slab--card slab--still">
                         <header class="flex items-start pb-(--space-md)">
-                            <p class="label inline-flex items-center gap-(--space-3xs) px-(--space-2xs) py-(--space-3xs) border-(--kind-color) border-2 text-text">
+                            <p class="label inline-flex items-center gap-1 px-2 py-1 border-(--kind-color) border-2 text-text">
                                 <span
                                     class="flex-none size-2 bg-(--kind-color)"
                                     aria-hidden="true"
@@ -111,7 +110,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                                 {ASSET_KIND_LABELS[asset.data.kind]}
                             </p>
                         </header>
-                        <div class="flex flex-col gap-(--space-2xs) pb-(--space-2xs)">
+                        <div class="flex flex-col gap-2 pb-2">
                             <h3 class="text-balance text-xl">
                                 {asset.title}
                             </h3>
@@ -119,12 +118,12 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                                 {asset.data.description}
                             </p>
                         </div>
-                        <dl class="flex flex-col gap-(--space-3xs) pb-(--space-md) pt-(--space-xs) border-border-subtle border-t">
-                            <div class="flex justify-between gap-(--space-xs)">
+                        <dl class="flex flex-col gap-1 pb-(--space-md) pt-3 border-border-subtle border-t">
+                            <div class="flex items-baseline justify-between gap-3">
                                 <dt class="label text-text-secondary">Format</dt>
                                 <dd class="font-mono text-base">{asset.data.format}</dd>
                             </div>
-                            <div class="flex justify-between gap-(--space-xs)">
+                            <div class="flex items-baseline justify-between gap-3">
                                 <dt class="label text-text-secondary">Size</dt>
                                 <dd
                                     class="font-mono text-base"
@@ -134,7 +133,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                                 </dd>
                             </div>
                             {asset.availability === 'open' && (
-                                <div class="flex justify-between gap-(--space-xs)">
+                                <div class="flex items-baseline justify-between gap-3">
                                     <dt class="label text-text-secondary">Date</dt>
                                     <dd class="font-mono text-base">
                                         <time datetime={toIsoDate(asset.data.date)}>{formatDateStamp(asset.data.date)}</time>
@@ -158,10 +157,10 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                                 data-unlocks-at={asset.data.unlocksAt?.toISOString()}
                             >
                                 <p
-                                    class="halftone label resources__blocked flex items-center justify-center min-h-(--control-size) px-4 text-text-secondary"
+                                    class="halftone label flex items-center justify-center min-h-(--control-size) px-4 border-2 border-border-subtle border-dashed text-text-secondary"
                                     data-unlock-locked
                                 >
-                                    <span>Coming soon</span>
+                                    <span class="bg-(--slab-fill)">Coming soon</span>
                                 </p>
                                 {asset.data.href && (
                                     <a
@@ -178,8 +177,8 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                             </div>
                         )}
                         {asset.availability === 'pending' && (
-                            <p class="halftone label resources__blocked flex items-center justify-center min-h-(--control-size) px-4 text-text-secondary">
-                                <span>Coming soon</span>
+                            <p class="halftone label flex items-center justify-center min-h-(--control-size) px-4 border-2 border-border-subtle border-dashed text-text-secondary">
+                                <span class="bg-(--slab-fill)">Coming soon</span>
                             </p>
                         )}
                     </article>
@@ -191,8 +190,8 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             data-resources-empty
             hidden
         >
-            <div class="flex flex-col gap-(--space-2xs)">
-                <p class="font-bold font-sans text-2xl text-balance tracking-tight">No matches.</p>
+            <div class="flex flex-col gap-2">
+                <p class="font-bold text-2xl text-balance tracking-tight">No matches.</p>
                 <p class="text-base text-text-secondary">
                     Nothing in the library matches
                     &ldquo;<span class="font-mono wrap-anywhere" data-search-echo />&rdquo;.
@@ -210,16 +209,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
 </section>
 
 <style>
-    .resources__blocked {
-        border: 2px dashed var(--color-border-subtle);
-    }
-
-    .resources__blocked > span {
-        background-color: var(--slab-fill);
-    }
-
     .resources__card {
-        --slab-fill: var(--color-bg-raised);
         border-top: 4px solid var(--kind-color);
     }
 
@@ -233,31 +223,8 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
         row-gap: 0;
     }
 
-    .resources__grid {
-        column-gap: var(--space-lg);
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        row-gap: var(--space-2xl);
-    }
-
     .resources__grid > * {
         min-width: 0;
-    }
-
-    .resources__swatch--chip {
-        outline: 1px solid var(--color-bg-page);
-    }
-
-    @media (max-width: 1024px) {
-        .resources__grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-    }
-
-    @media (max-width: 768px) {
-        .resources__grid {
-            grid-template-columns: minmax(0, 1fr);
-        }
     }
 </style>
 

@@ -14,7 +14,6 @@ const sessions = events
         date: event.data.date.toISOString(),
         end: event.data.end.toISOString(),
         headingId: index === 0 ? 'assembly-next-title' : `assembly-next-${index + 1}-title`,
-        id: event.id,
         longDate: event.data.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', timeZone: 'America/Chicago', year: 'numeric' }),
         room: event.data.room,
         rsvp: event.data.rsvp ?? LINKS.meetup,
@@ -24,7 +23,7 @@ const sessions = events
 ---
 
 <section
-    class="stage stage--assembly stage--tight border-b-2 border-border-strong"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-label="Next Assembly"
     data-event-group="assembly-upcoming"
     data-event-role="some"
@@ -32,22 +31,20 @@ const sessions = events
 >
     {sessions.map((session, index) => (
         <article
-            id={index === 0 ? session.id : undefined}
             class="slab slab--lift slab--still"
             aria-labelledby={session.headingId}
             data-event-end={session.end}
             data-event-group="assembly-upcoming"
-            data-event-id={session.id}
             data-event-role="next"
             data-motion="unfold"
             hidden={index > 0}
         >
-            <p class="inline-block mb-4 px-2.5 py-1.5 border-2 border-event-assembly font-mono leading-none text-sm tracking-[0.06em] uppercase">
+            <p class="label inline-block mb-4 px-2 py-1 border-2 border-event-assembly">
                 Next Assembly
             </p>
             <h2
                 id={session.headingId}
-                class="mb-(--space-lg) font-display text-5xl text-balance max-md:text-2xl"
+                class="mb-(--space-lg) font-display text-2xl-5xl text-balance"
             >
                 <time datetime={session.date}>{session.longDate}</time>
             </h2>
@@ -57,22 +54,22 @@ const sessions = events
             >
                 <div class="pr-(--space-lg) pt-(--space-lg) max-md:pr-0">
                     <dt class="label mb-2 text-text-secondary">Time</dt>
-                    <dd class="font-bold font-sans text-balance text-xl">{session.time}</dd>
+                    <dd class="font-bold text-balance text-xl">{session.time}</dd>
                 </div>
                 <div class="pt-(--space-lg) px-(--space-lg) border-border-strong border-l-2 max-md:border-l-0 max-md:px-0">
                     <dt class="label mb-2 text-text-secondary">Where</dt>
-                    <dd class="font-bold font-sans text-xl">
+                    <dd class="font-bold text-xl">
                         <address class="mb-1 not-italic">{session.venue}</address>
                         {session.room && (
                             <p>{session.room}</p>
                         )}
                     </dd>
                 </div>
-                <div class="pl-(--space-lg) pt-(--space-lg) border-border-strong border-l-2 max-lg:border-l-0 max-lg:pl-0 max-md:pt-(--space-lg)">
+                <div class="pl-(--space-lg) pt-(--space-lg) border-border-strong border-l-2 max-lg:border-l-0 max-lg:pl-0">
                     <dt class="label mb-2 text-text-secondary">RSVP</dt>
-                    <dd class="font-bold font-sans text-xl">
+                    <dd class="font-bold text-xl">
                         <a
-                            class="active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
+                            class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
                             href={session.rsvp}
                             rel="noopener noreferrer"
                             target="_blank"

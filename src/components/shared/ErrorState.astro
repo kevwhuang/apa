@@ -24,7 +24,7 @@ const { code, headingId, lede } = Astro.props;
     <div class="rank rank--2 items-center">
         <div class="flex flex-col gap-6">
             <PageHead
-                class="text-9xl max-lg:text-8xl max-md:text-5xl"
+                class="text-5xl-9xl"
                 headingId={headingId}
             >
                 {code}
@@ -41,13 +41,13 @@ const { code, headingId, lede } = Astro.props;
             </p>
             <nav aria-label="Suggested pages">
                 <ul
-                    class="flex flex-wrap gap-3 list-none"
+                    class="flex flex-wrap max-w-md gap-3"
                     data-motion-stagger="rise"
                 >
                     {ROUTES.map(route => (
-                        <li>
+                        <li class="max-md:grow">
                             <a
-                                class:list={['btn', route.primary && 'btn--primary']}
+                                class:list={['btn', route.primary && 'btn--primary', 'max-md:w-full']}
                                 href={route.href}
                             >
                                 {route.label}
@@ -57,8 +57,8 @@ const { code, headingId, lede } = Astro.props;
                 </ul>
             </nav>
         </div>
-        <div class="error__frame">
-            <div class="error__plate slab slab--bare slab--lift flex items-center justify-center">
+        <div class="pb-(--lift) pe-(--lift)">
+            <div class="error__plate slab slab--bare slab--lift aspect-square flex items-center justify-center max-md:aspect-2/1">
                 <BrandMark
                     class="h-auto w-7/10 max-md:w-11/20"
                     mono
@@ -69,20 +69,7 @@ const { code, headingId, lede } = Astro.props;
 </section>
 
 <style>
-    .error__frame {
-        --plate-drop: var(--lift);
-        padding-block-end: var(--plate-drop);
-        padding-inline-end: var(--plate-drop);
-    }
-
     .error__plate {
         --slab-fill: var(--color-signal);
-        aspect-ratio: 1;
-    }
-
-    @media (max-width: 768px) {
-        .error__plate {
-            aspect-ratio: 2;
-        }
     }
 </style>

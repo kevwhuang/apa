@@ -20,7 +20,6 @@ const ACCOUNT_BENEFITS = [
     { blurb: 'One email a season with what is on the calendar and where to find us next, sent to your account address if you opt in at check-in.', label: 'The dispatch' },
 ];
 
-const CLASS_GENRE_CHIP = 'label inline-flex items-center h-6 px-2 border-2 border-border-strong';
 const DEFAULT_CITY = 'Austin';
 const DEFAULT_ROLE = 'fan';
 const DEFAULT_STATE = 'TX';
@@ -43,7 +42,7 @@ const assemblies = events
 >
     <div class="flex flex-col gap-6">
         <PageHead
-            class="max-w-4xl text-7xl max-md:text-4xl"
+            class="max-w-4xl text-3xl-7xl"
             headingId="onboarding-title"
         >
             Welcome in
@@ -67,7 +66,7 @@ const assemblies = events
         data-onboarding-surface="expired"
         hidden
     >
-        <h2 class="font-display text-3xl text-balance">
+        <h2 class="font-display text-2xl-3xl text-balance">
             This link no longer works
         </h2>
         <p class="max-w-2xl text-lg text-text-secondary">
@@ -93,13 +92,13 @@ const assemblies = events
                     Progress
                 </p>
                 <ol
-                    class="onboarding-rail list-none"
+                    class="onboarding-rail"
                     aria-labelledby="onboarding-progress-label"
                     data-motion="rise"
                 >
                     {ONBOARDING_STEPS.map((step, index) => (
                         <li
-                            class="onboarding-rail__step grid grid-cols-[var(--rail-node)_minmax(0,1fr)] items-center relative gap-x-(--space-sm) max-md:bg-bg-page max-md:p-(--space-xs)"
+                            class="onboarding-rail__step grid grid-cols-[var(--rail-node)_minmax(0,1fr)] items-center relative gap-x-4 max-md:bg-bg-page max-md:p-3"
                             aria-current={index === 0 ? 'step' : undefined}
                             data-onboarding-step={index}
                         >
@@ -122,7 +121,7 @@ const assemblies = events
             </div>
         </div>
         <form
-            class="onboarding-form slab slab--card flex flex-col gap-6"
+            class="onboarding-form slab slab--card slab--plush flex flex-col max-w-(--measure-form) w-full gap-6 mx-auto"
             data-motion="unfold"
             data-onboarding-form
         >
@@ -130,7 +129,7 @@ const assemblies = events
                 class="flex flex-col min-w-0 gap-(--space-lg)"
                 data-onboarding-pane="0"
             >
-                <legend class="mb-(--space-xs) font-bold font-display leading-none text-2xl tracking-[-0.02em] max-md:text-xl">
+                <legend class="mb-3 font-bold font-display leading-none text-xl-2xl tracking-[-0.02em]">
                     The basics
                 </legend>
                 <p class="font-mono text-base wrap-anywhere">
@@ -155,7 +154,7 @@ const assemblies = events
                             hidden
                         />
                         <p
-                            class="label absolute left-0 top-0 p-(--space-xs) border-b-2 border-border-strong border-r-2 bg-bg-page text-text"
+                            class="label absolute left-0 top-0 p-3 border-b-2 border-border-strong border-r-2 bg-bg-page text-text"
                             data-preview-role
                         >
                             {formatRole(DEFAULT_ROLE)}
@@ -176,19 +175,19 @@ const assemblies = events
                             Austin, TX
                         </p>
                         <ul
-                            class="flex flex-wrap gap-2 list-none"
+                            class="flex flex-wrap gap-2"
                             data-preview-genres
                         />
                     </div>
                 </article>
-                <div class="flex flex-col gap-(--space-2xs)">
+                <div class="flex flex-col gap-2">
                     <p class="label text-text-secondary">{PROFILE_FIELDS.portrait.label}</p>
                     <div class="flex flex-wrap items-center gap-(--space-md)">
-                        <label class="halftone onboarding__pick">
+                        <label class="dropzone halftone onboarding__pick basis-55 flex grow items-center relative min-h-(--control-size) px-4 py-2 border-2 border-border-strong border-dashed bg-bg-page">
                             <span class="label">{PROFILE_FIELDS.portrait.picker}</span>
                             <input
                                 id="onboarding-portrait"
-                                class="onboarding__file sr-only"
+                                class="dropzone__input sr-only"
                                 accept={AVATAR.acceptAttribute}
                                 aria-describedby="onboarding-portrait-error onboarding-portrait-help"
                                 aria-invalid="false"
@@ -198,7 +197,7 @@ const assemblies = events
                             />
                         </label>
                         <button
-                            class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-[color,transform]"
+                            class="action-text flex items-center min-h-(--control-size) px-1 text-text-secondary"
                             aria-label="Remove portrait"
                             data-portrait-remove
                             hidden
@@ -220,12 +219,12 @@ const assemblies = events
                         {AVATAR_EXTENSIONS_OR_LIST}. Up to {formatBytes(AVATAR.maxFileBytes)}, at least {AVATAR.minEdgePixels}px on each side.
                     </p>
                 </div>
-                <div class="flex flex-col gap-(--space-2xs)">
-                    <label class="flex flex-col gap-(--space-2xs)">
+                <div class="flex flex-col gap-2">
+                    <label class="flex flex-col gap-2">
                         <span class="label text-text-secondary">{PROFILE_FIELDS.artistName.label}</span>
                         <input
                             id="onboarding-artist-name"
-                            class="input font-sans"
+                            class="input"
                             aria-describedby="onboarding-artist-name-error"
                             aria-invalid="false"
                             autocomplete={PROFILE_FIELDS.artistName.autocomplete}
@@ -241,13 +240,13 @@ const assemblies = events
                         hidden
                     />
                 </div>
-                <fieldset class="flex flex-col gap-(--space-2xs)">
-                    <legend class="label mb-(--space-2xs) text-text-secondary">
+                <fieldset class="flex flex-col gap-2">
+                    <legend class="label mb-2 text-text-secondary">
                         {PROFILE_FIELDS.genres.label}
                     </legend>
                     <div class="flex flex-wrap gap-2">
                         {GENRES.map(genre => (
-                            <label class="onboarding__chip">
+                            <label class="chip gap-2">
                                 <input
                                     class="box"
                                     name="genres"
@@ -259,13 +258,13 @@ const assemblies = events
                         ))}
                     </div>
                 </fieldset>
-                <fieldset class="flex flex-col gap-(--space-2xs)">
-                    <legend class="label mb-(--space-2xs) text-text-secondary">
-                        {PROFILE_FIELDS.role.label} <span class="text-text-secondary">({PROFILE_FIELDS.role.qualifier})</span>
+                <fieldset class="flex flex-col gap-2">
+                    <legend class="label mb-2 text-text-secondary">
+                        {PROFILE_FIELDS.role.label} <span class="whitespace-nowrap text-text-secondary">({PROFILE_FIELDS.role.qualifier})</span>
                     </legend>
                     <div class="flex flex-wrap gap-2">
                         {PROFILE_ROLES.map(role => (
-                            <label class="onboarding__chip">
+                            <label class="chip gap-2">
                                 <input
                                     class="box"
                                     checked={role.id === DEFAULT_ROLE}
@@ -279,12 +278,12 @@ const assemblies = events
                     </div>
                 </fieldset>
                 <div class="grid grid-cols-2 gap-(--space-lg) max-md:grid-cols-1">
-                    <div class="flex flex-col gap-(--space-2xs)">
-                        <label class="flex flex-col gap-(--space-2xs)">
+                    <div class="flex flex-col gap-2">
+                        <label class="flex flex-col gap-2">
                             <span class="label text-text-secondary">{PROFILE_FIELDS.city.label}</span>
                             <input
                                 id="onboarding-city"
-                                class="input font-sans"
+                                class="input"
                                 aria-describedby="onboarding-city-error"
                                 aria-invalid="false"
                                 autocomplete={PROFILE_FIELDS.city.autocomplete}
@@ -301,13 +300,13 @@ const assemblies = events
                             hidden
                         />
                     </div>
-                    <div class="flex flex-col gap-(--space-2xs)">
-                        <label class="flex flex-col gap-(--space-2xs)">
+                    <div class="flex flex-col gap-2">
+                        <label class="flex flex-col gap-2">
                             <span class="label text-text-secondary">{PROFILE_FIELDS.state.label}</span>
                             <span class="select">
                                 <select
                                     id="onboarding-state"
-                                    class="input font-sans"
+                                    class="input"
                                     aria-describedby="onboarding-state-error"
                                     aria-invalid="false"
                                     autocomplete={PROFILE_FIELDS.state.autocomplete}
@@ -340,18 +339,18 @@ const assemblies = events
                 hidden
             >
                 <legend
-                    class="mb-6 font-bold font-display leading-none text-2xl tracking-[-0.02em] max-md:text-xl"
+                    class="mb-6 font-bold font-display leading-none text-xl-2xl tracking-[-0.02em]"
                     tabindex="-1"
                 >
                     Why an account
                 </legend>
                 <ul
-                    class="onboarding-benefits slab slab--bare slab--card mb-(--lift) list-none"
+                    class="slab slab--bare slab--card grid grid-cols-2 mb-(--lift) max-md:grid-cols-1"
                     data-onboarding-reveal
                 >
                     {ACCOUNT_BENEFITS.map(benefit => (
-                        <li class="onboarding-benefits__cell flex flex-col min-w-0 gap-(--space-2xs) p-(--space-md)">
-                            <p class="font-bold font-sans leading-(--text-xl) text-lg tracking-tight">{benefit.label}</p>
+                        <li class="onboarding-benefits__cell flex flex-col min-w-0 gap-2 p-(--space-md)">
+                            <p class="font-bold leading-(--text-xl) text-lg tracking-tight">{benefit.label}</p>
                             <p class="text-base wrap-anywhere">{benefit.blurb}</p>
                         </li>
                     ))}
@@ -363,27 +362,27 @@ const assemblies = events
                 hidden
             >
                 <legend
-                    class="mb-6 font-bold font-display leading-none text-2xl tracking-[-0.02em] max-md:text-xl"
+                    class="mb-6 font-bold font-display leading-none text-xl-2xl tracking-[-0.02em]"
                     tabindex="-1"
                 >
                     Take the tour
                 </legend>
                 <div
-                    class="onboarding-tour slab slab--well mb-(--space-md)"
+                    class="onboarding-tour slab slab--plush slab--well flex flex-col gap-(--space-md) mb-(--space-md)"
                     data-onboarding-reveal
                 >
-                    <p class="font-bold font-sans leading-(--text-xl) text-lg tracking-tight">{TOUR_STOPS.length} things you reach for most</p>
-                    <ol class="grid border-border-inverse-subtle border-y-2 list-none">
+                    <p class="font-bold leading-(--text-xl) text-lg tracking-tight">{TOUR_STOPS.length} things you reach for most</p>
+                    <ol class="grid border-border-inverse-subtle border-y-2">
                         {TOUR_STOPS.map((stop, index) => (
-                            <li class="onboarding-tour__stop grid grid-cols-[auto_minmax(0,1fr)] gap-x-(--space-sm) py-(--space-xs)">
+                            <li class="onboarding-tour__stop grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 py-3">
                                 <span
                                     class="label onboarding-tour__index shrink-0 text-link-on-inverse"
                                     aria-hidden="true"
                                 >
                                     {index + 1}
                                 </span>
-                                <span class="flex flex-col min-w-0 gap-(--space-3xs)">
-                                    <span class="font-bold font-sans leading-(--text-base) text-base tracking-tight">{stop.name}</span>
+                                <span class="flex flex-col min-w-0 gap-1">
+                                    <span class="font-bold leading-(--text-base) text-base tracking-tight">{stop.name}</span>
                                     <span class="text-base wrap-anywhere text-text-inverse-secondary">{stop.blurb}</span>
                                 </span>
                             </li>
@@ -397,8 +396,8 @@ const assemblies = events
                         Start tour <IconArrow />
                     </button>
                 </div>
-                <p class="font-bold font-sans leading-(--text-xl) text-lg tracking-tight">Or go straight there</p>
-                <ul class="grid gap-(--space-md) list-none">
+                <p class="font-bold leading-(--text-xl) text-lg tracking-tight">Or go straight there</p>
+                <ul class="grid gap-(--space-md)">
                     {assemblies.map((assembly, index) => (
                         <li
                             class="grid"
@@ -408,10 +407,10 @@ const assemblies = events
                             hidden={index > 0}
                         >
                             <a
-                                class="onboarding-next__line slab slab--card slab--still mb-(--lift)"
+                                class="onboarding-next__line slab slab--card slab--still flex flex-col gap-2 mb-(--lift)"
                                 href="/assemblies"
                             >
-                                <span class="flex items-center justify-between gap-(--space-sm)">
+                                <span class="flex items-center justify-between gap-4">
                                     <span class="font-mono text-base underline underline-offset-4">Next Assembly</span>
                                     <span
                                         class="onboarding-next__arrow"
@@ -429,10 +428,10 @@ const assemblies = events
                     {WELCOME_LINKS.map(link => (
                         <li class="grid">
                             <a
-                                class="onboarding-next__line slab slab--card slab--still mb-(--lift)"
+                                class="onboarding-next__line slab slab--card slab--still flex flex-col gap-2 mb-(--lift)"
                                 href={link.href}
                             >
-                                <span class="flex items-center justify-between gap-(--space-sm)">
+                                <span class="flex items-center justify-between gap-4">
                                     <span class="font-mono text-base underline underline-offset-4">{link.label}</span>
                                     <span
                                         class="onboarding-next__arrow"
@@ -447,7 +446,7 @@ const assemblies = events
                     ))}
                 </ul>
             </fieldset>
-            <div class="flex flex-wrap items-center gap-(--space-sm) pt-(--space-md) border-border-strong border-t-2">
+            <div class="flex flex-wrap items-center gap-4 pt-(--space-md) border-border-strong border-t-2">
                 <button
                     class="btn"
                     data-onboarding-back
@@ -468,7 +467,7 @@ const assemblies = events
     </div>
     <template data-preview-chip>
         <li
-            class={CLASS_GENRE_CHIP}
+            class="label inline-flex items-center h-6 px-2 border-2 border-border-strong"
             data-preview-genre
         />
     </template>
@@ -477,24 +476,12 @@ const assemblies = events
 <Schedule />
 
 <style>
-    .onboarding-benefits {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
     .onboarding-benefits__cell:not(:nth-child(-n + 2)) {
         border-top: 2px solid var(--color-border-strong);
     }
 
     .onboarding-benefits__cell:nth-child(odd) {
         border-right: 2px solid var(--color-border-strong);
-    }
-
-    .onboarding-form {
-        margin-inline: auto;
-        max-width: var(--measure-form);
-        padding: var(--space-lg);
-        width: 100%;
     }
 
     .onboarding-next__arrow {
@@ -507,9 +494,6 @@ const assemblies = events
     }
 
     .onboarding-next__line {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2xs);
         transition:
             background-color var(--duration-fast) var(--motion-ease-ui),
             box-shadow var(--duration-base) var(--motion-ease-entrance),
@@ -533,7 +517,7 @@ const assemblies = events
     }
 
     .onboarding-rail {
-        --rail-node: 34px;
+        --rail-node: 36px;
         display: flex;
         flex-direction: column;
         gap: var(--space-md);
@@ -598,13 +582,6 @@ const assemblies = events
         color: var(--color-text-on-signal);
     }
 
-    .onboarding-tour {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-md);
-        padding: var(--space-lg);
-    }
-
     .onboarding-tour__index {
         line-height: var(--text-base);
     }
@@ -619,71 +596,16 @@ const assemblies = events
         top: calc(var(--header-height) + var(--space-md));
     }
 
-    .onboarding__chip {
-        align-items: center;
-        border: 2px solid var(--color-border-strong);
-        display: flex;
-        font-family: var(--font-mono);
-        font-size: var(--text-sm);
-        gap: var(--space-2xs);
-        letter-spacing: 0.06em;
-        line-height: 1;
-        min-height: var(--control-size);
-        padding: var(--space-2xs) var(--space-sm);
-        text-transform: uppercase;
-        transition: background-color var(--duration-fast) var(--motion-ease-ui);
-        user-select: none;
-    }
-
-    .onboarding__chip:has(.box:checked) {
-        background-color: var(--color-bg-sunken);
-    }
-
-    .onboarding__file {
-        clip-path: inset(50%);
-        height: 100%;
-        inset: 0;
-        margin: 0;
-        width: 100%;
-    }
-
     .onboarding__pick {
-        align-items: center;
-        background-color: var(--color-bg-page);
-        border: 2px dashed var(--color-border-strong);
-        display: flex;
-        flex: 1 1 220px;
-        min-height: var(--control-size);
-        padding: var(--space-2xs) var(--space-sm);
-        position: relative;
         transition:
             background-color var(--duration-fast) var(--motion-ease-ui),
             border-color var(--duration-fast) var(--motion-ease-ui),
             box-shadow var(--duration-fast) var(--motion-ease-ui);
     }
 
-    .onboarding__pick > span {
-        background-color: inherit;
-    }
-
-    .onboarding__pick:active {
-        background-color: var(--color-bg-active);
-        border-color: var(--color-border-selected);
-    }
-
-    .onboarding__pick:has(.onboarding__file:focus-visible) {
-        border-color: var(--color-border-selected);
-        border-style: solid;
-    }
-
-    .onboarding__pick:has(.onboarding__file[aria-invalid='true']) {
+    .onboarding__pick:has(.dropzone__input[aria-invalid='true']) {
         border-color: var(--color-border-invalid);
-        box-shadow: var(--lift) var(--lift) 0 0 var(--color-border-strong);
-    }
-
-    .onboarding__pick:hover {
-        background-color: var(--color-bg-hover);
-        border-color: var(--color-border-selected);
+        box-shadow: var(--lift-shadow);
     }
 
     [data-onboarding-reveal='off'] {
@@ -698,21 +620,12 @@ const assemblies = events
     }
 
     @media (max-width: 768px) {
-        .onboarding-benefits {
-            grid-template-columns: minmax(0, 1fr);
-        }
-
         .onboarding-benefits__cell:not(:first-child) {
             border-top: 2px solid var(--color-border-strong);
         }
 
         .onboarding-benefits__cell:nth-child(odd) {
             border-right: 0;
-        }
-
-        .onboarding-form,
-        .onboarding-tour {
-            padding: var(--space-md);
         }
 
         .onboarding-rail {

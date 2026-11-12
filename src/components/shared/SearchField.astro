@@ -25,7 +25,7 @@ const { class: fieldClass, 'data-motion': motion, label, placeholder } = Astro.p
             <IconSearch />
         </span>
         <input
-            class="input input--sunk pl-11 pr-(--control-size) font-mono"
+            class="input search-field__input pl-11 pr-(--control-size) font-mono"
             autocomplete="off"
             data-search-input
             placeholder={placeholder}
@@ -43,3 +43,14 @@ const { class: fieldClass, 'data-motion': motion, label, placeholder } = Astro.p
         </button>
     </span>
 </label>
+
+<style>
+    .search-field__input {
+        background-color: var(--color-bg-sunken);
+    }
+
+    .search-field__input:focus-visible,
+    .search-field__input:hover {
+        background-color: var(--color-bg-page);
+    }
+</style>

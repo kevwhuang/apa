@@ -33,7 +33,7 @@ const PRODUCERS_WELCOMED = '1,000+';
 const assembly = getProgram('assembly');
 const bash = getProgram('bash');
 const camp = getProgram('camp');
-const contactHref = `/contact?topic=${encodeURIComponent(PARTNER_INQUIRY_TOPIC)}#contact-topic`;
+const contactHref = `/contact?topic=${encodeURIComponent(PARTNER_INQUIRY_TOPIC)}`;
 const programs = Object.values(EVENT_PROGRAMS);
 
 const LANES: Lane[] = [
@@ -63,7 +63,7 @@ const TIERS: Tier[] = [
 >
     <div class="flex flex-col gap-6">
         <PageHead
-            class="text-7xl max-md:text-4xl"
+            class="text-4xl-7xl"
             headingId="partners-title"
         >
             Partner with us
@@ -92,14 +92,14 @@ const TIERS: Tier[] = [
             By the numbers
         </SectionHead>
         <dl
-            class="mark grid grid-cols-4 gap-px border-2 border-border-strong bg-border-strong max-lg:grid-cols-2 max-md:grid-cols-1"
+            class="mark grid grid-cols-4 gap-px border-2 border-border-strong bg-border-strong max-lg:grid-cols-2 max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))]"
             data-motion-stagger="stamp"
         >
             {STATS.map(stat => (
                 <div class="flex flex-col gap-3 p-(--space-md) text-center bg-bg-page">
                     <dt class="label text-text-secondary">{stat.label}</dt>
                     <dd
-                        class="font-bold font-display leading-none text-3xl tracking-[-0.02em] max-md:text-2xl"
+                        class="font-bold font-display leading-none text-2xl-3xl tracking-[-0.02em]"
                         data-motion-count={stat.value}
                     >
                         {stat.value}
@@ -129,11 +129,11 @@ const TIERS: Tier[] = [
             Each one helps keep our volunteer-run programs going.
         </p>
         <ul
-            class="grid grid-cols-2 gap-x-(--space-lg) gap-y-(--space-2xl) mb-8 list-none max-md:grid-cols-1"
+            class="grid grid-cols-2 gap-x-(--space-lg) gap-y-(--space-2xl) mb-8 max-md:grid-cols-1"
             data-motion-stagger="flip"
         >
             {LANES.map(lane => (
-                <li class="slab slab--card p-(--space-lg)">
+                <li class="slab slab--card">
                     <h3 class="mb-2 text-2xl">{lane.name}</h3>
                     <p class="text-base text-text-secondary">{lane.detail}</p>
                 </li>
@@ -144,7 +144,7 @@ const TIERS: Tier[] = [
             data-motion="rise"
         >
             <a
-                class="action-text hover:text-link inline-flex items-center min-h-(--control-size) gap-2 underline underline-offset-4 transition-[color,transform]"
+                class="action-text inline-flex items-center min-h-(--control-size) gap-2 underline underline-offset-4"
                 href={contactHref}
             >
                 Start a conversation <IconArrow />
@@ -172,16 +172,16 @@ const TIERS: Tier[] = [
             dollar goes to the programs.
         </p>
         <ul
-            class="tiers grid grid-cols-3 gap-x-(--space-lg) gap-y-(--space-2xl) list-none max-lg:grid-cols-1"
+            class="grid grid-cols-3 gap-x-(--space-lg) gap-y-(--space-2xl) max-lg:grid-cols-1"
             data-motion-stagger="flip"
         >
             {TIERS.map(tier => (
-                <li class="gap-y-5">
+                <li class="content-start grid grid-cols-1 grid-rows-subgrid row-span-4 gap-y-5">
                     <article
                         class:list={[
                             'slab slab--still tier',
                             tier.featured ? 'slab--well tier--featured' : 'slab--card',
-                            'text-center',
+                            'content-start grid grid-cols-1 grid-rows-subgrid row-span-4 text-center',
                         ]}
                     >
                         <h3 class="mb-2 font-display text-2xl">{tier.name}</h3>
@@ -249,8 +249,8 @@ const TIERS: Tier[] = [
                     ))}
                 </ul>
                 <p class="max-w-2xl text-sm text-text-secondary">
-                    The Alliance is a volunteer-run collective, not a 501(c)(3), so donations aren't
-                    tax-deductible. Every dollar still goes to the programs.
+                    The Alliance is a volunteer-run collective and not yet a 501(c)(3), so donations aren't
+                    tax-deductible yet. Every dollar still goes to the programs.
                 </p>
             </div>
             <div
@@ -258,7 +258,7 @@ const TIERS: Tier[] = [
                 data-motion="unfold"
             >
                 <p class="label mb-4 text-text-secondary">Suggested amounts</p>
-                <ul class="flex flex-wrap gap-3 mb-8 list-none">
+                <ul class="flex flex-wrap gap-3 mb-8">
                     {DONATION_AMOUNTS.map(amount => (
                         <li class="chip">{amount}</li>
                     ))}
@@ -291,15 +291,15 @@ const TIERS: Tier[] = [
             Backed by
         </SectionHead>
         <ul
-            class="grid grid-cols-2 gap-px border-2 border-border-strong list-none bg-border-strong max-md:grid-cols-1"
+            class="grid grid-cols-2 gap-px border-2 border-border-strong bg-border-strong max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))]"
             data-motion="rise"
         >
             {PARTNERS.map(partner => (
-                <li class="partner-tile flex flex-col gap-5 p-[round(clamp(24px,calc(18.667px_+_1.6667vw),40px),4px)] bg-bg-page">
+                <li class="flex flex-col gap-(--space-md) p-(--space-lg) text-center bg-bg-page">
                     <p class="label text-text-secondary">{partner.name}</p>
                     <div class="flex items-center justify-center h-[round(clamp(80px,calc(69.333px_+_3.3333vw),112px),4px)] w-full">
                         <Image
-                            class="partner-tile__logo object-contain max-h-full max-w-full"
+                            class="partner-logo object-contain max-h-full max-w-full"
                             alt={partner.name}
                             densities={[1, 2]}
                             src={partner.logo}
@@ -314,25 +314,11 @@ const TIERS: Tier[] = [
 
 <style>
     .tier {
-        align-content: start;
-        display: grid;
-        grid-row: span 4;
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: subgrid;
         padding: var(--space-lg) var(--space-md);
     }
 
     .tier--featured {
         --slab-level: var(--z-card);
-        --slab-line: var(--color-border-strong);
         --slab-rule: 2px;
-    }
-
-    .tiers > li {
-        align-content: start;
-        display: grid;
-        grid-row: span 4;
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: subgrid;
     }
 </style>

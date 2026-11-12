@@ -17,7 +17,7 @@ const upcoming = editions
 ---
 
 <section
-    class="stage stage--bash border-b-2 border-border-strong"
+    class="stage border-b-2 border-border-strong"
     aria-labelledby="landing-bash-title"
     data-event-group="home-bash"
     data-event-role="some"
@@ -38,7 +38,7 @@ const upcoming = editions
         </div>
         <div class="relative">
             <SectionHead
-                class="text-8xl max-lg:text-7xl max-md:text-3xl"
+                class="text-3xl-8xl"
                 headingId="landing-bash-title"
             >
                 Next {program.name}
@@ -60,7 +60,7 @@ const upcoming = editions
                     All Bashes
                 </a>
                 <a
-                    class="action-text hover:text-link-on-inverse inline-flex items-center min-h-(--control-size) gap-2 underline underline-offset-4 text-text-inverse transition-[color,transform]"
+                    class="action-text inline-flex items-center min-h-(--control-size) gap-2 underline underline-offset-4 text-text-inverse"
                     href="/partners"
                 >
                     Partner on it <IconArrow />
@@ -79,7 +79,7 @@ const upcoming = editions
         >
             <div>
                 <dt class="label mb-2 text-text-secondary">When</dt>
-                <dd class="font-bold font-sans text-xl">
+                <dd class="font-bold text-xl">
                     <time
                         class="block mb-1 text-marker-cobalt"
                         datetime={edition.data.date.toISOString()}
@@ -91,7 +91,7 @@ const upcoming = editions
             </div>
             <div>
                 <dt class="label mb-2 text-text-secondary">Where</dt>
-                <dd class="font-bold font-sans text-xl">
+                <dd class="font-bold text-xl">
                     <address class="mb-1 not-italic">{edition.data.location}</address>
                     {edition.data.room && (
                         <p>{edition.data.room}</p>
@@ -100,9 +100,9 @@ const upcoming = editions
             </div>
             <div>
                 <dt class="label mb-2 text-text-secondary">RSVP</dt>
-                <dd class="font-bold font-sans text-xl">
+                <dd class="font-bold text-xl">
                     <a
-                        class="active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
+                        class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
                         href={LINKS.meetup}
                         rel="noopener noreferrer"
                         target="_blank"
@@ -119,7 +119,7 @@ const upcoming = editions
 <Schedule />
 
 <style>
-    .bash-well.slab {
+    .bash-well {
         grid-column: main-start / full-end;
         padding-block: var(--space-2xl);
         padding-inline: var(--shell-pad) max(var(--shell-pad), calc(100% - var(--shell-inner)));

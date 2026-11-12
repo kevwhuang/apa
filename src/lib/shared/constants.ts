@@ -125,10 +125,10 @@ const GENRES = [
     'urbano',
 ] as const;
 
-const JOIN_ROUTE = '/contact#contact-topic';
+const JOIN_ROUTE = '/contact';
 
 const KIND_COLORS: Record<AssetKind, string> = {
-    audio: 'var(--color-chart-3)',
+    audio: 'var(--color-chart-2)',
     bash: 'var(--color-marker-cobalt)',
     brochure: 'var(--color-text-secondary)',
     media: 'var(--color-signal)',
@@ -245,7 +245,7 @@ const ROLES = [
 ] as const;
 
 const SESSION_TTL_DAYS = 14;
-const SITE_UPDATED = '2026-11-11T00:00:00-06:00';
+const SITE_UPDATED = '2026-11-12T00:00:00-06:00';
 
 const STORAGE = {
     adminProds: { key: 'apa.admin-prods', scope: 'local', topic: 'apa:admin-prods-changed' },

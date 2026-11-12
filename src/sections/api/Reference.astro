@@ -22,7 +22,7 @@ const ENDPOINTS: Endpoint[] = [
 >
     <div class="flex flex-col gap-6">
         <PageHead
-            class="max-w-4xl text-7xl max-md:text-5xl"
+            class="text-5xl-7xl text-balance"
             headingId="api-title"
         >
             Read the data
@@ -36,29 +36,29 @@ const ENDPOINTS: Endpoint[] = [
         </p>
     </div>
     <dl
-        class="api__ledger"
+        class="grid grid-cols-[minmax(200px,0.62fr)_repeat(3,minmax(0,1fr))] gap-0.5 border-2 border-border-strong bg-border-strong max-lg:grid-cols-[minmax(0,0.38fr)_minmax(0,1fr)] max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))]"
         aria-label="API contract"
         data-motion-stagger="rise"
     >
-        <div class="api__cell--flag content-center grid px-(--space-sm) py-(--space-xs)">
-            <dt class="label mb-(--space-2xs) text-text-inverse-secondary">Endpoints</dt>
+        <div class="content-center grid px-(--space-lg) py-(--space-md) bg-bg-inverse text-text-inverse max-lg:row-span-3 max-md:px-(--space-md) max-md:py-4 max-md:row-auto">
+            <dt class="label mb-2 text-text-inverse-secondary">Endpoints</dt>
             <dd
-                class="font-bold font-display leading-none text-4xl tracking-[-0.02em]"
+                class="font-bold font-display text-4xl tracking-[-0.02em]"
                 data-motion-count={String(ENDPOINTS.length)}
             >
                 {ENDPOINTS.length}
             </dd>
         </div>
-        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
-            <dt class="label mb-(--space-3xs) text-text-secondary">Methods</dt>
+        <div class="content-center grid px-4 py-3 bg-bg-page">
+            <dt class="label mb-1 text-text-secondary">Methods</dt>
             <dd class="font-mono text-base">GET</dd>
         </div>
-        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
-            <dt class="label mb-(--space-3xs) text-text-secondary">Format</dt>
+        <div class="content-center grid px-4 py-3 bg-bg-page">
+            <dt class="label mb-1 text-text-secondary">Format</dt>
             <dd class="font-mono text-base">JSON</dd>
         </div>
-        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
-            <dt class="label mb-(--space-3xs) text-text-secondary">Caching</dt>
+        <div class="content-center grid px-4 py-3 bg-bg-page">
+            <dt class="label mb-1 text-text-secondary">Caching</dt>
             <dd class="font-mono text-base">no-store</dd>
         </div>
     </dl>
@@ -79,7 +79,7 @@ const ENDPOINTS: Endpoint[] = [
             class="overflow-x-auto"
             data-motion="unfold"
         >
-            <table class="api__table border-2 border-border-strong">
+            <table class="min-w-140 border-2 border-border-strong">
                 <caption class="sr-only">API endpoints, the payload each returns, and a link to open each one</caption>
                 <thead>
                     <tr class="label border-b-2 border-border-strong text-text-secondary">
@@ -113,10 +113,10 @@ const ENDPOINTS: Endpoint[] = [
                                 <span class="label mr-2 px-2 py-1 bg-bg-inverse text-text-inverse">GET</span>
                                 <code class="font-bold font-mono text-base">{endpoint.path}</code>
                             </th>
-                            <td class="min-w-[320px] px-4 py-4 text-base text-text-secondary">{endpoint.blurb}</td>
+                            <td class="min-w-80 px-4 py-4 text-base text-text-secondary">{endpoint.blurb}</td>
                             <td class="px-4 py-4 text-right">
                                 <a
-                                    class="action-text api__open inline-flex items-center min-h-(--control-size) gap-2 transition-[color,transform]"
+                                    class="action-text hit inline-flex items-center min-h-(--control-size) gap-2"
                                     aria-label={`Open ${endpoint.path}`}
                                     href={endpoint.path}
                                 >
@@ -130,47 +130,3 @@ const ENDPOINTS: Endpoint[] = [
         </div>
     </div>
 </section>
-
-<style>
-    .api__cell--flag {
-        background-color: var(--color-bg-inverse);
-        color: var(--color-text-inverse);
-        padding: var(--space-md) var(--space-lg);
-    }
-
-    .api__ledger {
-        background-color: var(--color-border-strong);
-        border: 2px solid var(--color-border-strong);
-        display: grid;
-        gap: 2px;
-        grid-template-columns: minmax(200px, 0.62fr) repeat(3, minmax(0, 1fr));
-    }
-
-    .api__table {
-        display: table;
-        min-width: 560px;
-        overflow-x: visible;
-        width: 100%;
-    }
-
-    @media (max-width: 1024px) {
-        .api__cell--flag {
-            grid-row: span 3;
-        }
-
-        .api__ledger {
-            grid-template-columns: minmax(0, 0.38fr) minmax(0, 1fr);
-        }
-    }
-
-    @media (max-width: 768px) {
-        .api__cell--flag {
-            grid-row: auto;
-            padding: var(--space-sm) var(--space-md);
-        }
-
-        .api__ledger {
-            grid-template-columns: minmax(0, 1fr);
-        }
-    }
-</style>

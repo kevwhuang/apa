@@ -28,7 +28,7 @@ export default defineConfig({
         {
             cssVariable: '--font-space-mono',
             display: 'block',
-            fallbacks: ['Courier New', 'monospace'],
+            fallbacks: ['monospace'],
             name: 'Space Mono',
             provider: fontProviders.fontsource(),
             styles: ['normal'],

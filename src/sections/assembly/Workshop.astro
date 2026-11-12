@@ -27,44 +27,65 @@ const events = await getCollection('events');
 const portraits = import.meta.glob<{ default: ImageMetadata }>('/src/images/speakers/*.webp', { eager: true });
 
 const sessions = events
-    .filter(event => event.data.speakers.length > 0 && event.data.type === 'assembly' && event.data.workshop && isUpcoming(event.data.end))
+    .filter(event => event.data.speakers.length > 0 && event.data.type === 'assembly' && event.data.workshop)
     .sort((a, b) => +a.data.date - +b.data.date);
 
-const cards = sessions.map((session, index) => ({
+const ended = sessions.filter(session => !isUpcoming(session.data.end));
+const upcoming = sessions.filter(session => isUpcoming(session.data.end));
+
+const cards = [...ended.slice(-1), ...upcoming].map((session, index) => ({
     bios: session.data.speakers.flatMap(({ bio }) => (bio ? [bio] : [])),
     description: session.data.description,
     end: session.data.end.toISOString(),
     extras: session.id === SESSION_EXTRAS.id ? SESSION_EXTRAS : undefined,
     headingId: index === 0 ? 'workshop-title' : `workshop-${index + 1}-title`,
+    isUpcoming: isUpcoming(session.data.end),
     portrait: portraits[`/src/images/speakers/${session.data.speakers[0].name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}.webp`]?.default,
     speaker: session.data.speaker ?? session.data.speakers.map(speaker => speaker.name).join(' & '),
     workshop: session.data.workshop,
 }));
+
+const shown = cards.find(card => card.isUpcoming) ?? cards.at(-1);
 ---
 
-{cards.map((card, index) => (
+{cards.map(card => (
     <section
-        class="stage stage--assembly stage--tight border-b-2 border-border-strong"
+        class="stage stage--tight border-b-2 border-border-strong"
         aria-labelledby={card.headingId}
         data-event-end={card.end}
         data-event-group="workshop"
-        data-event-role="next"
-        hidden={index > 0}
+        data-event-role="current"
+        hidden={card !== shown}
     >
         <div
-            class="slab slab--roomy workshop"
+            class="slab slab--lift slab--roomy workshop"
             data-motion="unfold"
         >
             <hgroup>
                 <p
-                    class="mark slab workshop__marker mb-(--space-lg) font-mono text-4xl max-md:text-2xl"
+                    class="mark slab workshop__marker mb-(--space-lg) font-mono text-2xl-4xl"
                     data-motion="stamp"
                 >
-                    Upcoming workshop
+                    <span
+                        data-event-end={card.end}
+                        data-event-group="workshop"
+                        data-event-role="upcoming"
+                        hidden={!card.isUpcoming}
+                    >
+                        Upcoming workshop
+                    </span>
+                    <span
+                        data-event-end={card.end}
+                        data-event-group="workshop"
+                        data-event-role="past"
+                        hidden={card.isUpcoming}
+                    >
+                        Latest workshop
+                    </span>
                 </p>
                 <h2
                     id={card.headingId}
-                    class="mb-(--space-lg) font-display text-5xl text-balance max-md:text-xl"
+                    class="mb-(--space-lg) font-display text-xl-5xl text-balance"
                 >
                     {card.workshop}
                 </h2>
@@ -73,7 +94,7 @@ const cards = sessions.map((session, index) => ({
                 <div class="flex flex-col self-start gap-(--space-md)">
                     <div class="slab slab--card">
                         <div
-                            class="workshop__plate mb-6"
+                            class="mb-6 pb-(--lift) pe-(--lift)"
                             data-motion="wipe"
                         >
                             {card.portrait
@@ -92,13 +113,13 @@ const cards = sessions.map((session, index) => ({
                                             class="slab slab--bare slab--card aspect-square"
                                             color={PALETTE[0].background}
                                             label={getInitials(card.speaker)}
-                                            labelClass="leading-none text-6xl"
+                                            labelClass="text-6xl"
                                             labelColor={PALETTE[0].text}
                                         />
                                     )}
                         </div>
                         <p class="label mb-2 text-text-secondary">Presented by</p>
-                        <p class:list={[card.extras ? 'mb-1' : 'mb-3', 'font-bold font-sans text-xl tracking-tight']}>
+                        <p class:list={[card.extras ? 'mb-1' : 'mb-3', 'font-bold text-xl tracking-tight']}>
                             {card.speaker}
                         </p>
                         {card.extras && (
@@ -127,13 +148,13 @@ const cards = sessions.map((session, index) => ({
                                 data-motion-stagger="rise"
                             >
                                 {card.extras.files.map(file => (
-                                    <li class="workshop__row grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-(--space-sm) gap-y-(--space-3xs) py-(--space-xs) border-t border-t-border-subtle">
+                                    <li class="workshop__row first:border-t-0 first:pt-0 grid grid-cols-[minmax(min-content,1fr)_auto] items-center gap-x-4 gap-y-1 py-3 border-t border-t-border-subtle">
                                         <div class="[grid-area:body] flex flex-col gap-1">
-                                            <p class="py-(--space-sm) font-mono">{file.title}</p>
+                                            <p class="py-4 font-mono">{file.title}</p>
                                             <p class="text-base text-text-secondary">{file.description}</p>
                                         </div>
                                         <p
-                                            class="[grid-area:meta] font-mono text-base text-text-secondary"
+                                            class="[grid-area:meta] font-mono text-base whitespace-nowrap text-text-secondary"
                                             data-placeholder
                                         >
                                             {file.meta}
@@ -143,7 +164,7 @@ const cards = sessions.map((session, index) => ({
                                 ))}
                             </ul>
                             <a
-                                class="action-text hover:text-link inline-flex items-center min-h-(--control-size) gap-2 transition-[color,transform]"
+                                class="action-text inline-flex items-center min-h-(--control-size) gap-2"
                                 href="/resources"
                             >
                                 Browse resources <IconArrow />
@@ -161,8 +182,6 @@ const cards = sessions.map((session, index) => ({
 <style>
     .workshop {
         --slab-fill: var(--color-bg-sunken);
-        --slab-level: var(--z-lift);
-        --slab-rule: 2px;
     }
 
     .workshop__marker {
@@ -172,21 +191,10 @@ const cards = sessions.map((session, index) => ({
         color: var(--color-event-assembly-text);
     }
 
-    .workshop__plate {
-        --plate-drop: var(--lift);
-        padding-block-end: var(--plate-drop);
-        padding-inline-end: var(--plate-drop);
-    }
-
     .workshop__row {
         grid-template-areas:
             'body status'
             'meta status';
-    }
-
-    .workshop__row:first-child {
-        border-top: 0;
-        padding-top: 0;
     }
 
     @media (max-width: 1024px) {

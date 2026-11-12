@@ -31,7 +31,7 @@ const files = (await getCollection('downloads', asset => asset.data.kind === 'ba
                 class="overflow-x-auto"
                 data-motion="unfold"
             >
-                <table class="bash-files__table border-2 border-border-strong">
+                <table class="table-fixed border-2 border-border-strong">
                     <caption class="sr-only">Bash files with their format, size, and download</caption>
                     <colgroup>
                         <col />
@@ -69,13 +69,13 @@ const files = (await getCollection('downloads', asset => asset.data.kind === 'ba
                     </thead>
                     <tbody class="divide-border-strong divide-y">
                         {files.map(file => (
-                            <tr id={file.id}>
+                            <tr>
                                 <th
-                                    class="p-4 font-bold font-sans text-left max-md:px-2"
+                                    class="p-4 font-bold text-left max-md:px-2"
                                     scope="row"
                                 >
                                     {file.data.title}
-                                    <span class="hidden font-mono font-normal text-base text-text-secondary max-md:block">
+                                    <span class="hidden font-mono font-normal text-base whitespace-nowrap text-text-secondary max-md:block">
                                         {file.data.format} &middot; {file.data.size}
                                     </span>
                                 </th>
@@ -84,7 +84,7 @@ const files = (await getCollection('downloads', asset => asset.data.kind === 'ba
                                 <td class="p-4 text-center max-md:px-2">
                                     {file.availability === 'open' && (
                                         <a
-                                            class="action-text inline-flex items-center min-h-(--control-size) transition-[color,transform]"
+                                            class="action-text inline-flex items-center min-h-(--control-size)"
                                             aria-label={`Download ${file.data.title}`}
                                             download
                                             href={file.data.href}
@@ -104,11 +104,3 @@ const files = (await getCollection('downloads', asset => asset.data.kind === 'ba
         </div>
     </section>
 )}
-
-<style>
-    .bash-files__table {
-        display: table;
-        overflow-x: visible;
-        table-layout: fixed;
-    }
-</style>

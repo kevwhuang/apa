@@ -6,11 +6,13 @@ import { UPLOAD } from '@lib/shared/constants';
 import { UPLOAD_EXTENSIONS_OR_LIST } from '@lib/audio/uploads';
 import { formatBytes } from '@lib/shared/utils';
 
+const CLASS_QUEUED_LINK = 'active:translate-y-px hover:text-link flex flex-[1_1_140px] items-center min-h-(--control-size) min-w-0 font-mono text-base underline underline-offset-4 wrap-anywhere transition-[color,translate]';
+
 const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
 ---
 
 <section
-    class="stage stage--assembly stage--tight border-b-2 border-border-strong"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="feedback-title"
 >
     <div>
@@ -44,7 +46,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                         role="group"
                     >
                         <button
-                            class="chip feedback__mode is-active hover:bg-bg-hover h-(--control-size)"
+                            class="chip feedback__mode is-active hover:bg-bg-hover"
                             aria-controls="feedback-panel-link"
                             aria-pressed="true"
                             data-mode="link"
@@ -53,7 +55,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                             Paste a link
                         </button>
                         <button
-                            class="chip feedback__mode hover:bg-bg-hover h-(--control-size)"
+                            class="chip feedback__mode hover:bg-bg-hover"
                             aria-controls="feedback-panel-file"
                             aria-pressed="false"
                             data-mode="file"
@@ -173,7 +175,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                 data-motion="unfold"
             >
                 <table
-                    class="board__table table-fixed border-2 border-border-strong"
+                    class="table-fixed border-2 border-border-strong"
                     data-placeholder
                 >
                     <caption class="sr-only">Demos submitted at the last Assembly</caption>
@@ -257,13 +259,13 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
             <div class="flex flex-wrap items-baseline gap-3">
                 <p class="label px-2 py-1 bg-bg-inverse text-text-inverse">Link</p>
                 <p
-                    class="font-bold font-sans wrap-anywhere"
+                    class="font-bold wrap-anywhere"
                     data-row-host
                 />
             </div>
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <a
-                    class="active:translate-y-px hover:text-link flex flex-[1_1_140px] items-center min-h-(--control-size) min-w-0 font-mono text-base underline underline-offset-4 wrap-anywhere transition-[color,translate]"
+                    class={CLASS_QUEUED_LINK}
                     data-row-href
                     href="/assemblies"
                     rel="noopener noreferrer"
@@ -273,7 +275,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                     <span class="sr-only">&nbsp;(opens in a new tab)</span>
                 </a>
                 <button
-                    class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-[color,transform]"
+                    class="action-text flex items-center min-h-(--control-size) px-1 text-text-secondary"
                     data-row-remove
                     type="button"
                 >
@@ -288,7 +290,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                 <div class="flex flex-wrap items-baseline gap-3">
                     <p class="label px-2 py-1 bg-bg-inverse text-text-inverse">File</p>
                     <p
-                        class="font-bold font-sans wrap-anywhere"
+                        class="font-bold wrap-anywhere"
                         data-row-name
                     />
                 </div>
@@ -322,7 +324,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                     data-row-percent
                 />
                 <button
-                    class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-[color,transform]"
+                    class="action-text flex items-center min-h-(--control-size) px-1 text-text-secondary"
                     data-row-cancel
                     type="button"
                 >
@@ -339,7 +341,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
             />
             <td class="px-4 max-md:px-2">
                 <span
-                    class="block font-bold font-sans truncate"
+                    class="block font-bold wrap-break-word"
                     data-cell-producer
                 />
                 <span

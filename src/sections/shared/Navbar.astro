@@ -20,7 +20,7 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
 ---
 
 <header
-    class:list={['is-instant', 'site-header', hasHero && 'site-header--overlay', 'z-100']}
+    class:list={['is-instant', 'site-header', hasHero && 'site-header--overlay', 'z-200']}
     data-has-hero={isOverHero ? 'true' : undefined}
     transition:animate="none"
 >
@@ -49,7 +49,7 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
                             <Fragment>
                                 <button
                                     id={`nav-${group.id}`}
-                                    class="site-nav__trigger"
+                                    class="label site-nav__trigger"
                                     aria-controls={`nav-${group.id}-menu`}
                                     aria-expanded="false"
                                     data-nav-trigger
@@ -70,7 +70,7 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
                                     {group.items.map(item => (
                                         <li>
                                             <a
-                                                class="site-nav__item"
+                                                class="label site-nav__item"
                                                 href={item.href}
                                             >
                                                 {item.label}
@@ -82,7 +82,7 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
                         )}
                         {'href' in group && (
                             <a
-                                class="site-nav__link"
+                                class="label site-nav__link"
                                 href={group.href}
                             >
                                 {group.label}
@@ -92,7 +92,7 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
                 ))}
             </ul>
         </nav>
-        <div class="site-header__controls flex items-center gap-(--space-3xs) ml-auto">
+        <div class="site-header__controls flex items-center gap-1 ml-auto">
             <AccountControl />
             <a
                 class="cart-link"
@@ -149,8 +149,12 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
 
     .cart-link {
         --control-box: calc(var(--control-lead) + var(--control-ink));
-        align-items: center;
         display: inline-flex;
+    }
+
+    .cart-link,
+    .nav-toggle {
+        align-items: center;
         height: var(--control-size);
         justify-content: flex-start;
         padding-inline-start: var(--control-lead);
@@ -161,54 +165,37 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
         width: var(--control-box);
     }
 
-    .cart-link:active {
+    .cart-link:active,
+    .nav-toggle:active {
         transform: translateY(1px);
     }
 
-    .cart-link:hover {
+    .cart-link:hover,
+    .nav-toggle:hover {
         color: var(--color-link);
     }
 
     .cart-link::after {
         content: '';
-        inset: 0 calc(var(--control-box) - var(--control-hit)) 0 0;
+        inset: 0 calc(var(--control-box) - (var(--control-hit) + var(--control-size)) / 2) 0 calc((var(--control-hit) - var(--control-size)) / 2);
         position: absolute;
     }
 
     .nav-toggle {
         --control-box: var(--control-hit);
-        align-items: center;
         display: none;
-        height: var(--control-size);
-        justify-content: flex-start;
-        padding-inline-start: var(--control-lead);
-        position: relative;
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-        width: var(--control-box);
-    }
-
-    .nav-toggle:active {
-        transform: translateY(1px);
-    }
-
-    .nav-toggle:hover {
-        color: var(--color-link);
     }
 
     .nav-toggle::after {
         content: '';
-        inset: 0 calc(var(--control-box) - var(--control-hit)) 0 0;
+        inset: 0 calc(var(--control-box) - var(--control-size)) 0 0;
         position: absolute;
     }
 
     .site-header {
-        --control-compact: 40px;
         --control-hit: var(--control-size);
         --control-ink: 22px;
         --control-lead: round((var(--control-hit) - var(--control-ink)) / 2, 4px);
-        --header-gutter: calc(var(--shell-pad) + max(0px, (100% - var(--shell-max)) / 2));
         --nav-gap: round(clamp(12px, calc(9.333px + 0.8333vw), 20px), 4px);
         --nav-pad: round(clamp(8px, calc(6.667px + 0.4167vw), 12px), 4px);
         background: var(--color-bg-page);
@@ -245,14 +232,14 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
         gap: var(--nav-gap);
         grid-template-columns: 1fr auto 1fr;
         height: 100%;
-        padding-inline: var(--header-gutter);
+        padding-inline: calc(var(--shell-pad) + max(0px, (100% - var(--shell-max)) / 2));
     }
 
     .site-header__brand {
         align-items: center;
         display: inline-flex;
         flex-shrink: 0;
-        gap: var(--space-2xs);
+        gap: 8px;
         height: var(--control-size);
         justify-self: start;
         position: relative;
@@ -265,7 +252,7 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
 
     .site-header__brand:focus-visible::after {
         content: '';
-        inset: calc(-1 * var(--space-3xs)) calc(-1 * var(--space-xs));
+        inset: -4px -12px;
         outline: 2px solid var(--color-focus-ring);
         position: absolute;
     }
@@ -281,16 +268,10 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
 
     .site-nav__item {
         --nav-item-hover-bg: var(--color-nav-bg-hover);
-        --nav-item-hover-ink: var(--color-link);
         align-items: center;
         display: flex;
-        font-family: var(--font-mono);
-        font-size: var(--text-sm);
-        letter-spacing: 0.06em;
-        line-height: 1;
         min-height: var(--control-size);
-        padding-inline: var(--space-sm);
-        text-transform: uppercase;
+        padding-inline: 16px;
         transition:
             background var(--duration-fast) var(--motion-ease-ui),
             color var(--duration-fast) var(--motion-ease-ui),
@@ -306,7 +287,7 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
     .site-nav__item:focus-visible,
     .site-nav__item:hover {
         background: var(--nav-item-hover-bg);
-        color: var(--nav-item-hover-ink);
+        color: var(--color-link);
     }
 
     .site-nav__item[aria-current] {
@@ -314,48 +295,39 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
         color: var(--color-link);
     }
 
-    .site-nav__item[aria-current]:focus-visible,
-    .site-nav__item[aria-current]:hover {
-        color: var(--color-link);
-    }
-
-    .site-nav__link {
+    .site-nav__link,
+    .site-nav__trigger {
         align-items: center;
         display: flex;
-        font-family: var(--font-mono);
-        font-size: var(--text-sm);
-        letter-spacing: 0.06em;
-        line-height: 1;
         min-height: var(--control-size);
         padding-inline: var(--nav-pad);
-        text-transform: uppercase;
         transition:
             color var(--duration-fast) var(--motion-ease-ui),
             transform var(--duration-fast) var(--motion-ease-ui);
     }
 
-    .site-nav__link:active {
+    .site-nav__link:active,
+    .site-nav__trigger:active {
         transform: translateY(1px);
     }
 
-    .site-nav__link:hover {
-        color: var(--color-link);
-    }
-
-    .site-nav__link[aria-current] {
+    .site-nav__link:hover,
+    .site-nav__link[aria-current],
+    .site-nav__trigger:hover,
+    .site-nav__trigger[aria-expanded='true'] {
         color: var(--color-link);
     }
 
     .site-nav__menu {
         background: var(--color-bg-raised);
         border: 2px solid var(--color-border-strong);
-        box-shadow: var(--lift) var(--lift) 0 0 var(--color-border-strong);
+        box-shadow: var(--lift-shadow);
         display: flex;
         flex-direction: column;
         gap: 2px;
-        inset: calc(100% + var(--space-2xs)) auto auto 0;
+        inset: calc(100% + 8px) auto auto 0;
         min-width: 240px;
-        padding: var(--space-2xs);
+        padding: 8px;
         position: absolute;
     }
 
@@ -363,35 +335,11 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
         background: var(--color-nav-indicator);
         content: '';
         height: 2px;
-        margin-bottom: var(--space-3xs);
+        margin-bottom: 4px;
     }
 
     .site-nav__trigger {
-        align-items: center;
-        display: flex;
-        font-family: var(--font-mono);
-        font-size: var(--text-sm);
-        gap: var(--space-3xs);
-        letter-spacing: 0.06em;
-        line-height: 1;
-        min-height: var(--control-size);
-        padding-inline: var(--nav-pad);
-        text-transform: uppercase;
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .site-nav__trigger:active {
-        transform: translateY(1px);
-    }
-
-    .site-nav__trigger:hover {
-        color: var(--color-link);
-    }
-
-    .site-nav__trigger[aria-expanded='true'] {
-        color: var(--color-link);
+        gap: 4px;
     }
 
     .site-nav__trigger[aria-expanded='true'] .site-nav__chevron {
@@ -436,7 +384,6 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
 
         .site-nav__item {
             --nav-item-hover-bg: none;
-            --nav-item-hover-ink: var(--color-link);
         }
 
         .site-nav__item:focus-visible,
@@ -447,7 +394,7 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
 
         .site-nav__list {
             flex-direction: column;
-            padding-block: var(--space-2xs);
+            padding-block: 8px;
             padding-inline: calc(var(--shell-pad) - var(--nav-pad));
         }
 
@@ -458,7 +405,7 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
             gap: 0;
             inset: auto;
             min-width: 0;
-            padding: 0 0 0 var(--space-md);
+            padding: 0 0 0 var(--nav-pad);
             position: static;
         }
 
@@ -473,8 +420,8 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
 
     @media (max-width: 768px) {
         .site-header {
-            --control-hit: var(--control-compact);
-            --nav-gap: var(--space-3xs);
+            --control-hit: 40px;
+            --nav-gap: 4px;
         }
     }
 </style>
@@ -484,28 +431,27 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
     import { registerPageScript } from '@lib/shared/utils';
 
     const CART_BADGE_MAX = 99;
-    const DESKTOP_QUERY = '(min-width: 1025px)';
     const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled])';
     const HEADER_INSTANT_CLASS = 'is-instant';
     const HEADER_STATE_CLASSES = ['is-hidden'] as const;
     const HOVER_CLICK_GRACE = 500;
     const HOVER_CLOSE_DELAY = 200;
+    const HOVER_QUERY = '(hover: hover)';
+    const MOBILE_QUERY = '(max-width: 1024px)';
     const SCROLL_DELTA = 6;
     const SCROLL_TOP_THRESHOLD = 80;
 
-    const HOVER_QUERY = `(hover: hover) and ${DESKTOP_QUERY}`;
-
     let hoverCloseTimer: number | undefined;
-    let isHashNavigation = false;
     let isHeaderHovered = false;
     let isHeaderRequested = false;
+    let isJumpNavigation = false;
     let isPointerActive = false;
     let isScrollTicking = false;
     let lastScrollY = 0;
     let unsubscribeCart: (() => void) | undefined;
 
     function canHover() {
-        return window.matchMedia(HOVER_QUERY).matches;
+        return window.matchMedia(HOVER_QUERY).matches && !window.matchMedia(MOBILE_QUERY).matches;
     }
 
     function clearHoverTimer() {
@@ -610,19 +556,10 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
     function handleHashChange() {
         if (!window.location.hash) return;
 
-        isHashNavigation = true;
+        isJumpNavigation = true;
 
         if (!history.state) document.querySelector(':target')?.scrollIntoView();
 
-        handleScroll();
-    }
-
-    function handleHashClick(event: MouseEvent) {
-        const link = event.target instanceof Element ? event.target.closest('a') : null;
-
-        if (!link?.hash || link.pathname !== window.location.pathname) return;
-
-        isHashNavigation = true;
         handleScroll();
     }
 
@@ -643,6 +580,20 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
         closeAll(trigger);
         setExpanded(trigger, true);
         trigger.dataset.hoverOpened = String(Date.now());
+    }
+
+    function handleJumpClick(event: MouseEvent) {
+        if (!(event.target instanceof Element)) return;
+
+        const control = event.target.closest('[data-jump]');
+        const link = event.target.closest('a');
+
+        const isHashLink = link !== null && link.hash !== '' && link.pathname === window.location.pathname;
+
+        if (!control && !isHashLink) return;
+
+        isJumpNavigation = true;
+        handleScroll();
     }
 
     function handleMenuKeydown(event: KeyboardEvent, menu: HTMLElement) {
@@ -740,8 +691,8 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
 
         if (!header || !menu || !toggle) return;
 
-        isHashNavigation = Boolean(window.location.hash);
         isHeaderRequested = true;
+        isJumpNavigation = Boolean(window.location.hash);
         isScrollTicking = false;
         lastScrollY = window.scrollY;
         seedCart();
@@ -750,7 +701,7 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
         updateHeader();
         settleHeader(header);
         document.addEventListener('click', event => handleDocumentClick(event, menu, toggle), { signal });
-        document.addEventListener('click', handleHashClick, { signal });
+        document.addEventListener('click', handleJumpClick, { signal });
         document.addEventListener('click', handlePointerSettle, { signal });
         document.addEventListener('focusout', handleFocusOut, { signal });
         document.addEventListener('keydown', event => handleDocumentKeydown(event, menu, toggle), { signal });
@@ -767,7 +718,7 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
 
         toggle.addEventListener('click', () => toggleMenu(menu, toggle), { signal });
         window.addEventListener('scroll', handleScroll, { passive: true, signal });
-        window.matchMedia(DESKTOP_QUERY).addEventListener('change', () => closeMenu(menu, toggle), { signal });
+        window.matchMedia(MOBILE_QUERY).addEventListener('change', () => closeMenu(menu, toggle), { signal });
 
         document.querySelectorAll<HTMLElement>('[data-nav-trigger]').forEach((trigger) => {
             const panel = findMenu(trigger);
@@ -838,13 +789,13 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
     function trackScroll() {
         const currentScrollY = window.scrollY;
 
-        if (currentScrollY < lastScrollY - SCROLL_DELTA || isHashNavigation) {
+        if (currentScrollY < lastScrollY - SCROLL_DELTA || isJumpNavigation) {
             isHeaderRequested = true;
         } else if (currentScrollY > lastScrollY + SCROLL_DELTA) {
             isHeaderRequested = false;
         }
 
-        isHashNavigation = false;
+        isJumpNavigation = false;
         isScrollTicking = false;
         lastScrollY = currentScrollY;
         updateHeader();

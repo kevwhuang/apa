@@ -43,7 +43,7 @@ const waveHeights = Array.from(
 
 <button
     class:list={[
-        'producer-track aria-pressed:bg-btn-primary-bg aria-pressed:text-btn-primary-text group hover:bg-bg-raised-hover flex items-center min-h-(--control-size) w-full gap-3 p-3 border-2 border-border-strong text-left',
+        'producer-track active:translate-y-px aria-pressed:bg-btn-primary-bg aria-pressed:text-btn-primary-text group hover:bg-bg-raised-hover flex items-center min-h-(--control-size) w-full gap-3 p-3 border-2 border-border-strong text-left transition-[translate]',
         rowClass,
     ]}
     aria-pressed="false"
@@ -75,12 +75,12 @@ const waveHeights = Array.from(
     </span>
     {hasWave && (
         <span
-            class="producer-track__wave"
+            class="flex flex-none items-center h-5 gap-0.5 max-md:hidden"
             aria-hidden="true"
         >
             {waveHeights.map(height => (
                 <span
-                    class="producer-track__bar min-h-0.5 w-(--producer-track-bar-width,2px) bg-text-secondary"
+                    class="group-aria-pressed:bg-current min-h-0.5 w-(--producer-track-bar-width,2px) bg-text-secondary"
                     style={`height: ${height}%;`}
                 />
             ))}
@@ -95,34 +95,7 @@ const waveHeights = Array.from(
 </button>
 
 <style>
-    .producer-track {
-        transition: transform var(--duration-fast) var(--motion-ease-ui);
-        user-select: none;
-    }
-
-    .producer-track:active {
-        transform: translateY(1px);
-    }
-
     .producer-track:focus-visible {
         outline-offset: -2px;
-    }
-
-    .producer-track[aria-pressed='true'] .producer-track__bar {
-        background: currentColor;
-    }
-
-    .producer-track__wave {
-        align-items: center;
-        display: flex;
-        flex: 0 0 auto;
-        gap: 2px;
-        height: 20px;
-    }
-
-    @media (max-width: 768px) {
-        .producer-track__wave {
-            display: none;
-        }
     }
 </style>

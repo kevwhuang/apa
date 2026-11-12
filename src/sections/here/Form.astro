@@ -8,13 +8,13 @@ import Schedule from '@components/program/Schedule.astro';
 import { EMAIL_MAX_LENGTH } from '@lib/shared/constants';
 import { formatDateStamp, formatTime, formatVenue, getProgram, mergeCalendar } from '@lib/shared/utils';
 
-const DOOR_HOST = 'austinproduceralliance.com';
+const DOOR_HOST_PARTS = ['austinproducer', 'alliance.com'];
 const DOOR_PATH = 'here';
 
 const bashEditions = await getCollection('bash');
 const events = await getCollection('events');
 
-const doorUrl = `${DOOR_HOST}/${DOOR_PATH}`;
+const doorUrl = `${DOOR_HOST_PARTS.join('')}/${DOOR_PATH}`;
 
 const { upcoming } = mergeCalendar(events, bashEditions);
 ---
@@ -25,7 +25,7 @@ const { upcoming } = mergeCalendar(events, bashEditions);
 >
     <div class="flex flex-col gap-6">
         <PageHead
-            class="max-w-3xl text-7xl text-balance max-md:text-5xl"
+            class="max-w-3xl text-5xl-7xl text-balance"
             headingId="checkin-title"
         >
             You made it
@@ -50,10 +50,10 @@ const { upcoming } = mergeCalendar(events, bashEditions);
             aria-label="What you scanned"
             data-motion="wipe"
         >
-            <div class="door-pass__panel slab slab--well flex flex-col h-full gap-(--space-lg)">
+            <div class="door-pass__panel slab slab--plush slab--well flex flex-col h-full gap-(--space-lg)">
                 <div class="flex flex-col gap-(--space-lg) mb-auto">
-                    <p class="font-mono text-lg wrap-break-word text-link-on-inverse max-md:text-base">
-                        {DOOR_HOST}/<wbr />{DOOR_PATH}
+                    <p class="font-mono text-base-lg wrap-break-word text-link-on-inverse">
+                        {DOOR_HOST_PARTS[0]}<wbr />{DOOR_HOST_PARTS[1]}/<wbr />{DOOR_PATH}
                     </p>
                     {upcoming.map((event, index) => (
                         <dl
@@ -64,13 +64,13 @@ const { upcoming } = mergeCalendar(events, bashEditions);
                             data-event-title={`${getProgram(event.type).name} on ${formatDateStamp(event.date)}`}
                             hidden={index > 0}
                         >
-                            <div class="last:border-b-0 grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-inverse-subtle">
+                            <div class="last:border-b-0 grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 py-1 border-b border-border-inverse-subtle">
                                 <dt class="label text-text-inverse-secondary">Program</dt>
                                 <dd class="text-base">
                                     {getProgram(event.type).name}
                                 </dd>
                             </div>
-                            <div class="last:border-b-0 grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-inverse-subtle">
+                            <div class="last:border-b-0 grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 py-1 border-b border-border-inverse-subtle">
                                 <dt class="label text-text-inverse-secondary">When</dt>
                                 <dd class="font-mono text-base">
                                     <time datetime={event.date.toISOString()}>
@@ -78,7 +78,7 @@ const { upcoming } = mergeCalendar(events, bashEditions);
                                     </time>
                                 </dd>
                             </div>
-                            <div class="last:border-b-0 grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-inverse-subtle">
+                            <div class="last:border-b-0 grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 py-1 border-b border-border-inverse-subtle">
                                 <dt class="label text-text-inverse-secondary">Where</dt>
                                 <dd class="font-mono text-base">
                                     {formatVenue(event.location)}
@@ -87,14 +87,14 @@ const { upcoming } = mergeCalendar(events, bashEditions);
                         </dl>
                     ))}
                 </div>
-                <div class="door-pass__foot flex flex-wrap items-center justify-between gap-(--space-xs) pt-(--space-md) bg-repeat-x bg-top-left">
-                    <p class="door-pass__stamp label px-(--space-2xs) py-(--space-3xs) border-2 border-link-on-inverse text-link-on-inverse">Checked</p>
+                <div class="door-pass__foot flex flex-wrap items-center justify-between gap-3 pt-(--space-md) bg-repeat-x bg-top-left">
+                    <p class="label px-2 py-1 border-2 border-link-on-inverse text-link-on-inverse">Checked</p>
                     <p class="label text-text-inverse-secondary">1 Prod on arrival</p>
                 </div>
             </div>
         </aside>
         <div
-            class="door-scan slab slab--card flex items-center justify-center"
+            class="door-scan slab slab--card slab--plush flex items-center justify-center"
             data-motion="rise"
         >
             <QrCode
@@ -111,17 +111,17 @@ const { upcoming } = mergeCalendar(events, bashEditions);
     aria-label="Check in"
 >
     <form
-        class="checkin-form slab slab--card flex flex-col max-w-(--measure-form) w-full gap-(--space-lg) mx-auto"
+        class="checkin-form slab slab--card slab--plush flex flex-col max-w-(--measure-form) w-full gap-(--space-lg) mx-auto"
         data-checkin-form
         data-motion="unfold"
     >
         <h2 class="text-2xl">
             Check in
         </h2>
-        <div class="flex flex-col gap-(--space-2xs)">
-            <label class="flex flex-col gap-(--space-2xs)">
+        <div class="flex flex-col gap-2">
+            <label class="flex flex-col gap-2">
                 <span class="label flex flex-wrap items-baseline text-text">
-                    <span class="pr-(--space-2xs) text-link">1</span>
+                    <span class="pr-2 text-link">1</span>
                     Email
                 </span>
                 <input
@@ -143,12 +143,12 @@ const { upcoming } = mergeCalendar(events, bashEditions);
                 hidden
             />
         </div>
-        <div class="flex flex-col gap-(--space-2xs)">
+        <div class="flex flex-col gap-2">
             <p class="label flex flex-wrap items-baseline text-text">
-                <span class="pr-(--space-2xs) text-link">2</span>
+                <span class="pr-2 text-link">2</span>
                 Terms
             </p>
-            <label class="checkin__check">
+            <label class="self-start gap-3 py-2 text-sm">
                 <input
                     id="checkin-terms"
                     class="box"
@@ -175,12 +175,12 @@ const { upcoming } = mergeCalendar(events, bashEditions);
                 hidden
             />
         </div>
-        <div class="flex flex-col gap-(--space-2xs)">
+        <div class="flex flex-col gap-2">
             <p class="label flex flex-wrap items-baseline text-text">
-                <span class="pr-(--space-2xs) text-link">3</span>
+                <span class="pr-2 text-link">3</span>
                 Newsletter
             </p>
-            <label class="checkin__check">
+            <label class="self-start gap-3 py-2 text-sm">
                 <input
                     id="checkin-newsletter"
                     class="box"
@@ -192,7 +192,7 @@ const { upcoming } = mergeCalendar(events, bashEditions);
             </label>
         </div>
         <button
-            class="btn btn--primary checkin-form__submit w-full"
+            class="btn btn--primary w-full"
             type="submit"
         >
             Check in <IconArrow />
@@ -203,8 +203,8 @@ const { upcoming } = mergeCalendar(events, bashEditions);
         data-checkin-done
         hidden
     >
-        <div class="checkin__receipt slab slab--card flex flex-col gap-(--space-lg)">
-            <hgroup class="flex flex-col gap-(--space-xs)">
+        <div class="checkin__receipt slab slab--card slab--plush flex flex-col gap-(--space-lg)">
+            <hgroup class="flex flex-col gap-3">
                 <h2
                     class="font-display text-3xl"
                     data-checkin-heading
@@ -241,39 +241,39 @@ const { upcoming } = mergeCalendar(events, bashEditions);
             </div>
         </div>
         <article
-            class="mail slab slab--lift flex flex-col gap-(--space-lg)"
+            class="mail slab slab--lift slab--plush flex flex-col gap-(--space-lg)"
             aria-label="Welcome email"
         >
-            <div class="flex flex-wrap items-center justify-between gap-(--space-xs) pb-(--space-xs) border-b-2 border-border-strong">
+            <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b-2 border-border-strong">
                 <p class="label text-link">Welcome email</p>
-                <p class="label mail__stamp px-(--space-2xs) py-(--space-3xs) border-2 border-link text-link">Sent</p>
+                <p class="label px-2 py-1 border-2 border-link text-link">Sent</p>
             </div>
             <dl class="flex flex-col">
-                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-subtle">
+                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 py-1 border-b border-border-subtle">
                     <dt class="label text-text-secondary">From</dt>
                     <dd
                         class="font-mono text-base wrap-anywhere"
                         data-mail-from
                     />
                 </div>
-                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-subtle">
+                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 py-1 border-b border-border-subtle">
                     <dt class="label text-text-secondary">To</dt>
                     <dd
                         class="font-mono text-base wrap-anywhere"
                         data-mail-to
                     />
                 </div>
-                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-subtle">
+                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 py-1 border-b border-border-subtle">
                     <dt class="label text-text-secondary">Reply to</dt>
                     <dd
                         class="font-mono text-base wrap-anywhere"
                         data-mail-reply
                     />
                 </div>
-                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-subtle">
+                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 py-1 border-b border-border-subtle">
                     <dt class="label text-text-secondary">Subject</dt>
                     <dd
-                        class="font-bold font-sans leading-(--text-xl) text-lg"
+                        class="font-bold leading-(--text-xl) text-lg"
                         data-mail-subject
                     />
                 </div>
@@ -283,10 +283,10 @@ const { upcoming } = mergeCalendar(events, bashEditions);
                 data-mail-preheader
             />
             <div
-                class="flex flex-col gap-(--space-sm)"
+                class="flex flex-col gap-4"
                 data-mail-body
             />
-            <div class="mail__actions flex flex-wrap items-center gap-(--space-xs) pt-(--space-md) bg-repeat-x bg-top-left">
+            <div class="mail__actions flex flex-wrap items-center gap-3 pt-(--space-md) bg-repeat-x bg-top-left">
                 <a
                     class="btn btn--accent"
                     data-mail-action
@@ -306,25 +306,6 @@ const { upcoming } = mergeCalendar(events, bashEditions);
 <Schedule />
 
 <style>
-    .checkin-form,
-    .checkin__receipt,
-    .door-pass__panel,
-    .door-scan,
-    .mail {
-        padding: var(--space-lg);
-    }
-
-    .checkin__check {
-        align-items: center;
-        align-self: flex-start;
-        display: flex;
-        font-size: var(--text-sm);
-        gap: var(--space-xs);
-        line-height: var(--text-sm--line-height);
-        min-height: var(--control-size);
-        padding-block: var(--space-2xs);
-    }
-
     .door-pass__foot,
     .door-pass__rows {
         background-image: radial-gradient(circle, var(--color-border) 1px, transparent 1px);

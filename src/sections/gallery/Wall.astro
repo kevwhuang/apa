@@ -5,6 +5,8 @@ import PageHead from '@components/shared/PageHead.astro';
 
 import type { ImageMetadata } from 'astro';
 
+const CLASS_VIEWER = 'wall__viewer fixed grid inset-0 overflow-visible place-items-center z-301 h-auto max-h-none max-w-none w-auto cursor-zoom-out';
+
 const CLASS_VIEWER_PHOTO = 'block box-content object-contain aspect-(--wall-ratio) h-auto min-h-0 w-[calc(100%-4px)] border-2 border-current cursor-default pointer-events-auto select-none';
 
 const FIGURES = [
@@ -65,7 +67,7 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
 >
     <div>
         <PageHead
-            class="max-w-3xl mb-6 text-7xl max-md:text-5xl"
+            class="max-w-3xl mb-6 text-5xl-7xl"
             headingId="gallery-title"
         >
             The wall
@@ -120,7 +122,7 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
         ))}
     </ul>
     <dialog
-        class="wall__viewer fixed grid inset-0 overflow-visible place-items-center z-(--z-overlay) h-auto max-h-none max-w-none w-auto cursor-zoom-out"
+        class={CLASS_VIEWER}
         aria-labelledby="wall-viewer-title"
     >
         <h2
@@ -164,11 +166,7 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
 
 <style>
     .wall__item {
-        flex-basis: calc(var(--figure-ratio) * var(--wall-row) + 4px);
-    }
-
-    .wall__list {
-        --wall-row: clamp(156px, calc(129.333px + 8.3333vw), 236px);
+        flex-basis: calc(var(--figure-ratio) * clamp(156px, calc(129.333px + 8.3333vw), 236px) + 4px);
     }
 
     .wall__list::after {
@@ -182,7 +180,7 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
         max-height: 100%;
         padding-top: var(--wall-meta);
         pointer-events: none;
-        width: min(calc(var(--wall-width) + 4px), 100%, calc(var(--wall-frame) * var(--wall-ratio) + 4px));
+        width: min(calc(var(--wall-width) + 4px), 100%, calc((100dvh - 2 * var(--shell-pad) - 2 * var(--wall-meta) - 4px) * var(--wall-ratio) + 4px));
     }
 
     .wall__stack .spinner {
@@ -195,8 +193,7 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
 
     .wall__viewer {
         --color-focus-ring: var(--color-focus-ring-on-brand);
-        --wall-frame: calc(100dvh - 2 * var(--shell-pad) - 2 * var(--wall-meta) - 4px);
-        --wall-gap: var(--space-xs);
+        --wall-gap: 12px;
         --wall-meta: calc(var(--wall-gap) + var(--text-sm));
         --wall-ratio: 1;
         --wall-width: 100%;
@@ -211,8 +208,7 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
     }
 
     .wall__viewer .spinner {
-        border-color: var(--color-border-on-brand);
-        border-top-color: currentColor;
+        --spinner-track: var(--color-border-on-brand);
     }
 
     .wall__viewer[data-loading] .spinner {

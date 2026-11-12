@@ -130,16 +130,16 @@ function toRuns(grid: boolean[][]) {
 }
 ---
 
-<figure class:list={['qr flex flex-col items-center gap-(--space-sm)', qrClass]}>
+<figure class:list={['qr flex flex-col items-center gap-4', qrClass]}>
     <svg
-        class="qr__code"
+        class="qr__code aspect-square max-w-full text-qr-code"
         aria-label={label}
         role="img"
         shape-rendering="crispEdges"
         viewBox={`0 0 ${viewSize} ${viewSize}`}
     >
         <rect
-            class="qr__quiet"
+            class="fill-qr-bg"
             height={viewSize}
             width={viewSize}
             x="0"
@@ -156,20 +156,12 @@ function toRuns(grid: boolean[][]) {
         ))}
     </svg>
     {caption && (
-        <figcaption class="label qr__caption text-balance text-center">{caption}</figcaption>
+        <figcaption class="label text-balance text-center">{caption}</figcaption>
     )}
 </figure>
 
 <style>
     .qr__code {
-        aspect-ratio: 1;
-        color: var(--color-qr-code);
-        display: block;
-        max-width: 100%;
         width: clamp(240px, calc(213.333px + 8.3333vw), 320px);
-    }
-
-    .qr__quiet {
-        fill: var(--color-qr-bg);
     }
 </style>

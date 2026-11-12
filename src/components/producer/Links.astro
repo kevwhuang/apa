@@ -23,7 +23,7 @@ const { linkClass, links } = Astro.props;
 
 {links.length > 0 && (
     <ul
-        class="flex flex-wrap list-none"
+        class="flex flex-wrap"
         data-placeholder
     >
         {links.map((link) => {
@@ -35,7 +35,7 @@ const { linkClass, links } = Astro.props;
                         class:list={[
                             linkClass,
                             'inline-flex items-center min-h-(--control-size)',
-                            LinkIcon ? 'active:translate-y-px justify-center w-9 transition-[color,translate]' : 'action-text px-3 underline underline-offset-4 transition-[color,transform]',
+                            LinkIcon ? 'active:translate-y-px justify-center w-(--control-size) transition-[color,translate]' : 'action-text px-3 underline underline-offset-4',
                         ]}
                         href={link.href}
                         rel="noopener noreferrer"

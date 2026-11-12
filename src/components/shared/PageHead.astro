@@ -10,7 +10,7 @@ interface Props {
 const { class: headingClass, eyebrow, eyebrowClass = 'mb-4', headingId, tone = 'light' } = Astro.props;
 ---
 
-<div class="page-head">
+<div>
     {eyebrow && (
         <p
             class:list={['label', eyebrowClass, tone === 'dark' ? 'text-link-on-inverse' : 'text-link']}

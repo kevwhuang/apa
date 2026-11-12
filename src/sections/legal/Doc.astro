@@ -53,7 +53,7 @@ const SECTIONS: Record<Props['kind'], { body: string[]; heading: string }[]> = {
         },
         {
             body: [
-                'This site is not directed at children under 13, and nothing anyone enters here, child or adult, ever reaches us; what the demonstrations keep stays in your own browser. The <a href="/terms#eligibility">terms of service</a> draw the same line for membership. If you believe a child has emailed us personal information, write to us and we delete it.',
+                'This site is not directed at children under 13, and nothing anyone enters here, child or adult, ever reaches us; what the demonstrations keep stays in your own browser. Membership starts at the same age. If you believe a child has emailed us personal information, write to us and we delete it.',
             ],
             heading: 'Children',
         },
@@ -67,7 +67,7 @@ const SECTIONS: Record<Props['kind'], { body: string[]; heading: string }[]> = {
     terms: [
         {
             body: [
-                'You need to be 13 or older to use this site (the same floor our <a href="/privacy#children">privacy policy</a> draws), and membership starts at the same age. Venues set event ages: where a room is 18+ or 21+, the venue\'s rule holds over anything written here, so read the listing before you plan around it.',
+                'You need to be 13 or older to use this site, and membership starts at the same age. Venues set event ages: where a room is 18+ or 21+, the venue\'s rule holds over anything written here, so read the listing before you plan around it.',
             ],
             heading: 'Eligibility',
         },
@@ -95,7 +95,7 @@ const SECTIONS: Record<Props['kind'], { body: string[]; heading: string }[]> = {
         },
         {
             body: [
-                'The store is a demonstration. Checkout checks the card details for shape and expiry and nothing more, no payment is collected or processed, and no order placed today obligates anyone to anything. Your cart and receipt exist only in your browser. The <a href="/privacy#data-stored-in-your-browser">privacy policy</a> lists exactly where. No real money moves through this site.',
+                'The store is a demonstration. Checkout checks the card details for shape and expiry and nothing more, no payment is collected or processed, and no order placed today obligates anyone to anything. Your cart and receipt exist only in your browser. The privacy policy lists exactly where. No real money moves through this site.',
                 'Prods are the Alliance\'s participation currency: members earn them for showing up and contributing, and each is worth $1.00 of credit toward any item in the store, applied at checkout. The balances and redemptions shown on this site today are a demonstration. Prods are not money: they have no cash value and cannot be bought, sold, or transferred, and the program can change or wind down as the Alliance evolves.',
             ],
             heading: 'Store & Prods',
@@ -159,14 +159,6 @@ function parseInline(html: string) {
 
     return segments;
 }
-
-function slugify(heading: string) {
-    return heading
-        .toLowerCase()
-        .replace(/&/g, 'and')
-        .replace(/[^a-z\d]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-}
 ---
 
 <section
@@ -182,7 +174,7 @@ function slugify(heading: string) {
         </p>
         <h1
             id={`${kind}-title`}
-            class="mb-10 text-7xl max-md:text-4xl"
+            class="mb-10 text-4xl-7xl"
             data-motion="strike"
         >
             {title}
@@ -193,16 +185,13 @@ function slugify(heading: string) {
         >
             {SECTIONS[kind].map(section => (
                 <>
-                    <h2
-                        id={slugify(section.heading)}
-                        class="first:pt-0 pt-4 text-2xl text-balance"
-                    >
+                    <h2 class="first:pt-0 pt-4 text-2xl text-balance">
                         {section.heading}
                     </h2>
                     {section.body.map(paragraph => (
                         <p>
                             {parseInline(paragraph).map((segment) => {
-                                if (segment.kind === 'code') return <code>{segment.code}</code>;
+                                if (segment.kind === 'code') return <code class="px-1 border border-border-subtle whitespace-nowrap bg-code-bg">{segment.code}</code>;
                                 if (segment.kind === 'text') return segment.text;
 
                                 return <a {...segment.attributes}>{segment.label}</a>;
@@ -211,10 +200,7 @@ function slugify(heading: string) {
                     ))}
                 </>
             ))}
-            <h2
-                id="contact"
-                class="first:pt-0 pt-4 text-2xl text-balance"
-            >
+            <h2 class="pt-4 text-2xl text-balance">
                 Contact
             </h2>
             <p>
@@ -226,30 +212,22 @@ function slugify(heading: string) {
 
 <style>
     .legal__body a {
-        display: inline-block;
         font-family: var(--font-mono);
-        max-width: 100%;
         overflow-wrap: anywhere;
+        position: relative;
         text-decoration-line: underline;
         text-underline-offset: 4px;
+        top: 0;
         transition:
             color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
+            top var(--duration-fast) var(--motion-ease-ui);
     }
 
     .legal__body a:active {
-        transform: translateY(1px);
+        top: 1px;
     }
 
     .legal__body a:hover {
         color: var(--color-link);
-    }
-
-    .legal__body code {
-        background-color: var(--color-code-bg);
-        border: 1px solid var(--color-border-subtle);
-        font-family: var(--font-mono);
-        padding: 1px 4px;
-        white-space: nowrap;
     }
 </style>

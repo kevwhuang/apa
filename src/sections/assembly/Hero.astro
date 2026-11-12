@@ -7,21 +7,23 @@ const AGENDA = [
     { name: 'Featured workshop', note: 'One topic, taken apart properly.', time: '7:30 PM' },
     { name: 'After hours', note: 'Collabs form on the way out the door.', time: '9:00 PM' },
 ] as const;
+
+const CLASS_AGENDA_ITEM = 'first:border-t-0 first:pt-0 last:pb-0 grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-(--space-md) gap-y-1 py-4 border-border-subtle border-t';
 ---
 
 <section
-    class="stage stage--assembly stage--tight border-b-2 border-border-strong"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="assembly-title"
 >
     <div>
         <PageHead
-            class="max-w-4xl mb-6 text-7xl max-md:text-4xl"
+            class="max-w-4xl mb-6 text-4xl-7xl"
             headingId="assembly-title"
         >
             The working<br />
             <span class="text-text-brand">session</span>
         </PageHead>
-        <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-(--space-2xl) max-lg:grid-cols-1">
+        <div class="grid grid-cols-2 gap-(--space-2xl) max-lg:grid-cols-1">
             <div class="flex flex-col gap-5">
                 <p
                     class="text-lg text-text-secondary"
@@ -55,14 +57,14 @@ const AGENDA = [
                     data-motion-stagger="rise"
                 >
                     {AGENDA.map(item => (
-                        <li class="first:border-t-0 first:pt-0 last:pb-0 grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-(--space-md) gap-y-(--space-3xs) py-(--space-sm) border-border-subtle border-t">
+                        <li class={CLASS_AGENDA_ITEM}>
                             <p
                                 class="row-span-2 font-mono tabular-nums text-base text-text-brand"
                                 data-placeholder
                             >
                                 {item.time}
                             </p>
-                            <p class="font-bold font-sans leading-(--text-lg) tracking-tight">{item.name}</p>
+                            <p class="font-bold leading-(--text-lg) tracking-tight">{item.name}</p>
                             <p class="text-base text-text-secondary">{item.note}</p>
                         </li>
                     ))}

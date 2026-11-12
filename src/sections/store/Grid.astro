@@ -28,7 +28,7 @@ const categories = PRODUCT_CATEGORIES.filter(category => products.some(product =
 >
     <div>
         <PageHead
-            class="mb-6 text-7xl max-md:text-4xl"
+            class="mb-6 text-4xl-7xl"
             headingId="store-title"
         >
             Wear the Alliance
@@ -118,35 +118,35 @@ const categories = PRODUCT_CATEGORIES.filter(category => products.some(product =
                         ))}
                         {getStockLabel(product.data.stock) && (
                             <span
-                                class="absolute left-0 top-0 p-(--space-xs) border-b-2 border-border-strong border-r-2 font-mono leading-none text-base tracking-[0.06em] uppercase bg-bg-page text-text"
+                                class="absolute left-0 top-0 p-3 border-b-2 border-border-strong border-r-2 font-mono leading-none text-base tracking-[0.06em] uppercase bg-bg-page text-text"
                                 data-placeholder
                             >
                                 {getStockLabel(product.data.stock)}
                             </span>
                         )}
                     </span>
-                    <span class="block pb-(--space-2xs) pt-(--space-md) px-(--space-md)">
+                    <span class="block pb-2 pt-(--space-md) px-(--space-md)">
                         <span class="flex flex-wrap items-center justify-between gap-x-4 mb-2">
                             <span class="label text-text-secondary">
                                 {product.data.category}
                             </span>
                             {swatches.length > 1 && (
                                 <span
-                                    class="flex gap-1.5"
+                                    class="flex gap-1"
                                     aria-label={`${swatches.length} variations`}
                                     data-placeholder
                                     role="img"
                                 >
                                     {swatches.map(hex => (
                                         <span
-                                            class="size-3.5 border-2 border-border"
+                                            class="size-4 border-2 border-border"
                                             style={`background: ${hex};`}
                                         />
                                     ))}
                                 </span>
                             )}
                         </span>
-                        <span class="block font-bold font-sans text-xl tracking-tight">
+                        <span class="block font-bold text-xl tracking-tight">
                             {product.data.title}
                         </span>
                     </span>
@@ -197,10 +197,6 @@ const categories = PRODUCT_CATEGORIES.filter(category => products.some(product =
         row-gap: 0;
     }
 
-    .store__grid > * {
-        min-width: 0;
-    }
-
     @media (max-width: 1024px) {
         .store__grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -209,7 +205,7 @@ const categories = PRODUCT_CATEGORIES.filter(category => products.some(product =
 
     @media (max-width: 768px) {
         .store__grid {
-            grid-template-columns: minmax(0, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
         }
     }
 </style>

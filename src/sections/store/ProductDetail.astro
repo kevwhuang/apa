@@ -13,6 +13,7 @@ interface Props {
     slug: string;
 }
 
+const CLASS_QUANTITY_STEP = 'active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text-disabled aria-disabled:hover:bg-transparent aria-disabled:text-text-disabled hover:bg-bg-hover size-(--control-size) font-bold font-mono text-lg';
 const FRAME_IMAGE_WIDTH = 620;
 const THUMB_IMAGE_WIDTH = 140;
 
@@ -35,12 +36,12 @@ const priceCents = getVariationPrice(product, baseVariation);
     class="stage stage--tight"
     aria-labelledby="product-title"
 >
-    <div class="grid grid-cols-2 gap-12 max-md:grid-cols-1">
+    <div class="grid grid-cols-2 gap-12 max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,272px),1fr))]">
         <div
             class="flex flex-col gap-5"
             data-motion="unfold"
         >
-            <div class="product-gallery__frame slab slab--bare slab--lift">
+            <div class="product-gallery__frame slab slab--bare slab--lift overflow-hidden aspect-square mb-(--lift)">
                 {gallery.map(({ image, variation }) => image && (
                     <Image
                         class:list={['product-gallery__photo absolute inset-0 object-cover size-full opacity-0 pointer-events-none', variation === product.base && 'is-current']}
@@ -55,7 +56,7 @@ const priceCents = getVariationPrice(product, baseVariation);
                 ))}
                 {getStockLabel(product.stock) && (
                     <span
-                        class="absolute left-0 top-0 p-(--space-xs) border-b-2 border-border-strong border-r-2 font-mono leading-none text-base tracking-[0.06em] uppercase bg-bg-page text-text"
+                        class="absolute left-0 top-0 p-3 border-b-2 border-border-strong border-r-2 font-mono leading-none text-base tracking-[0.06em] uppercase bg-bg-page text-text"
                         data-placeholder
                     >
                         {getStockLabel(product.stock)}
@@ -70,7 +71,7 @@ const priceCents = getVariationPrice(product, baseVariation);
                 {gallery.map(({ image, variation }) => (
                     <li>
                         <button
-                            class="product-gallery__thumb block relative aspect-square w-full p-0 border-2 border-border"
+                            class="product-gallery__thumb block relative aspect-square w-full border-2 border-border"
                             aria-label={`Show ${variation} view`}
                             aria-pressed={variation === product.base ? 'true' : 'false'}
                             data-gallery-thumb={variation}
@@ -91,11 +92,11 @@ const priceCents = getVariationPrice(product, baseVariation);
                 ))}
             </ul>
         </div>
-        <div class="self-start sticky top-28 space-y-8 max-md:static">
+        <div class="self-start sticky top-[calc(var(--header-height)+var(--space-md))] space-y-8 max-md:static">
             <div>
                 <h1
                     id="product-title"
-                    class="mb-3 text-4xl text-balance max-lg:text-3xl"
+                    class="mb-3 text-3xl-4xl text-balance"
                     data-motion="strike"
                 >
                     {product.title}
@@ -137,7 +138,7 @@ const priceCents = getVariationPrice(product, baseVariation);
                     >
                         {product.variations.map(variation => (
                             <button
-                                class="product__swatch active:border-border-strong aria-pressed:border-border-strong hover:border-border-strong h-10 w-10 border-2 border-border"
+                                class="product__swatch active:border-border-strong aria-pressed:border-border-strong hover:border-border-strong relative size-10 border-2 border-border"
                                 aria-label={variation.name}
                                 aria-pressed={variation.name === product.base ? 'true' : 'false'}
                                 data-image={toImageKey(variation)}
@@ -188,7 +189,7 @@ const priceCents = getVariationPrice(product, baseVariation);
                     </p>
                     <div class:list={['inline-flex items-center border-2', isInStock ? 'border-border-strong' : 'border-border-disabled text-text-disabled']}>
                         <button
-                            class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text-disabled aria-disabled:hover:bg-transparent aria-disabled:text-text-disabled hover:bg-bg-hover h-(--control-size) w-(--control-size) font-bold font-mono text-lg"
+                            class={CLASS_QUANTITY_STEP}
                             aria-disabled="true"
                             aria-label="Decrease quantity"
                             data-quantity="-1"
@@ -204,7 +205,7 @@ const priceCents = getVariationPrice(product, baseVariation);
                             1
                         </span>
                         <button
-                            class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text-disabled aria-disabled:hover:bg-transparent aria-disabled:text-text-disabled hover:bg-bg-hover h-(--control-size) w-(--control-size) font-bold font-mono text-lg"
+                            class={CLASS_QUANTITY_STEP}
                             aria-disabled={!isInStock || ceiling <= 1}
                             aria-label="Increase quantity"
                             data-quantity="+1"
@@ -292,11 +293,7 @@ const priceCents = getVariationPrice(product, baseVariation);
 
 <style>
     .product-gallery__frame {
-        aspect-ratio: 1;
         background-color: var(--color-bg-sunken);
-        margin-bottom: var(--lift);
-        overflow: hidden;
-        position: relative;
     }
 
     .product-gallery__photo.is-current {
@@ -324,7 +321,7 @@ const priceCents = getVariationPrice(product, baseVariation);
 
     .product-gallery__thumb[aria-pressed='true'] {
         border-color: var(--color-border-strong);
-        box-shadow: var(--lift) var(--lift) 0 0 var(--color-border-strong);
+        box-shadow: var(--lift-shadow);
     }
 
     .product-gallery__thumb-image {
@@ -335,23 +332,19 @@ const priceCents = getVariationPrice(product, baseVariation);
     }
 
     .product-gallery__thumbs {
-        gap: calc(var(--lift) + var(--space-xs));
+        gap: calc(var(--lift) + 12px);
+    }
+
+    .product__swatch::after {
+        content: '';
+        inset: -8px;
+        position: absolute;
     }
 
     .product__swatch[aria-pressed='true'] {
         box-shadow:
-            0 0 0 3px var(--color-bg-page),
-            0 0 0 5px var(--color-border-strong);
-    }
-
-    [data-variation] {
-        position: relative;
-    }
-
-    [data-variation]::after {
-        content: '';
-        inset: -8px;
-        position: absolute;
+            0 0 0 4px var(--color-bg-page),
+            0 0 0 6px var(--color-border-strong);
     }
 </style>
 

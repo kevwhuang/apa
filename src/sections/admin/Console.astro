@@ -69,7 +69,7 @@ const SWITCHES = [
     </h1>
     <div>
         <SectionHead
-            class="text-3xl max-md:text-2xl"
+            class="text-2xl-3xl"
             headingId="admin-switches-title"
         >
             Switches
@@ -81,10 +81,10 @@ const SWITCHES = [
             {SWITCHES.map(control => (
                 <li>
                     <div class="admin__row slab slab--card slab--still flex flex-wrap items-center gap-x-6 gap-y-4 mb-(--lift)">
-                        <div class="flex-1 min-w-[200px]">
+                        <div class="flex-1 min-w-50">
                             <h3
                                 id={`${control.id}-title`}
-                                class="mb-(--space-xs) text-balance text-lg"
+                                class="mb-3 text-balance text-lg"
                             >
                                 {control.name}
                             </h3>
@@ -92,7 +92,7 @@ const SWITCHES = [
                                 {control.blurb}
                             </p>
                         </div>
-                        <p class="admin__state label">
+                        <p class="label min-w-18 select-none text-right max-md:text-left">
                             <span class="admin__state-on">{control.on}</span>
                             <span class="admin__state-off">{control.off}</span>
                         </p>
@@ -120,19 +120,19 @@ const SWITCHES = [
 >
     <div>
         <SectionHead
-            class="text-3xl max-md:text-2xl"
+            class="text-2xl-3xl"
             headingId="admin-actions-title"
         >
             Actions
         </SectionHead>
         <ul
-            class="grid grid-cols-2 -mb-(--space-2xl) gap-x-(--space-lg) list-none max-md:grid-cols-none"
+            class="grid grid-cols-2 -mb-(--space-2xl) gap-x-(--space-lg) list-none max-md:grid-cols-1"
             data-motion-stagger="flip"
         >
             {ACTIONS.map(action => (
-                <li class="content-start grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-span-4 gap-y-(--space-xs) pb-(--space-2xl)">
-                    <article class="slab slab--card slab--still content-start grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-span-4 gap-y-(--space-xs)">
-                        <div class="flex items-baseline justify-between gap-x-(--space-sm)">
+                <li class="content-start grid grid-cols-1 grid-rows-subgrid row-span-4 gap-y-3 pb-(--space-2xl)">
+                    <article class="slab slab--card slab--still content-start grid grid-cols-1 grid-rows-subgrid row-span-4 gap-y-3">
+                        <div class="flex items-baseline justify-between gap-x-4">
                             <h3 class="min-w-0 text-lg">
                                 {action.name}
                             </h3>
@@ -193,12 +193,6 @@ const SWITCHES = [
         display: none;
     }
 
-    .admin__state {
-        min-width: 72px;
-        text-align: right;
-        user-select: none;
-    }
-
     .admin__switch {
         appearance: none;
         background-color: var(--color-bg-sunken);
@@ -214,7 +208,6 @@ const SWITCHES = [
             background-color var(--duration-fast) var(--motion-ease-ui),
             background-position var(--duration-fast) var(--motion-ease-ui),
             border-color var(--duration-fast) var(--motion-ease-ui),
-            box-shadow var(--duration-fast) var(--motion-ease-ui),
             opacity var(--duration-fast) var(--motion-ease-ui);
         width: 80px;
     }
@@ -228,24 +221,12 @@ const SWITCHES = [
         background-position: calc(100% - 4px) center;
     }
 
-    .admin__switch:focus-visible {
-        box-shadow:
-            0 0 0 2px var(--color-focus-ring-offset),
-            0 0 0 4px var(--color-focus-ring);
-    }
-
     .admin__switch:hover {
         border-color: var(--color-border-strong);
     }
 
     .admin__switch[aria-busy='true'] {
         opacity: 0.6;
-    }
-
-    @media (max-width: 768px) {
-        .admin__state {
-            text-align: left;
-        }
     }
 </style>
 

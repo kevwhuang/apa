@@ -21,7 +21,7 @@ import IconSpark from '@components/icons/Spark.astro';
     </button>
     <dialog
         id="ai-window"
-        class="ai__window z-(--z-drawer)"
+        class="ai__window overflow-y-clip z-(--z-drawer)"
         aria-labelledby="ai-title"
         data-ai-window
     >
@@ -29,7 +29,7 @@ import IconSpark from '@components/icons/Spark.astro';
             class="grip z-1"
             data-ai-grip
         />
-        <div class="ai__head flex items-center justify-between shrink-0 gap-(--space-2xs) pl-(--space-sm) border-b border-border-subtle">
+        <div class="ai__head flex items-center justify-between shrink-0 gap-2 pl-4 border-b border-border-subtle">
             <h2
                 id="ai-title"
                 class="ai__eyebrow label text-link"
@@ -46,17 +46,17 @@ import IconSpark from '@components/icons/Spark.astro';
             </button>
         </div>
         <ol
-            class="ai__log flex flex-1 flex-col overflow-y-auto overscroll-contain [scrollbar-gutter:stable] min-h-0 gap-(--space-2xs) p-(--space-sm) list-none"
+            class="ai__log flex flex-1 flex-col overflow-y-auto overscroll-contain [scrollbar-gutter:stable] min-h-0 gap-2 p-4 list-none"
             aria-live="polite"
             data-ai-log
         />
         <form
-            class="ai__form flex shrink-0 gap-(--space-2xs) p-(--space-sm) border-border-subtle border-t"
+            class="ai__form flex flex-wrap justify-end shrink-0 gap-2 p-4 border-border-subtle border-t"
             data-ai-form
         >
             <input
                 id="ai-question"
-                class="input flex-1 min-w-0"
+                class="input flex-1 min-w-42"
                 aria-label="Question"
                 autocomplete="off"
                 data-ai-field
@@ -77,13 +77,13 @@ import IconSpark from '@components/icons/Spark.astro';
             </button>
         </form>
         <template data-ai-answer>
-            <li class="ai__card flex flex-col self-start max-w-[95%] gap-(--space-2xs) px-(--space-xs) py-(--space-2xs) border-blockquote-border border-l-2 bg-bg-sunken">
+            <li class="ai__card flex flex-col self-start max-w-[95%] gap-2 px-3 py-2 border-blockquote-border border-l-2 bg-bg-sunken">
                 <p
                     class="ai__body text-base wrap-anywhere"
                     data-ai-text
                 />
                 <a
-                    class="action-text ai__source"
+                    class="action-text ai__source hit"
                     data-ai-source
                     href="/"
                 >
@@ -92,11 +92,11 @@ import IconSpark from '@components/icons/Spark.astro';
             </li>
         </template>
         <template data-ai-ask>
-            <li class="ai__ask self-end max-w-[85%] px-(--space-xs) py-(--space-2xs) text-base wrap-anywhere bg-bg-inverse text-text-inverse" />
+            <li class="ai__ask self-end max-w-[85%] px-3 py-2 text-base wrap-anywhere bg-bg-inverse text-text-inverse" />
         </template>
         <template data-ai-thinking>
             <li
-                class="ai__thinking flex items-center self-start gap-(--space-2xs) py-(--space-2xs) font-mono text-base text-text-secondary"
+                class="ai__thinking flex items-center self-start gap-2 py-2 font-mono text-base text-text-secondary"
                 data-ai-pending
             >
                 <span
@@ -111,7 +111,7 @@ import IconSpark from '@components/icons/Spark.astro';
 
 <style>
     .ai {
-        --ai-offset: calc(var(--space-md) + 2 * (var(--launcher-size) + var(--space-2xs)));
+        --ai-offset: calc(var(--space-md) + 2 * (var(--control-size) + 8px));
         display: none;
     }
 
@@ -151,12 +151,12 @@ import IconSpark from '@components/icons/Spark.astro';
         border-right: 0;
         color: var(--color-text-inverse);
         display: inline-flex;
-        height: var(--launcher-size);
+        height: var(--control-size);
         inset: auto 0 var(--ai-offset) auto;
         justify-content: center;
         position: fixed;
         transition: transform var(--duration-fast) var(--motion-ease-ui);
-        width: var(--launcher-size);
+        width: var(--control-size);
     }
 
     .ai__launcher:active {
@@ -199,25 +199,20 @@ import IconSpark from '@components/icons/Spark.astro';
         align-items: center;
         align-self: flex-start;
         display: inline-flex;
-        gap: var(--space-2xs);
+        gap: 8px;
         min-height: 24px;
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
     }
 
     .ai__window {
         background: var(--color-bg-raised);
         border: 2px solid var(--color-border-strong);
-        box-shadow: var(--lift) var(--lift) 0 0 var(--color-border-strong);
+        box-shadow: var(--lift-shadow);
         color: var(--color-text);
         height: min(600px, calc(100dvh - var(--header-height) - var(--space-md) - var(--ai-offset)));
-        inset: auto calc(var(--launcher-size) + var(--lift)) var(--ai-offset) auto;
-        max-width: calc(100vw - var(--launcher-size) - var(--lift) - var(--shell-pad));
-        overflow: hidden;
-        padding: 0;
+        inset: auto calc(var(--control-size) + var(--lift)) var(--ai-offset) auto;
+        max-width: calc(100vw - var(--control-size) - var(--lift) - var(--shell-pad));
         position: fixed;
-        width: var(--ai-width, min(340px, calc(100vw - var(--launcher-size) - 2 * var(--space-md))));
+        width: var(--ai-width, min(340px, calc(100vw - var(--control-size) - 2 * var(--space-md))));
     }
 
     .ai__window[open] {
@@ -232,9 +227,9 @@ import IconSpark from '@components/icons/Spark.astro';
 
     interface AiAnswer {
         body: string;
-        href: string;
+        href?: string;
         keywords: string[];
-        label: string;
+        label?: string;
     }
 
     interface AiMessage {
@@ -252,10 +247,8 @@ import IconSpark from '@components/icons/Spark.astro';
             label: 'All Assemblies',
         },
         {
-            body: 'Prods are the credit you earn for taking part. They add up as you show up, and each one is worth $1.00 of credit at checkout. Prods are not money: they have no cash value and cannot be bought, sold, or transferred. The terms spell out the rules.',
-            href: '/terms#store-and-prods',
+            body: 'Prods are the credit you earn for taking part. They add up as you show up, and each one is worth $1.00 of credit at checkout. Prods are not money: they have no cash value and cannot be bought, sold, or transferred.',
             keywords: ['credit', 'currency', 'earn', 'point', 'prod', 'reward'],
-            label: 'Read Prods terms',
         },
         {
             body: 'Membership is open to anyone producing in Austin. Come to an Assembly, check in at the door, and your account and profile start from there.',
@@ -330,8 +323,15 @@ import IconSpark from '@components/icons/Spark.astro';
 
         if (!item || !source) return null;
 
-        source.href = answer.href;
         setText(item.querySelector('[data-ai-text]'), answer.body);
+
+        if (!answer.href || !answer.label) {
+            source.remove();
+
+            return item;
+        }
+
+        source.href = answer.href;
         setText(source.querySelector('[data-ai-source-label]'), answer.label);
 
         return item;

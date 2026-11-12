@@ -29,7 +29,7 @@ function getKitRank(id: string): number {
         >
             The kit
             <a
-                class="action-text hover:text-link inline-flex items-center min-h-(--control-size) gap-2 whitespace-nowrap transition-[color,transform] max-md:hidden"
+                class="action-text inline-flex items-center min-h-(--control-size) gap-2 whitespace-nowrap max-md:hidden"
                 href="/resources"
                 slot="cta"
             >
@@ -37,24 +37,24 @@ function getKitRank(id: string): number {
             </a>
         </SectionHead>
         <ul
-            class="grid grid-cols-2 gap-x-(--space-lg) gap-y-(--space-2xl) list-none max-md:grid-cols-1 max-md:mb-(--space-md)"
+            class="grid grid-cols-2 gap-x-(--space-lg) gap-y-(--space-2xl) list-none max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))] max-md:mb-(--space-md)"
             data-motion-stagger="rise"
         >
             {assets.map(asset => (
-                <li class="bash-kit__card slab slab--card slab--still grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-span-3 gap-y-(--space-sm)">
+                <li class="slab slab--card slab--plush slab--still grid grid-cols-1 grid-rows-subgrid row-span-3 gap-y-4">
                     <h3 class="font-display text-2xl text-balance">
                         {asset.data.title}
                     </h3>
                     <p class="text-text-secondary">
                         {asset.data.description}
                     </p>
-                    <div class="flex flex-wrap items-center justify-between gap-x-(--space-md) pt-(--space-xs) border-border-subtle border-t">
+                    <div class="flex flex-wrap items-center justify-between gap-x-(--space-md) pt-3 border-border-subtle border-t">
                         <p class="font-mono text-base text-text-secondary">
                             {asset.data.format} &middot; {asset.data.size}
                         </p>
                         {asset.availability === 'open' && (
                             <a
-                                class="action-text inline-flex items-center min-h-(--control-size) transition-[color,transform]"
+                                class="action-text inline-flex items-center min-h-(--control-size)"
                                 aria-label={`Download ${asset.data.title}`}
                                 download
                                 href={asset.data.href}
@@ -74,7 +74,7 @@ function getKitRank(id: string): number {
             data-motion="rise"
         >
             <a
-                class="action-text hover:text-link inline-flex items-center min-h-(--control-size) gap-2 underline underline-offset-4 transition-[color,transform]"
+                class="action-text inline-flex items-center min-h-(--control-size) gap-2 underline underline-offset-4"
                 href="/resources"
             >
                 Browse resources <IconArrow />
@@ -82,9 +82,3 @@ function getKitRank(id: string): number {
         </p>
     </div>
 </section>
-
-<style>
-    .bash-kit__card {
-        padding: var(--space-lg);
-    }
-</style>

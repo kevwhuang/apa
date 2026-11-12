@@ -8,17 +8,19 @@ const GUARDED_PRESET: MotionPresetName = 'rise';
 const ORIGIN_TOP = '50% 0%';
 const REST_PROPERTIES = 'clipPath,rotate,scale,transform,transformOrigin,translate,willChange';
 const RULE_CLIP = 'inset(0% 100% 0% 0%)';
-const STRIKE_CLIP = 'inset(0% 0% 108% 0%)';
+const STRIKE_CLIP = 'inset(-30% -30% 138% -30%)';
 const STRIKE_OFFSET = '0.18em';
+const STRIKE_OPEN = 'inset(-30% -30% -30% -30%)';
 const STRIKE_SKEW = 2;
 const TILT_ROTATION = -8;
 const UNFOLD_CLIP = 'inset(14% 0% 14% 0%)';
+const UNFOLD_OPEN = 'inset(-15% -15% -15% -15%)';
 const UNFOLD_PERSPECTIVE = 700;
 const UNFOLD_ROTATION = -8;
 const VISIBLE_PRESETS: MotionPresetName[] = ['rule', 'strike', 'wipe'];
-const WIPE_CLIP = 'inset(-50% 100% 0% 0%)';
+const WIPE_CLIP = 'inset(-50% 105% -5% -5%)';
 const WIPE_OFFSET = -28;
-const WIPE_OPEN = 'inset(-50% 0% 0% 0%)';
+const WIPE_OPEN = 'inset(-50% -5% -5% -5%)';
 
 const ENTRANCE_PRESETS: Record<MotionPresetName, MotionPreset> = {
     blur: {
@@ -67,7 +69,7 @@ const ENTRANCE_PRESETS: Record<MotionPresetName, MotionPreset> = {
         ease: 'entrance',
         from: () => ({ clipPath: STRIKE_CLIP, opacity: 1, skewY: STRIKE_SKEW, y: STRIKE_OFFSET }),
         stagger: 'base',
-        to: () => ({ clipPath: CLIP_OPEN, skewY: 0, y: 0 }),
+        to: () => ({ clipPath: STRIKE_OPEN, skewY: 0, y: 0 }),
     },
     tilt: {
         duration: 'cinematic',
@@ -81,7 +83,7 @@ const ENTRANCE_PRESETS: Record<MotionPresetName, MotionPreset> = {
         ease: 'entrance',
         from: () => ({ clipPath: UNFOLD_CLIP, opacity: 0, rotateX: UNFOLD_ROTATION, transformPerspective: UNFOLD_PERSPECTIVE }),
         stagger: 'base',
-        to: () => ({ clipPath: CLIP_OPEN, opacity: 1, rotateX: 0 }),
+        to: () => ({ clipPath: UNFOLD_OPEN, opacity: 1, rotateX: 0 }),
     },
     wipe: {
         duration: 'slowest',

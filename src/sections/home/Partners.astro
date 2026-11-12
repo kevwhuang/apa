@@ -12,7 +12,7 @@ import { PARTNERS, PARTNER_LOGO_WIDTH } from '@lib/shared/constants';
 >
     <div>
         <SectionHead
-            class="text-5xl text-balance max-md:text-3xl"
+            class="text-3xl-5xl text-balance"
             headingId="partners-title"
         >
             Backed by our top sponsors
@@ -31,11 +31,11 @@ import { PARTNERS, PARTNER_LOGO_WIDTH } from '@lib/shared/constants';
         style={`--backers-cols: ${PARTNERS.length + 1}`}
     >
         {PARTNERS.map(partner => (
-            <li class="partner-tile grid grid-rows-[auto_minmax(0,1fr)] min-h-(--backers-cell) gap-(--space-md) p-(--space-lg) bg-bg-page">
+            <li class="grid grid-rows-[auto_minmax(0,1fr)] min-h-(--backers-cell) gap-(--space-md) p-(--space-lg) text-center bg-bg-page">
                 <p class="label text-text-secondary">{partner.name}</p>
                 <div class="backers__logo">
                     <Image
-                        class="partner-tile__logo object-contain max-h-full max-w-full"
+                        class="partner-logo object-contain max-h-full max-w-full"
                         alt={partner.name}
                         densities={[1, 2]}
                         src={partner.logo}
@@ -44,7 +44,7 @@ import { PARTNERS, PARTNER_LOGO_WIDTH } from '@lib/shared/constants';
                 </div>
             </li>
         ))}
-        <li class="backers__action grid">
+        <li class="grid max-lg:col-span-full">
             <a
                 class="backers__cta grid grid-rows-[auto_minmax(0,1fr)] min-h-(--backers-cell) gap-(--space-md) p-(--space-lg) text-center"
                 href="/partners"
@@ -100,10 +100,6 @@ import { PARTNERS, PARTNER_LOGO_WIDTH } from '@lib/shared/constants';
     @media (max-width: 1024px) {
         .backers {
             grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .backers__action {
-            grid-column: 1 / -1;
         }
     }
 

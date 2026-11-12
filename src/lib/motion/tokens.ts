@@ -19,7 +19,6 @@ const EASE_FALLBACKS: Record<MotionEaseToken, MotionBezier> = {
 };
 
 const FALLBACK_DATA_KEY = 'motionTokenFallback';
-const MILLISECONDS_PER_SECOND = 1_000;
 
 const SCALAR_FALLBACKS = {
     '--motion-travel': 24,
@@ -120,9 +119,7 @@ function readEase(styles: CSSStyleDeclaration, name: string, fallback: MotionBez
 }
 
 function readNumber(styles: CSSStyleDeclaration, name: string, fallback: number) {
-    const raw = styles.getPropertyValue(name).trim();
-
-    const parsed = Number.parseFloat(raw);
+    const parsed = Number.parseFloat(styles.getPropertyValue(name));
 
     if (!Number.isFinite(parsed)) {
         fallbacks.push(name);
@@ -130,7 +127,7 @@ function readNumber(styles: CSSStyleDeclaration, name: string, fallback: number)
         return fallback;
     }
 
-    return raw.endsWith('ms') ? parsed / MILLISECONDS_PER_SECOND : parsed;
+    return parsed;
 }
 
 function refreshMotionTokens(): void {

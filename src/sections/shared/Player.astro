@@ -31,7 +31,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
             class="grip z-1"
             data-player-grip
         />
-        <div class="player__head flex flex-none items-center justify-between min-h-(--control-size) pl-(--space-md) pr-(--space-2xs)">
+        <div class="player__head flex flex-none items-center justify-between min-h-(--control-size) pl-4">
             <p class="label player__eyebrow text-link">Now playing</p>
             <button
                 class="player__close"
@@ -43,11 +43,11 @@ import IconWaveform from '@components/icons/Waveform.astro';
             </button>
         </div>
         <div
-            class="player__rack scroll-slot flex flex-auto flex-col min-h-0 gap-(--space-2xs) px-(--space-md) py-(--space-sm) border-border-subtle border-t"
+            class="player__rack scroll-slot flex flex-auto flex-col min-h-0 gap-2 px-4 py-4 border-border-subtle border-t"
             data-player-rack
             hidden
         >
-            <div class="player__rack-head flex items-baseline justify-between gap-(--space-2xs)">
+            <div class="player__rack-head flex items-baseline justify-between gap-2">
                 <p class="label player__rack-label flex-none text-link">Rack</p>
                 <p
                     class="player__rack-file min-w-0 text-base truncate text-text-secondary"
@@ -55,7 +55,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
                 />
             </div>
             <ul
-                class="player__plugins empty:hidden flex flex-col gap-(--space-2xs) list-none"
+                class="player__plugins empty:hidden flex flex-col gap-2 list-none"
                 aria-label="Active plugins"
                 data-player-plugins
             />
@@ -75,8 +75,8 @@ import IconWaveform from '@components/icons/Waveform.astro';
         >
             Go to rack <IconArrow />
         </a>
-        <div class="player__controls flex flex-col flex-none gap-(--space-2xs) py-(--space-sm) border-border-subtle border-t">
-            <div class="player__meta flex flex-col gap-(--space-3xs) px-(--space-md)">
+        <div class="player__controls flex flex-col flex-none gap-2 py-4 border-border-subtle border-t">
+            <div class="player__meta flex flex-col gap-1 px-4">
                 <p
                     class="player__title min-w-0 font-bold leading-(--text-xl) text-lg truncate"
                     data-player-title
@@ -90,7 +90,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
                     Play a track to load it here.
                 </p>
             </div>
-            <div class="player__row flex items-center gap-(--space-2xs) px-(--space-md)">
+            <div class="player__row flex items-center gap-2 px-4">
                 <button
                     class="player__control player__control--play"
                     aria-pressed="false"
@@ -114,7 +114,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
                         Play
                     </span>
                 </button>
-                <div class="player__row-slider flex flex-auto flex-col min-w-0 gap-(--space-3xs)">
+                <div class="player__row-slider flex flex-auto flex-col min-w-0 gap-1">
                     <input
                         class="range h-6"
                         aria-label="Seek within the track"
@@ -132,7 +132,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
                     </p>
                 </div>
             </div>
-            <div class="player__row flex items-center gap-(--space-2xs) px-(--space-md)">
+            <div class="player__row flex items-center gap-2 px-4">
                 <button
                     class="player__control"
                     aria-pressed="false"
@@ -150,7 +150,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
                     </span>
                     <span class="sr-only">Mute</span>
                 </button>
-                <div class="player__row-slider flex flex-auto flex-col min-w-0 gap-(--space-3xs)">
+                <div class="player__row-slider flex flex-auto flex-col min-w-0 gap-1">
                     <input
                         class="range h-6"
                         aria-label="Volume"
@@ -262,12 +262,12 @@ import IconWaveform from '@components/icons/Waveform.astro';
         border-right: 0;
         color: var(--color-text-inverse);
         display: inline-flex;
-        height: var(--launcher-size);
+        height: var(--control-size);
         inset: auto 0 var(--space-md) auto;
         justify-content: center;
         position: fixed;
         transition: transform var(--duration-fast) var(--motion-ease-ui);
-        width: var(--launcher-size);
+        width: var(--control-size);
     }
 
     .player__launcher:active {
@@ -289,39 +289,28 @@ import IconWaveform from '@components/icons/Waveform.astro';
         color: var(--color-text);
         display: flex;
         flex: 0 0 auto;
-        gap: var(--space-2xs);
+        gap: 8px;
         min-height: var(--control-size);
-        padding: 0 var(--space-md);
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .player__link:active {
-        transform: translateY(1px);
+        padding: 0 16px;
     }
 
     .player__link:focus-visible {
         outline-offset: -2px;
     }
 
-    .player__link:hover {
-        color: var(--color-link);
-    }
-
     .player__panel {
         background: var(--color-bg-raised);
         border: 2px solid var(--color-border-strong);
-        box-shadow: var(--lift) var(--lift) 0 0 var(--color-border-strong);
+        box-shadow: var(--lift-shadow);
         color: var(--color-text);
         display: flex;
         flex-direction: column;
         height: auto;
-        inset: auto calc(var(--launcher-size) + var(--lift)) var(--space-md) auto;
+        inset: auto calc(var(--control-size) + var(--lift)) var(--space-md) auto;
         max-height: calc(100dvh - var(--header-height) - 2 * var(--space-md));
-        max-width: calc(100vw - var(--launcher-size) - var(--lift) - var(--shell-pad));
+        max-width: calc(100vw - var(--control-size) - var(--lift) - var(--shell-pad));
         position: fixed;
-        width: var(--player-width, min(340px, calc(100vw - var(--launcher-size) - 2 * var(--space-md))));
+        width: var(--player-width, min(340px, calc(100vw - var(--control-size) - 2 * var(--space-md))));
     }
 
     .player__plugin {
@@ -333,7 +322,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
         font-size: var(--text-base);
         line-height: var(--text-base--line-height);
         min-height: 36px;
-        padding: var(--space-2xs) var(--space-sm);
+        padding: 8px 16px;
         transition:
             border-color var(--duration-fast) var(--motion-ease-ui),
             color var(--duration-fast) var(--motion-ease-ui);

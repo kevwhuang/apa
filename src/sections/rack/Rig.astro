@@ -36,7 +36,6 @@ import { formatBytes, formatEntry } from '@lib/shared/utils';
 interface Module {
     blurb: string;
     featured?: boolean;
-    id: string;
     kind: keyof typeof MODULE_NAMES;
     readout?: string;
     role: string;
@@ -54,6 +53,7 @@ interface ModuleSlider {
     value: number;
 }
 
+const CLASS_DROP = 'dropzone halftone rack__drop flex flex-col items-center justify-center relative gap-3 p-4 border-2 border-border-inverse-strong border-dashed text-center bg-bg-inverse-raised';
 const DISTORTION_TONE_POSITION = 0.7819;
 const FILTER_CUTOFF_POSITION = 0.5498;
 const HIGHPASS_CUTOFF_POSITION = 0.389;
@@ -61,7 +61,6 @@ const HIGHPASS_CUTOFF_POSITION = 0.389;
 const MODULES: Module[] = [
     {
         blurb: 'Sets the level running into everything downstream. Pull it back before you drive the saturator, or lean on it to push the compressor harder.',
-        id: 'tare',
         kind: 'trim',
         role: 'Input trim',
         sliders: [
@@ -70,7 +69,6 @@ const MODULES: Module[] = [
     },
     {
         blurb: 'A resonant low-pass: everything above the corner falls away. Sweep the cutoff against a running loop and raise Q until the corner sings.',
-        id: 'sieve',
         kind: 'filter',
         role: 'Low-pass filter',
         sliders: [
@@ -80,7 +78,6 @@ const MODULES: Module[] = [
     },
     {
         blurb: 'Cuts everything under the corner, where rumble and mud collect. The scale is logarithmic, and a high Q rings the corner itself.',
-        id: 'sill',
         kind: 'highpass',
         role: 'High-pass filter',
         sliders: [
@@ -91,7 +88,6 @@ const MODULES: Module[] = [
     {
         blurb: 'Three bands: a low shelf, a peaking mid, and a high shelf. Boost or cut any of them and the tilt lands on the chain immediately.',
         featured: true,
-        id: 'ledger',
         kind: 'eq',
         role: 'Equalizer',
         sliders: [
@@ -102,7 +98,6 @@ const MODULES: Module[] = [
     },
     {
         blurb: 'An RMS watcher opens and closes a gain stage with fast ramps. Set the threshold above the noise floor and below the hits.',
-        id: 'latch',
         kind: 'gate',
         readout: 'Gate closed',
         role: 'Noise gate',
@@ -114,7 +109,6 @@ const MODULES: Module[] = [
     {
         blurb: 'Pull the threshold down until the gain-reduction readout moves, then set how hard it leans once the signal crosses the line.',
         featured: true,
-        id: 'clamp',
         kind: 'compressor',
         readout: 'GR 0.0 dB',
         role: 'Compressor',
@@ -126,7 +120,6 @@ const MODULES: Module[] = [
     },
     {
         blurb: 'Hard clipping, harder-edged than the saturator that follows. The curve shears flat at the rails instead of rounding into them, so the harmonics come out brittle and loud. The tone control is a low-pass that tames the fizz clipping throws off.',
-        id: 'scorch',
         kind: 'distortion',
         role: 'Distortion',
         sliders: [
@@ -136,7 +129,6 @@ const MODULES: Module[] = [
     },
     {
         blurb: 'A tanh drive curve, oversampled 4x, and makeup gain that holds the level steady as drive rises. Soft knees, no hard edges. It sits ahead of the time effects, so the repeats inherit the dirt.',
-        id: 'grit',
         kind: 'saturator',
         role: 'Saturator',
         sliders: [
@@ -145,7 +137,6 @@ const MODULES: Module[] = [
     },
     {
         blurb: 'Two modulated delay lines run against the dry path. Rate moves the LFO, depth widens the sweep either side of it.',
-        id: 'weave',
         kind: 'chorus',
         role: 'Chorus',
         sliders: [
@@ -155,7 +146,6 @@ const MODULES: Module[] = [
     },
     {
         blurb: 'One LFO on one gain stage: amplitude modulation, nothing more. Rate is the speed of the pulse, depth is how far each dip falls.',
-        id: 'pulse',
         kind: 'tremolo',
         role: 'Tremolo',
         sliders: [
@@ -165,7 +155,6 @@ const MODULES: Module[] = [
     },
     {
         blurb: 'Time and feedback into a real feedback loop, capped just short of self-oscillation. Long times with high feedback stack up fast.',
-        id: 'relay',
         kind: 'delay',
         role: 'Delay',
         sliders: [
@@ -176,7 +165,6 @@ const MODULES: Module[] = [
     {
         blurb: 'Convolution against a noise impulse that regenerates whenever the decay changes. Wet sets how much of the room reaches the output.',
         featured: true,
-        id: 'chamber',
         kind: 'reverb',
         role: 'Reverb',
         sliders: [
@@ -186,7 +174,6 @@ const MODULES: Module[] = [
     },
     {
         blurb: 'A stereo panner across the field. Center is dead ahead, and either edge leaves you with a single speaker.',
-        id: 'bearing',
         kind: 'pan',
         role: 'Stereo panner',
         sliders: [
@@ -195,7 +182,6 @@ const MODULES: Module[] = [
     },
     {
         blurb: 'A 20:1 brickwall with a 1 ms attack, sitting last before the analysis stages. Drag the ceiling down and the gain-reduction readout shows how many decibels it pulls off the peaks.',
-        id: 'ceiling',
         kind: 'limiter',
         readout: 'GR 0.0 dB',
         role: 'Limiter',
@@ -206,7 +192,6 @@ const MODULES: Module[] = [
     },
     {
         blurb: 'A passthrough level meter reading whatever reaches it. The bars run while the rack plays and rest the moment it stops.',
-        id: 'needle',
         kind: 'meter',
         role: 'Metering',
         sliders: [],
@@ -214,7 +199,6 @@ const MODULES: Module[] = [
     },
     {
         blurb: 'Autocorrelation on the signal at this point in the chain: hertz, nearest note, cents off. Feed it something monophonic. Chords read as nonsense.',
-        id: 'pitchfork',
         kind: 'tuner',
         readout: '\u2014',
         role: 'Tuner',
@@ -229,14 +213,14 @@ const MODULES: Module[] = [
     aria-labelledby="rig-title"
 >
     <div
-        class="rack__scene stage__item--full absolute inset-0 pointer-events-none"
+        class="rack__scene stage__full absolute inset-0 pointer-events-none"
         aria-hidden="true"
     >
         <canvas class="rack__canvas" hidden />
     </div>
     <div class="flex flex-col relative gap-6">
         <PageHead
-            class="max-w-4xl text-7xl max-md:text-5xl"
+            class="max-w-4xl text-5xl-7xl"
             headingId="rig-title"
         >
             One live rack
@@ -251,12 +235,12 @@ const MODULES: Module[] = [
         </p>
     </div>
     <dl
-        class="rack__ledger relative"
+        class="grid grid-cols-[minmax(200px,0.62fr)_repeat(3,minmax(0,1fr))] relative gap-px border-2 border-border-strong bg-border-strong max-lg:grid-cols-[minmax(0,0.38fr)_minmax(0,1fr)] max-md:grid-cols-1"
         aria-label="How the rack works"
         data-motion-stagger="rise"
     >
-        <div class="rack__cell--flag content-center grid px-(--space-sm) py-(--space-xs)">
-            <dt class="label mb-(--space-2xs) text-text-inverse-secondary">Modules</dt>
+        <div class="content-center grid px-(--space-lg) py-(--space-md) bg-bg-inverse text-text-inverse max-lg:row-span-3 max-md:px-(--space-md) max-md:py-4 max-md:row-auto">
+            <dt class="label mb-2 text-text-inverse-secondary">Modules</dt>
             <dd
                 class="font-bold font-display leading-none text-4xl tracking-[-0.02em]"
                 data-motion-count={String(MODULES.length)}
@@ -264,16 +248,16 @@ const MODULES: Module[] = [
                 {MODULES.length}
             </dd>
         </div>
-        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
-            <dt class="label mb-(--space-3xs) text-text-secondary">Formats</dt>
+        <div class="content-start grid px-4 py-3 bg-bg-page">
+            <dt class="label mb-1 text-text-secondary">Formats</dt>
             <dd class="font-mono text-base">{RACK_EXTENSION_LIST}</dd>
         </div>
-        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
-            <dt class="label mb-(--space-3xs) text-text-secondary">Ceiling</dt>
+        <div class="content-start grid px-4 py-3 bg-bg-page">
+            <dt class="label mb-1 text-text-secondary">Ceiling</dt>
             <dd class="font-mono text-base">{formatBytes(RACK_MAX_BYTES)} per file</dd>
         </div>
-        <div class="content-center grid px-(--space-sm) py-(--space-xs) bg-bg-page">
-            <dt class="label mb-(--space-3xs) text-text-secondary">Output</dt>
+        <div class="content-start grid px-4 py-3 bg-bg-page">
+            <dt class="label mb-1 text-text-secondary">Output</dt>
             <dd class="font-mono text-base">Plays through the site player</dd>
         </div>
     </dl>
@@ -295,28 +279,31 @@ const MODULES: Module[] = [
         >
             Load a file and build the chain
         </SectionHead>
-        <div class="rack__body">
+        <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] gap-(--space-md) max-md:grid-cols-1">
             <label
-                class="halftone rack__drop"
+                class={CLASS_DROP}
                 data-rack-drop
                 for="rack-file"
             >
                 <IconUpload />
-                <span class="action-text transition-colors">Drop or choose audio</span>
-                <span class="font-mono text-base text-text-inverse">
+                <span class="font-bold font-sans text-balance text-base tracking-tight">Drop or choose audio</span>
+                <span
+                    id="rack-help"
+                    class="font-mono text-balance text-sm text-text-inverse-secondary"
+                >
                     {RACK_EXTENSION_LIST} only. Up to {formatBytes(RACK_MAX_BYTES)}.
                 </span>
                 <input
                     id="rack-file"
-                    class="sr-only"
+                    class="dropzone__input sr-only"
                     accept={UPLOAD.acceptAttribute}
-                    aria-describedby="rack-error"
+                    aria-describedby="rack-help rack-error"
                     aria-label="Drop or choose audio"
                     data-rack-input
                     type="file"
                 />
             </label>
-            <div class="flex items-center gap-(--space-sm) p-(--space-sm) border border-border-inverse-subtle">
+            <div class="flex items-center gap-4 p-4 border border-border-inverse-subtle">
                 <button
                     class="rack__play"
                     aria-pressed="false"
@@ -340,7 +327,7 @@ const MODULES: Module[] = [
                 </button>
                 <div class="min-w-0">
                     <p
-                        class="rack__meta flex items-center gap-(--space-2xs) text-base"
+                        class="rack__meta flex items-center gap-2 text-base"
                         aria-live="polite"
                         data-rack-meta
                     >
@@ -366,21 +353,21 @@ const MODULES: Module[] = [
                 </div>
             </div>
             <ol
-                class="col-span-full flex flex-wrap items-center gap-(--space-sm) list-none"
+                class="col-span-full flex flex-wrap items-center gap-4"
                 data-rack-path
             >
-                <li class="rack__node">In</li>
+                <li class="label rack__node">In</li>
                 <li
-                    class="rack__node rack__node--idle"
+                    class="label rack__node rack__node--idle"
                     data-rack-idle
                 >
                     Straight through
                 </li>
-                <li class="rack__node">Out</li>
+                <li class="label rack__node">Out</li>
             </ol>
             <template data-rack-chip>
                 <li
-                    class="rack__node rack__node--plug"
+                    class="label rack__node rack__node--plug"
                     data-rack-plug
                 />
             </template>
@@ -400,24 +387,23 @@ const MODULES: Module[] = [
             The modules, in signal order
         </SectionHead>
         <ul
-            class="rack__grid rank list-none"
+            class="rack__grid rank"
             data-motion-stagger="flip"
         >
             {MODULES.map((module, index) => (
                 <li class="rack__tile">
                     <article
-                        id={module.id}
                         class:list={[
-                            'module slab slab--card slab--still grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-[1/span_5] space-y-(--space-xs)',
+                            'module slab slab--card slab--still grid grid-cols-1 grid-rows-subgrid row-[1/span_5] space-y-3',
                             module.featured && 'module--featured',
                         ]}
                         data-module={module.kind}
                     >
-                        <p class="label flex flex-wrap items-baseline row-1 gap-(--space-2xs)">
-                            <span class="text-(--module-accent)">{formatEntry(index + 1)}</span>
+                        <p class="label flex flex-wrap items-baseline row-1 gap-2">
+                            <span class="text-link">{formatEntry(index + 1)}</span>
                             <span>{module.role}</span>
                         </p>
-                        <div class="flex flex-wrap items-center justify-between row-2 gap-(--space-2xs)">
+                        <div class="flex flex-wrap items-center justify-between row-2 gap-2">
                             <h3
                                 class="min-w-0 text-xl"
                                 data-module-name
@@ -440,10 +426,10 @@ const MODULES: Module[] = [
                         {module.sliders.length > 0 && (
                             <div class="flex flex-col row-4">
                                 {module.sliders.map(slider => (
-                                    <label class="grid grid-cols-[80px_minmax(0,1fr)_76px] items-center min-h-(--control-size) gap-(--space-2xs) max-lg:grid-cols-[72px_minmax(0,1fr)_76px]">
+                                    <label class="grid grid-cols-[80px_minmax(0,1fr)_76px] items-center min-h-(--control-size) gap-x-2 max-lg:grid-cols-[72px_minmax(0,1fr)_76px] max-md:grid-cols-[minmax(0,1fr)_auto]">
                                         <span class="label whitespace-nowrap text-(--module-mute)">{slider.label}</span>
                                         <input
-                                            class="range h-(--control-size)"
+                                            class="range h-(--control-size) max-md:col-span-full max-md:row-start-2"
                                             aria-valuetext={slider.display}
                                             data-module-parameter={slider.parameter}
                                             max={slider.max}
@@ -477,7 +463,7 @@ const MODULES: Module[] = [
                         {module.visualization === 'readout' && (
                             <div class="row-5">
                                 <p
-                                    class="flex items-center justify-center min-h-(--control-size) px-(--space-xs) py-(--space-2xs) border-(--module-line) border-2 font-mono text-center text-lg bg-(--module-fill) select-none"
+                                    class="flex items-center justify-center min-h-(--control-size) px-3 py-2 border-(--module-line) border-2 font-mono text-center text-lg bg-(--module-fill) select-none"
                                     data-module-readout
                                 >
                                     {module.readout}
@@ -493,8 +479,6 @@ const MODULES: Module[] = [
 
 <style>
     .module {
-        --module-accent: var(--color-link);
-        --module-contrast: var(--color-text-inverse);
         --module-fill: var(--color-bg-sunken);
         --module-invert: var(--color-bg-inverse);
         --module-line: var(--color-border-strong);
@@ -506,7 +490,7 @@ const MODULES: Module[] = [
         content: '';
         inset: 0 auto 0 0;
         position: absolute;
-        width: var(--space-3xs);
+        width: 4px;
     }
 
     .module--featured {
@@ -515,22 +499,16 @@ const MODULES: Module[] = [
 
     .module__active {
         border-color: var(--module-line);
-        color: inherit;
         flex: 0 0 auto;
         height: var(--control-size);
         padding: 0;
-        transition: transform var(--duration-fast) var(--motion-ease-ui);
         width: var(--control-size);
-    }
-
-    .module__active:active {
-        transform: translateY(1px);
     }
 
     .module__active:hover {
         background-color: var(--module-invert);
         border-color: var(--module-invert);
-        color: var(--module-contrast);
+        color: var(--color-text-inverse);
     }
 
     .module__active[aria-pressed='true'] {
@@ -545,18 +523,8 @@ const MODULES: Module[] = [
         color: var(--color-btn-primary-text);
     }
 
-    .rack .action-text:hover {
-        color: var(--color-link-on-inverse);
-    }
-
     .rack.is-decoding .rack__meta {
         color: var(--color-link-on-inverse);
-    }
-
-    .rack__body {
-        display: grid;
-        gap: var(--space-md);
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
     }
 
     .rack__canvas {
@@ -566,67 +534,16 @@ const MODULES: Module[] = [
         width: 100%;
     }
 
-    .rack__cell--flag {
-        background-color: var(--color-bg-inverse);
-        color: var(--color-text-inverse);
-        padding: var(--space-md) var(--space-lg);
-    }
-
     .rack__drop {
-        --halftone-ink: var(--color-text-secondary);
-        align-items: center;
-        background-color: var(--color-bg-inverse-raised);
-        border: 2px dashed currentColor;
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-xs);
-        justify-content: center;
-        min-height: 132px;
-        padding: var(--space-sm);
-        text-align: center;
-        transition:
-            background var(--duration-fast) var(--motion-ease-ui),
-            border-color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .rack__drop > span {
-        background-color: var(--color-bg-inverse-raised);
-    }
-
-    .rack__drop.is-dragging {
-        background-image: none;
-        border-color: var(--color-border-selected);
-        border-style: solid;
-    }
-
-    .rack__drop:active {
-        transform: translateY(1px);
-    }
-
-    .rack__drop:has(input:focus-visible) {
-        border-color: var(--color-border-selected);
-        outline: 2px solid var(--color-focus-ring);
-        outline-offset: 2px;
-    }
-
-    .rack__drop:hover {
-        border-color: var(--color-border-selected);
+        --color-bg-active: var(--color-border-inverse-subtle);
+        --color-bg-hover: var(--color-bg-inverse);
+        --halftone-ink: var(--color-border-inverse-subtle);
     }
 
     .rack__grid {
         --rank-cols: repeat(2, minmax(0, 1fr));
-        column-gap: var(--space-lg);
         margin-bottom: calc(-1 * var(--space-2xl));
         row-gap: 0;
-    }
-
-    .rack__ledger {
-        background-color: var(--color-border-strong);
-        border: 2px solid var(--color-border-strong);
-        display: grid;
-        gap: 2px;
-        grid-template-columns: minmax(200px, 0.62fr) repeat(3, minmax(0, 1fr));
     }
 
     .rack__node {
@@ -634,21 +551,16 @@ const MODULES: Module[] = [
         border: 1px solid var(--color-border-inverse-subtle);
         color: var(--color-text-inverse-secondary);
         display: inline-flex;
-        font-family: var(--font-mono);
-        font-size: var(--text-sm);
-        letter-spacing: 0.06em;
-        line-height: 1;
         min-height: 36px;
-        padding: 0 var(--space-2xs);
+        padding: 0 8px;
         position: relative;
-        text-transform: uppercase;
     }
 
     .rack__node + .rack__node::before {
         background-color: var(--color-text-inverse-secondary);
         content: '';
         height: 8px;
-        inset: auto calc(100% + var(--space-3xs)) auto auto;
+        inset: auto calc(100% + 4px) auto auto;
         mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='59' height='50' viewBox='0 0 59 50'><path d='M6 25h44M34 6l19 19-19 19' fill='none' stroke='currentColor' stroke-linecap='square' stroke-width='8'/></svg>");
         mask-position: center;
         mask-repeat: no-repeat;
@@ -725,32 +637,9 @@ const MODULES: Module[] = [
         height: var(--space-2xl);
     }
 
-    @media (max-width: 1024px) {
-        .rack__cell--flag {
-            grid-row: span 3;
-        }
-
-        .rack__ledger {
-            grid-template-columns: minmax(0, 0.38fr) minmax(0, 1fr);
-        }
-    }
-
     @media (max-width: 768px) {
-        .rack__body {
-            grid-template-columns: minmax(0, 1fr);
-        }
-
-        .rack__cell--flag {
-            grid-row: auto;
-            padding: var(--space-sm) var(--space-md);
-        }
-
         .rack__grid {
             --rank-cols: minmax(0, 1fr);
-        }
-
-        .rack__ledger {
-            grid-template-columns: minmax(0, 1fr);
         }
     }
 </style>

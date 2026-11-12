@@ -5,6 +5,8 @@ import Schedule from '@components/program/Schedule.astro';
 import { LINKS } from '@lib/shared/constants';
 import { formatTimeRange, isUpcoming } from '@lib/shared/utils';
 
+const CLASS_TICKET_DETAILS = 'content-center grid justify-center gap-(--space-lg) pl-(--space-lg) border-dashed border-l-2 border-marker-cobalt max-lg:border-l-0 max-lg:border-t-2 max-lg:grid-cols-[auto_auto] max-lg:justify-start max-lg:pl-0 max-lg:pt-(--space-lg) max-md:grid-cols-none';
+
 const editions = await getCollection('bash');
 
 const upcoming = editions
@@ -15,7 +17,6 @@ const tickets = upcoming.map((edition, index) => ({
     date: edition.data.date.toISOString(),
     end: edition.data.end.toISOString(),
     headingId: index === 0 ? 'bash-next-title' : `bash-next-${index + 1}-title`,
-    id: edition.id,
     location: edition.data.location,
     longDate: edition.data.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', timeZone: 'America/Chicago', year: 'numeric' }),
     prompt: edition.data.prompt,
@@ -25,7 +26,7 @@ const tickets = upcoming.map((edition, index) => ({
 ---
 
 <section
-    class="stage stage--bash stage--tight border-b-2 border-border-strong"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-label="Next Bash"
     data-event-group="bash-upcoming"
     data-event-role="some"
@@ -33,12 +34,10 @@ const tickets = upcoming.map((edition, index) => ({
 >
     {tickets.map((ticket, index) => (
         <article
-            id={index === 0 ? ticket.id : undefined}
-            class="bash-ticket slab slab--cut slab--lift slab--still"
+            class="bash-ticket slab slab--cut slab--lift slab--plush slab--still"
             aria-labelledby={ticket.headingId}
             data-event-end={ticket.end}
             data-event-group="bash-upcoming"
-            data-event-id={ticket.id}
             data-event-role="next"
             data-motion="unfold"
             hidden={index > 0}
@@ -46,12 +45,12 @@ const tickets = upcoming.map((edition, index) => ({
             <div class="grid grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] max-lg:grid-cols-1">
                 <div class="flex flex-col justify-between gap-(--space-2xl) pr-(--space-lg) max-lg:gap-(--space-lg) max-lg:pb-(--space-lg) max-lg:pr-0">
                     <div>
-                        <p class="inline-block mb-4 px-2.5 py-1.5 border-2 border-marker-cobalt font-mono leading-none text-sm tracking-[0.06em] uppercase">
+                        <p class="label inline-block mb-4 px-2 py-1 border-2 border-marker-cobalt">
                             Next Bash
                         </p>
                         <h2
                             id={ticket.headingId}
-                            class="font-display text-5xl text-balance text-marker-cobalt max-md:text-2xl"
+                            class="font-display text-2xl-5xl text-balance text-marker-cobalt"
                         >
                             <time datetime={ticket.date}>{ticket.longDate}</time>
                         </h2>
@@ -64,29 +63,29 @@ const tickets = upcoming.map((edition, index) => ({
                     </p>
                 </div>
                 <dl
-                    class="content-center grid justify-center gap-(--space-lg) pl-(--space-lg) border-dashed border-l-2 border-marker-cobalt max-lg:border-l-0 max-lg:border-t-2 max-lg:grid-cols-[auto_auto] max-lg:pl-0 max-lg:pt-(--space-lg) max-md:grid-cols-none"
+                    class={CLASS_TICKET_DETAILS}
                     data-motion-stagger="rise"
                 >
                     <div>
                         <dt class="label mb-2 text-text-secondary">Time</dt>
-                        <dd class="font-bold font-sans text-balance text-xl">{ticket.time}</dd>
+                        <dd class="font-bold text-balance text-xl">{ticket.time}</dd>
                     </div>
                     <div class="max-lg:row-span-2">
                         <dt class="label mb-2 text-text-secondary">Where</dt>
                         <dd>
-                            <address class="mb-1 font-bold font-sans not-italic text-xl wrap-anywhere">
+                            <address class="mb-1 font-bold not-italic text-xl wrap-anywhere">
                                 {ticket.location}
                             </address>
                             {ticket.room && (
-                                <p class="font-bold font-sans text-xl wrap-anywhere">{ticket.room}</p>
+                                <p class="font-bold text-xl wrap-anywhere">{ticket.room}</p>
                             )}
                         </dd>
                     </div>
                     <div>
                         <dt class="label mb-2 text-text-secondary">RSVP</dt>
-                        <dd class="font-bold font-sans text-xl">
+                        <dd class="font-bold text-xl">
                             <a
-                                class="active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
+                                class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
                                 href={LINKS.meetup}
                                 rel="noopener noreferrer"
                                 target="_blank"
@@ -103,10 +102,3 @@ const tickets = upcoming.map((edition, index) => ({
 </section>
 
 <Schedule />
-
-<style>
-    .bash-ticket.slab {
-        padding: var(--space-lg);
-        padding-inline-start: calc(var(--space-lg) + var(--slab-cut));
-    }
-</style>

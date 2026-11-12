@@ -15,7 +15,7 @@ const style = labelColor ? `background: ${color}; color: ${labelColor};` : `back
 ---
 
 <div
-    class:list={['tile flex items-center justify-center overflow-hidden relative', tileClass]}
+    class:list={['flex items-center justify-center overflow-hidden relative', tileClass]}
     data-motion={motion}
     style={style}
 >
@@ -25,7 +25,7 @@ const style = labelColor ? `background: ${color}; color: ${labelColor};` : `back
     />
     {label && (
         <span
-            class:list={['relative font-bold select-none', numeric ? 'font-display tracking-[-0.02em]' : 'font-sans tracking-[-0.025em]', labelClass]}
+            class:list={['relative font-bold select-none', numeric ? 'font-display tracking-[-0.02em]' : 'tracking-tight', labelClass]}
             aria-hidden="true"
         >
             {label}

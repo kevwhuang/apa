@@ -26,7 +26,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                 <label class="action-text signin__tab">
                     <input
                         id="mode-signin"
-                        class="signin__radio"
+                        class="signin__radio sr-only"
                         checked
                         name="mode"
                         type="radio"
@@ -36,7 +36,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                 <label class="action-text signin__tab">
                     <input
                         id="mode-signup"
-                        class="signin__radio"
+                        class="signin__radio sr-only"
                         name="mode"
                         type="radio"
                     />
@@ -44,7 +44,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                 </label>
             </fieldset>
             <form
-                class="signin__panel--in flex flex-col gap-6 p-(--space-lg)"
+                class="signin__in flex flex-col gap-6 p-(--space-lg)"
                 data-auth-form="signin"
             >
                 <h2 class="sr-only">
@@ -77,7 +77,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                         <span class="block relative">
                             <input
                                 id="signin-password"
-                                class="input pr-12 font-sans"
+                                class="input pr-12"
                                 aria-describedby="signin-password-error"
                                 aria-invalid="false"
                                 autocomplete="current-password"
@@ -86,16 +86,16 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                                 type="password"
                             />
                             <button
-                                class="signin__reveal"
+                                class="reveal"
                                 aria-label="Show password"
                                 aria-pressed="false"
                                 data-reveal="signin-password"
                                 type="button"
                             >
-                                <span class="signin__glyph--show flex items-center">
+                                <span class="reveal__show flex items-center">
                                     <IconEye />
                                 </span>
-                                <span class="signin__glyph--hide flex items-center">
+                                <span class="reveal__hide flex items-center">
                                     <IconEyeOff />
                                 </span>
                             </button>
@@ -116,7 +116,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                 </button>
             </form>
             <form
-                class="signin__panel--up flex flex-col gap-6 p-(--space-lg)"
+                class="signin__up flex flex-col gap-6 p-(--space-lg)"
                 data-auth-form="signup"
             >
                 <h2 class="sr-only">
@@ -149,7 +149,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                         <span class="block relative">
                             <input
                                 id="signup-password"
-                                class="input pr-12 font-sans"
+                                class="input pr-12"
                                 aria-describedby="signup-password-error"
                                 aria-invalid="false"
                                 autocomplete="new-password"
@@ -159,16 +159,16 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                                 type="password"
                             />
                             <button
-                                class="signin__reveal"
+                                class="reveal"
                                 aria-label="Show password"
                                 aria-pressed="false"
                                 data-reveal="signup-password"
                                 type="button"
                             >
-                                <span class="signin__glyph--show flex items-center">
+                                <span class="reveal__show flex items-center">
                                     <IconEye />
                                 </span>
-                                <span class="signin__glyph--hide flex items-center">
+                                <span class="reveal__hide flex items-center">
                                     <IconEyeOff />
                                 </span>
                             </button>
@@ -187,7 +187,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                         <span class="block relative">
                             <input
                                 id="signup-confirm"
-                                class="input pr-12 font-sans"
+                                class="input pr-12"
                                 aria-describedby="signup-confirm-error"
                                 aria-invalid="false"
                                 autocomplete="new-password"
@@ -196,16 +196,16 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                                 type="password"
                             />
                             <button
-                                class="signin__reveal"
+                                class="reveal"
                                 aria-label="Show password"
                                 aria-pressed="false"
                                 data-reveal="signup-confirm"
                                 type="button"
                             >
-                                <span class="signin__glyph--show flex items-center">
+                                <span class="reveal__show flex items-center">
                                     <IconEye />
                                 </span>
-                                <span class="signin__glyph--hide flex items-center">
+                                <span class="reveal__hide flex items-center">
                                     <IconEyeOff />
                                 </span>
                             </button>
@@ -234,63 +234,11 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
         display: var(--session-out-only, grid);
     }
 
-    .signin:has(#mode-signup:checked) .signin__panel--in {
+    .signin:has(#mode-signup:checked) .signin__in {
         display: none;
     }
 
-    .signin:not(:has(#mode-signup:checked)) .signin__panel--up {
-        display: none;
-    }
-
-    .signin__radio {
-        appearance: none;
-        height: 0;
-        margin: 0;
-        opacity: 0;
-        position: absolute;
-        width: 0;
-    }
-
-    .signin__reveal {
-        align-items: center;
-        bottom: 0;
-        color: var(--color-text-secondary);
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        position: absolute;
-        right: 0;
-        top: 0;
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-        width: 48px;
-    }
-
-    .signin__reveal:active {
-        transform: translateY(1px);
-    }
-
-    .signin__reveal:focus-visible {
-        outline-offset: -4px;
-    }
-
-    .signin__reveal:hover {
-        color: var(--color-link);
-    }
-
-    .signin__reveal::after {
-        content: '';
-        height: 48px;
-        position: absolute;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 48px;
-    }
-
-    .signin__reveal[aria-pressed='false'] .signin__glyph--hide,
-    .signin__reveal[aria-pressed='true'] .signin__glyph--show {
+    .signin:not(:has(#mode-signup:checked)) .signin__up {
         display: none;
     }
 
@@ -298,11 +246,10 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
         align-items: center;
         background-color: var(--color-bg-page);
         color: var(--color-tab-text);
-        cursor: pointer;
         display: flex;
         justify-content: center;
         min-height: 52px;
-        padding: var(--space-2xs);
+        padding: 8px;
         text-align: center;
         user-select: none;
         white-space: nowrap;

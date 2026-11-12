@@ -19,21 +19,19 @@ const isStill = archive.some(card => card.notes.length > 0);
 >
     <div>
         <SectionHead
-            class="text-4xl text-balance max-md:text-2xl"
+            class="text-2xl-4xl text-balance"
             headingId="bash-past-title"
         >
             Past Bashes
         </SectionHead>
         <ol
-            class="grid grid-cols-2 -mb-(--space-2xl) gap-x-(--space-lg) gap-y-0 list-none max-md:grid-cols-1"
+            class="grid grid-cols-2 -mb-(--space-2xl) gap-x-(--space-lg) gap-y-0 list-none max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))]"
             data-motion-stagger="flip"
         >
             {archive.map(card => (
                 <li
-                    id={isUpcoming(card.end) ? undefined : card.id}
-                    class="grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-span-3 pb-(--space-2xl)"
+                    class="grid grid-cols-1 grid-rows-subgrid row-span-3 pb-(--space-2xl)"
                     data-event-end={card.end.toISOString()}
-                    data-event-id={card.id}
                     data-event-role="past"
                     hidden={isUpcoming(card.end)}
                 >

@@ -26,27 +26,27 @@ const track = featured?.data.tracks[0];
         aria-labelledby="featured-producer-title"
     >
         <div
-            class="halftone--accent stage__item--full absolute bottom-0 inset-x-0 h-(--space-lg) pointer-events-none"
+            class="halftone--accent stage__full absolute bottom-0 inset-x-0 h-(--space-lg) pointer-events-none"
             aria-hidden="true"
             data-scrub="drift"
         />
         <div class="relative">
             <SectionHead
-                class="text-8xl max-lg:text-7xl max-md:text-3xl"
+                class="text-3xl-8xl"
                 headingId="featured-producer-title"
             >
                 {featured.data.name}
             </SectionHead>
-            <div class="rank rank--split items-start">
+            <div class="producer-feature__rank rank items-start">
                 <div>
                     <div
-                        class="producer-feature__portrait mb-6"
+                        class="mb-6 pb-(--lift) pe-(--lift)"
                         data-motion="wipe"
                     >
                         <ProducerPortrait
                             class="slab slab--bare slab--card aspect-square"
                             color={PALETTE[0].background}
-                            labelClass="leading-none text-8xl"
+                            labelClass="text-8xl"
                             labelColor={PALETTE[0].text}
                             name={featured.data.name}
                             producerId={featured.data.producerId}
@@ -104,12 +104,12 @@ const track = featured?.data.tracks[0];
 >
     <div>
         <SectionHead
-            class="text-5xl text-balance max-md:text-3xl"
+            class="text-3xl-5xl text-balance"
             headingId="producers-title"
         >
             Producers of every genre
             <a
-                class="action-text hover:text-link inline-flex items-center min-h-(--control-size) gap-2 whitespace-nowrap transition-[color,transform] max-md:hidden"
+                class="action-text inline-flex items-center min-h-(--control-size) gap-2 whitespace-nowrap max-md:hidden"
                 href="/directory"
                 slot="cta"
             >
@@ -117,7 +117,7 @@ const track = featured?.data.tracks[0];
             </a>
         </SectionHead>
         <ul
-            class="producer-strip grid grid-cols-4 gap-x-(--space-lg) gap-y-(--space-2xl) list-none max-lg:grid-cols-2 max-md:grid-cols-1 max-md:mb-10"
+            class="producer-strip grid grid-cols-4 gap-x-(--space-lg) gap-y-(--space-2xl) list-none max-lg:grid-cols-2 max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))] max-md:mb-10"
             data-motion-stagger="flip"
             data-producer-strip
         >
@@ -130,7 +130,7 @@ const track = featured?.data.tracks[0];
                         <ProducerPortrait
                             class="aspect-square border-b-2 border-border-strong"
                             color={PALETTE[(index + 1) % PALETTE.length].background}
-                            labelClass="leading-none text-5xl"
+                            labelClass="text-5xl"
                             labelColor={PALETTE[(index + 1) % PALETTE.length].text}
                             name={producer.data.name}
                             producerId={producer.data.producerId}
@@ -161,10 +161,8 @@ const track = featured?.data.tracks[0];
 </section>
 
 <style>
-    .producer-feature__portrait {
-        --plate-drop: var(--lift);
-        padding-block-end: var(--plate-drop);
-        padding-inline-end: var(--plate-drop);
+    .producer-feature__rank {
+        --rank-cols: minmax(0, 0.38fr) minmax(0, 1fr);
     }
 
     .producer-feature__track {
@@ -179,6 +177,12 @@ const track = featured?.data.tracks[0];
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: subgrid;
         row-gap: 0;
+    }
+
+    @media (max-width: 768px) {
+        .producer-feature__rank {
+            --rank-cols: minmax(0, 1fr);
+        }
     }
 </style>
 

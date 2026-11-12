@@ -117,7 +117,7 @@ const receipt = pastOrders[0];
 >
     <div class="text-center">
         <PageHead
-            class="mb-6 text-7xl max-md:text-4xl"
+            class="mb-6 text-4xl-7xl"
             headingId="order-title"
         >
             <span data-order-heading>Your receipts</span>
@@ -135,12 +135,12 @@ const receipt = pastOrders[0];
         data-order-detail
     >
         <ul
-            class="order__list scroll-slot border-2 border-border-strong list-none"
+            class="order__list scroll-slot border-2 border-border-strong divide-border-strong divide-y-2 list-none"
             data-order-list
         >
             {receipt.items.map(() => (
                 <li
-                    class="first:border-t-0 p-4 border-border-strong border-t-2"
+                    class="p-4"
                     aria-hidden="true"
                 >
                     <span class="block h-14" />
@@ -227,19 +227,19 @@ const receipt = pastOrders[0];
         </div>
     </div>
     <template data-order-row>
-        <li class="first:border-t-0 flex items-center gap-4 p-4 border-border-strong border-t-2">
-            <span class="block shrink-0 h-14 w-14 border-2 border-border-strong bg-bg-inverse">
+        <li class="flex flex-wrap items-center justify-end gap-4 p-4">
+            <span class="block shrink-0 size-14 border-2 border-border-strong bg-bg-inverse">
                 <img
-                    class="block object-cover h-full w-full"
+                    class="block object-cover size-full"
                     alt=""
                     data-row-photo
                     hidden
                     loading="lazy"
                 />
             </span>
-            <div class="flex flex-1 flex-col min-w-0 gap-1">
+            <div class="flex flex-1 flex-col min-w-36 gap-1">
                 <p
-                    class="font-bold font-sans leading-(--text-lg) tracking-tight"
+                    class="font-bold leading-(--text-lg) tracking-tight"
                     data-row-title
                 />
                 <p
@@ -289,13 +289,13 @@ const receipt = pastOrders[0];
                                 Order
                             </th>
                             <th
-                                class="order__cell order__date text-left"
+                                class="order__cell order__date text-left max-md:hidden"
                                 scope="col"
                             >
                                 Date
                             </th>
                             <th
-                                class="order__cell text-left"
+                                class="order__cell order__items text-left max-md:hidden"
                                 scope="col"
                             >
                                 Items
@@ -330,12 +330,16 @@ const receipt = pastOrders[0];
                     data-cell="id"
                     type="button"
                 />
-                <time class="order__stamp font-mono text-base text-text-secondary" />
+                <time class="order__stamp hidden font-mono text-base whitespace-nowrap text-text-secondary max-md:block" />
+                <span
+                    class="hidden text-base max-md:line-clamp-1"
+                    data-cell="summary"
+                />
             </th>
-            <td class="order__cell order__date font-mono text-base whitespace-nowrap text-text-secondary">
+            <td class="order__cell order__date font-mono text-base whitespace-nowrap text-text-secondary max-md:hidden">
                 <time data-cell="date" />
             </td>
-            <td class="order__cell text-base wrap-anywhere">
+            <td class="order__cell order__items text-base wrap-anywhere max-md:hidden">
                 <span
                     class="line-clamp-1"
                     data-cell="items"
@@ -351,11 +355,12 @@ const receipt = pastOrders[0];
 
 <style>
     .order__cell {
-        padding: var(--space-sm) round(clamp(8px, calc(5.333px + 0.8333vw), 16px), 4px);
+        padding: 16px round(clamp(8px, calc(5.333px + 0.8333vw), 16px), 4px);
     }
 
     .order__list {
         --scroll-slot-max: 40vh;
+        scrollbar-gutter: auto;
     }
 
     .order__pick {
@@ -402,16 +407,6 @@ const receipt = pastOrders[0];
         min-height: var(--scroll-slot-max);
     }
 
-    .order__stamp {
-        display: none;
-    }
-
-    .order__table {
-        display: table;
-        overflow-x: visible;
-        width: 100%;
-    }
-
     .order__table thead th {
         background-color: var(--color-bg-page);
         box-shadow: inset 0 -2px 0 var(--color-border-strong);
@@ -421,21 +416,12 @@ const receipt = pastOrders[0];
     }
 
     @media (max-width: 768px) {
-        .order__date {
-            display: none;
-        }
-
         .order__pick {
-            margin-bottom: var(--space-3xs);
+            margin-bottom: 4px;
         }
 
         .order__scroller {
-            --scroll-slot-max: calc(40px + var(--text-sm) + 5 * (32px + max(var(--space-md), var(--text-base--line-height)) + var(--space-3xs) + var(--text-base--line-height)));
-        }
-
-        .order__stamp {
-            display: block;
-            white-space: nowrap;
+            --scroll-slot-max: calc(40px + var(--text-sm) + 5 * (32px + max(var(--space-md), var(--text-base--line-height)) + 4px + 2 * var(--text-base--line-height)));
         }
     }
 </style>
@@ -487,8 +473,10 @@ const receipt = pastOrders[0];
     }
 
     function renderHeading(order: Order, isFresh: boolean) {
+        const stamp = formatDateStamp(new Date(order.placedAt)).replaceAll(' ', '\u00a0');
+
         setText(document.querySelector('[data-order-heading]'), isFresh ? 'Order received' : 'Your receipts');
-        setText(document.querySelector('[data-order-number]'), `Order ${order.id} \u00b7 ${formatDateStamp(new Date(order.placedAt))}`);
+        setText(document.querySelector('[data-order-number]'), `Order ${order.id}\u00a0\u00b7 ${stamp}`);
     }
 
     function renderItems(order: Order) {
@@ -524,6 +512,7 @@ const receipt = pastOrders[0];
         orders.forEach((order, index) => {
             const fragment = template.content.cloneNode(true) as DocumentFragment;
             const placedDate = new Date(order.placedAt);
+            const summary = summarizeItems(order.items);
 
             const pick = fragment.querySelector('[data-cell="id"]');
             const row = fragment.querySelector('[data-order-index]');
@@ -537,7 +526,8 @@ const receipt = pastOrders[0];
                 setText(stamp, formatDateStamp(placedDate));
             });
 
-            setText(fragment.querySelector('[data-cell="items"]'), summarizeItems(order.items));
+            setText(fragment.querySelector('[data-cell="items"]'), summary);
+            setText(fragment.querySelector('[data-cell="summary"]'), summary);
             setText(fragment.querySelector('[data-cell="total"]'), formatPrice(order.totals.totalCents));
             setText(pick, order.id);
             body.append(fragment);

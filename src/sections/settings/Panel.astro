@@ -52,9 +52,9 @@ const LINK_FIELDS = [
         data-motion-stagger="rise"
     >
         <div class="flex flex-col gap-(--space-md)">
-            <div class="settings__overview slab slab--bare slab--card grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-px max-lg:grid-cols-2 max-md:grid-cols-1">
+            <div class="settings__overview slab slab--bare slab--card grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-px max-lg:grid-cols-1">
                 <section
-                    class="bg-bg-raised"
+                    class="bg-bg-raised max-lg:grid max-lg:grid-cols-[repeat(auto-fit,minmax(min(100%,240px),1fr))]"
                     aria-label="Your card"
                 >
                     <PlaceholderTile
@@ -71,7 +71,7 @@ const LINK_FIELDS = [
                             hidden
                         />
                         <p
-                            class="label absolute left-0 top-0 p-(--space-xs) border-b-2 border-border-strong border-r-2 bg-bg-page text-text"
+                            class="label absolute left-0 top-0 p-3 border-b-2 border-border-strong border-r-2 bg-bg-page text-text"
                             data-settings-role
                         >
                             {formatRole(DEMO_PROFILE.role)}
@@ -79,7 +79,7 @@ const LINK_FIELDS = [
                     </PlaceholderTile>
                     <div class="p-(--space-md)">
                         <p
-                            class="mb-3 font-bold font-sans text-2xl tracking-tight wrap-break-word"
+                            class="mb-3 font-bold text-2xl tracking-tight wrap-break-word"
                             data-settings-name
                         >
                             {DEMO_PROFILE.artistName}
@@ -87,7 +87,7 @@ const LINK_FIELDS = [
                         <p class="mb-6 font-mono text-base wrap-anywhere text-text-secondary">
                             {DEMO_PROFILE.city}, {DEMO_PROFILE.state}
                         </p>
-                        <ul class="flex flex-wrap gap-2 list-none">
+                        <ul class="flex flex-wrap gap-2">
                             {DEMO_PROFILE.genres.map(genre => (
                                 <li class="label inline-flex items-center h-6 px-2 border-2 border-border-strong">{genre}</li>
                             ))}
@@ -95,13 +95,13 @@ const LINK_FIELDS = [
                     </div>
                 </section>
                 <dl
-                    class="settings__stats grid grid-cols-2 gap-px max-lg:grid-cols-1"
+                    class="settings__stats grid grid-cols-2 gap-px max-md:grid-cols-1"
                     aria-label="Account summary"
                 >
                     <div class="flex flex-col justify-center p-(--space-md) bg-bg-raised">
                         <dt class="label mb-2 text-text-secondary">Balance</dt>
                         <dd
-                            class="font-bold font-sans text-xl"
+                            class="font-bold text-xl"
                             data-settings-prods
                         >
                             {formatProds(getProdsBalance(DEMO_PROFILE.email))}
@@ -110,7 +110,7 @@ const LINK_FIELDS = [
                     <div class="flex flex-col justify-center p-(--space-md) bg-bg-raised">
                         <dt class="label mb-2 text-text-secondary">Attended</dt>
                         <dd
-                            class="font-bold font-sans text-xl"
+                            class="font-bold text-xl"
                             data-settings-attended
                         >
                             {getProdsAttendance(DEMO_PROFILE.email).length}
@@ -119,7 +119,7 @@ const LINK_FIELDS = [
                     <div class="col-span-full flex flex-col justify-center p-(--space-md) bg-bg-raised">
                         <dt class="label mb-2 text-text-secondary">Member since</dt>
                         <dd
-                            class="font-bold font-sans text-xl"
+                            class="font-bold text-xl"
                             data-settings-since
                         >
                             {formatDateStamp(DEMO_PROFILE.joined)}
@@ -128,7 +128,7 @@ const LINK_FIELDS = [
                     <div class="col-span-full flex flex-col justify-center p-(--space-md) bg-bg-raised">
                         <dt class="label mb-2 text-text-secondary">Email</dt>
                         <dd
-                            class="font-bold font-sans text-xl wrap-anywhere"
+                            class="font-bold text-xl wrap-anywhere"
                             data-settings-email
                         >
                             {DEMO_PROFILE.email}
@@ -137,7 +137,7 @@ const LINK_FIELDS = [
                 </dl>
             </div>
             <a
-                class="action-text hover:text-link inline-flex items-center self-start min-h-(--control-size) gap-2 px-(--space-3xs) underline transition-[color,transform]"
+                class="action-text inline-flex items-center self-start min-h-(--control-size) gap-2 px-1 underline underline-offset-4"
                 data-settings-onboarding
                 hidden
                 href="/onboarding"
@@ -146,20 +146,20 @@ const LINK_FIELDS = [
             </a>
         </div>
         <form
-            class="settings__form slab slab--card"
+            class="settings__form slab slab--card slab--plush flex flex-col max-w-(--measure-form) w-full gap-(--space-lg) mx-auto"
             data-settings-form
         >
             <h2 class="text-2xl">
                 Profile
             </h2>
-            <div class="flex flex-col gap-(--space-2xs)">
+            <div class="flex flex-col gap-2">
                 <p class="label text-text-secondary">{PROFILE_FIELDS.portrait.label}</p>
                 <div class="settings__track aria-busy:cursor-progress aria-busy:opacity-60 flex flex-wrap items-center gap-(--space-md)">
-                    <label class="halftone settings__pick">
+                    <label class="dropzone halftone settings__pick basis-55 flex grow items-center relative min-h-(--control-size) px-4 py-2 border-2 border-border-strong border-dashed bg-bg-page">
                         <span class="label">{PROFILE_FIELDS.portrait.picker}</span>
                         <input
                             id="settings-portrait"
-                            class="settings__file sr-only"
+                            class="dropzone__input sr-only"
                             accept={AVATAR.acceptAttribute}
                             aria-describedby="settings-portrait-error settings-portrait-help"
                             aria-invalid="false"
@@ -169,7 +169,7 @@ const LINK_FIELDS = [
                         />
                     </label>
                     <div
-                        class="settings__staged slab slab--sunk"
+                        class="settings__staged slab slab--sunk basis-65 flex flex-wrap grow items-center justify-between gap-x-4 gap-y-1"
                         data-portrait-staged
                         hidden
                     >
@@ -179,7 +179,7 @@ const LINK_FIELDS = [
                             data-portrait-preview
                         />
                         <button
-                            class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-[color,transform]"
+                            class="action-text flex items-center min-h-(--control-size) px-1 text-text-secondary"
                             aria-label="Remove portrait"
                             data-portrait-remove
                             type="button"
@@ -201,12 +201,12 @@ const LINK_FIELDS = [
                     {AVATAR_EXTENSIONS_OR_LIST}. Up to {formatBytes(AVATAR.maxFileBytes)}, at least {AVATAR.minEdgePixels}px on each side.
                 </p>
             </div>
-            <div class="flex flex-col gap-(--space-2xs)">
-                <label class="flex flex-col gap-(--space-2xs)">
+            <div class="flex flex-col gap-2">
+                <label class="flex flex-col gap-2">
                     <span class="label text-text-secondary">{PROFILE_FIELDS.artistName.label}</span>
                     <input
                         id="settings-name"
-                        class="input font-sans"
+                        class="input"
                         aria-describedby="settings-name-error"
                         aria-invalid="false"
                         autocomplete={PROFILE_FIELDS.artistName.autocomplete}
@@ -223,12 +223,12 @@ const LINK_FIELDS = [
                     hidden
                 />
             </div>
-            <div class="flex flex-col gap-(--space-2xs)">
-                <label class="flex flex-col gap-(--space-2xs)">
+            <div class="flex flex-col gap-2">
+                <label class="flex flex-col gap-2">
                     <span class="label text-text-secondary">{PROFILE_FIELDS.bio.label}</span>
                     <textarea
                         id="settings-bio"
-                        class="input input--area font-sans"
+                        class="input resize-none"
                         aria-describedby="settings-bio-error settings-bio-count"
                         aria-invalid="false"
                         maxlength={PROFILE_FIELDS.bio.maxLength}
@@ -251,13 +251,13 @@ const LINK_FIELDS = [
                     <span data-bio-count>{DEMO_PROFILE.bio.length}</span> / {PROFILE_FIELDS.bio.maxLength}<span class="sr-only">&#32;characters</span>
                 </p>
             </div>
-            <fieldset class="flex flex-col gap-(--space-2xs)">
-                <legend class="label mb-(--space-2xs) text-text-secondary">
+            <fieldset class="flex flex-col gap-2">
+                <legend class="label mb-2 text-text-secondary">
                     {PROFILE_FIELDS.genres.label}
                 </legend>
                 <div class="flex flex-wrap gap-2">
                     {GENRES.map(genre => (
-                        <label class="settings__chip">
+                        <label class="chip gap-2">
                             <input
                                 class="box"
                                 checked={DEMO_PROFILE.genres.includes(genre)}
@@ -270,13 +270,13 @@ const LINK_FIELDS = [
                     ))}
                 </div>
             </fieldset>
-            <fieldset class="flex flex-col gap-(--space-2xs)">
-                <legend class="label mb-(--space-2xs) text-text-secondary">
-                    {PROFILE_FIELDS.role.label} <span class="text-text-secondary">({PROFILE_FIELDS.role.qualifier})</span>
+            <fieldset class="flex flex-col gap-2">
+                <legend class="label mb-2 text-text-secondary">
+                    {PROFILE_FIELDS.role.label} <span class="whitespace-nowrap text-text-secondary">({PROFILE_FIELDS.role.qualifier})</span>
                 </legend>
                 <div class="flex flex-wrap gap-2">
                     {PROFILE_ROLES.map(role => (
-                        <label class="settings__chip">
+                        <label class="chip gap-2">
                             <input
                                 class="box"
                                 checked={role.id === DEMO_PROFILE.role}
@@ -290,12 +290,12 @@ const LINK_FIELDS = [
                 </div>
             </fieldset>
             <div class="grid grid-cols-2 gap-(--space-lg) max-md:grid-cols-1">
-                <div class="flex flex-col gap-(--space-2xs)">
-                    <label class="flex flex-col gap-(--space-2xs)">
+                <div class="flex flex-col gap-2">
+                    <label class="flex flex-col gap-2">
                         <span class="label text-text-secondary">{PROFILE_FIELDS.city.label}</span>
                         <input
                             id="settings-city"
-                            class="input font-sans"
+                            class="input"
                             aria-describedby="settings-city-error"
                             aria-invalid="false"
                             autocomplete={PROFILE_FIELDS.city.autocomplete}
@@ -312,13 +312,13 @@ const LINK_FIELDS = [
                         hidden
                     />
                 </div>
-                <div class="flex flex-col gap-(--space-2xs)">
-                    <label class="flex flex-col gap-(--space-2xs)">
+                <div class="flex flex-col gap-2">
+                    <label class="flex flex-col gap-2">
                         <span class="label text-text-secondary">{PROFILE_FIELDS.state.label}</span>
                         <span class="select">
                             <select
                                 id="settings-state"
-                                class="input font-sans"
+                                class="input"
                                 aria-describedby="settings-state-error"
                                 aria-invalid="false"
                                 autocomplete={PROFILE_FIELDS.state.autocomplete}
@@ -352,10 +352,10 @@ const LINK_FIELDS = [
             </button>
         </form>
         <form
-            class="settings__form slab slab--card"
+            class="settings__form slab slab--card slab--plush flex flex-col max-w-(--measure-form) w-full gap-(--space-lg) mx-auto"
             data-links-form
         >
-            <hgroup class="flex flex-col gap-(--space-xs)">
+            <hgroup class="flex flex-col gap-3">
                 <h2 class="text-2xl">
                     Links
                 </h2>
@@ -365,8 +365,8 @@ const LINK_FIELDS = [
                 </p>
             </hgroup>
             {LINK_FIELDS.map(field => (
-                <div class="flex flex-col gap-(--space-2xs)">
-                    <label class="flex flex-col gap-(--space-2xs)">
+                <div class="flex flex-col gap-2">
+                    <label class="flex flex-col gap-2">
                         <span class="label text-text-secondary">{field.label}</span>
                         <input
                             id={`settings-${field.name}`}
@@ -397,10 +397,10 @@ const LINK_FIELDS = [
             </button>
         </form>
         <form
-            class="settings__form slab slab--card"
+            class="settings__form slab slab--card slab--plush flex flex-col max-w-(--measure-form) w-full gap-(--space-lg) mx-auto"
             data-track-form
         >
-            <hgroup class="flex flex-col gap-(--space-xs)">
+            <hgroup class="flex flex-col gap-3">
                 <h2 class="text-2xl">
                     Spotlight
                 </h2>
@@ -409,13 +409,13 @@ const LINK_FIELDS = [
                     better take arrives.
                 </p>
             </hgroup>
-            <div class="flex flex-col gap-(--space-2xs)">
+            <div class="flex flex-col gap-2">
                 <div class="settings__track aria-busy:cursor-progress aria-busy:opacity-60 grid gap-(--space-md)">
-                    <label class="halftone settings__pick">
+                    <label class="dropzone halftone settings__pick basis-55 flex grow items-center relative min-h-(--control-size) px-4 py-2 border-2 border-border-strong border-dashed bg-bg-page">
                         <span class="label">Choose an audio file</span>
                         <input
                             id="settings-track"
-                            class="settings__file sr-only"
+                            class="dropzone__input sr-only"
                             accept={UPLOAD.acceptAttribute}
                             aria-describedby="settings-track-error settings-track-help"
                             aria-invalid="false"
@@ -425,17 +425,17 @@ const LINK_FIELDS = [
                         />
                     </label>
                     <div
-                        class="settings__staged slab slab--sunk"
+                        class="settings__staged slab slab--sunk basis-65 flex flex-wrap grow items-center justify-between gap-x-4 gap-y-1"
                         data-track-staged
                     >
                         <p
-                            class="min-w-0 font-bold font-sans wrap-anywhere"
+                            class="min-w-0 font-bold wrap-anywhere"
                             data-track-name
                         >
                             {DEMO_PROFILE.track.name}
                         </p>
                         <button
-                            class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-[color,transform]"
+                            class="action-text flex items-center min-h-(--control-size) px-1 text-text-secondary"
                             aria-label="Remove track"
                             data-track-remove
                             type="button"
@@ -465,19 +465,19 @@ const LINK_FIELDS = [
             </button>
         </form>
         <form
-            class="settings__form slab slab--card"
+            class="settings__form slab slab--card slab--plush flex flex-col max-w-(--measure-form) w-full gap-(--space-lg) mx-auto"
             data-password-form
         >
             <h2 class="text-2xl">
                 Password
             </h2>
-            <div class="flex flex-col gap-(--space-2xs)">
-                <label class="flex flex-col gap-(--space-2xs)">
+            <div class="flex flex-col gap-2">
+                <label class="flex flex-col gap-2">
                     <span class="label text-text-secondary">Current password</span>
                     <span class="block relative">
                         <input
                             id="settings-current"
-                            class="input pr-12 font-sans"
+                            class="input pr-12"
                             aria-describedby="settings-current-error"
                             aria-invalid="false"
                             autocomplete="current-password"
@@ -487,16 +487,16 @@ const LINK_FIELDS = [
                             type="password"
                         />
                         <button
-                            class="settings__reveal"
+                            class="reveal"
                             aria-label="Show password"
                             aria-pressed="false"
                             data-reveal="settings-current"
                             type="button"
                         >
-                            <span class="settings__glyph--show flex items-center">
+                            <span class="reveal__show flex items-center">
                                 <IconEye />
                             </span>
-                            <span class="settings__glyph--hide flex items-center">
+                            <span class="reveal__hide flex items-center">
                                 <IconEyeOff />
                             </span>
                         </button>
@@ -509,13 +509,13 @@ const LINK_FIELDS = [
                     hidden
                 />
             </div>
-            <div class="flex flex-col gap-(--space-2xs)">
-                <label class="flex flex-col gap-(--space-2xs)">
+            <div class="flex flex-col gap-2">
+                <label class="flex flex-col gap-2">
                     <span class="label text-text-secondary">New password</span>
                     <span class="block relative">
                         <input
                             id="settings-password"
-                            class="input pr-12 font-sans"
+                            class="input pr-12"
                             aria-describedby="settings-password-error"
                             aria-invalid="false"
                             autocomplete="new-password"
@@ -525,16 +525,16 @@ const LINK_FIELDS = [
                             type="password"
                         />
                         <button
-                            class="settings__reveal"
+                            class="reveal"
                             aria-label="Show password"
                             aria-pressed="false"
                             data-reveal="settings-password"
                             type="button"
                         >
-                            <span class="settings__glyph--show flex items-center">
+                            <span class="reveal__show flex items-center">
                                 <IconEye />
                             </span>
-                            <span class="settings__glyph--hide flex items-center">
+                            <span class="reveal__hide flex items-center">
                                 <IconEyeOff />
                             </span>
                         </button>
@@ -550,13 +550,13 @@ const LINK_FIELDS = [
                     At least {PASSWORD_MIN_LENGTH} characters with a letter and a digit.
                 </p>
             </div>
-            <div class="flex flex-col gap-(--space-2xs)">
-                <label class="flex flex-col gap-(--space-2xs)">
+            <div class="flex flex-col gap-2">
+                <label class="flex flex-col gap-2">
                     <span class="label text-text-secondary">Confirm new password</span>
                     <span class="block relative">
                         <input
                             id="settings-confirm"
-                            class="input pr-12 font-sans"
+                            class="input pr-12"
                             aria-describedby="settings-confirm-error"
                             aria-invalid="false"
                             autocomplete="new-password"
@@ -565,16 +565,16 @@ const LINK_FIELDS = [
                             type="password"
                         />
                         <button
-                            class="settings__reveal"
+                            class="reveal"
                             aria-label="Show password"
                             aria-pressed="false"
                             data-reveal="settings-confirm"
                             type="button"
                         >
-                            <span class="settings__glyph--show flex items-center">
+                            <span class="reveal__show flex items-center">
                                 <IconEye />
                             </span>
-                            <span class="settings__glyph--hide flex items-center">
+                            <span class="reveal__hide flex items-center">
                                 <IconEyeOff />
                             </span>
                         </button>
@@ -595,10 +595,10 @@ const LINK_FIELDS = [
             </button>
         </form>
         <section
-            class="settings__panel slab slab--card"
+            class="settings__panel slab slab--card slab--plush flex flex-col max-w-(--measure-form) w-full gap-(--space-lg) mx-auto"
             aria-labelledby="settings-attendance-title"
         >
-            <hgroup class="flex flex-col gap-(--space-xs)">
+            <hgroup class="flex flex-col gap-3">
                 <h2
                     id="settings-attendance-title"
                     class="text-2xl"
@@ -616,19 +616,19 @@ const LINK_FIELDS = [
             >
                 No check-ins on file. Events you check in to appear here.
             </p>
-            <div class="scroll-slot settings__scroller--attendance overflow-x-auto border-2 border-border-strong">
+            <div class="scroll-slot settings__attendance overflow-x-auto border-2 border-border-strong">
                 <table class="settings__table">
                     <caption class="sr-only">Events you checked in to, with the date of each check-in</caption>
                     <thead>
                         <tr class="label text-text-secondary">
                             <th
-                                class="w-full px-(--space-sm) py-(--space-xs) text-left whitespace-nowrap max-md:px-(--space-2xs)"
+                                class="w-full px-4 py-3 text-left whitespace-nowrap max-md:px-2"
                                 scope="col"
                             >
                                 Event
                             </th>
                             <th
-                                class="px-(--space-sm) py-(--space-xs) text-right whitespace-nowrap max-md:hidden"
+                                class="px-4 py-3 text-right whitespace-nowrap max-md:hidden"
                                 scope="col"
                             >
                                 Date
@@ -643,10 +643,10 @@ const LINK_FIELDS = [
                 <template data-settings-attendance-row>
                     <tr>
                         <th
-                            class="px-(--space-sm) py-(--space-sm) font-bold font-sans text-left wrap-anywhere max-md:px-(--space-2xs)"
+                            class="px-4 py-4 font-bold text-left wrap-anywhere max-md:px-2"
                             scope="row"
                         >
-                            <div class="grid gap-(--space-3xs)">
+                            <div class="grid gap-1">
                                 <span data-cell="event" />
                                 <time
                                     class="hidden font-mono font-normal text-base whitespace-nowrap text-text-secondary max-md:block"
@@ -654,7 +654,7 @@ const LINK_FIELDS = [
                                 />
                             </div>
                         </th>
-                        <td class="px-(--space-sm) py-(--space-sm) font-mono text-base text-right whitespace-nowrap text-text-secondary max-md:hidden">
+                        <td class="px-4 py-4 font-mono text-base text-right whitespace-nowrap text-text-secondary max-md:hidden">
                             <time data-cell="date" />
                         </td>
                     </tr>
@@ -662,10 +662,10 @@ const LINK_FIELDS = [
             </div>
         </section>
         <section
-            class="settings__panel slab slab--card"
+            class="settings__panel slab slab--card slab--plush flex flex-col max-w-(--measure-form) w-full gap-(--space-lg) mx-auto"
             aria-labelledby="settings-ledger-title"
         >
-            <hgroup class="flex flex-col gap-(--space-xs)">
+            <hgroup class="flex flex-col gap-3">
                 <h2
                     id="settings-ledger-title"
                     class="text-2xl"
@@ -677,31 +677,31 @@ const LINK_FIELDS = [
                     stood after each entry.
                 </p>
             </hgroup>
-            <div class="scroll-slot settings__scroller--ledger overflow-x-auto border-2 border-border-strong">
+            <div class="scroll-slot settings__ledger overflow-x-auto border-2 border-border-strong">
                 <table class="settings__table">
                     <caption class="sr-only">Dated ledger entries with reason, change, and running balance</caption>
                     <thead>
                         <tr class="label text-text-secondary">
                             <th
-                                class="px-(--space-sm) py-(--space-xs) text-left whitespace-nowrap max-md:hidden"
+                                class="px-4 py-3 text-left whitespace-nowrap max-md:hidden"
                                 scope="col"
                             >
                                 Date
                             </th>
                             <th
-                                class="w-full px-(--space-sm) py-(--space-xs) text-left whitespace-nowrap max-md:px-(--space-2xs)"
+                                class="w-full px-4 py-3 text-left whitespace-nowrap max-md:px-2"
                                 scope="col"
                             >
                                 Reason
                             </th>
                             <th
-                                class="px-(--space-sm) py-(--space-xs) text-right whitespace-nowrap max-md:hidden"
+                                class="px-4 py-3 text-right whitespace-nowrap max-md:hidden"
                                 scope="col"
                             >
                                 Change
                             </th>
                             <th
-                                class="px-(--space-sm) py-(--space-xs) text-right whitespace-nowrap max-md:px-(--space-2xs)"
+                                class="px-4 py-3 text-right whitespace-nowrap max-md:px-2"
                                 scope="col"
                             >
                                 Balance
@@ -715,24 +715,24 @@ const LINK_FIELDS = [
                 </table>
                 <template data-settings-ledger-row>
                     <tr>
-                        <td class="px-(--space-sm) py-(--space-sm) font-mono text-base whitespace-nowrap text-text-secondary max-md:hidden">
+                        <td class="px-4 py-4 font-mono text-base whitespace-nowrap text-text-secondary max-md:hidden">
                             <time data-cell="date" />
                         </td>
-                        <td class="px-(--space-sm) py-(--space-sm) text-base wrap-anywhere max-md:px-(--space-2xs)">
-                            <div class="grid gap-(--space-3xs)">
+                        <td class="px-4 py-4 text-base wrap-anywhere max-md:px-2">
+                            <div class="grid gap-1">
                                 <span data-cell="reason" />
                                 <time
-                                    class="hidden font-mono whitespace-nowrap text-text-secondary max-md:block"
+                                    class="hidden font-mono text-text-secondary max-md:block"
                                     data-cell="date"
                                 />
                             </div>
                         </td>
                         <td
-                            class="px-(--space-sm) py-(--space-sm) font-mono text-base text-right whitespace-nowrap max-md:hidden"
+                            class="px-4 py-4 font-mono text-base text-right whitespace-nowrap max-md:hidden"
                             data-cell="change"
                         />
-                        <td class="px-(--space-sm) py-(--space-sm) font-mono text-base text-right whitespace-nowrap max-md:px-(--space-2xs)">
-                            <div class="grid gap-(--space-3xs)">
+                        <td class="px-4 py-4 font-mono text-base text-right whitespace-nowrap max-md:px-2">
+                            <div class="grid gap-1">
                                 <span data-cell="balance" />
                                 <span
                                     class="hidden max-md:block"
@@ -748,46 +748,9 @@ const LINK_FIELDS = [
 </section>
 
 <style>
-    .settings__chip {
-        align-items: center;
-        border: 2px solid var(--color-border-strong);
-        display: flex;
-        font-family: var(--font-mono);
-        font-size: var(--text-sm);
-        gap: var(--space-2xs);
-        letter-spacing: 0.06em;
-        line-height: 1;
-        min-height: var(--control-size);
-        padding: var(--space-2xs) var(--space-sm);
-        text-transform: uppercase;
-        transition: background-color var(--duration-fast) var(--motion-ease-ui);
-        user-select: none;
-    }
-
-    .settings__chip:has(.box:checked) {
-        background-color: var(--color-bg-sunken);
-    }
-
-    .settings__file {
-        clip-path: inset(50%);
-        height: 100%;
-        inset: 0;
-        margin: 0;
-        width: 100%;
-    }
-
-    .settings__form {
-        margin-inline: auto;
-        max-width: var(--measure-form);
-        width: 100%;
-    }
-
-    .settings__form,
-    .settings__panel {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-lg);
-        padding: var(--space-lg);
+    .settings__attendance,
+    .settings__ledger {
+        --scroll-slot-max: calc(2 * 2px + 2 * 12px + var(--text-sm) + 5 * (2 * 16px + var(--text-base--line-height) + 1px));
     }
 
     .settings__overview {
@@ -795,110 +758,19 @@ const LINK_FIELDS = [
     }
 
     .settings__pick {
-        align-items: center;
-        background-color: var(--color-bg-page);
-        border: 2px dashed var(--color-border-strong);
-        display: flex;
-        flex: 1 1 220px;
-        min-height: var(--control-size);
-        padding: var(--space-2xs) var(--space-sm);
-        position: relative;
         transition:
             background-color var(--duration-fast) var(--motion-ease-ui),
             border-color var(--duration-fast) var(--motion-ease-ui),
             box-shadow var(--duration-fast) var(--motion-ease-ui);
     }
 
-    .settings__pick > span {
-        background-color: inherit;
-    }
-
-    .settings__pick:active {
-        background-color: var(--color-bg-active);
-        border-color: var(--color-border-selected);
-    }
-
-    .settings__pick:has(.settings__file:focus-visible) {
-        border-color: var(--color-border-selected);
-        border-style: solid;
-    }
-
-    .settings__pick:has(.settings__file[aria-invalid='true']) {
+    .settings__pick:has(.dropzone__input[aria-invalid='true']) {
         border-color: var(--color-border-invalid);
-        box-shadow: var(--lift) var(--lift) 0 0 var(--color-border-strong);
-    }
-
-    .settings__pick:hover {
-        background-color: var(--color-bg-hover);
-        border-color: var(--color-border-selected);
-    }
-
-    .settings__reveal {
-        align-items: center;
-        bottom: 0;
-        color: var(--color-text-secondary);
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        position: absolute;
-        right: 0;
-        top: 0;
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-        width: 48px;
-    }
-
-    .settings__reveal:active {
-        transform: translateY(1px);
-    }
-
-    .settings__reveal:focus-visible {
-        outline-offset: -4px;
-    }
-
-    .settings__reveal:hover {
-        color: var(--color-link);
-    }
-
-    .settings__reveal::after {
-        content: '';
-        height: 48px;
-        position: absolute;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 48px;
-    }
-
-    .settings__reveal[aria-pressed='false'] .settings__glyph--hide,
-    .settings__reveal[aria-pressed='true'] .settings__glyph--show {
-        display: none;
-    }
-
-    .settings__scroller--attendance {
-        --scroll-slot-max: calc(2 * 2px + 2 * var(--space-xs) + var(--text-sm) + 5 * (2 * var(--space-sm) + var(--text-base--line-height) + 1px));
-    }
-
-    .settings__scroller--ledger {
-        --scroll-slot-max: calc(2 * 2px + 2 * var(--space-xs) + var(--text-sm) + 5 * (2 * var(--space-sm) + var(--text-base--line-height) + 1px));
+        box-shadow: var(--lift-shadow);
     }
 
     .settings__staged {
-        align-items: center;
-        column-gap: var(--space-sm);
-        display: flex;
-        flex: 1 1 260px;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        padding: var(--space-2xs) var(--space-sm);
-        row-gap: var(--space-3xs);
-    }
-
-    .settings__table {
-        display: table;
-        overflow-x: visible;
-        width: 100%;
+        padding: 8px 16px;
     }
 
     .settings__table thead th {
@@ -910,9 +782,9 @@ const LINK_FIELDS = [
     }
 
     @media (max-width: 768px) {
-        .settings__scroller--attendance,
-        .settings__scroller--ledger {
-            --scroll-slot-max: calc(2 * 2px + 2 * var(--space-xs) + var(--text-sm) + 5 * (2 * var(--space-sm) + 2 * var(--text-base--line-height) + var(--space-3xs) + 1px));
+        .settings__attendance,
+        .settings__ledger {
+            --scroll-slot-max: calc(2 * 2px + 2 * 12px + var(--text-sm) + 5 * (2 * 16px + 2 * var(--text-base--line-height) + 4px + 1px));
         }
     }
 </style>
@@ -1210,7 +1082,7 @@ const LINK_FIELDS = [
         track.addEventListener('submit', event => void handleTrackSubmit(event, track), { signal });
         track.querySelector<HTMLButtonElement>('[data-track-remove]')?.addEventListener('click', () => removeTrack(track), { signal });
 
-        document.querySelectorAll<HTMLElement>('.settings__scroller--attendance, .settings__scroller--ledger').forEach((scroller) => {
+        document.querySelectorAll<HTMLElement>('.settings__attendance, .settings__ledger').forEach((scroller) => {
             observeRowWindow(scroller, signal);
         });
 
@@ -1257,7 +1129,7 @@ const LINK_FIELDS = [
     function renderAttendance(email: string, joined?: number) {
         const body = document.querySelector<HTMLElement>('[data-settings-attendance]');
         const empty = document.querySelector<HTMLElement>('[data-settings-attendance-empty]');
-        const scroller = document.querySelector<HTMLElement>('.settings__scroller--attendance');
+        const scroller = document.querySelector<HTMLElement>('.settings__attendance');
         const template = document.querySelector<HTMLTemplateElement>('[data-settings-attendance-row]');
 
         if (!body || !empty || !scroller || !template) return;

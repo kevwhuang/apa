@@ -3,7 +3,7 @@ import IconArrow from '@components/icons/Arrow.astro';
 ---
 
 <dialog
-    class="tour z-(--z-overlay)"
+    class="tour fixed inset-0 overflow-visible h-auto max-h-none max-w-none w-auto bg-transparent text-inherit pointer-events-none"
     aria-labelledby="tour-eyebrow"
     data-tour
 >
@@ -24,7 +24,7 @@ import IconArrow from '@components/icons/Arrow.astro';
         aria-hidden="true"
     />
     <div
-        class="tour__ring"
+        class="tour__ring fixed left-(--tour-left) top-(--tour-top) h-(--tour-height) w-(--tour-width) outline-2 outline-border-selected pointer-events-auto"
         aria-hidden="true"
     />
     <div
@@ -45,7 +45,7 @@ import IconArrow from '@components/icons/Arrow.astro';
             aria-live="polite"
             data-tour-announce
         />
-        <div class="tour__foot flex flex-wrap items-center gap-(--space-2xs) pt-(--space-sm) border-border-strong border-t-2">
+        <div class="tour__foot flex flex-wrap items-center gap-2 pt-4 border-border-strong border-t-2">
             <button
                 class="btn"
                 data-tour-back
@@ -62,7 +62,7 @@ import IconArrow from '@components/icons/Arrow.astro';
                 <span data-tour-next-label>Next</span> <IconArrow />
             </button>
             <button
-                class="action-text tour__skip inline-flex items-center min-h-(--control-size) ms-auto px-(--space-3xs) text-text-secondary transition-[color,transform]"
+                class="action-text tour__skip inline-flex items-center min-h-(--control-size) ms-auto px-1 text-text-secondary"
                 data-tour-skip
                 type="button"
             >
@@ -80,16 +80,6 @@ import IconArrow from '@components/icons/Arrow.astro';
         --tour-left: 0px;
         --tour-top: 0px;
         --tour-width: 0px;
-        background-color: transparent;
-        color: inherit;
-        height: auto;
-        inset: 0;
-        max-height: none;
-        max-width: none;
-        overflow: visible;
-        pointer-events: none;
-        position: fixed;
-        width: auto;
     }
 
     .tour::backdrop {
@@ -100,12 +90,12 @@ import IconArrow from '@components/icons/Arrow.astro';
     .tour__card {
         display: flex;
         flex-direction: column;
-        gap: var(--space-sm);
+        gap: 16px;
         left: var(--tour-card-x);
         pointer-events: auto;
         position: fixed;
         top: var(--tour-card-y);
-        width: min(380px, calc(100vw - 2 * var(--space-sm)));
+        width: min(380px, calc(100vw - 2 * 16px));
     }
 
     .tour__pane {
@@ -130,15 +120,6 @@ import IconArrow from '@components/icons/Arrow.astro';
     .tour__pane--top {
         height: var(--tour-top);
         inset: 0 0 auto 0;
-    }
-
-    .tour__ring {
-        height: var(--tour-height);
-        inset: var(--tour-top) auto auto var(--tour-left);
-        outline: 2px solid var(--color-border-selected);
-        pointer-events: auto;
-        position: fixed;
-        width: var(--tour-width);
     }
 </style>
 

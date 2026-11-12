@@ -11,6 +11,8 @@ const plannedCount = programs.filter(program => program.state === 'planned').len
 
 const activePrograms = new Intl.ListFormat('en', { type: 'conjunction' }).format(activeNames);
 
+const CLASS_ROADMAP_NODE = 'roadmap__node flex items-center justify-center relative h-(--roadmap-node) w-(--roadmap-node) border-2 border-border-strong font-bold font-mono leading-none text-sm bg-bg-raised text-link';
+
 const COMMITMENTS = [
     { description: 'advance the Alliance\'s vision through every decision', name: 'Alignment' },
     { description: 'be present and engaged at every event', name: 'Attendance' },
@@ -28,7 +30,7 @@ const OPENINGS = [
 
 const ROADMAP: { detail: string; name: string; status: 'later' | 'next' }[] = [
     {
-        detail: 'Nonprofit status makes donations to the Alliance tax-deductible.',
+        detail: 'Nonprofit status will make donations to the Alliance tax-deductible.',
         name: 'Register as a 501(c)\u2060(3) nonprofit',
         status: 'next',
     },
@@ -50,11 +52,11 @@ const ROADMAP: { detail: string; name: string; status: 'later' | 'next' }[] = [
 ];
 
 const SECTIONS = [
-    { href: '#mission', label: 'Mission' },
-    { href: '#story', label: 'Story' },
-    { href: '#commitments', label: 'Commitments' },
-    { href: '#openings', label: 'Openings' },
-    { href: '#roadmap', label: 'Roadmap' },
+    { label: 'Mission', target: 'mission-title' },
+    { label: 'Story', target: 'story-title' },
+    { label: 'Commitments', target: 'commitments-title' },
+    { label: 'Openings', target: 'openings-title' },
+    { label: 'Roadmap', target: 'roadmap-title' },
 ];
 
 const openingColors = PALETTE.slice(0, OPENINGS.length);
@@ -72,20 +74,21 @@ const openingColors = PALETTE.slice(0, OPENINGS.length);
     </h1>
     <div class="grid grid-cols-[160px_minmax(0,1fr)] gap-12 max-md:grid-cols-1">
         <aside
-            class="self-start sticky top-28 max-md:static"
+            class="self-start sticky top-[calc(var(--header-height)+var(--space-md))] max-md:static"
             aria-label="On this page"
             data-motion="rise"
         >
             <nav aria-label="Sections">
-                <ul class="about__toc list-none">
+                <ul class="max-md:flex max-md:gap-4 max-md:overflow-x-auto">
                     {SECTIONS.map(section => (
                         <li>
-                            <a
+                            <button
                                 class="about__link label hover:text-link"
-                                href={section.href}
+                                data-jump={section.target}
+                                type="button"
                             >
                                 {section.label}
-                            </a>
+                            </button>
                         </li>
                     ))}
                 </ul>
@@ -93,11 +96,11 @@ const openingColors = PALETTE.slice(0, OPENINGS.length);
         </aside>
         <div class="flex flex-col gap-(--space-2xl) text-lg">
             <section
-                id="mission"
+                class="scroll-mt-[calc(var(--header-height)+var(--space-md))]"
                 aria-labelledby="mission-title"
             >
                 <SectionHead
-                    class="text-4xl max-md:text-2xl"
+                    class="text-2xl-4xl"
                     headingId="mission-title"
                 >
                     Mission
@@ -106,7 +109,7 @@ const openingColors = PALETTE.slice(0, OPENINGS.length);
                     class="py-10 border-border-strong border-y-2"
                     data-motion="unfold"
                 >
-                    <blockquote class="mb-6 font-bold font-sans leading-(--text-4xl) text-3xl tracking-tight max-md:leading-(--text-3xl) max-md:text-2xl">
+                    <blockquote class="mb-6 font-bold leading-(--text-3xl-4xl) text-2xl-3xl text-pretty tracking-tight">
                         <span class="text-text-brand">&ldquo;</span>{CANONICAL.mission}<span class="text-text-brand">&rdquo;</span>
                     </blockquote>
                     <figcaption class="font-mono text-base text-right text-text-secondary">
@@ -115,11 +118,11 @@ const openingColors = PALETTE.slice(0, OPENINGS.length);
                 </figure>
             </section>
             <section
-                id="story"
+                class="scroll-mt-[calc(var(--header-height)+var(--space-md))]"
                 aria-labelledby="story-title"
             >
                 <SectionHead
-                    class="text-4xl max-md:text-2xl"
+                    class="text-2xl-4xl"
                     headingId="story-title"
                 >
                     Story
@@ -127,11 +130,11 @@ const openingColors = PALETTE.slice(0, OPENINGS.length);
                 <p data-motion="blur">{CANONICAL.story}</p>
             </section>
             <section
-                id="commitments"
+                class="scroll-mt-[calc(var(--header-height)+var(--space-md))]"
                 aria-labelledby="commitments-title"
             >
                 <SectionHead
-                    class="text-4xl max-md:text-xl"
+                    class="text-xl-4xl"
                     headingId="commitments-title"
                 >
                     Commitments
@@ -143,22 +146,22 @@ const openingColors = PALETTE.slice(0, OPENINGS.length);
                     Everyone who organizes for the Alliance holds to the same six.
                 </p>
                 <ul
-                    class="space-y-4 list-none"
+                    class="space-y-4 list-none text-pretty"
                     data-motion-stagger="rise"
                 >
                     {COMMITMENTS.map(commitment => (
                         <li>
-                            <strong class="font-bold font-sans">{commitment.name}</strong>: {commitment.description}
+                            <strong class="font-bold">{commitment.name}</strong>: {commitment.description}
                         </li>
                     ))}
                 </ul>
             </section>
             <section
-                id="openings"
+                class="scroll-mt-[calc(var(--header-height)+var(--space-md))]"
                 aria-labelledby="openings-title"
             >
                 <SectionHead
-                    class="text-4xl max-md:text-2xl"
+                    class="text-2xl-4xl"
                     headingId="openings-title"
                 >
                     Openings
@@ -170,13 +173,13 @@ const openingColors = PALETTE.slice(0, OPENINGS.length);
                     The Alliance is run by its organizers. These are the seats we are looking to fill.
                 </p>
                 <ul
-                    class="grid grid-cols-3 gap-x-(--space-lg) gap-y-(--space-2xl) mb-8 list-none max-lg:grid-cols-2 max-md:grid-cols-1"
+                    class="grid grid-cols-3 gap-x-(--space-lg) gap-y-(--space-2xl) mb-8 list-none max-lg:grid-cols-2 max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))]"
                     data-motion-stagger="flip"
                 >
                     {OPENINGS.map((opening, index) => (
                         <li class="slab slab--bare slab--card">
                             <PlaceholderTile
-                                class="aspect-[4/3]"
+                                class="aspect-4/3"
                                 color={openingColors[index].background}
                             />
                             <div class="p-(--space-md)">
@@ -191,7 +194,7 @@ const openingColors = PALETTE.slice(0, OPENINGS.length);
                 </ul>
                 <p data-motion="rise">
                     <a
-                        class="action-text hover:text-link inline-flex items-center min-h-(--control-size) gap-2 underline underline-offset-4 transition-[color,transform]"
+                        class="action-text inline-flex items-center min-h-(--control-size) gap-2 underline underline-offset-4"
                         href={JOIN_ROUTE}
                     >
                         Ask about an opening <IconArrow />
@@ -199,11 +202,11 @@ const openingColors = PALETTE.slice(0, OPENINGS.length);
                 </p>
             </section>
             <section
-                id="roadmap"
+                class="scroll-mt-[calc(var(--header-height)+var(--space-md))]"
                 aria-labelledby="roadmap-title"
             >
                 <SectionHead
-                    class="text-4xl max-md:text-2xl"
+                    class="text-2xl-4xl"
                     headingId="roadmap-title"
                 >
                     Roadmap
@@ -227,7 +230,7 @@ const openingColors = PALETTE.slice(0, OPENINGS.length);
                                 class="roadmap__rail flex justify-center relative"
                                 aria-hidden="true"
                             >
-                                <span class="roadmap__node flex items-center justify-center relative h-(--roadmap-node) w-(--roadmap-node) border-2 border-border-strong font-bold font-mono leading-none text-sm bg-bg-raised text-link">{index + 1}</span>
+                                <span class={CLASS_ROADMAP_NODE}>{index + 1}</span>
                             </div>
                             <div class:list={milestone.status === 'next' ? ['mark', 'slab', 'slab--well'] : ['slab', 'slab--card']}>
                                 <h3 class="mb-2 text-xl">{milestone.name}</h3>
@@ -299,17 +302,29 @@ const openingColors = PALETTE.slice(0, OPENINGS.length);
     @media (max-width: 768px) {
         .about__link {
             min-width: auto;
-            padding-inline: var(--space-xs);
+            padding-inline: 12px;
         }
 
         .about__link:focus-visible {
             outline-offset: -2px;
         }
-
-        .about__toc {
-            display: flex;
-            gap: var(--space-sm);
-            overflow-x: auto;
-        }
     }
 </style>
+
+<script>
+    import { registerPageScript } from '@lib/shared/utils';
+
+    function handleJump(button: HTMLButtonElement) {
+        const heading = document.getElementById(button.dataset.jump ?? '');
+
+        heading?.closest('section')?.scrollIntoView({ behavior: 'instant', block: 'start' });
+    }
+
+    function initAbout(signal: AbortSignal) {
+        document.querySelectorAll<HTMLButtonElement>('[data-jump]').forEach((button) => {
+            button.addEventListener('click', () => handleJump(button), { signal });
+        });
+    }
+
+    registerPageScript(initAbout);
+</script>

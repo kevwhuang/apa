@@ -3,13 +3,16 @@ import { isUpcoming, setHidden } from '@lib/shared/utils';
 const SECOND_ENTRY = 2;
 
 function applyGroup(elements: HTMLElement[]) {
+    const current = filterByRole(elements, 'current');
     const later = filterByRole(elements, 'later');
     const next = filterByRole(elements, 'next');
     const upcoming = filterByRole(elements, 'upcoming');
 
     const count = [...next, ...upcoming].filter(isLive).length;
+    const shown = current.find(isLive) ?? current.at(-1);
     const soonest = next.findIndex(isLive);
 
+    current.forEach(element => setHidden(element, element !== shown));
     filterByRole(elements, 'many').forEach(element => setHidden(element, count < SECOND_ENTRY));
     filterByRole(elements, 'past').forEach(element => setHidden(element, isLive(element)));
     filterByRole(elements, 'some').forEach(element => setHidden(element, count === 0));
@@ -23,11 +26,6 @@ function applySchedule(): void {
 
     new Set(elements.map(element => element.dataset.eventGroup)).forEach((group) => {
         applyGroup(elements.filter(element => element.dataset.eventGroup === group));
-    });
-
-    document.querySelectorAll<HTMLElement>('[data-event-id]').forEach((element) => {
-        if (element.closest('[hidden]')) element.removeAttribute('id');
-        else element.id = element.dataset.eventId ?? '';
     });
 }
 

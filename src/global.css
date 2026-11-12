@@ -42,28 +42,20 @@
     --color-btn-disabled-bg: #d7d2c6;
     --color-btn-disabled-border: #d7d2c6;
     --color-btn-disabled-text: #6f6a63;
-    --color-btn-on-brand-bg-hover: #202944;
-    --color-btn-on-brand-border: #f6f1e4;
-    --color-btn-on-brand-text: #f6f1e4;
     --color-btn-primary-bg: #e9560c;
     --color-btn-primary-bg-active: #bb4202;
     --color-btn-primary-bg-hover: #ff6a2c;
     --color-btn-primary-text: #171310;
     --color-btn-primary-text-active: #f6f1e4;
     --color-chart-1: #e9560c;
-    --color-chart-2: #171310;
-    --color-chart-3: #121b33;
-    --color-chart-4: #6f6a63;
-    --color-chart-5: #949087;
+    --color-chart-2: #121b33;
     --color-code-bg: #f0ebde;
     --color-control-border: #6f6a63;
-    --color-control-border-hover: #6f6a63;
     --color-control-checked-bg: #e9560c;
     --color-control-checked-bg-hover: #ff6a2c;
     --color-control-disabled-bg: #d7d2c6;
     --color-control-disabled-mark: #949087;
     --color-error: #a8352a;
-    --color-error-border: #a8352a;
     --color-error-text: #a8352a;
     --color-error-text-on-inverse: #de7d6c;
     --color-event-assembly: #e9560c;
@@ -147,31 +139,65 @@
     --text-10xl--line-height: 1;
     --text-2xl: clamp(32px, calc(30.666px + 0.4168vw), 36px);
     --text-2xl--line-height: var(--text-3xl);
+    --text-2xl-3xl: clamp(32px, calc(28px + 1.25vw), 44px);
+    --text-2xl-3xl--line-height: var(--text-3xl);
+    --text-2xl-4xl: clamp(32px, calc(24.666px + 2.2918vw), 54px);
+    --text-2xl-4xl--line-height: var(--text-3xl-4xl);
+    --text-2xl-5xl: clamp(32px, calc(20px + 3.75vw), 68px);
+    --text-2xl-5xl--line-height: var(--text-3xl-5xl);
     --text-3xl: clamp(40px, calc(38.666px + 0.4168vw), 44px);
     --text-3xl--line-height: 1;
+    --text-3xl-4xl: clamp(40px, calc(35.333px + 1.4584vw), 54px);
+    --text-3xl-4xl--line-height: 1;
+    --text-3xl-5xl: clamp(40px, calc(30.666px + 2.9168vw), 68px);
+    --text-3xl-5xl--line-height: 1;
+    --text-3xl-7xl: clamp(40px, calc(17.333px + 7.0834vw), 108px);
+    --text-3xl-7xl--line-height: 1;
+    --text-3xl-8xl: clamp(40px, calc(8.666px + 9.7918vw), 134px);
+    --text-3xl-8xl--line-height: 1;
     --text-4xl: clamp(48px, calc(46px + 0.625vw), 54px);
     --text-4xl--line-height: 1;
+    --text-4xl-5xl: clamp(48px, calc(41.333px + 2.0834vw), 68px);
+    --text-4xl-5xl--line-height: 1;
+    --text-4xl-6xl: clamp(48px, calc(35.333px + 3.9584vw), 86px);
+    --text-4xl-6xl--line-height: 1;
+    --text-4xl-7xl: clamp(48px, calc(28px + 6.25vw), 108px);
+    --text-4xl-7xl--line-height: 1;
     --text-5xl: clamp(62px, calc(60px + 0.625vw), 68px);
     --text-5xl--line-height: 1;
+    --text-5xl-7xl: clamp(62px, calc(46.666px + 4.7918vw), 108px);
+    --text-5xl-7xl--line-height: 1;
+    --text-5xl-9xl: clamp(62px, calc(26.666px + 11.0418vw), 168px);
+    --text-5xl-9xl--line-height: 1;
     --text-6xl: clamp(76px, calc(72.666px + 1.0418vw), 86px);
     --text-6xl--line-height: 1;
     --text-7xl: clamp(96px, calc(92px + 1.25vw), 108px);
     --text-7xl--line-height: 1;
+    --text-7xl-10xl: clamp(96px, calc(58px + 11.875vw), 210px);
+    --text-7xl-10xl--line-height: 1;
     --text-8xl: clamp(120px, calc(115.333px + 1.4584vw), 134px);
     --text-8xl--line-height: 1;
     --text-9xl: clamp(150px, calc(144px + 1.875vw), 168px);
     --text-9xl--line-height: 1;
     --text-base: clamp(16px, calc(15.333px + 0.2084vw), 18px);
     --text-base--line-height: var(--text-xl);
+    --text-base-lg: clamp(16px, calc(14px + 0.625vw), 22px);
+    --text-base-lg--line-height: var(--text-xl-2xl);
     --text-lg: clamp(20px, calc(19.333px + 0.2084vw), 22px);
     --text-lg--line-height: var(--text-2xl);
+    --text-lg-xl: clamp(20px, calc(17.333px + 0.8334vw), 28px);
     --text-shadow-*: initial;
     --text-sm: clamp(12px, calc(11.333px + 0.2084vw), 14px);
     --text-sm--line-height: var(--text-lg);
     --text-xl: clamp(26px, calc(25.333px + 0.2084vw), 28px);
     --text-xl--line-height: var(--text-2xl);
+    --text-xl-2xl: clamp(26px, calc(22.666px + 1.0418vw), 36px);
+    --text-xl-2xl--line-height: var(--text-2xl-3xl);
+    --text-xl-4xl: clamp(26px, calc(16.666px + 2.9168vw), 54px);
+    --text-xl-4xl--line-height: var(--text-2xl-4xl);
+    --text-xl-5xl: clamp(26px, calc(12px + 4.375vw), 68px);
+    --text-xl-5xl--line-height: var(--text-2xl-5xl);
     --text-xs: clamp(10px, calc(9.333px + 0.2084vw), 12px);
-    --text-xs--line-height: var(--text-base);
 }
 
 :root {
@@ -186,8 +212,8 @@
     --duration-slowest: 0.7s;
     --halftone-pitch: 6px;
     --header-height: 80px;
-    --launcher-size: 48px;
     --lift: clamp(2px, 1vw, calc(var(--shell-max) / 100));
+    --lift-shadow: var(--lift) var(--lift) 0 0 var(--color-border-strong);
     --light-only: initial;
     --measure-form: calc(var(--shell-max) * 3 / 4 - 2 * var(--shell-pad));
     --measure-search: calc(var(--shell-max) * 3 / 8);
@@ -197,32 +223,21 @@
     --motion-ease-snap: cubic-bezier(0.34, 1.5, 0.64, 1);
     --motion-ease-ui: ease;
     --motion-travel: 24;
-    --rank-cols: minmax(0, 1fr);
-    --rank-cols-2: minmax(0, 1.18fr) minmax(0, 0.9fr);
-    --rank-cols-split: minmax(0, 0.38fr) minmax(0, 1fr);
-    --section-pad: round(clamp(88px, calc(58.667px + 9.1667vw), 176px), 4px);
-    --section-pad-sm: round(clamp(48px, calc(34.667px + 4.1667vw), 88px), 4px);
-    --select-pad: calc(2 * var(--space-sm) + 12px);
     --session-in-only: none;
     --session-out-only: initial;
     --shell-inner: calc(var(--shell-max) - 2 * var(--shell-pad));
     --shell-max: 1280px;
     --shell-pad: round(clamp(20px, calc(8px + 3.75vw), 56px), 4px);
     --space-2xl: round(clamp(48px, calc(40px + 2.5vw), 72px), 4px);
-    --space-2xs: 8px;
-    --space-3xs: 4px;
     --space-lg: round(clamp(28px, calc(25.333px + 0.8333vw), 36px), 4px);
     --space-md: round(clamp(20px, calc(18.667px + 0.4167vw), 24px), 4px);
-    --space-sm: 16px;
-    --space-xs: 12px;
     --stagger-base: 0.07s;
     --stagger-max-total: 0.45s;
     --stagger-tight: 0.035s;
     --z-card: 2;
-    --z-drawer: 200;
+    --z-drawer: 100;
     --z-ground: 0;
     --z-lift: 3;
-    --z-overlay: 301;
     --z-page: 1;
 }
 
@@ -239,7 +254,21 @@ summary {
     user-select: none;
 }
 
-h1:not(.label),
+@layer base {
+    dd,
+    p {
+        text-wrap: pretty;
+    }
+}
+
+dialog::backdrop,
+.scrim {
+    background-color: var(--color-ink);
+    cursor: zoom-out;
+    opacity: 0.65;
+}
+
+h1,
 h2.font-display,
 h3.font-display {
     font-family: var(--font-display);
@@ -248,9 +277,10 @@ h3.font-display {
     line-height: 1;
 }
 
-h2:not(.label, .font-display),
+h2:not(.font-display, .label),
 h3 {
     --text-base--line-height: var(--text-lg);
+    --text-base-lg--line-height: var(--text-lg-xl);
     --text-lg--line-height: var(--text-xl);
     font-weight: 700;
     letter-spacing: -0.025em;
@@ -259,6 +289,7 @@ h3 {
 html {
     color-scheme: light;
     scrollbar-gutter: stable;
+    touch-action: manipulation;
 }
 
 html.is-motion-armed [data-motion],
@@ -278,16 +309,21 @@ textarea:autofill {
     caret-color: var(--color-input-text);
 }
 
-input:not([type='checkbox'], [type='radio'], [type='range'], [aria-invalid='true']):focus-visible,
+input:not([aria-invalid='true'], [type='checkbox'], [type='radio'], [type='range']):focus-visible,
 select:not([aria-invalid='true']):focus-visible,
 textarea:not([aria-invalid='true']):focus-visible {
     border-color: var(--color-input-border-focus);
     outline: none;
 }
 
+input:not([type='checkbox'], [type='radio'], [type='range']),
+select,
+textarea {
+    font-size: max(16px, 1em);
+}
+
 label:has(> .box) {
     align-items: center;
-    cursor: pointer;
     display: inline-flex;
     min-height: var(--control-size);
 }
@@ -300,26 +336,12 @@ label:has(> :disabled) {
     cursor: not-allowed;
 }
 
-pre {
-    overflow-x: auto;
-}
-
 table {
-    display: block;
-    max-width: 100%;
-    overflow-x: auto;
     width: 100%;
 }
 
 thead th {
     font-weight: inherit;
-}
-
-.scrim,
-dialog::backdrop {
-    background-color: var(--color-ink);
-    cursor: zoom-out;
-    opacity: 0.65;
 }
 
 .scroll-slot :focus-visible {
@@ -344,8 +366,8 @@ dialog::backdrop {
 }
 
 ::-webkit-scrollbar {
-    height: var(--space-xs);
-    width: var(--space-xs);
+    height: 12px;
+    width: 12px;
 }
 
 ::-webkit-scrollbar-corner,
@@ -385,7 +407,7 @@ dialog::backdrop {
 
 [aria-invalid='true']:autofill {
     box-shadow:
-        var(--lift) var(--lift) 0 0 var(--color-border-strong),
+        var(--lift-shadow),
         inset 0 0 0 100vmax var(--color-input-autofill-bg);
 }
 
@@ -414,15 +436,11 @@ dialog::backdrop {
     --color-btn-disabled-bg: #3b3732;
     --color-btn-disabled-border: #3b3732;
     --color-btn-disabled-text: #949087;
-    --color-chart-2: #f6f1e4;
-    --color-chart-3: #e4ecfe;
-    --color-chart-4: #d7d2c6;
+    --color-chart-2: #e4ecfe;
     --color-code-bg: #292421;
     --color-control-border: #949087;
-    --color-control-border-hover: #949087;
     --color-control-disabled-bg: #292421;
     --color-control-disabled-mark: #6f6a63;
-    --color-error-border: #de7d6c;
     --color-error-text: #de7d6c;
     --color-error-text-on-inverse: #a8352a;
     --color-focus-ring: #f6f1e4;
@@ -470,24 +488,10 @@ dialog::backdrop {
 
 [data-theme='dark'] :is(.slab--card, dialog) {
     --color-bg-sunken: var(--color-bg-page);
-    --color-code-bg: var(--color-bg-page);
 }
 
 [id] {
     scroll-margin-top: calc(var(--header-height) + var(--space-2xl));
-}
-
-@media (max-width: 768px) {
-    :root {
-        --rank-cols-2: minmax(0, 1fr);
-        --rank-cols-split: minmax(0, 1fr);
-    }
-
-    input:not([type='checkbox'], [type='radio'], [type='range']),
-    select,
-    textarea {
-        font-size: max(16px, 1em);
-    }
 }
 
 @media (prefers-reduced-motion: reduce) {

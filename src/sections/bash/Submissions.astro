@@ -87,7 +87,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                 data-motion="unfold"
             >
                 <table
-                    class="board__table table-fixed border-2 border-border-strong"
+                    class="table-fixed border-2 border-border-strong"
                     data-placeholder
                 >
                     <caption class="sr-only">Tracks submitted at the last Bash</caption>
@@ -170,7 +170,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
         <li class="slab slab--card slab--still flex flex-col gap-3">
             <div class="flex flex-wrap items-baseline justify-between gap-3">
                 <p
-                    class="font-bold font-sans wrap-anywhere"
+                    class="font-bold wrap-anywhere"
                     data-row-name
                 />
                 <p
@@ -203,7 +203,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                     data-row-percent
                 />
                 <button
-                    class="action-text hover:text-link flex items-center min-h-(--control-size) px-1 text-text-secondary transition-[color,transform]"
+                    class="action-text flex items-center min-h-(--control-size) px-1 text-text-secondary"
                     data-row-cancel
                     type="button"
                 >
@@ -220,7 +220,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
             />
             <td class="px-4 max-md:px-2">
                 <span
-                    class="block font-bold font-sans truncate"
+                    class="block font-bold truncate"
                     data-cell-producer
                 />
                 <span

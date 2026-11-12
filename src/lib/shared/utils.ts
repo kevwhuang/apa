@@ -659,7 +659,6 @@ function toProgramBashCard(entry: CollectionEntry<'bash'>) {
         date: entry.data.date,
         end: entry.data.end,
         heading: entry.data.edition,
-        id: entry.id,
         location: entry.data.location,
         notes: [
             {
@@ -685,7 +684,6 @@ function toProgramCard(entry: CollectionEntry<'events'>) {
         date: entry.data.date,
         end: entry.data.end,
         heading: entry.data.workshop ?? entry.data.title,
-        id: entry.id,
         location: entry.data.location,
         notes: [
             {

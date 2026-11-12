@@ -21,15 +21,18 @@ const bars = Array.from({ length: STEP_COUNT }, (_, step) => BAR_MIN + (BAR_MAX 
     aria-labelledby="hero-title"
 >
     <div
-        class="halftone hero__drift stage__item--full -inset-y-[8%] absolute inset-x-0 pointer-events-none"
+        class="halftone stage__full -inset-y-[8%] absolute inset-x-0 pointer-events-none"
         aria-hidden="true"
         data-scrub="drift"
     />
     <div
-        class="hero__field stage__item--full absolute inset-0 pointer-events-none"
+        class="hero__field stage__full absolute inset-0 pointer-events-none"
         aria-hidden="true"
     >
-        <canvas class="hero__canvas" hidden />
+        <canvas
+            class="hero__canvas absolute inset-0 h-full w-full duration-(--duration-cinematic) ease-(--motion-ease-entrance) transition-opacity pointer-events-none"
+            hidden
+        />
     </div>
     <h1
         id="hero-title"
@@ -62,13 +65,13 @@ const bars = Array.from({ length: STEP_COUNT }, (_, step) => BAR_MIN + (BAR_MAX 
             </p>
             <div class="hero__actions flex flex-col items-center self-center gap-3">
                 <a
-                    class="btn btn--primary max-w-[240px] w-full"
+                    class="btn btn--primary max-w-60 w-full"
                     href="/resources"
                 >
                     Browse resources
                 </a>
                 <a
-                    class="btn max-w-[240px] w-full bg-bg-page"
+                    class="btn max-w-60 w-full bg-bg-page"
                     href="/store"
                 >
                     Browse store
@@ -85,15 +88,6 @@ const bars = Array.from({ length: STEP_COUNT }, (_, step) => BAR_MIN + (BAR_MAX 
         --stage-pad-top: var(--header-height);
         grid-template-rows: var(--hero-gap) repeat(3, max-content var(--hero-gap));
         row-gap: 0;
-    }
-
-    .hero__canvas {
-        height: 100%;
-        inset: 0;
-        pointer-events: none;
-        position: absolute;
-        transition: opacity var(--duration-cinematic) var(--motion-ease-entrance);
-        width: 100%;
     }
 
     .hero__foot {
@@ -121,7 +115,7 @@ const bars = Array.from({ length: STEP_COUNT }, (_, step) => BAR_MIN + (BAR_MAX 
 
     .hero__playhead::after {
         height: 12px;
-        left: -5px;
+        left: calc(var(--playhead-width) / 2 - 6px);
         rotate: 45deg;
         top: -6px;
         width: 12px;
@@ -157,13 +151,6 @@ const bars = Array.from({ length: STEP_COUNT }, (_, step) => BAR_MIN + (BAR_MAX 
 
         .hero__timeline {
             grid-row: 4 / span 5;
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .hero__canvas,
-        .hero__playhead {
-            transform: none !important;
         }
     }
 </style>

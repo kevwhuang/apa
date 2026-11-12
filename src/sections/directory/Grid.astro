@@ -12,7 +12,7 @@ import { formatCalendarMonth, formatRole, toIsoDate, toRoster } from '@lib/share
 import type { CollectionEntry } from 'astro:content';
 
 const ROLE_COLORS: Record<CollectionEntry<'producers'>['data']['roles'][number], string> = {
-    artist: 'var(--color-chart-3)',
+    artist: 'var(--color-chart-2)',
     engineer: 'var(--color-marker-cobalt)',
     fan: 'var(--color-text-secondary)',
     producer: 'var(--color-signal)',
@@ -43,7 +43,7 @@ const roster = [...producers]
 >
     <div>
         <PageHead
-            class="max-w-4xl mb-6 text-7xl max-md:text-4xl"
+            class="max-w-4xl mb-6 text-4xl-7xl"
             headingId="directory-title"
         >
             Meet the Alliance
@@ -91,14 +91,14 @@ const roster = [...producers]
                     </button>
                     {allRoles.map(role => (
                         <button
-                            class="chip role-btn hover:bg-bg-hover gap-(--space-3xs)"
+                            class="chip role-btn hover:bg-bg-hover gap-1"
                             aria-pressed="false"
                             data-role={role}
                             style={`--role-color: ${ROLE_COLORS[role]}`}
                             type="button"
                         >
                             <span
-                                class="roster__swatch flex-none size-2 bg-(--role-color)"
+                                class="flex-none size-2 outline outline-bg-page bg-(--role-color)"
                                 aria-hidden="true"
                             />
                             {formatRole(role)}
@@ -143,13 +143,13 @@ const roster = [...producers]
             Showing all {roster.length} members
         </p>
         <ul
-            class="roster__grid grid grid-cols-3 gap-x-(--space-lg) list-none max-lg:grid-cols-2 max-md:grid-cols-1"
+            class="roster__grid grid grid-cols-3 gap-x-(--space-lg) list-none max-lg:grid-cols-2 max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))]"
             data-motion-stagger="flip"
         >
             {roster.map((producer, index) => (
                 <li
                     id={producer.data.producerId}
-                    class="producer-card mb-(--space-2xl)"
+                    class="producer-card min-w-0 mb-(--space-2xl)"
                     data-genres={producer.data.genres.join(',')}
                     data-role={producer.data.roles[0]}
                     data-search={producer.search}
@@ -159,24 +159,24 @@ const roster = [...producers]
                         <ProducerPortrait
                             class="aspect-square"
                             color={PALETTE[(index + 1) % PALETTE.length].background}
-                            labelClass="leading-none text-6xl"
+                            labelClass="text-6xl"
                             labelColor={PALETTE[(index + 1) % PALETTE.length].text}
                             name={producer.data.name}
                             producerId={producer.data.producerId}
                         >
                             {producer.data.featured && (
-                                <p class="label absolute left-0 top-0 p-(--space-xs) border-b-2 border-border-strong border-r-2 bg-bg-page text-text">Spotlight</p>
+                                <p class="label absolute left-0 top-0 p-3 border-b-2 border-border-strong border-r-2 bg-bg-page text-text">Spotlight</p>
                             )}
                         </ProducerPortrait>
-                        <div class="producer-card__body grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-span-6 p-(--space-md)">
+                        <div class="grid grid-cols-1 grid-rows-subgrid row-span-6 p-(--space-md)">
                             <h2
                                 class="mb-3 text-2xl text-balance"
                                 data-placeholder
                             >
                                 {producer.data.name}
                             </h2>
-                            <div class="flex flex-wrap items-center justify-between self-start gap-(--space-xs) mb-6">
-                                <p class="label inline-flex items-center gap-(--space-3xs) px-(--space-2xs) py-(--space-3xs) border-(--role-color) border-2 text-text">
+                            <div class="flex flex-wrap items-center justify-between self-start gap-3 mb-6">
+                                <p class="label inline-flex items-center gap-1 px-2 py-1 border-(--role-color) border-2 text-text">
                                     <span
                                         class="flex-none size-2 bg-(--role-color)"
                                         aria-hidden="true"
@@ -216,9 +216,9 @@ const roster = [...producers]
                                             aria-hidden="true"
                                         />
                                     )}
-                            <div class="flex flex-wrap items-center justify-between self-start min-h-(--control-size) gap-x-(--space-sm) gap-y-(--space-xs)">
+                            <div class="flex flex-wrap items-center justify-end self-start min-h-(--control-size) gap-x-4 gap-y-3">
                                 <p
-                                    class="font-mono text-base whitespace-nowrap text-text-secondary"
+                                    class="grow font-mono leading-(--control-size) text-base whitespace-nowrap text-text-secondary"
                                     data-placeholder
                                 >
                                     <span class="sr-only">Member since </span><time datetime={toIsoDate(producer.data.joined)}>{formatCalendarMonth(producer.data.joined)}</time>
@@ -238,8 +238,8 @@ const roster = [...producers]
             data-directory-empty
             hidden
         >
-            <div class="flex flex-col gap-(--space-2xs)">
-                <p class="font-bold font-sans text-2xl text-balance tracking-tight">No matches.</p>
+            <div class="flex flex-col gap-2">
+                <p class="font-bold text-2xl text-balance tracking-tight">No matches.</p>
                 <p
                     class="text-base text-text-secondary"
                     data-empty-query
@@ -276,19 +276,11 @@ const roster = [...producers]
     }
 
     .producer-card__bio {
-        --scroll-slot-max: 12lh;
-    }
-
-    .roster__grid > * {
-        min-width: 0;
+        --scroll-slot-max: 20lh;
     }
 
     .roster__grid:has(> :not(.hidden)) {
         margin-bottom: calc(-1 * var(--space-2xl));
-    }
-
-    .roster__swatch {
-        outline: 1px solid var(--color-bg-page);
     }
 </style>
 

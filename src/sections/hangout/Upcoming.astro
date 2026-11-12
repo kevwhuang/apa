@@ -7,6 +7,8 @@ import SectionHead from '@components/shared/SectionHead.astro';
 import { LINKS } from '@lib/shared/constants';
 import { formatTimeRange, formatVenue, isUpcoming, toProgramCard } from '@lib/shared/utils';
 
+const CLASS_DATE_PLATE = 'content-center grid justify-items-center gap-(--space-md) px-(--space-2xl) py-(--space-lg) border-border-strong border-r-2 bg-event-hangout text-event-hangout-text max-lg:border-b-2 max-lg:border-r-0 max-lg:p-(--space-lg)';
+
 const events = await getCollection('events');
 
 const upcoming = events
@@ -16,7 +18,6 @@ const upcoming = events
 const hangouts = upcoming.map(event => ({
     end: event.data.end.toISOString(),
     excerpt: event.data.excerpt,
-    id: event.id,
     monthDay: event.data.date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', timeZone: 'America/Chicago' }),
     rsvp: event.data.rsvp ?? LINKS.meetup,
     start: event.data.date.toISOString(),
@@ -31,7 +32,7 @@ const isStill = later.some(card => card.notes.length > 0);
 ---
 
 <section
-    class="stage stage--hangout stage--tight border-border-strong border-t-2"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="hangout-next-title"
     data-event-group="hangout-upcoming"
     data-event-role="some"
@@ -53,39 +54,35 @@ const isStill = later.some(card => card.notes.length > 0);
                 data-motion="unfold"
                 hidden={index > 0}
             >
-                <article
-                    id={index === 0 ? hangout.id : undefined}
-                    class="slab slab--bare slab--lift slab--still grid grid-cols-[auto_minmax(0,1fr)] overflow-clip max-lg:grid-cols-1"
-                    data-event-id={hangout.id}
-                >
-                    <div class="content-center grid justify-items-center gap-(--space-md) px-(--space-2xl) py-(--space-lg) border-border-strong border-r-2 bg-event-hangout text-event-hangout-text max-lg:border-b-2 max-lg:border-r-0 max-lg:p-(--space-lg)">
+                <article class="slab slab--bare slab--lift slab--still grid grid-cols-[auto_minmax(0,1fr)] overflow-clip max-lg:grid-cols-1">
+                    <div class={CLASS_DATE_PLATE}>
                         <time
-                            class="font-bold font-display tabular-nums text-6xl tracking-[-0.02em] whitespace-nowrap max-md:text-4xl"
+                            class="font-bold font-display tabular-nums text-4xl-6xl tracking-[-0.02em] whitespace-nowrap"
                             datetime={hangout.start}
                         >
                             {hangout.monthDay}
                         </time>
-                        <p class="pt-(--space-sm) border-event-hangout-text border-t-2 font-mono text-balance text-center text-lg">{hangout.time}</p>
+                        <p class="pt-4 border-event-hangout-text border-t-2 font-mono text-balance text-center text-lg">{hangout.time}</p>
                     </div>
                     <div class="p-(--space-lg)">
-                        <h3 class="mb-(--space-xs) font-display text-3xl text-balance">
+                        <h3 class="mb-3 font-display text-3xl text-balance">
                             {hangout.title}
                         </h3>
                         <p class="max-w-2xl mb-(--space-lg) text-text-secondary">
                             {hangout.excerpt}
                         </p>
                         <dl class="grid grid-cols-2 max-w-2xl gap-(--space-md) pt-(--space-md) border-border-subtle border-t max-md:grid-cols-1">
-                            <div class="flex flex-col gap-(--space-2xs)">
+                            <div class="flex flex-col gap-2">
                                 <dt class="label text-text-secondary">Where</dt>
                                 <dd>
-                                    <address class="font-bold font-sans not-italic text-lg">{hangout.venue}</address>
+                                    <address class="font-bold not-italic text-lg">{hangout.venue}</address>
                                 </dd>
                             </div>
-                            <div class="flex flex-col gap-(--space-2xs)">
+                            <div class="flex flex-col gap-2">
                                 <dt class="label text-text-secondary">RSVP</dt>
-                                <dd class="font-bold font-sans text-lg">
+                                <dd class="font-bold text-lg">
                                     <a
-                                        class="active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
+                                        class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
                                         href={hangout.rsvp}
                                         rel="noopener noreferrer"
                                         target="_blank"
@@ -104,7 +101,7 @@ const isStill = later.some(card => card.notes.length > 0);
 </section>
 
 <section
-    class="stage stage--hangout stage--tight border-border-strong border-t-2"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="hangout-upcoming-title"
     data-event-group="hangout-upcoming"
     data-event-role="many"
@@ -112,22 +109,20 @@ const isStill = later.some(card => card.notes.length > 0);
 >
     <div>
         <SectionHead
-            class="text-4xl text-balance max-md:text-2xl"
+            class="text-2xl-4xl text-balance"
             headingId="hangout-upcoming-title"
         >
             Upcoming Hangouts
         </SectionHead>
         <ol
-            class="grid grid-cols-2 -mb-(--space-2xl) gap-x-(--space-lg) gap-y-0 list-none max-md:grid-cols-1"
+            class="grid grid-cols-2 -mb-(--space-2xl) gap-x-(--space-lg) gap-y-0 list-none max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))]"
             data-motion-stagger="flip"
         >
             {later.map(card => (
                 <li
-                    id={card.id}
-                    class="grid grid-cols-[minmax(0,1fr)] grid-rows-subgrid row-span-3 pb-(--space-2xl)"
+                    class="grid grid-cols-1 grid-rows-subgrid row-span-3 pb-(--space-2xl)"
                     data-event-end={card.end.toISOString()}
                     data-event-group="hangout-upcoming"
-                    data-event-id={card.id}
                     data-event-role="later"
                 >
                     <ProgramCard

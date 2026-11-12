@@ -29,7 +29,7 @@ const sessions = events
 ---
 
 <section
-    class="stage stage--assembly border-b-2 border-border-strong"
+    class="stage @container border-b-2 border-border-strong"
     aria-labelledby="landing-assembly-title"
     data-event-group="home-assembly"
     data-event-role="some"
@@ -37,7 +37,7 @@ const sessions = events
 >
     <div>
         <SectionHead
-            class="text-7xl max-lg:text-6xl max-md:text-3xl"
+            class="text-3xl-7xl"
             headingId="landing-assembly-title"
         >
             Next {program.name}
@@ -65,8 +65,8 @@ const sessions = events
                     class="contents"
                     datetime={session.date}
                 >
-                    <span class="assembly-sheet__day">{session.day}</span>
-                    <span class="assembly-sheet__month">{session.month}</span>
+                    <span class="font-bold font-display text-7xl-10xl tracking-[-0.02em]">{session.day}</span>
+                    <span class="font-bold font-display leading-none text-2xl-3xl tracking-[-0.02em] whitespace-nowrap">{session.month}</span>
                 </time>
                 <span
                     class="halftone--accent absolute bottom-0 inset-x-0 h-[calc(var(--drift-unit)*2)]"
@@ -78,13 +78,13 @@ const sessions = events
                 data-motion="rise"
             >
                 {session.workshop && (
-                    <hgroup class="flex flex-col gap-(--space-xs) mb-6">
+                    <hgroup class="flex flex-col gap-3 mb-6">
                         {session.credit && (
-                            <p class="font-bold font-sans text-lg tracking-tight">
+                            <p class="font-bold text-lg tracking-tight">
                                 {session.credit}
                             </p>
                         )}
-                        <h3 class="font-display text-3xl text-balance max-md:text-2xl">
+                        <h3 class="font-display text-2xl-3xl text-balance">
                             {session.workshop}
                         </h3>
                     </hgroup>
@@ -93,11 +93,11 @@ const sessions = events
                 <dl class="grid grid-cols-2 gap-x-6 gap-y-5 mb-8 max-lg:grid-cols-1">
                     <div>
                         <dt class="label mb-2 text-text-secondary">Time</dt>
-                        <dd class="font-bold font-sans text-balance text-xl">{session.time}</dd>
+                        <dd class="font-bold text-balance text-xl">{session.time}</dd>
                     </div>
                     <div>
                         <dt class="label mb-2 text-text-secondary">Where</dt>
-                        <dd class="font-bold font-sans text-xl">
+                        <dd class="font-bold text-xl">
                             <address class="mb-1 not-italic">{session.venue}</address>
                             {session.room && (
                                 <p>{session.room}</p>
@@ -106,9 +106,9 @@ const sessions = events
                     </div>
                     <div>
                         <dt class="label mb-2 text-text-secondary">RSVP</dt>
-                        <dd class="font-bold font-sans text-xl">
+                        <dd class="font-bold text-xl">
                             <a
-                                class="active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
+                                class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
                                 href={session.rsvp}
                                 rel="noopener noreferrer"
                                 target="_blank"
@@ -137,7 +137,7 @@ const sessions = events
 <style>
     .assembly-sheet {
         --assembly-bleed: max(var(--shell-pad), calc(100% - var(--shell-inner)));
-        --assembly-gutter: max(var(--shell-pad), calc((100vw - var(--shell-inner)) / 2));
+        --assembly-gutter: calc(max(var(--shell-pad), (100cqw - var(--shell-inner)) / 2) - var(--slab-rule));
         --assembly-plate: calc((100% - var(--assembly-bleed)) / 3);
         display: grid;
         grid-column: full-start / main-end;
@@ -145,25 +145,8 @@ const sessions = events
     }
 
     .assembly-sheet__body {
-        padding-block: calc(var(--space-2xl) * 1.75);
+        padding-block: round(var(--space-2xl) * 1.75, 4px);
         padding-inline: var(--space-2xl);
-    }
-
-    .assembly-sheet__day {
-        font-family: var(--font-display);
-        font-size: var(--text-10xl);
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        line-height: 1;
-    }
-
-    .assembly-sheet__month {
-        font-family: var(--font-display);
-        font-size: var(--text-3xl);
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        line-height: 1;
-        white-space: nowrap;
     }
 
     .assembly-sheet__plate {
@@ -171,10 +154,10 @@ const sessions = events
         background: var(--color-event-assembly);
         color: var(--color-event-assembly-text);
         display: grid;
-        gap: var(--space-xs);
+        gap: 12px;
         justify-items: start;
         overflow: clip;
-        padding-block: calc(var(--space-2xl) * 2.25);
+        padding-block: round(var(--space-2xl) * 2.25, 4px);
         padding-inline: var(--assembly-gutter) var(--space-2xl);
         position: relative;
     }
@@ -204,17 +187,9 @@ const sessions = events
             padding-inline: var(--shell-pad) var(--space-md);
         }
 
-        .assembly-sheet__day {
-            font-size: var(--text-7xl);
-        }
-
-        .assembly-sheet__month {
-            font-size: var(--text-2xl);
-        }
-
         .assembly-sheet__plate {
             align-content: start;
-            padding-block: var(--space-lg) calc(var(--drift-unit) * 2 + var(--space-xs));
+            padding-block: var(--space-lg) calc(var(--drift-unit) * 2 + 12px);
             padding-inline: var(--assembly-gutter) var(--space-md);
         }
     }

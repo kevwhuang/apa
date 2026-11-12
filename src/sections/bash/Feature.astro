@@ -16,13 +16,13 @@ const program = getProgram('bash');
     aria-labelledby="bash-title"
 >
     <div
-        class="halftone--accent stage__item--full absolute bottom-0 inset-x-0 h-(--space-lg) pointer-events-none"
+        class="halftone--accent stage__full absolute bottom-0 inset-x-0 h-(--space-lg) pointer-events-none"
         aria-hidden="true"
         data-scrub="drift"
     />
     <div class="flex flex-col relative gap-6">
         <PageHead
-            class="text-7xl max-lg:text-6xl max-md:text-3xl"
+            class="text-3xl-7xl"
             headingId="bash-title"
             tone="dark"
         >
@@ -60,14 +60,14 @@ const program = getProgram('bash');
                     </h2>
                     <ol class="grid grid-cols-3 gap-(--space-lg) list-none max-lg:gap-(--space-md) max-lg:grid-cols-[auto_minmax(0,1fr)]">
                         {FORMAT_STEPS.map((step, index) => (
-                            <li class="content-start grid grid-cols-[auto_minmax(0,1fr)] gap-x-(--space-md) gap-y-(--space-3xs) pt-(--space-sm) border-event-bash-text border-t-2 max-lg:col-span-2 max-lg:grid-cols-subgrid">
+                            <li class="content-start grid grid-cols-[48px_minmax(0,1fr)] gap-x-(--space-md) gap-y-1 pt-4 border-event-bash-text border-t-2 max-lg:col-span-2 max-lg:grid-cols-subgrid">
                                 <span
                                     class="row-span-2 font-display text-4xl"
                                     aria-hidden="true"
                                 >
                                     {index + 1}
                                 </span>
-                                <p class="font-bold font-sans leading-(--text-lg) text-lg tracking-tight">{step.name}</p>
+                                <p class="font-bold leading-(--text-lg) text-lg tracking-tight">{step.name}</p>
                                 <p class="text-base text-pretty">{step.note}</p>
                             </li>
                         ))}

@@ -26,7 +26,7 @@ const images = await toImageSources();
     <div>
         <h1
             id="cart-title"
-            class="mb-12 text-4xl text-balance max-lg:text-3xl"
+            class="mb-12 text-3xl-4xl text-balance"
             data-motion="strike"
         >
             Your cart
@@ -34,7 +34,7 @@ const images = await toImageSources();
         <div class="cart__grid grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] gap-12 max-md:grid-cols-1">
             <div class="cart__main flex flex-col gap-6">
                 <aside
-                    class="cart__notice slab slab--card flex flex-col max-w-(--measure-form) w-full gap-4 mx-auto"
+                    class="cart__notice slab slab--card flex flex-col max-w-(--measure-form) w-full gap-4"
                     aria-label="Cart changes"
                     data-cart-notice
                     hidden
@@ -42,7 +42,7 @@ const images = await toImageSources();
                 >
                     <p class="label text-warning-text">Your cart changed</p>
                     <ul
-                        class="flex flex-col gap-(--space-3xs) list-none"
+                        class="flex flex-col gap-1 list-none"
                         data-cart-issues
                     />
                     <button
@@ -54,12 +54,12 @@ const images = await toImageSources();
                     </button>
                 </aside>
                 <div
-                    class="cart__empty slab slab--card slab--empty max-w-(--measure-form) w-full mx-auto"
+                    class="cart__empty slab slab--card slab--empty max-w-(--measure-form) w-full"
                     data-cart-empty
                     data-motion="rise"
                     tabindex="-1"
                 >
-                    <p class="font-bold font-sans text-2xl text-balance tracking-tight">Nothing in the cart.</p>
+                    <p class="font-bold text-2xl text-balance tracking-tight">Nothing in the cart.</p>
                     <a
                         class="btn btn--primary"
                         href="/store"
@@ -134,7 +134,7 @@ const images = await toImageSources();
                     data-row-initial
                 />
                 <img
-                    class="absolute inset-0 object-cover h-full w-full"
+                    class="absolute inset-0 object-cover size-full"
                     alt=""
                     data-row-photo
                     hidden
@@ -144,9 +144,9 @@ const images = await toImageSources();
             <div class="cart-items__body flex flex-col">
                 <div class="flex flex-col gap-1 mb-3">
                     <div class="cart-items__heading flex items-start gap-3">
-                        <p class="min-w-0 font-bold font-sans leading-(--text-lg) tracking-tight">
+                        <p class="min-w-0 font-bold leading-(--text-lg) tracking-tight">
                             <a
-                                class="active:translate-y-px hover:text-link hover:underline inline-block underline-offset-4 wrap-anywhere transition-[color,translate]"
+                                class="hit active:translate-y-px hover:text-link hover:underline inline-block underline-offset-4 wrap-anywhere transition-[color,translate]"
                                 data-row-title
                                 href="/store"
                             >
@@ -163,11 +163,11 @@ const images = await toImageSources();
                         data-row-variant
                     />
                 </div>
-                <div class="flex flex-wrap items-center gap-x-(--space-md) gap-y-(--space-2xs)">
-                    <div class="flex items-center">
+                <div class="flex flex-wrap items-center gap-y-2">
+                    <div class="flex items-center max-md:contents">
                         <div class="inline-flex items-center border-2 border-border-strong">
                             <button
-                                class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text-disabled aria-disabled:hover:bg-transparent aria-disabled:text-text-disabled hover:bg-bg-raised-hover h-(--control-size) w-(--control-size) font-bold font-mono"
+                                class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text-disabled aria-disabled:hover:bg-transparent aria-disabled:text-text-disabled hover:bg-bg-raised-hover size-(--control-size) font-bold font-mono"
                                 data-row-decrease
                                 type="button"
                             >
@@ -178,7 +178,7 @@ const images = await toImageSources();
                                 data-row-quantity
                             />
                             <button
-                                class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text-disabled aria-disabled:hover:bg-transparent aria-disabled:text-text-disabled hover:bg-bg-raised-hover h-(--control-size) w-(--control-size) font-bold font-mono"
+                                class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text-disabled aria-disabled:hover:bg-transparent aria-disabled:text-text-disabled hover:bg-bg-raised-hover size-(--control-size) font-bold font-mono"
                                 data-row-increase
                                 type="button"
                             >
@@ -186,7 +186,7 @@ const images = await toImageSources();
                             </button>
                         </div>
                         <button
-                            class="cart-items__remove active:translate-y-px hover:text-link inline-flex items-center justify-center shrink-0 h-(--control-size) w-(--control-size) text-text-secondary transition-[color,translate]"
+                            class="cart-items__remove active:translate-y-px hover:text-link inline-flex items-center justify-center shrink-0 size-(--control-size) text-text-secondary transition-[color,translate]"
                             data-row-remove
                             type="button"
                         >
@@ -194,7 +194,7 @@ const images = await toImageSources();
                         </button>
                     </div>
                     <p
-                        class="ml-auto font-mono text-base"
+                        class="ml-auto pl-(--space-md) font-mono text-base"
                         data-row-price
                     />
                 </div>
@@ -235,20 +235,9 @@ const images = await toImageSources();
         min-height: calc(var(--row-count) * var(--row-height) + (var(--row-count) - 1) * var(--space-2xl));
     }
 
-    .cart-checkout[aria-disabled='true'] {
-        background: var(--color-btn-disabled-bg);
-        border-color: var(--color-btn-disabled-border);
-        color: var(--color-btn-disabled-text);
-        cursor: not-allowed;
-    }
-
-    .cart-checkout[aria-disabled='true']:active {
-        transform: none;
-    }
-
     .cart-items__body {
         align-self: start;
-        gap: var(--space-sm);
+        gap: 16px;
         padding: var(--row-pad);
     }
 
@@ -265,7 +254,7 @@ const images = await toImageSources();
     .cart__list {
         --row-controls: calc(var(--control-size) + 4px);
         --row-count: var(--cart-rows, var(--cart-seed-rows));
-        --row-height: calc(2 * var(--row-pad) + var(--text-lg) + var(--text-base) + 4 * var(--spacing) + var(--space-sm) + var(--row-controls) + 4px);
+        --row-height: calc(2 * var(--row-pad) + var(--text-lg) + var(--text-base) + 4 * var(--spacing) + 16px + var(--row-controls) + 4px);
         --row-pad: round(clamp(16px, calc(9.333px + 2.0833vw), 36px), 4px);
     }
 
@@ -290,7 +279,7 @@ const images = await toImageSources();
         }
 
         .cart__list {
-            --row-controls: calc(var(--control-size) + 4px + var(--space-2xs) + var(--text-base--line-height));
+            --row-controls: calc(var(--control-size) + 4px + 8px + var(--text-base--line-height));
         }
     }
 </style>

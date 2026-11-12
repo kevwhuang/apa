@@ -2,6 +2,8 @@
 import PageHead from '@components/shared/PageHead.astro';
 import { LINKS } from '@lib/shared/constants';
 
+const CLASS_DETAIL_ROW = 'col-span-full content-start grid grid-cols-subgrid items-baseline gap-x-(--space-md) gap-y-3 px-(--space-lg) py-4 bg-event-hangout max-lg:grid-cols-1 max-lg:py-(--space-lg)';
+
 const DETAILS: { detail: string; href?: string; term: string }[] = [
     { detail: 'The fourth Tuesday of the month', term: 'When' },
     { detail: 'A borrowed room, announced to members ahead of the date', term: 'Where' },
@@ -12,12 +14,12 @@ const DETAILS: { detail: string; href?: string; term: string }[] = [
 ---
 
 <section
-    class="stage stage--hangout stage--tight"
+    class="stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="hangout-title"
 >
     <div class="flex flex-col gap-6">
         <PageHead
-            class="max-w-4xl text-7xl max-md:text-5xl"
+            class="max-w-4xl text-5xl-7xl"
             headingId="hangout-title"
         >
             Bring a track,<br />
@@ -37,13 +39,13 @@ const DETAILS: { detail: string; href?: string; term: string }[] = [
                 </h2>
                 <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-px border-border-on-brand border-t bg-border-on-brand max-lg:grid-cols-2 max-md:grid-cols-1">
                     {DETAILS.map(item => (
-                        <div class:list={['col-span-full content-start grid grid-cols-subgrid items-baseline gap-x-(--space-md) gap-y-(--space-xs) px-(--space-lg) py-(--space-sm) bg-event-hangout max-lg:grid-cols-1 max-lg:py-(--space-lg)', !item.href && 'max-lg:col-auto']}>
+                        <div class:list={[CLASS_DETAIL_ROW, !item.href && 'max-lg:col-auto']}>
                             <dt class="label">{item.term}</dt>
                             <dd>
                                 {item.href
                                     ? (
                                             <a
-                                                class="active:translate-y-px hover:text-link-on-brand inline-block underline underline-offset-4 transition-[color,translate]"
+                                                class="hit active:translate-y-px hover:text-link-on-brand inline-block underline underline-offset-4 transition-[color,translate]"
                                                 href={item.href}
                                                 rel="noopener noreferrer"
                                                 target="_blank"

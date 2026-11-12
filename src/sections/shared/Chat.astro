@@ -20,7 +20,7 @@ import IconClose from '@components/icons/Close.astro';
     </button>
     <dialog
         id="chat-window"
-        class="chat__window z-(--z-drawer)"
+        class="chat__window overflow-y-clip z-(--z-drawer)"
         aria-labelledby="chat-title"
         data-chat-window
     >
@@ -28,8 +28,8 @@ import IconClose from '@components/icons/Close.astro';
             class="grip z-1"
             data-chat-grip
         />
-        <div class="chat__head flex items-center justify-between shrink-0 gap-(--space-2xs) pl-(--space-sm) border-b border-border-subtle">
-            <div class="chat__title flex items-center min-w-0 gap-(--space-sm)">
+        <div class="chat__head flex items-center justify-between shrink-0 gap-2 pl-4 border-b border-border-subtle">
+            <div class="chat__title flex items-center min-w-0 gap-4">
                 <h2
                     id="chat-title"
                     class="chat__eyebrow label text-link"
@@ -50,17 +50,17 @@ import IconClose from '@components/icons/Close.astro';
             </button>
         </div>
         <ol
-            class="chat__log scroll-slot flex flex-1 flex-col min-h-0 gap-(--space-2xs) p-(--space-sm) list-none"
+            class="chat__log scroll-slot flex flex-1 flex-col min-h-0 gap-2 p-4 list-none"
             aria-live="polite"
             data-chat-log
         />
         <form
-            class="chat__form flex shrink-0 gap-(--space-2xs) p-(--space-sm) border-border-subtle border-t"
+            class="chat__form flex flex-wrap justify-end shrink-0 gap-2 p-4 border-border-subtle border-t"
             data-chat-form
         >
             <input
                 id="chat-message"
-                class="input flex-1 min-w-0"
+                class="input flex-1 min-w-42"
                 aria-label="Message"
                 autocomplete="off"
                 data-chat-field
@@ -82,7 +82,7 @@ import IconClose from '@components/icons/Close.astro';
                     aria-hidden="true"
                     data-chat-avatar
                 />
-                <span class="chat__meta [grid-area:meta] flex flex-wrap items-baseline min-w-0 gap-x-(--space-2xs)">
+                <span class="chat__meta [grid-area:meta] flex flex-wrap items-baseline min-w-0 gap-x-2">
                     <span
                         class="chat__author min-w-0 font-bold leading-(--text-lg) text-base wrap-anywhere"
                         data-chat-author
@@ -114,7 +114,7 @@ import IconClose from '@components/icons/Close.astro';
 
 <style>
     .chat {
-        --chat-offset: calc(var(--space-md) + var(--launcher-size) + var(--space-2xs));
+        --chat-offset: calc(var(--space-md) + var(--control-size) + 8px);
         display: none;
     }
 
@@ -131,13 +131,13 @@ import IconClose from '@components/icons/Close.astro';
         font-size: var(--text-sm);
         font-weight: 700;
         grid-area: avatar;
-        height: 30px;
+        height: 32px;
         justify-content: center;
         line-height: 1;
         overflow: hidden;
         text-transform: uppercase;
         user-select: none;
-        width: 30px;
+        width: 32px;
     }
 
     .chat__close {
@@ -172,12 +172,12 @@ import IconClose from '@components/icons/Close.astro';
         border-right: 0;
         color: var(--color-text-inverse);
         display: inline-flex;
-        height: var(--launcher-size);
+        height: var(--control-size);
         inset: auto 0 var(--chat-offset) auto;
         justify-content: center;
         position: fixed;
         transition: transform var(--duration-fast) var(--motion-ease-ui);
-        width: var(--launcher-size);
+        width: var(--control-size);
     }
 
     .chat__launcher:active {
@@ -198,17 +198,17 @@ import IconClose from '@components/icons/Close.astro';
     }
 
     .chat__message {
-        column-gap: var(--space-2xs);
+        column-gap: 8px;
         display: grid;
         grid-template-areas:
             'avatar meta'
             'avatar body';
-        grid-template-columns: 30px minmax(0, 1fr);
-        row-gap: var(--space-3xs);
+        grid-template-columns: 32px minmax(0, 1fr);
+        row-gap: 4px;
     }
 
     .chat__message:has(+ .chat__message:not(.chat__message--grouped)) {
-        margin-bottom: calc(var(--space-sm) - var(--space-2xs));
+        margin-bottom: 8px;
     }
 
     .chat__message--grouped {
@@ -223,15 +223,13 @@ import IconClose from '@components/icons/Close.astro';
     .chat__window {
         background: var(--color-bg-raised);
         border: 2px solid var(--color-border-strong);
-        box-shadow: var(--lift) var(--lift) 0 0 var(--color-border-strong);
+        box-shadow: var(--lift-shadow);
         color: var(--color-text);
         height: min(600px, calc(100dvh - var(--header-height) - var(--space-md) - var(--chat-offset)));
-        inset: auto calc(var(--launcher-size) + var(--lift)) var(--chat-offset) auto;
-        max-width: calc(100vw - var(--launcher-size) - var(--lift) - var(--shell-pad));
-        overflow: hidden;
-        padding: 0;
+        inset: auto calc(var(--control-size) + var(--lift)) var(--chat-offset) auto;
+        max-width: calc(100vw - var(--control-size) - var(--lift) - var(--shell-pad));
         position: fixed;
-        width: var(--chat-width, min(340px, calc(100vw - var(--launcher-size) - 2 * var(--space-md))));
+        width: var(--chat-width, min(340px, calc(100vw - var(--control-size) - 2 * var(--space-md))));
     }
 
     .chat__window[open] {

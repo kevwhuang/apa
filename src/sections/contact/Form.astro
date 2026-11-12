@@ -16,10 +16,10 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
     </h1>
     <div data-motion="unfold">
         <form
-            class="contact-form slab slab--card flex flex-col max-w-(--measure-form) gap-(--space-lg) mx-auto"
+            class="contact-form slab slab--card slab--plush flex flex-col max-w-(--measure-form) gap-(--space-lg) mx-auto"
             data-contact-form
         >
-            <hgroup class="flex flex-col gap-(--space-xs)">
+            <hgroup class="flex flex-col gap-3">
                 <h2 class="font-display text-3xl">
                     Contact us
                 </h2>
@@ -28,12 +28,12 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
                 </p>
             </hgroup>
             <div class="grid grid-cols-2 gap-(--space-lg) max-md:grid-cols-1">
-                <div class="flex flex-col gap-(--space-2xs)">
-                    <label class="flex flex-col gap-(--space-2xs)">
+                <div class="flex flex-col gap-2">
+                    <label class="flex flex-col gap-2">
                         <span class="label text-text-secondary">Name</span>
                         <input
                             id="contact-name"
-                            class="input font-sans"
+                            class="input"
                             aria-describedby="contact-name-error"
                             aria-invalid="false"
                             autocomplete="name"
@@ -49,8 +49,8 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
                         hidden
                     />
                 </div>
-                <div class="flex flex-col gap-(--space-2xs)">
-                    <label class="flex flex-col gap-(--space-2xs)">
+                <div class="flex flex-col gap-2">
+                    <label class="flex flex-col gap-2">
                         <span class="label text-text-secondary">Email</span>
                         <input
                             id="contact-email"
@@ -72,13 +72,13 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
                     />
                 </div>
             </div>
-            <div class="flex flex-col gap-(--space-2xs)">
-                <label class="flex flex-col gap-(--space-2xs)">
+            <div class="flex flex-col gap-2">
+                <label class="flex flex-col gap-2">
                     <span class="label text-text-secondary">Topic</span>
                     <span class="select">
                         <select
                             id="contact-topic"
-                            class="input font-sans"
+                            class="input"
                             aria-describedby="contact-topic-error"
                             aria-invalid="false"
                             name="topic"
@@ -98,12 +98,12 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
                     hidden
                 />
             </div>
-            <div class="flex flex-col gap-(--space-2xs)">
-                <label class="flex flex-col gap-(--space-2xs)">
+            <div class="flex flex-col gap-2">
+                <label class="flex flex-col gap-2">
                     <span class="label text-text-secondary">Message</span>
                     <textarea
                         id="contact-message"
-                        class="contact-form__message input input--area font-sans"
+                        class="contact-form__message input"
                         aria-describedby="contact-message-error"
                         aria-invalid="false"
                         maxlength={CONTACT_LIMITS.message}
@@ -133,13 +133,13 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
             </button>
         </form>
         <div
-            class="contact__done slab slab--card flex flex-col max-w-(--measure-form) gap-(--space-lg) mx-auto"
+            class="contact__done slab slab--card slab--plush flex flex-col max-w-(--measure-form) gap-(--space-lg) mx-auto"
             data-contact-done
             hidden
         >
-            <hgroup class="flex flex-col gap-(--space-xs)">
+            <hgroup class="flex flex-col gap-3">
                 <h2
-                    class="font-display text-3xl"
+                    class="font-display text-2xl-3xl"
                     data-contact-heading
                     tabindex="-1"
                 >
@@ -150,28 +150,28 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
                 </p>
             </hgroup>
             <dl class="flex flex-col">
-                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-subtle">
+                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 py-1 border-b border-border-subtle">
                     <dt class="label text-text-secondary">From</dt>
                     <dd
                         class="font-mono text-base wrap-break-word"
                         data-contact-from
                     />
                 </div>
-                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-subtle">
+                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 py-1 border-b border-border-subtle">
                     <dt class="label text-text-secondary">To</dt>
                     <dd
                         class="font-mono text-base wrap-break-word"
                         data-contact-to
                     />
                 </div>
-                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-subtle">
+                <div class="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 py-1 border-b border-border-subtle">
                     <dt class="label text-text-secondary">Subject</dt>
                     <dd
                         class="font-mono text-base wrap-break-word"
                         data-contact-subject
                     />
                 </div>
-                <div class="contact__receipt-row--message grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-(--space-xs) py-(--space-3xs) border-b border-border-subtle">
+                <div class="flex flex-col gap-2 pb-1 pt-3">
                     <dt class="label text-text-secondary">Message</dt>
                     <dd
                         class="contact__receipt-body slab slab--sunk whitespace-pre-line wrap-break-word"
@@ -219,7 +219,7 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
                     class="contact-line contact-line--accent slab slab--card slab--still mb-(--lift)"
                     href={`mailto:${LINKS.email}`}
                 >
-                    <span class="flex items-center justify-between gap-(--space-sm)">
+                    <span class="flex items-center justify-between gap-4">
                         <span class="font-bold font-mono text-lg tracking-wide uppercase">Email</span>
                         <span
                             class="contact-line__arrow shrink-0 font-mono leading-none text-xl text-link transition-[translate]"
@@ -239,7 +239,7 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
                         rel="noopener noreferrer"
                         target="_blank"
                     >
-                        <span class="flex items-center justify-between gap-(--space-sm)">
+                        <span class="flex items-center justify-between gap-4">
                             <span class="font-bold font-mono text-lg tracking-wide uppercase">{platform.label}</span>
                             <span
                                 class="contact-line__arrow shrink-0 font-mono leading-none text-xl text-link transition-[translate]"
@@ -258,15 +258,10 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
 </section>
 
 <style>
-    .contact-form,
-    .contact__done {
-        padding: var(--space-lg);
-    }
-
     .contact-form__message {
         field-sizing: content;
-        max-height: calc(10lh + 2 * var(--space-2xs) + 4px);
-        min-height: calc(5lh + 2 * var(--space-2xs) + 4px);
+        max-height: calc(10lh + 2 * 8px + 4px);
+        min-height: calc(5lh + 2 * 8px + 4px);
         resize: vertical;
     }
 
@@ -277,9 +272,8 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
     .contact-line {
         display: flex;
         flex-direction: column;
-        gap: var(--space-xs);
+        gap: 12px;
         min-height: 148px;
-        padding: var(--space-md);
         transition:
             box-shadow var(--duration-base) var(--motion-ease-entrance),
             transform var(--duration-fast) var(--motion-ease-ui);
@@ -324,15 +318,7 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
     }
 
     .contact__receipt-body {
-        padding: var(--space-sm);
-    }
-
-    .contact__receipt-row--message {
-        border-bottom: 0;
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2xs);
-        padding-top: var(--space-xs);
+        padding: 16px;
     }
 </style>
 

@@ -16,7 +16,7 @@ const upcoming = events
 ---
 
 <section
-    class="stage stage--hangout border-b-2 border-border-strong"
+    class="stage border-b-2 border-border-strong"
     aria-labelledby="landing-hangout-title"
     data-event-group="home-hangout"
     data-event-role="some"
@@ -24,7 +24,7 @@ const upcoming = events
 >
     <div>
         <SectionHead
-            class="text-5xl max-md:text-4xl"
+            class="text-4xl-5xl"
             headingId="landing-hangout-title"
         >
             Next {program.name}
@@ -48,9 +48,7 @@ const upcoming = events
                     aria-hidden="true"
                 />
                 <article
-                    id={index === 0 ? event.id : undefined}
-                    class="hangout-flyer__card slab slab--bare slab--card slab--still"
-                    data-event-id={event.id}
+                    class="slab slab--bare slab--card slab--still grid grid-cols-[auto_minmax(0,1fr)_auto] overflow-clip max-md:grid-cols-1"
                     data-motion="tilt"
                 >
                     <p
@@ -62,17 +60,17 @@ const upcoming = events
                             datetime={event.data.date.toISOString()}
                         >
                             <span class="hangout-flyer__day">{formatCalendarDay(event.data.date)}</span>
-                            <span class="hangout-flyer__month block font-mono text-lg whitespace-nowrap">{formatCalendarMonth(event.data.date)}</span>
+                            <span class="block font-mono text-lg max-md:self-center max-md:justify-self-end max-md:text-end">{formatCalendarMonth(event.data.date)}</span>
                         </time>
                     </p>
                     <div class="content-start p-(--space-lg)">
-                        <h3 class="mb-6 font-display text-3xl text-balance max-lg:text-2xl">{event.data.title}</h3>
+                        <h3 class="mb-6 font-display text-2xl-3xl text-balance">{event.data.title}</h3>
                         <p class="max-w-2xl mb-8 text-lg text-text-secondary">{event.data.excerpt}</p>
                         <dl class="grid grid-cols-2 gap-x-6 gap-y-5 mb-8 max-lg:grid-cols-1">
                             <div>
                                 <dt class="label mb-2 text-text-secondary">Time</dt>
                                 <dd
-                                    class="font-bold font-sans text-balance text-xl"
+                                    class="font-bold text-balance text-xl"
                                     data-placeholder
                                 >
                                     {formatTimeRange(event.data.date, event.data.end)}
@@ -80,15 +78,15 @@ const upcoming = events
                             </div>
                             <div>
                                 <dt class="label mb-2 text-text-secondary">Where</dt>
-                                <dd class="font-bold font-sans text-xl">
+                                <dd class="font-bold text-xl">
                                     <address class="not-italic">{formatVenue(event.data.location)}</address>
                                 </dd>
                             </div>
                             <div>
                                 <dt class="label mb-2 text-text-secondary">RSVP</dt>
-                                <dd class="font-bold font-sans text-xl">
+                                <dd class="font-bold text-xl">
                                     <a
-                                        class="active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
+                                        class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
                                         href={event.data.rsvp ?? LINKS.meetup}
                                         rel="noopener noreferrer"
                                         target="_blank"
@@ -123,16 +121,10 @@ const upcoming = events
 <Schedule />
 
 <style>
-    .hangout-flyer__card {
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr) auto;
-        overflow: clip;
-    }
-
     .hangout-flyer__day {
         display: block;
         font-family: var(--font-display);
-        font-size: var(--text-9xl);
+        font-size: clamp(76px, calc(45.333px + 9.5833vw), 168px);
         font-weight: 700;
         letter-spacing: -0.02em;
         line-height: 1;
@@ -150,7 +142,7 @@ const upcoming = events
         display: flex;
         justify-content: center;
         padding-block: var(--space-md);
-        padding-inline: var(--space-xs);
+        padding-inline: 12px;
         writing-mode: vertical-rl;
     }
 
@@ -160,28 +152,18 @@ const upcoming = events
         border-right: 2px solid var(--color-border-strong);
         color: var(--color-event-hangout-text);
         display: grid;
-        gap: var(--space-2xs);
+        gap: 8px;
         justify-items: start;
         padding: var(--space-lg);
     }
 
     @media (max-width: 768px) {
-        .hangout-flyer__card {
-            grid-template-columns: minmax(0, 1fr);
-        }
-
         .hangout-flyer__day {
             align-self: center;
-            font-size: var(--text-6xl);
         }
 
         .hangout-flyer__field {
             inset: calc(-1 * var(--space-md)) calc(-1 * var(--space-lg));
-        }
-
-        .hangout-flyer__month {
-            align-self: center;
-            justify-self: end;
         }
 
         .hangout-flyer__rail {
@@ -192,7 +174,7 @@ const upcoming = events
             align-content: start;
             border-bottom: 2px solid var(--color-border-strong);
             border-right: 0;
-            column-gap: var(--space-sm);
+            column-gap: 16px;
             grid-template-columns: auto minmax(0, 1fr);
             padding: var(--space-md);
         }

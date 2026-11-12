@@ -61,12 +61,12 @@ const year = new Date().getFullYear();
         >
             {columns.map(column => (
                 <div>
-                    <h2 class="footer__head label mb-(--space-sm) text-text-inverse-secondary">{column.head}</h2>
-                    <ul class="flex flex-col gap-(--space-2xs) list-none">
+                    <h2 class="footer__head label mb-4 text-text-inverse-secondary">{column.head}</h2>
+                    <ul class="flex flex-col list-none">
                         {column.items.map(item => (
                             <li>
                                 <a
-                                    class="footer__link active:translate-y-px hover:text-link-on-inverse inline-flex items-center min-h-9 text-base transition-[color,translate]"
+                                    class="footer__link active:translate-y-px hover:text-link-on-inverse flex items-center min-h-(--control-size) text-base transition-[color,translate]"
                                     data-footer-onboarding={item.href === ONBOARDING_ROUTE ? '' : undefined}
                                     href={item.href}
                                 >
@@ -79,25 +79,25 @@ const year = new Date().getFullYear();
             ))}
         </div>
     </div>
-    <div class="stage stage--flush border-border-inverse-strong border-t-2">
-        <div class="footer__row footer__sign">
-            <div class="footer__meta">
+    <div class="footer__bar stage border-border-inverse-strong border-t-2">
+        <div class="footer__sign">
+            <div class="footer__meta flex flex-col gap-6">
                 <p class="footer__copy text-balance">
                     &copy; {year}&#32;
                     <span class="footer__owner">
                         <a
-                            class="footer__home"
+                            class="footer__home hit"
                             href="/"
                         >
                             {BRAND.name}
                         </a>
                     </span>
                 </p>
-                <p class="footer__stamp">
+                <p class="footer__stamp flex flex-wrap gap-2 max-lg:flex-col">
                     <span class="footer__credit whitespace-nowrap">
                         Made by&#32;
                         <a
-                            class="footer__credit-link"
+                            class="footer__credit-link hit"
                             href={LINKS.aephonics}
                             rel="noopener noreferrer"
                             target="_blank"
@@ -115,11 +115,11 @@ const year = new Date().getFullYear();
                     <span class="footer__updated whitespace-nowrap">Updated <time datetime={SITE_UPDATED}>{formatDateStamp(updated)}</time></span>
                 </p>
             </div>
-            <ul class="footer__socials flex gap-(--space-2xs) list-none">
+            <ul class="footer__socials flex gap-2 list-none max-md:flex-wrap">
                 {SOCIALS.map(({ Icon, href, label }) => (
                     <li>
                         <a
-                            class="footer__social"
+                            class="footer__social active:translate-y-px hover:text-link-on-inverse inline-flex items-center justify-center size-14 text-text-inverse transition-[color,translate]"
                             href={href}
                             rel="noopener noreferrer"
                             target="_blank"
@@ -135,6 +135,10 @@ const year = new Date().getFullYear();
 </footer>
 
 <style>
+    .footer__bar {
+        --stage-pad: 0px;
+    }
+
     .footer__credit-link,
     .footer__home {
         color: var(--color-link-on-inverse);
@@ -163,83 +167,39 @@ const year = new Date().getFullYear();
         display: grid;
         grid-template-columns: repeat(var(--footer-cols), max-content);
         justify-content: space-between;
-        padding-inline-end: max(0px, var(--launcher-size) + var(--space-2xs) - var(--shell-pad));
         row-gap: var(--space-2xl);
+    }
+
+    .footer__grid,
+    .footer__sign {
+        padding-inline-end: max(0px, var(--control-size) + 8px - var(--shell-pad));
     }
 
     .footer__head {
         font-size: var(--text-lg);
     }
 
-    .footer__meta {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2xs);
-    }
-
-    .footer__row {
+    .footer__sign {
         align-items: center;
         color: var(--color-text-inverse-secondary);
+        display: grid;
         font-family: var(--font-mono);
         font-size: var(--text-base);
-        gap: var(--space-sm);
-        letter-spacing: 0.04em;
-        line-height: var(--text-base--line-height);
-        min-height: calc(var(--control-size) + 2 * var(--space-lg));
-        padding-block: var(--space-lg);
-    }
-
-    .footer__sign {
-        --footer-social: 56px;
-        display: grid;
+        gap: 16px;
         grid-template-columns: auto auto;
         justify-content: space-between;
-        padding-inline-end: max(0px, var(--launcher-size) + var(--space-2xs) - var(--shell-pad));
-    }
-
-    .footer__social {
-        align-items: center;
-        color: var(--color-text-inverse);
-        display: inline-flex;
-        height: var(--footer-social);
-        justify-content: center;
-        transition:
-            color var(--duration-fast) var(--motion-ease-ui),
-            transform var(--duration-fast) var(--motion-ease-ui);
-        width: var(--footer-social);
-    }
-
-    .footer__social:active {
-        transform: translateY(1px);
-    }
-
-    .footer__social:hover {
-        color: var(--color-link-on-inverse);
-    }
-
-    .footer__stamp {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-2xs);
-    }
-
-    @media (max-width: 1024px) {
-        .footer__stamp {
-            flex-direction: column;
-        }
+        letter-spacing: 0.04em;
+        line-height: var(--text-base--line-height);
+        padding-block: var(--space-lg);
     }
 
     @media (max-width: 768px) {
         .footer__grid {
-            grid-template-columns: repeat(2, max-content);
+            grid-template-columns: repeat(2, minmax(max-content, 1fr));
         }
 
         .footer__sign {
             grid-template-columns: minmax(0, 1fr);
-        }
-
-        .footer__socials {
-            flex-wrap: wrap;
         }
     }
 </style>
