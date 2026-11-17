@@ -1,30 +1,27 @@
 ---
-import { getCollection } from 'astro:content';
-
 import Schedule from '@components/program/Schedule.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { LINKS } from '@lib/shared/constants';
-import { formatCalendarDay, formatCalendarMonth, formatCredit, formatTimeRange, formatVenue, getProgram, isUpcoming } from '@lib/shared/utils';
+import { formatCalendarDay, formatCalendarMonth, formatTimeRange, formatVenue, isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { getProgram, loadEvents } from '@lib/programs/calendar';
 
-const events = await getCollection('events');
-
-const program = getProgram('assembly');
+const events = await loadEvents();
+const program = await getProgram('assembly');
 
 const sessions = events
-    .filter(event => event.data.type === 'assembly' && isUpcoming(event.data.end))
-    .sort((a, b) => +a.data.date - +b.data.date)
+    .filter(event => event.program.id === 'assembly' && isUpcoming(event.ends_at))
     .map(event => ({
-        credit: formatCredit(event.data.title),
-        date: event.data.date.toISOString(),
-        day: formatCalendarDay(event.data.date),
-        end: event.data.end.toISOString(),
-        excerpt: event.data.excerpt,
-        month: formatCalendarMonth(event.data.date),
-        room: event.data.room,
-        rsvp: event.data.rsvp ?? LINKS.meetup,
-        time: formatTimeRange(event.data.date, event.data.end),
-        venue: formatVenue(event.data.location),
-        workshop: event.data.workshop,
+        body: event.body,
+        credit: event.speaker?.name,
+        day: formatCalendarDay(event.starts_at),
+        endsAt: toAustinIso(event.ends_at),
+        externalUrl: event.external_url ?? LINKS.meetup,
+        month: formatCalendarMonth(event.starts_at),
+        room: event.room,
+        startsAt: toAustinIso(event.starts_at),
+        time: formatTimeRange(event.starts_at, event.ends_at),
+        title: event.title,
+        venue: formatVenue(event.venue),
     }));
 ---
 
@@ -52,7 +49,7 @@ const sessions = events
     {sessions.map((session, index) => (
         <article
             class="assembly-sheet slab slab--bare slab--lift slab--still"
-            data-event-end={session.end}
+            data-event-end={session.endsAt}
             data-event-group="home-assembly"
             data-event-role="next"
             hidden={index > 0}
@@ -63,7 +60,7 @@ const sessions = events
             >
                 <time
                     class="contents"
-                    datetime={session.date}
+                    datetime={session.startsAt}
                 >
                     <span class="font-bold font-display text-7xl-10xl tracking-[-0.02em]">{session.day}</span>
                     <span class="font-bold font-display leading-none text-2xl-3xl tracking-[-0.02em] whitespace-nowrap">{session.month}</span>
@@ -77,7 +74,7 @@ const sessions = events
                 class="assembly-sheet__body"
                 data-motion="rise"
             >
-                {session.workshop && (
+                {session.title && (
                     <hgroup class="flex flex-col gap-3 mb-6">
                         {session.credit && (
                             <p class="font-bold text-lg tracking-tight">
@@ -85,11 +82,11 @@ const sessions = events
                             </p>
                         )}
                         <h3 class="font-display text-2xl-3xl text-balance">
-                            {session.workshop}
+                            {session.title}
                         </h3>
                     </hgroup>
                 )}
-                <p class="max-w-2xl mb-8 text-lg text-text-secondary">{session.excerpt}</p>
+                <p class="max-w-2xl mb-8 text-lg text-text-secondary">{session.body}</p>
                 <dl class="grid grid-cols-2 gap-x-6 gap-y-5 mb-8 max-lg:grid-cols-1">
                     <div>
                         <dt class="label mb-2 text-text-secondary">Time</dt>
@@ -109,7 +106,7 @@ const sessions = events
                         <dd class="font-bold text-xl">
                             <a
                                 class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
-                                href={session.rsvp}
+                                href={session.externalUrl}
                                 rel="noopener noreferrer"
                                 target="_blank"
                             >

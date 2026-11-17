@@ -1,9 +1,7 @@
 ---
-title: July 2024
-date: 2024-07-10T19:00:00-05:00
-end: 2024-07-10T21:00:00-05:00
-location: Capital Factory · 701 Brazos St
-room: Devvie on the 1st floor
-excerpt: Producers of every genre and experience level play finished songs and early sketches one at a time for feedback from the room. The rest of the night is for meeting people to make music with.
-type: assembly
+ends_at: 2024-07-10T21:00:00-05:00
+program: assembly
+room: Devvie (1st floor)
+starts_at: 2024-07-10T19:00:00-05:00
+venue: Capital Factory
 ---

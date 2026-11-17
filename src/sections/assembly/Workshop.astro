@@ -1,12 +1,12 @@
 ---
 import { Image } from 'astro:assets';
-import { getCollection } from 'astro:content';
 
 import IconArrow from '@components/icons/Arrow.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import Schedule from '@components/program/Schedule.astro';
 import { PALETTE } from '@lib/shared/constants';
-import { getInitials, isUpcoming } from '@lib/shared/utils';
+import { getInitials, isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { loadEvents } from '@lib/programs/calendar';
 
 import type { ImageMetadata } from 'astro';
 
@@ -14,35 +14,32 @@ const PORTRAIT_SIZES = '(max-width: 768px) calc(81.5vw - 78px), (max-width: 1024
 const PORTRAIT_WIDTH = 500;
 
 const SESSION_EXTRAS = {
+    event_id: '2026_11_assembly',
     files: [
-        { description: 'Two tracks prepared to mix cleanly, split out for rehearsing each blend.', meta: 'ZIP \u00b7 210 MB', title: 'Practice Stems' },
-        { description: 'Every phrasing and beatmatching chart from the lab, annotated after the fact.', meta: 'PDF \u00b7 24 pages', title: 'Workshop Slides' },
+        { description: 'Two tracks prepared to mix cleanly, split out for rehearsing each blend.', metadata: 'ZIP \u00b7 210 MB', title: 'Practice Stems' },
+        { description: 'Every phrasing and beatmatching chart from the lab, annotated after the fact.', metadata: 'PDF \u00b7 24 pages', title: 'Workshop Slides' },
     ],
-    id: '2026_11_assembly_alt_slauson',
-    role: 'Electronic music producer',
 } as const;
 
-const events = await getCollection('events');
+const events = await loadEvents();
 
 const portraits = import.meta.glob<{ default: ImageMetadata }>('/src/images/speakers/*.webp', { eager: true });
 
-const sessions = events
-    .filter(event => event.data.speakers.length > 0 && event.data.type === 'assembly' && event.data.workshop)
-    .sort((a, b) => +a.data.date - +b.data.date);
+const sessions = events.flatMap(event => (event.program.id === 'assembly' && event.speaker && event.title ? [{ ...event, speaker: event.speaker, title: event.title }] : []));
 
-const ended = sessions.filter(session => !isUpcoming(session.data.end));
-const upcoming = sessions.filter(session => isUpcoming(session.data.end));
+const ended = sessions.filter(session => !isUpcoming(session.ends_at));
+const upcoming = sessions.filter(session => isUpcoming(session.ends_at));
 
 const cards = [...ended.slice(-1), ...upcoming].map((session, index) => ({
-    bios: session.data.speakers.flatMap(({ bio }) => (bio ? [bio] : [])),
-    description: session.data.description,
-    end: session.data.end.toISOString(),
-    extras: session.id === SESSION_EXTRAS.id ? SESSION_EXTRAS : undefined,
+    bio: session.speaker.bio,
+    body: session.body,
+    endsAt: toAustinIso(session.ends_at),
+    extras: session.id === SESSION_EXTRAS.event_id ? SESSION_EXTRAS : undefined,
     headingId: index === 0 ? 'workshop-title' : `workshop-${index + 1}-title`,
-    isUpcoming: isUpcoming(session.data.end),
-    portrait: portraits[`/src/images/speakers/${session.data.speakers[0].name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}.webp`]?.default,
-    speaker: session.data.speaker ?? session.data.speakers.map(speaker => speaker.name).join(' & '),
-    workshop: session.data.workshop,
+    isUpcoming: isUpcoming(session.ends_at),
+    portrait: portraits[`/src/images/speakers/${session.speaker.name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}.webp`]?.default,
+    speaker: session.speaker.name,
+    title: session.title,
 }));
 
 const shown = cards.find(card => card.isUpcoming) ?? cards.at(-1);
@@ -52,7 +49,7 @@ const shown = cards.find(card => card.isUpcoming) ?? cards.at(-1);
     <section
         class="stage stage--tight border-b-2 border-border-strong"
         aria-labelledby={card.headingId}
-        data-event-end={card.end}
+        data-event-end={card.endsAt}
         data-event-group="workshop"
         data-event-role="current"
         hidden={card !== shown}
@@ -67,7 +64,7 @@ const shown = cards.find(card => card.isUpcoming) ?? cards.at(-1);
                     data-motion="stamp"
                 >
                     <span
-                        data-event-end={card.end}
+                        data-event-end={card.endsAt}
                         data-event-group="workshop"
                         data-event-role="upcoming"
                         hidden={!card.isUpcoming}
@@ -75,7 +72,7 @@ const shown = cards.find(card => card.isUpcoming) ?? cards.at(-1);
                         Upcoming workshop
                     </span>
                     <span
-                        data-event-end={card.end}
+                        data-event-end={card.endsAt}
                         data-event-group="workshop"
                         data-event-role="past"
                         hidden={card.isUpcoming}
@@ -87,7 +84,7 @@ const shown = cards.find(card => card.isUpcoming) ?? cards.at(-1);
                     id={card.headingId}
                     class="mb-(--space-lg) font-display text-xl-5xl text-balance"
                 >
-                    {card.workshop}
+                    {card.title}
                 </h2>
             </hgroup>
             <div class="grid grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-12 max-md:grid-cols-1">
@@ -101,7 +98,7 @@ const shown = cards.find(card => card.isUpcoming) ?? cards.at(-1);
                                 ? (
                                         <Image
                                             class="slab slab--bare slab--card block aspect-square h-auto w-full"
-                                            alt="Portrait of the workshop presenter"
+                                            alt="Portrait of the workshop speaker"
                                             sizes={PORTRAIT_SIZES}
                                             src={card.portrait}
                                             width={PORTRAIT_WIDTH}
@@ -118,28 +115,21 @@ const shown = cards.find(card => card.isUpcoming) ?? cards.at(-1);
                                         />
                                     )}
                         </div>
-                        <p class="label mb-2 text-text-secondary">Presented by</p>
-                        <p class:list={[card.extras ? 'mb-1' : 'mb-3', 'font-bold text-xl tracking-tight']}>
-                            {card.speaker}
-                        </p>
-                        {card.extras && (
-                            <p class="mb-3 font-mono text-base text-text-secondary">
-                                {card.extras.role}
-                            </p>
-                        )}
+                        <dl>
+                            <dt class="label mb-2 text-text-secondary">Speaker</dt>
+                            <dd class="mb-3 font-bold text-xl tracking-tight">
+                                {card.speaker}
+                            </dd>
+                        </dl>
                         <div class="flex flex-col gap-3">
-                            {card.bios.map(bio => (
-                                <p class="text-base text-text-secondary">{bio}</p>
-                            ))}
+                            <p class="text-base text-text-secondary">{card.bio}</p>
                         </div>
                     </div>
                 </div>
                 <div>
-                    {card.description && (
-                        <p class:list={[card.extras && 'mb-10', 'text-lg text-text-secondary']}>
-                            {card.description}
-                        </p>
-                    )}
+                    <p class:list={[card.extras && 'mb-10', 'text-lg text-text-secondary']}>
+                        {card.body}
+                    </p>
                     {card.extras && (
                         <div>
                             <h3 class="mb-(--space-md) font-display text-2xl">Workshop files</h3>
@@ -157,7 +147,7 @@ const shown = cards.find(card => card.isUpcoming) ?? cards.at(-1);
                                             class="[grid-area:meta] font-mono text-base whitespace-nowrap text-text-secondary"
                                             data-placeholder
                                         >
-                                            {file.meta}
+                                            {file.metadata}
                                         </p>
                                         <p class="label [grid-area:status] text-text-secondary">Coming soon</p>
                                     </li>

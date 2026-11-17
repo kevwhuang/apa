@@ -4,7 +4,7 @@ declare module 'eslint-plugin-jsx-a11y';
 
 type AssetKind = (typeof import('@lib/shared/constants').ASSET_KINDS)[number];
 type AvatarResult = { dataUrl: string; ok: true } | { message: string; ok: false };
-type EventType = (typeof import('@lib/shared/constants').EVENT_TYPES)[number];
+type EventData = import('astro:content').CollectionEntry<'events'>['data'];
 type FieldErrors = Record<string, string>;
 type ImageSources = Record<string, string>;
 type MotionBezier = [number, number, number, number];
@@ -18,10 +18,13 @@ type OnboardingGate = { email: string; state: 'granted'; token: OnboardingToken 
 type OnboardingRejection = 'expired' | 'malformed' | 'missing';
 type OrderResult = { code: PaymentErrorCode; message: string; ok: false } | { ok: true; order: Order };
 type PaymentErrorCode = 'cart-changed' | 'empty-cart' | 'storage-full';
+type Program = import('astro:content').CollectionEntry<'programs'>['data'] & { id: string; summary: string };
 type RackKind = 'chorus' | 'compressor' | 'delay' | 'distortion' | 'eq' | 'filter' | 'gate' | 'highpass' | 'limiter' | 'meter' | 'pan' | 'reverb' | 'saturator' | 'tremolo' | 'trim' | 'tuner';
 type RackLoadResult = { buffer: AudioBuffer; ok: true } | { message: string; ok: false };
 type SessionErrorCode = 'already-registered' | 'invalid-credentials' | 'invalid-email' | 'storage-full' | 'weak-password';
 type SessionResult = { code: SessionErrorCode; message: string; ok: false } | { ok: true; session: Session };
+type Speaker = import('astro:content').CollectionEntry<'speakers'>['data'] & { bio: string };
+type Sponsor = import('astro:content').CollectionEntry<'sponsors'>['data'] & { description: string };
 type StorageScope = 'local' | 'memory';
 type Theme = 'dark' | 'light';
 type Timer = ReturnType<typeof setInterval>;
@@ -33,16 +36,6 @@ interface BashSubmission {
     file: string;
     producer: string;
     submittedAt: string;
-}
-
-interface CalendarEvent {
-    date: Date;
-    end: Date;
-    excerpt: string;
-    id: string;
-    location: string;
-    title: string;
-    type: EventType;
 }
 
 interface CartIssue {
@@ -107,12 +100,13 @@ interface ContactEmailInput {
     topic: string;
 }
 
-interface EventProgram {
-    cadence: (typeof import('@lib/shared/constants').EVENT_CADENCES)[number];
+interface EventRecord extends Omit<EventData, 'program' | 'speaker' | 'sponsors'> {
+    body: string;
+    id: string;
     name: string;
-    shortName: string;
-    state: 'active' | 'planned';
-    summary: string;
+    program: Program;
+    speaker?: Speaker;
+    sponsors: Sponsor[];
 }
 
 interface FieldRule {

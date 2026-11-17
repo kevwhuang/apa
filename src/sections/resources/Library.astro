@@ -5,7 +5,7 @@ import IconArrow from '@components/icons/Arrow.astro';
 import SearchField from '@components/shared/SearchField.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { ASSET_KIND_LABELS, KIND_COLORS } from '@lib/shared/constants';
-import { formatDateStamp, mergeAssets, toIsoDate } from '@lib/shared/utils';
+import { formatDateStamp, mergeAssets, toAustinIso } from '@lib/shared/utils';
 import { isDownload, toAvailability } from '@lib/resources/unlocks';
 
 const downloads = await getCollection('downloads', entry => entry.data.kind !== 'bash');
@@ -136,7 +136,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                                 <div class="flex items-baseline justify-between gap-3">
                                     <dt class="label text-text-secondary">Date</dt>
                                     <dd class="font-mono text-base">
-                                        <time datetime={toIsoDate(asset.data.date)}>{formatDateStamp(asset.data.date)}</time>
+                                        <time datetime={toAustinIso(asset.data.date)}>{formatDateStamp(asset.data.date)}</time>
                                     </dd>
                                 </div>
                             )}
@@ -154,7 +154,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                         {asset.availability === 'scheduled' && (
                             <div
                                 data-unlock
-                                data-unlocks-at={asset.data.unlocksAt?.toISOString()}
+                                data-unlocks-at={asset.data.unlocksAt ? toAustinIso(asset.data.unlocksAt) : undefined}
                             >
                                 <p
                                     class="halftone label flex items-center justify-center min-h-(--control-size) px-4 border-2 border-border-subtle border-dashed text-text-secondary"

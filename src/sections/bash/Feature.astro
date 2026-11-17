@@ -1,6 +1,6 @@
 ---
 import PageHead from '@components/shared/PageHead.astro';
-import { getProgram } from '@lib/shared/utils';
+import { getProgram } from '@lib/programs/calendar';
 
 const FORMAT_STEPS = [
     { name: 'Get the prompt', note: 'Everyone works from the same prompt and the same samples.' },
@@ -8,7 +8,7 @@ const FORMAT_STEPS = [
     { name: 'Win the room', note: 'The crowd picks its top two, and they go head-to-head.' },
 ] as const;
 
-const program = getProgram('bash');
+const program = await getProgram('bash');
 ---
 
 <section

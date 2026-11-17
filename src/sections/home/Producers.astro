@@ -7,7 +7,7 @@ import ProducerPortrait from '@components/producer/Portrait.astro';
 import ProducerTrack from '@components/producer/Track.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { PALETTE } from '@lib/shared/constants';
-import { formatCalendarMonth, formatRole, toIsoDate, toRoster } from '@lib/shared/utils';
+import { formatCalendarMonth, formatRole, toAustinIso, toRoster } from '@lib/shared/utils';
 
 const GENRE_LIMIT = 2;
 const STRIP_LIMIT = 4;
@@ -56,7 +56,7 @@ const track = featured?.data.tracks[0];
                         class:list={[featured.data.links.length > 0 && 'mb-4', 'font-mono text-base text-text-inverse-secondary']}
                         data-placeholder
                     >
-                        Since <time datetime={toIsoDate(featured.data.joined)}>{formatCalendarMonth(featured.data.joined)}</time>
+                        Since <time datetime={toAustinIso(featured.data.joined)}>{formatCalendarMonth(featured.data.joined)}</time>
                     </p>
                     <ProducerLinks
                         linkClass="hover:text-link-on-inverse"

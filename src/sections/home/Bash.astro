@@ -1,19 +1,15 @@
 ---
-import { getCollection } from 'astro:content';
-
 import IconArrow from '@components/icons/Arrow.astro';
 import Schedule from '@components/program/Schedule.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { LINKS } from '@lib/shared/constants';
-import { formatDateStamp, formatTimeRange, getProgram, isUpcoming } from '@lib/shared/utils';
+import { formatDateStamp, formatTimeRange, formatVenue, isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { getProgram, loadEvents } from '@lib/programs/calendar';
 
-const editions = await getCollection('bash');
+const events = await loadEvents();
+const program = await getProgram('bash');
 
-const program = getProgram('bash');
-
-const upcoming = editions
-    .filter(edition => isUpcoming(edition.data.end))
-    .sort((a, b) => +a.data.date - +b.data.date);
+const upcoming = events.filter(event => event.program.id === 'bash' && isUpcoming(event.ends_at));
 ---
 
 <section
@@ -68,10 +64,10 @@ const upcoming = editions
             </div>
         </div>
     </div>
-    {upcoming.map((edition, index) => (
+    {upcoming.map((event, index) => (
         <dl
             class="slab slab--cut slab--lift slab--still grid grid-cols-3 gap-x-6 gap-y-5 max-lg:grid-cols-2 max-md:grid-cols-1"
-            data-event-end={edition.data.end.toISOString()}
+            data-event-end={toAustinIso(event.ends_at)}
             data-event-group="home-bash"
             data-event-role="next"
             data-motion-stagger="rise"
@@ -82,19 +78,19 @@ const upcoming = editions
                 <dd class="font-bold text-xl">
                     <time
                         class="block mb-1 text-marker-cobalt"
-                        datetime={edition.data.date.toISOString()}
+                        datetime={toAustinIso(event.starts_at)}
                     >
-                        {formatDateStamp(edition.data.date)}
+                        {formatDateStamp(event.starts_at)}
                     </time>
-                    <span class="block text-balance">{formatTimeRange(edition.data.date, edition.data.end)}</span>
+                    <span class="block text-balance">{formatTimeRange(event.starts_at, event.ends_at)}</span>
                 </dd>
             </div>
             <div>
                 <dt class="label mb-2 text-text-secondary">Where</dt>
                 <dd class="font-bold text-xl">
-                    <address class="mb-1 not-italic">{edition.data.location}</address>
-                    {edition.data.room && (
-                        <p>{edition.data.room}</p>
+                    <address class="mb-1 not-italic">{formatVenue(event.venue)}</address>
+                    {event.room && (
+                        <p>{event.room}</p>
                     )}
                 </dd>
             </div>
@@ -103,7 +99,7 @@ const upcoming = editions
                 <dd class="font-bold text-xl">
                     <a
                         class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
-                        href={LINKS.meetup}
+                        href={event.external_url ?? LINKS.meetup}
                         rel="noopener noreferrer"
                         target="_blank"
                     >

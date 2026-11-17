@@ -1,18 +1,14 @@
 ---
-import { getCollection } from 'astro:content';
-
 import Schedule from '@components/program/Schedule.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { LINKS } from '@lib/shared/constants';
-import { formatCalendarDay, formatCalendarMonth, formatTimeRange, formatVenue, getProgram, isUpcoming } from '@lib/shared/utils';
+import { formatCalendarDay, formatCalendarMonth, formatTimeRange, formatVenue, isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { getProgram, loadEvents } from '@lib/programs/calendar';
 
-const events = await getCollection('events');
+const events = await loadEvents();
+const program = await getProgram('hangout');
 
-const program = getProgram('hangout');
-
-const upcoming = events
-    .filter(event => event.data.type === 'hangout' && isUpcoming(event.data.end))
-    .sort((a, b) => +a.data.date - +b.data.date);
+const upcoming = events.filter(event => event.program.id === 'hangout' && isUpcoming(event.ends_at));
 ---
 
 <section
@@ -38,7 +34,7 @@ const upcoming = events
         {upcoming.map((event, index) => (
             <div
                 class="relative"
-                data-event-end={event.data.end.toISOString()}
+                data-event-end={toAustinIso(event.ends_at)}
                 data-event-group="home-hangout"
                 data-event-role="next"
                 hidden={index > 0}
@@ -57,15 +53,15 @@ const upcoming = events
                     >
                         <time
                             class="contents"
-                            datetime={event.data.date.toISOString()}
+                            datetime={toAustinIso(event.starts_at)}
                         >
-                            <span class="hangout-flyer__day">{formatCalendarDay(event.data.date)}</span>
-                            <span class="block font-mono text-lg max-md:self-center max-md:justify-self-end max-md:text-end">{formatCalendarMonth(event.data.date)}</span>
+                            <span class="hangout-flyer__day">{formatCalendarDay(event.starts_at)}</span>
+                            <span class="block font-mono text-lg max-md:self-center max-md:justify-self-end max-md:text-end">{formatCalendarMonth(event.starts_at)}</span>
                         </time>
                     </p>
                     <div class="content-start p-(--space-lg)">
-                        <h3 class="mb-6 font-display text-2xl-3xl text-balance">{event.data.title}</h3>
-                        <p class="max-w-2xl mb-8 text-lg text-text-secondary">{event.data.excerpt}</p>
+                        <h3 class="mb-6 font-display text-2xl-3xl text-balance">{event.name}</h3>
+                        <p class="max-w-2xl mb-8 text-lg text-text-secondary">{event.body}</p>
                         <dl class="grid grid-cols-2 gap-x-6 gap-y-5 mb-8 max-lg:grid-cols-1">
                             <div>
                                 <dt class="label mb-2 text-text-secondary">Time</dt>
@@ -73,13 +69,13 @@ const upcoming = events
                                     class="font-bold text-balance text-xl"
                                     data-placeholder
                                 >
-                                    {formatTimeRange(event.data.date, event.data.end)}
+                                    {formatTimeRange(event.starts_at, event.ends_at)}
                                 </dd>
                             </div>
                             <div>
                                 <dt class="label mb-2 text-text-secondary">Where</dt>
                                 <dd class="font-bold text-xl">
-                                    <address class="not-italic">{formatVenue(event.data.location)}</address>
+                                    <address class="not-italic">{formatVenue(event.venue)}</address>
                                 </dd>
                             </div>
                             <div>
@@ -87,7 +83,7 @@ const upcoming = events
                                 <dd class="font-bold text-xl">
                                     <a
                                         class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
-                                        href={event.data.rsvp ?? LINKS.meetup}
+                                        href={event.external_url ?? LINKS.meetup}
                                         rel="noopener noreferrer"
                                         target="_blank"
                                     >
@@ -110,7 +106,7 @@ const upcoming = events
                         class="hangout-flyer__rail label"
                         aria-hidden="true"
                     >
-                        {program.shortName} &middot; {program.cadence}
+                        {program.short_name} &middot; {program.cadence}
                     </p>
                 </article>
             </div>

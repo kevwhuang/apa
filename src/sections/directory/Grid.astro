@@ -7,7 +7,7 @@ import ProducerPortrait from '@components/producer/Portrait.astro';
 import ProducerTrack from '@components/producer/Track.astro';
 import SearchField from '@components/shared/SearchField.astro';
 import { PALETTE } from '@lib/shared/constants';
-import { formatCalendarMonth, formatRole, toIsoDate, toRoster } from '@lib/shared/utils';
+import { formatCalendarMonth, formatRole, toAustinIso, toRoster } from '@lib/shared/utils';
 
 import type { CollectionEntry } from 'astro:content';
 
@@ -221,7 +221,7 @@ const roster = [...producers]
                                     class="grow font-mono leading-(--control-size) text-base whitespace-nowrap text-text-secondary"
                                     data-placeholder
                                 >
-                                    <span class="sr-only">Member since </span><time datetime={toIsoDate(producer.data.joined)}>{formatCalendarMonth(producer.data.joined)}</time>
+                                    <span class="sr-only">Member since </span><time datetime={toAustinIso(producer.data.joined)}>{formatCalendarMonth(producer.data.joined)}</time>
                                 </p>
                                 <ProducerLinks
                                     linkClass="hover:text-link"

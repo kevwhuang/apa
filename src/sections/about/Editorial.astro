@@ -2,12 +2,13 @@
 import IconArrow from '@components/icons/Arrow.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { CANONICAL, EVENT_PROGRAMS, JOIN_ROUTE, PALETTE } from '@lib/shared/constants';
+import { CANONICAL, JOIN_ROUTE, PALETTE } from '@lib/shared/constants';
+import { loadPrograms } from '@lib/programs/calendar';
 
-const programs = Object.values(EVENT_PROGRAMS);
+const programs = await loadPrograms();
 
-const activeNames = programs.filter(program => program.state === 'active').map(program => program.name);
-const plannedCount = programs.filter(program => program.state === 'planned').length;
+const activeNames = programs.filter(program => program.status === 'active').map(program => program.name);
+const plannedCount = programs.filter(program => program.status === 'planned').length;
 
 const activePrograms = new Intl.ListFormat('en', { type: 'conjunction' }).format(activeNames);
 

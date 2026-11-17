@@ -1,17 +1,18 @@
 ---
 import WaveformBars from '@components/shared/WaveformBars.astro';
 import { STEP_COUNT, stepEnergy } from '@lib/motion/pattern';
-import { getProgram } from '@lib/shared/utils';
+import { getProgram } from '@lib/programs/calendar';
 
 const BAR_CONTRAST = 1.6;
 const BAR_MAX = 92;
 const BAR_MIN = 8;
 
-const assembly = getProgram('assembly');
+const assembly = await getProgram('assembly');
+const bash = await getProgram('bash');
+const camp = await getProgram('camp');
+const hangout = await getProgram('hangout');
+
 const barPeak = Math.max(...Array.from({ length: STEP_COUNT }, (_, step) => stepEnergy(step)));
-const bash = getProgram('bash');
-const camp = getProgram('camp');
-const hangout = getProgram('hangout');
 
 const bars = Array.from({ length: STEP_COUNT }, (_, step) => BAR_MIN + (BAR_MAX - BAR_MIN) * (stepEnergy(step) / barPeak) ** BAR_CONTRAST);
 ---
@@ -60,7 +61,7 @@ const bars = Array.from({ length: STEP_COUNT }, (_, step) => BAR_MIN + (BAR_MAX 
                 data-motion="blur"
             >
                 A working community for music producers in Austin, Texas. At {assembly.name},
-                the {bash.cadence} {bash.name}, {camp.name}, and the {hangout.cadence} {hangout.name}, producers
+                the {hangout.cadence} {hangout.name}, the {bash.cadence} {bash.name}, and {camp.name}, producers
                 of every genre and experience level find their people.
             </p>
             <div class="hero__actions flex flex-col items-center self-center gap-3">

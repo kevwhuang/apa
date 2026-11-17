@@ -1,28 +1,26 @@
 ---
-import { getCollection } from 'astro:content';
-
 import Schedule from '@components/program/Schedule.astro';
-import { LINKS } from '@lib/shared/constants';
-import { formatTimeRange, isUpcoming } from '@lib/shared/utils';
+import { LINKS, LOCALE, TIME_ZONE } from '@lib/shared/constants';
+import { formatTimeRange, formatVenue, isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { loadEvents } from '@lib/programs/calendar';
 
 const CLASS_TICKET_DETAILS = 'content-center grid justify-center gap-(--space-lg) pl-(--space-lg) border-dashed border-l-2 border-marker-cobalt max-lg:border-l-0 max-lg:border-t-2 max-lg:grid-cols-[auto_auto] max-lg:justify-start max-lg:pl-0 max-lg:pt-(--space-lg) max-md:grid-cols-none';
 
-const editions = await getCollection('bash');
+const events = await loadEvents();
 
-const upcoming = editions
-    .filter(edition => isUpcoming(edition.data.end))
-    .sort((a, b) => +a.data.date - +b.data.date);
-
-const tickets = upcoming.map((edition, index) => ({
-    date: edition.data.date.toISOString(),
-    end: edition.data.end.toISOString(),
-    headingId: index === 0 ? 'bash-next-title' : `bash-next-${index + 1}-title`,
-    location: edition.data.location,
-    longDate: edition.data.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', timeZone: 'America/Chicago', year: 'numeric' }),
-    prompt: edition.data.prompt,
-    room: edition.data.room,
-    time: formatTimeRange(edition.data.date, edition.data.end),
-}));
+const tickets = events
+    .filter(event => event.program.id === 'bash' && isUpcoming(event.ends_at))
+    .map((event, index) => ({
+        body: event.body,
+        endsAt: toAustinIso(event.ends_at),
+        externalUrl: event.external_url ?? LINKS.meetup,
+        headingId: index === 0 ? 'bash-next-title' : `bash-next-${index + 1}-title`,
+        longDate: event.starts_at.toLocaleDateString(LOCALE, { day: 'numeric', month: 'long', timeZone: TIME_ZONE, year: 'numeric' }),
+        room: event.room,
+        startsAt: toAustinIso(event.starts_at),
+        time: formatTimeRange(event.starts_at, event.ends_at),
+        venue: formatVenue(event.venue),
+    }));
 ---
 
 <section
@@ -36,7 +34,7 @@ const tickets = upcoming.map((edition, index) => ({
         <article
             class="bash-ticket slab slab--cut slab--lift slab--plush slab--still"
             aria-labelledby={ticket.headingId}
-            data-event-end={ticket.end}
+            data-event-end={ticket.endsAt}
             data-event-group="bash-upcoming"
             data-event-role="next"
             data-motion="unfold"
@@ -52,14 +50,14 @@ const tickets = upcoming.map((edition, index) => ({
                             id={ticket.headingId}
                             class="font-display text-2xl-5xl text-balance text-marker-cobalt"
                         >
-                            <time datetime={ticket.date}>{ticket.longDate}</time>
+                            <time datetime={ticket.startsAt}>{ticket.longDate}</time>
                         </h2>
                     </div>
                     <p
                         class="max-w-2xl text-text-secondary"
                         data-motion="rise"
                     >
-                        {ticket.prompt}
+                        {ticket.body}
                     </p>
                 </div>
                 <dl
@@ -74,7 +72,7 @@ const tickets = upcoming.map((edition, index) => ({
                         <dt class="label mb-2 text-text-secondary">Where</dt>
                         <dd>
                             <address class="mb-1 font-bold not-italic text-xl wrap-anywhere">
-                                {ticket.location}
+                                {ticket.venue}
                             </address>
                             {ticket.room && (
                                 <p class="font-bold text-xl wrap-anywhere">{ticket.room}</p>
@@ -86,7 +84,7 @@ const tickets = upcoming.map((edition, index) => ({
                         <dd class="font-bold text-xl">
                             <a
                                 class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
-                                href={LINKS.meetup}
+                                href={ticket.externalUrl}
                                 rel="noopener noreferrer"
                                 target="_blank"
                             >

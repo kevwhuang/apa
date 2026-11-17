@@ -38,68 +38,6 @@ const DEMO_CREDENTIALS = {
 
 const EMAIL_MAX_LENGTH = 254;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const EVENT_CADENCES = ['monthly', 'quarterly', 'biannually', 'annually'] as const;
-
-const EVENT_PROGRAMS: Record<EventType, EventProgram> = {
-    'assembly': {
-        cadence: 'monthly',
-        name: 'Assembly',
-        shortName: 'Assembly',
-        state: 'active',
-        summary: 'The Alliance\'s centerpiece at STATION Austin, an evening devoted to craft and community, with time for tracks to be heard.',
-    },
-    'bash': {
-        cadence: 'quarterly',
-        name: 'Bash',
-        shortName: 'Bash',
-        state: 'active',
-        summary: 'An afternoon of producing against the clock at ACC Highland Campus, sparked by a prompt and capped by a final showdown.',
-    },
-    'camp': {
-        cadence: 'biannually',
-        name: 'CAMP',
-        shortName: 'CAMP',
-        state: 'active',
-        summary: 'A weekend retreat where producers disconnect from daily life and create together under one roof.',
-    },
-    'hangout': {
-        cadence: 'monthly',
-        name: 'Hangout',
-        shortName: 'Hangout',
-        state: 'active',
-        summary: 'A pop-up social for track feedback and conversation, landing midway between Assemblies.',
-    },
-    'open-decks': {
-        cadence: 'quarterly',
-        name: 'Open Decks',
-        shortName: 'Open Decks',
-        state: 'planned',
-        summary: 'An indoor or outdoor open stage where anyone can sign up and perform a set.',
-    },
-    'studio-tour': {
-        cadence: 'annually',
-        name: 'Studio Tour',
-        shortName: 'Studio Tour',
-        state: 'planned',
-        summary: 'An evening group tour through the inner workings of a real Austin studio.',
-    },
-    'the-royale': {
-        cadence: 'annually',
-        name: 'The Royale',
-        shortName: 'Royale',
-        state: 'planned',
-        summary: 'An all-day production tournament with group stages, knockout rounds, and winners decided by vote.',
-    },
-    'the-annual': {
-        cadence: 'annually',
-        name: 'The Annual',
-        shortName: 'Annual',
-        state: 'planned',
-        summary: 'The Alliance\'s largest party, an end-of-year mixer hosted in collaboration with partner communities.',
-    },
-};
-
-const EVENT_TYPES = ['assembly', 'bash', 'camp', 'hangout', 'open-decks', 'studio-tour', 'the-royale', 'the-annual'] as const;
 
 const GENRES = [
     'afrobeats',
@@ -149,6 +87,7 @@ const LINKS = {
     spotify: 'https://open.spotify.com/user/31uvopo4bn7six3qvkkbkjxu2bwe',
 } as const;
 
+const LOCALE = 'en-US';
 const MAX_AVATAR_MEGABYTES = 10;
 const MAX_DECODE_MEGABYTES = 25;
 const MAX_FILE_MEGABYTES = 100;
@@ -222,6 +161,8 @@ const PALETTE = [
     { background: 'var(--color-avatar-6-bg)', text: 'var(--color-avatar-6-text)' },
 ] as const;
 
+const PARAGRAPH_SEPARATOR = '\n\n';
+
 const PARTNERS = [
     { logo: austinCommunityCollege, name: 'Austin Community College' },
     { logo: stationAustin, name: 'STATION Austin' },
@@ -262,6 +203,8 @@ const STORAGE = {
     theme: { key: 'apa.theme', scope: 'local', topic: 'apa:theme-changed' },
     tour: { key: 'apa.tour', scope: 'local', topic: 'apa:tour-changed' },
 } as const;
+
+const TIME_ZONE = 'America/Chicago';
 
 const TOUR_STOPS = [
     {
@@ -471,15 +414,13 @@ export {
     DEMO_CREDENTIALS,
     EMAIL_MAX_LENGTH,
     EMAIL_PATTERN,
-    EVENT_CADENCES,
-    EVENT_PROGRAMS,
-    EVENT_TYPES,
     FIELD_LIMITS,
     GENRES,
     JOIN_ROUTE,
     KIND_COLORS,
     LAUNCHER_SIZE,
     LINKS,
+    LOCALE,
     MEMBER_ROLES,
     MILLISECONDS_PER_DAY,
     MILLISECONDS_PER_HOUR,
@@ -492,6 +433,7 @@ export {
     ONBOARDING_TOKEN_TTL_HOURS,
     ORDER_ID,
     PALETTE,
+    PARAGRAPH_SEPARATOR,
     PARTNERS,
     PARTNER_INQUIRY_TOPIC,
     PARTNER_LOGO_WIDTH,
@@ -508,6 +450,7 @@ export {
     SESSION_TTL_DAYS,
     SITE_UPDATED,
     STORAGE,
+    TIME_ZONE,
     TOUR_STOPS,
     TRACK_PLAY_TOPIC,
     TRACK_STATE_TOPIC,

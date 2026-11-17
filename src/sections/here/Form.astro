@@ -1,22 +1,20 @@
 ---
-import { getCollection } from 'astro:content';
-
 import IconArrow from '@components/icons/Arrow.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import QrCode from '@components/shared/QrCode.astro';
 import Schedule from '@components/program/Schedule.astro';
 import { EMAIL_MAX_LENGTH } from '@lib/shared/constants';
-import { formatDateStamp, formatTime, formatVenue, getProgram, mergeCalendar } from '@lib/shared/utils';
+import { formatDateStamp, formatTime, formatVenue, isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { loadEvents } from '@lib/programs/calendar';
 
 const DOOR_HOST_PARTS = ['austinproducer', 'alliance.com'];
 const DOOR_PATH = 'here';
 
-const bashEditions = await getCollection('bash');
-const events = await getCollection('events');
+const events = await loadEvents();
 
 const doorUrl = `${DOOR_HOST_PARTS.join('')}/${DOOR_PATH}`;
 
-const { upcoming } = mergeCalendar(events, bashEditions);
+const upcoming = events.filter(event => isUpcoming(event.ends_at));
 ---
 
 <section
@@ -58,30 +56,30 @@ const { upcoming } = mergeCalendar(events, bashEditions);
                     {upcoming.map((event, index) => (
                         <dl
                             class="door-pass__rows flex flex-col pt-(--space-md) bg-repeat-x bg-top-left"
-                            data-event-end={event.end.toISOString()}
+                            data-event-end={toAustinIso(event.ends_at)}
                             data-event-group="door"
                             data-event-role="next"
-                            data-event-title={`${getProgram(event.type).name} on ${formatDateStamp(event.date)}`}
+                            data-event-title={`${event.program.name} on ${formatDateStamp(event.starts_at)}`}
                             hidden={index > 0}
                         >
                             <div class="last:border-b-0 grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 py-1 border-b border-border-inverse-subtle">
                                 <dt class="label text-text-inverse-secondary">Program</dt>
                                 <dd class="text-base">
-                                    {getProgram(event.type).name}
+                                    {event.program.name}
                                 </dd>
                             </div>
                             <div class="last:border-b-0 grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 py-1 border-b border-border-inverse-subtle">
                                 <dt class="label text-text-inverse-secondary">When</dt>
                                 <dd class="font-mono text-base">
-                                    <time datetime={event.date.toISOString()}>
-                                        {formatDateStamp(event.date)}, {formatTime(event.date)}
+                                    <time datetime={toAustinIso(event.starts_at)}>
+                                        {formatDateStamp(event.starts_at)}, {formatTime(event.starts_at)}
                                     </time>
                                 </dd>
                             </div>
                             <div class="last:border-b-0 grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 py-1 border-b border-border-inverse-subtle">
                                 <dt class="label text-text-inverse-secondary">Where</dt>
                                 <dd class="font-mono text-base">
-                                    {formatVenue(event.location)}
+                                    {formatVenue(event.venue)}
                                 </dd>
                             </div>
                         </dl>

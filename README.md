@@ -22,13 +22,13 @@ Austin Producer Alliance (APA) is an organization of music producers in Austin, 
 | :--- | :---: | :--- |
 | **Assembly** | Monthly | The Alliance's centerpiece at STATION Austin, an evening devoted to craft and community, with time for tracks to be heard. |
 | **Bash** | Quarterly | An afternoon of producing against the clock at Austin Community College, sparked by a prompt and capped by a final showdown. |
+| **Hangout** | Monthly | A pop-up social for connecting beyond the music, landing midway between assemblies. |
 | **CAMP** | Biannually | A weekend retreat where producers disconnect from daily life and create together under one roof. |
 
 ### Planned
 
 | Event | Cadence | Description |
 | :--- | :---: | :--- |
-| **Hangout** | Monthly | A pop-up social for connecting beyond the music, landing midway between assemblies. |
 | **Open&nbsp;Decks** | Quarterly | An indoor or outdoor open stage where anyone can sign up and perform a set. |
 | **Studio&nbsp;Tour** | Annually | An evening group tour through the inner workings of a real Austin studio. |
 | **The&nbsp;Royale** | Annually | An all-day production tournament with group stages, knockout rounds, and winners decided by vote. |

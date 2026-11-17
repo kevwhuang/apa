@@ -112,9 +112,7 @@ const VECTOR_COMPONENTS = 3;
 const Z_COMPONENT = 2;
 
 function buildGroundIndices(columns: number, rows: number) {
-    const axis: number[] = [];
     const major: number[] = [];
-    const middle = Math.round((columns - 1) / 2 / GROUND_STRIDE) * GROUND_STRIDE;
     const minor: number[] = [];
 
     for (let row = 0; row < rows; row += 1) {
@@ -126,14 +124,14 @@ function buildGroundIndices(columns: number, rows: number) {
     }
 
     for (let column = 0; column < columns; column += GROUND_STRIDE) {
-        const target = column === middle ? axis : column % (GROUND_STRIDE * GROUND_MAJOR_STRIDE) === 0 ? major : minor;
+        const target = column % (GROUND_STRIDE * GROUND_MAJOR_STRIDE) === 0 ? major : minor;
 
         for (let row = 0; row < rows - 1; row += 1) {
             target.push(row * columns + column, (row + 1) * columns + column);
         }
     }
 
-    return { axis, major, minor };
+    return { major, minor };
 }
 
 function buildIndices(rings: number, segments: number) {
@@ -195,7 +193,6 @@ function mountScene({ canvas, holder, palette, signal, still }: SceneOptions) {
     const accentColor = new Color(palette.accent);
     const camera = new PerspectiveCamera(CAMERA_FOV, 1, CAMERA_NEAR, CAMERA_FAR);
     const geometry = new BufferGeometry();
-    const groundAxisMaterial = new LineBasicMaterial({ color: palette.accent });
     const groundGeometry = new BufferGeometry();
     const groundMajorMaterial = new LineBasicMaterial({ color: palette.line });
     const groundMaterial = new LineBasicMaterial({ color: palette.faint });
@@ -210,7 +207,7 @@ function mountScene({ canvas, holder, palette, signal, still }: SceneOptions) {
 
     const columns = isMobile ? GROUND_COLUMNS_MOBILE : GROUND_COLUMNS;
     const dolly = isMobile ? CAMERA_DEPTH_MOBILE : CAMERA_DEPTH;
-    const ground = new LineSegments(groundGeometry, [groundMaterial, groundMajorMaterial, groundAxisMaterial]);
+    const ground = new LineSegments(groundGeometry, [groundMaterial, groundMajorMaterial]);
     const mist = new Points(moteGeometry, moteMaterial);
     const motes = isMobile ? MOTE_COUNT_MOBILE : MOTE_COUNT;
     const rings = isMobile ? RING_COUNT_MOBILE : RING_COUNT;
@@ -219,7 +216,7 @@ function mountScene({ canvas, holder, palette, signal, still }: SceneOptions) {
     const shift = isMobile ? AXIS_SHIFT_MOBILE : AXIS_SHIFT;
     const tunnel = new LineSegments(geometry, [hoopMaterial, readMaterial, spokeMaterial]);
 
-    const { axis, major, minor } = buildGroundIndices(columns, rows);
+    const { major, minor } = buildGroundIndices(columns, rows);
     const cosine = new Float32Array(segments);
     const grades = new Float32Array(columns);
     const groundPlaces = new Float32Array(columns * rows * VECTOR_COMPONENTS);
@@ -284,7 +281,6 @@ function mountScene({ canvas, holder, palette, signal, still }: SceneOptions) {
         stop();
         canvas.hidden = true;
         geometry.dispose();
-        groundAxisMaterial.dispose();
         groundGeometry.dispose();
         groundMajorMaterial.dispose();
         groundMaterial.dispose();
@@ -336,7 +332,6 @@ function mountScene({ canvas, holder, palette, signal, still }: SceneOptions) {
         if (!isValidPalette(next)) return;
 
         accentColor.set(next.accent);
-        groundAxisMaterial.color.set(next.accent);
         groundMajorMaterial.color.set(next.line);
         groundMaterial.color.set(next.faint);
         lineColor.set(next.line);
@@ -535,10 +530,9 @@ function mountScene({ canvas, holder, palette, signal, still }: SceneOptions) {
     geometry.addGroup(hoop.length + read.length, spoke.length, 2);
     groundPlace.setUsage(DynamicDrawUsage);
     groundGeometry.setAttribute('position', groundPlace);
-    groundGeometry.setIndex(new BufferAttribute(new Uint16Array([...minor, ...major, ...axis]), 1));
+    groundGeometry.setIndex(new BufferAttribute(new Uint16Array([...minor, ...major]), 1));
     groundGeometry.addGroup(0, minor.length, 0);
     groundGeometry.addGroup(minor.length, major.length, 1);
-    groundGeometry.addGroup(minor.length + major.length, axis.length, 2);
     motePlace.setUsage(DynamicDrawUsage);
     moteGeometry.setAttribute('position', motePlace);
     camera.position.set(0, CAMERA_HEIGHT, dolly);

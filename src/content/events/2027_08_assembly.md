@@ -1,9 +1,7 @@
 ---
-title: August 2027
-date: 2027-08-12T18:00:00-05:00
-end: 2027-08-12T21:00:00-05:00
-location: STATION Austin · 701 Brazos St
-room: Antone's on the 16th floor
-excerpt: Producers of every genre and experience level play finished songs and early sketches one at a time for feedback from the room. The rest of the night is for meeting people to make music with.
-type: assembly
+ends_at: 2027-08-12T21:00:00-05:00
+program: assembly
+room: Antone's (16th floor)
+starts_at: 2027-08-12T18:00:00-05:00
+venue: STATION Austin
 ---

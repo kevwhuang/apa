@@ -1,24 +1,22 @@
 ---
-import { getCollection } from 'astro:content';
-
 import Schedule from '@components/program/Schedule.astro';
-import { LINKS } from '@lib/shared/constants';
-import { formatTimeRange, formatVenue, isUpcoming } from '@lib/shared/utils';
+import { LINKS, LOCALE, TIME_ZONE } from '@lib/shared/constants';
+import { formatTimeRange, formatVenue, isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { loadEvents } from '@lib/programs/calendar';
 
-const events = await getCollection('events');
+const events = await loadEvents();
 
 const sessions = events
-    .filter(event => event.data.type === 'assembly' && isUpcoming(event.data.end))
-    .sort((a, b) => +a.data.date - +b.data.date)
+    .filter(event => event.program.id === 'assembly' && isUpcoming(event.ends_at))
     .map((event, index) => ({
-        date: event.data.date.toISOString(),
-        end: event.data.end.toISOString(),
+        endsAt: toAustinIso(event.ends_at),
+        externalUrl: event.external_url ?? LINKS.meetup,
         headingId: index === 0 ? 'assembly-next-title' : `assembly-next-${index + 1}-title`,
-        longDate: event.data.date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', timeZone: 'America/Chicago', year: 'numeric' }),
-        room: event.data.room,
-        rsvp: event.data.rsvp ?? LINKS.meetup,
-        time: formatTimeRange(event.data.date, event.data.end),
-        venue: formatVenue(event.data.location) || 'Venue TBD',
+        longDate: event.starts_at.toLocaleDateString(LOCALE, { day: 'numeric', month: 'long', timeZone: TIME_ZONE, year: 'numeric' }),
+        room: event.room,
+        startsAt: toAustinIso(event.starts_at),
+        time: formatTimeRange(event.starts_at, event.ends_at),
+        venue: formatVenue(event.venue),
     }));
 ---
 
@@ -33,7 +31,7 @@ const sessions = events
         <article
             class="slab slab--lift slab--still"
             aria-labelledby={session.headingId}
-            data-event-end={session.end}
+            data-event-end={session.endsAt}
             data-event-group="assembly-upcoming"
             data-event-role="next"
             data-motion="unfold"
@@ -46,7 +44,7 @@ const sessions = events
                 id={session.headingId}
                 class="mb-(--space-lg) font-display text-2xl-5xl text-balance"
             >
-                <time datetime={session.date}>{session.longDate}</time>
+                <time datetime={session.startsAt}>{session.longDate}</time>
             </h2>
             <dl
                 class="grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)] border-border-strong border-t-2 max-lg:grid-cols-2 max-md:grid-cols-1"
@@ -70,7 +68,7 @@ const sessions = events
                     <dd class="font-bold text-xl">
                         <a
                             class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
-                            href={session.rsvp}
+                            href={session.externalUrl}
                             rel="noopener noreferrer"
                             target="_blank"
                         >

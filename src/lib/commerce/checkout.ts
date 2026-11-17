@@ -2,7 +2,7 @@ import { MOCK_LATENCY_MILLISECONDS, ORDER_ID, STORAGE } from '@lib/shared/consta
 import { addProdsEntry, getProdsBalance } from '@lib/account/prods';
 import { clampQuantity, clear, compareItems, getItems, getTotals, toCatalogItem, toProds } from '@lib/commerce/cart';
 import { createStore } from '@lib/shared/state';
-import { delay } from '@lib/shared/utils';
+import { delay, toAustinIso } from '@lib/shared/utils';
 import { getSession, updateSession } from '@lib/account/session';
 
 const MAX_ORDER_CENTS = 100_000_000;
@@ -111,7 +111,7 @@ async function placeOrder(input: OrderInput): Promise<OrderResult> {
 
         const reason = `Redeemed \u00b7 ${titles.size === 1 ? stored.items[0].title : `Order ${stored.id}`}`;
 
-        addProdsEntry(session.email, { amount: -prodsApplied, date: new Date(stored.placedAt).toISOString(), reason });
+        addProdsEntry(session.email, { amount: -prodsApplied, date: toAustinIso(new Date(stored.placedAt)), reason });
 
         await updateSession({ prods: getProdsBalance(session.email, session.createdAt) });
     }

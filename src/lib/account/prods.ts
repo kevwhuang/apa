@@ -1,5 +1,6 @@
 import { STORAGE, WELCOME_PRODS } from '@lib/shared/constants';
 import { createStore } from '@lib/shared/state';
+import { toAustinIso } from '@lib/shared/utils';
 
 type ProdsLedgers = Record<string, ProdsEntry[]>;
 
@@ -196,7 +197,7 @@ function getProdsBalance(email: string, joined: number | string = Date.now()): n
 function getProdsLedger(email: string, joined: number | string = Date.now()): ProdsEntry[] {
     const key = email.toLowerCase();
 
-    const start = SEED_LEDGERS[key] ?? [{ amount: WELCOME_PRODS, date: new Date(joined).toISOString(), reason: WELCOME_REASON }];
+    const start = SEED_LEDGERS[key] ?? [{ amount: WELCOME_PRODS, date: toAustinIso(new Date(joined)), reason: WELCOME_REASON }];
 
     return [...start, ...(adjustments.get()[key] ?? [])];
 }

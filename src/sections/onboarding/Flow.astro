@@ -1,13 +1,12 @@
 ---
-import { getCollection } from 'astro:content';
-
 import IconArrow from '@components/icons/Arrow.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import Schedule from '@components/program/Schedule.astro';
 import { AVATAR, GENRES, ONBOARDING_STEPS, PROFILE_FIELDS, PROFILE_ROLES, TOUR_STOPS, US_STATES } from '@lib/shared/constants';
 import { AVATAR_EXTENSIONS_OR_LIST } from '@lib/account/images';
-import { formatBytes, formatDateStamp, formatRole, formatVenue, isUpcoming } from '@lib/shared/utils';
+import { formatBytes, formatDateStamp, formatRole, formatVenue, isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { loadEvents } from '@lib/programs/calendar';
 
 const ACCOUNT_BENEFITS = [
     { blurb: 'Prods are the Alliance\'s participation currency. You earn them by showing up and taking part, and each one takes $1 off at checkout.', label: 'Prods' },
@@ -29,11 +28,9 @@ const WELCOME_LINKS = [
     { blurb: 'How the Alliance works and who keeps it running.', href: '/about', label: 'About' },
 ];
 
-const events = await getCollection('events');
+const events = await loadEvents();
 
-const assemblies = events
-    .filter(event => event.data.type === 'assembly' && isUpcoming(event.data.end))
-    .sort((a, b) => +a.data.date - +b.data.date);
+const assemblies = events.filter(event => event.program.id === 'assembly' && isUpcoming(event.ends_at));
 ---
 
 <section
@@ -401,7 +398,7 @@ const assemblies = events
                     {assemblies.map((assembly, index) => (
                         <li
                             class="grid"
-                            data-event-end={assembly.data.end.toISOString()}
+                            data-event-end={toAustinIso(assembly.ends_at)}
                             data-event-group="onboarding"
                             data-event-role="next"
                             hidden={index > 0}
@@ -420,7 +417,7 @@ const assemblies = events
                                     </span>
                                 </span>
                                 <span class="text-base wrap-anywhere text-text-secondary">
-                                    <time datetime={assembly.data.date.toISOString()}>{formatDateStamp(assembly.data.date)}</time> at {formatVenue(assembly.data.location)}. Come say hi.
+                                    <time datetime={toAustinIso(assembly.starts_at)}>{formatDateStamp(assembly.starts_at)}</time> at {formatVenue(assembly.venue)}. Come say hi.
                                 </span>
                             </a>
                         </li>

@@ -2,36 +2,19 @@ import { defineCollection, reference } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
-import { ASSET_KINDS, EVENT_TYPES, GENRES, MEMBER_ROLES, PRODUCT_CATEGORIES, PRODUCT_SIZES } from '@lib/shared/constants';
+import { ASSET_KINDS, GENRES, MEMBER_ROLES, PRODUCT_CATEGORIES, PRODUCT_SIZES } from '@lib/shared/constants';
 
 const CONTENT_DIRECTORY = 'src/content';
 const PRODUCER_ID_PATTERN = /^\d{6}$/;
+const PROGRAM_CADENCES = ['monthly', 'quarterly', 'biannually', 'annually'] as const;
+const PROGRAM_STATUSES = ['active', 'planned'] as const;
+const PROGRAM_TITLE_STYLES = ['month', 'numeral'] as const;
 const SKU_FIRST_VARIATION = '0';
 const SKU_GENERATION = '0';
 const SKU_PATTERN = /^\d{5}$/;
+const URL_MESSAGE = 'URL must start with https:// and not end with a slash.';
+const URL_PATTERN = /^https:\/\/.*[^/]$/;
 const VARIATION_LIMIT = 10;
-
-const bash = defineCollection({
-    loader: glob({ base: `./${CONTENT_DIRECTORY}/bash`, pattern: '**/*.md' }),
-    schema: z.object({
-        date: z.coerce.date(),
-        edition: z.string(),
-        end: z.coerce.date(),
-        location: z.string(),
-        prompt: z.string(),
-        recap: z.string(),
-        room: z.string().optional(),
-        sponsors: z.array(z.object({
-            description: z.string().optional(),
-            name: z.string(),
-        })).default([]),
-        title: z.string(),
-        winners: z.array(z.object({
-            name: z.string(),
-            place: z.string(),
-        })).default([]),
-    }),
-});
 
 const docs = defineCollection({
     loader: glob({ base: `./${CONTENT_DIRECTORY}/docs`, pattern: '**/*.md' }),
@@ -60,26 +43,18 @@ const downloads = defineCollection({
 
 const events = defineCollection({
     loader: glob({ base: `./${CONTENT_DIRECTORY}/events`, pattern: '**/*.md' }),
-    schema: z.object({
-        date: z.coerce.date(),
-        description: z.string().optional(),
-        end: z.coerce.date(),
-        excerpt: z.string(),
-        location: z.string(),
-        room: z.string().optional(),
-        rsvp: z.url().optional(),
-        speaker: z.string().optional(),
-        speakers: z.array(z.object({
-            bio: z.string().optional(),
-            credits: z.string().optional(),
-            name: z.string(),
-            realName: z.string().optional(),
-            website: z.url().optional(),
-        })).default([]),
-        title: z.string(),
-        type: z.enum(EVENT_TYPES),
-        workshop: z.string().optional(),
-    }),
+    schema: z.strictObject({
+        ends_at: z.coerce.date(),
+        external_url: z.url().regex(URL_PATTERN, { message: URL_MESSAGE }).optional(),
+        program: reference('programs'),
+        room: z.string().min(1).optional(),
+        speaker: reference('speakers').optional(),
+        sponsors: z.array(reference('sponsors')).min(1).default([]),
+        starts_at: z.coerce.date(),
+        title: z.string().min(1).optional(),
+        venue: z.string().min(1).optional(),
+    })
+        .refine(data => data.program.id !== 'bash' || data.title !== undefined, { message: 'A Bash event needs a title.' }),
 });
 
 const producers = defineCollection({
@@ -139,8 +114,34 @@ const products = defineCollection({
         ),
 });
 
+const programs = defineCollection({
+    loader: glob({ base: `./${CONTENT_DIRECTORY}/programs`, pattern: '**/*.md' }),
+    schema: z.strictObject({
+        cadence: z.enum(PROGRAM_CADENCES),
+        default_body: z.string().min(1).optional(),
+        name: z.string().min(1),
+        short_name: z.string().min(1),
+        status: z.enum(PROGRAM_STATUSES),
+        title_style: z.enum(PROGRAM_TITLE_STYLES).default('month'),
+    }),
+});
+
+const speakers = defineCollection({
+    loader: glob({ base: `./${CONTENT_DIRECTORY}/speakers`, pattern: '**/*.md' }),
+    schema: z.strictObject({
+        name: z.string().min(1),
+    }),
+});
+
+const sponsors = defineCollection({
+    loader: glob({ base: `./${CONTENT_DIRECTORY}/sponsors`, pattern: '**/*.md' }),
+    schema: z.strictObject({
+        name: z.string().min(1),
+    }),
+});
+
 function sortGenres(genres: (typeof GENRES)[number][]): (typeof GENRES)[number][] {
     return [...genres].sort((a, b) => GENRES.indexOf(a) - GENRES.indexOf(b));
 }
 
-export const collections = { bash, docs, downloads, events, producers, products };
+export const collections = { docs, downloads, events, producers, products, programs, speakers, sponsors };

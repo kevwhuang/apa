@@ -4,8 +4,8 @@ import { Image } from 'astro:assets';
 import IconArrow from '@components/icons/Arrow.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { EVENT_PROGRAMS, PARTNERS, PARTNER_INQUIRY_TOPIC, PARTNER_LOGO_WIDTH } from '@lib/shared/constants';
-import { getProgram } from '@lib/shared/utils';
+import { PARTNERS, PARTNER_INQUIRY_TOPIC, PARTNER_LOGO_WIDTH } from '@lib/shared/constants';
+import { getProgram, loadPrograms } from '@lib/programs/calendar';
 
 interface Lane {
     detail: string;
@@ -30,11 +30,12 @@ const DONATION_USES = [
 const FOUNDING_YEAR = '2022';
 const PRODUCERS_WELCOMED = '1,000+';
 
-const assembly = getProgram('assembly');
-const bash = getProgram('bash');
-const camp = getProgram('camp');
+const assembly = await getProgram('assembly');
+const bash = await getProgram('bash');
+const camp = await getProgram('camp');
+const programs = await loadPrograms();
+
 const contactHref = `/contact?topic=${encodeURIComponent(PARTNER_INQUIRY_TOPIC)}`;
-const programs = Object.values(EVENT_PROGRAMS);
 
 const LANES: Lane[] = [
     { detail: `${assembly.name}, the ${bash.name}, and ${camp.name} are open to every genre and experience level. ${assembly.name} meets monthly, the ${bash.name} quarterly, and ${camp.name} twice a year. Showing up is the simplest way in.`, name: 'Come to an event' },
@@ -46,8 +47,8 @@ const LANES: Lane[] = [
 const STATS = [
     { label: 'Founded', value: FOUNDING_YEAR },
     { label: 'Welcomed', value: PRODUCERS_WELCOMED },
-    { label: 'Programs running', value: String(programs.filter(program => program.state === 'active').length) },
-    { label: 'Programs planned', value: String(programs.filter(program => program.state === 'planned').length) },
+    { label: 'Programs running', value: String(programs.filter(program => program.status === 'active').length) },
+    { label: 'Programs planned', value: String(programs.filter(program => program.status === 'planned').length) },
 ];
 
 const TIERS: Tier[] = [

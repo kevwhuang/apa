@@ -1,26 +1,21 @@
-import { getCollection } from 'astro:content';
-
 import { isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { loadEvents } from '@lib/programs/calendar';
 
 import type { APIRoute } from 'astro';
 
 export const prerender = false;
 
 export const GET: APIRoute = async () => {
-    const editions = await getCollection('bash');
-    const events = await getCollection('events');
+    const events = await loadEvents();
 
-    const records = [
-        ...events.map(entry => ({ ...entry.data, id: entry.id })),
-        ...editions.map(entry => ({ ...entry.data, id: entry.id, type: 'bash' })),
-    ]
-        .sort((a, b) => +a.date - +b.date)
-        .map(record => ({
-            ...record,
-            date: toAustinIso(record.date),
-            end: toAustinIso(record.end),
-            status: isUpcoming(record.end) ? 'upcoming' : 'past',
-        }));
+    const records = events.map(event => ({
+        ...event,
+        ends_at: toAustinIso(event.ends_at),
+        program: event.program.id,
+        sponsors: event.program.id === 'bash' || event.sponsors.length > 0 ? event.sponsors : undefined,
+        starts_at: toAustinIso(event.starts_at),
+        status: isUpcoming(event.ends_at) ? 'upcoming' : 'past',
+    }));
 
     return Response.json(records, {
         headers: { 'Cache-Control': 'no-store' },

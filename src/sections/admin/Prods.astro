@@ -314,7 +314,17 @@ const CLASS_MEMBER_ROW = 'active:translate-y-px hover:bg-bg-hover grid min-h-(--
     import { MOCK_LATENCY_MILLISECONDS } from '@lib/shared/constants';
     import { addProdsEntry, getProdsBalance, getProdsRows } from '@lib/account/prods';
     import { clearFieldErrors, focusFirstError, setFieldErrors, validateFields } from '@lib/ui/forms';
-    import { delay, formatDateStamp, formatProds, initSearchField, isOutsideBox, registerPageScript, setPending, setText } from '@lib/shared/utils';
+    import {
+        delay,
+        formatDateStamp,
+        formatProds,
+        initSearchField,
+        isOutsideBox,
+        registerPageScript,
+        setPending,
+        setText,
+        toAustinIso,
+    } from '@lib/shared/utils';
     import { fitRowWindow, observeRowWindow } from '@lib/account/ledger';
     import { toast } from '@lib/ui/toasts';
 
@@ -367,7 +377,7 @@ const CLASS_MEMBER_ROW = 'active:translate-y-px hover:bg-bg-hover grid min-h-(--
 
         const isSaved = addProdsEntry(memberEmail, {
             amount,
-            date: new Date().toISOString(),
+            date: toAustinIso(new Date()),
             reason,
         });
 

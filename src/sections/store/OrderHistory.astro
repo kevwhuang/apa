@@ -427,7 +427,17 @@ const receipt = pastOrders[0];
 </style>
 
 <script>
-    import { formatDateStamp, formatPrice, formatVariant, parseCatalog, parseImageSources, registerPageScript, setProductImage, setText, toIsoDate } from '@lib/shared/utils';
+    import {
+        formatDateStamp,
+        formatPrice,
+        formatVariant,
+        parseCatalog,
+        parseImageSources,
+        registerPageScript,
+        setProductImage,
+        setText,
+        toAustinIso,
+    } from '@lib/shared/utils';
     import { reconcileOrder } from '@lib/commerce/checkout';
 
     let images: ImageSources = {};
@@ -522,7 +532,7 @@ const receipt = pastOrders[0];
             row?.setAttribute('data-order-index', String(index));
 
             stamps.forEach((stamp) => {
-                stamp.setAttribute('datetime', toIsoDate(placedDate));
+                stamp.setAttribute('datetime', toAustinIso(placedDate));
                 setText(stamp, formatDateStamp(placedDate));
             });
 

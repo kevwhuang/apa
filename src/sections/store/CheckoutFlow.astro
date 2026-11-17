@@ -639,7 +639,19 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
 
     import { CHECKOUT_STEPS, COMMERCE, EMAIL_PATTERN, FIELD_LIMITS } from '@lib/shared/constants';
     import { clearFieldErrors, focusFirstError, isValidationBypassed, renderIssueList, setFieldErrors, validateFields } from '@lib/ui/forms';
-    import { formatPrice, formatProds, formatVariant, parseCatalog, parseImageSources, registerPageScript, setPending, setProductImage, setText, setTitleLink } from '@lib/shared/utils';
+    import {
+        formatPrice,
+        formatProds,
+        formatVariant,
+        parseCatalog,
+        parseImageSources,
+        registerPageScript,
+        setPending,
+        setProductImage,
+        setText,
+        setTitleLink,
+        toAustinIso,
+    } from '@lib/shared/utils';
     import { getItems, getTotals, isPromoCode, reconcile, toCatalogItem, toProds } from '@lib/commerce/cart';
     import { getProdsBalance as readProdsBalance } from '@lib/account/prods';
     import { getSession } from '@lib/account/session';
@@ -667,6 +679,7 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
     const EXPIRY_PATTERN = /^(0[1-9]|1[0-2]) ?\/ ?(\d{2})$/;
     const LAST_STEP = 2;
     const MAX_EXPIRY_YEARS = 20;
+    const MONTHS_PER_YEAR = 12;
     const REVIEW_STEP = 0;
     const ZIP_PATTERN = /^\d{5}(-\d{4})?$/;
 
@@ -930,12 +943,12 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
 
         if (!match) return false;
 
-        const expiry = new Date(CENTURY + Number(match[2]), Number(match[1]), 1);
-        const now = new Date();
+        const expiry = (CENTURY + Number(match[2])) * MONTHS_PER_YEAR + Number(match[1]);
+        const [year, month] = toAustinIso(new Date()).split('-').map(Number);
 
-        const limit = new Date(now.getFullYear() + MAX_EXPIRY_YEARS, now.getMonth(), 1);
+        const current = year * MONTHS_PER_YEAR + month;
 
-        return expiry <= limit && expiry > now;
+        return expiry >= current && expiry < current + MAX_EXPIRY_YEARS * MONTHS_PER_YEAR;
     }
 
     function isProdsEngaged(form: HTMLFormElement) {

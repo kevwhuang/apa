@@ -6,7 +6,7 @@ import IconMeetup from '@components/icons/Meetup.astro';
 import IconSoundCloud from '@components/icons/SoundCloud.astro';
 import IconSpotify from '@components/icons/Spotify.astro';
 import { BRAND } from '@lib/shared/brand';
-import { LINKS, NAV_GROUPS, ONBOARDING_ROUTE, SITE_UPDATED } from '@lib/shared/constants';
+import { LINKS, LOCALE, NAV_GROUPS, ONBOARDING_ROUTE, SITE_UPDATED, TIME_ZONE } from '@lib/shared/constants';
 import { formatDateStamp } from '@lib/shared/utils';
 
 const ACCOUNT_LINKS = [
@@ -47,7 +47,7 @@ const columns = [
 ];
 
 const updated = new Date(SITE_UPDATED);
-const year = new Date().getFullYear();
+const year = new Date().toLocaleDateString(LOCALE, { timeZone: TIME_ZONE, year: 'numeric' });
 ---
 
 <footer

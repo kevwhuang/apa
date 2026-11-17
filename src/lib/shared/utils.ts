@@ -1,12 +1,7 @@
-import { BYTES_PER_KILOBYTE, BYTES_PER_MEGABYTE, CENTS_PER_DOLLAR, EVENT_PROGRAMS, PALETTE, ROLES } from '@lib/shared/constants';
+import { BYTES_PER_KILOBYTE, BYTES_PER_MEGABYTE, CENTS_PER_DOLLAR, LOCALE, PALETTE, PARAGRAPH_SEPARATOR, ROLES, TIME_ZONE } from '@lib/shared/constants';
 import { revealTarget } from '@lib/motion/entrances';
 
 import type { CollectionEntry } from 'astro:content';
-
-interface Calendar {
-    past: CalendarEvent[];
-    upcoming: CalendarEvent[];
-}
 
 interface FilterGroupOptions {
     cards: NodeListOf<HTMLElement>;
@@ -41,11 +36,9 @@ interface SearchFieldOptions {
 }
 
 const CLOCK_DIGITS = 2;
-const DETAIL_SEPARATOR = ' \u00b7 ';
 const EMPTY_TILE_COLOR: TileColor = { background: 'var(--color-ink)', text: 'var(--color-text-inverse-secondary)' };
 const ENTRY_PAD = 2;
 const FLOAT_WINDOW_TOPIC = 'apa:float-window';
-const ISO_DATE_LENGTH = 10;
 const MAX_INITIALS = 2;
 const MILLISECONDS_PER_MINUTE = 60_000;
 const MINUTES_PER_HOUR = 60;
@@ -53,10 +46,9 @@ const PANEL_NARROW_VIEWPORT = 480;
 const PANEL_RESIZE_STEP = 16;
 const PANEL_WIDE_DIVISOR = 2;
 const PANEL_WIDE_VIEWPORT = 1_024;
-const PARAGRAPH_SEPARATOR = '\n\n';
 const SECONDS_PER_MINUTE = 60;
 const SLOW_CORE_COUNT = 4;
-const WINNER_MEDALS: Record<string, string | undefined> = { 'First place': '\u{1F947}', 'Second place': '\u{1F948}', 'Third place': '\u{1F949}' };
+const VENUE_PLACEHOLDER = 'Venue TBD';
 
 const panelWidths = new Map<string, number>();
 
@@ -88,29 +80,25 @@ function formatBytes(bytes: number): string {
 }
 
 function formatCalendarDay(date: Date): string {
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(LOCALE, {
         day: '2-digit',
-        timeZone: 'America/Chicago',
+        timeZone: TIME_ZONE,
     });
 }
 
 function formatCalendarMonth(date: Date): string {
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(LOCALE, {
         month: 'short',
-        timeZone: 'America/Chicago',
+        timeZone: TIME_ZONE,
         year: 'numeric',
     });
 }
 
-function formatCredit(title: string): string {
-    return title.split(DETAIL_SEPARATOR).slice(1).join(DETAIL_SEPARATOR);
-}
-
 function formatDateStamp(date: Date): string {
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(LOCALE, {
         day: 'numeric',
         month: 'short',
-        timeZone: 'America/Chicago',
+        timeZone: TIME_ZONE,
         year: 'numeric',
     });
 }
@@ -145,10 +133,10 @@ function formatSku(sku: string): string {
 }
 
 function formatTime(date: Date): string {
-    return date.toLocaleTimeString('en-US', {
+    return date.toLocaleTimeString(LOCALE, {
         hour: 'numeric',
         minute: '2-digit',
-        timeZone: 'America/Chicago',
+        timeZone: TIME_ZONE,
     });
 }
 
@@ -162,8 +150,8 @@ function formatVariant(item: CartItem): string {
     return parts.length > 0 ? parts.join(' / ') : 'Base';
 }
 
-function formatVenue(location: string): string {
-    return location.split(DETAIL_SEPARATOR)[0];
+function formatVenue(venue: string | undefined): string {
+    return venue ?? VENUE_PLACEHOLDER;
 }
 
 function getInitials(name: string): string {
@@ -192,10 +180,6 @@ function getProductHref(catalog: CatalogEntry[], item: CartItem) {
     if (!item.variation) return `/store/${sku}`;
 
     return `/store/${sku}?variation=${encodeURIComponent(item.variation.toLowerCase())}`;
-}
-
-function getProgram(type: EventType): EventProgram {
-    return EVENT_PROGRAMS[type];
 }
 
 function getStockLabel(stock: number): string {
@@ -435,19 +419,6 @@ function mergeAssets(downloads: CollectionEntry<'downloads'>[], docs: Collection
     });
 }
 
-function mergeCalendar(events: CollectionEntry<'events'>[], bashEditions: CollectionEntry<'bash'>[]): Calendar {
-    const merged = [...events.map(toCalendarEvent), ...bashEditions.map(toCalendarBashEvent)];
-
-    return {
-        past: merged
-            .filter(event => !isUpcoming(event.end))
-            .sort((a, b) => +b.date - +a.date),
-        upcoming: merged
-            .filter(event => isUpcoming(event.end))
-            .sort((a, b) => +a.date - +b.date),
-    };
-}
-
 function onFloatWindowClaim(panel: HTMLElement, close: () => void, signal: AbortSignal): void {
     window.addEventListener(FLOAT_WINDOW_TOPIC, (event) => {
         if (event.detail.panel !== panel && panel.checkVisibility()) close();
@@ -583,7 +554,7 @@ function toAustinIso(date: Date): string {
         minute: '2-digit',
         month: '2-digit',
         second: '2-digit',
-        timeZone: 'America/Chicago',
+        timeZone: TIME_ZONE,
         year: 'numeric',
     });
 
@@ -609,41 +580,13 @@ function toAustinIso(date: Date): string {
     return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}${sign}${hours}:${minutes}`;
 }
 
-function toCalendarBashEvent(entry: CollectionEntry<'bash'>) {
-    return {
-        date: entry.data.date,
-        end: entry.data.end,
-        excerpt: entry.data.recap,
-        id: entry.id,
-        location: entry.data.location,
-        title: entry.data.title,
-        type: 'bash' as const,
-    };
-}
-
-function toCalendarEvent(entry: CollectionEntry<'events'>) {
-    return {
-        date: entry.data.date,
-        end: entry.data.end,
-        excerpt: entry.data.excerpt,
-        id: entry.id,
-        location: entry.data.location,
-        title: entry.data.title,
-        type: entry.data.type,
-    };
-}
-
-function toIsoDate(date: Date): string {
-    return date.toISOString().slice(0, ISO_DATE_LENGTH);
-}
-
 function toProducerRecord(producer: CollectionEntry<'producers'>): ProducerRecord {
     return {
         bio: producer.data.bio,
         featured: producer.data.featured,
         genres: producer.data.genres,
         id: producer.data.producerId,
-        joined: toIsoDate(producer.data.joined),
+        joined: toAustinIso(producer.data.joined),
         links: producer.data.links,
         location: producer.data.location,
         name: producer.data.name,
@@ -652,50 +595,26 @@ function toProducerRecord(producer: CollectionEntry<'producers'>): ProducerRecor
     };
 }
 
-function toProgramBashCard(entry: CollectionEntry<'bash'>) {
-    const { sponsors, winners } = entry.data;
+function toProgramCard(event: EventRecord) {
+    const { speaker, sponsors } = event;
 
     return {
-        date: entry.data.date,
-        end: entry.data.end,
-        heading: entry.data.edition,
-        location: entry.data.location,
+        credit: speaker?.name,
+        endsAt: event.ends_at,
+        heading: event.title ?? event.name,
         notes: [
+            {
+                label: 'Speaker',
+                paragraphs: speaker ? [speaker.bio] : [],
+            },
             {
                 label: sponsors.length > 1 ? 'Sponsors' : 'Sponsor',
-                paragraphs: sponsors.flatMap(({ description, name }) => description?.split(PARAGRAPH_SEPARATOR) ?? [name]),
-            },
-            {
-                label: winners.length > 1 ? 'Winners' : 'Winner',
-                paragraphs: winners.length > 0
-                    ? [entry.data.recap, ...winners.map(({ name, place }) => `${WINNER_MEDALS[place] ?? place} ${name}`)]
-                    : [],
+                paragraphs: sponsors.flatMap(({ description }) => description.split(PARAGRAPH_SEPARATOR)),
             },
         ].filter(note => note.paragraphs.length > 0),
-        text: entry.data.prompt,
-    };
-}
-
-function toProgramCard(entry: CollectionEntry<'events'>) {
-    const bios = entry.data.speakers.flatMap(({ bio }) => (bio ? [bio] : []));
-
-    return {
-        credit: entry.data.workshop ? formatCredit(entry.data.title) : '',
-        date: entry.data.date,
-        end: entry.data.end,
-        heading: entry.data.workshop ?? entry.data.title,
-        location: entry.data.location,
-        notes: [
-            {
-                label: bios.length > 1 ? 'Presenters' : 'Presenter',
-                paragraphs: bios,
-            },
-            {
-                label: 'Workshop',
-                paragraphs: entry.data.description && entry.data.workshop ? entry.data.description.split(PARAGRAPH_SEPARATOR) : [],
-            },
-        ].filter(note => note.paragraphs.length > 0),
-        text: entry.data.excerpt,
+        startsAt: event.starts_at,
+        text: event.body,
+        venue: formatVenue(event.venue),
     };
 }
 
@@ -712,7 +631,6 @@ export {
     formatBytes,
     formatCalendarDay,
     formatCalendarMonth,
-    formatCredit,
     formatDateStamp,
     formatDuration,
     formatEntry,
@@ -725,7 +643,6 @@ export {
     formatVariant,
     formatVenue,
     getInitials,
-    getProgram,
     getStockLabel,
     initFilterGroup,
     initPanelResize,
@@ -735,7 +652,6 @@ export {
     isSlowDevice,
     isUpcoming,
     mergeAssets,
-    mergeCalendar,
     onFloatWindowClaim,
     parseCatalog,
     parseImageSources,
@@ -750,9 +666,7 @@ export {
     setText,
     setTitleLink,
     toAustinIso,
-    toIsoDate,
     toProducerRecord,
-    toProgramBashCard,
     toProgramCard,
     toRoster,
 };
