@@ -1,22 +1,23 @@
 ---
+import Domain from '@components/shared/Domain.astro';
 import Schedule from '@components/program/Schedule.astro';
-import { LINKS, LOCALE, TIME_ZONE } from '@lib/shared/constants';
-import { formatTimeRange, formatVenue, isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { LOCALE, TIME_ZONE } from '@lib/shared/constants';
+import { formatTimeRange, isUpcoming, toAustinIso } from '@lib/shared/utils';
 import { loadEvents } from '@lib/programs/calendar';
 
 const events = await loadEvents();
 
 const sessions = events
-    .filter(event => event.program.id === 'assembly' && isUpcoming(event.ends_at))
+    .filter(event => event.program === 'Assembly' && isUpcoming(event.ends_at))
     .map((event, index) => ({
         endsAt: toAustinIso(event.ends_at),
-        externalUrl: event.external_url ?? LINKS.meetup,
+        externalUrl: event.external_url,
         headingId: index === 0 ? 'assembly-next-title' : `assembly-next-${index + 1}-title`,
         longDate: event.starts_at.toLocaleDateString(LOCALE, { day: 'numeric', month: 'long', timeZone: TIME_ZONE, year: 'numeric' }),
         room: event.room,
         startsAt: toAustinIso(event.starts_at),
         time: formatTimeRange(event.starts_at, event.ends_at),
-        venue: formatVenue(event.venue),
+        venue: event.venue,
     }));
 ---
 
@@ -66,15 +67,19 @@ const sessions = events
                 <div class="pl-(--space-lg) pt-(--space-lg) border-border-strong border-l-2 max-lg:border-l-0 max-lg:pl-0">
                     <dt class="label mb-2 text-text-secondary">RSVP</dt>
                     <dd class="font-bold text-xl">
-                        <a
-                            class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
-                            href={session.externalUrl}
-                            rel="noopener noreferrer"
-                            target="_blank"
-                        >
-                            meetup.com
-                            <span class="sr-only">&nbsp;(opens in a new tab)</span>
-                        </a>
+                        {session.externalUrl
+                            ? (
+                                    <a
+                                        class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 wrap-anywhere transition-[color,translate]"
+                                        href={session.externalUrl}
+                                        rel="noopener noreferrer"
+                                        target="_blank"
+                                    >
+                                        <Domain href={session.externalUrl} />
+                                        <span class="sr-only">&nbsp;(opens in a new tab)</span>
+                                    </a>
+                                )
+                            : 'TBD'}
                     </dd>
                 </div>
             </dl>

@@ -1,15 +1,14 @@
 ---
 import PageHead from '@components/shared/PageHead.astro';
-import { LINKS } from '@lib/shared/constants';
 
-const CLASS_DETAIL_ROW = 'col-span-full content-start grid grid-cols-subgrid items-baseline gap-x-(--space-md) gap-y-3 px-(--space-lg) py-4 bg-event-hangout max-lg:grid-cols-1 max-lg:py-(--space-lg)';
+const CLASS_DETAIL_ROW = 'col-span-full content-start grid grid-cols-subgrid items-baseline gap-x-(--space-md) gap-y-3 px-(--space-lg) py-4 bg-event-hangout max-lg:col-auto max-lg:grid-cols-1 max-lg:py-(--space-lg)';
 
-const DETAILS: { detail: string; href?: string; term: string }[] = [
-    { detail: 'The fourth Tuesday of the month', term: 'When' },
-    { detail: 'A borrowed room, announced to members ahead of the date', term: 'Where' },
-    { detail: 'A track or a project file for feedback, or gear to pass around', term: 'Bring' },
-    { detail: 'One on one or in small groups, with plenty of time to socialize', term: 'Feedback' },
-    { detail: 'meetup.com', href: LINKS.meetup, term: 'RSVP' },
+const DETAILS: { detail: string; term: string }[] = [
+    { detail: 'Open to everyone', term: 'Who' },
+    { detail: 'A track, project, or gear', term: 'What' },
+    { detail: 'Fourth Tuesday, 7 to 10 PM', term: 'When' },
+    { detail: 'A different spot each month', term: 'Where' },
+    { detail: 'Feedback and good company', term: 'Why' },
 ];
 ---
 
@@ -22,12 +21,12 @@ const DETAILS: { detail: string; href?: string; term: string }[] = [
             class="max-w-4xl text-5xl-7xl"
             headingId="hangout-title"
         >
-            Bring a track,<br />
-            <span class="text-text-brand">keep it loose</span>
+            Fresh ears,<br />
+            <span class="text-text-brand">new faces</span>
         </PageHead>
-        <div class="grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] items-start gap-(--space-2xl) max-lg:grid-cols-1">
+        <div class="grid grid-cols-2 items-start gap-(--space-2xl) max-lg:grid-cols-1">
             <aside
-                class="hangout-hero__card slab slab--bare slab--lift slab--still overflow-clip"
+                class="hangout-hero__card slab slab--bare slab--card overflow-clip"
                 aria-labelledby="hangout-details-title"
                 data-motion="unfold"
             >
@@ -39,41 +38,28 @@ const DETAILS: { detail: string; href?: string; term: string }[] = [
                 </h2>
                 <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-px border-border-on-brand border-t bg-border-on-brand max-lg:grid-cols-2 max-md:grid-cols-1">
                     {DETAILS.map(item => (
-                        <div class:list={[CLASS_DETAIL_ROW, !item.href && 'max-lg:col-auto']}>
+                        <div class={CLASS_DETAIL_ROW}>
                             <dt class="label">{item.term}</dt>
-                            <dd>
-                                {item.href
-                                    ? (
-                                            <a
-                                                class="hit active:translate-y-px hover:text-link-on-brand inline-block underline underline-offset-4 transition-[color,translate]"
-                                                href={item.href}
-                                                rel="noopener noreferrer"
-                                                target="_blank"
-                                            >
-                                                {item.detail}
-                                                <span class="sr-only">&nbsp;(opens in a new tab)</span>
-                                            </a>
-                                        )
-                                    : item.detail}
-                            </dd>
+                            <dd>{item.detail}</dd>
                         </div>
                     ))}
                 </dl>
             </aside>
-            <div class="flex flex-col gap-5">
+            <div class="flex flex-col self-center gap-5">
                 <p
                     class="text-lg text-text-secondary"
                     data-motion="blur"
                 >
-                    Hangout is the Alliance's monthly pop-up social for track feedback and conversation, held midway between Assemblies.
+                    The Alliance's monthly pop-up social for conversation and feedback lands midway between Assemblies.
                 </p>
                 <p
                     class="text-text-secondary"
                     data-motion="rise"
                 >
-                    Three hours on a midweek evening. People bring a track, a project file, or a piece of gear,
-                    and feedback happens one on one or in small groups. That leaves time to talk through a mix
-                    and get to know the person who made it.
+                    Producers drop in and get to know one another. Evenings center on good
+                    company and conversation about life outside the studio. Anyone who brings a
+                    track is welcome to play it for the room. The night stays casual and goes
+                    until closing.
                 </p>
             </div>
         </div>
@@ -82,7 +68,6 @@ const DETAILS: { detail: string; href?: string; term: string }[] = [
 
 <style>
     .hangout-hero__card {
-        --color-focus-ring: var(--color-focus-ring-on-brand);
         --slab-fill: var(--color-event-hangout);
         color: var(--color-event-hangout-text);
     }

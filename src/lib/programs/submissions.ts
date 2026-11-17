@@ -1,3 +1,5 @@
+import { LOCALE } from '@lib/shared/constants';
+
 const BASH_SUBMISSIONS: BashSubmission[] = [
     { file: 'split_custody.wav', producer: 'Devon Park', submittedAt: '2026-07-25T14:04:00-05:00' },
     { file: 'handshake_deal_v2.mp3', producer: 'Ramona Vex', submittedAt: '2026-07-25T14:17:00-05:00' },
@@ -23,8 +25,26 @@ const BASH_SUBMISSIONS: BashSubmission[] = [
     { file: 'dust_on_the_needle.wav', producer: 'Inez Rao', submittedAt: '2026-07-25T17:18:00-05:00' },
     { file: 'sample_estate.mp3', producer: 'Cole Bratton', submittedAt: '2026-07-25T17:22:00-05:00' },
     { file: 'last_pressing_master.wav', producer: 'Mia Solano', submittedAt: '2026-07-25T17:28:00-05:00' },
+    { file: 'after_hours_flip.wav', producer: 'Rhea Dunmore', submittedAt: '2026-07-26T00:30:00-05:00' },
 ];
 
 const BOARD_PAGE_SIZE = 10;
+const BOARD_SHARE_MAX = 0.75;
+const BOARD_SHARE_MIN = 0.25;
 
-export { BASH_SUBMISSIONS, BOARD_PAGE_SIZE };
+function describeBoard(page: number, total: number): string {
+    if (total === 0) return '';
+
+    const first = (page - 1) * BOARD_PAGE_SIZE + 1;
+    const last = Math.min(total, page * BOARD_PAGE_SIZE);
+
+    const range = first === last ? first.toLocaleString(LOCALE) : `${first.toLocaleString(LOCALE)}\u2013${last.toLocaleString(LOCALE)}`;
+
+    return `${range} of ${total.toLocaleString(LOCALE)}`;
+}
+
+function getBoardShare(producerWidth: number, otherWidth: number): number {
+    return Math.min(BOARD_SHARE_MAX, Math.max(BOARD_SHARE_MIN, producerWidth / (producerWidth + otherWidth)));
+}
+
+export { BASH_SUBMISSIONS, BOARD_PAGE_SIZE, describeBoard, getBoardShare };

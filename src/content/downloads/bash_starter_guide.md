@@ -1,7 +1,7 @@
 ---
 available: false
 date: 2026-11-08T00:00:00-06:00
-description: The rules of the Bash, plus how the afternoon runs and what to bring.
+description: The details and rules of the Bash.
 format: PDF
 kind: bash
 size: 2.4 MB

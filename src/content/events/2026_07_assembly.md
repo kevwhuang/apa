@@ -1,6 +1,7 @@
 ---
 ends_at: 2026-07-09T21:00:00-05:00
-program: assembly
+external_url: https://www.meetup.com/austinproduceralliance/events/314555853
+program: Assembly
 room: Antone's (16th floor)
 speaker: dk_darkly
 starts_at: 2026-07-09T18:00:00-05:00
@@ -8,6 +9,4 @@ title: 'Remix Lab: Rip It, Chop It, Flip It, Drop It'
 venue: STATION Austin
 ---
 
-dk darkly, a DJ and producer, broke down the remix process in an interactive workshop that covered its technical, creative, and business sides. He started from the moment of hearing a song and sensing right away what it could become.
-
-He went through identifying key, tempo, and groove, sourcing stems, selecting samples, and balancing new ideas with the source material, then covered the logistics of releasing an unofficial remix in a copyright-mad world. His own Ableton projects served as the examples throughout. The workshop was for people who had never tried a remix and for those who had been remixing for years, and it offered a practical toolkit for the next project.
+Remixing starts with hearing a song and sensing right away what it could become. In this interactive workshop, dk darkly breaks down the technical, creative, and business sides of the process, with examples from his own Ableton Live projects. He covers identifying a song's key, tempo, and groove, sourcing stems, selecting samples, and balancing new ideas with the source material, along with the logistics of releasing an unofficial remix. First-time remixers and longtime remixers alike are welcome.

@@ -8,11 +8,9 @@ import { loadEvents } from '@lib/programs/calendar';
 const events = await loadEvents();
 
 const archive = events
-    .filter(event => event.program.id === 'hangout')
+    .filter(event => event.program === 'Hangout')
     .toReversed()
     .map(event => toProgramCard(event));
-
-const isStill = archive.some(card => card.notes.length > 0);
 ---
 
 <section
@@ -41,9 +39,8 @@ const isStill = archive.some(card => card.notes.length > 0);
                         credit={card.credit}
                         group="hangout-archive"
                         heading={card.heading}
-                        isStill={isStill}
                         notes={card.notes}
-                        program="hangout"
+                        program="Hangout"
                         startsAt={card.startsAt}
                         text={card.text}
                         venue={card.venue}

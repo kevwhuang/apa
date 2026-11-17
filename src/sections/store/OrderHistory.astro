@@ -371,10 +371,6 @@ const receipt = pastOrders[0];
         width: 100%;
     }
 
-    .order__pick:focus-visible {
-        outline-offset: -2px;
-    }
-
     .order__pick:hover {
         color: var(--color-link);
     }
@@ -428,6 +424,7 @@ const receipt = pastOrders[0];
 
 <script>
     import {
+        applyInstantly,
         formatDateStamp,
         formatPrice,
         formatVariant,
@@ -570,10 +567,15 @@ const receipt = pastOrders[0];
         const isFresh = document.documentElement.dataset.receipt === 'fresh' && order.id === placedId;
 
         document.querySelectorAll<HTMLElement>('[data-order-index]').forEach((row) => {
+            const isCurrent = Number(row.dataset.orderIndex) === index;
             const pick = row.querySelector('[data-cell="id"]');
 
-            if (Number(row.dataset.orderIndex) === index) pick?.setAttribute('aria-current', 'true');
-            else pick?.removeAttribute('aria-current');
+            if (!pick || pick.hasAttribute('aria-current') === isCurrent) return;
+
+            applyInstantly(row, () => {
+                if (isCurrent) pick.setAttribute('aria-current', 'true');
+                else pick.removeAttribute('aria-current');
+            });
         });
 
         renderHeading(order, isFresh);

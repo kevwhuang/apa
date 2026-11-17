@@ -97,19 +97,6 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
                         </li>
                     ))}
                 </ol>
-                <aside
-                    class="checkout__notice slab slab--card flex flex-col gap-4"
-                    aria-label="Cart changes"
-                    data-checkout-notice
-                    hidden
-                    role="status"
-                >
-                    <p class="label text-warning-text">Your cart changed</p>
-                    <ul
-                        class="flex flex-col gap-1 list-none"
-                        data-checkout-issues
-                    />
-                </aside>
                 <fieldset
                     class="slab slab--card slab--plush step-pane min-w-0"
                     aria-labelledby="checkout-review-title"
@@ -136,7 +123,6 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
                                 <input
                                     id="checkout-code"
                                     class="input font-mono"
-                                    aria-describedby="checkout-code-error"
                                     aria-invalid="false"
                                     autocomplete="off"
                                     maxlength={FIELD_LIMITS.code}
@@ -172,12 +158,6 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
                                 Remove
                             </button>
                         </p>
-                        <p
-                            id="checkout-code-error"
-                            class="text-error-text"
-                            data-field-error
-                            hidden
-                        />
                     </div>
                     <dl class="flex flex-col gap-2 pt-4 border-border-strong border-t-2 font-mono text-base">
                         <div class="flex justify-between gap-4">
@@ -239,52 +219,42 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
                     </h2>
                     <div class="grid grid-cols-12 gap-x-4 gap-y-(--space-md) max-md:grid-cols-1">
                         {SHIPPING_FIELDS.map(field => (
-                            <div class:list={['flex flex-col gap-2', field.column]}>
-                                <label class="flex flex-col gap-2">
-                                    <span class="label text-text-secondary">{field.label}</span>
-                                    {field.kind === 'select'
-                                        ? (
-                                                <span class="select">
-                                                    <select
-                                                        id={`checkout-${field.name}`}
-                                                        class="input"
-                                                        aria-describedby={`checkout-${field.name}-error`}
-                                                        aria-invalid="false"
-                                                        autocomplete={field.autocomplete}
-                                                        name={field.name}
-                                                        required
-                                                    >
-                                                        <option value="">Choose&hellip;</option>
-                                                        {US_STATES.map(state => (
-                                                            <option value={state.code}>{state.name}</option>
-                                                        ))}
-                                                    </select>
-                                                </span>
-                                            )
-                                        : (
-                                                <input
+                            <label class:list={['flex flex-col gap-2', field.column]}>
+                                <span class="label text-text-secondary">{field.label}</span>
+                                {field.kind === 'select'
+                                    ? (
+                                            <span class="select">
+                                                <select
                                                     id={`checkout-${field.name}`}
                                                     class="input"
-                                                    aria-describedby={`checkout-${field.name}-error`}
                                                     aria-invalid="false"
                                                     autocomplete={field.autocomplete}
-                                                    inputmode={field.inputmode}
-                                                    maxlength={field.maxlength}
                                                     name={field.name}
-                                                    pattern={field.pattern}
-                                                    placeholder={field.placeholder}
-                                                    required={!field.optional}
-                                                    type={field.type ?? 'text'}
-                                                />
-                                            )}
-                                </label>
-                                <p
-                                    id={`checkout-${field.name}-error`}
-                                    class="text-error-text"
-                                    data-field-error
-                                    hidden
-                                />
-                            </div>
+                                                    required
+                                                >
+                                                    <option value="">Choose&hellip;</option>
+                                                    {US_STATES.map(state => (
+                                                        <option value={state.code}>{state.name}</option>
+                                                    ))}
+                                                </select>
+                                            </span>
+                                        )
+                                    : (
+                                            <input
+                                                id={`checkout-${field.name}`}
+                                                class="input"
+                                                aria-invalid="false"
+                                                autocomplete={field.autocomplete}
+                                                inputmode={field.inputmode}
+                                                maxlength={field.maxlength}
+                                                name={field.name}
+                                                pattern={field.pattern}
+                                                placeholder={field.placeholder}
+                                                required={!field.optional}
+                                                type={field.type ?? 'text'}
+                                            />
+                                        )}
+                            </label>
                         ))}
                     </div>
                 </fieldset>
@@ -327,40 +297,30 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
                         <legend class="sr-only">Card details</legend>
                         <div class="grid grid-cols-6 gap-x-4 gap-y-(--space-md) max-md:grid-cols-1">
                             {PAYMENT_FIELDS.map(field => (
-                                <div class:list={['flex flex-col gap-2', field.column]}>
-                                    <label class="flex flex-col gap-2">
-                                        <span class="label text-text-secondary">{field.label}</span>
-                                        <input
-                                            id={`checkout-${field.name}`}
-                                            class="input font-mono"
-                                            aria-describedby={`checkout-${field.name}-error`}
-                                            aria-invalid="false"
-                                            autocomplete={field.autocomplete}
-                                            inputmode={field.inputmode}
-                                            maxlength={field.maxlength}
-                                            name={field.name}
-                                            pattern={field.pattern}
-                                            placeholder={field.placeholder}
-                                            required
-                                            type="text"
-                                        />
-                                    </label>
-                                    <p
-                                        id={`checkout-${field.name}-error`}
-                                        class="text-error-text"
-                                        data-field-error
-                                        hidden
+                                <label class:list={['flex flex-col gap-2', field.column]}>
+                                    <span class="label text-text-secondary">{field.label}</span>
+                                    <input
+                                        id={`checkout-${field.name}`}
+                                        class="input font-mono"
+                                        aria-invalid="false"
+                                        autocomplete={field.autocomplete}
+                                        inputmode={field.inputmode}
+                                        maxlength={field.maxlength}
+                                        name={field.name}
+                                        pattern={field.pattern}
+                                        placeholder={field.placeholder}
+                                        required
+                                        type="text"
                                     />
-                                </div>
+                                </label>
                             ))}
                         </div>
                     </fieldset>
-                    <div class="flex flex-col gap-1">
+                    <div class="flex flex-col">
                         <label class="checkout__check self-start gap-3 py-2 text-sm">
                             <input
                                 id="checkout-terms"
                                 class="box"
-                                aria-describedby="checkout-terms-error"
                                 aria-invalid="false"
                                 name="terms"
                                 required
@@ -376,12 +336,6 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
                                 </a>.
                             </span>
                         </label>
-                        <p
-                            id="checkout-terms-error"
-                            class="text-error-text"
-                            data-field-error
-                            hidden
-                        />
                     </div>
                 </fieldset>
                 <div class="flex flex-wrap justify-between gap-4">
@@ -462,20 +416,6 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
             </aside>
         </div>
     </div>
-    <template data-issue-row>
-        <li class="flex gap-2 text-base text-text-secondary">
-            <span
-                class="font-bold text-warning-text"
-                aria-hidden="true"
-            >
-                &middot;
-            </span>
-            <span
-                class="min-w-0"
-                data-issue-text
-            />
-        </li>
-    </template>
     <template data-review-row>
         <li class="flex flex-wrap items-baseline justify-between gap-4 p-(--space-md)">
             <span class="block self-center shrink-0 size-14 border-2 border-border-strong bg-bg-inverse">
@@ -582,10 +522,6 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
         color: var(--color-error-text-on-inverse);
     }
 
-    .checkout__notice {
-        border-left: 2px solid var(--color-warning-border);
-    }
-
     .checkout__prods {
         align-items: center;
         border: 2px solid var(--color-border-strong);
@@ -638,8 +574,10 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
     import { navigate } from 'astro:transitions/client';
 
     import { CHECKOUT_STEPS, COMMERCE, EMAIL_PATTERN, FIELD_LIMITS } from '@lib/shared/constants';
-    import { clearFieldErrors, focusFirstError, isValidationBypassed, renderIssueList, setFieldErrors, validateFields } from '@lib/ui/forms';
+    import { clearFieldErrors, isValidationBypassed, reportFieldErrors, validateFields, watchFieldErrors } from '@lib/ui/forms';
     import {
+        applyInstantly,
+        describeCartChange,
         formatPrice,
         formatProds,
         formatVariant,
@@ -778,11 +716,7 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
     }
 
     function handleBackClick(controls: CheckoutControls) {
-        if (isBlocked) {
-            isBlocked = false;
-            renderIssues([]);
-        }
-
+        isBlocked = false;
         step = Math.max(REVIEW_STEP, step - 1);
         updateSteps(controls, true);
     }
@@ -793,8 +727,7 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
         if (!input || input.value.trim().length === 0) return;
 
         if (!isPromoCode(input.value)) {
-            setFieldErrors(form, { code: CODE_MESSAGE });
-            input.focus();
+            reportFieldErrors(form, { code: CODE_MESSAGE });
 
             return;
         }
@@ -813,9 +746,9 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
 
         if (!apply || !input) return;
 
-        apply.disabled = input.value.trim().length === 0;
-
-        if (input.getAttribute('aria-invalid') === 'true') clearFieldErrors(form);
+        applyInstantly(apply, () => {
+            apply.disabled = input.value.trim().length === 0;
+        });
     }
 
     function handleCodeKeydown(event: KeyboardEvent, form: HTMLFormElement) {
@@ -851,9 +784,7 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
         clearFieldErrors(controls.form);
 
         if (Object.keys(errors).length > 0) {
-            setFieldErrors(controls.form, errors);
-            focusFirstError(controls.form, errors);
-            toast('Check the fields.', 'error');
+            reportFieldErrors(controls.form, errors);
 
             return;
         }
@@ -902,7 +833,10 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
         promoCode = '';
         step = REVIEW_STEP;
         form.noValidate = true;
-        renderIssues(reconcile(catalog));
+
+        const issues = reconcile(catalog);
+
+        if (issues.length > 0) toast(describeCartChange(issues), 'info');
 
         const hasItems = getItems().length > 0;
 
@@ -914,6 +848,7 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
         backButton.addEventListener('click', () => handleBackClick(controls), { signal });
         form.addEventListener('submit', event => void handleFormSubmit(event, controls), { signal });
         signal.addEventListener('abort', () => clearCardFields(form), { once: true });
+        watchFieldErrors(form, signal);
 
         form.querySelectorAll<HTMLInputElement>('[name="cc-number"], [name="cc-csc"]').forEach((input) => {
             input.addEventListener('input', () => {
@@ -981,19 +916,13 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
 
         const isApplied = promoCode.length > 0;
 
-        apply.disabled = input.value.trim().length === 0;
+        applyInstantly(apply, () => {
+            apply.disabled = input.value.trim().length === 0;
+        });
+
         entry.toggleAttribute('hidden', isApplied);
         tag.toggleAttribute('hidden', !isApplied);
         setText(form.querySelector('[data-code-label]'), isApplied ? `${promoCode} \u00b7 ${getDiscountPercent()}% off` : '');
-    }
-
-    function renderIssues(issues: CartIssue[]) {
-        renderIssueList(
-            issues,
-            document.querySelector<HTMLElement>('[data-checkout-notice]'),
-            document.querySelector<HTMLElement>('[data-checkout-issues]'),
-            document.querySelector<HTMLTemplateElement>('[data-issue-row]'),
-        );
     }
 
     function renderItems() {
@@ -1078,9 +1007,10 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
 
         if (!shouldBypass && issues.length > 0) {
             isBlocked = true;
-            renderIssues(issues);
             renderOrder(controls.form);
             controls.nextButton.textContent = 'Back to cart';
+            controls.nextButton.focus();
+            toast(describeCartChange(issues), 'error');
 
             return;
         }

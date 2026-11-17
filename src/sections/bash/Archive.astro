@@ -8,11 +8,9 @@ import { loadEvents } from '@lib/programs/calendar';
 const events = await loadEvents();
 
 const archive = events
-    .filter(event => event.program.id === 'bash')
+    .filter(event => event.program === 'Bash')
     .toReversed()
     .map(event => toProgramCard(event));
-
-const isStill = archive.some(card => card.notes.length > 0);
 ---
 
 <section
@@ -40,9 +38,8 @@ const isStill = archive.some(card => card.notes.length > 0);
                     <ProgramCard
                         group="bash-archive"
                         heading={card.heading}
-                        isStill={isStill}
                         notes={card.notes}
-                        program="bash"
+                        program="Bash"
                         startsAt={card.startsAt}
                         text={card.text}
                         venue={card.venue}

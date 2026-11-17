@@ -4,7 +4,7 @@ import { getCollection } from 'astro:content';
 
 import PageHead from '@components/shared/PageHead.astro';
 import { PRODUCT_CATEGORIES } from '@lib/shared/constants';
-import { formatPrice, getStockLabel } from '@lib/shared/utils';
+import { describeMatches, formatPrice, getStockLabel } from '@lib/shared/utils';
 import { getBaseVariation, getVariationImage, getVariationPrice } from '@lib/commerce/products';
 
 const CARD_IMAGE_WIDTH = 420;
@@ -72,7 +72,7 @@ const categories = PRODUCT_CATEGORIES.filter(category => products.some(product =
             data-motion="stamp"
             data-store-status
         >
-            Showing all {products.length} products
+            {describeMatches(products.length, products.length, false, '')}
         </p>
     </div>
 </section>
@@ -212,7 +212,7 @@ const categories = PRODUCT_CATEGORIES.filter(category => products.some(product =
 
 <script>
     import { REDUCED_MOTION_QUERY } from '@lib/shared/constants';
-    import { initFilterGroup, registerPageScript } from '@lib/shared/utils';
+    import { describeMatches, initFilterGroup, registerPageScript } from '@lib/shared/utils';
     import { isValidationBypassed } from '@lib/ui/forms';
 
     const HOVER_QUERY = '(hover: hover)';
@@ -268,7 +268,7 @@ const categories = PRODUCT_CATEGORIES.filter(category => products.some(product =
                 },
             ],
             signal,
-            status: (shown, total, isFiltered) => (isFiltered ? `Showing ${shown} of ${total} products` : `Showing all ${total} products`),
+            status: describeMatches,
             statusElement: document.querySelector<HTMLElement>('[data-store-status]'),
         });
 

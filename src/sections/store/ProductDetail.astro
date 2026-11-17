@@ -13,7 +13,7 @@ interface Props {
     slug: string;
 }
 
-const CLASS_QUANTITY_STEP = 'active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text-disabled aria-disabled:hover:bg-transparent aria-disabled:text-text-disabled hover:bg-bg-hover size-(--control-size) font-bold font-mono text-lg';
+const CLASS_QUANTITY_STEP = 'product__step active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text-disabled aria-disabled:hover:bg-transparent aria-disabled:text-text-disabled hover:bg-bg-hover size-(--control-size) font-bold font-mono text-lg';
 const FRAME_IMAGE_WIDTH = 620;
 const THUMB_IMAGE_WIDTH = 140;
 
@@ -41,7 +41,7 @@ const priceCents = getVariationPrice(product, baseVariation);
             class="flex flex-col gap-5"
             data-motion="unfold"
         >
-            <div class="product-gallery__frame slab slab--bare slab--lift overflow-hidden aspect-square mb-(--lift)">
+            <div class="product-gallery__frame slab slab--bare slab--card overflow-hidden aspect-square">
                 {gallery.map(({ image, variation }) => image && (
                     <Image
                         class:list={['product-gallery__photo absolute inset-0 object-cover size-full opacity-0 pointer-events-none', variation === product.base && 'is-current']}
@@ -335,6 +335,14 @@ const priceCents = getVariationPrice(product, baseVariation);
         gap: calc(var(--lift) + 12px);
     }
 
+    .product__step:active:not([aria-disabled='true']) {
+        --color-focus-ring: var(--color-focus-ring-offset);
+    }
+
+    .product__step:focus-visible {
+        outline-offset: -4px;
+    }
+
     .product__swatch::after {
         content: '';
         inset: -8px;
@@ -351,7 +359,7 @@ const priceCents = getVariationPrice(product, baseVariation);
 <script>
     import { COMMERCE } from '@lib/shared/constants';
     import { add, getItems } from '@lib/commerce/cart';
-    import { registerPageScript } from '@lib/shared/utils';
+    import { applyInstantly, registerPageScript } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
 
     const STORAGE_MESSAGE = 'Nothing was added because your browser storage is full. Clear some space and try again.';
@@ -428,8 +436,10 @@ const priceCents = getVariationPrice(product, baseVariation);
 
             if (sizeButton.classList.contains('is-active') === isActive) return;
 
-            sizeButton.classList.toggle('is-active', isActive);
-            sizeButton.setAttribute('aria-pressed', String(isActive));
+            applyInstantly(sizeButton, () => {
+                sizeButton.classList.toggle('is-active', isActive);
+                sizeButton.setAttribute('aria-pressed', String(isActive));
+            });
         });
     }
 

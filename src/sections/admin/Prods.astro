@@ -184,8 +184,7 @@ const CLASS_MEMBER_ROW = 'active:translate-y-px hover:bg-bg-hover grid min-h-(--
                             <label class="flex flex-col gap-2">
                                 <span class="label text-text-secondary">Amount</span>
                                 <input
-                                    class="input aria-invalid:shadow-none font-mono"
-                                    aria-describedby="prods-amount-error"
+                                    class="input font-mono"
                                     aria-invalid="false"
                                     autocomplete="off"
                                     max="100"
@@ -196,19 +195,12 @@ const CLASS_MEMBER_ROW = 'active:translate-y-px hover:bg-bg-hover grid min-h-(--
                                     type="number"
                                 />
                             </label>
-                            <p
-                                id="prods-amount-error"
-                                class="text-error-text"
-                                data-field-error
-                                hidden
-                            />
                         </div>
                         <div class="flex flex-col gap-2">
                             <label class="flex flex-col gap-2">
                                 <span class="label text-text-secondary">Reason</span>
                                 <input
-                                    class="input aria-invalid:shadow-none"
-                                    aria-describedby="prods-reason-error"
+                                    class="input"
                                     aria-invalid="false"
                                     autocomplete="off"
                                     maxlength="80"
@@ -217,12 +209,6 @@ const CLASS_MEMBER_ROW = 'active:translate-y-px hover:bg-bg-hover grid min-h-(--
                                     type="text"
                                 />
                             </label>
-                            <p
-                                id="prods-reason-error"
-                                class="text-error-text"
-                                data-field-error
-                                hidden
-                            />
                         </div>
                     </div>
                     <button
@@ -313,7 +299,7 @@ const CLASS_MEMBER_ROW = 'active:translate-y-px hover:bg-bg-hover grid min-h-(--
 <script>
     import { MOCK_LATENCY_MILLISECONDS } from '@lib/shared/constants';
     import { addProdsEntry, getProdsBalance, getProdsRows } from '@lib/account/prods';
-    import { clearFieldErrors, focusFirstError, setFieldErrors, validateFields } from '@lib/ui/forms';
+    import { clearFieldErrors, reportFieldErrors, setFieldErrors, validateFields } from '@lib/ui/forms';
     import {
         delay,
         formatDateStamp,
@@ -353,9 +339,7 @@ const CLASS_MEMBER_ROW = 'active:translate-y-px hover:bg-bg-hover grid min-h-(--
         clearFieldErrors(form);
 
         if (Object.keys(errors).length > 0) {
-            setFieldErrors(form, errors);
-            focusFirstError(form, errors);
-            toast('Check the fields.', 'error');
+            reportFieldErrors(form, errors);
 
             return;
         }
@@ -432,7 +416,7 @@ const CLASS_MEMBER_ROW = 'active:translate-y-px hover:bg-bg-hover grid min-h-(--
         if (!dialog.open || event.key !== 'Tab') return;
 
         const first = dialog.querySelector<HTMLButtonElement>('[data-prods-close]');
-        const last = dialog.querySelector<HTMLButtonElement>('[data-prods-apply]');
+        const last = Array.from(dialog.querySelectorAll<HTMLButtonElement>('[data-prods-apply], [data-toast-close]')).at(-1);
 
         if (document.activeElement !== (event.shiftKey ? first : last)) return;
 

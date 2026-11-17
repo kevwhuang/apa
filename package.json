@@ -1,6 +1,6 @@
 {
     "name": "apa",
-    "version": "26.11.17",
+    "version": "26.11.18",
     "type": "module",
     "author": "Kevin Huang",
     "scripts": {
@@ -13,11 +13,11 @@
     "dependencies": {
         "@astrojs/netlify": "^8.2.14",
         "@astrojs/react": "^6.0.6",
-        "@astrojs/sitemap": "^3.7.5",
+        "@astrojs/sitemap": "^3.7.6",
         "@netlify/blobs": "^10.7.13",
-        "@supabase/supabase-js": "^2.119.0",
+        "@supabase/supabase-js": "^2.119.2",
         "@tailwindcss/vite": "^4.3.5",
-        "astro": "^7.4.12",
+        "astro": "^7.4.13",
         "astro-robots-txt": "^1.0.0",
         "gsap": "^3.15.1",
         "react": "^19.3.1",
@@ -33,7 +33,7 @@
         "@stylistic/eslint-plugin": "^5.10.0",
         "@types/react": "^19.3.0",
         "@types/three": "^0.185.4",
-        "bun-types": "^1.4.4",
+        "bun-types": "^1.4.5",
         "eslint": "^10.15.0",
         "eslint-plugin-astro": "^3.2.1",
         "eslint-plugin-jsx-a11y": "^6.10.2",

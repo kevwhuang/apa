@@ -1,14 +1,13 @@
 ---
+import Domain from '@components/shared/Domain.astro';
 import Schedule from '@components/program/Schedule.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { LINKS } from '@lib/shared/constants';
-import { formatCalendarDay, formatCalendarMonth, formatTimeRange, formatVenue, isUpcoming, toAustinIso } from '@lib/shared/utils';
-import { getProgram, loadEvents } from '@lib/programs/calendar';
+import { formatCalendarDay, formatCalendarMonth, formatTimeRange, isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { loadEvents } from '@lib/programs/calendar';
 
 const events = await loadEvents();
-const program = await getProgram('hangout');
 
-const upcoming = events.filter(event => event.program.id === 'hangout' && isUpcoming(event.ends_at));
+const upcoming = events.filter(event => event.program === 'Hangout' && isUpcoming(event.ends_at));
 ---
 
 <section
@@ -23,13 +22,13 @@ const upcoming = events.filter(event => event.program.id === 'hangout' && isUpco
             class="text-4xl-5xl"
             headingId="landing-hangout-title"
         >
-            Next {program.name}
+            Next Hangout
         </SectionHead>
         <p
-            class="max-w-2xl mb-(--space-2xl) text-lg text-text-secondary"
+            class="max-w-4xl mb-(--space-2xl) text-lg text-text-secondary"
             data-motion="blur"
         >
-            {program.summary}
+            A pop-up social for conversation and feedback, landing midway between Assemblies.
         </p>
         {upcoming.map((event, index) => (
             <div
@@ -44,7 +43,7 @@ const upcoming = events.filter(event => event.program.id === 'hangout' && isUpco
                     aria-hidden="true"
                 />
                 <article
-                    class="slab slab--bare slab--card slab--still grid grid-cols-[auto_minmax(0,1fr)_auto] overflow-clip max-md:grid-cols-1"
+                    class="slab slab--bare slab--lift slab--still grid grid-cols-[auto_minmax(0,1fr)_auto] overflow-clip max-md:grid-cols-1"
                     data-motion="tilt"
                 >
                     <p
@@ -60,8 +59,8 @@ const upcoming = events.filter(event => event.program.id === 'hangout' && isUpco
                         </time>
                     </p>
                     <div class="content-start p-(--space-lg)">
-                        <h3 class="mb-6 font-display text-2xl-3xl text-balance">{event.name}</h3>
-                        <p class="max-w-2xl mb-8 text-lg text-text-secondary">{event.body}</p>
+                        <h3 class="mb-6 font-display text-2xl-3xl text-balance">{event.title}</h3>
+                        <p class="mb-8 text-lg text-wrap text-text-secondary">{event.body}</p>
                         <dl class="grid grid-cols-2 gap-x-6 gap-y-5 mb-8 max-lg:grid-cols-1">
                             <div>
                                 <dt class="label mb-2 text-text-secondary">Time</dt>
@@ -75,21 +74,25 @@ const upcoming = events.filter(event => event.program.id === 'hangout' && isUpco
                             <div>
                                 <dt class="label mb-2 text-text-secondary">Where</dt>
                                 <dd class="font-bold text-xl">
-                                    <address class="not-italic">{formatVenue(event.venue)}</address>
+                                    <address class="not-italic">{event.venue}</address>
                                 </dd>
                             </div>
                             <div>
                                 <dt class="label mb-2 text-text-secondary">RSVP</dt>
                                 <dd class="font-bold text-xl">
-                                    <a
-                                        class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
-                                        href={event.external_url ?? LINKS.meetup}
-                                        rel="noopener noreferrer"
-                                        target="_blank"
-                                    >
-                                        meetup.com
-                                        <span class="sr-only">&nbsp;(opens in a new tab)</span>
-                                    </a>
+                                    {event.external_url
+                                        ? (
+                                                <a
+                                                    class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 wrap-anywhere transition-[color,translate]"
+                                                    href={event.external_url}
+                                                    rel="noopener noreferrer"
+                                                    target="_blank"
+                                                >
+                                                    <Domain href={event.external_url} />
+                                                    <span class="sr-only">&nbsp;(opens in a new tab)</span>
+                                                </a>
+                                            )
+                                        : 'TBD'}
                                 </dd>
                             </div>
                         </dl>
@@ -106,7 +109,7 @@ const upcoming = events.filter(event => event.program.id === 'hangout' && isUpco
                         class="hangout-flyer__rail label"
                         aria-hidden="true"
                     >
-                        {program.short_name} &middot; {program.cadence}
+                        Hangout &middot; monthly
                     </p>
                 </article>
             </div>

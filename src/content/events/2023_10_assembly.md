@@ -1,6 +1,7 @@
 ---
 ends_at: 2023-10-09T21:00:00-05:00
-program: assembly
+external_url: https://www.meetup.com/austinproduceralliance/events/289839198
+program: Assembly
 room: Antone's (16th floor)
 speaker: alt_slauson
 starts_at: 2023-10-09T19:00:00-05:00
@@ -8,4 +9,4 @@ title: Avant-Garde Methods for Creativity
 venue: Capital Factory
 ---
 
-Alt Slauson set aside the nebulous terms and vague techniques for reaching specific end goals that often come up when people discuss creativity. Instead he talked about how to achieve creativity reliably and how to navigate it in daily life. He discussed biology and mental states as a way to work toward reliable success, and shared specific methods he had found for creating interesting sounds. He had presented Unusual Methods for Creativity at the July 2023 Assembly.
+Creativity is often discussed in vague terms, with equally vague techniques for reaching particular goals. In this talk, Alt Slauson sets that vagueness aside and grounds the subject in biology and mental states, explaining how to reach a creative mindset reliably and navigate it in daily life. He also shares the specific methods he uses to create interesting sounds.

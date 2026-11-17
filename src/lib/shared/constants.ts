@@ -87,6 +87,7 @@ const LINKS = {
     spotify: 'https://open.spotify.com/user/31uvopo4bn7six3qvkkbkjxu2bwe',
 } as const;
 
+const LINK_MAX_LENGTH = 100;
 const LOCALE = 'en-US';
 const MAX_AVATAR_MEGABYTES = 10;
 const MAX_DECODE_MEGABYTES = 25;
@@ -186,13 +187,13 @@ const ROLES = [
 ] as const;
 
 const SESSION_TTL_DAYS = 14;
-const SITE_UPDATED = '2026-11-12T00:00:00-06:00';
+const SITE_UPDATED = '2026-11-18T00:00:00-06:00';
 
 const STORAGE = {
     adminProds: { key: 'apa.admin-prods', scope: 'local', topic: 'apa:admin-prods-changed' },
-    bashBoard: { key: 'apa.bash-board', scope: 'local', topic: 'apa:bash-board-changed' },
     cart: { key: 'apa.cart', scope: 'local', topic: 'apa:cart-changed' },
     chat: { key: 'apa.chat', scope: 'local', topic: 'apa:chat-changed' },
+    intake: { key: 'apa.intake', scope: 'local', topic: 'apa:intake-changed' },
     newsletter: { key: 'apa.newsletter', scope: 'local', topic: 'apa:newsletter-changed' },
     onboardingDraft: { key: 'apa.onboarding-draft', scope: 'local', topic: 'apa:onboarding-draft-changed' },
     order: { key: 'apa.order', scope: 'local', topic: 'apa:order-changed' },
@@ -390,8 +391,8 @@ const ROUTES = [
 ] as const;
 
 const UPLOAD = {
-    acceptAttribute: '.mp3,.wav,audio/mpeg,audio/wav,audio/x-wav',
-    extensions: ['mp3', 'wav'],
+    acceptAttribute: '.wav,.mp3,audio/wav,audio/x-wav,audio/mpeg',
+    extensions: ['wav', 'mp3'],
     failureTrigger: 'fail',
     maxDecodeBytes: MAX_DECODE_MEGABYTES * BYTES_PER_MEGABYTE,
     maxFileBytes: MAX_FILE_MEGABYTES * BYTES_PER_MEGABYTE,
@@ -420,6 +421,7 @@ export {
     KIND_COLORS,
     LAUNCHER_SIZE,
     LINKS,
+    LINK_MAX_LENGTH,
     LOCALE,
     MEMBER_ROLES,
     MILLISECONDS_PER_DAY,

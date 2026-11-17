@@ -1,27 +1,26 @@
 ---
+import Domain from '@components/shared/Domain.astro';
 import Schedule from '@components/program/Schedule.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { LINKS } from '@lib/shared/constants';
-import { formatCalendarDay, formatCalendarMonth, formatTimeRange, formatVenue, isUpcoming, toAustinIso } from '@lib/shared/utils';
-import { getProgram, loadEvents } from '@lib/programs/calendar';
+import { formatCalendarDay, formatCalendarMonth, formatTimeRange, isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { loadEvents } from '@lib/programs/calendar';
 
 const events = await loadEvents();
-const program = await getProgram('assembly');
 
 const sessions = events
-    .filter(event => event.program.id === 'assembly' && isUpcoming(event.ends_at))
+    .filter(event => event.program === 'Assembly' && isUpcoming(event.ends_at))
     .map(event => ({
         body: event.body,
         credit: event.speaker?.name,
         day: formatCalendarDay(event.starts_at),
         endsAt: toAustinIso(event.ends_at),
-        externalUrl: event.external_url ?? LINKS.meetup,
+        externalUrl: event.external_url,
         month: formatCalendarMonth(event.starts_at),
         room: event.room,
         startsAt: toAustinIso(event.starts_at),
         time: formatTimeRange(event.starts_at, event.ends_at),
         title: event.title,
-        venue: formatVenue(event.venue),
+        venue: event.venue,
     }));
 ---
 
@@ -37,13 +36,14 @@ const sessions = events
             class="text-3xl-7xl"
             headingId="landing-assembly-title"
         >
-            Next {program.name}
+            Next Assembly
         </SectionHead>
         <p
-            class="max-w-2xl text-lg text-text-secondary"
+            class="max-w-4xl text-lg text-text-secondary"
             data-motion="blur"
         >
-            {program.summary}
+            The Alliance's centerpiece at STATION Austin, an evening devoted to craft and community,
+            with time for tracks to be heard.
         </p>
     </div>
     {sessions.map((session, index) => (
@@ -74,19 +74,17 @@ const sessions = events
                 class="assembly-sheet__body"
                 data-motion="rise"
             >
-                {session.title && (
-                    <hgroup class="flex flex-col gap-3 mb-6">
-                        {session.credit && (
-                            <p class="font-bold text-lg tracking-tight">
-                                {session.credit}
-                            </p>
-                        )}
-                        <h3 class="font-display text-2xl-3xl text-balance">
-                            {session.title}
-                        </h3>
-                    </hgroup>
-                )}
-                <p class="max-w-2xl mb-8 text-lg text-text-secondary">{session.body}</p>
+                <hgroup class="flex flex-col gap-3 mb-6">
+                    <h3 class="font-display text-2xl-3xl text-balance">
+                        {session.title}
+                    </h3>
+                    {session.credit && (
+                        <p class="font-bold text-lg tracking-tight">
+                            {session.credit}
+                        </p>
+                    )}
+                </hgroup>
+                <p class="mb-8 text-lg text-wrap text-text-secondary">{session.body}</p>
                 <dl class="grid grid-cols-2 gap-x-6 gap-y-5 mb-8 max-lg:grid-cols-1">
                     <div>
                         <dt class="label mb-2 text-text-secondary">Time</dt>
@@ -104,15 +102,19 @@ const sessions = events
                     <div>
                         <dt class="label mb-2 text-text-secondary">RSVP</dt>
                         <dd class="font-bold text-xl">
-                            <a
-                                class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
-                                href={session.externalUrl}
-                                rel="noopener noreferrer"
-                                target="_blank"
-                            >
-                                meetup.com
-                                <span class="sr-only">&nbsp;(opens in a new tab)</span>
-                            </a>
+                            {session.externalUrl
+                                ? (
+                                        <a
+                                            class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 wrap-anywhere transition-[color,translate]"
+                                            href={session.externalUrl}
+                                            rel="noopener noreferrer"
+                                            target="_blank"
+                                        >
+                                            <Domain href={session.externalUrl} />
+                                            <span class="sr-only">&nbsp;(opens in a new tab)</span>
+                                        </a>
+                                    )
+                                : 'TBD'}
                         </dd>
                     </div>
                 </dl>

@@ -2,42 +2,46 @@
 import { Image, getImage } from 'astro:assets';
 
 import PageHead from '@components/shared/PageHead.astro';
+import { LOCALE, TIME_ZONE } from '@lib/shared/constants';
+import { loadEvents } from '@lib/programs/calendar';
 
 import type { ImageMetadata } from 'astro';
 
-const CLASS_VIEWER = 'wall__viewer fixed grid inset-0 overflow-visible place-items-center z-301 h-auto max-h-none max-w-none w-auto cursor-zoom-out';
+const CLASS_VIEWER = 'wall__viewer group fixed grid inset-0 overflow-visible place-items-center z-301 h-auto max-h-none max-w-none w-auto cursor-zoom-out';
 
 const CLASS_VIEWER_PHOTO = 'block box-content object-contain aspect-(--wall-ratio) h-auto min-h-0 w-[calc(100%-4px)] border-2 border-current cursor-default pointer-events-auto select-none';
 
 const FIGURES = [
     { alt: 'Nine people gather around a round black metal table on a covered dock, two seated and seven standing, with a lake and a bright cloud-filled sky behind them', image_path: '/src/images/gallery/2026_10_camp_river_oaks.webp', label: 'October 2026 CAMP' },
-    { alt: 'Sixteen people pose beneath a projected Meetup page for the Austin Producer Alliance, three kneeling in the front row, with a handwritten track list on a whiteboard at left', event_id: '2026_07_bash', image_path: '/src/images/gallery/2026_07_bash.webp', label: 'Fall 2026 Bash' },
-    { alt: 'About twenty people pose for a group photo against a dark wall, some kneeling in front and throwing up peace signs, with folded T-shirts stacked on a table at right', event_id: '2026_06_assembly', image_path: '/src/images/gallery/2026_06_assembly_alex_lacroix.webp', label: 'June 2026 Assembly \u00b7 Alex LaCroix' },
-    { alt: 'A yellow waveform and plugin window glow on a projected wall above a wooden cabinet as a speaker sits at a desk alongside and attendees follow on laptops', event_id: '2026_05_assembly', image_path: '/src/images/gallery/2026_05_assembly_vonryk.webp', label: 'May 2026 Assembly \u00b7 VonRyk' },
-    { alt: 'Thirteen people pose behind gray tables in front of a teal Ableton banner, four crouching in the front row', event_id: '2026_04_bash', image_path: '/src/images/gallery/2026_04_bash.webp', label: 'Summer 2026 Bash' },
-    { alt: 'Fourteen attendees seated at tables on both sides of a concrete aisle look toward the camera, while a person in a yellow jacket stands at the back beside the dark wall', event_id: '2025_11_assembly', image_path: '/src/images/gallery/2025_11_assembly.webp', label: 'November 2025' },
-    { alt: 'A speaker in a dark blazer gestures mid-sentence between two wall screens showing a Final Tips slide, with a handwritten note on the whiteboard behind', event_id: '2025_08_assembly', image_path: '/src/images/gallery/2025_08_assembly_austin_breckenridge.webp', label: 'August 2025 Assembly \u00b7 Austin Breckenridge' },
-    { alt: 'Attendees spread across rows of white tables face the front, with a MIDI keyboard and laptop on the table at right and a red lettered wall panel on the left', event_id: '2025_07_assembly', image_path: '/src/images/gallery/2025_07_assembly_justin_m.webp', label: 'July 2025 Assembly \u00b7 Justin M' },
-    { alt: 'Seen from the front of the room over a laptop, two studio monitors and printed QR code sheets, attendees sit at tables on both sides of a concrete aisle', event_id: '2025_05_assembly', image_path: '/src/images/gallery/2025_05_assembly_jonathan_bolton.webp', label: 'May 2025 Assembly \u00b7 Jonathan Bolton' },
-    { alt: 'Two people stand at the front of the room beside a whiteboard and a title slide, one talking to attendees seated at tables, while a third person stands at right beneath word-covered wall panels', event_id: '2025_04_assembly', image_path: '/src/images/gallery/2025_04_assembly_alt_slauson.webp', label: 'April 2025 Assembly \u00b7 Alt Slauson' },
-    { alt: 'Attendees fill a long room at tables and laptops, facing a speaker between two wall screens of music software in the distance', event_id: '2025_03_assembly', image_path: '/src/images/gallery/2025_03_assembly_dreamshift.webp', label: 'March 2025 Assembly \u00b7 DREAMSHIFT' },
-    { alt: 'A speaker at a laptop stands between two wall screens showing the same blue software window, with attendees following along on laptops at rows of tables', event_id: '2025_02_assembly', image_path: '/src/images/gallery/2025_02_assembly_shane_hazleton.webp', label: 'February 2025 Assembly \u00b7 Shane Hazleton' },
-    { alt: 'Participants sit in office chairs around a central table of laptops and small keyboards in a lab with blue accent lighting, sports bottles lined up on a counter in the foreground', event_id: '2025_02_bash', image_path: '/src/images/gallery/2025_02_bash.webp', label: 'Spring 2025 Bash' },
-    { alt: 'A person stands smiling at right beside a laptop and studio monitor as attendees chat at tables across a wide room with a line-art mural on the far wall', event_id: '2025_01_assembly', image_path: '/src/images/gallery/2025_01_assembly_boomchii.webp', label: 'January 2025 Assembly \u00b7 Boomchii' },
-    { alt: 'Seen from the front of the room over a laptop and studio monitor, attendees sit on both sides of a concrete aisle with a white line-art mural on the far wall', event_id: '2024_12_assembly', image_path: '/src/images/gallery/2024_12_assembly_justin_m.webp', label: 'December 2024 Assembly \u00b7 Justin M' },
-    { alt: 'Attendees sit at white tables under foil-wrapped ceiling ducts, several smiling toward the camera, with a red water bottle and a phone on the table in the foreground', event_id: '2024_10_assembly', image_path: '/src/images/gallery/2024_10_assembly.webp', label: 'October 2024' },
-    { alt: 'Attendees sit at rows of white tables with laptops and water bottles, a black wall on the left and a blue star mural at the far end', event_id: '2024_09_assembly', image_path: '/src/images/gallery/2024_09_assembly.webp', label: 'September 2024' },
-    { alt: 'Attendees listen from rows of white tables, one leaning back with both hands behind the head, with a red water bottle and cooler bag in the foreground and a blue star mural on the back wall', event_id: '2024_08_assembly', image_path: '/src/images/gallery/2024_08_assembly.webp', label: 'August 2024' },
-    { alt: 'A smiling speaker in a cap stands at a rolling desk with a laptop and two small studio monitors beside a projected slide titled Tips to Get Started in Sync', event_id: '2024_06_assembly', image_path: '/src/images/gallery/2024_06_assembly_will_evans.webp', label: 'June 2024 Assembly \u00b7 Will Evans' },
-    { alt: 'A speaker stands beside a DJ controller and a pair of studio monitors, talking to attendees seated at tables in front of tall windows looking out on a lit street', event_id: '2024_05_assembly', image_path: '/src/images/gallery/2024_05_assembly_kai_castro.webp', label: 'May 2024 Assembly \u00b7 Kai Castro' },
-    { alt: 'Attendees at rows of white tables face a speaker seated at a laptop as a video page is projected on the wall behind', event_id: '2024_04_assembly', image_path: '/src/images/gallery/2024_04_assembly_justin_m.webp', label: 'April 2024 Assembly \u00b7 Justin M' },
-    { alt: 'A speaker with headphones around the neck stands behind a laptop and studio monitors as attendees at rows of tables watch a music session projected between two flags', event_id: '2024_03_assembly', image_path: '/src/images/gallery/2024_03_assembly_den_zuko.webp', label: 'March 2024 Assembly \u00b7 Den Zuko' },
-    { alt: 'Attendees work heads-down with pens and laptops around a U of white tables, beneath a Cisco DevNet sign on a black wall', event_id: '2024_02_assembly', image_path: '/src/images/gallery/2024_02_assembly_henyx.webp', label: 'February 2024 Assembly \u00b7 Henyx' },
-    { alt: 'Producers in headphones work at laptops and MIDI keyboards around a long central table in a computer lab with green accent lighting on the walls', event_id: '2023_08_bash', image_path: '/src/images/gallery/2023_08_bash.webp', label: 'Fall II 2023 Bash' },
-    { alt: 'A speaker stands between two wall screens showing the same colorful track arrangement and addresses attendees seated at rows of white tables', event_id: '2023_08_assembly', image_path: '/src/images/gallery/2023_08_assembly_lonely_child.webp', label: 'August 2023 Assembly \u00b7 Lonely Child' },
+    { alt: 'Sixteen people pose beneath a projected Austin Producer Alliance Meetup page, three crouching in the front row, a handwritten track list on a whiteboard at left', event_id: '2026_07_bash', image_path: '/src/images/gallery/2026_07_bash.webp' },
+    { alt: 'About twenty people pose against a black wall, four crouching in the front row and several flashing peace signs, folded T-shirts stacked on a table at right', event_id: '2026_06_assembly', image_path: '/src/images/gallery/2026_06_assembly_alex_lacroix.webp' },
+    { alt: 'A yellow waveform and plugin window are projected on the wall above a wooden cabinet as a speaker sits at a desk at right and attendees follow on laptops', event_id: '2026_05_assembly', image_path: '/src/images/gallery/2026_05_assembly_vonryk.webp' },
+    { alt: 'Thirteen people pose behind gray tables in front of a teal Ableton banner, four crouching in the front row', event_id: '2026_04_bash', image_path: '/src/images/gallery/2026_04_bash.webp' },
+    { alt: 'Fourteen attendees seated at tables on both sides of a concrete aisle look toward the camera, while a person in a yellow jacket stands at the back by the black wall', event_id: '2025_11_assembly', image_path: '/src/images/gallery/2025_11_assembly.webp' },
+    { alt: 'A speaker in a dark blazer gestures mid-sentence between two wall screens showing a Final Tips slide, with a handwritten note on the whiteboard behind', event_id: '2025_08_assembly', image_path: '/src/images/gallery/2025_08_assembly_austin_breckenridge.webp' },
+    { alt: 'Attendees spread across rows of white tables face the front, with a MIDI keyboard and laptop on the table at right and a red lettered wall panel on the left', event_id: '2025_07_assembly', image_path: '/src/images/gallery/2025_07_assembly_justin_m.webp' },
+    { alt: 'Seen from the front of the room over a laptop, two studio monitors and printed QR code sheets, attendees sit at tables on both sides of a concrete aisle', event_id: '2025_05_assembly', image_path: '/src/images/gallery/2025_05_assembly_jonathan_bolton.webp' },
+    { alt: 'Two people stand at the front beside a whiteboard and a title slide, one talking to attendees at tables, as a third stands at right below word-covered panels', event_id: '2025_04_assembly', image_path: '/src/images/gallery/2025_04_assembly_alt_slauson.webp' },
+    { alt: 'Attendees sit at rows of tables and laptops in a long room, facing a speaker between two wall screens of music software in the distance', event_id: '2025_03_assembly', image_path: '/src/images/gallery/2025_03_assembly_dreamshift.webp' },
+    { alt: 'A speaker at a laptop stands between two wall screens showing the same blue software window, with attendees following along on laptops at rows of tables', event_id: '2025_02_assembly', image_path: '/src/images/gallery/2025_02_assembly_shane_hazleton.webp' },
+    { alt: 'Attendees sit in office chairs around a central table of laptops and MIDI keyboards in a lab with blue accent lighting, water bottles on a desk in the foreground', event_id: '2025_02_bash', image_path: '/src/images/gallery/2025_02_bash.webp' },
+    { alt: 'A person stands smiling at right beside a laptop and studio monitor as attendees chat at tables across a wide room with a white line-art mural on the far wall', event_id: '2025_01_assembly', image_path: '/src/images/gallery/2025_01_assembly_boomchii.webp' },
+    { alt: 'Seen from the front of the room over a laptop and two studio monitors, attendees sit on both sides of a concrete aisle with a white line-art mural on the far wall', event_id: '2024_12_assembly', image_path: '/src/images/gallery/2024_12_assembly_justin_m.webp' },
+    { alt: 'Attendees sit at white tables under foil-wrapped ceiling ducts, one smiling toward the camera, with a red water bottle and a phone on the table in the foreground', event_id: '2024_10_assembly', image_path: '/src/images/gallery/2024_10_assembly.webp' },
+    { alt: 'Attendees sit at rows of white tables with laptops and water bottles, a black wall on the left and a blue mural with red stars at the far end', event_id: '2024_09_assembly', image_path: '/src/images/gallery/2024_09_assembly.webp' },
+    { alt: 'Attendees listen at rows of white tables, one leaning back with hands on the head, a red water bottle and cooler bag in front and a blue mural with red stars behind', event_id: '2024_08_assembly', image_path: '/src/images/gallery/2024_08_assembly.webp' },
+    { alt: 'A smiling speaker in a cap stands at a rolling desk with a laptop and two small studio monitors beside a projected slide titled Tips to Get Started in Sync', event_id: '2024_06_assembly', image_path: '/src/images/gallery/2024_06_assembly_will_evans.webp' },
+    { alt: 'A speaker stands beside a DJ controller and two studio monitors, talking to attendees seated at tables in front of tall windows looking out on a lit street', event_id: '2024_05_assembly', image_path: '/src/images/gallery/2024_05_assembly_kai_castro.webp' },
+    { alt: 'Attendees at rows of white tables face a speaker seated at a laptop as a video page is projected on the wall behind', event_id: '2024_04_assembly', image_path: '/src/images/gallery/2024_04_assembly_justin_m.webp' },
+    { alt: 'A speaker with headphones around the neck stands behind a laptop and studio monitors as attendees at rows of tables watch a music session projected between two flags', event_id: '2024_03_assembly', image_path: '/src/images/gallery/2024_03_assembly_den_zuko.webp' },
+    { alt: 'Attendees work heads-down with pens and laptops around a U of white tables, beneath a Cisco DevNet sign on a black wall', event_id: '2024_02_assembly', image_path: '/src/images/gallery/2024_02_assembly_henyx.webp' },
+    { alt: 'Producers in headphones work at laptops and MIDI keyboards around a long central table in a computer lab with green accent lighting on the walls', event_id: '2023_08_bash', image_path: '/src/images/gallery/2023_08_bash.webp' },
+    { alt: 'A speaker stands between two wall screens showing the same colorful track arrangement and addresses attendees seated at rows of white tables', event_id: '2023_08_assembly', image_path: '/src/images/gallery/2023_08_assembly_lonely_child.webp' },
 ] as const;
 
 const IMAGE_DENSITY = 2;
+
+const events = await loadEvents();
 
 const images = import.meta.glob<{ default: ImageMetadata }>('/src/images/gallery/*.webp', { eager: true });
 
@@ -45,6 +49,12 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
     const asset = images[figure.image_path];
 
     if (!asset) throw new Error(`Gallery asset ${figure.image_path} is missing.`);
+
+    const event = 'event_id' in figure ? events.find(candidate => candidate.id === figure.event_id) : undefined;
+
+    const label = 'label' in figure ? figure.label : event && formatCaption(event);
+
+    if (!label) throw new Error(`Gallery photo ${figure.image_path} has no event.`);
 
     const metadata = asset.default;
 
@@ -54,11 +64,21 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
         alt: figure.alt,
         columnWidth: Math.round(metadata.width / IMAGE_DENSITY),
         image: metadata,
-        label: figure.label,
+        label,
         ratio: metadata.width / metadata.height,
         source: full.src,
     };
 }));
+
+function formatCaption(event: (typeof events)[number]) {
+    if (event.program === 'Bash') return `${event.title} ${event.program}`;
+
+    const stamp = event.program === 'Hangout'
+        ? event.title
+        : event.starts_at.toLocaleDateString(LOCALE, { month: 'long', timeZone: TIME_ZONE, year: 'numeric' });
+
+    return event.speaker ? `${stamp} ${event.program} \u00b7 ${event.speaker.name}` : stamp;
+}
 ---
 
 <section
@@ -148,7 +168,7 @@ const figures = await Promise.all(FIGURES.map(async (figure) => {
                     data-wall-caption
                 />
                 <button
-                    class="label active:translate-y-px focus-visible:not-sr-only sr-only transition-[translate]"
+                    class="label active:translate-y-px focus-visible:not-sr-only group-open:visible sr-only transition-[translate]"
                     aria-label="Close viewer"
                     data-wall-close
                     type="button"

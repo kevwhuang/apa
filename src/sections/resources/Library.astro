@@ -5,7 +5,7 @@ import IconArrow from '@components/icons/Arrow.astro';
 import SearchField from '@components/shared/SearchField.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { ASSET_KIND_LABELS, KIND_COLORS } from '@lib/shared/constants';
-import { formatDateStamp, mergeAssets, toAustinIso } from '@lib/shared/utils';
+import { describeMatches, formatDateStamp, mergeAssets, toAustinIso } from '@lib/shared/utils';
 import { isDownload, toAvailability } from '@lib/resources/unlocks';
 
 const downloads = await getCollection('downloads', entry => entry.data.kind !== 'bash');
@@ -87,7 +87,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             data-motion="stamp"
             data-resources-status
         >
-            Showing all {assets.length} assets
+            {describeMatches(assets.length, assets.length, false, '')}
         </p>
         <ul
             class="resources__grid grid grid-cols-3 gap-x-(--space-lg) gap-y-(--space-2xl) max-lg:grid-cols-2 max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))]"
@@ -100,7 +100,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                     data-search={asset.search}
                     style={`--kind-color: ${KIND_COLORS[asset.data.kind]}`}
                 >
-                    <article class="resources__card slab slab--card slab--still">
+                    <article class="resources__card slab slab--card">
                         <header class="flex items-start pb-(--space-md)">
                             <p class="label inline-flex items-center gap-1 px-2 py-1 border-(--kind-color) border-2 text-text">
                                 <span
@@ -229,14 +229,8 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
 </style>
 
 <script>
-    import { initFilterGroup, initSearchField, registerPageScript } from '@lib/shared/utils';
+    import { describeMatches, initFilterGroup, initSearchField, registerPageScript } from '@lib/shared/utils';
     import { initUnlocks } from '@lib/resources/unlocks';
-
-    function describeAssets(shown: number, total: number, isFiltered: boolean, query: string) {
-        if (query) return `Showing ${shown} of ${total} assets for \u201c${query}\u201d`;
-
-        return isFiltered ? `Showing ${shown} of ${total} assets` : `Showing all ${total} assets`;
-    }
 
     function initResourcesLibrary(signal: AbortSignal) {
         const buttons = document.querySelectorAll<HTMLButtonElement>('.resources__chip');
@@ -258,7 +252,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             ],
             searchElement,
             signal,
-            status: describeAssets,
+            status: describeMatches,
             statusElement: document.querySelector<HTMLElement>('[data-resources-status]'),
         });
 

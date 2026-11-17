@@ -1,6 +1,6 @@
 ---
-const CLASS_TOAST = 'toast flex items-stretch max-w-xl min-h-(--control-size) w-full pe-2 border-2 border-border-strong bg-toast-bg text-toast-text pointer-events-auto';
-const CLASS_TOAST_BADGE = 'toast__badge flex items-center justify-center shrink-0 w-(--control-size) font-bold font-mono leading-none text-xl bg-(--toast-tone) text-(--toast-glyph-tone)';
+const CLASS_TOAST = 'toast flex items-stretch max-w-xl min-h-(--control-size) w-full pe-2 border-2 border-border-strong bg-toast-bg text-toast-text pointer-events-auto max-md:pe-0';
+const CLASS_TOAST_BADGE = 'toast__badge flex items-center justify-center shrink-0 w-(--control-size) font-bold font-mono leading-none text-xl bg-(--toast-tone) text-(--toast-glyph-tone) max-md:w-8';
 const CLASS_TOAST_CLOSE = 'toast__close active:translate-y-px hover:text-toast-action inline-flex items-center justify-center self-center shrink-0 size-(--control-size) leading-none text-xl text-inherit transition-[color,translate]';
 ---
 
@@ -8,10 +8,11 @@ const CLASS_TOAST_CLOSE = 'toast__close active:translate-y-px hover:text-toast-a
     class="toaster z-300"
     aria-label="Notifications"
     popover="manual"
+    transition:animate="none"
     transition:persist
 >
     <ol
-        class="toaster__list flex flex-col items-center w-full gap-2 list-none"
+        class="toaster__list flex flex-col items-center relative w-full gap-2 list-none"
         aria-live="polite"
         data-toast-list
     />
@@ -21,7 +22,7 @@ const CLASS_TOAST_CLOSE = 'toast__close active:translate-y-px hover:text-toast-a
                 class={CLASS_TOAST_BADGE}
                 aria-hidden="true"
             />
-            <span class="toast__body flex flex-1 flex-col justify-center min-w-0 gap-1 pe-3 ps-(--space-md) py-4">
+            <span class="toast__body flex flex-1 flex-col justify-center min-w-0 gap-1 pe-3 ps-(--space-md) py-4 max-md:pe-0 max-md:ps-3">
                 <span
                     class="label toast__label wrap-anywhere"
                     data-toast-label
@@ -46,8 +47,10 @@ const CLASS_TOAST_CLOSE = 'toast__close active:translate-y-px hover:text-toast-a
 <style>
     .toast {
         --color-focus-ring: var(--color-focus-ring-offset);
+        --toast-drop: 4px;
         --toast-glyph: '\0069';
         --toast-glyph-tone: var(--color-text);
+        --toast-rise: 12px;
         --toast-tone: var(--color-bg-page);
         animation: var(--duration-slow) var(--motion-ease-entrance) both toast__rise;
     }
@@ -56,6 +59,31 @@ const CLASS_TOAST_CLOSE = 'toast__close active:translate-y-px hover:text-toast-a
         --toast-glyph: '\0021';
         --toast-glyph-tone: var(--color-on-error);
         --toast-tone: var(--color-error);
+    }
+
+    .toast--leaving {
+        animation:
+            var(--duration-slow) var(--motion-ease-entrance) both toast__rise,
+            var(--duration-base) var(--motion-ease-ui) both toast__fade-out;
+    }
+
+    .toast--leaving.toast--settled {
+        animation: var(--duration-base) var(--motion-ease-ui) both toast__fade-out;
+    }
+
+    .toast--renewed {
+        --toast-rise: 0;
+    }
+
+    .toast--replaced {
+        --toast-drop: 0;
+        inset: auto 0 var(--toast-offset);
+        margin-inline: auto;
+        position: absolute;
+    }
+
+    .toast--settled {
+        animation: none;
     }
 
     .toast--success {
@@ -73,26 +101,42 @@ const CLASS_TOAST_CLOSE = 'toast__close active:translate-y-px hover:text-toast-a
         display: block;
         height: auto;
         inset-block: auto var(--space-lg);
-        inset-inline: var(--shell-pad) calc(var(--control-size) + var(--lift));
+        inset-inline: calc(var(--control-size) + var(--lift));
         overflow: visible;
         pointer-events: none;
         position: fixed;
         width: auto;
     }
 
+    @media (max-width: 768px) {
+        .toast__close:focus-visible {
+            outline-offset: -6px;
+        }
+    }
+
+    @keyframes toast__fade-out {
+        to {
+            opacity: 0;
+            translate: 0 var(--toast-drop);
+        }
+    }
+
     @keyframes toast__rise {
         from {
             opacity: 0;
-            transform: translateY(12px);
+            transform: translateY(var(--toast-rise));
         }
     }
 </style>
 
 <script>
+    import { REDUCED_MOTION_QUERY } from '@lib/shared/constants';
     import { TOAST_TOPIC } from '@lib/ui/toasts';
     import { setText } from '@lib/shared/utils';
 
-    const TOAST_DISMISS_MILLISECONDS = 5_000;
+    const LIVE_TOAST_SELECTOR = '.toast:not(.toast--leaving)';
+    const TOAST_DISMISS_MILLISECONDS = 10_000;
+    const TOAST_ENTRANCE = 'toast__rise';
 
     const TOAST_LABELS: Record<ToastTone, string> = {
         error: 'Error',
@@ -102,15 +146,77 @@ const CLASS_TOAST_CLOSE = 'toast__close active:translate-y-px hover:text-toast-a
 
     const TOAST_LIMIT = 3;
 
+    const reducedMotionQuery = window.matchMedia(REDUCED_MOTION_QUERY);
     const timers = new WeakMap<HTMLElement, number>();
 
-    function dismissToast(item: HTMLElement) {
+    function dismissDuplicates(list: HTMLElement, item: HTMLElement, tone: ToastTone, message: string) {
+        const duplicate = findToasts(list, `${LIVE_TOAST_SELECTOR}.toast--${tone}`, message).at(-1);
+
+        findToasts(list, `.toast--replaced.toast--${tone}`, message).forEach(copy => copy.remove());
+
+        if (!duplicate) return;
+
+        const startTimes = readStartTimes(duplicate);
+
+        item.classList.toggle('toast--renewed', !startTimes.has(TOAST_ENTRANCE) || duplicate.classList.contains('toast--renewed'));
+        replaceToast(list, duplicate);
+
+        return startTimes;
+    }
+
+    async function dismissToast(item: HTMLElement) {
         const timer = timers.get(item);
 
         if (timer !== undefined) window.clearTimeout(timer);
 
-        item.remove();
         timers.delete(item);
+
+        if (getComputedStyle(item).opacity !== '0' && !reducedMotionQuery.matches) {
+            item.classList.add('toast--leaving');
+            item.inert = true;
+            await finishAnimations(item);
+        }
+
+        item.remove();
+    }
+
+    function findToasts(list: HTMLElement, selector: string, message: string) {
+        return Array.from(list.querySelectorAll<HTMLElement>(selector)).filter(item => item.querySelector('[data-toast-message]')?.textContent === message);
+    }
+
+    async function finishAnimations(item: HTMLElement) {
+        let running = item.getAnimations();
+
+        while (running.length > 0) {
+            await Promise.allSettled(running.map(animation => animation.finished));
+            running = item.getAnimations().filter(animation => animation.playState === 'running');
+        }
+    }
+
+    function handleBeforeSwap(event: DocumentEventMap['astro:before-swap']) {
+        const aside = document.querySelector<HTMLElement>('.toaster');
+        const { swap } = event;
+
+        if (!aside) return;
+
+        event.swap = () => swapToaster(aside, swap);
+    }
+
+    function handleDialogClose(event: Event) {
+        const aside = document.querySelector<HTMLElement>('.toaster');
+        const list = document.querySelector<HTMLElement>('[data-toast-list]');
+
+        if (!aside || !(event.target instanceof HTMLDialogElement) || !event.target.contains(aside) || !list) return;
+
+        preserveMotion(aside, () => document.body.append(aside));
+
+        if (list.querySelector(LIVE_TOAST_SELECTOR)) raiseToaster(aside);
+    }
+
+    function handleEntranceEnd(event: AnimationEvent) {
+        if (event.animationName !== TOAST_ENTRANCE || !(event.currentTarget instanceof HTMLElement)) return;
+
+        event.currentTarget.classList.add('toast--settled');
     }
 
     function handleToast(event: WindowEventMap['apa:toast']) {
@@ -128,32 +234,84 @@ const CLASS_TOAST_CLOSE = 'toast__close active:translate-y-px hover:text-toast-a
         if (!item) return;
 
         item.classList.add(`toast--${tone}`);
+        item.addEventListener('animationend', handleEntranceEnd);
         setText(fragment.querySelector('[data-toast-label]'), TOAST_LABELS[tone]);
         setText(fragment.querySelector('[data-toast-message]'), message);
-        fragment.querySelector('[data-toast-close]')?.addEventListener('click', () => dismissToast(item));
+        fragment.querySelector('[data-toast-close]')?.addEventListener('click', () => void dismissToast(item));
+
+        const startTimes = dismissDuplicates(list, item, tone, message);
+
         list.append(fragment);
+
+        if (startTimes) restoreStartTimes(item, startTimes);
+
         raiseToaster(aside);
-        timers.set(item, window.setTimeout(() => dismissToast(item), TOAST_DISMISS_MILLISECONDS));
+        timers.set(item, window.setTimeout(() => void dismissToast(item), TOAST_DISMISS_MILLISECONDS));
         trimToasts(list);
+    }
+
+    function preserveMotion(aside: HTMLElement, update: () => void) {
+        const snapshots = Array.from(aside.querySelectorAll<HTMLElement>('.toast'), item => ({ item, startTimes: readStartTimes(item) }));
+
+        update();
+        snapshots.forEach(({ item, startTimes }) => restoreStartTimes(item, startTimes));
     }
 
     function raiseToaster(aside: HTMLElement) {
         if (!('showPopover' in aside)) return;
+
+        preserveMotion(aside, () => showToaster(aside));
+    }
+
+    function readStartTimes(item: HTMLElement) {
+        const startTimes = new Map<string, CSSNumberish | null>();
+
+        item.getAnimations().forEach((animation) => {
+            if (animation instanceof CSSAnimation) startTimes.set(animation.animationName, animation.startTime);
+        });
+
+        return startTimes;
+    }
+
+    function replaceToast(list: HTMLElement, item: HTMLElement) {
+        const shift = new DOMMatrixReadOnly(getComputedStyle(item).transform).m42;
+
+        item.style.setProperty('--toast-offset', `${list.getBoundingClientRect().bottom - item.getBoundingClientRect().bottom + shift}px`);
+        item.classList.add('toast--replaced');
+        void dismissToast(item);
+    }
+
+    function restoreStartTimes(item: HTMLElement, startTimes: ReturnType<typeof readStartTimes>) {
+        item.getAnimations().forEach((animation) => {
+            const startTime = animation instanceof CSSAnimation ? startTimes.get(animation.animationName) ?? null : null;
+
+            if (startTime !== null) animation.startTime = startTime;
+        });
+    }
+
+    function showToaster(aside: HTMLElement) {
+        const host = document.querySelector('dialog:modal') ?? document.body;
+
+        if (aside.parentElement !== host) host.append(aside);
 
         if (aside.matches(':popover-open')) aside.hidePopover();
 
         aside.showPopover();
     }
 
-    function trimToasts(list: HTMLElement) {
-        while (list.children.length > TOAST_LIMIT) {
-            const oldest = list.firstElementChild;
+    function swapToaster(aside: HTMLElement, swap: () => void) {
+        preserveMotion(aside, swap);
 
-            if (!(oldest instanceof HTMLElement)) return;
-
-            dismissToast(oldest);
-        }
+        if (aside.querySelector(LIVE_TOAST_SELECTOR)) raiseToaster(aside);
     }
 
+    function trimToasts(list: HTMLElement) {
+        Array.from(list.querySelectorAll<HTMLElement>(LIVE_TOAST_SELECTOR))
+            .slice(0, -TOAST_LIMIT)
+            .forEach(item => void dismissToast(item));
+    }
+
+    document.addEventListener('astro:before-swap', handleBeforeSwap);
+    document.addEventListener('close', handleDialogClose, { capture: true });
     window.addEventListener(TOAST_TOPIC, handleToast);
 </script>

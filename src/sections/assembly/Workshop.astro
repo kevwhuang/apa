@@ -1,11 +1,14 @@
 ---
 import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
 
 import IconArrow from '@components/icons/Arrow.astro';
+import IconDownload from '@components/icons/Download.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import Schedule from '@components/program/Schedule.astro';
 import { PALETTE } from '@lib/shared/constants';
 import { getInitials, isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { isDownload, toAvailability } from '@lib/resources/unlocks';
 import { loadEvents } from '@lib/programs/calendar';
 
 import type { ImageMetadata } from 'astro';
@@ -15,17 +18,29 @@ const PORTRAIT_WIDTH = 500;
 
 const SESSION_EXTRAS = {
     event_id: '2026_11_assembly',
-    files: [
-        { description: 'Two tracks prepared to mix cleanly, split out for rehearsing each blend.', metadata: 'ZIP \u00b7 210 MB', title: 'Practice Stems' },
-        { description: 'Every phrasing and beatmatching chart from the lab, annotated after the fact.', metadata: 'PDF \u00b7 24 pages', title: 'Workshop Slides' },
-    ],
+    files: ['logo_kit', 'press_kit'],
 } as const;
 
+const downloads = await getCollection('downloads');
 const events = await loadEvents();
+
+const files = SESSION_EXTRAS.files.map((id) => {
+    const entry = downloads.find(download => download.id === id);
+
+    if (!entry) throw new Error(`Download ${id} has no file.`);
+
+    return {
+        availability: toAvailability(entry.data),
+        description: entry.data.description,
+        href: entry.data.href,
+        isDownload: isDownload(entry.data),
+        title: entry.data.title,
+    };
+});
 
 const portraits = import.meta.glob<{ default: ImageMetadata }>('/src/images/speakers/*.webp', { eager: true });
 
-const sessions = events.flatMap(event => (event.program.id === 'assembly' && event.speaker && event.title ? [{ ...event, speaker: event.speaker, title: event.title }] : []));
+const sessions = events.flatMap(event => (event.program === 'Assembly' && event.speaker ? [{ ...event, speaker: event.speaker }] : []));
 
 const ended = sessions.filter(session => !isUpcoming(session.ends_at));
 const upcoming = sessions.filter(session => isUpcoming(session.ends_at));
@@ -34,7 +49,7 @@ const cards = [...ended.slice(-1), ...upcoming].map((session, index) => ({
     bio: session.speaker.bio,
     body: session.body,
     endsAt: toAustinIso(session.ends_at),
-    extras: session.id === SESSION_EXTRAS.event_id ? SESSION_EXTRAS : undefined,
+    extras: session.id === SESSION_EXTRAS.event_id && files.length > 0 ? { files } : undefined,
     headingId: index === 0 ? 'workshop-title' : `workshop-${index + 1}-title`,
     isUpcoming: isUpcoming(session.ends_at),
     portrait: portraits[`/src/images/speakers/${session.speaker.name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}.webp`]?.default,
@@ -55,7 +70,7 @@ const shown = cards.find(card => card.isUpcoming) ?? cards.at(-1);
         hidden={card !== shown}
     >
         <div
-            class="slab slab--lift slab--roomy workshop"
+            class="slab slab--card slab--roomy workshop"
             data-motion="unfold"
         >
             <hgroup>
@@ -91,7 +106,7 @@ const shown = cards.find(card => card.isUpcoming) ?? cards.at(-1);
                 <div class="flex flex-col self-start gap-(--space-md)">
                     <div class="slab slab--card">
                         <div
-                            class="mb-6 pb-(--lift) pe-(--lift)"
+                            class="mb-6"
                             data-motion="wipe"
                         >
                             {card.portrait
@@ -131,35 +146,30 @@ const shown = cards.find(card => card.isUpcoming) ?? cards.at(-1);
                         {card.body}
                     </p>
                     {card.extras && (
-                        <div>
-                            <h3 class="mb-(--space-md) font-display text-2xl">Workshop files</h3>
-                            <ul
-                                class="flex flex-col list-none"
-                                data-motion-stagger="rise"
-                            >
-                                {card.extras.files.map(file => (
-                                    <li class="workshop__row first:border-t-0 first:pt-0 grid grid-cols-[minmax(min-content,1fr)_auto] items-center gap-x-4 gap-y-1 py-3 border-t border-t-border-subtle">
-                                        <div class="[grid-area:body] flex flex-col gap-1">
-                                            <p class="py-4 font-mono">{file.title}</p>
-                                            <p class="text-base text-text-secondary">{file.description}</p>
-                                        </div>
-                                        <p
-                                            class="[grid-area:meta] font-mono text-base whitespace-nowrap text-text-secondary"
-                                            data-placeholder
+                        <ul
+                            class="flex flex-col list-none"
+                            aria-label="Workshop files"
+                            data-motion-stagger="rise"
+                        >
+                            {card.extras.files.map(file => (
+                                <li class="workshop__row first:border-t-0 first:pt-0 last:pb-0 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 py-4 border-t border-t-border-subtle">
+                                    <div class="[grid-area:body] flex flex-col gap-1">
+                                        <p class="overflow-hidden font-bold tracking-tight text-ellipsis wrap-normal">{file.title}</p>
+                                        <p class="overflow-hidden text-base text-ellipsis wrap-normal text-text-secondary">{file.description}</p>
+                                    </div>
+                                    {file.availability === 'open' && (
+                                        <a
+                                            class:list={['hit active:translate-y-px focus-visible:text-link hover:text-link [grid-area:link] inline-flex size-8 transition-[color,translate]', file.isDownload ? '-me-0.75' : 'items-center justify-end text-2xl']}
+                                            aria-label={`${file.isDownload ? 'Download' : 'View'} ${file.title}`}
+                                            download={file.isDownload ? '' : undefined}
+                                            href={file.href}
                                         >
-                                            {file.metadata}
-                                        </p>
-                                        <p class="label [grid-area:status] text-text-secondary">Coming soon</p>
-                                    </li>
-                                ))}
-                            </ul>
-                            <a
-                                class="action-text inline-flex items-center min-h-(--control-size) gap-2"
-                                href="/resources"
-                            >
-                                Browse resources <IconArrow />
-                            </a>
-                        </div>
+                                            {file.isDownload ? <IconDownload /> : <IconArrow />}
+                                        </a>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
                     )}
                 </div>
             </div>
@@ -182,16 +192,6 @@ const shown = cards.find(card => card.isUpcoming) ?? cards.at(-1);
     }
 
     .workshop__row {
-        grid-template-areas:
-            'body status'
-            'meta status';
-    }
-
-    @media (max-width: 1024px) {
-        .workshop__row {
-            grid-template-areas:
-                'body body'
-                'meta status';
-        }
+        grid-template-areas: 'body link';
     }
 </style>

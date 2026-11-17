@@ -1,32 +1,10 @@
 import { getCollection } from 'astro:content';
 
-import { LOCALE, TIME_ZONE } from '@lib/shared/constants';
-
 import type { CollectionEntry } from 'astro:content';
 
 interface Sources {
-    programs: Program[];
     speakers: CollectionEntry<'speakers'>[];
     sponsors: CollectionEntry<'sponsors'>[];
-}
-
-const CREDIT_SEPARATOR = ' \u00b7 ';
-const ROMAN_MONTHS = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi', 'xii'] as const;
-
-function formatEventName(data: EventData, program: Program, speaker?: Speaker) {
-    if (data.title && program.id === 'bash') return `${data.title} ${program.name}`;
-
-    const month = program.title_style === 'numeral'
-        ? ROMAN_MONTHS[Number(data.starts_at.toLocaleDateString(LOCALE, { month: 'numeric', timeZone: TIME_ZONE })) - 1]
-        : data.starts_at.toLocaleDateString(LOCALE, { month: 'long', timeZone: TIME_ZONE });
-
-    const stamp = `${month} ${data.starts_at.toLocaleDateString(LOCALE, { timeZone: TIME_ZONE, year: 'numeric' })}`;
-
-    return speaker ? `${stamp} ${program.name}${CREDIT_SEPARATOR}${speaker.name}` : stamp;
-}
-
-async function getProgram(id: string): Promise<Program> {
-    return getRecord(await loadPrograms(), id, 'Program');
 }
 
 function getRecord<T extends { id: string }>(records: T[], id: string, label: string) {
@@ -41,7 +19,6 @@ async function loadEvents(): Promise<EventRecord[]> {
     const events = await getCollection('events');
 
     const sources = {
-        programs: await loadPrograms(),
         speakers: await getCollection('speakers'),
         sponsors: await getCollection('sponsors'),
     };
@@ -51,62 +28,40 @@ async function loadEvents(): Promise<EventRecord[]> {
         .sort((a, b) => +a.starts_at - +b.starts_at);
 }
 
-async function loadPrograms(): Promise<Program[]> {
-    const programs = await getCollection('programs');
+function requireBody(entry: CollectionEntry<'events' | 'speakers' | 'sponsors'>) {
+    if (!entry.body) throw new Error(`${entry.collection} ${entry.id} needs a body.`);
 
-    return programs
-        .map(toProgram)
-        .sort((a, b) => a.id.localeCompare(b.id));
-}
-
-function requireText(text: string | undefined, label: string) {
-    if (text === undefined) throw new Error(`${label} is missing and its program sets no default.`);
-
-    return text;
+    return entry.body;
 }
 
 function toEventRecord(entry: CollectionEntry<'events'>, sources: Sources) {
-    const { program: programLink, speaker: speakerLink, sponsors: sponsorLinks, ...core } = entry.data;
+    const { program, speaker: speakerLink, sponsor: sponsorLink, ...core } = entry.data;
 
-    const program = getRecord(sources.programs, programLink.id, 'Program');
+    const slug = program.toLowerCase();
 
-    const idPattern = new RegExp(`^\\d{4}_\\d{2}_${program.id}(_\\d+)?$`);
+    const idPattern = new RegExp(`^\\d{4}_\\d{2}_${slug}(_\\d+)?$`);
 
-    if (!idPattern.test(entry.id)) throw new Error(`Event ${entry.id} must be named YYYY_MM_${program.id}.`);
+    if (!idPattern.test(entry.id)) throw new Error(`Event ${entry.id} must be named YYYY_MM_${slug}.`);
 
     const speaker = speakerLink && toSpeaker(getRecord(sources.speakers, speakerLink.id, 'Speaker'));
-
-    const sponsors = sponsorLinks
-        .map(link => getRecord(sources.sponsors, link.id, 'Sponsor'))
-        .map(toSponsor);
+    const sponsor = sponsorLink && toSponsor(getRecord(sources.sponsors, sponsorLink.id, 'Sponsor'));
 
     return {
         ...core,
-        body: requireText(entry.body ?? program.default_body, `The body of event ${entry.id}`),
+        body: requireBody(entry),
         id: entry.id,
-        name: formatEventName(entry.data, program, speaker),
         program,
         speaker,
-        sponsors,
+        sponsor,
     };
 }
 
-function toProgram(entry: CollectionEntry<'programs'>) {
-    if (!entry.body) throw new Error(`Program ${entry.id} needs a summary as the body of its file.`);
-
-    return { ...entry.data, id: entry.id, summary: entry.body };
-}
-
 function toSpeaker(entry: CollectionEntry<'speakers'>) {
-    if (!entry.body) throw new Error(`Speaker ${entry.id} needs a bio as the body of its file.`);
-
-    return { ...entry.data, bio: entry.body };
+    return { ...entry.data, bio: requireBody(entry) };
 }
 
 function toSponsor(entry: CollectionEntry<'sponsors'>) {
-    if (!entry.body) throw new Error(`Sponsor ${entry.id} needs a description as the body of its file.`);
-
-    return { ...entry.data, description: entry.body };
+    return { ...entry.data, description: requireBody(entry) };
 }
 
-export { getProgram, loadEvents, loadPrograms };
+export { loadEvents };

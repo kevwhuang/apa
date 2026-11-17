@@ -5,7 +5,7 @@ import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import Schedule from '@components/program/Schedule.astro';
 import { AVATAR, GENRES, ONBOARDING_STEPS, PROFILE_FIELDS, PROFILE_ROLES, TOUR_STOPS, US_STATES } from '@lib/shared/constants';
 import { AVATAR_EXTENSIONS_OR_LIST } from '@lib/account/images';
-import { formatBytes, formatDateStamp, formatRole, formatVenue, isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { formatBytes, formatDateStamp, formatRole, isUpcoming, toAustinIso } from '@lib/shared/utils';
 import { loadEvents } from '@lib/programs/calendar';
 
 const ACCOUNT_BENEFITS = [
@@ -30,7 +30,7 @@ const WELCOME_LINKS = [
 
 const events = await loadEvents();
 
-const assemblies = events.filter(event => event.program.id === 'assembly' && isUpcoming(event.ends_at));
+const assemblies = events.filter(event => event.program === 'Assembly' && isUpcoming(event.ends_at));
 ---
 
 <section
@@ -180,13 +180,13 @@ const assemblies = events.filter(event => event.program.id === 'assembly' && isU
                 <div class="flex flex-col gap-2">
                     <p class="label text-text-secondary">{PROFILE_FIELDS.portrait.label}</p>
                     <div class="flex flex-wrap items-center gap-(--space-md)">
-                        <label class="dropzone halftone onboarding__pick basis-55 flex grow items-center relative min-h-(--control-size) px-4 py-2 border-2 border-border-strong border-dashed bg-bg-page">
+                        <label class="dropzone halftone basis-55 flex grow items-center relative min-h-(--control-size) px-4 py-2 border-2 border-border-strong border-dashed bg-bg-page">
                             <span class="label">{PROFILE_FIELDS.portrait.picker}</span>
                             <input
                                 id="onboarding-portrait"
                                 class="dropzone__input sr-only"
                                 accept={AVATAR.acceptAttribute}
-                                aria-describedby="onboarding-portrait-error onboarding-portrait-help"
+                                aria-describedby="onboarding-portrait-help"
                                 aria-invalid="false"
                                 data-portrait-input
                                 name="portrait"
@@ -204,12 +204,6 @@ const assemblies = events.filter(event => event.program.id === 'assembly' && isU
                         </button>
                     </div>
                     <p
-                        id="onboarding-portrait-error"
-                        class="text-error-text"
-                        data-field-error
-                        hidden
-                    />
-                    <p
                         id="onboarding-portrait-help"
                         class="text-base text-text-secondary"
                     >
@@ -222,7 +216,6 @@ const assemblies = events.filter(event => event.program.id === 'assembly' && isU
                         <input
                             id="onboarding-artist-name"
                             class="input"
-                            aria-describedby="onboarding-artist-name-error"
                             aria-invalid="false"
                             autocomplete={PROFILE_FIELDS.artistName.autocomplete}
                             maxlength={PROFILE_FIELDS.artistName.maxLength}
@@ -230,12 +223,6 @@ const assemblies = events.filter(event => event.program.id === 'assembly' && isU
                             type="text"
                         />
                     </label>
-                    <p
-                        id="onboarding-artist-name-error"
-                        class="text-error-text"
-                        data-field-error
-                        hidden
-                    />
                 </div>
                 <fieldset class="flex flex-col gap-2">
                     <legend class="label mb-2 text-text-secondary">
@@ -281,7 +268,6 @@ const assemblies = events.filter(event => event.program.id === 'assembly' && isU
                             <input
                                 id="onboarding-city"
                                 class="input"
-                                aria-describedby="onboarding-city-error"
                                 aria-invalid="false"
                                 autocomplete={PROFILE_FIELDS.city.autocomplete}
                                 name="city"
@@ -290,12 +276,6 @@ const assemblies = events.filter(event => event.program.id === 'assembly' && isU
                                 value={DEFAULT_CITY}
                             />
                         </label>
-                        <p
-                            id="onboarding-city-error"
-                            class="text-error-text"
-                            data-field-error
-                            hidden
-                        />
                     </div>
                     <div class="flex flex-col gap-2">
                         <label class="flex flex-col gap-2">
@@ -304,7 +284,6 @@ const assemblies = events.filter(event => event.program.id === 'assembly' && isU
                                 <select
                                     id="onboarding-state"
                                     class="input"
-                                    aria-describedby="onboarding-state-error"
                                     aria-invalid="false"
                                     autocomplete={PROFILE_FIELDS.state.autocomplete}
                                     name="state"
@@ -321,12 +300,6 @@ const assemblies = events.filter(event => event.program.id === 'assembly' && isU
                                 </select>
                             </span>
                         </label>
-                        <p
-                            id="onboarding-state-error"
-                            class="text-error-text"
-                            data-field-error
-                            hidden
-                        />
                     </div>
                 </div>
             </fieldset>
@@ -342,7 +315,7 @@ const assemblies = events.filter(event => event.program.id === 'assembly' && isU
                     Why an account
                 </legend>
                 <ul
-                    class="slab slab--bare slab--card grid grid-cols-2 mb-(--lift) max-md:grid-cols-1"
+                    class="slab slab--bare slab--card grid grid-cols-2 max-md:grid-cols-1"
                     data-onboarding-reveal
                 >
                     {ACCOUNT_BENEFITS.map(benefit => (
@@ -417,7 +390,7 @@ const assemblies = events.filter(event => event.program.id === 'assembly' && isU
                                     </span>
                                 </span>
                                 <span class="text-base wrap-anywhere text-text-secondary">
-                                    <time datetime={toAustinIso(assembly.starts_at)}>{formatDateStamp(assembly.starts_at)}</time> at {formatVenue(assembly.venue)}. Come say hi.
+                                    <time datetime={toAustinIso(assembly.starts_at)}>{formatDateStamp(assembly.starts_at)}</time> at {assembly.venue}. Come say hi.
                                 </span>
                             </a>
                         </li>
@@ -593,18 +566,6 @@ const assemblies = events.filter(event => event.program.id === 'assembly' && isU
         top: calc(var(--header-height) + var(--space-md));
     }
 
-    .onboarding__pick {
-        transition:
-            background-color var(--duration-fast) var(--motion-ease-ui),
-            border-color var(--duration-fast) var(--motion-ease-ui),
-            box-shadow var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .onboarding__pick:has(.dropzone__input[aria-invalid='true']) {
-        border-color: var(--color-border-invalid);
-        box-shadow: var(--lift-shadow);
-    }
-
     [data-onboarding-reveal='off'] {
         opacity: 0;
         translate: 0 calc(var(--motion-travel) * 1px);
@@ -648,7 +609,7 @@ const assemblies = events.filter(event => event.program.id === 'assembly' && isU
     import { MOTION_SELECTOR, revealTarget } from '@lib/motion/entrances';
     import { ONBOARDING_STEPS, ONBOARDING_TOKEN_PARAMETER, PROFILE_FIELDS, REDUCED_MOTION_QUERY } from '@lib/shared/constants';
     import { armTour } from '@lib/tour/tour';
-    import { clearFieldErrors, focusFirstError, setFieldErrors, setRole, validateFields } from '@lib/ui/forms';
+    import { clearFieldErrors, reportFieldErrors, setRole, validateFields, watchFieldErrors } from '@lib/ui/forms';
     import { clearOnboardingDraft, getOnboardingDraft, saveOnboardingDraft, verifyOnboardingToken } from '@lib/account/onboarding';
     import { formatRole, getInitials, pickTileColor, registerPageScript, setAvatarImage, setHidden, setPending, setText } from '@lib/shared/utils';
     import { getSession, startSession, updateSession } from '@lib/account/session';
@@ -766,8 +727,7 @@ const assemblies = events.filter(event => event.program.id === 'assembly' && isU
             clearFieldErrors(form);
 
             if (!staged.ok) {
-                setFieldErrors(form, { portrait: staged.message });
-                input.focus();
+                reportFieldErrors(form, { portrait: staged.message });
 
                 return;
             }
@@ -800,9 +760,7 @@ const assemblies = events.filter(event => event.program.id === 'assembly' && isU
         clearFieldErrors(form);
 
         if (Object.keys(errors).length > 0) {
-            setFieldErrors(form, errors);
-            focusFirstError(form, errors);
-            toast('Check the fields.', 'error');
+            reportFieldErrors(form, errors);
 
             return;
         }
@@ -873,6 +831,7 @@ const assemblies = events.filter(event => event.program.id === 'assembly' && isU
         form.querySelector<HTMLButtonElement>('[data-onboarding-tour]')?.addEventListener('click', () => void handleTour(), { signal });
         form.querySelector<HTMLButtonElement>('[data-portrait-remove]')?.addEventListener('click', () => handlePortraitRemove(form), { signal });
         picture?.addEventListener('change', () => void handlePortraitChange(form, picture), { signal });
+        watchFieldErrors(form, signal);
     }
 
     function persistDraft(form: HTMLFormElement) {

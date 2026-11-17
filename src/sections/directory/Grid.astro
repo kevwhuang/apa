@@ -7,7 +7,7 @@ import ProducerPortrait from '@components/producer/Portrait.astro';
 import ProducerTrack from '@components/producer/Track.astro';
 import SearchField from '@components/shared/SearchField.astro';
 import { PALETTE } from '@lib/shared/constants';
-import { formatCalendarMonth, formatRole, toAustinIso, toRoster } from '@lib/shared/utils';
+import { describeMatches, formatCalendarMonth, formatRole, toAustinIso, toRoster } from '@lib/shared/utils';
 
 import type { CollectionEntry } from 'astro:content';
 
@@ -140,7 +140,7 @@ const roster = [...producers]
             data-directory-status
             data-motion="stamp"
         >
-            Showing all {roster.length} members
+            {describeMatches(roster.length, roster.length, false, '')}
         </p>
         <ul
             class="roster__grid grid grid-cols-3 gap-x-(--space-lg) list-none max-lg:grid-cols-2 max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))]"
@@ -155,7 +155,7 @@ const roster = [...producers]
                     data-search={producer.search}
                     style={`--role-color: ${ROLE_COLORS[producer.data.roles[0]]}`}
                 >
-                    <article class="producer-card__frame slab slab--bare slab--card slab--still">
+                    <article class="producer-card__frame slab slab--bare slab--card">
                         <ProducerPortrait
                             class="aspect-square"
                             color={PALETTE[(index + 1) % PALETTE.length].background}
@@ -285,14 +285,8 @@ const roster = [...producers]
 </style>
 
 <script>
-    import { initFilterGroup, initSearchField, registerPageScript } from '@lib/shared/utils';
+    import { describeMatches, initFilterGroup, initSearchField, registerPageScript } from '@lib/shared/utils';
     import { initTracks } from '@lib/audio/tracks';
-
-    function describeMembers(shown: number, total: number, isFiltered: boolean, query: string) {
-        if (query) return `Showing ${shown} of ${total} members for \u201c${query}\u201d`;
-
-        return isFiltered ? `Showing ${shown} of ${total} members` : `Showing all ${total} members`;
-    }
 
     function initDirectoryGrid(signal: AbortSignal) {
         const cards = document.querySelectorAll<HTMLElement>('.producer-card');
@@ -320,7 +314,7 @@ const roster = [...producers]
             ],
             searchElement,
             signal,
-            status: describeMembers,
+            status: describeMatches,
             statusElement: document.querySelector<HTMLElement>('[data-directory-status]'),
         });
 

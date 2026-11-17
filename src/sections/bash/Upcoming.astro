@@ -8,11 +8,9 @@ import { loadEvents } from '@lib/programs/calendar';
 const events = await loadEvents();
 
 const later = events
-    .filter(event => event.program.id === 'bash' && isUpcoming(event.ends_at))
+    .filter(event => event.program === 'Bash' && isUpcoming(event.ends_at))
     .slice(1)
     .map(event => toProgramCard(event));
-
-const isStill = later.some(card => card.notes.length > 0);
 ---
 
 <section
@@ -43,9 +41,8 @@ const isStill = later.some(card => card.notes.length > 0);
                     <ProgramCard
                         group="bash-upcoming"
                         heading={card.heading}
-                        isStill={isStill}
                         notes={card.notes}
-                        program="bash"
+                        program="Bash"
                         startsAt={card.startsAt}
                         text={card.text}
                         venue={card.venue}

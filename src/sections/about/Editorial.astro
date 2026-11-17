@@ -3,14 +3,6 @@ import IconArrow from '@components/icons/Arrow.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { CANONICAL, JOIN_ROUTE, PALETTE } from '@lib/shared/constants';
-import { loadPrograms } from '@lib/programs/calendar';
-
-const programs = await loadPrograms();
-
-const activeNames = programs.filter(program => program.status === 'active').map(program => program.name);
-const plannedCount = programs.filter(program => program.status === 'planned').length;
-
-const activePrograms = new Intl.ListFormat('en', { type: 'conjunction' }).format(activeNames);
 
 const CLASS_ROADMAP_NODE = 'roadmap__node flex items-center justify-center relative h-(--roadmap-node) w-(--roadmap-node) border-2 border-border-strong font-bold font-mono leading-none text-sm bg-bg-raised text-link';
 
@@ -36,7 +28,7 @@ const ROADMAP: { detail: string; name: string; status: 'later' | 'next' }[] = [
         status: 'next',
     },
     {
-        detail: `${activePrograms} run on a recurring calendar, and ${plannedCount} more programs round out the lineup.`,
+        detail: 'Assembly, Bash, CAMP, and Hangout run on a recurring calendar, and 4 more programs round out the lineup.',
         name: 'Launch all planned events',
         status: 'later',
     },
@@ -295,7 +287,6 @@ const openingColors = PALETTE.slice(0, OPENINGS.length);
     }
 
     .roadmap__step[data-status='next'] .slab--well {
-        --slab-level: var(--z-card);
         --slab-line: var(--color-border-strong);
         --slab-rule: 2px;
     }
@@ -315,6 +306,17 @@ const openingColors = PALETTE.slice(0, OPENINGS.length);
 <script>
     import { registerPageScript } from '@lib/shared/utils';
 
+    function handleFocus(button: HTMLButtonElement) {
+        const strip = button.closest('ul');
+
+        if (!strip) return;
+
+        const buttonBox = button.getBoundingClientRect();
+        const stripBox = strip.getBoundingClientRect();
+
+        strip.scrollBy({ behavior: 'instant', left: Math.max(buttonBox.right - stripBox.right, 0) + Math.min(buttonBox.left - stripBox.left, 0) });
+    }
+
     function handleJump(button: HTMLButtonElement) {
         const heading = document.getElementById(button.dataset.jump ?? '');
 
@@ -324,6 +326,7 @@ const openingColors = PALETTE.slice(0, OPENINGS.length);
     function initAbout(signal: AbortSignal) {
         document.querySelectorAll<HTMLButtonElement>('[data-jump]').forEach((button) => {
             button.addEventListener('click', () => handleJump(button), { signal });
+            button.addEventListener('focus', () => handleFocus(button), { signal });
         });
     }
 

@@ -1,11 +1,12 @@
 ---
-ends_at: 2025-01-16T21:30:00-06:00
-program: assembly
+ends_at: 2025-01-16T21:00:00-06:00
+external_url: https://www.meetup.com/austinproduceralliance/events/305038925
+program: Assembly
 room: Antone's (16th floor)
 speaker: boomchii
-starts_at: 2025-01-16T18:30:00-06:00
-title: "The Art of Vocal Production: Mixing Essentials"
+starts_at: 2025-01-16T18:00:00-06:00
+title: 'The Art of Vocal Production: Mixing Essentials'
 venue: Capital Factory
 ---
 
-Boomchii and the ArtistDev team presented The Art of Vocal Production: Mixing Essentials, a talk on vocal mixing techniques for client projects. They went through strategies and best practices for improving a vocal track, with the emphasis on clarity, balance, and impact. The session was pitched at producers of every level, from the experienced to those just starting out.
+Mixing vocals for a client project calls for clarity, balance, and impact. In this talk, Boomchii and the ArtistDev team share strategies and best practices for achieving all three. They walk through their go-to techniques and offer ways for producers to refine their own vocal mixes.

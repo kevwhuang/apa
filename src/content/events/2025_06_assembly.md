@@ -1,6 +1,7 @@
 ---
-ends_at: 2025-06-07T16:30:00-05:00
-program: assembly
+ends_at: 2025-06-07T17:00:00-05:00
+external_url: https://www.meetup.com/austinproduceralliance/events/307999975
+program: Assembly
 room: Building 2000 Room 1420
 speaker: henyx
 starts_at: 2025-06-07T13:30:00-05:00
@@ -8,8 +9,6 @@ title: FL Studio Bootcamp
 venue: ACC Highland
 ---
 
-Henyx taught FL Studio from the ground up at the Flex Factory. He started from what it is like to jump into something new without clear direction, which can be fun at first but can quickly spiral until a producer feels lost and frustrated and loses motivation. He showed what it takes to bring ideas to life, and attendees worked hands-on in the software alongside audio professionals.
+Starting something new without clear direction can be fun at first, but a producer can soon end up lost, frustrated, and unmotivated. This bootcamp at the Flex Factory teaches FL Studio from the ground up and shows what it takes to bring ideas to life, with hands-on work alongside audio professionals.
 
-Attendees were asked to bring their own laptops to follow along. Experienced producers were paired with beginners so that everyone had the support they needed.
-
-Gear was up for grabs for those who took part in the activities, with a chance to win a license for FL Studio Producer Edition ($180), a Novation FLkey Mini MIDI Controller ($120), and more. Producers just getting started and producers already making hits could both take part.
+Producers at every stage can take part. Attendees are asked to bring a laptop to follow along, and beginners are paired with experienced producers so that everyone has the support they need. Those who take part in the activities can win gear, including a license for FL Studio Producer Edition ($180) and a Novation FLkey Mini MIDI controller ($120).

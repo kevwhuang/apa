@@ -7,7 +7,6 @@ interface Props {
     credit?: string;
     group: string;
     heading: string;
-    isStill: boolean;
     notes: { label: string; paragraphs: string[] }[];
     program: keyof typeof BANDS;
     startsAt: Date;
@@ -16,17 +15,17 @@ interface Props {
 }
 
 const BANDS = {
-    assembly: 'bg-event-assembly',
-    bash: 'bg-event-bash',
-    hangout: 'bg-event-hangout',
+    Assembly: 'bg-event-assembly',
+    Bash: 'bg-event-bash',
+    Hangout: 'bg-event-hangout',
 };
 
-const { credit, group, heading, isStill, notes, program, startsAt, text, venue } = Astro.props;
+const { credit, group, heading, notes, program, startsAt, text, venue } = Astro.props;
 
 const paragraphs = text.split(PARAGRAPH_SEPARATOR);
 ---
 
-<article class:list={['slab slab--bare slab--card', isStill && 'slab--still', 'content-start grid grid-cols-1 grid-rows-subgrid row-span-3']}>
+<article class="slab slab--bare slab--card content-start grid grid-cols-1 grid-rows-subgrid row-span-3">
     <div class="flex flex-col">
         <div
             class:list={['h-3 border-b-2 border-border-strong', BANDS[program]]}
@@ -41,27 +40,27 @@ const paragraphs = text.split(PARAGRAPH_SEPARATOR);
     </div>
     <div class="p-(--space-md)">
         <hgroup class="flex flex-col gap-2 mb-3">
+            <h3 class="font-display text-balance text-xl max-lg:text-lg">
+                {heading}
+            </h3>
             {credit && (
                 <p class="font-bold leading-(--text-xl) text-lg tracking-tight">
                     {credit}
                 </p>
             )}
-            <h3 class="font-display text-balance text-xl max-lg:text-lg">
-                {heading}
-            </h3>
         </hgroup>
         {paragraphs.length > 1
             ? (
                     <div class="flex flex-col gap-4">
                         {paragraphs.map(paragraph => (
-                            <p class="text-base text-text-secondary">
+                            <p class="text-base text-wrap text-text-secondary">
                                 {paragraph}
                             </p>
                         ))}
                     </div>
                 )
             : (
-                    <p class="text-base text-text-secondary">
+                    <p class="text-base text-wrap text-text-secondary">
                         {text}
                     </p>
                 )}

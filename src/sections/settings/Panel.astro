@@ -3,7 +3,7 @@ import IconArrow from '@components/icons/Arrow.astro';
 import IconEye from '@components/icons/Eye.astro';
 import IconEyeOff from '@components/icons/EyeOff.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import { AVATAR, GENRES, PASSWORD_MIN_LENGTH, PROFILE_FIELDS, PROFILE_ROLES, UPLOAD, US_STATES } from '@lib/shared/constants';
+import { AVATAR, GENRES, LINK_MAX_LENGTH, PASSWORD_MIN_LENGTH, PROFILE_FIELDS, PROFILE_ROLES, UPLOAD, US_STATES } from '@lib/shared/constants';
 import { AVATAR_EXTENSIONS_OR_LIST } from '@lib/account/images';
 import { UPLOAD_EXTENSIONS_OR_LIST } from '@lib/audio/uploads';
 import { formatBytes, formatDateStamp, formatProds, formatRole, getInitials, pickTileColor } from '@lib/shared/utils';
@@ -155,13 +155,13 @@ const LINK_FIELDS = [
             <div class="flex flex-col gap-2">
                 <p class="label text-text-secondary">{PROFILE_FIELDS.portrait.label}</p>
                 <div class="settings__track aria-busy:cursor-progress aria-busy:opacity-60 flex flex-wrap items-center gap-(--space-md)">
-                    <label class="dropzone halftone settings__pick basis-55 flex grow items-center relative min-h-(--control-size) px-4 py-2 border-2 border-border-strong border-dashed bg-bg-page">
+                    <label class="dropzone halftone basis-55 flex grow items-center relative min-h-(--control-size) px-4 py-2 border-2 border-border-strong border-dashed bg-bg-page">
                         <span class="label">{PROFILE_FIELDS.portrait.picker}</span>
                         <input
                             id="settings-portrait"
                             class="dropzone__input sr-only"
                             accept={AVATAR.acceptAttribute}
-                            aria-describedby="settings-portrait-error settings-portrait-help"
+                            aria-describedby="settings-portrait-help"
                             aria-invalid="false"
                             data-portrait-input
                             name="portrait"
@@ -189,12 +189,6 @@ const LINK_FIELDS = [
                     </div>
                 </div>
                 <p
-                    id="settings-portrait-error"
-                    class="text-error-text"
-                    data-field-error
-                    hidden
-                />
-                <p
                     id="settings-portrait-help"
                     class="text-base text-text-secondary"
                 >
@@ -207,7 +201,6 @@ const LINK_FIELDS = [
                     <input
                         id="settings-name"
                         class="input"
-                        aria-describedby="settings-name-error"
                         aria-invalid="false"
                         autocomplete={PROFILE_FIELDS.artistName.autocomplete}
                         maxlength={PROFILE_FIELDS.artistName.maxLength}
@@ -216,12 +209,6 @@ const LINK_FIELDS = [
                         value={DEMO_PROFILE.artistName}
                     />
                 </label>
-                <p
-                    id="settings-name-error"
-                    class="text-error-text"
-                    data-field-error
-                    hidden
-                />
             </div>
             <div class="flex flex-col gap-2">
                 <label class="flex flex-col gap-2">
@@ -229,7 +216,7 @@ const LINK_FIELDS = [
                     <textarea
                         id="settings-bio"
                         class="input resize-none"
-                        aria-describedby="settings-bio-error settings-bio-count"
+                        aria-describedby="settings-bio-count"
                         aria-invalid="false"
                         maxlength={PROFILE_FIELDS.bio.maxLength}
                         name="bio"
@@ -237,12 +224,6 @@ const LINK_FIELDS = [
                         set:text={DEMO_PROFILE.bio}
                     />
                 </label>
-                <p
-                    id="settings-bio-error"
-                    class="text-error-text"
-                    data-field-error
-                    hidden
-                />
                 <p
                     id="settings-bio-count"
                     class="font-mono tabular-nums text-sm text-text-secondary"
@@ -296,7 +277,6 @@ const LINK_FIELDS = [
                         <input
                             id="settings-city"
                             class="input"
-                            aria-describedby="settings-city-error"
                             aria-invalid="false"
                             autocomplete={PROFILE_FIELDS.city.autocomplete}
                             name="city"
@@ -305,12 +285,6 @@ const LINK_FIELDS = [
                             value={DEMO_PROFILE.city}
                         />
                     </label>
-                    <p
-                        id="settings-city-error"
-                        class="text-error-text"
-                        data-field-error
-                        hidden
-                    />
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="flex flex-col gap-2">
@@ -319,7 +293,6 @@ const LINK_FIELDS = [
                             <select
                                 id="settings-state"
                                 class="input"
-                                aria-describedby="settings-state-error"
                                 aria-invalid="false"
                                 autocomplete={PROFILE_FIELDS.state.autocomplete}
                                 name="state"
@@ -336,12 +309,6 @@ const LINK_FIELDS = [
                             </select>
                         </span>
                     </label>
-                    <p
-                        id="settings-state-error"
-                        class="text-error-text"
-                        data-field-error
-                        hidden
-                    />
                 </div>
             </div>
             <button
@@ -371,9 +338,9 @@ const LINK_FIELDS = [
                         <input
                             id={`settings-${field.name}`}
                             class="input font-mono"
-                            aria-describedby={`settings-${field.name}-error`}
                             aria-invalid="false"
                             inputmode="url"
+                            maxlength={LINK_MAX_LENGTH}
                             name={field.name}
                             placeholder={field.placeholder}
                             spellcheck="false"
@@ -381,12 +348,6 @@ const LINK_FIELDS = [
                             value={field.value}
                         />
                     </label>
-                    <p
-                        id={`settings-${field.name}-error`}
-                        class="text-error-text"
-                        data-field-error
-                        hidden
-                    />
                 </div>
             ))}
             <button
@@ -411,13 +372,13 @@ const LINK_FIELDS = [
             </hgroup>
             <div class="flex flex-col gap-2">
                 <div class="settings__track aria-busy:cursor-progress aria-busy:opacity-60 grid gap-(--space-md)">
-                    <label class="dropzone halftone settings__pick basis-55 flex grow items-center relative min-h-(--control-size) px-4 py-2 border-2 border-border-strong border-dashed bg-bg-page">
+                    <label class="dropzone halftone basis-55 flex grow items-center relative min-h-(--control-size) px-4 py-2 border-2 border-border-strong border-dashed bg-bg-page">
                         <span class="label">Choose an audio file</span>
                         <input
                             id="settings-track"
                             class="dropzone__input sr-only"
                             accept={UPLOAD.acceptAttribute}
-                            aria-describedby="settings-track-error settings-track-help"
+                            aria-describedby="settings-track-help"
                             aria-invalid="false"
                             data-track-input
                             name="track"
@@ -445,16 +406,10 @@ const LINK_FIELDS = [
                     </div>
                 </div>
                 <p
-                    id="settings-track-error"
-                    class="text-error-text"
-                    data-field-error
-                    hidden
-                />
-                <p
                     id="settings-track-help"
                     class="text-base text-text-secondary"
                 >
-                    {UPLOAD_EXTENSIONS_OR_LIST} only. Up to {formatBytes(UPLOAD.maxFileBytes)}.
+                    A {UPLOAD_EXTENSIONS_OR_LIST} file up to {formatBytes(UPLOAD.maxFileBytes)}.
                 </p>
             </div>
             <button
@@ -478,7 +433,6 @@ const LINK_FIELDS = [
                         <input
                             id="settings-current"
                             class="input pr-12"
-                            aria-describedby="settings-current-error"
                             aria-invalid="false"
                             autocomplete="current-password"
                             minlength={PASSWORD_MIN_LENGTH}
@@ -502,12 +456,6 @@ const LINK_FIELDS = [
                         </button>
                     </span>
                 </label>
-                <p
-                    id="settings-current-error"
-                    class="text-error-text"
-                    data-field-error
-                    hidden
-                />
             </div>
             <div class="flex flex-col gap-2">
                 <label class="flex flex-col gap-2">
@@ -516,7 +464,7 @@ const LINK_FIELDS = [
                         <input
                             id="settings-password"
                             class="input pr-12"
-                            aria-describedby="settings-password-error"
+                            aria-describedby="settings-password-help"
                             aria-invalid="false"
                             autocomplete="new-password"
                             minlength={PASSWORD_MIN_LENGTH}
@@ -541,12 +489,9 @@ const LINK_FIELDS = [
                     </span>
                 </label>
                 <p
-                    id="settings-password-error"
-                    class="text-error-text"
-                    data-field-error
-                    hidden
-                />
-                <p class="text-base text-text-secondary">
+                    id="settings-password-help"
+                    class="text-base text-text-secondary"
+                >
                     At least {PASSWORD_MIN_LENGTH} characters with a letter and a digit.
                 </p>
             </div>
@@ -557,7 +502,6 @@ const LINK_FIELDS = [
                         <input
                             id="settings-confirm"
                             class="input pr-12"
-                            aria-describedby="settings-confirm-error"
                             aria-invalid="false"
                             autocomplete="new-password"
                             name="confirm"
@@ -580,12 +524,6 @@ const LINK_FIELDS = [
                         </button>
                     </span>
                 </label>
-                <p
-                    id="settings-confirm-error"
-                    class="text-error-text"
-                    data-field-error
-                    hidden
-                />
             </div>
             <button
                 class="btn btn--primary self-start"
@@ -757,18 +695,6 @@ const LINK_FIELDS = [
         --slab-fill: var(--color-border-strong);
     }
 
-    .settings__pick {
-        transition:
-            background-color var(--duration-fast) var(--motion-ease-ui),
-            border-color var(--duration-fast) var(--motion-ease-ui),
-            box-shadow var(--duration-fast) var(--motion-ease-ui);
-    }
-
-    .settings__pick:has(.dropzone__input[aria-invalid='true']) {
-        border-color: var(--color-border-invalid);
-        box-shadow: var(--lift-shadow);
-    }
-
     .settings__staged {
         padding: 8px 16px;
     }
@@ -790,8 +716,8 @@ const LINK_FIELDS = [
 </style>
 
 <script>
-    import { MOCK_LATENCY_MILLISECONDS, PROFILE_FIELDS, UPLOAD } from '@lib/shared/constants';
-    import { clearFieldErrors, focusFirstError, getConfirmRule, getPasswordRule, handleReveal, isValidationBypassed, setFieldErrors, setRole, validateFields } from '@lib/ui/forms';
+    import { LINK_MAX_LENGTH, MOCK_LATENCY_MILLISECONDS, PROFILE_FIELDS, UPLOAD } from '@lib/shared/constants';
+    import { clearFieldErrors, getConfirmRule, getPasswordRule, handleReveal, isValidationBypassed, reportFieldErrors, setRole, validateFields, watchFieldErrors } from '@lib/ui/forms';
     import { delay, formatDateStamp, formatProds, formatRole, getInitials, pickTileColor, registerPageScript, setAvatarImage, setPending, setText } from '@lib/shared/utils';
     import { getProdsAttendance, getProdsBalance, getProdsRows, onProdsChange } from '@lib/account/prods';
     import { observeRowWindow } from '@lib/account/ledger';
@@ -802,9 +728,7 @@ const LINK_FIELDS = [
     import { toast } from '@lib/ui/toasts';
 
     const CURRENT_PASSWORD_MESSAGE = 'Enter your current password.';
-    const INVALID_MESSAGE = 'Check the fields.';
-    const LINK_MESSAGE = 'Enter a full https:// address.';
-    const LINK_NAMES = ['instagram', 'spotify', 'soundcloud', 'youtube'];
+    const LINK_LABELS: Record<string, string> = { instagram: 'Instagram', soundcloud: 'SoundCloud', spotify: 'Spotify', youtube: 'YouTube' };
     const LINK_PATTERN = /^https?:\/\/\S+\.\S+$/i;
 
     const PROFILE_RULES: Record<string, FieldRule> = {
@@ -817,7 +741,7 @@ const LINK_FIELDS = [
     const TRACK_MISSING_MESSAGE = 'Stage an audio file before you save.';
 
     const LINK_RULES: Record<string, FieldRule> = Object.fromEntries(
-        LINK_NAMES.map(name => [name, { message: LINK_MESSAGE, pattern: LINK_PATTERN }]),
+        Object.entries(LINK_LABELS).map(([name, label]) => [name, { max: LINK_MAX_LENGTH, message: `Enter a full https:// address for ${label}.`, pattern: LINK_PATTERN }]),
     );
 
     const PASSWORD_RULES: Record<string, FieldRule> = {
@@ -841,9 +765,7 @@ const LINK_FIELDS = [
         clearFieldErrors(form);
 
         if (Object.keys(errors).length > 0) {
-            setFieldErrors(form, errors);
-            focusFirstError(form, errors);
-            toast(INVALID_MESSAGE, 'error');
+            reportFieldErrors(form, errors);
 
             return;
         }
@@ -866,9 +788,7 @@ const LINK_FIELDS = [
         clearFieldErrors(form);
 
         if (Object.keys(errors).length > 0) {
-            setFieldErrors(form, errors);
-            focusFirstError(form, errors);
-            toast(INVALID_MESSAGE, 'error');
+            reportFieldErrors(form, errors);
 
             return;
         }
@@ -907,8 +827,7 @@ const LINK_FIELDS = [
             clearFieldErrors(form);
 
             if (!staged.ok) {
-                setFieldErrors(form, { portrait: staged.message });
-                input.focus();
+                reportFieldErrors(form, { portrait: staged.message });
 
                 return;
             }
@@ -932,9 +851,7 @@ const LINK_FIELDS = [
         clearFieldErrors(form);
 
         if (Object.keys(errors).length > 0) {
-            setFieldErrors(form, errors);
-            focusFirstError(form, errors);
-            toast(INVALID_MESSAGE, 'error');
+            reportFieldErrors(form, errors);
 
             return;
         }
@@ -984,8 +901,7 @@ const LINK_FIELDS = [
         clearFieldErrors(form);
 
         if (error) {
-            setFieldErrors(form, { track: error });
-            input.focus();
+            reportFieldErrors(form, { track: error });
 
             return;
         }
@@ -999,8 +915,7 @@ const LINK_FIELDS = [
             if (signal.aborted) return;
 
             if (!result.ok) {
-                setFieldErrors(form, { track: result.message });
-                input.focus();
+                reportFieldErrors(form, { track: result.message });
 
                 return;
             }
@@ -1020,9 +935,7 @@ const LINK_FIELDS = [
         const staged = form.querySelector<HTMLElement>('[data-track-staged]');
 
         if (!isValidationBypassed() && staged?.hasAttribute('hidden') !== false) {
-            setFieldErrors(form, { track: TRACK_MISSING_MESSAGE });
-            form.querySelector<HTMLInputElement>('[data-track-input]')?.focus();
-            toast(INVALID_MESSAGE, 'error');
+            reportFieldErrors(form, { track: TRACK_MISSING_MESSAGE });
 
             return;
         }
@@ -1081,6 +994,10 @@ const LINK_FIELDS = [
         signal.addEventListener('abort', () => unsubscribeProds?.(), { once: true });
         track.addEventListener('submit', event => void handleTrackSubmit(event, track), { signal });
         track.querySelector<HTMLButtonElement>('[data-track-remove]')?.addEventListener('click', () => removeTrack(track), { signal });
+        watchFieldErrors(links, signal);
+        watchFieldErrors(password, signal);
+        watchFieldErrors(profile, signal);
+        watchFieldErrors(track, signal);
 
         document.querySelectorAll<HTMLElement>('.settings__attendance, .settings__ledger').forEach((scroller) => {
             observeRowWindow(scroller, signal);

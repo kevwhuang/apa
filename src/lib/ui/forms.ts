@@ -1,5 +1,5 @@
 import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
-import { describeCartIssue, setText } from '@lib/shared/utils';
+import { toast } from '@lib/ui/toasts';
 
 const BYPASS_WINDOW_MILLISECONDS = 0;
 const PLACEHOLDER_EMAIL = 'you@studio.fm';
@@ -11,17 +11,18 @@ function clearFieldErrors(form: HTMLFormElement): void {
     form.querySelectorAll('[aria-invalid]').forEach((control) => {
         control.setAttribute('aria-invalid', 'false');
     });
-
-    form.querySelectorAll('[data-field-error]').forEach((element) => {
-        element.textContent = '';
-        element.setAttribute('hidden', '');
-    });
 }
 
-function focusFirstError(form: HTMLFormElement, errors: FieldErrors): void {
-    const names = Object.keys(errors);
+function describeFieldErrors(form: HTMLFormElement, errors: FieldErrors) {
+    const keys = Object.keys(errors);
 
-    if (names.length === 0) return;
+    const names = new Set([...Array.from(form.elements, getControlName).filter(name => keys.includes(name)), ...keys]);
+
+    return Array.from(new Set(Array.from(names, name => errors[name]))).join(' ');
+}
+
+function focusFirstError(form: HTMLFormElement, errors: FieldErrors) {
+    const names = Object.keys(errors);
 
     const control = Array.from(form.elements).find(element => names.includes(getControlName(element)));
 
@@ -34,20 +35,6 @@ function getConfirmRule(): FieldRule {
 
 function getControlName(element: Element) {
     return 'name' in element && typeof element.name === 'string' ? element.name : '';
-}
-
-function getErrorElement(form: HTMLFormElement, name: string) {
-    const control = form.querySelector(`[name="${name}"]`);
-
-    const described = control?.getAttribute('aria-describedby') ?? '';
-
-    for (const id of described.split(/\s+/).filter(Boolean)) {
-        const element = form.ownerDocument.getElementById(id);
-
-        if (element?.hasAttribute('data-field-error')) return element;
-    }
-
-    return null;
 }
 
 function getPasswordRule(): FieldRule {
@@ -68,6 +55,18 @@ function handleBypassClick(event: MouseEvent) {
     bypassTimer = setTimeout(releaseBypass, BYPASS_WINDOW_MILLISECONDS);
 }
 
+function handleFieldEdit(event: Event) {
+    const { currentTarget: form, target } = event;
+
+    if (!(form instanceof HTMLFormElement) || !(target instanceof Element)) return;
+
+    const name = getControlName(target);
+
+    if (name.length === 0 || !form.querySelector(`[name="${name}"][aria-invalid="true"]`)) return;
+
+    markField(form, name, false);
+}
+
 function handleReveal(button: HTMLButtonElement): void {
     const input = document.getElementById(button.dataset.reveal ?? '');
     const isShown = button.getAttribute('aria-pressed') === 'true';
@@ -83,6 +82,12 @@ function isValidationBypassed(): boolean {
     return isBypassing;
 }
 
+function markField(form: HTMLFormElement, name: string, isInvalid: boolean) {
+    form.querySelectorAll(`[name="${name}"]`).forEach((control) => {
+        control.setAttribute('aria-invalid', String(isInvalid));
+    });
+}
+
 function readEmail(values: FormData): string {
     const email = String(values.get('email') ?? '').trim();
 
@@ -96,32 +101,17 @@ function releaseBypass() {
     bypassTimer = undefined;
 }
 
-function renderIssueList(issues: CartIssue[], notice: HTMLElement | null, list: HTMLElement | null, template: HTMLTemplateElement | null): void {
-    if (!list || !notice || !template) return;
+function reportFieldErrors(form: HTMLFormElement, errors: FieldErrors): void {
+    if (Object.keys(errors).length === 0) return;
 
-    list.replaceChildren();
-    notice.toggleAttribute('hidden', issues.length === 0);
-
-    issues.forEach((issue) => {
-        const fragment = template.content.cloneNode(true) as DocumentFragment;
-
-        setText(fragment.querySelector('[data-issue-text]'), describeCartIssue(issue));
-        list.append(fragment);
-    });
+    setFieldErrors(form, errors);
+    focusFirstError(form, errors);
+    toast(describeFieldErrors(form, errors), 'error');
 }
 
 function setFieldErrors(form: HTMLFormElement, errors: FieldErrors): void {
-    Object.entries(errors).forEach(([name, message]) => {
-        form.querySelectorAll(`[name="${name}"]`).forEach((control) => {
-            control.setAttribute('aria-invalid', 'true');
-        });
-
-        const element = getErrorElement(form, name);
-
-        if (!element) return;
-
-        element.textContent = message;
-        element.removeAttribute('hidden');
+    Object.keys(errors).forEach((name) => {
+        markField(form, name, true);
     });
 }
 
@@ -160,18 +150,23 @@ function violates(rule: FieldRule, value: string, values: FormData) {
     return rule.validate ? !rule.validate(value, values) : false;
 }
 
+function watchFieldErrors(form: HTMLFormElement, signal: AbortSignal): void {
+    form.addEventListener('change', handleFieldEdit, { capture: true, signal });
+    form.addEventListener('input', handleFieldEdit, { capture: true, signal });
+}
+
 if (typeof document !== 'undefined') document.addEventListener('click', handleBypassClick, { capture: true });
 
 export {
     clearFieldErrors,
-    focusFirstError,
     getConfirmRule,
     getPasswordRule,
     handleReveal,
     isValidationBypassed,
     readEmail,
-    renderIssueList,
+    reportFieldErrors,
     setFieldErrors,
     setRole,
     validateFields,
+    watchFieldErrors,
 };

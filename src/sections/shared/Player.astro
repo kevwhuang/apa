@@ -204,7 +204,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     .player__close:focus-visible {
-        outline-offset: -2px;
+        outline-offset: -4px;
     }
 
     .player__close:hover {
@@ -275,7 +275,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
     }
 
     .player__launcher:focus-visible {
-        outline-offset: -4px;
+        outline-offset: -6px;
     }
 
     .player__launcher:hover {
@@ -301,7 +301,6 @@ import IconWaveform from '@components/icons/Waveform.astro';
     .player__panel {
         background: var(--color-bg-raised);
         border: 2px solid var(--color-border-strong);
-        box-shadow: var(--lift-shadow);
         color: var(--color-text);
         display: flex;
         flex-direction: column;
@@ -354,7 +353,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
         setVolume,
         togglePlayback,
     } from '@lib/audio/player';
-    import { claimFloatWindow, formatDuration, initPanelResize, onFloatWindowClaim, registerPageScript, setHidden, setText } from '@lib/shared/utils';
+    import { applyInstantly, claimFloatWindow, formatDuration, initPanelResize, onFloatWindowClaim, registerPageScript, setHidden, setText } from '@lib/shared/utils';
 
     interface PlayerSource {
         artist: string;
@@ -546,7 +545,7 @@ import IconWaveform from '@components/icons/Waveform.astro';
         setText(document.querySelector('[data-player-toggle-label]'), toggleLabel(source));
         setText(title, source?.title ?? EMPTY_TITLE);
         toggle.setAttribute('aria-pressed', String(playing));
-        toggle.toggleAttribute('disabled', !source);
+        applyInstantly(toggle, () => toggle.toggleAttribute('disabled', !source));
 
         if (!isOpened && state.open) claimFloatWindow(panel);
 

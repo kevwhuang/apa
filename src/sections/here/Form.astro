@@ -4,7 +4,7 @@ import PageHead from '@components/shared/PageHead.astro';
 import QrCode from '@components/shared/QrCode.astro';
 import Schedule from '@components/program/Schedule.astro';
 import { EMAIL_MAX_LENGTH } from '@lib/shared/constants';
-import { formatDateStamp, formatTime, formatVenue, isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { formatDateStamp, formatTime, isUpcoming, toAustinIso } from '@lib/shared/utils';
 import { loadEvents } from '@lib/programs/calendar';
 
 const DOOR_HOST_PARTS = ['austinproducer', 'alliance.com'];
@@ -59,13 +59,13 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
                             data-event-end={toAustinIso(event.ends_at)}
                             data-event-group="door"
                             data-event-role="next"
-                            data-event-title={`${event.program.name} on ${formatDateStamp(event.starts_at)}`}
+                            data-event-title={event.title}
                             hidden={index > 0}
                         >
                             <div class="last:border-b-0 grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 py-1 border-b border-border-inverse-subtle">
                                 <dt class="label text-text-inverse-secondary">Program</dt>
                                 <dd class="text-base">
-                                    {event.program.name}
+                                    {event.program}
                                 </dd>
                             </div>
                             <div class="last:border-b-0 grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 py-1 border-b border-border-inverse-subtle">
@@ -79,7 +79,7 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
                             <div class="last:border-b-0 grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 py-1 border-b border-border-inverse-subtle">
                                 <dt class="label text-text-inverse-secondary">Where</dt>
                                 <dd class="font-mono text-base">
-                                    {formatVenue(event.venue)}
+                                    {event.venue}
                                 </dd>
                             </div>
                         </dl>
@@ -125,7 +125,6 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
                 <input
                     id="checkin-email"
                     class="input font-mono"
-                    aria-describedby="checkin-email-error"
                     aria-invalid="false"
                     autocomplete="email"
                     maxlength={EMAIL_MAX_LENGTH}
@@ -134,12 +133,6 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
                     type="email"
                 />
             </label>
-            <p
-                id="checkin-email-error"
-                class="text-error-text"
-                data-field-error
-                hidden
-            />
         </div>
         <div class="flex flex-col gap-2">
             <p class="label flex flex-wrap items-baseline text-text">
@@ -150,7 +143,6 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
                 <input
                     id="checkin-terms"
                     class="box"
-                    aria-describedby="checkin-terms-error"
                     aria-invalid="false"
                     name="terms"
                     required
@@ -166,12 +158,6 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
                     </a>
                 </span>
             </label>
-            <p
-                id="checkin-terms-error"
-                class="text-error-text"
-                data-field-error
-                hidden
-            />
         </div>
         <div class="flex flex-col gap-2">
             <p class="label flex flex-wrap items-baseline text-text">
@@ -239,7 +225,7 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
             </div>
         </div>
         <article
-            class="mail slab slab--lift slab--plush flex flex-col gap-(--space-lg)"
+            class="mail slab slab--card slab--plush flex flex-col gap-(--space-lg)"
             aria-label="Welcome email"
         >
             <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b-2 border-border-strong">
@@ -317,7 +303,7 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
 </style>
 
 <script>
-    import { clearFieldErrors, focusFirstError, readEmail, setFieldErrors, validateFields } from '@lib/ui/forms';
+    import { clearFieldErrors, readEmail, reportFieldErrors, validateFields, watchFieldErrors } from '@lib/ui/forms';
     import { composeOnboardingEmail } from '@lib/shared/email';
     import { createOnboardingToken } from '@lib/account/onboarding';
     import { formatProds, registerPageScript, setPending, setText } from '@lib/shared/utils';
@@ -344,9 +330,7 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
         clearFieldErrors(form);
 
         if (Object.keys(errors).length > 0) {
-            setFieldErrors(form, errors);
-            focusFirstError(form, errors);
-            toast('Check the fields.', 'error');
+            reportFieldErrors(form, errors);
 
             return;
         }
@@ -360,8 +344,8 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
         setPending(button, false);
 
         if (!result.ok) {
-            setFieldErrors(form, { email: result.message });
-            focusFirstError(form, { email: result.message });
+            if (result.code === 'storage-full') toast(result.message, 'error');
+            else reportFieldErrors(form, { email: result.message });
 
             return;
         }
@@ -379,6 +363,7 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
         form.noValidate = true;
         again?.addEventListener('click', () => handleCheckInAgain(form, done), { signal });
         form.addEventListener('submit', event => handleCheckInSubmit(event, form), { signal });
+        watchFieldErrors(form, signal);
     }
 
     function renderBody(container: HTMLElement, template: HTMLTemplateElement, paragraphs: string[]) {

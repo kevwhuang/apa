@@ -39,6 +39,7 @@ const CLOCK_DIGITS = 2;
 const EMPTY_TILE_COLOR: TileColor = { background: 'var(--color-ink)', text: 'var(--color-text-inverse-secondary)' };
 const ENTRY_PAD = 2;
 const FLOAT_WINDOW_TOPIC = 'apa:float-window';
+const INSTANT_CLASS = 'is-instant';
 const MAX_INITIALS = 2;
 const MILLISECONDS_PER_MINUTE = 60_000;
 const MINUTES_PER_HOUR = 60;
@@ -48,9 +49,15 @@ const PANEL_WIDE_DIVISOR = 2;
 const PANEL_WIDE_VIEWPORT = 1_024;
 const SECONDS_PER_MINUTE = 60;
 const SLOW_CORE_COUNT = 4;
-const VENUE_PLACEHOLDER = 'Venue TBD';
 
 const panelWidths = new Map<string, number>();
+
+function applyInstantly(root: HTMLElement, change: () => void): void {
+    root.classList.add(INSTANT_CLASS);
+    change();
+    root.getBoundingClientRect();
+    requestAnimationFrame(() => root.classList.remove(INSTANT_CLASS));
+}
 
 function claimFloatWindow(panel: HTMLElement): void {
     window.dispatchEvent(new CustomEvent(FLOAT_WINDOW_TOPIC, { detail: { panel } }));
@@ -62,12 +69,25 @@ function delay(milliseconds: number): Promise<void> {
     });
 }
 
-function describeCartIssue(issue: CartIssue): string {
+function describeCartChange(issues: CartIssue[]): string {
+    return `Your cart changed. ${issues.map(describeCartIssue).join(' ')}`;
+}
+
+function describeCartIssue(issue: CartIssue) {
     if (issue.kind === 'out-of-stock') return `${issue.title} sold out and was removed.`;
     if (issue.kind === 'price-changed') return `${issue.title} is now ${formatPrice(issue.to ?? 0)}, previously ${formatPrice(issue.from ?? 0)}.`;
     if (issue.kind === 'quantity-reduced') return `${issue.title} was reduced to ${issue.to ?? 0}. That is all we have left.`;
 
     return `${issue.title} is no longer in the store and was removed.`;
+}
+
+function describeMatches(shown: number, total: number, isFiltered: boolean, query: string): string {
+    const tally = `${shown.toLocaleString(LOCALE)} of ${total.toLocaleString(LOCALE)}`;
+
+    if (shown === 0) return tally;
+    if (query) return `${tally} for \u201c${query}\u201d`;
+
+    return isFiltered || total === 1 ? tally : `All ${total.toLocaleString(LOCALE)}`;
 }
 
 function formatBytes(bytes: number): string {
@@ -148,10 +168,6 @@ function formatVariant(item: CartItem): string {
     const parts = [item.variation, item.size].filter(Boolean);
 
     return parts.length > 0 ? parts.join(' / ') : 'Base';
-}
-
-function formatVenue(venue: string | undefined): string {
-    return venue ?? VENUE_PLACEHOLDER;
 }
 
 function getInitials(name: string): string {
@@ -401,6 +417,18 @@ function isUpcoming(end: Date): boolean {
     return end.getTime() >= Date.now();
 }
 
+function measureWidest(element: Element, values: string[]): number {
+    const context = document.createElement('canvas').getContext('2d');
+
+    if (!context) return 0;
+
+    const { fontFamily, fontSize, fontStyle, fontWeight } = getComputedStyle(element);
+
+    context.font = `${fontStyle} ${fontWeight} ${fontSize} ${fontFamily}`;
+
+    return values.reduce((widest, value) => Math.max(widest, context.measureText(value).width), 0);
+}
+
 function mergeAssets(downloads: CollectionEntry<'downloads'>[], docs: CollectionEntry<'docs'>[]): CollectionEntry<'downloads'>[] {
     return downloads.map((entry) => {
         const doc = docs.find(candidate => candidate.id === entry.data.doc?.id);
@@ -433,8 +461,10 @@ function paintFilterButtons(buttons: NodeListOf<HTMLButtonElement>, key: string,
 
         if (button.classList.contains('is-active') === isActive) return;
 
-        button.classList.toggle('is-active', isActive);
-        button.setAttribute('aria-pressed', String(isActive));
+        applyInstantly(button, () => {
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-pressed', String(isActive));
+        });
     });
 }
 
@@ -500,20 +530,15 @@ function setHidden(element: HTMLElement | null, isHidden: boolean): void {
     element.hidden = isHidden;
 }
 
-function setMessage(element: HTMLElement | null, message: string): void {
-    if (!element) return;
-
-    element.textContent = message;
-    element.toggleAttribute('hidden', message.length === 0);
-}
-
 function setPending(control: HTMLButtonElement | null, isPending: boolean): void {
     if (!control) return;
 
-    control.disabled = isPending;
+    applyInstantly(control, () => {
+        control.disabled = isPending;
 
-    if (isPending) control.setAttribute('aria-busy', 'true');
-    else control.removeAttribute('aria-busy');
+        if (isPending) control.setAttribute('aria-busy', 'true');
+        else control.removeAttribute('aria-busy');
+    });
 }
 
 function setProductImage(image: HTMLImageElement | null, sources: ImageSources, item: CartItem): void {
@@ -596,25 +621,25 @@ function toProducerRecord(producer: CollectionEntry<'producers'>): ProducerRecor
 }
 
 function toProgramCard(event: EventRecord) {
-    const { speaker, sponsors } = event;
+    const { speaker, sponsor } = event;
 
     return {
         credit: speaker?.name,
         endsAt: event.ends_at,
-        heading: event.title ?? event.name,
+        heading: event.title,
         notes: [
             {
                 label: 'Speaker',
                 paragraphs: speaker ? [speaker.bio] : [],
             },
             {
-                label: sponsors.length > 1 ? 'Sponsors' : 'Sponsor',
-                paragraphs: sponsors.flatMap(({ description }) => description.split(PARAGRAPH_SEPARATOR)),
+                label: 'Sponsor',
+                paragraphs: sponsor ? sponsor.description.split(PARAGRAPH_SEPARATOR) : [],
             },
         ].filter(note => note.paragraphs.length > 0),
         startsAt: event.starts_at,
         text: event.body,
-        venue: formatVenue(event.venue),
+        venue: event.venue,
     };
 }
 
@@ -625,9 +650,11 @@ function toRoster(producers: CollectionEntry<'producers'>[]): CollectionEntry<'p
 }
 
 export {
+    applyInstantly,
     claimFloatWindow,
     delay,
-    describeCartIssue,
+    describeCartChange,
+    describeMatches,
     formatBytes,
     formatCalendarDay,
     formatCalendarMonth,
@@ -641,7 +668,6 @@ export {
     formatTime,
     formatTimeRange,
     formatVariant,
-    formatVenue,
     getInitials,
     getStockLabel,
     initFilterGroup,
@@ -651,6 +677,7 @@ export {
     isOutsideBox,
     isSlowDevice,
     isUpcoming,
+    measureWidest,
     mergeAssets,
     onFloatWindowClaim,
     parseCatalog,
@@ -660,7 +687,6 @@ export {
     registerPageScript,
     setAvatarImage,
     setHidden,
-    setMessage,
     setPending,
     setProductImage,
     setText,

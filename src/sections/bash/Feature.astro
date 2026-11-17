@@ -1,14 +1,11 @@
 ---
 import PageHead from '@components/shared/PageHead.astro';
-import { getProgram } from '@lib/programs/calendar';
 
 const FORMAT_STEPS = [
-    { name: 'Get the prompt', note: 'Everyone works from the same prompt and the same samples.' },
-    { name: 'Beat the clock', note: 'Make a 60 to 90 second track before the clock runs out.' },
-    { name: 'Win the room', note: 'The crowd picks its top two, and they go head-to-head.' },
+    { name: 'Get the files', note: 'Producers download the guide and resources. The prompt is optional but encouraged, and only tracks that use it are eligible for the vote, the mixtape, and the prizes.' },
+    { name: 'Beat the clock', note: 'In one shared room, producers have three hours to make a short track and submit it before the deadline. They are encouraged to walk around, watch how others work, mingle, and pair up.' },
+    { name: 'Win the room', note: 'Every Bash ends with a vote to pick the winners, and some Bashes add a head-to-head final. Producers stay to hang out afterward, and an optional social follows.' },
 ] as const;
-
-const program = await getProgram('bash');
 ---
 
 <section
@@ -28,7 +25,7 @@ const program = await getProgram('bash');
         >
             One prompt,<br />
             <span class="text-text-brand">one afternoon,</span><br />
-            one <span class="whitespace-nowrap">showdown</span>
+            one <span class="whitespace-nowrap">room</span>
         </PageHead>
         <div class="flex flex-col gap-(--space-lg) mb-(--space-lg)">
             <div class="flex flex-col gap-5">
@@ -36,14 +33,17 @@ const program = await getProgram('bash');
                     class="max-w-2xl text-lg text-text-inverse-secondary"
                     data-motion="blur"
                 >
-                    {program.summary}
+                    An afternoon of producing against the clock, with a prompt to spark ideas and a
+                    closing vote from the whole room.
                 </p>
                 <p
                     class="max-w-2xl text-text-inverse-secondary"
                     data-motion="rise"
                 >
-                    Bashes run four times a year on a Saturday afternoon, open to every experience
-                    level and genre.
+                    Bashes run quarterly on a Saturday afternoon and welcome every experience level
+                    and genre. Producers bring their own gear, such as a laptop, headphones, and
+                    keyboards. The room also has Mac stations fitted with Ableton Live and MIDI
+                    controllers. The Starter Guide covers the full details and rules.
                 </p>
             </div>
             <aside

@@ -2,6 +2,13 @@ button.chip:active {
     transform: translateY(1px);
 }
 
+html .is-instant.is-instant,
+html .is-instant.is-instant * {
+    transition-property:
+        transform,
+        translate;
+}
+
 html[data-theme='dark'] .partner-logo {
     --partner-invert: 1;
 }
@@ -64,7 +71,6 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
 }
 
 .box {
-    --box-lift: 4px;
     --box-mark: 12px;
     --box-size: 24px;
     appearance: none;
@@ -82,7 +88,6 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
         background-color var(--duration-fast) var(--motion-ease-ui),
         background-size var(--duration-fast) var(--motion-ease-ui),
         border-color var(--duration-fast) var(--motion-ease-ui),
-        box-shadow var(--duration-fast) var(--motion-ease-ui),
         transform var(--duration-fast) var(--motion-ease-ui);
     width: var(--box-size);
 }
@@ -101,7 +106,10 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
 
 .box[aria-invalid='true'] {
     border-color: var(--color-border-invalid);
-    box-shadow: var(--box-lift) var(--box-lift) 0 0 var(--color-border-strong);
+}
+
+.box[aria-invalid='true']:focus-visible {
+    outline: none;
 }
 
 .btn {
@@ -247,6 +255,11 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
     border-color: var(--color-border-selected);
 }
 
+.dropzone:not(.is-dragging):has(.dropzone__input[aria-invalid='true']) {
+    border-color: var(--color-border-invalid);
+    border-style: solid;
+}
+
 .dropzone__input {
     clip-path: inset(50%);
     height: 100%;
@@ -322,8 +335,7 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
         padding: 8px 16px;
         transition:
             background-color var(--duration-fast) var(--motion-ease-ui),
-            border-color var(--duration-fast) var(--motion-ease-ui),
-            box-shadow var(--duration-fast) var(--motion-ease-ui);
+            border-color var(--duration-fast) var(--motion-ease-ui);
         width: 100%;
     }
 
@@ -345,7 +357,6 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
 
     .input[aria-invalid='true'] {
         border-color: var(--color-input-border-invalid);
-        box-shadow: var(--lift-shadow);
     }
 
     .input[type='number'] {
@@ -535,7 +546,7 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
 }
 
 .reveal:focus-visible {
-    outline-offset: -4px;
+    outline-offset: -6px;
 }
 
 .reveal:hover {
@@ -581,7 +592,7 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
 
 .slab {
     --color-focus-ring: var(--color-border-focus);
-    --slab-drop: calc(min(var(--slab-level), 1) * var(--lift));
+    --slab-drop: 0px;
     --slab-fill: var(--color-bg-page);
     --slab-level: var(--z-page);
     --slab-line: var(--color-border-strong);
@@ -604,6 +615,10 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
     --slab-fill: var(--color-bg-raised);
     --slab-level: var(--z-card);
     --slab-rule: 2px;
+}
+
+:is(a, button).slab--card {
+    --slab-drop: var(--lift);
 }
 
 .slab--cut {
@@ -661,6 +676,7 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
 }
 
 .slab--lift {
+    --slab-drop: var(--lift);
     --slab-fill: var(--color-bg-raised);
     --slab-level: var(--z-lift);
     --slab-rule: 2px;
@@ -695,6 +711,7 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
 }
 
 .slab--well {
+    --color-border-invalid: var(--color-error-text-on-inverse);
     --color-focus-ring: var(--color-focus-ring-offset);
     --color-halftone-accent: var(--color-halftone-accent-inverse);
     --color-scrollbar-thumb: var(--color-border-subtle);
@@ -716,7 +733,6 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
 
 .slab--well .slab {
     --slab-line: var(--color-border-inverse-strong);
-    --slab-shadow: var(--color-border-inverse-strong);
 }
 
 .slab--well .spinner {
@@ -725,6 +741,10 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
 
 .slab--well :is(a, button, summary).action-text:hover {
     color: var(--color-link-on-inverse);
+}
+
+.slab.is-failed {
+    --slab-line: var(--color-border-invalid);
 }
 
 .spinner {

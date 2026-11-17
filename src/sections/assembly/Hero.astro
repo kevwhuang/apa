@@ -2,10 +2,10 @@
 import PageHead from '@components/shared/PageHead.astro';
 
 const AGENDA = [
-    { name: 'Doors open', note: 'Meet the room and talk shop.', time: '6:00 PM' },
-    { name: 'Demo hour', note: 'Queued tracks play out loud for feedback.', time: '6:30 PM' },
-    { name: 'Featured workshop', note: 'One topic, taken apart properly.', time: '7:30 PM' },
-    { name: 'After hours', note: 'Collabs form on the way out the door.', time: '9:00 PM' },
+    { name: 'Arrivals', note: 'Check in, meet the room, and talk shop', time: '6:00 PM' },
+    { name: 'Demo drop', note: 'Each track plays out loud for the room\'s feedback', time: '6:30 PM' },
+    { name: 'Workshop', note: 'One topic in depth, or an interactive session for everyone', time: '7:30 PM' },
+    { name: 'After hours', note: 'The conversation carries on downstairs', time: '9:00 PM' },
 ] as const;
 
 const CLASS_AGENDA_ITEM = 'first:border-t-0 first:pt-0 last:pb-0 grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-(--space-md) gap-y-1 py-4 border-border-subtle border-t';
@@ -20,25 +20,28 @@ const CLASS_AGENDA_ITEM = 'first:border-t-0 first:pt-0 last:pb-0 grid grid-cols-
             class="max-w-4xl mb-6 text-4xl-7xl"
             headingId="assembly-title"
         >
-            The working<br />
-            <span class="text-text-brand">session</span>
+            Your people,<br />
+            <span class="text-text-brand">your sound</span>
         </PageHead>
-        <div class="grid grid-cols-2 gap-(--space-2xl) max-lg:grid-cols-1">
-            <div class="flex flex-col gap-5">
+        <div class="grid grid-cols-2 gap-(--space-lg) max-lg:grid-cols-1">
+            <div class="flex flex-col self-center gap-5">
                 <p
                     class="text-lg text-text-secondary"
                     data-motion="blur"
                 >
-                    Assembly is the Alliance's monthly centerpiece, an evening at STATION
-                    Austin devoted to craft and community.
+                    Assembly is the Alliance's monthly centerpiece at STATION Austin, an
+                    evening devoted to craft and community, with time for tracks to be heard.
                 </p>
                 <p
                     class="text-text-secondary"
                     data-motion="rise"
                 >
-                    The night opens with networking. Demos come next, where work in progress plays
-                    out loud and gets talked through together. Then a workshop takes one topic
-                    apart, and the evening ends with a mingle.
+                    Producers meet and introduce themselves, play their tracks at
+                    the demo drop, and hear feedback from the room. Each
+                    evening centers on a featured workshop or an interactive session,
+                    such as a producer round robin, lightning talks, or an open
+                    discussion. Members and organizers share announcements, and the
+                    conversation carries on after hours.
                 </p>
             </div>
             <aside

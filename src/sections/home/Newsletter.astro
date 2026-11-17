@@ -31,7 +31,6 @@ import SectionHead from '@components/shared/SectionHead.astro';
                     <input
                         id="newsletter-email"
                         class="input font-mono"
-                        aria-describedby="newsletter-email-error"
                         aria-invalid="false"
                         autocomplete="email"
                         name="email"
@@ -48,12 +47,6 @@ import SectionHead from '@components/shared/SectionHead.astro';
                 </button>
             </div>
             <p
-                id="newsletter-email-error"
-                class="text-error-text"
-                data-field-error
-                hidden
-            />
-            <p
                 class="hidden p-3 bg-signal text-text-on-signal"
                 data-output
             />
@@ -63,10 +56,10 @@ import SectionHead from '@components/shared/SectionHead.astro';
 
 <script>
     import { EMAIL_PATTERN, STORAGE } from '@lib/shared/constants';
-    import { clearFieldErrors, focusFirstError, isValidationBypassed, setFieldErrors, validateFields } from '@lib/ui/forms';
+    import { clearFieldErrors, isValidationBypassed, reportFieldErrors, validateFields, watchFieldErrors } from '@lib/ui/forms';
     import { createStore } from '@lib/shared/state';
     import { getSession } from '@lib/account/session';
-    import { registerPageScript } from '@lib/shared/utils';
+    import { applyInstantly, registerPageScript } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
 
     interface NewsletterElements {
@@ -76,13 +69,12 @@ import SectionHead from '@components/shared/SectionHead.astro';
         output: HTMLElement;
     }
 
-    const INVALID_MESSAGE = 'Enter a valid email address.';
+    const RULES: Record<string, FieldRule> = {
+        email: { message: 'Enter a valid email address.', pattern: EMAIL_PATTERN, required: true },
+    };
+
     const STORAGE_MESSAGE = 'You are not on the list because your browser storage is full. Clear some space and try again.';
     const SUBSCRIBED_MESSAGE = 'Your account is already on the list.';
-
-    const RULES: Record<string, FieldRule> = {
-        email: { message: INVALID_MESSAGE, pattern: EMAIL_PATTERN, required: true },
-    };
 
     const subscription = createStore<null | string>({
         fallback: null,
@@ -116,8 +108,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
         clearFieldErrors(elements.form);
 
         if (Object.keys(errors).length > 0) {
-            setFieldErrors(elements.form, errors);
-            focusFirstError(elements.form, errors);
+            reportFieldErrors(elements.form, errors);
 
             return;
         }
@@ -152,6 +143,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
 
         form.noValidate = true;
         form.addEventListener('submit', event => handleNewsletterSubmit(event, elements), { signal });
+        watchFieldErrors(form, signal);
 
         if (subscribed !== null) showConfirmation(elements, subscribed, true);
     }
@@ -173,7 +165,10 @@ import SectionHead from '@components/shared/SectionHead.astro';
     function showConfirmation(elements: NewsletterElements, email: string, isReturning: boolean) {
         const { button, input, output } = elements;
 
-        button.disabled = true;
+        applyInstantly(button, () => {
+            button.disabled = true;
+        });
+
         input.disabled = true;
         input.value = email;
         output.textContent = isReturning ? SUBSCRIBED_MESSAGE : 'You are on the list. The next dispatch lands in your inbox.';

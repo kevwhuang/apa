@@ -1,6 +1,7 @@
 import { STORAGE } from '@lib/shared/constants';
 import { acceptFiles, releaseAudioContext, uploadSubmission } from '@lib/audio/uploads';
 import { formatBytes, formatDuration, preventNavigation, setText } from '@lib/shared/utils';
+import { toast } from '@lib/ui/toasts';
 
 interface DropzoneElements {
     input: HTMLInputElement;
@@ -35,9 +36,9 @@ interface QueuedUpload {
 }
 
 const DEFAULT_MESSAGES: DropzoneMessages = {
-    failed: (name, reason) => `${name} failed: ${reason}`,
+    failed: (name, reason) => `${name} could not be loaded. ${reason}`,
     ready: name => `${name} ready.`,
-    rejected: (name, reason) => `${name} rejected: ${reason}`,
+    rejected: (name, reason) => `${name} was not added. ${reason}`,
     removed: name => `${name} removed.`,
 };
 
@@ -106,13 +107,10 @@ function setCancelLabel(row: HTMLElement, entry: UploadEntry, isReading: boolean
     cancel.setAttribute('aria-label', `${isReading ? 'Cancel' : 'Remove'} ${entry.file.name}`);
 }
 
-function showRowError(row: HTMLElement, message: string) {
-    const error = row.querySelector<HTMLElement>('[data-row-error]');
-
-    setText(error, message);
-    error?.removeAttribute('hidden');
+function showRowFailure(row: HTMLElement) {
+    row.classList.add('is-failed');
     row.querySelector('[data-row-progress]')?.setAttribute('hidden', '');
-    setText(row.querySelector('[data-row-percent]'), '');
+    setText(row.querySelector('[data-row-percent]'), 'Failed');
 }
 
 function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors, options: DropzoneOptions) {
@@ -128,6 +126,9 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
 
     function handleDragEnter(event: DragEvent) {
         event.preventDefault();
+
+        if (input.disabled) return;
+
         zone.classList.add('is-dragging');
         depth += 1;
     }
@@ -145,7 +146,7 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
 
         const files = event.dataTransfer?.files;
 
-        if (files && files.length > 0) intake(files);
+        if (!input.disabled && files && files.length > 0) intake(files);
     }
 
     function handleInputChange() {
@@ -185,20 +186,26 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
     function intake(files: FileList | File[]) {
         const created = acceptFiles(files, queue.map(item => item.entry));
 
+        const rejected = created.filter(entry => entry.status === 'rejected');
+
+        input.setAttribute('aria-invalid', 'false');
+
         created.forEach((entry) => {
+            if (entry.status === 'rejected') return;
+
             const row = renderRow(entry);
 
             if (!row) return;
 
-            if (entry.status === 'rejected') {
-                announce(DEFAULT_MESSAGES.rejected(entry.file.name, entry.error ?? 'That file was not accepted.'));
-
-                return;
-            }
-
             queue.push({ controller: new AbortController(), entry, row });
             void readEntry(entry, row);
         });
+
+        if (rejected.length === 0) return;
+
+        input.setAttribute('aria-invalid', 'true');
+        input.focus();
+        toast(rejected.map(entry => DEFAULT_MESSAGES.rejected(entry.file.name, entry.error ?? 'That file was not accepted.')).join(' '), 'error');
     }
 
     async function readEntry(entry: UploadEntry, row: HTMLElement) {
@@ -221,8 +228,8 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
         if (!result.ok) {
             entry.status = 'failed';
             setCancelLabel(row, entry, false);
-            showRowError(row, result.message);
-            announce(DEFAULT_MESSAGES.failed(entry.file.name, result.message));
+            showRowFailure(row);
+            toast(DEFAULT_MESSAGES.failed(entry.file.name, result.message), 'error');
 
             return;
         }
@@ -256,9 +263,6 @@ function startDropzone(elements: DropzoneElements, selectors: DropzoneSelectors,
         progress?.setAttribute('aria-label', `Read progress for ${entry.file.name}`);
         setText(row.querySelector('[data-row-meta]'), describeEntry(entry));
         setText(row.querySelector('[data-row-name]'), entry.file.name);
-
-        if (entry.status === 'rejected') showRowError(row, entry.error ?? 'That file was not accepted.');
-
         cancel?.addEventListener('click', () => handleRemove(entry, row), { signal });
         setCancelLabel(row, entry, false);
         list.append(fragment);

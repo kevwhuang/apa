@@ -40,7 +40,7 @@ const track = featured?.data.tracks[0];
             <div class="producer-feature__rank rank items-start">
                 <div>
                     <div
-                        class="mb-6 pb-(--lift) pe-(--lift)"
+                        class="mb-6"
                         data-motion="wipe"
                     >
                         <ProducerPortrait
@@ -84,7 +84,7 @@ const track = featured?.data.tracks[0];
                         ))}
                     </ul>
                     {track && (
-                        <div class="producer-feature__track slab slab--card slab--still text-text">
+                        <div class="producer-feature__track slab slab--card text-text">
                             <p class="label mb-3 text-link">Spotlight</p>
                             <ProducerTrack
                                 producerId={featured.data.producerId}

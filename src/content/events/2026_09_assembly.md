@@ -1,11 +1,12 @@
 ---
 ends_at: 2026-09-10T21:00:00-05:00
-program: assembly
+external_url: https://www.meetup.com/austinproduceralliance/events/314555862
+program: Assembly
 room: Antone's (16th floor)
 speaker: jameson_sutton
 starts_at: 2026-09-10T18:00:00-05:00
-title: Sound Design & Approaches in Game Audio
+title: Sound Design and Approaches in Game Audio
 venue: STATION Austin
 ---
 
-Jameson Sutton, a game audio designer and foley artist, walked through his workflow and core approach for creating unique sounds and music in games and multimedia projects. He covered how to turn "weird" sounds into elements and samples, and how to prepare mentally before taking on unusual sound design. Foley is the recording of everyday sounds performed to match what happens on screen.
+In this walkthrough, foley artist Jameson Sutton shares the workflow and core approach he uses to create distinctive sounds and music for games and multimedia projects. He covers how to prepare mentally before taking on unusual sound design and how to turn "weird" sounds into elements and samples.

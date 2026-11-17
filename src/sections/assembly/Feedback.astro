@@ -2,7 +2,7 @@
 import IconUpload from '@components/icons/Upload.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { BOARD_PAGE_SIZE } from '@lib/programs/submissions';
-import { UPLOAD } from '@lib/shared/constants';
+import { LINK_MAX_LENGTH, UPLOAD } from '@lib/shared/constants';
 import { UPLOAD_EXTENSIONS_OR_LIST } from '@lib/audio/uploads';
 import { formatBytes } from '@lib/shared/utils';
 
@@ -17,143 +17,137 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
 >
     <div>
         <SectionHead
-            class="text-4xl"
+            class="text-4xl text-balance"
             headingId="feedback-title"
         >
             Queue a demo
         </SectionHead>
-        <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-12 mb-(--space-2xl) max-md:grid-cols-1">
-            <div
-                class="flex flex-col gap-4"
-                data-motion-stagger="blur"
-            >
-                <p class="text-lg text-text-secondary">
-                    Every Assembly sets aside time for demos. Queue a track here and it plays out
-                    loud for the room at the next one, then gets talked through together.
-                </p>
-                <p class="text-text-secondary">
-                    A SoundCloud or Spotify link works, and so does an MP3 or WAV straight out of
-                    your session. Unfinished is fine, and rough mixes often get the most useful
-                    feedback.
-                </p>
-            </div>
-            <div class="flex flex-col gap-(--space-2xl)">
-                <div class="flex flex-col gap-(--space-md)">
-                    <div
-                        class="flex flex-wrap gap-4"
-                        aria-label="How to hand over your track"
-                        data-motion="stamp"
-                        role="group"
-                    >
-                        <button
-                            class="chip feedback__mode is-active hover:bg-bg-hover"
-                            aria-controls="feedback-panel-link"
-                            aria-pressed="true"
-                            data-mode="link"
-                            type="button"
-                        >
-                            Paste a link
-                        </button>
-                        <button
-                            class="chip feedback__mode hover:bg-bg-hover"
-                            aria-controls="feedback-panel-file"
-                            aria-pressed="false"
-                            data-mode="file"
-                            type="button"
-                        >
-                            Drop a file
-                        </button>
-                    </div>
-                    <form
-                        id="feedback-panel-link"
-                        class="slab slab--card slab--still flex flex-col gap-3"
-                        data-feedback-panel="link"
-                        data-motion="unfold"
-                    >
-                        <label class="flex flex-col gap-2">
-                            <span class="label text-text-secondary">Track link</span>
-                            <input
-                                id="feedback-link"
-                                class="input font-mono"
-                                aria-describedby="feedback-link-help feedback-link-error"
-                                aria-invalid="false"
-                                autocomplete="off"
-                                data-feedback-link
-                                name="link"
-                                placeholder="https://soundcloud.com/you/rough-mix"
-                                spellcheck="false"
-                                type="url"
-                            />
-                        </label>
-                        <p
-                            id="feedback-link-help"
-                            class="text-base text-text-secondary"
-                        >
-                            SoundCloud or Spotify links only.
-                        </p>
-                        <p
-                            id="feedback-link-error"
-                            class="text-error-text"
-                            data-link-error
-                            hidden
-                        />
-                        <button
-                            class="btn btn--primary self-start"
-                            type="submit"
-                        >
-                            Add to queue
-                        </button>
-                    </form>
-                    <div
-                        id="feedback-panel-file"
-                        class="slab slab--card slab--still flex flex-col gap-3"
-                        data-feedback-panel="file"
-                        data-motion="unfold"
-                        hidden
-                    >
-                        <label
-                            class="dropzone halftone flex flex-col items-center justify-center relative min-h-[220px] gap-3 p-(--space-lg) border-2 border-border-strong border-dashed text-center bg-bg-page"
-                            data-dropzone
-                            for="feedback-input"
-                        >
-                            <IconUpload />
-                            <span class="font-bold font-sans text-2xl tracking-tight">
-                                Drop your track here
-                            </span>
-                            <span class="label text-text">or choose a file</span>
-                            <input
-                                id="feedback-input"
-                                class="dropzone__input sr-only"
-                                accept={UPLOAD.acceptAttribute}
-                                aria-describedby="feedback-file-help"
-                                data-dropzone-input
-                                multiple
-                                name="feedback"
-                                type="file"
-                            />
-                        </label>
-                        <p
-                            id="feedback-file-help"
-                            class="text-base text-text-secondary"
-                            data-placeholder
-                        >
-                            {UPLOAD_EXTENSIONS_OR_LIST} only. Up to {formatBytes(UPLOAD.maxFileBytes)} each.
-                        </p>
-                    </div>
-                </div>
-                <ol
-                    class="empty:hidden flex flex-col gap-(--space-2xl) list-none"
-                    aria-label="Queued for the next Assembly"
-                    data-feedback-list
-                />
+        <div
+            class="has-[+[hidden]]:mb-0 flex flex-col gap-(--space-2xl) mb-(--space-2xl)"
+            data-motion="unfold"
+        >
+            <div class="flex flex-col gap-(--space-md)">
                 <p
-                    class="sr-only"
-                    aria-live="polite"
-                    data-feedback-status
-                />
+                    class="font-bold text-base"
+                    data-intake-note
+                    hidden
+                >
+                    Submissions are closed.
+                </p>
+                <div
+                    class="flex flex-wrap gap-4"
+                    aria-label="How to hand over your track"
+                    data-motion="stamp"
+                    role="group"
+                >
+                    <button
+                        class="chip feedback__mode is-active hover:bg-bg-hover"
+                        aria-controls="feedback-panel-link"
+                        aria-pressed="true"
+                        data-intake-control
+                        data-mode="link"
+                        type="button"
+                    >
+                        Paste a link
+                    </button>
+                    <button
+                        class="chip feedback__mode hover:bg-bg-hover"
+                        aria-controls="feedback-panel-file"
+                        aria-pressed="false"
+                        data-intake-control
+                        data-mode="file"
+                        type="button"
+                    >
+                        Drop a file
+                    </button>
+                </div>
+                <form
+                    id="feedback-panel-link"
+                    class="slab slab--card flex flex-col gap-3"
+                    data-feedback-panel="link"
+                    data-motion="unfold"
+                >
+                    <label class="flex flex-col gap-2">
+                        <span class="sr-only">Track link</span>
+                        <input
+                            id="feedback-link"
+                            class="input font-mono"
+                            aria-describedby="feedback-link-help"
+                            aria-invalid="false"
+                            autocomplete="off"
+                            data-feedback-link
+                            data-intake-control
+                            maxlength={LINK_MAX_LENGTH}
+                            name="link"
+                            spellcheck="false"
+                            type="url"
+                        />
+                    </label>
+                    <p
+                        id="feedback-link-help"
+                        class="text-base text-text-secondary"
+                    >
+                        A Spotify or SoundCloud link.
+                    </p>
+                    <button
+                        class="btn btn--primary self-start"
+                        data-intake-control
+                        type="submit"
+                    >
+                        Add to queue
+                    </button>
+                </form>
+                <div
+                    id="feedback-panel-file"
+                    class="slab slab--card flex flex-col gap-3"
+                    data-feedback-panel="file"
+                    data-motion="unfold"
+                    hidden
+                >
+                    <label
+                        class="dropzone halftone flex flex-col items-center justify-center relative min-h-[220px] gap-3 p-(--space-lg) border-2 border-border-strong border-dashed text-center bg-bg-page"
+                        data-dropzone
+                        for="feedback-input"
+                    >
+                        <IconUpload />
+                        <span class="font-bold font-sans text-2xl tracking-tight">
+                            Drop your track
+                        </span>
+                        <span class="label text-text">or choose a file</span>
+                        <input
+                            id="feedback-input"
+                            class="dropzone__input sr-only"
+                            accept={UPLOAD.acceptAttribute}
+                            aria-describedby="feedback-file-help"
+                            aria-invalid="false"
+                            data-dropzone-input
+                            data-intake-control
+                            multiple
+                            name="feedback"
+                            type="file"
+                        />
+                    </label>
+                    <p
+                        id="feedback-file-help"
+                        class="text-base text-text-secondary"
+                        data-placeholder
+                    >
+                        {UPLOAD_EXTENSIONS_OR_LIST} files up to {formatBytes(UPLOAD.maxFileBytes)}.
+                    </p>
+                </div>
             </div>
+            <ol
+                class="empty:hidden flex flex-col gap-(--space-2xl) list-none"
+                aria-label="Queued for the next Assembly"
+                data-feedback-list
+            />
+            <p
+                class="sr-only"
+                aria-live="polite"
+                data-feedback-status
+            />
         </div>
-        <div>
+        <div data-board-root>
             <div class="flex flex-wrap items-baseline justify-between gap-3 mb-6">
                 <h3
                     class="text-2xl"
@@ -171,19 +165,20 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                 </p>
             </div>
             <div
-                class="overflow-x-auto mb-5"
+                class="@container overflow-x-auto mb-5"
+                data-board-frame
                 data-motion="unfold"
             >
                 <table
-                    class="table-fixed border-2 border-border-strong"
+                    class="table-fixed border-2 border-border-strong [--board-index:calc(var(--text-base)*var(--board-digits,2)*0.612+33px)] [--board-time:calc(var(--text-sm)*6.048+33px)] max-md:[--board-index:calc(var(--text-base)*var(--board-digits,2)*0.612+17px)] max-md:[--board-time:calc(var(--text-sm)*6.048+17px)]"
                     data-placeholder
                 >
                     <caption class="sr-only">Demos submitted at the last Assembly</caption>
                     <colgroup>
-                        <col class="w-16 max-md:w-10" />
-                        <col class="w-80 max-lg:w-64 max-md:w-auto" />
+                        <col class="w-(--board-index)" />
+                        <col class="w-[clamp(160px,calc((100cqw-var(--board-index)-var(--board-time)-66px)*var(--board-share,0.391)+32px),calc(100cqw-var(--board-index)-var(--board-time)-162px))] max-md:w-[max(128px,calc(100cqw-var(--board-index)-var(--board-time)-2px))]" />
                         <col class="max-md:hidden" />
-                        <col class="w-32 max-md:w-24" />
+                        <col class="w-(--board-time)" />
                     </colgroup>
                     <thead>
                         <tr class="label border-b-2 border-border-strong text-text-secondary">
@@ -206,7 +201,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                                 Source
                             </th>
                             <th
-                                class="px-4 py-3 text-right max-md:px-2"
+                                class="px-4 py-3 text-right whitespace-nowrap max-md:px-2"
                                 scope="col"
                             >
                                 Submitted
@@ -255,7 +250,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
         </div>
     </div>
     <template data-feedback-row-link>
-        <li class="slab slab--card slab--still flex flex-col gap-3">
+        <li class="slab slab--card flex flex-col gap-3">
             <div class="flex flex-wrap items-baseline gap-3">
                 <p class="label px-2 py-1 bg-bg-inverse text-text-inverse">Link</p>
                 <p
@@ -285,7 +280,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
         </li>
     </template>
     <template data-feedback-row-file>
-        <li class="slab slab--card slab--still flex flex-col gap-3">
+        <li class="slab slab--card flex flex-col gap-3">
             <div class="flex flex-wrap items-baseline justify-between gap-3">
                 <div class="flex flex-wrap items-baseline gap-3">
                     <p class="label px-2 py-1 bg-bg-inverse text-text-inverse">File</p>
@@ -306,11 +301,6 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                 height="72"
                 hidden
                 width="640"
-            />
-            <p
-                class="text-error-text"
-                data-row-error
-                hidden
             />
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <progress
@@ -336,16 +326,16 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
     <template data-board-row>
         <tr class="h-14 max-md:h-18">
             <td
-                class="px-4 font-mono text-base text-text-secondary max-md:px-2"
+                class="px-4 font-mono text-base whitespace-nowrap text-text-secondary max-md:px-2"
                 data-cell-index
             />
             <td class="px-4 max-md:px-2">
                 <span
-                    class="block font-bold wrap-break-word"
+                    class="block font-bold truncate"
                     data-cell-producer
                 />
                 <span
-                    class="hidden font-mono text-base truncate text-text-secondary max-md:block"
+                    class="has-[a]:overflow-visible hidden font-mono text-base truncate text-text-secondary max-md:block"
                     data-cell-source
                 />
             </td>
@@ -358,6 +348,17 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                 data-cell-submitted
             />
         </tr>
+    </template>
+    <template data-board-link>
+        <a
+            class="active:translate-y-px hover:text-link inline-block max-w-full align-top truncate transition-[color,translate]"
+            href="/assemblies"
+            rel="noopener noreferrer"
+            target="_blank"
+        >
+            <span data-board-link-label />
+            <span class="sr-only">&nbsp;(opens in a new tab)</span>
+        </a>
     </template>
     <template data-board-filler>
         <tr
@@ -380,19 +381,24 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
 
 <script>
     import { ASSEMBLY_DEMOS, parseTrackLink } from '@lib/programs/feedback';
-    import { BOARD_PAGE_SIZE } from '@lib/programs/submissions';
+    import { BOARD_PAGE_SIZE, describeBoard, getBoardShare } from '@lib/programs/submissions';
     import { LINKS, MOCK_LATENCY_MILLISECONDS } from '@lib/shared/constants';
+    import { applyInstantly, delay, formatEntry, formatTime, initRovingFocus, measureWidest, registerPageScript, setHidden, setText } from '@lib/shared/utils';
+    import { bindIntake } from '@lib/programs/intake';
     import { createDropzone, nextFocusTarget } from '@lib/audio/dropzone';
-    import { delay, formatEntry, formatTime, initRovingFocus, registerPageScript, setHidden, setMessage, setText } from '@lib/shared/utils';
     import { isValidationBypassed } from '@lib/ui/forms';
+    import { toast } from '@lib/ui/toasts';
 
     interface BoardElements {
         body: HTMLElement;
         chipTemplate: HTMLTemplateElement;
         fillerTemplate: HTMLTemplateElement;
+        frame: HTMLElement;
+        linkTemplate: HTMLTemplateElement;
         pager: HTMLElement;
         refresh: HTMLElement;
         refreshText: HTMLElement;
+        root: HTMLElement;
         rowTemplate: HTMLTemplateElement;
         status: HTMLElement;
     }
@@ -402,7 +408,10 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
         row: HTMLElement;
     }
 
+    const RESUBMIT_WINDOW_MILLISECONDS = 500;
+
     let linkQueue: QueuedLink[] = [];
+    let linkQueuedAt = Number.NEGATIVE_INFINITY;
 
     function announce(message: string) {
         setText(document.querySelector('[data-feedback-status]'), message);
@@ -410,13 +419,32 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
 
     function clearLinkError(input: HTMLInputElement) {
         input.setAttribute('aria-invalid', 'false');
-        setMessage(document.querySelector<HTMLElement>('[data-link-error]'), '');
     }
 
     function fillCells(row: HTMLElement, selector: string, value: string) {
         row.querySelectorAll<HTMLElement>(selector).forEach((cell) => {
             cell.textContent = value;
             cell.title = value;
+        });
+    }
+
+    function fillSource(row: HTMLElement, template: HTMLTemplateElement, source: string) {
+        const parsed = parseTrackLink(source);
+
+        fillCells(row, '[data-cell-source]', source);
+
+        if (!parsed.ok) return;
+
+        row.querySelectorAll<HTMLElement>('[data-cell-source]').forEach((cell) => {
+            const fragment = template.content.cloneNode(true) as DocumentFragment;
+
+            const anchor = fragment.querySelector('a');
+
+            if (!anchor) return;
+
+            anchor.href = parsed.link.href;
+            setText(anchor.querySelector('[data-board-link-label]'), source);
+            cell.replaceChildren(fragment);
         });
     }
 
@@ -429,8 +457,15 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
         announce(`${link.host} link removed.`);
     }
 
+    function handleLinkInput(input: HTMLInputElement) {
+        linkQueuedAt = Number.NEGATIVE_INFINITY;
+        clearLinkError(input);
+    }
+
     function handleLinkSubmit(event: SubmitEvent, form: HTMLFormElement, input: HTMLInputElement, list: HTMLElement, signal: AbortSignal) {
         event.preventDefault();
+
+        if (input.value.trim().length === 0 && event.timeStamp - linkQueuedAt < RESUBMIT_WINDOW_MILLISECONDS) return;
 
         const parsed = resolveLink(input.value);
 
@@ -452,6 +487,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
 
         clearLinkError(input);
         form.reset();
+        linkQueuedAt = event.timeStamp;
         linkQueue.push({ link: parsed.link, row });
         input.focus();
         announce(`${parsed.link.host} link queued for the next Assembly.`);
@@ -466,6 +502,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
         if (!form || !linkInput || !list) return;
 
         linkQueue = [];
+        linkQueuedAt = Number.NEGATIVE_INFINITY;
         setMode('link');
 
         createDropzone({
@@ -479,27 +516,32 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
 
         form.noValidate = true;
         form.addEventListener('submit', event => handleLinkSubmit(event, form, linkInput, list, signal), { signal });
-        linkInput.addEventListener('input', () => clearLinkError(linkInput), { signal });
+        linkInput.addEventListener('input', () => handleLinkInput(linkInput), { signal });
         initRovingFocus(modes, signal);
 
         modes.forEach((button) => {
             button.addEventListener('click', () => setMode(button.dataset.mode === 'file' ? 'file' : 'link'), { signal });
         });
+
+        bindIntake('assembly', signal);
     }
 
     function initDemoBoard(signal: AbortSignal) {
         const body = document.querySelector<HTMLElement>('[data-board-body]');
         const chipTemplate = document.querySelector<HTMLTemplateElement>('[data-board-page]');
         const fillerTemplate = document.querySelector<HTMLTemplateElement>('[data-board-filler]');
+        const frame = document.querySelector<HTMLElement>('[data-board-frame]');
+        const linkTemplate = document.querySelector<HTMLTemplateElement>('[data-board-link]');
         const pager = document.querySelector<HTMLElement>('[data-board-pager]');
         const refresh = document.querySelector<HTMLElement>('[data-board-refresh]');
         const refreshText = document.querySelector<HTMLElement>('[data-board-refresh-text]');
+        const root = document.querySelector<HTMLElement>('[data-board-root]');
         const rowTemplate = document.querySelector<HTMLTemplateElement>('[data-board-row]');
         const status = document.querySelector<HTMLElement>('[data-board-status]');
 
-        if (!body || !chipTemplate || !fillerTemplate || !pager || !refresh || !refreshText || !rowTemplate || !status) return;
+        if (!body || !chipTemplate || !fillerTemplate || !frame || !linkTemplate || !pager || !refresh || !refreshText || !root || !rowTemplate || !status) return;
 
-        startBoard({ body, chipTemplate, fillerTemplate, pager, refresh, refreshText, rowTemplate, status }, signal);
+        startBoard({ body, chipTemplate, fillerTemplate, frame, linkTemplate, pager, refresh, refreshText, root, rowTemplate, status }, signal);
     }
 
     function renderLinkRow(link: TrackLink, list: HTMLElement, signal: AbortSignal) {
@@ -540,16 +582,18 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
 
     function setLinkError(input: HTMLInputElement, message: string) {
         input.setAttribute('aria-invalid', 'true');
-        setMessage(document.querySelector<HTMLElement>('[data-link-error]'), message);
-        announce(message);
+        toast(message, 'error');
+        input.focus();
     }
 
     function setMode(next: 'file' | 'link') {
         document.querySelectorAll<HTMLButtonElement>('.feedback__mode').forEach((button) => {
             const isActive = button.dataset.mode === next;
 
-            button.classList.toggle('is-active', isActive);
-            button.setAttribute('aria-pressed', String(isActive));
+            applyInstantly(button, () => {
+                button.classList.toggle('is-active', isActive);
+                button.setAttribute('aria-pressed', String(isActive));
+            });
         });
 
         document.querySelectorAll<HTMLElement>('[data-feedback-panel]').forEach((panel) => {
@@ -558,7 +602,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
     }
 
     function startBoard(elements: BoardElements, signal: AbortSignal) {
-        const { body, chipTemplate, fillerTemplate, pager, refresh, refreshText, rowTemplate, status } = elements;
+        const { body, chipTemplate, fillerTemplate, frame, linkTemplate, pager, refresh, refreshText, root, rowTemplate, status } = elements;
         const rows = ASSEMBLY_DEMOS.toSorted((a, b) => +new Date(a.submittedAt) - +new Date(b.submittedAt));
 
         let page = 1;
@@ -589,11 +633,14 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
 
             buildPager();
             render();
+            void sizeColumns();
             setHidden(refresh, true);
             setText(refreshText, '');
         }
 
         function render() {
+            setHidden(pager, rows.length <= BOARD_PAGE_SIZE);
+            setHidden(root, rows.length === 0);
             renderRows();
             updatePager();
             updateStatus();
@@ -605,6 +652,8 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
             const visible = rows.slice(start, start + BOARD_PAGE_SIZE);
 
             body.replaceChildren();
+
+            if (visible.length === 0) return;
 
             visible.forEach((entry, index) => {
                 const fragment = rowTemplate.content.cloneNode(true) as DocumentFragment;
@@ -619,7 +668,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                 stamp.textContent = formatTime(new Date(entry.submittedAt));
                 setText(row.querySelector('[data-cell-index]'), formatEntry(start + index + 1));
                 fillCells(row, '[data-cell-producer]', entry.producer);
-                fillCells(row, '[data-cell-source]', entry.source);
+                fillSource(row, linkTemplate, entry.source);
                 row.querySelector('[data-cell-submitted]')?.append(stamp);
                 body.append(fragment);
             });
@@ -636,22 +685,41 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
             render();
         }
 
+        async function sizeColumns() {
+            frame.style.setProperty('--board-digits', String(formatEntry(rows.length).length));
+
+            await document.fonts.ready;
+
+            const producer = body.querySelector('[data-cell-producer]');
+            const source = body.querySelector('td[data-cell-source]');
+
+            if (signal.aborted || !producer || !source) return;
+
+            const producerWidth = measureWidest(producer, rows.map(entry => entry.producer));
+            const sourceWidth = measureWidest(source, rows.map(entry => entry.source));
+
+            if (producerWidth + sourceWidth > 0) frame.style.setProperty('--board-share', String(getBoardShare(producerWidth, sourceWidth)));
+        }
+
         function updatePager() {
             pager.querySelectorAll('button').forEach((chip, index) => {
                 const isActive = index + 1 === page;
 
-                chip.classList.toggle('is-active', isActive);
+                if (chip.classList.contains('is-active') === isActive) return;
 
-                if (isActive) chip.setAttribute('aria-current', 'page');
-                else chip.removeAttribute('aria-current');
+                applyInstantly(chip, () => {
+                    chip.classList.toggle('is-active', isActive);
+
+                    if (isActive) chip.setAttribute('aria-current', 'page');
+                    else chip.removeAttribute('aria-current');
+                });
             });
         }
 
         function updateStatus() {
-            const first = (page - 1) * BOARD_PAGE_SIZE + 1;
-            const last = Math.min(rows.length, page * BOARD_PAGE_SIZE);
+            const message = describeBoard(page, rows.length);
 
-            setText(status, `Showing ${first}\u2013${last} of ${rows.length}`);
+            if (status.textContent !== message) setText(status, message);
         }
 
         setHidden(refresh, false);

@@ -10,7 +10,7 @@ const ASSEMBLY_DEMOS: AssemblyDemo[] = [
     { producer: 'Rosa Quintero', source: 'open.spotify.com/track/5mQ2vTc8yL1nW4pR7sXd0B', submittedAt: '2026-10-08T17:13:00-05:00' },
     { producer: 'Tobias Achterberg', source: 'porch_light_v3.mp3', submittedAt: '2026-10-08T17:16:00-05:00' },
     { producer: 'Kit Oduya', source: 'soundcloud.com/kit-oduya/eastside-swing', submittedAt: '2026-10-08T17:20:00-05:00' },
-    { producer: 'Imani Castellanos-Whitfield', source: 'second_verse_needs_work_bounce_2026_10_07_master_attempt.wav', submittedAt: '2026-10-08T17:24:00-05:00' },
+    { producer: 'Imani Castellanos-Whitfield and the Late Night Sample Society', source: 'second_verse_needs_work_bounce_2026_10_07_master_attempt.wav', submittedAt: '2026-10-08T17:24:00-05:00' },
     { producer: 'Hal Nyberg', source: 'soundcloud.com/hal-nyberg/brass-loop-idea', submittedAt: '2026-10-08T17:27:00-05:00' },
     { producer: 'Selene Okoro', source: 'quiet_engine.wav', submittedAt: '2026-10-08T17:31:00-05:00' },
     { producer: 'Dario Pell', source: 'open.spotify.com/track/2hX9cKe4uVb6ZoQ3tN8fLa', submittedAt: '2026-10-08T17:34:00-05:00' },
@@ -29,6 +29,7 @@ const ASSEMBLY_DEMOS: AssemblyDemo[] = [
     { producer: 'Malik Prentiss', source: 'sidechain_sermon.mp3', submittedAt: '2026-10-08T18:20:00-05:00' },
     { producer: 'Oona Bright', source: 'soundcloud.com/oona-bright/county-line', submittedAt: '2026-10-08T18:24:00-05:00' },
     { producer: 'Sami Varga', source: 'last_call_sketch.wav', submittedAt: '2026-10-08T18:27:00-05:00' },
+    { producer: 'Adele Fontaine', source: 'open.spotify.com/track/9kLm2vQx4nT7pRb1sWd8Fy', submittedAt: '2026-10-09T00:30:00-05:00' },
 ];
 
 const KNOWN_HOSTS = [
@@ -51,7 +52,15 @@ function parseTrackLink(raw: string): TrackLinkResult {
 
     const known = KNOWN_HOSTS.find(host => host.pattern.test(url.hostname));
 
-    if (!known) return { message: 'That is not a SoundCloud or Spotify link.', ok: false };
+    if (!known || url.username || url.password || url.port) return { message: 'That is not a Spotify or SoundCloud link.', ok: false };
+
+    if (url.pathname.replace(/\/+$/, '').length === 0) return { message: 'That link does not point to a track.', ok: false };
+
+    url.hash = '';
+    url.hostname = url.hostname.replace(/^(m|www)\./, '');
+    url.pathname = url.pathname.replace(/\/+$/, '');
+    url.protocol = 'https:';
+    url.search = '';
 
     return { link: { host: known.label, href: url.href, id: crypto.randomUUID() }, ok: true };
 }

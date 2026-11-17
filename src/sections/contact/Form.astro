@@ -34,7 +34,6 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
                         <input
                             id="contact-name"
                             class="input"
-                            aria-describedby="contact-name-error"
                             aria-invalid="false"
                             autocomplete="name"
                             maxlength={CONTACT_LIMITS.name}
@@ -42,12 +41,6 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
                             required
                         />
                     </label>
-                    <p
-                        id="contact-name-error"
-                        class="text-error-text"
-                        data-field-error
-                        hidden
-                    />
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="flex flex-col gap-2">
@@ -55,7 +48,6 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
                         <input
                             id="contact-email"
                             class="input font-mono"
-                            aria-describedby="contact-email-error"
                             aria-invalid="false"
                             autocomplete="email"
                             maxlength={CONTACT_LIMITS.email}
@@ -64,12 +56,6 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
                             type="email"
                         />
                     </label>
-                    <p
-                        id="contact-email-error"
-                        class="text-error-text"
-                        data-field-error
-                        hidden
-                    />
                 </div>
             </div>
             <div class="flex flex-col gap-2">
@@ -79,7 +65,6 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
                         <select
                             id="contact-topic"
                             class="input"
-                            aria-describedby="contact-topic-error"
                             aria-invalid="false"
                             name="topic"
                             required
@@ -91,12 +76,6 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
                         </select>
                     </span>
                 </label>
-                <p
-                    id="contact-topic-error"
-                    class="text-error-text"
-                    data-field-error
-                    hidden
-                />
             </div>
             <div class="flex flex-col gap-2">
                 <label class="flex flex-col gap-2">
@@ -104,7 +83,6 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
                     <textarea
                         id="contact-message"
                         class="contact-form__message input"
-                        aria-describedby="contact-message-error"
                         aria-invalid="false"
                         maxlength={CONTACT_LIMITS.message}
                         name="message"
@@ -112,12 +90,6 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
                         rows="5"
                     />
                 </label>
-                <p
-                    id="contact-message-error"
-                    class="text-error-text"
-                    data-field-error
-                    hidden
-                />
             </div>
             <button
                 class="btn btn--primary contact-form__submit w-full"
@@ -324,7 +296,7 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
 
 <script>
     import { CONTACT_LIMITS, EMAIL_PATTERN } from '@lib/shared/constants';
-    import { clearFieldErrors, focusFirstError, setFieldErrors, validateFields } from '@lib/ui/forms';
+    import { clearFieldErrors, reportFieldErrors, validateFields, watchFieldErrors } from '@lib/ui/forms';
     import { composeContactEmail } from '@lib/shared/email';
     import { registerPageScript, setText } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
@@ -365,9 +337,7 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
         clearFieldErrors(form);
 
         if (Object.keys(errors).length > 0) {
-            setFieldErrors(form, errors);
-            focusFirstError(form, errors);
-            toast('Check the fields.', 'error');
+            reportFieldErrors(form, errors);
 
             return;
         }
@@ -385,6 +355,7 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
         form.noValidate = true;
         again?.addEventListener('click', () => handleContactAgain(form, done), { signal });
         form.addEventListener('submit', event => handleContactSubmit(event, form, done), { signal });
+        watchFieldErrors(form, signal);
         applyTopicFromQuery(form);
     }
 

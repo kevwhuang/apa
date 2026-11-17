@@ -43,6 +43,7 @@ const SWITCHES = [
     },
     {
         blurb: 'Controls whether members can queue a demo for the next Assembly.',
+        board: 'assembly',
         checked: true,
         id: 'assembly-intake',
         name: 'Assembly intake',
@@ -51,6 +52,7 @@ const SWITCHES = [
     },
     {
         blurb: 'Controls whether the submission form accepts new tracks for the current prompt.',
+        board: 'bash',
         checked: true,
         id: 'bash-intake',
         name: 'Bash intake',
@@ -80,7 +82,7 @@ const SWITCHES = [
         >
             {SWITCHES.map(control => (
                 <li>
-                    <div class="admin__row slab slab--card slab--still flex flex-wrap items-center gap-x-6 gap-y-4 mb-(--lift)">
+                    <div class="admin__row slab slab--card flex flex-wrap items-center gap-x-6 gap-y-4">
                         <div class="flex-1 min-w-50">
                             <h3
                                 id={`${control.id}-title`}
@@ -101,6 +103,7 @@ const SWITCHES = [
                             class="admin__switch"
                             aria-labelledby={`${control.id}-title`}
                             checked={control.checked}
+                            data-admin-board={control.board}
                             data-admin-off={`${control.name} closed.`}
                             data-admin-on={`${control.name} opened.`}
                             data-admin-toggle={control.id}
@@ -131,7 +134,7 @@ const SWITCHES = [
         >
             {ACTIONS.map(action => (
                 <li class="content-start grid grid-cols-1 grid-rows-subgrid row-span-4 gap-y-3 pb-(--space-2xl)">
-                    <article class="slab slab--card slab--still content-start grid grid-cols-1 grid-rows-subgrid row-span-4 gap-y-3">
+                    <article class="slab slab--card content-start grid grid-cols-1 grid-rows-subgrid row-span-4 gap-y-3">
                         <div class="flex items-baseline justify-between gap-x-4">
                             <h3 class="min-w-0 text-lg">
                                 {action.name}
@@ -232,8 +235,11 @@ const SWITCHES = [
 
 <script>
     import { MOCK_LATENCY_MILLISECONDS } from '@lib/shared/constants';
-    import { delay, registerPageScript } from '@lib/shared/utils';
+    import { applyInstantly, delay, registerPageScript } from '@lib/shared/utils';
+    import { isIntakeOpen, onIntakeChange, setIntakeOpen } from '@lib/programs/intake';
     import { toast } from '@lib/ui/toasts';
+
+    const STORAGE_MESSAGE = 'Nothing was saved because your browser storage is full. Clear some space and try again.';
 
     const pending = new Set<string>();
     const timers = new Map<string, number>();
@@ -268,7 +274,15 @@ const SWITCHES = [
     }
 
     function handleToggleChange(input: HTMLInputElement) {
+        const board = readBoard(input);
         const id = input.dataset.adminToggle ?? '';
+
+        if (board && !setIntakeOpen(board, input.checked)) {
+            input.checked = !input.checked;
+            toast(STORAGE_MESSAGE, 'error');
+
+            return;
+        }
 
         const queued = timers.get(id);
 
@@ -307,6 +321,15 @@ const SWITCHES = [
         document.querySelectorAll<HTMLButtonElement>('[data-admin-commit]').forEach((button) => {
             button.addEventListener('click', () => runAction(button.dataset.adminCommit ?? '', button), { signal });
         });
+
+        syncToggles();
+        signal.addEventListener('abort', onIntakeChange(syncToggles), { once: true });
+    }
+
+    function readBoard(input: HTMLInputElement) {
+        const board = input.dataset.adminBoard;
+
+        return board === 'assembly' || board === 'bash' ? board : null;
     }
 
     async function runAction(id: string, control: HTMLButtonElement | null) {
@@ -323,6 +346,22 @@ const SWITCHES = [
         pending.delete(id);
         closeConfirm(id, true);
         toast(commit?.dataset.adminResult ?? 'Done.', 'success');
+    }
+
+    function syncToggles() {
+        document.querySelectorAll<HTMLInputElement>('[data-admin-board]').forEach((input) => {
+            const board = readBoard(input);
+
+            if (!board) return;
+
+            const isOpen = isIntakeOpen(board);
+
+            if (input.checked === isOpen) return;
+
+            applyInstantly(input, () => {
+                input.checked = isOpen;
+            });
+        });
     }
 
     registerPageScript(initAdminConsole);

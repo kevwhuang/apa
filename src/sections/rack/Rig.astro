@@ -291,13 +291,14 @@ const MODULES: Module[] = [
                     id="rack-help"
                     class="font-mono text-balance text-sm text-text-inverse-secondary"
                 >
-                    {RACK_EXTENSION_LIST} only. Up to {formatBytes(RACK_MAX_BYTES)}.
+                    A {RACK_EXTENSION_LIST} file up to {formatBytes(RACK_MAX_BYTES)}.
                 </span>
                 <input
                     id="rack-file"
                     class="dropzone__input sr-only"
                     accept={UPLOAD.acceptAttribute}
-                    aria-describedby="rack-help rack-error"
+                    aria-describedby="rack-help"
+                    aria-invalid="false"
                     aria-label="Drop or choose audio"
                     data-rack-input
                     type="file"
@@ -344,12 +345,6 @@ const MODULES: Module[] = [
                             No file loaded
                         </span>
                     </p>
-                    <p
-                        id="rack-error"
-                        class="empty:hidden text-base text-error-text-on-inverse"
-                        aria-live="polite"
-                        data-rack-error
-                    />
                 </div>
             </div>
             <ol
@@ -394,7 +389,7 @@ const MODULES: Module[] = [
                 <li class="rack__tile">
                     <article
                         class:list={[
-                            'module slab slab--card slab--still grid grid-cols-1 grid-rows-subgrid row-[1/span_5] space-y-3',
+                            'module slab slab--card grid grid-cols-1 grid-rows-subgrid row-[1/span_5] space-y-3',
                             module.featured && 'module--featured',
                         ]}
                         data-module={module.kind}
@@ -659,9 +654,10 @@ const MODULES: Module[] = [
         toggleRack,
     } from '@lib/rack/rack';
     import { STORAGE } from '@lib/shared/constants';
-    import { formatDuration, preventNavigation, registerPageScript, setHidden, setText } from '@lib/shared/utils';
+    import { applyInstantly, formatDuration, preventNavigation, registerPageScript, setHidden, setText } from '@lib/shared/utils';
     import { initRig } from '@lib/motion/rig';
     import { readColorToken } from '@lib/motion/tokens';
+    import { toast } from '@lib/ui/toasts';
     import { validateRackFile } from '@lib/rack/loader';
 
     interface MeterView {
@@ -928,13 +924,15 @@ const MODULES: Module[] = [
     }
 
     async function intake(file: File, signal: AbortSignal) {
+        const input = document.querySelector<HTMLInputElement>('[data-rack-input]');
         const invalid = validateRackFile(file);
         const token = (requests += 1);
 
-        setText(document.querySelector('[data-rack-error]'), invalid ?? '');
+        input?.setAttribute('aria-invalid', 'false');
 
         if (invalid) {
             setDecoding(false);
+            showRackError(input, invalid);
 
             return;
         }
@@ -949,7 +947,7 @@ const MODULES: Module[] = [
         render();
         setDecoding(false);
 
-        if (!result.ok) setText(document.querySelector('[data-rack-error]'), result.message);
+        if (!result.ok) showRackError(input, result.message);
     }
 
     function paintView(view: ModuleView) {
@@ -981,7 +979,6 @@ const MODULES: Module[] = [
 
         meta.classList.toggle('font-mono', state.fileName !== null);
         meta.title = state.fileName ?? '';
-        toggle.disabled = state.fileName === null;
         setHidden(document.querySelector<HTMLElement>('[data-rack-icon-pause]'), !state.playing);
         setHidden(document.querySelector<HTMLElement>('[data-rack-icon-play]'), state.playing);
 
@@ -991,7 +988,11 @@ const MODULES: Module[] = [
         );
 
         setText(document.querySelector('[data-rack-toggle-label]'), state.playing ? 'Pause rack' : 'Play rack');
-        toggle.setAttribute('aria-pressed', String(state.playing));
+
+        applyInstantly(toggle, () => {
+            toggle.disabled = state.fileName === null;
+            toggle.setAttribute('aria-pressed', String(state.playing));
+        });
     }
 
     function renderPath(state: RackState) {
@@ -1022,7 +1023,7 @@ const MODULES: Module[] = [
         const isActive = state.activeKinds.includes(view.kind);
 
         view.card.classList.toggle('module--engaged', isActive);
-        view.toggle.setAttribute('aria-pressed', String(isActive));
+        if (view.toggle.getAttribute('aria-pressed') !== String(isActive)) applyInstantly(view.toggle, () => view.toggle.setAttribute('aria-pressed', String(isActive)));
 
         if (isActive && state.playing) return;
 
@@ -1044,6 +1045,12 @@ const MODULES: Module[] = [
     function setDragDepth(zone: HTMLElement, next: number) {
         depth = Math.max(0, next);
         zone.classList.toggle('is-dragging', depth > 0);
+    }
+
+    function showRackError(input: HTMLInputElement | null, message: string) {
+        input?.setAttribute('aria-invalid', 'true');
+        input?.focus();
+        toast(message, 'error');
     }
 
     function teardown() {

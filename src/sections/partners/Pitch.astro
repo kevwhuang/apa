@@ -5,7 +5,6 @@ import IconArrow from '@components/icons/Arrow.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { PARTNERS, PARTNER_INQUIRY_TOPIC, PARTNER_LOGO_WIDTH } from '@lib/shared/constants';
-import { getProgram, loadPrograms } from '@lib/programs/calendar';
 
 interface Lane {
     detail: string;
@@ -28,34 +27,32 @@ const DONATION_USES = [
 ];
 
 const FOUNDING_YEAR = '2022';
-const PRODUCERS_WELCOMED = '1,000+';
-
-const assembly = await getProgram('assembly');
-const bash = await getProgram('bash');
-const camp = await getProgram('camp');
-const programs = await loadPrograms();
-
-const contactHref = `/contact?topic=${encodeURIComponent(PARTNER_INQUIRY_TOPIC)}`;
 
 const LANES: Lane[] = [
-    { detail: `${assembly.name}, the ${bash.name}, and ${camp.name} are open to every genre and experience level. ${assembly.name} meets monthly, the ${bash.name} quarterly, and ${camp.name} twice a year. Showing up is the simplest way in.`, name: 'Come to an event' },
-    { detail: `Back the programs with a monthly contribution. It pays for rooms, gear, and keeping ${assembly.name} free to attend. Three levels run from $5 to $250 a month.`, name: 'Sponsor us' },
-    { detail: `Host a night, lead a workshop, or bring your venue, gear, studio, or school into a program. Our sponsors already host ${assembly.name} and the ${bash.name}.`, name: 'Collaborate' },
+    { detail: 'Assembly, the Bash, and CAMP are open to every genre and experience level. Assembly meets monthly, the Bash quarterly, and CAMP twice a year. Showing up is the simplest way in.', name: 'Come to an event' },
+    { detail: 'Back the programs with a monthly contribution. It pays for rooms, gear, and keeping Assembly free to attend. Three levels run from $5 to $250 a month.', name: 'Sponsor us' },
+    { detail: 'Host a night, lead a workshop, or bring your venue, gear, studio, or school into a program. Our sponsors already host Assembly and the Bash.', name: 'Collaborate' },
     { detail: 'Cover the Alliance in your publication, podcast, or social feed, with recaps, premieres, and the stories behind the tracks. Our press kit on the resources page has logos and photos.', name: 'Feature us' },
 ];
+
+const PRODUCERS_WELCOMED = '1,000+';
+const PROGRAMS_PLANNED = '4';
+const PROGRAMS_RUNNING = '4';
 
 const STATS = [
     { label: 'Founded', value: FOUNDING_YEAR },
     { label: 'Welcomed', value: PRODUCERS_WELCOMED },
-    { label: 'Programs running', value: String(programs.filter(program => program.status === 'active').length) },
-    { label: 'Programs planned', value: String(programs.filter(program => program.status === 'planned').length) },
+    { label: 'Programs running', value: PROGRAMS_RUNNING },
+    { label: 'Programs planned', value: PROGRAMS_PLANNED },
 ];
 
 const TIERS: Tier[] = [
     { name: 'Supporter', perks: ['Name on the site', 'Newsletter thank-you'], price: '$5' },
-    { featured: true, name: 'Backer', perks: ['Everything in Supporter', 'Featured on the website as a sponsor', `Mention from the front of the room at the ${bash.name}`, 'Guest passes across the year'], price: '$25' },
-    { name: 'Patron', perks: ['Everything in Backer', 'Logo on the site and event flyers', `Named partner on one ${bash.name}`, 'Co-branded workshop each year', 'Presence at every event'], price: '$250' },
+    { featured: true, name: 'Backer', perks: ['Everything in Supporter', 'Featured on the website as a sponsor', 'Mention from the front of the room at the Bash', 'Guest passes across the year'], price: '$25' },
+    { name: 'Patron', perks: ['Everything in Backer', 'Logo on the site and event flyers', 'Named partner on one Bash', 'Co-branded workshop each year', 'Presence at every event'], price: '$250' },
 ];
+
+const contactHref = `/contact?topic=${encodeURIComponent(PARTNER_INQUIRY_TOPIC)}`;
 ---
 
 <section
@@ -180,7 +177,7 @@ const TIERS: Tier[] = [
                 <li class="content-start grid grid-cols-1 grid-rows-subgrid row-span-4 gap-y-5">
                     <article
                         class:list={[
-                            'slab slab--still tier',
+                            'slab tier',
                             tier.featured ? 'slab--well tier--featured' : 'slab--card',
                             'content-start grid grid-cols-1 grid-rows-subgrid row-span-4 text-center',
                         ]}
@@ -255,7 +252,7 @@ const TIERS: Tier[] = [
                 </p>
             </div>
             <div
-                class="slab slab--card slab--roomy slab--still"
+                class="slab slab--card slab--roomy"
                 data-motion="unfold"
             >
                 <p class="label mb-4 text-text-secondary">Suggested amounts</p>
@@ -319,7 +316,6 @@ const TIERS: Tier[] = [
     }
 
     .tier--featured {
-        --slab-level: var(--z-card);
         --slab-rule: 2px;
     }
 </style>

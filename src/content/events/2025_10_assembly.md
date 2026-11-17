@@ -1,11 +1,14 @@
 ---
-ends_at: 2025-10-09T21:30:00-05:00
-program: assembly
+ends_at: 2025-10-09T21:00:00-05:00
+external_url: https://www.meetup.com/austinproduceralliance/events/305039056
+program: Assembly
 room: Antone's (16th floor)
 speaker: alex_lacroix
-starts_at: 2025-10-09T18:30:00-05:00
+starts_at: 2025-10-09T18:00:00-05:00
 title: Let's Make a Record in Logic Pro
 venue: Capital Factory
 ---
 
-Alex LaCroix led a live, interactive workshop in which a full track was arranged in Logic Pro in real time. He went through the creative decisions behind production, including sound selection, audio recording, arrangement, and refining a mix without getting lost in technical details. The session showed how each choice shaped the direction of a song, with the focus on the "why" behind the process. It offered attendees a clear sense of Logic Pro and a working framework for turning ideas into finished music.
+A full track comes together in Logic Pro in real time during this interactive workshop. Alex LaCroix walks through the creative decisions behind production, including sound selection, audio recording, arrangement, and mixing, without getting lost in technical details.
+
+He keeps the focus on the "why" behind the process, showing how each choice shapes the direction of a song. Attendees come away with a clearer understanding of Logic Pro and a working framework for turning ideas into finished music.

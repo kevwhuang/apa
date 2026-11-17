@@ -33,26 +33,6 @@ const images = await toImageSources();
         </h1>
         <div class="cart__grid grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] gap-12 max-md:grid-cols-1">
             <div class="cart__main flex flex-col gap-6">
-                <aside
-                    class="cart__notice slab slab--card flex flex-col max-w-(--measure-form) w-full gap-4"
-                    aria-label="Cart changes"
-                    data-cart-notice
-                    hidden
-                    role="status"
-                >
-                    <p class="label text-warning-text">Your cart changed</p>
-                    <ul
-                        class="flex flex-col gap-1 list-none"
-                        data-cart-issues
-                    />
-                    <button
-                        class="btn self-start"
-                        data-cart-dismiss
-                        type="button"
-                    >
-                        Dismiss
-                    </button>
-                </aside>
                 <div
                     class="cart__empty slab slab--card slab--empty max-w-(--measure-form) w-full"
                     data-cart-empty
@@ -119,7 +99,7 @@ const images = await toImageSources();
         </div>
     </div>
     <template data-cart-row>
-        <li class="cart-items__row slab slab--bare slab--card slab--still">
+        <li class="cart-items__row slab slab--bare slab--card">
             <div
                 class="flex items-center justify-center overflow-hidden relative self-start aspect-square"
                 data-row-tile
@@ -167,7 +147,7 @@ const images = await toImageSources();
                     <div class="flex items-center max-md:contents">
                         <div class="inline-flex items-center border-2 border-border-strong">
                             <button
-                                class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text-disabled aria-disabled:hover:bg-transparent aria-disabled:text-text-disabled hover:bg-bg-raised-hover size-(--control-size) font-bold font-mono"
+                                class="cart-items__step active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text-disabled aria-disabled:hover:bg-transparent aria-disabled:text-text-disabled hover:bg-bg-raised-hover size-(--control-size) font-bold font-mono"
                                 data-row-decrease
                                 type="button"
                             >
@@ -178,7 +158,7 @@ const images = await toImageSources();
                                 data-row-quantity
                             />
                             <button
-                                class="active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text-disabled aria-disabled:hover:bg-transparent aria-disabled:text-text-disabled hover:bg-bg-raised-hover size-(--control-size) font-bold font-mono"
+                                class="cart-items__step active:bg-bg-inverse active:text-text-inverse aria-disabled:active:bg-transparent aria-disabled:active:text-text-disabled aria-disabled:hover:bg-transparent aria-disabled:text-text-disabled hover:bg-bg-raised-hover size-(--control-size) font-bold font-mono"
                                 data-row-increase
                                 type="button"
                             >
@@ -199,20 +179,6 @@ const images = await toImageSources();
                     />
                 </div>
             </div>
-        </li>
-    </template>
-    <template data-cart-issue>
-        <li class="flex gap-2 text-base text-text-secondary">
-            <span
-                class="font-bold text-warning-text"
-                aria-hidden="true"
-            >
-                &middot;
-            </span>
-            <span
-                class="min-w-0"
-                data-issue-text
-            />
         </li>
     </template>
 </section>
@@ -241,8 +207,9 @@ const images = await toImageSources();
         padding: var(--row-pad);
     }
 
-    .cart-items__remove:focus-visible {
-        outline-offset: -2px;
+    .cart-items__remove:focus-visible,
+    .cart-items__step:focus-visible {
+        outline-offset: -4px;
     }
 
     .cart-items__row {
@@ -251,15 +218,15 @@ const images = await toImageSources();
         grid-template-columns: var(--row-square, var(--row-tile)) minmax(0, 1fr);
     }
 
+    .cart-items__step:active:not([aria-disabled='true']) {
+        --color-focus-ring: var(--color-focus-ring-offset);
+    }
+
     .cart__list {
         --row-controls: calc(var(--control-size) + 4px);
         --row-count: var(--cart-rows, var(--cart-seed-rows));
         --row-height: calc(2 * var(--row-pad) + var(--text-lg) + var(--text-base) + 4 * var(--spacing) + 16px + var(--row-controls) + 4px);
         --row-pad: round(clamp(16px, calc(9.333px + 2.0833vw), 36px), 4px);
-    }
-
-    .cart__notice {
-        border-left: 2px solid var(--color-warning-border);
     }
 
     .cart__summary {
@@ -286,9 +253,9 @@ const images = await toImageSources();
 
 <script>
     import { CARD_COLORS, COMMERCE, MOBILE_WIDTH } from '@lib/shared/constants';
-    import { formatPrice, formatSku, formatVariant, parseCatalog, parseImageSources, registerPageScript, setProductImage, setText, setTitleLink } from '@lib/shared/utils';
+    import { applyInstantly, describeCartChange, formatPrice, formatSku, formatVariant, parseCatalog, parseImageSources, registerPageScript, setProductImage, setText, setTitleLink } from '@lib/shared/utils';
     import { getItems, getTotals, onCartChange, reconcile, remove, setQuantity } from '@lib/commerce/cart';
-    import { isValidationBypassed, renderIssueList } from '@lib/ui/forms';
+    import { isValidationBypassed } from '@lib/ui/forms';
     import { toast } from '@lib/ui/toasts';
 
     interface FocusMark {
@@ -358,18 +325,18 @@ const images = await toImageSources();
 
     function initCartView(signal: AbortSignal) {
         const checkout = document.querySelector<HTMLElement>('.cart-checkout');
-        const dismiss = document.querySelector<HTMLButtonElement>('[data-cart-dismiss]');
-        const issueList = document.querySelector<HTMLElement>('[data-cart-issues]');
-        const issueTemplate = document.querySelector<HTMLTemplateElement>('[data-cart-issue]');
         const list = document.querySelector<HTMLElement>('[data-cart-list]');
-        const notice = document.querySelector<HTMLElement>('[data-cart-notice]');
         const source = document.querySelector<HTMLElement>('[data-catalog]');
 
         if (!checkout || !list) return;
 
         catalog = parseCatalog(source?.dataset.catalog);
         images = parseImageSources(source?.dataset.images);
-        renderIssueList(reconcile(catalog), notice, issueList, issueTemplate);
+
+        const issues = reconcile(catalog);
+
+        if (issues.length > 0) toast(describeCartChange(issues), 'info');
+
         renderCart(checkout, list, signal);
 
         const observer = new ResizeObserver(() => scheduleSquares(list));
@@ -377,7 +344,6 @@ const images = await toImageSources();
 
         observer.observe(list);
         checkout.addEventListener('click', event => handleCheckoutClick(event, checkout), { signal });
-        dismiss?.addEventListener('click', () => notice?.setAttribute('hidden', ''), { signal });
         signal.addEventListener('abort', unsubscribe, { once: true });
         signal.addEventListener('abort', () => stopSquares(observer), { once: true });
     }
@@ -414,7 +380,7 @@ const images = await toImageSources();
         const mark = captureFocus(list);
         const template = document.querySelector<HTMLTemplateElement>('[data-cart-row]');
 
-        checkout.setAttribute('aria-disabled', String(items.length === 0));
+        applyInstantly(checkout, () => checkout.setAttribute('aria-disabled', String(items.length === 0)));
         document.documentElement.dataset.cart = items.length > 0 ? 'filled' : 'empty';
         empty?.toggleAttribute('hidden', items.length > 0);
         list.replaceChildren();

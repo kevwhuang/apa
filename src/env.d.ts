@@ -7,6 +7,8 @@ type AvatarResult = { dataUrl: string; ok: true } | { message: string; ok: false
 type EventData = import('astro:content').CollectionEntry<'events'>['data'];
 type FieldErrors = Record<string, string>;
 type ImageSources = Record<string, string>;
+type IntakeBoard = 'assembly' | 'bash';
+type IntakeState = Record<IntakeBoard, boolean>;
 type MotionBezier = [number, number, number, number];
 type MotionDurationToken = 'base' | 'cinematic' | 'fast' | 'slow' | 'slower' | 'slowest';
 type MotionEaseToken = 'entrance' | 'linear' | 'mechanical' | 'snap';
@@ -18,7 +20,6 @@ type OnboardingGate = { email: string; state: 'granted'; token: OnboardingToken 
 type OnboardingRejection = 'expired' | 'malformed' | 'missing';
 type OrderResult = { code: PaymentErrorCode; message: string; ok: false } | { ok: true; order: Order };
 type PaymentErrorCode = 'cart-changed' | 'empty-cart' | 'storage-full';
-type Program = import('astro:content').CollectionEntry<'programs'>['data'] & { id: string; summary: string };
 type RackKind = 'chorus' | 'compressor' | 'delay' | 'distortion' | 'eq' | 'filter' | 'gate' | 'highpass' | 'limiter' | 'meter' | 'pan' | 'reverb' | 'saturator' | 'tremolo' | 'trim' | 'tuner';
 type RackLoadResult = { buffer: AudioBuffer; ok: true } | { message: string; ok: false };
 type SessionErrorCode = 'already-registered' | 'invalid-credentials' | 'invalid-email' | 'storage-full' | 'weak-password';
@@ -100,13 +101,11 @@ interface ContactEmailInput {
     topic: string;
 }
 
-interface EventRecord extends Omit<EventData, 'program' | 'speaker' | 'sponsors'> {
+interface EventRecord extends Omit<EventData, 'speaker' | 'sponsor'> {
     body: string;
     id: string;
-    name: string;
-    program: Program;
     speaker?: Speaker;
-    sponsors: Sponsor[];
+    sponsor?: Sponsor;
 }
 
 interface FieldRule {

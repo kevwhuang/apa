@@ -5,8 +5,8 @@ genres: [afrobeats, ambient, disco, drum & bass, dubstep, experimental, folk, fu
 joined: 2023-09-07T00:00:00-05:00
 links:
   - { href: 'https://instagram.com/tanawolfe', label: Instagram }
-  - { href: 'https://soundcloud.com/tanawolfe', label: SoundCloud }
   - { href: 'https://open.spotify.com/artist/6tanaWolf3aa', label: Spotify }
+  - { href: 'https://soundcloud.com/tanawolfe', label: SoundCloud }
   - { href: 'https://youtube.com/@tanawolfe', label: YouTube }
 location: San Marcos, TX
 name: Tana Wolfe

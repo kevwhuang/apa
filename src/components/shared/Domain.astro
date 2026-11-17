@@ -1,0 +1,11 @@
+---
+interface Props {
+    href: string;
+}
+
+const { href } = Astro.props;
+
+const [name, ...labels] = new URL(href).hostname.replace(/^www\./, '').split('.');
+---
+
+{name}{labels.map(label => <Fragment><wbr />.{label}</Fragment>)}

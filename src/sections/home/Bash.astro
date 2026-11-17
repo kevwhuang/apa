@@ -1,15 +1,14 @@
 ---
+import Domain from '@components/shared/Domain.astro';
 import IconArrow from '@components/icons/Arrow.astro';
 import Schedule from '@components/program/Schedule.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { LINKS } from '@lib/shared/constants';
-import { formatDateStamp, formatTimeRange, formatVenue, isUpcoming, toAustinIso } from '@lib/shared/utils';
-import { getProgram, loadEvents } from '@lib/programs/calendar';
+import { formatDateStamp, formatTimeRange, isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { loadEvents } from '@lib/programs/calendar';
 
 const events = await loadEvents();
-const program = await getProgram('bash');
 
-const upcoming = events.filter(event => event.program.id === 'bash' && isUpcoming(event.ends_at));
+const upcoming = events.filter(event => event.program === 'Bash' && isUpcoming(event.ends_at));
 ---
 
 <section
@@ -37,13 +36,14 @@ const upcoming = events.filter(event => event.program.id === 'bash' && isUpcomin
                 class="text-3xl-8xl"
                 headingId="landing-bash-title"
             >
-                Next {program.name}
+                Next Bash
             </SectionHead>
             <p
                 class="max-w-xl mb-10 text-lg text-text-inverse-secondary"
                 data-motion="blur"
             >
-                {program.summary}
+                An afternoon of producing against the clock, with a prompt to spark ideas and a
+                closing vote from the whole room.
             </p>
             <div
                 class="flex flex-wrap items-center gap-6"
@@ -88,7 +88,7 @@ const upcoming = events.filter(event => event.program.id === 'bash' && isUpcomin
             <div>
                 <dt class="label mb-2 text-text-secondary">Where</dt>
                 <dd class="font-bold text-xl">
-                    <address class="mb-1 not-italic">{formatVenue(event.venue)}</address>
+                    <address class="mb-1 not-italic">{event.venue}</address>
                     {event.room && (
                         <p>{event.room}</p>
                     )}
@@ -97,15 +97,19 @@ const upcoming = events.filter(event => event.program.id === 'bash' && isUpcomin
             <div>
                 <dt class="label mb-2 text-text-secondary">RSVP</dt>
                 <dd class="font-bold text-xl">
-                    <a
-                        class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 transition-[color,translate]"
-                        href={event.external_url ?? LINKS.meetup}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                    >
-                        meetup.com
-                        <span class="sr-only">&nbsp;(opens in a new tab)</span>
-                    </a>
+                    {event.external_url
+                        ? (
+                                <a
+                                    class="hit active:translate-y-px hover:text-link inline-block underline underline-offset-4 wrap-anywhere transition-[color,translate]"
+                                    href={event.external_url}
+                                    rel="noopener noreferrer"
+                                    target="_blank"
+                                >
+                                    <Domain href={event.external_url} />
+                                    <span class="sr-only">&nbsp;(opens in a new tab)</span>
+                                </a>
+                            )
+                        : 'TBD'}
                 </dd>
             </div>
         </dl>
