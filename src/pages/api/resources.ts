@@ -1,12 +1,17 @@
 import { getCollection } from 'astro:content';
 
+import { limitRequest } from '@lib/server/limiter';
 import { toAustinIso } from '@lib/shared/utils';
 
 import type { APIRoute } from 'astro';
 
 export const prerender = false;
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async ({ clientAddress }) => {
+    const limited = await limitRequest('content', clientAddress);
+
+    if (limited) return limited;
+
     const downloads = await getCollection('downloads');
 
     const records = downloads

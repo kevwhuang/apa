@@ -2,9 +2,9 @@
 import IconUpload from '@components/icons/Upload.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { BOARD_PAGE_SIZE } from '@lib/programs/submissions';
-import { LINK_MAX_LENGTH, UPLOAD } from '@lib/shared/constants';
-import { UPLOAD_EXTENSIONS_OR_LIST } from '@lib/audio/uploads';
+import { UPLOAD } from '@lib/shared/constants';
 import { formatBytes } from '@lib/shared/utils';
+import { uploadExtensionsOrList } from '@lib/audio/uploads';
 
 const CLASS_QUEUED_LINK = 'active:translate-y-px hover:text-link flex flex-[1_1_140px] items-center min-h-(--control-size) min-w-0 font-mono text-base underline underline-offset-4 wrap-anywhere transition-[color,translate]';
 
@@ -77,7 +77,6 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                             autocomplete="off"
                             data-feedback-link
                             data-intake-control
-                            maxlength={LINK_MAX_LENGTH}
                             name="link"
                             spellcheck="false"
                             type="url"
@@ -130,9 +129,8 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                     <p
                         id="feedback-file-help"
                         class="text-base text-text-secondary"
-                        data-placeholder
                     >
-                        {UPLOAD_EXTENSIONS_OR_LIST} files up to {formatBytes(UPLOAD.maxFileBytes)}.
+                        {uploadExtensionsOrList} files up to {formatBytes(UPLOAD.maxFileBytes)}.
                     </p>
                 </div>
             </div>
@@ -169,11 +167,8 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                 data-board-frame
                 data-motion="unfold"
             >
-                <table
-                    class="table-fixed border-2 border-border-strong [--board-index:calc(var(--text-base)*var(--board-digits,2)*0.612+33px)] [--board-time:calc(var(--text-sm)*6.048+33px)] max-md:[--board-index:calc(var(--text-base)*var(--board-digits,2)*0.612+17px)] max-md:[--board-time:calc(var(--text-sm)*6.048+17px)]"
-                    data-placeholder
-                >
-                    <caption class="sr-only">Demos submitted at the last Assembly</caption>
+                <table class="table-fixed border-2 border-border-strong [--board-index:calc(var(--text-base)*var(--board-digits,2)*0.612+33px)] [--board-time:calc(var(--text-sm)*6.048+33px)] max-md:[--board-index:calc(var(--text-base)*var(--board-digits,2)*0.612+17px)] max-md:[--board-time:calc(var(--text-sm)*6.048+17px)]">
+                    <caption class="sr-only">Demos queued for the next Assembly</caption>
                     <colgroup>
                         <col class="w-(--board-index)" />
                         <col class="w-[clamp(160px,calc((100cqw-var(--board-index)-var(--board-time)-66px)*var(--board-share,0.391)+32px),calc(100cqw-var(--board-index)-var(--board-time)-162px))] max-md:w-[max(128px,calc(100cqw-var(--board-index)-var(--board-time)-2px))]" />
@@ -335,7 +330,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                     data-cell-producer
                 />
                 <span
-                    class="has-[a]:overflow-visible hidden font-mono text-base truncate text-text-secondary max-md:block"
+                    class="has-[a]:overflow-visible has-[button]:overflow-visible hidden font-mono text-base truncate text-text-secondary max-md:block"
                     data-cell-source
                 />
             </td>
@@ -351,14 +346,24 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
     </template>
     <template data-board-link>
         <a
-            class="active:translate-y-px hover:text-link inline-block max-w-full align-top truncate transition-[color,translate]"
+            class="hit active:translate-y-px hover:text-link inline-flex max-w-full align-top transition-[color,translate]"
             href="/assemblies"
             rel="noopener noreferrer"
             target="_blank"
         >
-            <span data-board-link-label />
+            <span class="min-w-0 truncate" data-board-link-label />
             <span class="sr-only">&nbsp;(opens in a new tab)</span>
         </a>
+    </template>
+    <template data-board-play>
+        <button
+            class="hit active:translate-y-px aria-pressed:text-link hover:text-link inline-flex max-w-full align-top text-left transition-[color,translate]"
+            aria-pressed="false"
+            type="button"
+        >
+            <span class="sr-only">Play&nbsp;</span>
+            <span class="min-w-0 truncate" data-board-play-label />
+        </button>
     </template>
     <template data-board-filler>
         <tr
@@ -380,37 +385,20 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
 </section>
 
 <script>
-    import { ASSEMBLY_DEMOS, parseTrackLink } from '@lib/programs/feedback';
-    import { BOARD_PAGE_SIZE, describeBoard, getBoardShare } from '@lib/programs/submissions';
-    import { LINKS, MOCK_LATENCY_MILLISECONDS } from '@lib/shared/constants';
-    import { applyInstantly, delay, formatEntry, formatTime, initRovingFocus, measureWidest, registerPageScript, setHidden, setText } from '@lib/shared/utils';
+    import { applyInstantly, initRovingFocus, registerPageScript, setPending, setText } from '@lib/shared/utils';
     import { bindIntake } from '@lib/programs/intake';
-    import { createDropzone, nextFocusTarget } from '@lib/audio/dropzone';
-    import { isValidationBypassed } from '@lib/ui/forms';
+    import { createBoard } from '@lib/programs/board';
+    import { createDropzone, findNextFocusTarget } from '@lib/audio/dropzone';
+    import { getBoard, onBoardChange, removeSubmission, submitFile, submitLink, watchBoard } from '@lib/programs/submissions';
+    import { isSwitchOpen } from '@lib/programs/switches';
+    import { parseTrackLink } from '@lib/programs/feedback';
     import { toast } from '@lib/ui/toasts';
-
-    interface BoardElements {
-        body: HTMLElement;
-        chipTemplate: HTMLTemplateElement;
-        fillerTemplate: HTMLTemplateElement;
-        frame: HTMLElement;
-        linkTemplate: HTMLTemplateElement;
-        pager: HTMLElement;
-        refresh: HTMLElement;
-        refreshText: HTMLElement;
-        root: HTMLElement;
-        rowTemplate: HTMLTemplateElement;
-        status: HTMLElement;
-    }
-
-    interface QueuedLink {
-        link: TrackLink;
-        row: HTMLElement;
-    }
 
     const RESUBMIT_WINDOW_MILLISECONDS = 500;
 
-    let linkQueue: QueuedLink[] = [];
+    const linkRows = new Map<string, HTMLElement>();
+
+    let isSubmitting = false;
     let linkQueuedAt = Number.NEGATIVE_INFINITY;
 
     function announce(message: string) {
@@ -421,53 +409,37 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
         input.setAttribute('aria-invalid', 'false');
     }
 
-    function fillCells(row: HTMLElement, selector: string, value: string) {
-        row.querySelectorAll<HTMLElement>(selector).forEach((cell) => {
-            cell.textContent = value;
-            cell.title = value;
-        });
-    }
-
-    function fillSource(row: HTMLElement, template: HTMLTemplateElement, source: string) {
-        const parsed = parseTrackLink(source);
-
-        fillCells(row, '[data-cell-source]', source);
-
-        if (!parsed.ok) return;
-
-        row.querySelectorAll<HTMLElement>('[data-cell-source]').forEach((cell) => {
-            const fragment = template.content.cloneNode(true) as DocumentFragment;
-
-            const anchor = fragment.querySelector('a');
-
-            if (!anchor) return;
-
-            anchor.href = parsed.link.href;
-            setText(anchor.querySelector('[data-board-link-label]'), source);
-            cell.replaceChildren(fragment);
-        });
-    }
-
-    function handleLinkRemove(link: TrackLink, row: HTMLElement) {
-        const target = nextFocusTarget(row, '[data-feedback-link]');
-
-        linkQueue = linkQueue.filter(item => item.link.id !== link.id);
-        row.remove();
-        target?.focus();
-        announce(`${link.host} link removed.`);
-    }
-
     function handleLinkInput(input: HTMLInputElement) {
         linkQueuedAt = Number.NEGATIVE_INFINITY;
         clearLinkError(input);
     }
 
-    function handleLinkSubmit(event: SubmitEvent, form: HTMLFormElement, input: HTMLInputElement, list: HTMLElement, signal: AbortSignal) {
+    async function handleLinkRemove(id: string, host: string, row: HTMLElement) {
+        const button = row.querySelector<HTMLButtonElement>('[data-row-remove]');
+        const target = findNextFocusTarget(row, '[data-feedback-link]');
+
+        setPending(button, true);
+
+        const result = await removeSubmission(id);
+
+        if (!result.ok) {
+            setPending(button, false);
+            toast(result.message, 'error');
+
+            return;
+        }
+
+        target?.focus();
+        announce(`${host} link removed.`);
+    }
+
+    async function handleLinkSubmit(event: SubmitEvent, form: HTMLFormElement, input: HTMLInputElement) {
         event.preventDefault();
 
-        if (input.value.trim().length === 0 && event.timeStamp - linkQueuedAt < RESUBMIT_WINDOW_MILLISECONDS) return;
+        if (isSubmitting) return;
+        if (event.timeStamp - linkQueuedAt < RESUBMIT_WINDOW_MILLISECONDS && input.value.trim().length === 0) return;
 
-        const parsed = resolveLink(input.value);
+        const parsed = parseTrackLink(input.value);
 
         if (!parsed.ok) {
             setLinkError(input, parsed.message);
@@ -475,20 +447,27 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
             return;
         }
 
-        if (linkQueue.some(item => item.link.href === parsed.link.href)) {
-            setLinkError(input, 'That link is already on the list.');
+        const submit = form.querySelector<HTMLButtonElement>('[type="submit"]');
+
+        isSubmitting = true;
+        setPending(submit, true);
+
+        const result = await submitLink('assembly', parsed.link);
+
+        isSubmitting = false;
+        setPending(submit, false);
+
+        if (submit) submit.disabled = !isSwitchOpen('assembly_intake');
+
+        if (!result.ok) {
+            setLinkError(input, result.message);
 
             return;
         }
 
-        const row = renderLinkRow(parsed.link, list, signal);
-
-        if (!row) return;
-
         clearLinkError(input);
         form.reset();
-        linkQueuedAt = event.timeStamp;
-        linkQueue.push({ link: parsed.link, row });
+        linkQueuedAt = performance.now();
         input.focus();
         announce(`${parsed.link.host} link queued for the next Assembly.`);
     }
@@ -501,21 +480,26 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
 
         if (!form || !linkInput || !list) return;
 
-        linkQueue = [];
+        isSubmitting = false;
         linkQueuedAt = Number.NEGATIVE_INFINITY;
+        linkRows.clear();
         setMode('link');
 
-        createDropzone({
+        const syncFiles = createDropzone({
             selectors: {
                 list: '[data-feedback-list]',
                 row: '[data-feedback-row-file]',
                 status: '[data-feedback-status]',
             },
             signal,
+            store: {
+                remove: removeSubmission,
+                send: (file, options) => submitFile('assembly', file, options),
+            },
         });
 
         form.noValidate = true;
-        form.addEventListener('submit', event => handleLinkSubmit(event, form, linkInput, list, signal), { signal });
+        form.addEventListener('submit', event => void handleLinkSubmit(event, form, linkInput), { signal });
         linkInput.addEventListener('input', () => handleLinkInput(linkInput), { signal });
         initRovingFocus(modes, signal);
 
@@ -524,27 +508,16 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
         });
 
         bindIntake('assembly', signal);
+        watchBoard('assembly');
+        syncQueue(list, syncFiles, signal);
+        signal.addEventListener('abort', onBoardChange(() => syncQueue(list, syncFiles, signal)), { once: true });
     }
 
     function initDemoBoard(signal: AbortSignal) {
-        const body = document.querySelector<HTMLElement>('[data-board-body]');
-        const chipTemplate = document.querySelector<HTMLTemplateElement>('[data-board-page]');
-        const fillerTemplate = document.querySelector<HTMLTemplateElement>('[data-board-filler]');
-        const frame = document.querySelector<HTMLElement>('[data-board-frame]');
-        const linkTemplate = document.querySelector<HTMLTemplateElement>('[data-board-link]');
-        const pager = document.querySelector<HTMLElement>('[data-board-pager]');
-        const refresh = document.querySelector<HTMLElement>('[data-board-refresh]');
-        const refreshText = document.querySelector<HTMLElement>('[data-board-refresh-text]');
-        const root = document.querySelector<HTMLElement>('[data-board-root]');
-        const rowTemplate = document.querySelector<HTMLTemplateElement>('[data-board-row]');
-        const status = document.querySelector<HTMLElement>('[data-board-status]');
-
-        if (!body || !chipTemplate || !fillerTemplate || !frame || !linkTemplate || !pager || !refresh || !refreshText || !root || !rowTemplate || !status) return;
-
-        startBoard({ body, chipTemplate, fillerTemplate, frame, linkTemplate, pager, refresh, refreshText, root, rowTemplate, status }, signal);
+        createBoard({ board: 'assembly', signal, sourceSelector: '[data-cell-source]' });
     }
 
-    function renderLinkRow(link: TrackLink, list: HTMLElement, signal: AbortSignal) {
+    function renderLinkRow(entry: BoardEntry, list: HTMLElement, signal: AbortSignal) {
         const template = document.querySelector<HTMLTemplateElement>('[data-feedback-row-link]');
 
         if (!template) return null;
@@ -556,28 +529,23 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
         if (!row) return null;
 
         const anchor = row.querySelector<HTMLAnchorElement>('[data-row-href]');
+        const parsed = parseTrackLink(entry.href);
         const remove = row.querySelector<HTMLButtonElement>('[data-row-remove]');
 
-        setText(row.querySelector('[data-row-host]'), link.host);
+        const host = parsed.ok ? parsed.link.host : '';
+
+        setText(row.querySelector('[data-row-host]'), host);
 
         if (anchor) {
-            anchor.href = link.href;
-            setText(anchor.querySelector('[data-row-label]'), link.href);
+            anchor.href = entry.href;
+            setText(anchor.querySelector('[data-row-label]'), entry.href);
         }
 
-        remove?.setAttribute('aria-label', `Remove ${link.host} link`);
-        remove?.addEventListener('click', () => handleLinkRemove(link, row), { signal });
+        remove?.setAttribute('aria-label', `Remove ${host} link`);
+        remove?.addEventListener('click', () => void handleLinkRemove(entry.id, host, row), { signal });
         list.append(fragment);
 
         return row;
-    }
-
-    function resolveLink(raw: string) {
-        const parsed = parseTrackLink(raw);
-
-        if (!isValidationBypassed() || parsed.ok) return parsed;
-
-        return parseTrackLink(LINKS.soundcloud);
     }
 
     function setLinkError(input: HTMLInputElement, message: string) {
@@ -601,130 +569,30 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
         });
     }
 
-    function startBoard(elements: BoardElements, signal: AbortSignal) {
-        const { body, chipTemplate, fillerTemplate, frame, linkTemplate, pager, refresh, refreshText, root, rowTemplate, status } = elements;
-        const rows = ASSEMBLY_DEMOS.toSorted((a, b) => +new Date(a.submittedAt) - +new Date(b.submittedAt));
+    function syncLinks(entries: BoardEntry[], list: HTMLElement, signal: AbortSignal) {
+        const ids = new Set(entries.map(entry => entry.id));
 
-        let page = 1;
+        for (const [id, row] of linkRows) {
+            if (ids.has(id)) continue;
 
-        function buildPager() {
-            pager.replaceChildren();
-
-            for (let index = 1; index <= Math.max(1, Math.ceil(rows.length / BOARD_PAGE_SIZE)); index += 1) {
-                const fragment = chipTemplate.content.cloneNode(true) as DocumentFragment;
-
-                const chip = fragment.querySelector('button');
-
-                if (!chip) continue;
-
-                chip.addEventListener('click', () => setPage(index), { signal });
-                chip.setAttribute('aria-label', `Page ${index}`);
-                chip.textContent = String(index);
-                pager.append(fragment);
-            }
-
-            initRovingFocus(pager.querySelectorAll('button'), signal);
+            row.remove();
+            linkRows.delete(id);
         }
 
-        async function load() {
-            await delay(MOCK_LATENCY_MILLISECONDS);
+        entries.forEach((entry) => {
+            if (linkRows.has(entry.id)) return;
 
-            if (signal.aborted) return;
+            const row = renderLinkRow(entry, list, signal);
 
-            buildPager();
-            render();
-            void sizeColumns();
-            setHidden(refresh, true);
-            setText(refreshText, '');
-        }
+            if (row) linkRows.set(entry.id, row);
+        });
+    }
 
-        function render() {
-            setHidden(pager, rows.length <= BOARD_PAGE_SIZE);
-            setHidden(root, rows.length === 0);
-            renderRows();
-            updatePager();
-            updateStatus();
-        }
+    function syncQueue(list: HTMLElement, syncFiles: ((entries: BoardEntry[]) => void) | undefined, signal: AbortSignal) {
+        const own = getBoard('assembly').entries.filter(entry => entry.self);
 
-        function renderRows() {
-            const start = (page - 1) * BOARD_PAGE_SIZE;
-
-            const visible = rows.slice(start, start + BOARD_PAGE_SIZE);
-
-            body.replaceChildren();
-
-            if (visible.length === 0) return;
-
-            visible.forEach((entry, index) => {
-                const fragment = rowTemplate.content.cloneNode(true) as DocumentFragment;
-
-                const row = fragment.querySelector('tr');
-
-                if (!row) return;
-
-                const stamp = document.createElement('time');
-
-                stamp.dateTime = entry.submittedAt;
-                stamp.textContent = formatTime(new Date(entry.submittedAt));
-                setText(row.querySelector('[data-cell-index]'), formatEntry(start + index + 1));
-                fillCells(row, '[data-cell-producer]', entry.producer);
-                fillSource(row, linkTemplate, entry.source);
-                row.querySelector('[data-cell-submitted]')?.append(stamp);
-                body.append(fragment);
-            });
-
-            for (let index = visible.length; index < BOARD_PAGE_SIZE; index += 1) {
-                body.append(fillerTemplate.content.cloneNode(true));
-            }
-        }
-
-        function setPage(next: number) {
-            if (next === page) return;
-
-            page = next;
-            render();
-        }
-
-        async function sizeColumns() {
-            frame.style.setProperty('--board-digits', String(formatEntry(rows.length).length));
-
-            await document.fonts.ready;
-
-            const producer = body.querySelector('[data-cell-producer]');
-            const source = body.querySelector('td[data-cell-source]');
-
-            if (signal.aborted || !producer || !source) return;
-
-            const producerWidth = measureWidest(producer, rows.map(entry => entry.producer));
-            const sourceWidth = measureWidest(source, rows.map(entry => entry.source));
-
-            if (producerWidth + sourceWidth > 0) frame.style.setProperty('--board-share', String(getBoardShare(producerWidth, sourceWidth)));
-        }
-
-        function updatePager() {
-            pager.querySelectorAll('button').forEach((chip, index) => {
-                const isActive = index + 1 === page;
-
-                if (chip.classList.contains('is-active') === isActive) return;
-
-                applyInstantly(chip, () => {
-                    chip.classList.toggle('is-active', isActive);
-
-                    if (isActive) chip.setAttribute('aria-current', 'page');
-                    else chip.removeAttribute('aria-current');
-                });
-            });
-        }
-
-        function updateStatus() {
-            const message = describeBoard(page, rows.length);
-
-            if (status.textContent !== message) setText(status, message);
-        }
-
-        setHidden(refresh, false);
-        setText(refreshText, 'Loading\u2026');
-        void load();
+        syncLinks(own.filter(entry => entry.href), list, signal);
+        syncFiles?.(own.filter(entry => entry.path));
     }
 
     registerPageScript(initAssemblyFeedback);

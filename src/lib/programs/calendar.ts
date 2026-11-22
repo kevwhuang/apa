@@ -7,6 +7,8 @@ interface Sources {
     sponsors: CollectionEntry<'sponsors'>[];
 }
 
+const COLLECTION_LABELS = { events: 'Event', speakers: 'Speaker', sponsors: 'Sponsor' } as const;
+
 function getRecord<T extends { id: string }>(records: T[], id: string, label: string) {
     const record = records.find(candidate => candidate.id === id);
 
@@ -29,7 +31,7 @@ async function loadEvents(): Promise<EventRecord[]> {
 }
 
 function requireBody(entry: CollectionEntry<'events' | 'speakers' | 'sponsors'>) {
-    if (!entry.body) throw new Error(`${entry.collection} ${entry.id} needs a body.`);
+    if (!entry.body) throw new Error(`${COLLECTION_LABELS[entry.collection]} ${entry.id} needs a body.`);
 
     return entry.body;
 }
@@ -43,8 +45,8 @@ function toEventRecord(entry: CollectionEntry<'events'>, sources: Sources) {
 
     if (!idPattern.test(entry.id)) throw new Error(`Event ${entry.id} must be named YYYY_MM_${slug}.`);
 
-    const speaker = speakerLink && toSpeaker(getRecord(sources.speakers, speakerLink.id, 'Speaker'));
-    const sponsor = sponsorLink && toSponsor(getRecord(sources.sponsors, sponsorLink.id, 'Sponsor'));
+    const speaker = speakerLink && toSpeaker(getRecord(sources.speakers, speakerLink.id, COLLECTION_LABELS.speakers));
+    const sponsor = sponsorLink && toSponsor(getRecord(sources.sponsors, sponsorLink.id, COLLECTION_LABELS.sponsors));
 
     return {
         ...core,
@@ -64,4 +66,4 @@ function toSponsor(entry: CollectionEntry<'sponsors'>) {
     return { ...entry.data, description: requireBody(entry) };
 }
 
-export { loadEvents };
+export { getRecord, loadEvents };

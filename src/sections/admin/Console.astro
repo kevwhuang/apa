@@ -4,30 +4,29 @@ import SectionHead from '@components/shared/SectionHead.astro';
 const ACTIONS = [
     {
         blurb: 'Removes every demo queued for the next Assembly, along with the notes attached to each one.',
-        confirm: 'Clear all 12 demo entries? This cannot be undone.',
+        board: 'assembly',
         confirmLabel: 'clear Assembly demos',
-        count: '12 entries',
+        confirmMany: 'Clear all {count} demo entries? This cannot be undone.',
+        confirmOne: 'Clear the 1 demo entry? This cannot be undone.',
         id: 'assembly-entries',
         label: 'Clear Assembly demos',
         name: 'Assembly demos',
-        result: 'Cleared 12 entries.',
     },
     {
         blurb: 'Removes every track submitted for the current Bash prompt, along with its uploaded stems.',
-        confirm: 'Clear all 24 submission entries and their uploads? This cannot be undone.',
+        board: 'bash',
         confirmLabel: 'clear Bash submissions',
-        count: '24 entries',
+        confirmMany: 'Clear all {count} submission entries and their uploads? This cannot be undone.',
+        confirmOne: 'Clear the 1 submission entry and its upload? This cannot be undone.',
         id: 'bash-entries',
         label: 'Clear Bash submissions',
         name: 'Bash submissions',
-        result: 'Cleared 24 entries.',
     },
 ];
 
 const SWITCHES = [
     {
         blurb: 'Controls whether check-in and the site accept new member signups.',
-        checked: true,
         id: 'signups',
         name: 'Signups',
         off: 'Closed',
@@ -35,26 +34,21 @@ const SWITCHES = [
     },
     {
         blurb: 'Controls whether people at an event can check in with the code at the door.',
-        checked: true,
-        id: 'check-in',
+        id: 'check_in',
         name: 'Check-in',
         off: 'Closed',
         on: 'Open',
     },
     {
         blurb: 'Controls whether members can queue a demo for the next Assembly.',
-        board: 'assembly',
-        checked: true,
-        id: 'assembly-intake',
+        id: 'assembly_intake',
         name: 'Assembly intake',
         off: 'Closed',
         on: 'Open',
     },
     {
         blurb: 'Controls whether the submission form accepts new tracks for the current prompt.',
-        board: 'bash',
-        checked: true,
-        id: 'bash-intake',
+        id: 'bash_intake',
         name: 'Bash intake',
         off: 'Closed',
         on: 'Open',
@@ -63,7 +57,7 @@ const SWITCHES = [
 ---
 
 <section
-    class="stage stage--tight border-b-2 border-border-strong"
+    class="admin__stage stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="admin-switches-title"
 >
     <h1 class="sr-only">
@@ -94,7 +88,7 @@ const SWITCHES = [
                                 {control.blurb}
                             </p>
                         </div>
-                        <p class="label min-w-18 select-none text-right max-md:text-left">
+                        <p class="label min-w-18 text-right select-none max-md:text-left">
                             <span class="admin__state-on">{control.on}</span>
                             <span class="admin__state-off">{control.off}</span>
                         </p>
@@ -102,11 +96,10 @@ const SWITCHES = [
                             id={control.id}
                             class="admin__switch"
                             aria-labelledby={`${control.id}-title`}
-                            checked={control.checked}
-                            data-admin-board={control.board}
+                            checked
                             data-admin-off={`${control.name} closed.`}
                             data-admin-on={`${control.name} opened.`}
-                            data-admin-toggle={control.id}
+                            data-admin-switch={control.id}
                             role="switch"
                             type="checkbox"
                         />
@@ -118,7 +111,7 @@ const SWITCHES = [
 </section>
 
 <section
-    class="stage stage--tight border-b-2 border-border-strong"
+    class="admin__stage stage stage--tight border-b-2 border-border-strong"
     aria-labelledby="admin-actions-title"
 >
     <div>
@@ -139,7 +132,7 @@ const SWITCHES = [
                             <h3 class="min-w-0 text-lg">
                                 {action.name}
                             </h3>
-                            <p class="label shrink-0 text-text-secondary">{action.count}</p>
+                            <p class="label shrink-0 text-text-secondary" data-admin-count={action.id} />
                         </div>
                         <p class="text-base text-text-secondary">
                             {action.blurb}
@@ -147,6 +140,8 @@ const SWITCHES = [
                         <button
                             class="btn"
                             data-admin-action={action.id}
+                            data-admin-board={action.board}
+                            disabled
                             type="button"
                         >
                             {action.label}
@@ -156,13 +151,17 @@ const SWITCHES = [
                             data-admin-confirm={action.id}
                             hidden
                         >
-                            <p class="mb-3 text-base">{action.confirm}</p>
+                            <p
+                                class="mb-3 text-base"
+                                data-admin-many={action.confirmMany}
+                                data-admin-message={action.id}
+                                data-admin-one={action.confirmOne}
+                            />
                             <div class="flex flex-wrap gap-2">
                                 <button
                                     class="btn btn--accent"
                                     aria-label={`Yes, ${action.confirmLabel}`}
                                     data-admin-commit={action.id}
-                                    data-admin-result={action.result}
                                     type="button"
                                 >
                                     Yes
@@ -194,6 +193,10 @@ const SWITCHES = [
 
     .admin__row:not(:has(.admin__switch:checked)) .admin__state-on {
         display: none;
+    }
+
+    .admin__stage {
+        display: var(--admin-only, grid);
     }
 
     .admin__switch {
@@ -234,20 +237,19 @@ const SWITCHES = [
 </style>
 
 <script>
-    import { MOCK_LATENCY_MILLISECONDS } from '@lib/shared/constants';
-    import { applyInstantly, delay, registerPageScript } from '@lib/shared/utils';
-    import { isIntakeOpen, onIntakeChange, setIntakeOpen } from '@lib/programs/intake';
+    import { LOAD_FAILED_MESSAGE } from '@lib/shared/constants';
+    import { applyInstantly, registerPageScript, setText } from '@lib/shared/utils';
+    import { clearSubmissions, countSubmissions, onBoardChange, removeOrphans, watchBoard } from '@lib/programs/submissions';
+    import { getSession } from '@lib/account/session';
+    import { guardRoute } from '@lib/account/guard';
+    import { isSiteSwitch, isSwitchOpen, loadSwitches, onSwitchChange, setSwitchOpen } from '@lib/programs/switches';
+    import { syncEvents } from '@lib/account/checkin';
     import { toast } from '@lib/ui/toasts';
 
-    const STORAGE_MESSAGE = 'Nothing was saved because your browser storage is full. Clear some space and try again.';
-
     const pending = new Set<string>();
-    const timers = new Map<string, number>();
 
-    function clearTimers() {
-        timers.forEach(timer => window.clearTimeout(timer));
-        timers.clear();
-    }
+    let isCounting = false;
+    let isRecountQueued = false;
 
     function closeConfirm(id: string, shouldFocusTrigger: boolean) {
         const panel = document.querySelector<HTMLElement>(`[data-admin-confirm="${id}"]`);
@@ -258,56 +260,56 @@ const SWITCHES = [
         if (shouldFocusTrigger) trigger?.focus();
     }
 
-    async function handleActionClick(button: HTMLButtonElement) {
-        const id = button.dataset.adminAction ?? '';
-
-        const panel = document.querySelector<HTMLElement>(`[data-admin-confirm="${id}"]`);
-
-        if (panel) {
-            panel.removeAttribute('hidden');
-            panel.querySelector<HTMLButtonElement>('[data-admin-commit]')?.focus();
-
-            return;
-        }
-
-        await runAction(id, button);
+    function describeEntries(count: number) {
+        return count === 1 ? '1 entry' : `${count} entries`;
     }
 
-    function handleToggleChange(input: HTMLInputElement) {
-        const board = readBoard(input);
-        const id = input.dataset.adminToggle ?? '';
+    function handleActionClick(button: HTMLButtonElement) {
+        const panel = document.querySelector<HTMLElement>(`[data-admin-confirm="${button.dataset.adminAction}"]`);
 
-        if (board && !setIntakeOpen(board, input.checked)) {
-            input.checked = !input.checked;
-            toast(STORAGE_MESSAGE, 'error');
+        panel?.removeAttribute('hidden');
+        panel?.querySelector<HTMLButtonElement>('[data-admin-commit]')?.focus();
+    }
 
-            return;
-        }
+    async function handleToggleChange(input: HTMLInputElement) {
+        const id = input.dataset.adminSwitch ?? '';
 
-        const queued = timers.get(id);
+        if (!isSiteSwitch(id) || pending.has(id)) return;
 
-        if (queued !== undefined) window.clearTimeout(queued);
+        let isOpen = input.checked;
 
+        pending.add(id);
         input.setAttribute('aria-busy', 'true');
 
-        timers.set(id, window.setTimeout(() => {
-            timers.delete(id);
-            input.removeAttribute('aria-busy');
-            toast((input.checked ? input.dataset.adminOn : input.dataset.adminOff) ?? '', 'success');
-        }, MOCK_LATENCY_MILLISECONDS));
+        let result = await setSwitchOpen(id, isOpen);
+
+        while (input.checked !== isOpen && result.ok) {
+            isOpen = input.checked;
+
+            result = await setSwitchOpen(id, isOpen);
+        }
+
+        pending.delete(id);
+        input.removeAttribute('aria-busy');
+        syncToggles();
+
+        if (result.ok) toast((isOpen ? input.dataset.adminOn : input.dataset.adminOff) ?? '', 'success');
+        else toast(result.message, 'error');
     }
 
     function initAdminConsole(signal: AbortSignal) {
-        const toggles = document.querySelectorAll<HTMLInputElement>('[data-admin-toggle]');
+        const toggles = document.querySelectorAll<HTMLInputElement>('[data-admin-switch]');
 
         if (toggles.length === 0) return;
 
-        clearTimers();
-        pending.clear();
-        signal.addEventListener('abort', clearTimers, { once: true });
+        void guardRoute('admin', signal);
+
+        if (!getSession()?.admin) return;
+
+        syncToggles();
 
         toggles.forEach((input) => {
-            input.addEventListener('change', () => handleToggleChange(input), { signal });
+            input.addEventListener('change', () => void handleToggleChange(input), { signal });
         });
 
         document.querySelectorAll<HTMLButtonElement>('[data-admin-action]').forEach((button) => {
@@ -319,42 +321,110 @@ const SWITCHES = [
         });
 
         document.querySelectorAll<HTMLButtonElement>('[data-admin-commit]').forEach((button) => {
-            button.addEventListener('click', () => runAction(button.dataset.adminCommit ?? '', button), { signal });
+            button.addEventListener('click', () => void runAction(button), { signal });
         });
 
-        syncToggles();
-        signal.addEventListener('abort', onIntakeChange(syncToggles), { once: true });
+        void loadSwitchStates();
+        void refreshCounts();
+        signal.addEventListener('abort', onBoardChange(() => void refreshCounts()), { once: true });
+        signal.addEventListener('abort', onSwitchChange(syncToggles), { once: true });
+        watchBoard('assembly');
+        watchBoard('bash');
+        void removeOrphans();
+        void syncEvents();
     }
 
-    function readBoard(input: HTMLInputElement) {
-        const board = input.dataset.adminBoard;
+    async function loadSwitchStates() {
+        const isLoaded = await loadSwitches();
+
+        if (!isLoaded) toast(LOAD_FAILED_MESSAGE, 'error');
+    }
+
+    function readBoard(id: string) {
+        const board = document.querySelector<HTMLButtonElement>(`[data-admin-action="${id}"]`)?.dataset.adminBoard;
 
         return board === 'assembly' || board === 'bash' ? board : null;
     }
 
-    async function runAction(id: string, control: HTMLButtonElement | null) {
-        if (pending.has(id)) return;
+    async function refreshCount(trigger: HTMLButtonElement) {
+        const id = trigger.dataset.adminAction ?? '';
 
-        const commit = document.querySelector<HTMLButtonElement>(`[data-admin-commit="${id}"]`);
+        const board = readBoard(id);
+        const label = document.querySelector<HTMLElement>(`[data-admin-count="${id}"]`);
+        const message = document.querySelector<HTMLElement>(`[data-admin-message="${id}"]`);
 
-        control?.setAttribute('aria-busy', 'true');
+        if (!board || !message) return true;
+
+        const count = await countSubmissions(board);
+
+        if (count === null) return false;
+
+        const template = (count === 1 ? message.dataset.adminOne : message.dataset.adminMany) ?? '';
+
+        setText(label, describeEntries(count));
+        setText(message, template.replace('{count}', String(count)));
+        trigger.disabled = count === 0;
+
+        if (count === 0) closeConfirm(id, false);
+
+        return true;
+    }
+
+    async function refreshCounts() {
+        if (isCounting) {
+            isRecountQueued = true;
+
+            return;
+        }
+
+        isCounting = true;
+
+        let isLoaded: boolean;
+
+        do {
+            isRecountQueued = false;
+
+            const triggers = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-admin-board]'));
+
+            const results = await Promise.all(triggers.map(trigger => refreshCount(trigger)));
+
+            isLoaded = results.every(Boolean);
+        } while (isRecountQueued);
+
+        isCounting = false;
+
+        if (!isLoaded) toast(LOAD_FAILED_MESSAGE, 'error');
+    }
+
+    async function runAction(commit: HTMLButtonElement) {
+        const id = commit.dataset.adminCommit ?? '';
+
+        const board = readBoard(id);
+
+        if (!board || pending.has(id)) return;
+
+        commit.setAttribute('aria-busy', 'true');
         pending.add(id);
 
-        await delay(MOCK_LATENCY_MILLISECONDS);
+        const result = await clearSubmissions(board);
 
-        control?.removeAttribute('aria-busy');
+        commit.removeAttribute('aria-busy');
         pending.delete(id);
         closeConfirm(id, true);
-        toast(commit?.dataset.adminResult ?? 'Done.', 'success');
+
+        if (result.ok) toast(`Cleared ${describeEntries(result.cleared)}.`, 'success');
+        else toast(result.message, 'error');
+
+        void refreshCounts();
     }
 
     function syncToggles() {
-        document.querySelectorAll<HTMLInputElement>('[data-admin-board]').forEach((input) => {
-            const board = readBoard(input);
+        document.querySelectorAll<HTMLInputElement>('[data-admin-switch]').forEach((input) => {
+            const id = input.dataset.adminSwitch ?? '';
 
-            if (!board) return;
+            if (!isSiteSwitch(id) || pending.has(id)) return;
 
-            const isOpen = isIntakeOpen(board);
+            const isOpen = isSwitchOpen(id);
 
             if (input.checked === isOpen) return;
 

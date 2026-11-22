@@ -5,102 +5,10 @@ import BackLink from '@components/shared/BackLink.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 import { COMMERCE } from '@lib/shared/constants';
-import { formatPrice } from '@lib/shared/utils';
 import { toCatalog, toImageSources } from '@lib/commerce/products';
-import { getTotals } from '@lib/commerce/cart';
-
-interface OrderSeed {
-    email: string;
-    id: string;
-    items: Parameters<typeof getTotals>[0];
-    placedAt: string;
-    prodsApplied?: number;
-    promoCode?: string;
-}
-
-const PAST_ORDER_SEEDS: OrderSeed[] = [
-    {
-        email: 'p\u2022\u2022\u2022\u2022\u2022\u2022@example.com',
-        id: 'APA-04217',
-        items: [
-            { image: '02000_digital', priceCents: 500, productSlug: 'alliance_samples_i', quantity: 1, sku: '02000', title: 'Alliance Samples I', variation: 'Digital' },
-            { image: '01001_symbol', priceCents: 100, productSlug: 'alliance_sticker', quantity: 2, sku: '01001', title: 'Alliance Sticker', variation: 'Symbol' },
-            { image: '00010_bone', priceCents: 3_000, productSlug: 'alliance_tee', quantity: 1, size: 'M', sku: '00010', title: 'Alliance Tee', variation: 'Bone' },
-        ],
-        placedAt: '2026-07-28T16:42:00-05:00',
-    },
-    {
-        email: 'd\u2022\u2022\u2022\u2022\u2022\u2022\u2022@example.com',
-        id: 'APA-04106',
-        items: [
-            { image: '02000_digital', priceCents: 500, productSlug: 'alliance_samples_i', quantity: 1, sku: '02000', title: 'Alliance Samples I', variation: 'Digital' },
-            { image: '00001_navy', priceCents: 1_000, productSlug: 'legacy_tee', quantity: 1, size: 'L', sku: '00001', title: 'Legacy Tee', variation: 'Navy' },
-        ],
-        placedAt: '2026-07-04T11:15:00-05:00',
-        promoCode: COMMERCE.discountCode,
-    },
-    {
-        email: 'j\u2022\u2022\u2022\u2022@example.com',
-        id: 'APA-03994',
-        items: [
-            { image: '00020_charcoal', priceCents: 10_000, productSlug: 'alliance_hoodie', quantity: 1, size: 'L', sku: '00020', title: 'Alliance Hoodie', variation: 'Charcoal' },
-        ],
-        placedAt: '2026-06-13T18:20:00-05:00',
-        prodsApplied: 15,
-    },
-    {
-        email: 'i\u2022\u2022\u2022\u2022\u2022@example.com',
-        id: 'APA-03871',
-        items: [
-            { image: '00031_bone', priceCents: 4_000, productSlug: 'alliance_cap', quantity: 1, sku: '00031', title: 'Alliance Cap', variation: 'Bone' },
-            { image: '01001_symbol', priceCents: 100, productSlug: 'alliance_sticker', quantity: 1, sku: '01001', title: 'Alliance Sticker', variation: 'Symbol' },
-            { image: '00000_cotton', priceCents: 1_000, productSlug: 'legacy_tee', quantity: 1, size: 'M', sku: '00000', title: 'Legacy Tee', variation: 'Cotton' },
-        ],
-        placedAt: '2026-05-22T09:05:00-05:00',
-        prodsApplied: 24,
-        promoCode: COMMERCE.discountCode,
-    },
-    {
-        email: 's\u2022\u2022\u2022\u2022\u2022\u2022@example.com',
-        id: 'APA-03742',
-        items: [
-            { image: '02000_digital', priceCents: 500, productSlug: 'alliance_samples_i', quantity: 1, sku: '02000', title: 'Alliance Samples I', variation: 'Digital' },
-            { image: '00013_lime', priceCents: 3_000, productSlug: 'alliance_tee', quantity: 1, size: 'S', sku: '00013', title: 'Alliance Tee', variation: 'Lime' },
-        ],
-        placedAt: '2026-04-18T14:30:00-05:00',
-    },
-    {
-        email: 'r\u2022\u2022\u2022\u2022\u2022@example.com',
-        id: 'APA-03586',
-        items: [
-            { image: '00030_black', priceCents: 4_000, productSlug: 'alliance_cap', quantity: 1, sku: '00030', title: 'Alliance Cap', variation: 'Black' },
-            { image: '01001_symbol', priceCents: 100, productSlug: 'alliance_sticker', quantity: 2, sku: '01001', title: 'Alliance Sticker', variation: 'Symbol' },
-        ],
-        placedAt: '2026-03-09T12:48:00-05:00',
-    },
-    {
-        email: 'm\u2022\u2022\u2022\u2022@example.com',
-        id: 'APA-03581',
-        items: [
-            { image: '00021_smoke', priceCents: 10_000, productSlug: 'alliance_hoodie', quantity: 1, size: 'XL', sku: '00021', title: 'Alliance Hoodie', variation: 'Smoke' },
-            { image: '01001_symbol', priceCents: 100, productSlug: 'alliance_sticker', quantity: 1, sku: '01001', title: 'Alliance Sticker', variation: 'Symbol' },
-        ],
-        placedAt: '2026-02-14T15:10:00-06:00',
-    },
-];
 
 const catalog = toCatalog(await getCollection('products'));
 const images = await toImageSources();
-
-const pastOrders = PAST_ORDER_SEEDS.map(seed => ({
-    email: seed.email,
-    id: seed.id,
-    items: seed.items,
-    placedAt: Date.parse(seed.placedAt),
-    totals: getTotals(seed.items, seed.prodsApplied ?? 0, seed.promoCode ?? ''),
-}));
-
-const receipt = pastOrders[0];
 ---
 
 <BackLink
@@ -113,7 +21,6 @@ const receipt = pastOrders[0];
     aria-labelledby="order-title"
     data-catalog={JSON.stringify(catalog)}
     data-images={JSON.stringify(images)}
-    data-order-seed={JSON.stringify(pastOrders)}
 >
     <div class="text-center">
         <PageHead
@@ -125,9 +32,11 @@ const receipt = pastOrders[0];
         <p
             class="min-h-lh font-mono text-base text-text-secondary"
             data-motion="stamp"
-            data-order-number
             data-placeholder
-        />
+        >
+            <span data-order-number />
+            <time data-order-stamp />
+        </p>
     </div>
     <div
         class="flex flex-col gap-8"
@@ -138,14 +47,12 @@ const receipt = pastOrders[0];
             class="order__list scroll-slot border-2 border-border-strong divide-border-strong divide-y-2 list-none"
             data-order-list
         >
-            {receipt.items.map(() => (
-                <li
-                    class="p-4"
-                    aria-hidden="true"
-                >
-                    <span class="block h-14" />
-                </li>
-            ))}
+            <li
+                class="p-4"
+                aria-hidden="true"
+            >
+                <span class="block h-14" />
+            </li>
         </ul>
         <dl class="slab slab--sunk flex flex-col gap-2 font-mono text-base">
             <div class="flex justify-between gap-3">
@@ -154,7 +61,7 @@ const receipt = pastOrders[0];
                     class="min-w-0 wrap-break-word"
                     data-order-subtotal
                 >
-                    {formatPrice(receipt.totals.subtotalCents)}
+                    $0.00
                 </dd>
             </div>
             <div
@@ -189,7 +96,7 @@ const receipt = pastOrders[0];
                     class="min-w-0 wrap-break-word"
                     data-order-shipping
                 >
-                    {formatPrice(receipt.totals.shippingCents)}
+                    $0.00
                 </dd>
             </div>
             <div class="flex justify-between gap-3 mb-2">
@@ -198,7 +105,7 @@ const receipt = pastOrders[0];
                     class="min-w-0 wrap-break-word"
                     data-order-tax
                 >
-                    {formatPrice(receipt.totals.taxCents)}
+                    $0.00
                 </dd>
             </div>
             <div class="flex justify-between gap-3 pt-2 border-border-strong border-t-2 text-lg">
@@ -207,7 +114,7 @@ const receipt = pastOrders[0];
                     class="min-w-0 wrap-break-word"
                     data-order-total
                 >
-                    {formatPrice(receipt.totals.totalCents)}
+                    $0.00
                 </dd>
             </div>
         </dl>
@@ -332,7 +239,7 @@ const receipt = pastOrders[0];
                 />
                 <time class="order__stamp hidden font-mono text-base whitespace-nowrap text-text-secondary max-md:block" />
                 <span
-                    class="hidden text-base max-md:line-clamp-1"
+                    class="hidden text-base wrap-anywhere max-md:line-clamp-1"
                     data-cell="summary"
                 />
             </th>
@@ -354,6 +261,10 @@ const receipt = pastOrders[0];
 </section>
 
 <style>
+    html[data-receipt='none'][data-session='out'] [data-order-detail] {
+        display: none;
+    }
+
     .order__cell {
         padding: 16px round(clamp(8px, calc(5.333px + 0.8333vw), 16px), 4px);
     }
@@ -401,6 +312,7 @@ const receipt = pastOrders[0];
     .order__scroller {
         --scroll-slot-max: calc(40px + var(--text-sm) + 5 * (32px + max(var(--space-md), var(--text-base--line-height))));
         min-height: var(--scroll-slot-max);
+        scroll-padding-top: calc(2 * 16px + var(--text-sm));
     }
 
     .order__table thead th {
@@ -423,6 +335,7 @@ const receipt = pastOrders[0];
 </style>
 
 <script>
+    import { MILLISECONDS_PER_SECOND } from '@lib/shared/constants';
     import {
         applyInstantly,
         formatDateStamp,
@@ -435,10 +348,19 @@ const receipt = pastOrders[0];
         setText,
         toAustinIso,
     } from '@lib/shared/utils';
-    import { reconcileOrder } from '@lib/commerce/checkout';
+    import { getSession, onSessionChange } from '@lib/account/session';
+    import { loadOrderStatus, loadOrders, reconcileOrder } from '@lib/commerce/checkout';
+    import { toCatalogItem } from '@lib/commerce/cart';
+    import { toast } from '@lib/ui/toasts';
 
+    const HISTORY_MESSAGE = 'Your order history could not be loaded. Reload to try again.';
+    const RECEIPTS_HEADING = 'Your receipts';
+    const SETTLE_SECONDS = 600;
+
+    let catalog: CatalogEntry[] = [];
     let images: ImageSources = {};
     let orders: Order[] = [];
+    let ownerId = '';
     let placedId: null | string = null;
 
     function handleLedgerClick(event: MouseEvent) {
@@ -451,39 +373,73 @@ const receipt = pastOrders[0];
 
     function initOrderHistory(signal: AbortSignal) {
         const body = document.querySelector<HTMLElement>('[data-order-ledger-body]');
-        const detail = document.querySelector<HTMLElement>('[data-order-detail]');
         const heading = document.querySelector<HTMLElement>('[data-order-heading]')?.closest('h1');
         const source = document.querySelector<HTMLElement>('[data-catalog]');
 
-        const placed = reconcileOrder(parseCatalog(source?.dataset.catalog));
+        if (!body) return;
 
+        const unsubscribe = onSessionChange((session) => {
+            if ((session?.id ?? '') !== ownerId) void renderHistory(true, signal);
+        });
+
+        catalog = parseCatalog(source?.dataset.catalog);
         images = parseImageSources(source?.dataset.images);
-        orders = placed ? [placed, ...readSeed()] : readSeed();
-        placedId = placed?.id ?? null;
 
         if (heading) heading.tabIndex = -1;
 
-        detail?.toggleAttribute('hidden', orders.length === 0);
-        renderLedger();
-        selectOrder(0, false);
-        body?.addEventListener('click', handleLedgerClick, { signal });
-    }
-
-    function readSeed() {
-        const raw = document.querySelector<HTMLElement>('[data-order-seed]')?.dataset.orderSeed;
-
-        try {
-            return JSON.parse(raw ?? '[]') as Order[];
-        } catch {
-            return [];
-        }
+        body.addEventListener('click', handleLedgerClick, { signal });
+        signal.addEventListener('abort', unsubscribe, { once: true });
+        void renderHistory(false, signal);
     }
 
     function renderHeading(order: Order, isFresh: boolean) {
-        const stamp = formatDateStamp(new Date(order.placedAt)).replaceAll(' ', '\u00a0');
+        const placedDate = new Date(order.placedAt);
+        const stamp = document.querySelector('[data-order-stamp]');
 
-        setText(document.querySelector('[data-order-heading]'), isFresh ? 'Order received' : 'Your receipts');
-        setText(document.querySelector('[data-order-number]'), `Order ${order.id}\u00a0\u00b7 ${stamp}`);
+        stamp?.setAttribute('datetime', toAustinIso(placedDate));
+        setText(document.querySelector('[data-order-heading]'), isFresh ? 'Order received' : RECEIPTS_HEADING);
+        setText(document.querySelector('[data-order-number]'), `Order ${order.id}\u00a0\u00b7 `);
+        setText(stamp, formatDateStamp(placedDate).replaceAll(' ', '\u00a0'));
+    }
+
+    async function renderHistory(shouldReplace: boolean, signal: AbortSignal) {
+        const local = reconcileOrder(catalog);
+        const session = getSession();
+
+        const placed = local && local.account === (session?.email ?? '') ? local : null;
+
+        orders = placed ? [placed] : [];
+        ownerId = session?.id ?? '';
+        placedId = placed?.id ?? null;
+
+        if (!session || placed || shouldReplace) renderOrders(!session);
+
+        if (!session) return;
+
+        const history = await loadOrders(session.id);
+
+        if (signal.aborted || ownerId !== session.id) return;
+
+        if (!history) {
+            toast(HISTORY_MESSAGE, 'error');
+
+            return;
+        }
+
+        const status = placed && !history.some(order => order.id === placed.id) ? await loadOrderStatus(placed.id) : null;
+
+        if (signal.aborted || ownerId !== session.id) return;
+
+        const isStale = Date.now() - (placed?.placedAt ?? 0) > SETTLE_SECONDS * MILLISECONDS_PER_SECOND;
+
+        const paid = history
+            .filter(order => order.id !== placed?.id)
+            .map(order => ({ ...order, items: order.items.map(item => toCatalogItem(catalog, item)) }));
+
+        const isVoid = (isStale && status === 'canceled') || status === 'refunded';
+
+        orders = (!isVoid && placed ? [placed, ...paid] : paid).sort((left, right) => right.placedAt - left.placedAt);
+        renderOrders(true);
     }
 
     function renderItems(order: Order) {
@@ -506,7 +462,7 @@ const receipt = pastOrders[0];
         });
     }
 
-    function renderLedger() {
+    function renderLedger(isLoaded: boolean) {
         const body = document.querySelector<HTMLElement>('[data-order-ledger-body]');
         const empty = document.querySelector<HTMLElement>('[data-order-empty]');
         const ledger = document.querySelector<HTMLElement>('[data-order-ledger]');
@@ -540,8 +496,24 @@ const receipt = pastOrders[0];
             body.append(fragment);
         });
 
-        empty.toggleAttribute('hidden', orders.length > 0);
-        ledger.toggleAttribute('hidden', orders.length === 0);
+        empty.toggleAttribute('hidden', !isLoaded || orders.length > 0);
+        ledger.toggleAttribute('hidden', isLoaded && orders.length === 0);
+    }
+
+    function renderOrders(isLoaded: boolean) {
+        document.querySelector<HTMLElement>('[data-order-detail]')?.toggleAttribute('hidden', orders.length === 0);
+        renderLedger(isLoaded);
+
+        if (orders.length > 0) {
+            selectOrder(0, false);
+
+            return;
+        }
+
+        document.querySelector('[data-order-stamp]')?.removeAttribute('datetime');
+        setText(document.querySelector('[data-order-heading]'), RECEIPTS_HEADING);
+        setText(document.querySelector('[data-order-number]'), '');
+        setText(document.querySelector('[data-order-stamp]'), '');
     }
 
     function renderTotals(summary: CartTotals) {

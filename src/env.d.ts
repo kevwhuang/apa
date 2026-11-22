@@ -2,13 +2,21 @@
 
 declare module 'eslint-plugin-jsx-a11y';
 
+type ActionResult = { message: string; ok: false } | { ok: true };
 type AssetKind = (typeof import('@lib/shared/constants').ASSET_KINDS)[number];
+type AuthLink = 'expired' | 'recovery';
 type AvatarResult = { dataUrl: string; ok: true } | { message: string; ok: false };
+type BoardStatus = 'failed' | 'idle' | 'loading' | 'ready';
+type ChatErrorCode = 'rate-limited' | 'send-failed' | 'signed-out' | 'too-long';
+type ChatResult = { code: ChatErrorCode; message: string; ok: false } | { ok: true };
+type CheckInErrorCode = 'closed' | 'expired' | 'full' | 'invalid-email' | 'missing' | 'unavailable';
+type CheckInResult = { code: CheckInErrorCode; message: string; ok: false } | { confirmed: boolean; eventId: string; ok: true; prods: null | number; repeated: boolean };
+type ClearResult = { cleared: number; ok: true } | { message: string; ok: false };
 type EventData = import('astro:content').CollectionEntry<'events'>['data'];
 type FieldErrors = Record<string, string>;
 type ImageSources = Record<string, string>;
 type IntakeBoard = 'assembly' | 'bash';
-type IntakeState = Record<IntakeBoard, boolean>;
+type MemberRole = (typeof import('@lib/shared/constants').MEMBER_ROLES)[number];
 type MotionBezier = [number, number, number, number];
 type MotionDurationToken = 'base' | 'cinematic' | 'fast' | 'slow' | 'slower' | 'slowest';
 type MotionEaseToken = 'entrance' | 'linear' | 'mechanical' | 'snap';
@@ -16,27 +24,47 @@ type MotionPresetName = 'blur' | 'flip' | 'rise' | 'rule' | 'stamp' | 'strike' |
 type MotionScrubName = 'drift';
 type MotionStaggerOrigin = 'end' | 'start';
 type MotionStaggerToken = 'base' | 'tight';
-type OnboardingGate = { email: string; state: 'granted'; token: OnboardingToken } | { reason: OnboardingRejection; state: 'rejected' };
-type OnboardingRejection = 'expired' | 'malformed' | 'missing';
 type OrderResult = { code: PaymentErrorCode; message: string; ok: false } | { ok: true; order: Order };
-type PaymentErrorCode = 'cart-changed' | 'empty-cart' | 'storage-full';
+type PaymentErrorCode = 'cart-changed' | 'empty-cart' | 'not-configured' | 'payment-failed' | 'payment-unavailable' | 'rate-limited' | 'unavailable';
+type ProdsErrorCode = 'member-unknown' | 'negative' | 'not-admin' | 'unavailable';
+type ProdsResult = { code: ProdsErrorCode; message: string; ok: false } | { ok: true; prods: number };
+type ProfilePatch = Partial<Pick<Session, 'artistName' | 'avatar' | 'bio' | 'city' | 'genres' | 'links' | 'onboarded' | 'role' | 'state'>>;
 type RackKind = 'chorus' | 'compressor' | 'delay' | 'distortion' | 'eq' | 'filter' | 'gate' | 'highpass' | 'limiter' | 'meter' | 'pan' | 'reverb' | 'saturator' | 'tremolo' | 'trim' | 'tuner';
 type RackLoadResult = { buffer: AudioBuffer; ok: true } | { message: string; ok: false };
-type SessionErrorCode = 'already-registered' | 'invalid-credentials' | 'invalid-email' | 'storage-full' | 'weak-password';
-type SessionResult = { code: SessionErrorCode; message: string; ok: false } | { ok: true; session: Session };
+type RequestErrorCode = 'conflict' | 'network' | 'not-configured' | 'rate-limited' | 'rejected' | 'unauthorized' | 'unavailable';
+type RequestResult = { code: RequestErrorCode; message: string; ok: false } | { data: Record<string, unknown>; ok: true };
+type SessionErrorCode = 'already-registered' | 'email-unavailable' | 'invalid-credentials' | 'invalid-email' | 'rate-limited' | 'rejected' | 'same-password' | 'signed-out' | 'signups-closed' | 'unavailable' | 'unconfirmed' | 'upload-failed' | 'weak-password';
+type SessionResult = { code: SessionErrorCode; message: string; ok: false } | { ok: true; session: Session | null };
+type SiteSwitch = 'assembly_intake' | 'bash_intake' | 'check_in' | 'signups';
 type Speaker = import('astro:content').CollectionEntry<'speakers'>['data'] & { bio: string };
 type Sponsor = import('astro:content').CollectionEntry<'sponsors'>['data'] & { description: string };
 type StorageScope = 'local' | 'memory';
+type SubmissionErrorCode = 'canceled' | 'closed' | 'duplicate-file' | 'duplicate-link' | 'limit' | 'signed-out' | 'transfer' | 'unavailable';
+type SubmissionResult = { code: SubmissionErrorCode; message: string; ok: false } | { id: string; ok: true };
+type SwitchState = Record<SiteSwitch, boolean>;
 type Theme = 'dark' | 'light';
 type Timer = ReturnType<typeof setInterval>;
 type ToastTone = 'error' | 'info' | 'success';
 type TrackLinkResult = { link: TrackLink; ok: true } | { message: string; ok: false };
 type UploadResult = { entry: UploadEntry; ok: true } | { message: string; ok: false };
 
-interface BashSubmission {
-    file: string;
+interface BoardEntry {
+    bytes: number;
+    eventId: string;
+    href: string;
+    id: string;
+    path: string;
     producer: string;
-    submittedAt: string;
+    self: boolean;
+    source: string;
+    submittedAt: number;
+    userId: string;
+}
+
+interface BoardState {
+    entries: BoardEntry[];
+    eventId: string;
+    status: BoardStatus;
 }
 
 interface CartIssue {
@@ -68,6 +96,7 @@ interface CartTotals {
 
 interface CatalogEntry {
     priceCents: number;
+    sizes: string[];
     sku: string;
     slug: string;
     stock: number;
@@ -84,14 +113,28 @@ interface CatalogVariation {
 
 interface ChatMessage {
     body: string;
+    id: string;
     name: string;
     self: boolean;
     sentAt: number;
+    userId: string;
 }
 
 interface ChatState {
     messages: ChatMessage[];
+    online: number;
     open: boolean;
+}
+
+interface ComposedEmail {
+    actionHref: string;
+    actionLabel: string;
+    body: string[];
+    from: string;
+    preheader: string;
+    replyTo: string;
+    subject: string;
+    to: string;
 }
 
 interface ContactEmailInput {
@@ -99,6 +142,12 @@ interface ContactEmailInput {
     message: string;
     name: string;
     topic: string;
+}
+
+interface DoorCode {
+    code: string;
+    eventId: string;
+    secondsLeft: number;
 }
 
 interface EventRecord extends Omit<EventData, 'speaker' | 'sponsor'> {
@@ -117,25 +166,17 @@ interface FieldRule {
     validate?: (value: string, values: FormData) => boolean;
 }
 
-interface ImportMetaEnv {
-    readonly SUPABASE_PUBLISHABLE_KEY: string;
-    readonly SUPABASE_URL: string;
-}
-
-interface MockEmail {
-    actionHref: string;
-    actionLabel: string;
-    body: string[];
-    from: string;
-    preheader: string;
-    replyTo: string;
-    subject: string;
-    to: string;
+interface LiveList<T> {
+    discard(id: string): void;
+    merge(rows: T[]): void;
+    remove(id: string): void;
+    reset(): void;
+    revalidate(): Promise<boolean>;
+    upsert(row: T): void;
 }
 
 interface MotionBridge {
     arm: () => void;
-    armedClass: string;
     disarm: () => void;
     expired: boolean;
     live: () => boolean;
@@ -173,30 +214,12 @@ interface MotionTokens {
     travel: number;
 }
 
-interface OnboardingDraft {
-    artistName: string;
-    avatar: string;
-    email: string;
-    genres: string[];
-    location: string;
-    roles: string[];
-    step: number;
-}
-
 interface OnboardingEmailInput {
     email: string;
-    eventName?: string;
-    prods: number;
-    token: string;
-}
-
-interface OnboardingToken {
-    email: string;
-    issuedAt: number;
-    nonce: string;
 }
 
 interface Order {
+    account: string;
     email: string;
     id: string;
     items: CartItem[];
@@ -205,11 +228,21 @@ interface Order {
 }
 
 interface OrderInput {
-    cardNumber: string;
     email: string;
     items: CartItem[];
+    payment: PaymentField | null;
     prodsApplied: number;
     promoCode: string;
+    shipping: ShippingAddress;
+}
+
+interface PaymentField {
+    confirm(clientSecret: string, returnPath: string): Promise<ActionResult>;
+    destroy(): void;
+    mount(container: HTMLElement): void;
+    setAmount(cents: number): void;
+    setReadOnly(isReadOnly: boolean): void;
+    submit(): Promise<ActionResult>;
 }
 
 interface PlayerState {
@@ -227,18 +260,24 @@ interface PlayerTrack {
     title: string;
 }
 
-interface ProducerRecord extends Omit<import('astro:content').CollectionEntry<'producers'>['data'], 'joined' | 'producerId'> {
-    id: string;
-    joined: string;
+interface ProdsAttendance {
+    date: string;
+    event: string;
 }
 
-interface Profile {
+interface ProdsMember {
     artistName: string;
-    avatar: string;
-    createdAt: number;
-    onboarded: boolean;
+    email: string;
+    id: string;
+    joined: string;
     prods: number;
-    role: string;
+}
+
+interface ProdsRow {
+    amount: number;
+    date: string;
+    reason: string;
+    total: number;
 }
 
 interface RackAudio {
@@ -264,21 +303,75 @@ interface RackState {
     playing: boolean;
 }
 
+interface RosterLink {
+    href: string;
+    label: string;
+}
+
+interface RosterMember {
+    bio: string;
+    featured: boolean;
+    genres: string[];
+    id: string;
+    joined: string;
+    links: RosterLink[];
+    location: string;
+    name: string;
+    portrait: string;
+    roles: MemberRole[];
+    tracks: RosterTrack[];
+}
+
+interface RosterTrack {
+    durationSeconds: number;
+    path: string;
+    title: string;
+}
+
 interface Session {
+    admin: boolean;
     artistName: string;
     avatar: string;
+    bio: string;
+    city: string;
     createdAt: number;
     email: string;
-    expiresAt: number;
+    genres: string[];
+    id: string;
+    links: SessionLinks;
     onboarded: boolean;
+    passwordless: boolean;
     prods: number;
     role: string;
+    state: string;
+    track: string;
 }
 
 interface SessionDraft {
-    artistName?: string;
     email: string;
-    password?: string;
+    password: string;
+}
+
+interface SessionLinks {
+    instagram: string;
+    soundcloud: string;
+    spotify: string;
+    youtube: string;
+}
+
+interface ShippingAddress {
+    city: string;
+    familyName: string;
+    givenName: string;
+    line1: string;
+    line2: string;
+    state: string;
+    zip: string;
+}
+
+interface SignedTrack {
+    expiresAt: number;
+    url: string;
 }
 
 interface Store<T> {
@@ -317,8 +410,6 @@ interface UploadEntry {
     durationSeconds?: number;
     error?: string;
     file: File;
-    id: string;
-    loadedBytes: number;
     peaks?: Float32Array;
     status: 'failed' | 'queued' | 'reading' | 'ready' | 'rejected';
     totalBytes: number;
@@ -337,6 +428,7 @@ interface WindowEventMap {
     'apa:float-window': CustomEvent<{ panel: HTMLElement }>;
     'apa:theme-changed': Event;
     'apa:toast': CustomEvent<{ message: string; tone: ToastTone }>;
+    'apa:toast-retract': CustomEvent<{ message: string; tone: ToastTone }>;
     'apa:track-play': CustomEvent<{ track: PlayerTrack }>;
     'apa:track-state': CustomEvent<TrackState>;
 }

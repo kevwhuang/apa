@@ -1,4 +1,15 @@
-import { BYTES_PER_KILOBYTE, BYTES_PER_MEGABYTE, CENTS_PER_DOLLAR, LOCALE, PALETTE, PARAGRAPH_SEPARATOR, ROLES, TIME_ZONE } from '@lib/shared/constants';
+import {
+    BYTES_PER_KILOBYTE,
+    BYTES_PER_MEGABYTE,
+    CENTS_PER_DOLLAR,
+    LOCALE,
+    PALETTE,
+    PARAGRAPH_SEPARATOR,
+    ROLES,
+    SECONDS_PER_MINUTE,
+    TIME_ZONE,
+    TRACK_CONTENT_TYPES,
+} from '@lib/shared/constants';
 import { revealTarget } from '@lib/motion/entrances';
 
 import type { CollectionEntry } from 'astro:content';
@@ -39,6 +50,9 @@ const CLOCK_DIGITS = 2;
 const EMPTY_TILE_COLOR: TileColor = { background: 'var(--color-ink)', text: 'var(--color-text-inverse-secondary)' };
 const ENTRY_PAD = 2;
 const FLOAT_WINDOW_TOPIC = 'apa:float-window';
+const FRAME_BUDGET_BREACH_LIMIT = 12;
+const FRAME_BUDGET_MILLISECONDS = 6;
+const FRAME_BUDGET_WINDOW = 30;
 const INSTANT_CLASS = 'is-instant';
 const MAX_INITIALS = 2;
 const MILLISECONDS_PER_MINUTE = 60_000;
@@ -47,7 +61,6 @@ const PANEL_NARROW_VIEWPORT = 480;
 const PANEL_RESIZE_STEP = 16;
 const PANEL_WIDE_DIVISOR = 2;
 const PANEL_WIDE_VIEWPORT = 1_024;
-const SECONDS_PER_MINUTE = 60;
 const SLOW_CORE_COUNT = 4;
 
 const panelWidths = new Map<string, number>();
@@ -63,10 +76,26 @@ function claimFloatWindow(panel: HTMLElement): void {
     window.dispatchEvent(new CustomEvent(FLOAT_WINDOW_TOPIC, { detail: { panel } }));
 }
 
-function delay(milliseconds: number): Promise<void> {
-    return new Promise((resolve) => {
-        setTimeout(resolve, milliseconds);
-    });
+function createFrameBudget(onBreach: () => void): (duration: number) => void {
+    let breaches = 0;
+    let cost = 0;
+    let frames = 0;
+
+    return function watch(duration: number) {
+        cost += duration;
+        frames++;
+
+        if (frames < FRAME_BUDGET_WINDOW) return;
+
+        breaches = cost / frames > FRAME_BUDGET_MILLISECONDS ? breaches + 1 : 0;
+        cost = 0;
+        frames = 0;
+
+        if (breaches < FRAME_BUDGET_BREACH_LIMIT) return;
+
+        breaches = 0;
+        onBreach();
+    };
 }
 
 function describeCartChange(issues: CartIssue[]): string {
@@ -88,6 +117,10 @@ function describeMatches(shown: number, total: number, isFiltered: boolean, quer
     if (query) return `${tally} for \u201c${query}\u201d`;
 
     return isFiltered || total === 1 ? tally : `All ${total.toLocaleString(LOCALE)}`;
+}
+
+function escapeHtml(text: string): string {
+    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function formatBytes(bytes: number): string {
@@ -134,6 +167,23 @@ function formatEntry(value: number): string {
     return String(value).padStart(ENTRY_PAD, '0');
 }
 
+function formatLongDate(date: Date): string {
+    return date.toLocaleDateString(LOCALE, {
+        day: 'numeric',
+        month: 'long',
+        timeZone: TIME_ZONE,
+        year: 'numeric',
+    });
+}
+
+function formatLongMonth(date: Date): string {
+    return date.toLocaleDateString(LOCALE, {
+        month: 'long',
+        timeZone: TIME_ZONE,
+        year: 'numeric',
+    });
+}
+
 function formatPrice(cents: number): string {
     return `$${(cents / CENTS_PER_DOLLAR).toFixed(2)}`;
 }
@@ -173,7 +223,7 @@ function formatVariant(item: CartItem): string {
 function getInitials(name: string): string {
     const words = name.trim().split(/\s+/).filter(Boolean);
 
-    return words.slice(0, MAX_INITIALS).map(word => word.charAt(0).toUpperCase()).join('');
+    return words.slice(0, MAX_INITIALS).map(word => (Array.from(word)[0] ?? '').toUpperCase()).join('');
 }
 
 function getMaxPanelWidth(viewportWidth: number, reservedRight: number) {
@@ -202,6 +252,12 @@ function getStockLabel(stock: number): string {
     if (stock === 0) return 'Sold out';
 
     return '';
+}
+
+function handleClear(input: HTMLInputElement) {
+    input.value = '';
+    input.dispatchEvent(new Event('input'));
+    input.focus();
 }
 
 function handleRovingKeydown(event: KeyboardEvent, buttons: HTMLButtonElement[], index: number) {
@@ -236,7 +292,7 @@ function initFilterGroup(options: FilterGroupOptions): void {
             const isMatch = groups.every(({ active, matches }) => !active.size || matches(card, active))
                 && tokens.every(token => haystack.includes(token));
 
-            if (isMatch) shown += 1;
+            if (isMatch) shown++;
 
             card.classList.toggle('hidden', !isMatch);
 
@@ -377,12 +433,6 @@ function initSearchField(options: SearchFieldOptions): void {
 
     if (!searchElement) return;
 
-    function handleClear(input: HTMLInputElement) {
-        input.value = '';
-        input.dispatchEvent(new Event('input'));
-        input.focus();
-    }
-
     function sync(input: HTMLInputElement) {
         const isEmpty = input.value.length === 0;
 
@@ -407,26 +457,22 @@ function isOutsideBox(event: MouseEvent, box: Element | null): boolean {
     return event.clientX < left || event.clientX > right || event.clientY < top || event.clientY > bottom;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 function isSlowDevice(): boolean {
     const { connection } = navigator as Navigator & { connection?: { saveData?: boolean } };
 
     return (navigator.hardwareConcurrency ?? 0) <= SLOW_CORE_COUNT || connection?.saveData === true;
 }
 
-function isUpcoming(end: Date): boolean {
-    return end.getTime() >= Date.now();
+function isTrackExtension(value: string): value is keyof typeof TRACK_CONTENT_TYPES {
+    return Object.hasOwn(TRACK_CONTENT_TYPES, value);
 }
 
-function measureWidest(element: Element, values: string[]): number {
-    const context = document.createElement('canvas').getContext('2d');
-
-    if (!context) return 0;
-
-    const { fontFamily, fontSize, fontStyle, fontWeight } = getComputedStyle(element);
-
-    context.font = `${fontStyle} ${fontWeight} ${fontSize} ${fontFamily}`;
-
-    return values.reduce((widest, value) => Math.max(widest, context.measureText(value).width), 0);
+function isUpcoming(end: Date): boolean {
+    return end.getTime() >= Date.now();
 }
 
 function mergeAssets(downloads: CollectionEntry<'downloads'>[], docs: CollectionEntry<'docs'>[]): CollectionEntry<'downloads'>[] {
@@ -496,6 +542,12 @@ function pickTileColor(seed: string): TileColor {
 
 function preventNavigation(event: DragEvent): void {
     event.preventDefault();
+}
+
+function readText(record: Record<string, unknown>, key: string): string {
+    const value = record[key];
+
+    return typeof value === 'string' ? value.trim() : '';
 }
 
 function registerPageScript(init: (signal: AbortSignal) => void): void {
@@ -571,6 +623,10 @@ function setTitleLink(element: Element | null, catalog: CatalogEntry[], item: Ca
     setText(element, text);
 }
 
+function toAssetSlug(name: string): string {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+}
+
 function toAustinIso(date: Date): string {
     const formatter = new Intl.DateTimeFormat('en-CA', {
         day: '2-digit',
@@ -605,21 +661,6 @@ function toAustinIso(date: Date): string {
     return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}${sign}${hours}:${minutes}`;
 }
 
-function toProducerRecord(producer: CollectionEntry<'producers'>): ProducerRecord {
-    return {
-        bio: producer.data.bio,
-        featured: producer.data.featured,
-        genres: producer.data.genres,
-        id: producer.data.producerId,
-        joined: toAustinIso(producer.data.joined),
-        links: producer.data.links,
-        location: producer.data.location,
-        name: producer.data.name,
-        roles: producer.data.roles,
-        tracks: producer.data.tracks,
-    };
-}
-
 function toProgramCard(event: EventRecord) {
     const { speaker, sponsor } = event;
 
@@ -643,24 +684,21 @@ function toProgramCard(event: EventRecord) {
     };
 }
 
-function toRoster(producers: CollectionEntry<'producers'>[]): CollectionEntry<'producers'>[] {
-    if (new Set(producers.map(producer => producer.data.producerId)).size !== producers.length) throw new Error('Each producer needs its own ID.');
-
-    return producers;
-}
-
 export {
     applyInstantly,
     claimFloatWindow,
-    delay,
+    createFrameBudget,
     describeCartChange,
     describeMatches,
+    escapeHtml,
     formatBytes,
     formatCalendarDay,
     formatCalendarMonth,
     formatDateStamp,
     formatDuration,
     formatEntry,
+    formatLongDate,
+    formatLongMonth,
     formatPrice,
     formatProds,
     formatRole,
@@ -675,15 +713,17 @@ export {
     initRovingFocus,
     initSearchField,
     isOutsideBox,
+    isRecord,
     isSlowDevice,
+    isTrackExtension,
     isUpcoming,
-    measureWidest,
     mergeAssets,
     onFloatWindowClaim,
     parseCatalog,
     parseImageSources,
     pickTileColor,
     preventNavigation,
+    readText,
     registerPageScript,
     setAvatarImage,
     setHidden,
@@ -691,8 +731,7 @@ export {
     setProductImage,
     setText,
     setTitleLink,
+    toAssetSlug,
     toAustinIso,
-    toProducerRecord,
     toProgramCard,
-    toRoster,
 };

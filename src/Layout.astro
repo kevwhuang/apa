@@ -30,7 +30,8 @@ const initScript = init
     .replace('__THEME_KEY__', STORAGE.theme.key)
     .replace('__SESSION_KEY__', STORAGE.session.key)
     .replace('__CART_KEY__', STORAGE.cart.key)
-    .replace('__ORDER_KEY__', STORAGE.order.key);
+    .replace('__ORDER_KEY__', STORAGE.order.key)
+    .replace('__ONBOARDING_KEY__', STORAGE.onboardingDraft.key);
 
 const logoUrl = new URL(BRAND_ICONS.logo, Astro.site).href;
 const ogImageUrl = new URL(BRAND_ICONS.og, Astro.site).href;
@@ -123,12 +124,14 @@ const structuredData = {
 </html>
 
 <script>
+    import { initDownloads } from '@lib/resources/downloads';
     import { initMotion } from '@lib/motion/motion';
     import { syncSessionAttribute } from '@lib/account/session';
     import { syncThemeAttribute } from '@lib/ui/theme';
 
     document.addEventListener('astro:after-swap', syncSessionAttribute);
     document.addEventListener('astro:after-swap', syncThemeAttribute);
+    initDownloads();
     initMotion();
     syncThemeAttribute();
 </script>

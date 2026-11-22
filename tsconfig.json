@@ -3,6 +3,7 @@
     "exclude": [
         "dist",
         "netlify",
+        "supabase",
         "tests"
     ],
     "compilerOptions": {

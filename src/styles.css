@@ -13,10 +13,6 @@ html[data-theme='dark'] .partner-logo {
     --partner-invert: 1;
 }
 
-html[data-theme='dark'] .slab--card .slab--well {
-    --color-bg-inverse: var(--color-bg-page);
-}
-
 html[data-theme='dark'] .slab--well {
     --color-bg-inverse: var(--color-bg-raised);
     --color-bg-inverse-raised: var(--color-bg-page);
@@ -268,6 +264,12 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
     width: 100%;
 }
 
+.grid-tail--wide > :nth-last-child(1 of :not([hidden], .hidden)):nth-child(odd of :not([hidden], .hidden)) {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: calc((100% - var(--space-lg)) / 2);
+}
+
 .grip {
     --grip-width: 10px;
     cursor: ew-resize;
@@ -284,7 +286,7 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
 
 .grip::after {
     content: '';
-    inset: 0 calc((var(--grip-width) - var(--control-size)) / 2);
+    inset: 0 0 0 calc(var(--grip-width) - var(--control-size));
     position: absolute;
 }
 
@@ -326,51 +328,40 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
     position: absolute;
 }
 
-@layer components {
-    .input {
-        background-color: var(--color-input-bg);
-        border: 2px solid var(--color-input-border);
-        color: var(--color-input-text);
-        min-height: var(--control-size);
-        padding: 8px 16px;
-        transition:
-            background-color var(--duration-fast) var(--motion-ease-ui),
-            border-color var(--duration-fast) var(--motion-ease-ui);
-        width: 100%;
-    }
+.input {
+    background-color: var(--color-input-bg);
+    border: 2px solid var(--color-input-border);
+    color: var(--color-input-text);
+    min-height: var(--control-size);
+    padding: 8px 16px;
+    transition:
+        background-color var(--duration-fast) var(--motion-ease-ui),
+        border-color var(--duration-fast) var(--motion-ease-ui);
+    width: 100%;
+}
 
-    .input:disabled,
-    .input:disabled:hover {
-        background-color: var(--color-input-bg-disabled);
-        border-color: var(--color-input-border-disabled);
-        color: var(--color-input-text-disabled);
-    }
+.input:disabled,
+.input:disabled:hover {
+    background-color: var(--color-input-bg-disabled);
+    border-color: var(--color-input-border-disabled);
+    color: var(--color-input-text-disabled);
+}
 
-    .input:focus-visible,
-    .input:hover {
-        background-color: var(--color-input-bg-hover);
-    }
+.input:focus-visible,
+.input:hover {
+    background-color: var(--color-input-bg-hover);
+}
 
-    .input::placeholder {
-        color: var(--color-input-placeholder);
-    }
+.input::placeholder {
+    color: var(--color-input-placeholder);
+}
 
-    .input[aria-invalid='true'] {
-        border-color: var(--color-input-border-invalid);
-    }
+.input[aria-invalid='true'] {
+    border-color: var(--color-input-border-invalid);
+}
 
-    .input[type='number'] {
-        appearance: textfield;
-    }
-
-    .input[type='number']::-webkit-inner-spin-button,
-    .input[type='number']::-webkit-outer-spin-button {
-        appearance: none;
-    }
-
-    .input[type='search']::-webkit-search-cancel-button {
-        appearance: none;
-    }
+.input--trailing {
+    padding-right: var(--control-size);
 }
 
 .is-active {
@@ -613,7 +604,7 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
 
 .slab--card {
     --slab-fill: var(--color-bg-raised);
-    --slab-level: var(--z-card);
+    --slab-level: 2;
     --slab-rule: 2px;
 }
 
@@ -678,7 +669,7 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
 .slab--lift {
     --slab-drop: var(--lift);
     --slab-fill: var(--color-bg-raised);
-    --slab-level: var(--z-lift);
+    --slab-level: 3;
     --slab-rule: 2px;
 }
 
@@ -735,10 +726,6 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
     --slab-line: var(--color-border-inverse-strong);
 }
 
-.slab--well .spinner {
-    --spinner-track: var(--color-border-inverse-subtle);
-}
-
 .slab--well :is(a, button, summary).action-text:hover {
     color: var(--color-link-on-inverse);
 }
@@ -783,7 +770,21 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
     grid-column: full-start / full-end;
 }
 
+@media (max-width: 1024px) {
+    .grid-tail > :nth-last-child(1 of :not([hidden], .hidden)):nth-child(odd of :not([hidden], .hidden)) {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: calc((100% - var(--space-lg)) / 2);
+    }
+}
+
 @media (max-width: 768px) {
+    .grid-tail > :nth-last-child(1 of :not([hidden], .hidden)):nth-child(odd of :not([hidden], .hidden)) {
+        grid-column: auto;
+        justify-self: auto;
+        width: auto;
+    }
+
     .rank--2 {
         --rank-cols: minmax(0, 1fr);
     }

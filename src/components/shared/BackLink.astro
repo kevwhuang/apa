@@ -6,16 +6,21 @@ interface Props {
     label: string;
 }
 
+const CLASS_LINK = 'group active:translate-y-px focus-visible:text-link hover:text-link inline-flex items-center min-h-(--control-size) gap-3 font-bold text-xl tracking-tight transition-[color,translate]';
+
 const { href, label } = Astro.props;
 ---
 
-<nav
+<section
     class="back-link stage border-b-2 border-border-strong"
     aria-label="Breadcrumb"
 >
-    <div data-motion="stamp">
+    <nav
+        aria-label="Breadcrumb"
+        data-motion="stamp"
+    >
         <a
-            class="group active:translate-y-px focus-visible:text-link hover:text-link inline-flex items-center min-h-(--control-size) gap-3 font-bold text-xl tracking-tight transition-[color,translate]"
+            class={CLASS_LINK}
             href={href}
         >
             <span class="group-focus-visible:-translate-x-1 group-hover:-translate-x-1 inline-flex transition-[translate]">
@@ -23,8 +28,8 @@ const { href, label } = Astro.props;
             </span>
             {label}
         </a>
-    </div>
-</nav>
+    </nav>
+</section>
 
 <style>
     .back-link {

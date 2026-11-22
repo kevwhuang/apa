@@ -35,7 +35,9 @@ function createStore<T>(options: StoreOptions<T>): PersistentStore<T> {
     function onChange(callback: (value: T) => void): () => void {
         if (typeof window === 'undefined') return () => undefined;
 
-        const handler = () => callback(get());
+        function handler() {
+            callback(get());
+        }
 
         window.addEventListener(topic, handler);
 
@@ -75,7 +77,11 @@ function createStore<T>(options: StoreOptions<T>): PersistentStore<T> {
 }
 
 function getStorage(scope: StorageScope) {
-    return scope === 'local' && typeof localStorage !== 'undefined' ? localStorage : null;
+    try {
+        return scope === 'local' && typeof localStorage !== 'undefined' ? localStorage : null;
+    } catch {
+        return null;
+    }
 }
 
 function notify(topic: string) {

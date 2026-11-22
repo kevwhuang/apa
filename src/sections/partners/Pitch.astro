@@ -39,17 +39,17 @@ const PRODUCERS_WELCOMED = '1,000+';
 const PROGRAMS_PLANNED = '4';
 const PROGRAMS_RUNNING = '4';
 
+const TIERS: Tier[] = [
+    { name: 'Supporter', perks: ['Name on the site', 'Newsletter thank-you'], price: '$5' },
+    { featured: true, name: 'Backer', perks: ['Everything in Supporter', 'Featured on the website as a sponsor', 'Mention from the front of the room at the Bash', 'Guest passes across the year'], price: '$25' },
+    { name: 'Patron', perks: ['Everything in Backer', 'Logo on the site and event flyers', 'Named partner on one Bash', 'Co-branded workshop each year', 'Presence at every event'], price: '$250' },
+];
+
 const STATS = [
     { label: 'Founded', value: FOUNDING_YEAR },
     { label: 'Welcomed', value: PRODUCERS_WELCOMED },
     { label: 'Programs running', value: PROGRAMS_RUNNING },
     { label: 'Programs planned', value: PROGRAMS_PLANNED },
-];
-
-const TIERS: Tier[] = [
-    { name: 'Supporter', perks: ['Name on the site', 'Newsletter thank-you'], price: '$5' },
-    { featured: true, name: 'Backer', perks: ['Everything in Supporter', 'Featured on the website as a sponsor', 'Mention from the front of the room at the Bash', 'Guest passes across the year'], price: '$25' },
-    { name: 'Patron', perks: ['Everything in Backer', 'Logo on the site and event flyers', 'Named partner on one Bash', 'Co-branded workshop each year', 'Presence at every event'], price: '$250' },
 ];
 
 const contactHref = `/contact?topic=${encodeURIComponent(PARTNER_INQUIRY_TOPIC)}`;

@@ -1,16 +1,14 @@
-import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
-import { toast } from '@lib/ui/toasts';
+import { PASSWORD_MAX_BYTES, PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
+import { retractToast, toast } from '@lib/ui/toasts';
 
-const BYPASS_WINDOW_MILLISECONDS = 0;
-const PLACEHOLDER_EMAIL = 'you@studio.fm';
-
-let bypassTimer: Timer | undefined;
-let isBypassing = false;
+const summaries = new WeakMap<HTMLFormElement, Set<string>>();
 
 function clearFieldErrors(form: HTMLFormElement): void {
     form.querySelectorAll('[aria-invalid]').forEach((control) => {
         control.setAttribute('aria-invalid', 'false');
     });
+
+    queueMicrotask(() => retractSummaries(form));
 }
 
 function describeFieldErrors(form: HTMLFormElement, errors: FieldErrors) {
@@ -26,11 +24,14 @@ function focusFirstError(form: HTMLFormElement, errors: FieldErrors) {
 
     const control = Array.from(form.elements).find(element => names.includes(getControlName(element)));
 
-    if (control instanceof HTMLElement) control.focus();
+    if (!(control instanceof HTMLElement)) return;
+
+    control.focus();
+    control.scrollIntoView({ block: 'nearest' });
 }
 
 function getConfirmRule(): FieldRule {
-    return { message: 'Both passwords must match.', required: true, validate: (value, values) => value === values.get('password') };
+    return { message: 'Both passwords must match.', required: true, validate: (_value, values) => values.get('confirm') === values.get('password') };
 }
 
 function getControlName(element: Element) {
@@ -39,20 +40,11 @@ function getControlName(element: Element) {
 
 function getPasswordRule(): FieldRule {
     return {
-        message: `Use at least ${PASSWORD_MIN_LENGTH} characters, including a letter and a digit.`,
+        message: `Use ${PASSWORD_MIN_LENGTH} to ${PASSWORD_MAX_BYTES} characters, including a letter and a digit.`,
         min: PASSWORD_MIN_LENGTH,
         required: true,
-        validate: value => /[a-z]/i.test(value) && /\d/.test(value),
+        validate: value => /[a-z]/i.test(value) && /\d/.test(value) && new TextEncoder().encode(value).length <= PASSWORD_MAX_BYTES,
     };
-}
-
-function handleBypassClick(event: MouseEvent) {
-    isBypassing = event.metaKey;
-
-    if (!isBypassing) return;
-
-    clearTimeout(bypassTimer);
-    bypassTimer = setTimeout(releaseBypass, BYPASS_WINDOW_MILLISECONDS);
 }
 
 function handleFieldEdit(event: Event) {
@@ -78,35 +70,34 @@ function handleReveal(button: HTMLButtonElement): void {
     input.type = isShown ? 'password' : 'text';
 }
 
-function isValidationBypassed(): boolean {
-    return isBypassing;
-}
-
 function markField(form: HTMLFormElement, name: string, isInvalid: boolean) {
     form.querySelectorAll(`[name="${name}"]`).forEach((control) => {
         control.setAttribute('aria-invalid', String(isInvalid));
     });
 }
 
-function readEmail(values: FormData): string {
-    const email = String(values.get('email') ?? '').trim();
-
-    if (email.length > 0 || !isValidationBypassed()) return email;
-
-    return PLACEHOLDER_EMAIL;
-}
-
-function releaseBypass() {
-    isBypassing = false;
-    bypassTimer = undefined;
-}
-
 function reportFieldErrors(form: HTMLFormElement, errors: FieldErrors): void {
     if (Object.keys(errors).length === 0) return;
 
+    const summary = describeFieldErrors(form, errors);
+
     setFieldErrors(form, errors);
     focusFirstError(form, errors);
-    toast(describeFieldErrors(form, errors), 'error');
+    summaries.set(form, (summaries.get(form) ?? new Set<string>()).add(summary));
+    toast(summary, 'error');
+}
+
+function retractSummaries(form: HTMLFormElement) {
+    const posted = summaries.get(form);
+
+    if (!posted || form.querySelector('[aria-invalid="true"]')) return;
+
+    posted.forEach(summary => retractToast(summary));
+    summaries.delete(form);
+}
+
+function serialize(form: HTMLFormElement, avatar = ''): string {
+    return JSON.stringify([avatar, ...new FormData(form)]);
 }
 
 function setFieldErrors(form: HTMLFormElement, errors: FieldErrors): void {
@@ -121,9 +112,7 @@ function setRole(form: HTMLFormElement, value: string): void {
     if (match) match.checked = true;
 }
 
-function validateFields(form: HTMLFormElement, rules: Record<string, FieldRule>, strict = false): FieldErrors {
-    if (isValidationBypassed() && !strict) return {};
-
+function validateFields(form: HTMLFormElement, rules: Record<string, FieldRule>): FieldErrors {
     const errors: FieldErrors = {};
     const values = new FormData(form);
 
@@ -155,16 +144,13 @@ function watchFieldErrors(form: HTMLFormElement, signal: AbortSignal): void {
     form.addEventListener('input', handleFieldEdit, { capture: true, signal });
 }
 
-if (typeof document !== 'undefined') document.addEventListener('click', handleBypassClick, { capture: true });
-
 export {
     clearFieldErrors,
     getConfirmRule,
     getPasswordRule,
     handleReveal,
-    isValidationBypassed,
-    readEmail,
     reportFieldErrors,
+    serialize,
     setFieldErrors,
     setRole,
     validateFields,

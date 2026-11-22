@@ -3,9 +3,11 @@ const CART_KEY = '__CART_KEY__';
 const DARK_THEME_COLOR = '#171310';
 const DEFAULT_THEME = 'light';
 const LIGHT_THEME_COLOR = '#f6f1e4';
+const ONBOARDING_KEY = '__ONBOARDING_KEY__';
 const ORDER_KEY = '__ORDER_KEY__';
 const RECEIPT_FRESH_MILLISECONDS = 120_000;
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+const SEED_MARKER_KEY = 'apa.cart-seeded';
 const SESSION_KEY = '__SESSION_KEY__';
 const THEME_COLOR_SELECTOR = 'meta[name="theme-color"]';
 const THEME_KEY = '__THEME_KEY__';
@@ -15,27 +17,36 @@ const doc = globalThis.document;
 
 const root = doc.documentElement;
 
+function hasOnboardingProgress() {
+    try {
+        const rawProgress = globalThis.localStorage.getItem(ONBOARDING_KEY);
+        const rawSession = globalThis.localStorage.getItem(SESSION_KEY);
+
+        const progress = rawProgress ? JSON.parse(rawProgress) : null;
+        const session = rawSession ? JSON.parse(rawSession) : null;
+
+        return typeof session?.id === 'string' && session.id.length > 0 && progress?.userId === session.id && Number(progress.step) > 0;
+    } catch {
+        return false;
+    }
+}
+
 function initCartState() {
-    const rows = readCartRows();
-
     root.dataset.cart = readCartState();
-
-    if (rows !== null) root.style.setProperty('--cart-rows', String(rows));
+    root.style.setProperty('--cart-rows', String(readCartRows()));
 
     doc.addEventListener('astro:before-swap', (event) => {
         const next = event.newDocument.documentElement;
-        const nextRows = readCartRows();
 
         next.dataset.cart = readCartState();
-
-        if (nextRows !== null) next.style.setProperty('--cart-rows', String(nextRows));
+        next.style.setProperty('--cart-rows', String(readCartRows()));
     });
 }
 
 function initMotionBridge() {
     if (globalThis.window.__apaMotion) return;
 
-    const state = { arm, armedClass: ARMED_CLASS, disarm, expired: false, live };
+    const state = { arm, disarm, expired: false, live };
 
     let watchdog = globalThis.setTimeout(expire, WATCHDOG_MILLISECONDS);
 
@@ -77,6 +88,14 @@ function initMotionBridge() {
     globalThis.addEventListener('beforeprint', disarm);
 }
 
+function initOnboardingState() {
+    root.toggleAttribute('data-onboarding-resume', hasOnboardingProgress());
+
+    doc.addEventListener('astro:before-swap', (event) => {
+        event.newDocument.documentElement.toggleAttribute('data-onboarding-resume', hasOnboardingProgress());
+    });
+}
+
 function initReceiptState() {
     root.dataset.receipt = readReceiptState();
 
@@ -87,12 +106,6 @@ function initReceiptState() {
 
 function initScrollRestore() {
     let navigation = 'push';
-
-    function scrollToAnchor() {
-        const target = doc.getElementById(globalThis.location.hash.slice(1));
-
-        if (target) target.scrollIntoView({ behavior: 'instant', block: 'start' });
-    }
 
     function settle() {
         const state = globalThis.history.state;
@@ -112,6 +125,7 @@ function initScrollRestore() {
 }
 
 function initSessionState() {
+    let admin = 'false';
     let state = 'out';
 
     try {
@@ -119,12 +133,21 @@ function initSessionState() {
 
         const session = raw ? JSON.parse(raw) : null;
 
-        if (session && session.expiresAt > Date.now()) state = 'in';
+        if (session && typeof session.id === 'string' && session.id.length > 0) state = 'in';
+        if (state === 'in' && session.admin === true) admin = 'true';
     } catch {
         state = 'out';
     }
 
+    root.dataset.admin = admin;
     root.dataset.session = state;
+
+    doc.addEventListener('astro:before-swap', (event) => {
+        const next = event.newDocument.documentElement;
+
+        next.dataset.admin = root.dataset.admin;
+        next.dataset.session = root.dataset.session;
+    });
 }
 
 function initTheme() {
@@ -149,21 +172,15 @@ function initTheme() {
 }
 
 function readCartRows() {
-    let rows = null;
-
     try {
         const raw = globalThis.localStorage.getItem(CART_KEY);
 
-        const isSeedPending = raw === null;
+        const items = raw ? JSON.parse(raw) : [];
 
-        const items = isSeedPending ? [] : JSON.parse(raw);
-
-        if (!isSeedPending) rows = Array.isArray(items) ? items.length : 0;
+        return Array.isArray(items) ? items.length : 0;
     } catch {
-        rows = 0;
+        return 0;
     }
-
-    return rows;
 }
 
 function readCartState() {
@@ -178,7 +195,8 @@ function readReceiptState() {
 
         const order = raw ? JSON.parse(raw) : null;
 
-        if (order && Date.now() - Number(order.placedAt) < RECEIPT_FRESH_MILLISECONDS) state = 'fresh';
+        if (!order) state = 'none';
+        else if (Date.now() - Number(order.placedAt) < RECEIPT_FRESH_MILLISECONDS) state = 'fresh';
     } catch {
         state = 'stale';
     }
@@ -186,9 +204,34 @@ function readReceiptState() {
     return state;
 }
 
+function retirePrototypeStore() {
+    try {
+        if (globalThis.localStorage.getItem(SEED_MARKER_KEY) === null) return;
+
+        globalThis.localStorage.removeItem(CART_KEY);
+        globalThis.localStorage.removeItem(SEED_MARKER_KEY);
+
+        const raw = globalThis.localStorage.getItem(ORDER_KEY);
+
+        const order = raw ? JSON.parse(raw) : null;
+
+        if (typeof order?.account !== 'string') globalThis.localStorage.removeItem(ORDER_KEY);
+    } catch {
+        return;
+    }
+}
+
+function scrollToAnchor() {
+    const target = doc.getElementById(globalThis.location.hash.slice(1));
+
+    if (target) target.scrollIntoView({ behavior: 'instant', block: 'start' });
+}
+
 initTheme();
 initSessionState();
+retirePrototypeStore();
 initCartState();
 initReceiptState();
+initOnboardingState();
 initMotionBridge();
 initScrollRestore();

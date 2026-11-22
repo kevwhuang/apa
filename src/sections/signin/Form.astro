@@ -28,6 +28,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                         id="mode-signin"
                         class="signin__radio sr-only"
                         checked
+                        data-auth-mode="signin"
                         name="mode"
                         type="radio"
                     />
@@ -46,6 +47,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
             <form
                 class="signin__in flex flex-col gap-6 p-(--space-lg)"
                 data-auth-form="signin"
+                method="post"
             >
                 <h2 class="sr-only">
                     Sign in
@@ -70,7 +72,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                         <span class="block relative">
                             <input
                                 id="signin-password"
-                                class="input pr-12"
+                                class="input input--trailing"
                                 aria-invalid="false"
                                 autocomplete="current-password"
                                 name="password"
@@ -94,16 +96,26 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                         </span>
                     </label>
                 </div>
-                <button
-                    class="btn btn--primary self-start"
-                    type="submit"
-                >
-                    Sign in <IconArrow />
-                </button>
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <button
+                        class="btn btn--primary"
+                        type="submit"
+                    >
+                        Sign in <IconArrow />
+                    </button>
+                    <button
+                        class="action-text flex items-center min-h-(--control-size) px-1 text-text-secondary"
+                        data-auth-reset
+                        type="button"
+                    >
+                        Forgot password
+                    </button>
+                </div>
             </form>
             <form
                 class="signin__up flex flex-col gap-6 p-(--space-lg)"
                 data-auth-form="signup"
+                method="post"
             >
                 <h2 class="sr-only">
                     Create account
@@ -128,7 +140,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                         <span class="block relative">
                             <input
                                 id="signup-password"
-                                class="input pr-12"
+                                class="input input--trailing"
                                 aria-describedby="signup-password-help"
                                 aria-invalid="false"
                                 autocomplete="new-password"
@@ -166,7 +178,7 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
                         <span class="block relative">
                             <input
                                 id="signup-confirm"
-                                class="input pr-12"
+                                class="input input--trailing"
                                 aria-invalid="false"
                                 autocomplete="new-password"
                                 name="confirm"
@@ -255,34 +267,71 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
 <script>
     import { navigate } from 'astro:transitions/client';
 
-    import { clearFieldErrors, getConfirmRule, getPasswordRule, handleReveal, readEmail, reportFieldErrors, validateFields, watchFieldErrors } from '@lib/ui/forms';
-    import { getSession, onSessionChange, startSession } from '@lib/account/session';
+    import { EMAIL_REQUIRED_MESSAGE } from '@lib/shared/constants';
+    import { clearAuthLink, createAccount, getAuthLink, getSession, onSessionChange, requestPasswordReset, startSession } from '@lib/account/session';
+    import { clearFieldErrors, getConfirmRule, getPasswordRule, handleReveal, reportFieldErrors, validateFields, watchFieldErrors } from '@lib/ui/forms';
+    import { getNextPath } from '@lib/account/guard';
     import { registerPageScript, setPending } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
 
-    const ERROR_FIELDS: Record<Exclude<SessionErrorCode, 'storage-full'>, string> = {
+    const EMAIL_RULE: FieldRule = { message: EMAIL_REQUIRED_MESSAGE, required: true };
+
+    const ERROR_FIELDS: Partial<Record<SessionErrorCode, string>> = {
         'already-registered': 'email',
         'invalid-credentials': 'password',
         'invalid-email': 'email',
+        'unconfirmed': 'email',
         'weak-password': 'password',
     };
 
+    const EXPIRED_LINK_MESSAGE = 'That link has expired. Use Forgot password for a new one.';
+    const RESET_MESSAGE = 'If that address has an account, a reset link is on its way.';
+
+    const RESET_RULES: Record<string, FieldRule> = {
+        email: EMAIL_RULE,
+    };
+
     const SIGNIN_RULES: Record<string, FieldRule> = {
-        email: { message: 'Enter your email address.', required: true },
+        email: EMAIL_RULE,
         password: { message: 'Enter your password.', required: true },
     };
 
     const SIGNUP_RULES: Record<string, FieldRule> = {
         confirm: getConfirmRule(),
-        email: { message: 'Enter your email address.', required: true },
+        email: EMAIL_RULE,
         password: getPasswordRule(),
     };
 
     let isSubmitting = false;
     let unsubscribe: (() => void) | undefined;
 
-    async function handleSubmit(event: SubmitEvent, form: HTMLFormElement) {
+    async function handleReset(button: HTMLButtonElement) {
+        const { form } = button;
+
+        if (!form) return;
+
+        const errors = validateFields(form, RESET_RULES);
+
+        clearFieldErrors(form);
+
+        if (Object.keys(errors).length > 0) {
+            reportFieldErrors(form, errors);
+
+            return;
+        }
+
+        setPending(button, true);
+
+        await requestPasswordReset(String(new FormData(form).get('email') ?? '').trim());
+
+        setPending(button, false);
+        toast(RESET_MESSAGE, 'info');
+    }
+
+    async function handleSubmit(event: SubmitEvent, form: HTMLFormElement, signal: AbortSignal) {
         event.preventDefault();
+
+        if (isSubmitting) return;
 
         const isSignup = form.dataset.authForm === 'signup';
         const values = new FormData(form);
@@ -300,62 +349,92 @@ import { PASSWORD_MIN_LENGTH } from '@lib/shared/constants';
         }
 
         const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        const draft = { email: String(values.get('email') ?? '').trim(), password: String(values.get('password') ?? '') };
 
-        setPending(button, true);
         isSubmitting = true;
+        setPending(button, true);
 
-        const result = await startSession({
-            email: readEmail(values),
-            password: String(values.get('password') ?? ''),
-        });
+        const result = isSignup ? await createAccount(draft) : await startSession(draft);
 
-        isSubmitting = false;
+        if (signal.aborted) return;
+
         setPending(button, false);
 
         if (!result.ok) {
-            if (result.code === 'storage-full') toast(result.message, 'error');
-            else reportFieldErrors(form, { [ERROR_FIELDS[result.code]]: result.message });
+            const field = ERROR_FIELDS[result.code];
+
+            isSubmitting = false;
+
+            if (field) reportFieldErrors(form, { [field]: result.message });
+            else toast(result.message, 'error');
 
             return;
         }
 
-        const message = isSignup ? 'Account created. You are signed in.' : `Signed in as ${result.session.artistName || result.session.email}.`;
-
         form.reset();
-        toast(message, 'success');
 
-        await navigate('/settings');
+        if (result.session) {
+            toast(isSignup ? 'Account created. You are signed in.' : `Signed in as ${result.session.artistName || result.session.email}.`, 'success');
+
+            await navigate(getNextPath());
+        } else {
+            showConfirmation(draft.email);
+        }
+
+        isSubmitting = false;
     }
 
     function initSignInForm(signal: AbortSignal) {
         const forms = document.querySelectorAll<HTMLFormElement>('[data-auth-form]');
+        const reset = document.querySelector<HTMLButtonElement>('[data-auth-reset]');
         const reveals = document.querySelectorAll<HTMLButtonElement>('[data-reveal]');
 
         if (forms.length === 0) return;
 
         if (getSession()) {
-            void navigate('/settings', { history: 'replace' });
+            void navigate(getNextPath(), { history: 'replace' });
 
             return;
         }
 
+        isSubmitting = false;
         unsubscribe?.();
 
         unsubscribe = onSessionChange((session) => {
-            if (!isSubmitting && session) void navigate('/settings');
+            if (!isSubmitting && session) void navigate(getNextPath());
         });
 
         signal.addEventListener('abort', () => unsubscribe?.(), { once: true });
 
         forms.forEach((form) => {
             form.noValidate = true;
-            form.addEventListener('submit', event => void handleSubmit(event, form), { signal });
+            form.addEventListener('submit', event => void handleSubmit(event, form, signal), { signal });
             watchFieldErrors(form, signal);
         });
+
+        reset?.addEventListener('click', () => void handleReset(reset), { signal });
 
         reveals.forEach((button) => {
             button.addEventListener('click', () => handleReveal(button), { signal });
         });
+
+        if (getAuthLink() !== 'expired') return;
+
+        clearAuthLink();
+        toast(EXPIRED_LINK_MESSAGE, 'error');
+    }
+
+    function showConfirmation(email: string) {
+        const mode = document.querySelector<HTMLInputElement>('[data-auth-mode="signin"]');
+        const signin = document.querySelector<HTMLFormElement>('[data-auth-form="signin"]');
+
+        const address = signin?.querySelector<HTMLInputElement>('[name="email"]');
+
+        if (address) address.value = email;
+        if (mode) mode.checked = true;
+
+        signin?.querySelector<HTMLInputElement>('[name="password"]')?.focus();
+        toast(`Check your inbox to confirm ${email}, then sign in.`, 'info');
     }
 
     registerPageScript(initSignInForm);

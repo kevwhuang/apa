@@ -1,5 +1,7 @@
 import { getImage } from 'astro:assets';
 
+import { toAssetSlug } from '@lib/shared/utils';
+
 import type { CollectionEntry } from 'astro:content';
 
 type Product = CollectionEntry<'products'>['data'];
@@ -14,7 +16,7 @@ function getBaseVariation(product: Product): Variation {
 }
 
 function getVariationImage(variation: Variation): ImageMetadata | undefined {
-    return STORE_IMAGES[`/src/images/store/${toImageKey(variation)}.webp`]?.default;
+    return STORE_IMAGES[`/src/images/store/${toImageKey(variation)}${IMAGE_EXTENSION}`]?.default;
 }
 
 function getVariationPrice(product: Product, variation: Variation): number {
@@ -24,6 +26,7 @@ function getVariationPrice(product: Product, variation: Variation): number {
 function toCatalog(products: CollectionEntry<'products'>[]): CatalogEntry[] {
     return products.map(product => ({
         priceCents: product.data.priceCents,
+        sizes: [...product.data.sizes],
         sku: product.data.sku,
         slug: product.id,
         stock: product.data.stock,
@@ -38,7 +41,7 @@ function toCatalog(products: CollectionEntry<'products'>[]): CatalogEntry[] {
 }
 
 function toImageKey(variation: Pick<Variation, 'name' | 'sku'>): string {
-    return `${variation.sku}_${variation.name.toLowerCase().replace(/[^a-z\d]+/g, '_')}`;
+    return `${variation.sku}_${toAssetSlug(variation.name)}`;
 }
 
 async function toImageSources(): Promise<ImageSources> {

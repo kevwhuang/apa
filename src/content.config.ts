@@ -2,14 +2,15 @@ import { defineCollection, reference } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
-import { ASSET_KINDS, GENRES, MEMBER_ROLES, PRODUCT_CATEGORIES, PRODUCT_SIZES } from '@lib/shared/constants';
+import { ASSET_KINDS, PRODUCT_CATEGORIES, PRODUCT_SIZES } from '@lib/shared/constants';
 
 const CONTENT_DIRECTORY = 'src/content';
 const EVENT_PROGRAMS = ['Assembly', 'Bash', 'Hangout'] as const;
-const PRODUCER_ID_PATTERN = /^\d{6}$/;
+const EVENT_TITLE_MAX_LENGTH = 90;
 const SKU_FIRST_VARIATION = '0';
 const SKU_GENERATION = '0';
 const SKU_PATTERN = /^\d{5}$/;
+const SPEAKER_NAME_MAX_LENGTH = 70;
 const URL_MESSAGE = 'URL must start with https:// and not end with a slash.';
 const URL_PATTERN = /^https:\/\/.*[^/]$/;
 const VARIATION_LIMIT = 10;
@@ -49,32 +50,9 @@ const events = defineCollection({
         speaker: reference('speakers').optional(),
         sponsor: reference('sponsors').optional(),
         starts_at: z.coerce.date(),
-        title: z.string().min(1),
+        title: z.string().min(1).max(EVENT_TITLE_MAX_LENGTH),
         venue: z.string().min(1),
-    }),
-});
-
-const producers = defineCollection({
-    loader: glob({ base: `./${CONTENT_DIRECTORY}/producers`, pattern: '**/*.md' }),
-    schema: z.object({
-        bio: z.string(),
-        featured: z.boolean().default(false),
-        genres: z.array(z.enum(GENRES)).default([]).transform(sortGenres),
-        joined: z.coerce.date(),
-        links: z.array(z.object({
-            href: z.string(),
-            label: z.string(),
-        })).default([]),
-        location: z.string().default('Austin, TX'),
-        name: z.string(),
-        producerId: z.string().regex(PRODUCER_ID_PATTERN),
-        roles: z.array(z.enum(MEMBER_ROLES)).length(1),
-        tracks: z.array(z.object({
-            durationSeconds: z.number().int().positive(),
-            file: z.string().optional(),
-            title: z.string(),
-        })).max(1).default([]),
-    }),
+    }).refine(data => data.ends_at.getTime() > data.starts_at.getTime(), { message: 'Event must end after it starts.', path: ['ends_at'] }),
 });
 
 const products = defineCollection({
@@ -114,7 +92,7 @@ const products = defineCollection({
 const speakers = defineCollection({
     loader: glob({ base: `./${CONTENT_DIRECTORY}/speakers`, pattern: '**/*.md' }),
     schema: z.strictObject({
-        name: z.string().min(1),
+        name: z.string().min(1).max(SPEAKER_NAME_MAX_LENGTH),
     }),
 });
 
@@ -125,8 +103,4 @@ const sponsors = defineCollection({
     }),
 });
 
-function sortGenres(genres: (typeof GENRES)[number][]): (typeof GENRES)[number][] {
-    return [...genres].sort((a, b) => GENRES.indexOf(a) - GENRES.indexOf(b));
-}
-
-export const collections = { docs, downloads, events, producers, products, speakers, sponsors };
+export const collections = { docs, downloads, events, products, speakers, sponsors };

@@ -1,8 +1,7 @@
 ---
 import Domain from '@components/shared/Domain.astro';
 import Schedule from '@components/program/Schedule.astro';
-import { LOCALE, TIME_ZONE } from '@lib/shared/constants';
-import { formatTimeRange, isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { formatLongDate, formatTimeRange, isUpcoming, toAustinIso } from '@lib/shared/utils';
 import { loadEvents } from '@lib/programs/calendar';
 
 const events = await loadEvents();
@@ -13,7 +12,7 @@ const sessions = events
         endsAt: toAustinIso(event.ends_at),
         externalUrl: event.external_url,
         headingId: index === 0 ? 'assembly-next-title' : `assembly-next-${index + 1}-title`,
-        longDate: event.starts_at.toLocaleDateString(LOCALE, { day: 'numeric', month: 'long', timeZone: TIME_ZONE, year: 'numeric' }),
+        longDate: formatLongDate(event.starts_at),
         room: event.room,
         startsAt: toAustinIso(event.starts_at),
         time: formatTimeRange(event.starts_at, event.ends_at),

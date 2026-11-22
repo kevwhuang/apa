@@ -1,37 +1,91 @@
-import { MOCK_LATENCY_MILLISECONDS, STORAGE } from '@lib/shared/constants';
+import { REALTIME_SUBSCRIBE_STATES } from '@supabase/supabase-js';
+
+import { CHAT_MESSAGE_MAX_LENGTH, CHECK_VIOLATION, STORAGE, UNIQUE_VIOLATION } from '@lib/shared/constants';
+import { createLiveList } from '@lib/shared/live';
 import { createStore } from '@lib/shared/state';
-import { delay } from '@lib/shared/utils';
 import { getSession } from '@lib/account/session';
+import { isRecord } from '@lib/shared/utils';
+import { supabase } from '@lib/shared/supabase';
 
-const CHAT_REPLIES = [
-    'Sounds good. Drop it in here whenever it is ready and I will take a pass.',
-    'I can do the back half of the week. Mornings are better for me than nights.',
-    'Bring it to the next Assembly and the room can listen through it on the big system.',
-    'Noted. I will follow up here once I have had a proper listen.',
-];
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
-const FALLBACK: ChatState = { messages: [], open: false };
-const ONLINE_WINDOW_MILLISECONDS = 900_000;
+const CHAT_COLUMNS = 'id, user_id, author_name, body, created_at';
+const CHAT_HISTORY_LIMIT = 200;
+const CHAT_PAGE_SIZE = 50;
+const CHAT_TOPIC = 'chat:global';
+const FALLBACK: ChatState = { messages: [], online: 0, open: false };
 
-const ROOM_MEMBERS = [
-    { line: 'Anyone got stems to trade this week? I have a beat that needs a second pair of hands on it.', name: 'Devon Park' },
-    { line: 'That loop Devon closed the Assembly with is still stuck in my head. What did you track it on?', name: 'Inez Rao' },
-    { line: 'I have a session booked Thursday and a spare pair of ears going. Open invite to the room.', name: 'June Castillo' },
-] as const;
+const MESSAGES: Record<ChatErrorCode, string> = {
+    'rate-limited': 'You are sending messages too quickly. Wait a moment and try again.',
+    'send-failed': 'That message was not sent. Try again.',
+    'signed-out': 'Sign in to send a message.',
+    'too-long': `Use ${CHAT_MESSAGE_MAX_LENGTH} characters or fewer.`,
+};
 
-const SEED_OFFSETS_MILLISECONDS = [780_000, 540_000, 240_000];
-const SELF_NAME = 'You';
+const RATE_LIMIT_CODE = 'chat_rate_limited';
+
+const list = createLiveList<ChatMessage>({
+    fetchPage,
+    getStamp: message => message.sentAt,
+    limit: CHAT_HISTORY_LIMIT,
+    onChange: messages => store.set({ ...store.get(), messages }),
+    pageSize: CHAT_PAGE_SIZE,
+});
 
 const store = createStore<ChatState>({
     fallback: FALLBACK,
     key: STORAGE.chat.key,
-    normalize: normalizeChat,
     scope: STORAGE.chat.scope,
     topic: STORAGE.chat.topic,
 });
 
+let channel: RealtimeChannel | undefined;
+let hasEarlier = false;
+let hasHistory = false;
+let isLoadingEarlier = false;
+let isWanted = false;
+let joinedUserId = '';
+let oldestCreatedAt = '';
+let unsent: Pick<ChatMessage, 'body' | 'id' | 'userId'> | undefined;
+
 function closeChat(): void {
     store.set({ ...store.get(), open: false });
+}
+
+function connectChat(): void {
+    const userId = getSession()?.id ?? '';
+
+    if (!isWanted) return;
+
+    if (userId === joinedUserId) {
+        if (userId && !hasHistory) void list.revalidate();
+
+        return;
+    }
+
+    leave();
+    joinedUserId = userId;
+
+    if (userId) void join(userId);
+}
+
+async function fetchPage() {
+    const userId = joinedUserId;
+
+    const { data, error } = await supabase.from('chat_messages').select(CHAT_COLUMNS).order('created_at', { ascending: false }).limit(CHAT_PAGE_SIZE);
+
+    if (error || userId !== joinedUserId) return null;
+
+    const rows: Record<string, unknown>[] = data;
+
+    if (!oldestCreatedAt || rows.length < CHAT_PAGE_SIZE) {
+        hasEarlier = rows.length === CHAT_PAGE_SIZE;
+        oldestCreatedAt = toCursor(rows);
+    }
+
+    hasHistory = true;
+
+    return toChatMessages(rows);
 }
 
 function getChatState(): ChatState {
@@ -42,31 +96,84 @@ function getMessages(): ChatMessage[] {
     return store.get().messages;
 }
 
-function getOnlineCount(now: number): number {
-    const cutoff = now - ONLINE_WINDOW_MILLISECONDS;
-    const names = new Set<string>();
+function handleCreated(payload: unknown) {
+    const message = toChatMessage(payload);
 
-    for (const message of store.get().messages) {
-        if (message.sentAt >= cutoff) names.add(message.name);
-    }
-
-    return names.size;
+    if (message) list.upsert(message);
 }
 
-function normalizeChat(value: ChatState): ChatState {
-    if (typeof value !== 'object' || value === null || !Array.isArray(value.messages)) return { messages: [], open: false };
+function handlePresence() {
+    if (channel) store.set({ ...store.get(), online: Object.keys(channel.presenceState()).length });
+}
 
-    return {
-        messages: value.messages
-            .filter(message => typeof message?.body === 'string')
-            .map(message => ({
-                body: message.body,
-                name: String(message.name ?? ''),
-                self: message.self === true,
-                sentAt: Number(message.sentAt) || 0,
-            })),
-        open: value.open === true,
-    };
+function handleStatus(status: REALTIME_SUBSCRIBE_STATES) {
+    const isJoined = status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED;
+    const isWaiting = !hasHistory && status !== REALTIME_SUBSCRIBE_STATES.CLOSED;
+
+    if (isJoined) void channel?.track({});
+    if (isJoined || isWaiting) void list.revalidate();
+}
+
+function hasEarlierMessages(): boolean {
+    return hasEarlier && !isLoadingEarlier;
+}
+
+async function join(userId: string) {
+    try {
+        await supabase.realtime.setAuth();
+    } catch {
+        if (joinedUserId === userId) joinedUserId = '';
+
+        return;
+    }
+
+    if (channel || joinedUserId !== userId) return;
+
+    channel = supabase
+        .channel(CHAT_TOPIC, { config: { presence: { key: userId }, private: true } })
+        .on('broadcast', { event: 'message_created' }, message => handleCreated(message.payload))
+        .on('broadcast', { event: 'message_deleted' }, ({ payload }) => {
+            if (isRecord(payload) && typeof payload.id === 'string') list.remove(payload.id);
+        })
+        .on('presence', { event: 'sync' }, handlePresence)
+        .subscribe(handleStatus);
+}
+
+function leave() {
+    if (channel) void supabase.removeChannel(channel);
+
+    channel = undefined;
+    hasEarlier = false;
+    hasHistory = false;
+    oldestCreatedAt = '';
+    list.reset();
+    store.set({ ...store.get(), online: 0 });
+}
+
+async function loadEarlierMessages(): Promise<void> {
+    if (!hasEarlierMessages()) return;
+
+    const cursor = oldestCreatedAt;
+    const userId = joinedUserId;
+
+    isLoadingEarlier = true;
+
+    const { data, error } = await supabase
+        .from('chat_messages')
+        .select(CHAT_COLUMNS)
+        .lt('created_at', cursor)
+        .order('created_at', { ascending: false })
+        .limit(CHAT_PAGE_SIZE);
+
+    isLoadingEarlier = false;
+
+    if (error || userId !== joinedUserId) return;
+
+    const rows: Record<string, unknown>[] = data;
+
+    list.merge(toChatMessages(rows));
+    hasEarlier = getMessages().length < CHAT_HISTORY_LIMIT && rows.length === CHAT_PAGE_SIZE;
+    oldestCreatedAt = toCursor(rows) || cursor;
 }
 
 function onChatChange(callback: (state: ChatState) => void): () => void {
@@ -74,60 +181,85 @@ function onChatChange(callback: (state: ChatState) => void): () => void {
 }
 
 function openChat(): void {
+    isWanted = true;
     store.set({ ...store.get(), open: true });
+    connectChat();
 }
 
-function seedRoom(): void {
-    const state = store.get();
-
-    if (state.messages.length > 0) return;
-
-    const now = Date.now();
-
-    store.set({
-        ...state,
-        messages: ROOM_MEMBERS.map((member, index) => ({
-            body: member.line,
-            name: member.name,
-            self: false,
-            sentAt: now - SEED_OFFSETS_MILLISECONDS[index],
-        })),
-    });
+function reject(code: ChatErrorCode): ChatResult {
+    return { code, message: MESSAGES[code], ok: false };
 }
 
-async function sendChatMessage(body: string): Promise<ChatMessage | null> {
-    const text = body.trim();
+async function sendChatMessage(body: string): Promise<ChatResult> {
+    const session = getSession();
 
-    if (!text) return null;
+    if (!session) return reject('signed-out');
+    if (body.length > CHAT_MESSAGE_MAX_LENGTH) return reject('too-long');
 
-    const sent: ChatMessage = { body: text, name: getSession()?.artistName || SELF_NAME, self: true, sentAt: Date.now() };
+    const id = unsent?.body === body && unsent.userId === session.id ? unsent.id : crypto.randomUUID();
 
-    store.update(state => ({ ...state, messages: [...state.messages, sent] }));
+    list.upsert({ body, id, name: session.artistName, self: true, sentAt: Date.now(), userId: session.id });
 
-    const turn = getMessages().filter(message => message.self).length - 1;
+    const { data, error } = await supabase.from('chat_messages').insert({ body, id }).select(CHAT_COLUMNS).single();
 
-    await delay(MOCK_LATENCY_MILLISECONDS);
+    const isDuplicate = error?.code === UNIQUE_VIOLATION;
+    const isUnknown = error !== null && !error.code;
 
-    const reply: ChatMessage = {
-        body: CHAT_REPLIES[turn % CHAT_REPLIES.length],
-        name: ROOM_MEMBERS[turn % ROOM_MEMBERS.length].name,
-        self: false,
-        sentAt: Date.now(),
-    };
+    const stored = isDuplicate || isUnknown
+        ? await supabase.from('chat_messages').select(CHAT_COLUMNS).eq('id', id).retry(false).maybeSingle()
+        : null;
 
-    store.update(state => ({ ...state, messages: [...state.messages, reply] }));
+    const sent = toChatMessage(stored?.data ?? data);
 
-    return reply;
+    if (!sent) {
+        list.discard(id);
+
+        if (isUnknown) unsent = { body, id, userId: session.id };
+
+        if (error?.message === RATE_LIMIT_CODE) return reject('rate-limited');
+
+        return reject(error?.code === CHECK_VIOLATION ? 'too-long' : 'send-failed');
+    }
+
+    unsent = undefined;
+    list.upsert(sent);
+
+    return { ok: true };
+}
+
+function toChatMessage(row: unknown): ChatMessage | null {
+    if (!isRecord(row)) return null;
+
+    const { author_name: name, body, created_at: createdAt, id, user_id: userId } = row;
+
+    const sentAt = typeof createdAt === 'string' ? Date.parse(createdAt) : Number.NaN;
+
+    if (typeof body !== 'string' || typeof id !== 'string' || typeof name !== 'string' || typeof userId !== 'string') return null;
+    if (!Number.isFinite(sentAt)) return null;
+
+    return { body, id, name, self: userId === joinedUserId, sentAt, userId };
+}
+
+function toChatMessages(rows: Record<string, unknown>[]) {
+    return rows
+        .map(toChatMessage)
+        .filter(message => message !== null);
+}
+
+function toCursor(rows: Record<string, unknown>[]) {
+    const oldest = rows.at(-1)?.created_at;
+
+    return typeof oldest === 'string' ? oldest : '';
 }
 
 export {
-    ROOM_MEMBERS,
     closeChat,
+    connectChat,
     getChatState,
     getMessages,
-    getOnlineCount,
+    hasEarlierMessages,
+    loadEarlierMessages,
     onChatChange,
     openChat,
-    seedRoom,
     sendChatMessage,
 };

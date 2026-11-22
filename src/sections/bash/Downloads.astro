@@ -15,12 +15,12 @@ const assets = (await getCollection('downloads', asset => asset.data.kind === 'b
 
         return {
             ...asset,
-            href: isOpen && asset.data.href ? asset.data.href : '/resources',
-            isDownload: isOpen && isDownload(asset.data),
+            href: asset.data.href && isOpen ? asset.data.href : '/resources',
+            isDownload: isDownload(asset.data) && isOpen,
         };
     });
 
-function getKitRank(id: string): number {
+function getKitRank(id: string) {
     const rank = KIT_ORDER.indexOf(id);
 
     return rank === -1 ? KIT_ORDER.length : rank;
@@ -54,6 +54,7 @@ function getKitRank(id: string): number {
                         <a
                             class="hit active:translate-y-px focus-visible:text-link hover:text-link inline-flex size-12 -me-1 transition-[color,translate]"
                             aria-label={`Download ${asset.data.title}`}
+                            data-astro-prefetch={asset.isDownload ? 'false' : undefined}
                             download={asset.isDownload ? '' : undefined}
                             href={asset.href}
                         >

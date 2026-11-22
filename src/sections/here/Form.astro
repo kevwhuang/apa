@@ -10,9 +10,9 @@ import { loadEvents } from '@lib/programs/calendar';
 const DOOR_HOST_PARTS = ['austinproducer', 'alliance.com'];
 const DOOR_PATH = 'here';
 
-const events = await loadEvents();
-
 const doorUrl = `${DOOR_HOST_PARTS.join('')}/${DOOR_PATH}`;
+
+const events = await loadEvents();
 
 const upcoming = events.filter(event => isUpcoming(event.ends_at));
 ---
@@ -23,7 +23,7 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
 >
     <div class="flex flex-col gap-6">
         <PageHead
-            class="max-w-3xl text-5xl-7xl text-balance"
+            class="max-w-3xl text-4xl-7xl text-balance"
             headingId="checkin-title"
         >
             You made it
@@ -58,8 +58,8 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
                             class="door-pass__rows flex flex-col pt-(--space-md) bg-repeat-x bg-top-left"
                             data-event-end={toAustinIso(event.ends_at)}
                             data-event-group="door"
+                            data-event-id={event.id}
                             data-event-role="next"
-                            data-event-title={event.title}
                             hidden={index > 0}
                         >
                             <div class="last:border-b-0 grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-3 py-1 border-b border-border-inverse-subtle">
@@ -97,7 +97,7 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
         >
             <QrCode
                 caption="Scan to check in"
-                data={doorUrl}
+                data={new URL(DOOR_PATH, Astro.site).href}
                 label={`QR code for ${doorUrl}`}
             />
         </div>
@@ -177,6 +177,8 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
         </div>
         <button
             class="btn btn--primary w-full"
+            autocomplete="off"
+            disabled
             type="submit"
         >
             Check in <IconArrow />
@@ -190,13 +192,16 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
         <div class="checkin__receipt slab slab--card slab--plush flex flex-col gap-(--space-lg)">
             <hgroup class="flex flex-col gap-3">
                 <h2
-                    class="font-display text-3xl"
+                    class="font-display text-2xl-3xl"
                     data-checkin-heading
                     tabindex="-1"
                 >
                     You are checked in
                 </h2>
-                <p class="text-lg text-text-secondary">
+                <p
+                    class="text-lg text-text-secondary"
+                    data-checkin-account
+                >
                     An account is open for&#32;
                     <span
                         class="font-mono text-base wrap-anywhere"
@@ -211,12 +216,15 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
                     <span data-checkin-newsletter />
                 </p>
             </hgroup>
-            <p class="p-3 bg-signal text-text-on-signal">
+            <p
+                class="p-3 bg-signal text-text-on-signal"
+                data-checkin-mailed
+            >
                 Your welcome email is below.
             </p>
             <div class="flex flex-wrap gap-3 pt-(--space-md) border-border-strong border-t-2">
                 <button
-                    class="btn"
+                    class="btn text-balance"
                     data-checkin-again
                     type="button"
                 >
@@ -227,6 +235,7 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
         <article
             class="mail slab slab--card slab--plush flex flex-col gap-(--space-lg)"
             aria-label="Welcome email"
+            data-checkin-mail
         >
             <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b-2 border-border-strong">
                 <p class="label text-link">Welcome email</p>
@@ -278,7 +287,7 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
                 >
                     Finish profile
                 </a>
-                <p class="label text-text-secondary">Link lasts 24 hours</p>
+                <p class="label text-text-secondary">Link lasts 1 hour</p>
             </div>
         </article>
         <template data-mail-template>
@@ -303,17 +312,43 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
 </style>
 
 <script>
-    import { clearFieldErrors, readEmail, reportFieldErrors, validateFields, watchFieldErrors } from '@lib/ui/forms';
+    import { CODE_EXPIRED_MESSAGE, checkIn, getDoorCode, getDoorEvent, syncEvents } from '@lib/account/checkin';
+    import { EMAIL_REQUIRED_MESSAGE, MILLISECONDS_PER_SECOND } from '@lib/shared/constants';
+    import { buildQrPath } from '@lib/ui/qr';
+    import { clearFieldErrors, reportFieldErrors, validateFields, watchFieldErrors } from '@lib/ui/forms';
     import { composeOnboardingEmail } from '@lib/shared/email';
-    import { createOnboardingToken } from '@lib/account/onboarding';
-    import { formatProds, registerPageScript, setPending, setText } from '@lib/shared/utils';
-    import { startSession } from '@lib/account/session';
+    import { formatProds, registerPageScript, setHidden, setPending, setText } from '@lib/shared/utils';
+    import { getSession, onSessionChange, sendSignInLink } from '@lib/account/session';
     import { toast } from '@lib/ui/toasts';
 
+    const CODE_PARAMETER = 'c';
+    const DOOR_ROUTE = '/here';
+    const FAILED_RETRY_SECONDS = 5;
+    const LINK_FAILED_MESSAGE = 'You are checked in, but your sign-in link was not sent. Create an account with this address later and this check-in will be on it.';
+    const RETRY_SECONDS = 60;
+
     const RULES: Record<string, FieldRule> = {
-        email: { message: 'Enter your email address.', required: true },
+        email: { message: EMAIL_REQUIRED_MESSAGE, required: true },
         terms: { message: 'Accept the terms to check in.', required: true },
     };
+
+    let displayEventId = '';
+    let doorCode = '';
+    let doorTimer: Timer | undefined;
+    let isDisplaying = false;
+    let isSubmitting = false;
+    let staticQr = { path: '', viewBox: '' };
+    let stopSessionWatch: (() => void) | undefined;
+
+    function closeDisplay() {
+        clearTimeout(doorTimer);
+        stopSessionWatch?.();
+    }
+
+    function drawQr(path: string, viewBox: string) {
+        document.querySelector('[data-qr-path]')?.setAttribute('d', path);
+        document.querySelector('[data-qr]')?.setAttribute('viewBox', viewBox);
+    }
 
     function handleCheckInAgain(form: HTMLFormElement, done: HTMLElement) {
         done.setAttribute('hidden', '');
@@ -321,8 +356,10 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
         form.querySelector<HTMLInputElement>('[name="email"]')?.focus();
     }
 
-    async function handleCheckInSubmit(event: SubmitEvent, form: HTMLFormElement) {
+    async function handleCheckInSubmit(event: SubmitEvent, form: HTMLFormElement, signal: AbortSignal) {
         event.preventDefault();
+
+        if (isSubmitting) return;
 
         const errors = validateFields(form, RULES);
         const values = new FormData(form);
@@ -336,21 +373,39 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
         }
 
         const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        const email = String(values.get('email') ?? '').trim().toLowerCase();
+        const wantsNewsletter = values.get('newsletter') !== null;
 
+        isSubmitting = true;
         setPending(button, true);
 
-        const result = await startSession({ email: readEmail(values) });
+        const result = await checkIn(doorCode, email, wantsNewsletter);
 
+        const link = result.ok && !result.confirmed && result.prods === null ? await sendSignInLink(email) : null;
+
+        if (signal.aborted) return;
+
+        isSubmitting = false;
         setPending(button, false);
 
         if (!result.ok) {
-            if (result.code === 'storage-full') toast(result.message, 'error');
-            else reportFieldErrors(form, { email: result.message });
+            if (result.code === 'invalid-email') reportFieldErrors(form, { email: result.message });
+            else toast(result.message, 'error');
 
             return;
         }
 
-        renderCheckIn(form, result.session, values.get('newsletter') !== null);
+        const isMailed = link?.ok === true;
+
+        renderCheckIn(form, email, result.prods, wantsNewsletter, isMailed);
+
+        if (result.repeated) toast(`Already checked in as ${email}.`, 'info');
+        else if (isMailed || result.prods !== null) toast(`Checked in as ${email}.`, 'success');
+        else toast(result.confirmed ? `Checked in as ${email}. Sign in to add it to your account.` : LINK_FAILED_MESSAGE, 'info');
+    }
+
+    function handleVisibilityChange(signal: AbortSignal) {
+        if (document.visibilityState === 'visible' && isDisplaying) void refreshDisplay(signal);
     }
 
     function initCheckInForm(signal: AbortSignal) {
@@ -360,10 +415,68 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
 
         if (!done || !form) return;
 
+        const email = form.querySelector<HTMLInputElement>('[name="email"]');
+
+        displayEventId = '';
+        doorCode = new URLSearchParams(window.location.search).get(CODE_PARAMETER) ?? '';
+        isDisplaying = false;
+        isSubmitting = false;
+
+        staticQr = {
+            path: document.querySelector('[data-qr-path]')?.getAttribute('d') ?? '',
+            viewBox: document.querySelector('[data-qr]')?.getAttribute('viewBox') ?? '',
+        };
+
         form.noValidate = true;
+
+        if (email && !email.value) email.value = getSession()?.email ?? '';
+
         again?.addEventListener('click', () => handleCheckInAgain(form, done), { signal });
-        form.addEventListener('submit', event => handleCheckInSubmit(event, form), { signal });
+        document.addEventListener('visibilitychange', () => handleVisibilityChange(signal), { signal });
+        form.addEventListener('submit', event => void handleCheckInSubmit(event, form, signal), { signal });
+        setPending(form.querySelector<HTMLButtonElement>('button[type="submit"]'), false);
         watchFieldErrors(form, signal);
+        void loadDoorEvent(signal);
+        syncDisplay(signal);
+        stopSessionWatch?.();
+        stopSessionWatch = onSessionChange(() => syncDisplay(signal));
+        signal.addEventListener('abort', closeDisplay, { once: true });
+    }
+
+    async function loadDoorEvent(signal: AbortSignal) {
+        if (!doorCode) return;
+
+        const eventId = await getDoorEvent(doorCode);
+
+        if (signal.aborted) return;
+
+        if (eventId) showEvent(eventId);
+        else toast(CODE_EXPIRED_MESSAGE, 'error');
+    }
+
+    async function refreshDisplay(signal: AbortSignal) {
+        clearTimeout(doorTimer);
+
+        const door = await getDoorCode();
+
+        if (signal.aborted || !isDisplaying) return;
+
+        if (door) {
+            const shape = buildQrPath(`${window.location.origin}${DOOR_ROUTE}?${CODE_PARAMETER}=${door.code}`);
+
+            drawQr(shape.path, `0 0 ${shape.size} ${shape.size}`);
+
+            if (door.eventId !== displayEventId) showEvent(door.eventId);
+
+            displayEventId = door.eventId;
+        } else if (door === null) {
+            drawQr(staticQr.path, staticQr.viewBox);
+        }
+
+        const seconds = door === undefined ? FAILED_RETRY_SECONDS : door?.secondsLeft ?? RETRY_SECONDS;
+
+        clearTimeout(doorTimer);
+        doorTimer = setTimeout(() => void refreshDisplay(signal), seconds * MILLISECONDS_PER_SECOND);
     }
 
     function renderBody(container: HTMLElement, template: HTMLTemplateElement, paragraphs: string[]) {
@@ -380,46 +493,73 @@ const upcoming = events.filter(event => isUpcoming(event.ends_at));
         });
     }
 
-    function renderCheckIn(form: HTMLFormElement, session: Session, isSubscribed: boolean) {
-        const body = document.querySelector<HTMLElement>('[data-mail-body]');
+    function renderCheckIn(form: HTMLFormElement, email: string, prods: null | number, isSubscribed: boolean, isMailed: boolean) {
         const done = document.querySelector<HTMLElement>('[data-checkin-done]');
-        const template = document.querySelector<HTMLTemplateElement>('[data-mail-template]');
 
-        if (!body || !done || !template) return;
+        if (!done) return;
 
-        const action = document.querySelector<HTMLAnchorElement>('[data-mail-action]');
+        if (isMailed) renderMail(done, email);
 
-        const message = composeOnboardingEmail({
-            email: session.email,
-            eventName: document.querySelector<HTMLElement>('[data-event-title]:not([hidden])')?.dataset.eventTitle,
-            prods: session.prods,
-            token: createOnboardingToken(session.email),
-        });
-
-        form.setAttribute('hidden', '');
-        done.removeAttribute('hidden');
-        setText(document.querySelector<HTMLElement>('[data-checkin-email]'), session.email);
+        setHidden(done.querySelector<HTMLElement>('[data-checkin-account]'), prods === null);
+        setHidden(done.querySelector<HTMLElement>('[data-checkin-mail]'), !isMailed);
+        setHidden(done.querySelector<HTMLElement>('[data-checkin-mailed]'), !isMailed);
+        setText(done.querySelector('[data-checkin-email]'), email);
 
         setText(
-            document.querySelector<HTMLElement>('[data-checkin-newsletter]'),
+            done.querySelector('[data-checkin-newsletter]'),
             isSubscribed ? 'You are on the seasonal newsletter too.' : 'You are not on the newsletter.',
         );
 
-        setText(document.querySelector<HTMLElement>('[data-checkin-prods]'), formatProds(session.prods));
-        setText(document.querySelector<HTMLElement>('[data-mail-from]'), message.from);
-        setText(document.querySelector<HTMLElement>('[data-mail-preheader]'), message.preheader);
-        setText(document.querySelector<HTMLElement>('[data-mail-reply]'), message.replyTo);
-        setText(document.querySelector<HTMLElement>('[data-mail-subject]'), message.subject);
-        setText(document.querySelector<HTMLElement>('[data-mail-to]'), message.to);
-        renderBody(body, template, message.body);
+        setText(done.querySelector('[data-checkin-prods]'), prods === null ? '' : formatProds(prods));
+        done.removeAttribute('hidden');
+        form.setAttribute('hidden', '');
+        done.querySelector<HTMLElement>('[data-checkin-heading]')?.focus();
+    }
+
+    function renderMail(done: HTMLElement, email: string) {
+        const action = done.querySelector<HTMLAnchorElement>('[data-mail-action]');
+        const body = done.querySelector<HTMLElement>('[data-mail-body]');
+        const message = composeOnboardingEmail({ email });
+        const template = done.querySelector<HTMLTemplateElement>('[data-mail-template]');
+
+        setText(done.querySelector('[data-mail-from]'), message.from);
+        setText(done.querySelector('[data-mail-preheader]'), message.preheader);
+        setText(done.querySelector('[data-mail-reply]'), message.replyTo);
+        setText(done.querySelector('[data-mail-subject]'), message.subject);
+        setText(done.querySelector('[data-mail-to]'), message.to);
+
+        if (body && template) renderBody(body, template, message.body);
 
         if (action) {
             action.href = message.actionHref;
             action.textContent = message.actionLabel;
         }
+    }
 
-        document.querySelector<HTMLElement>('[data-checkin-heading]')?.focus();
-        toast(`Checked in as ${session.email}.`, 'success');
+    function showEvent(id: string) {
+        const rows = Array.from(document.querySelectorAll<HTMLElement>('[data-event-group="door"]'));
+
+        if (!rows.some(row => row.dataset.eventId === id)) return;
+
+        rows.forEach(row => setHidden(row, row.dataset.eventId !== id));
+    }
+
+    function syncDisplay(signal: AbortSignal) {
+        const isAdmin = getSession()?.admin === true;
+
+        if (isAdmin === isDisplaying) return;
+
+        isDisplaying = isAdmin;
+
+        if (isAdmin) {
+            void syncEvents();
+            void refreshDisplay(signal);
+
+            return;
+        }
+
+        clearTimeout(doorTimer);
+        drawQr(staticQr.path, staticQr.viewBox);
     }
 
     registerPageScript(initCheckInForm);

@@ -10,15 +10,6 @@ const DESCRIPTION_SUFFIX = ' Order it from the Austin Producer Alliance store.';
 
 const { product, slug } = Astro.props;
 
-export async function getStaticPaths() {
-    const products = await getCollection('products');
-
-    return products.map(product => ({
-        params: { sku: product.data.sku },
-        props: { product: product.data, slug: product.id },
-    }));
-}
-
 function toDescription(text: string) {
     const limit = DESCRIPTION_MAX - DESCRIPTION_SUFFIX.length;
 
@@ -35,6 +26,15 @@ function toDescription(text: string) {
     }
 
     return `${kept.length > 0 ? kept : text.slice(0, limit).trimEnd()}${DESCRIPTION_SUFFIX}`;
+}
+
+export async function getStaticPaths() {
+    const products = await getCollection('products');
+
+    return products.map(product => ({
+        params: { sku: product.data.sku },
+        props: { product: product.data, slug: product.id },
+    }));
 }
 ---
 

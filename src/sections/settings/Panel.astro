@@ -3,42 +3,32 @@ import IconArrow from '@components/icons/Arrow.astro';
 import IconEye from '@components/icons/Eye.astro';
 import IconEyeOff from '@components/icons/EyeOff.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
-import { AVATAR, GENRES, LINK_MAX_LENGTH, PASSWORD_MIN_LENGTH, PROFILE_FIELDS, PROFILE_ROLES, UPLOAD, US_STATES } from '@lib/shared/constants';
-import { AVATAR_EXTENSIONS_OR_LIST } from '@lib/account/images';
-import { UPLOAD_EXTENSIONS_OR_LIST } from '@lib/audio/uploads';
-import { formatBytes, formatDateStamp, formatProds, formatRole, getInitials, pickTileColor } from '@lib/shared/utils';
-import { getProdsAttendance, getProdsBalance } from '@lib/account/prods';
-
-const DEMO_PROFILE = {
-    artistName: 'Nightshift',
-    bio: 'I write patient, low-slung house in a converted garage on the east side and mix it loud enough to rattle the door.',
-    city: 'Austin',
-    email: 'nightshift@austinproduceralliance.com',
-    genres: ['house', 'techno'],
-    joined: new Date('2024-03-12T13:00:00-05:00'),
-    links: {
-        instagram: 'https://instagram.com/nightshift.wav',
-        soundcloud: 'https://soundcloud.com/nightshift',
-        spotify: 'https://open.spotify.com/artist/4kZ1nightshift',
-        youtube: 'https://youtube.com/@nightshift',
-    },
-    role: 'producer',
-    state: 'TX',
-    track: { name: 'Untitled Sketch 09.mp3' },
-};
-
-const DEMO_TILE = pickTileColor(DEMO_PROFILE.artistName);
+import {
+    AVATAR,
+    DEFAULT_ROLE,
+    DEFAULT_STATE,
+    GENRES,
+    LINK_MAX_LENGTH,
+    PASSWORD_MIN_LENGTH,
+    PROFILE_FIELDS,
+    PROFILE_ROLES,
+    UPLOAD,
+    US_STATES,
+} from '@lib/shared/constants';
+import { avatarExtensionsOrList } from '@lib/account/images';
+import { formatBytes, formatProds, formatRole } from '@lib/shared/utils';
+import { uploadExtensionsOrList } from '@lib/audio/uploads';
 
 const LINK_FIELDS = [
-    { label: 'Instagram', name: 'instagram', placeholder: 'https://instagram.com/\u2026', value: DEMO_PROFILE.links.instagram },
-    { label: 'Spotify', name: 'spotify', placeholder: 'https://open.spotify.com/artist/\u2026', value: DEMO_PROFILE.links.spotify },
-    { label: 'SoundCloud', name: 'soundcloud', placeholder: 'https://soundcloud.com/\u2026', value: DEMO_PROFILE.links.soundcloud },
-    { label: 'YouTube', name: 'youtube', placeholder: 'https://youtube.com/@\u2026', value: DEMO_PROFILE.links.youtube },
+    { label: 'Instagram', name: 'instagram', placeholder: 'https://instagram.com/\u2026' },
+    { label: 'Spotify', name: 'spotify', placeholder: 'https://open.spotify.com/artist/\u2026' },
+    { label: 'SoundCloud', name: 'soundcloud', placeholder: 'https://soundcloud.com/\u2026' },
+    { label: 'YouTube', name: 'youtube', placeholder: 'https://youtube.com/@\u2026' },
 ];
 ---
 
 <section
-    class="stage stage--tight"
+    class="settings-stage stage stage--tight"
     aria-labelledby="settings-title"
 >
     <h1
@@ -59,10 +49,10 @@ const LINK_FIELDS = [
                 >
                     <PlaceholderTile
                         class="settings__tile aspect-square"
-                        color={DEMO_TILE.background}
-                        label={getInitials(DEMO_PROFILE.artistName)}
+                        color="var(--color-ink)"
+                        label="??"
                         labelClass="settings__initials leading-none text-6xl"
-                        labelColor={DEMO_TILE.text}
+                        labelColor="var(--color-text-inverse-secondary)"
                     >
                         <img
                             class="absolute inset-0 object-cover h-full w-full"
@@ -74,24 +64,25 @@ const LINK_FIELDS = [
                             class="label absolute left-0 top-0 p-3 border-b-2 border-border-strong border-r-2 bg-bg-page text-text"
                             data-settings-role
                         >
-                            {formatRole(DEMO_PROFILE.role)}
+                            {formatRole(DEFAULT_ROLE)}
                         </p>
                     </PlaceholderTile>
                     <div class="p-(--space-md)">
                         <p
                             class="mb-3 font-bold text-2xl tracking-tight wrap-break-word"
                             data-settings-name
-                        >
-                            {DEMO_PROFILE.artistName}
-                        </p>
-                        <p class="mb-6 font-mono text-base wrap-anywhere text-text-secondary">
-                            {DEMO_PROFILE.city}, {DEMO_PROFILE.state}
-                        </p>
-                        <ul class="flex flex-wrap gap-2">
-                            {DEMO_PROFILE.genres.map(genre => (
-                                <li class="label inline-flex items-center h-6 px-2 border-2 border-border-strong">{genre}</li>
-                            ))}
-                        </ul>
+                        />
+                        <p
+                            class="mb-6 font-mono text-base wrap-anywhere text-text-secondary"
+                            data-settings-location
+                        />
+                        <ul
+                            class="flex flex-wrap gap-2"
+                            data-settings-genres
+                        />
+                        <template data-settings-chip>
+                            <li class="label inline-flex items-center h-6 px-2 border-2 border-border-strong" />
+                        </template>
                     </div>
                 </section>
                 <dl
@@ -104,7 +95,7 @@ const LINK_FIELDS = [
                             class="font-bold text-xl"
                             data-settings-prods
                         >
-                            {formatProds(getProdsBalance(DEMO_PROFILE.email))}
+                            {formatProds(0)}
                         </dd>
                     </div>
                     <div class="flex flex-col justify-center p-(--space-md) bg-bg-raised">
@@ -113,16 +104,13 @@ const LINK_FIELDS = [
                             class="font-bold text-xl"
                             data-settings-attended
                         >
-                            {getProdsAttendance(DEMO_PROFILE.email).length}
+                            0
                         </dd>
                     </div>
                     <div class="col-span-full flex flex-col justify-center p-(--space-md) bg-bg-raised">
                         <dt class="label mb-2 text-text-secondary">Member since</dt>
-                        <dd
-                            class="font-bold text-xl"
-                            data-settings-since
-                        >
-                            {formatDateStamp(DEMO_PROFILE.joined)}
+                        <dd class="font-bold text-xl">
+                            <time data-settings-since />
                         </dd>
                     </div>
                     <div class="col-span-full flex flex-col justify-center p-(--space-md) bg-bg-raised">
@@ -130,9 +118,7 @@ const LINK_FIELDS = [
                         <dd
                             class="font-bold text-xl wrap-anywhere"
                             data-settings-email
-                        >
-                            {DEMO_PROFILE.email}
-                        </dd>
+                        />
                     </div>
                 </dl>
             </div>
@@ -192,7 +178,7 @@ const LINK_FIELDS = [
                     id="settings-portrait-help"
                     class="text-base text-text-secondary"
                 >
-                    {AVATAR_EXTENSIONS_OR_LIST}. Up to {formatBytes(AVATAR.maxFileBytes)}, at least {AVATAR.minEdgePixels}px on each side.
+                    {avatarExtensionsOrList}. Up to {formatBytes(AVATAR.maxFileBytes)}, at least {AVATAR.minEdgePixels}px on each side.
                 </p>
             </div>
             <div class="flex flex-col gap-2">
@@ -206,7 +192,6 @@ const LINK_FIELDS = [
                         maxlength={PROFILE_FIELDS.artistName.maxLength}
                         name="artistName"
                         type="text"
-                        value={DEMO_PROFILE.artistName}
                     />
                 </label>
             </div>
@@ -221,7 +206,6 @@ const LINK_FIELDS = [
                         maxlength={PROFILE_FIELDS.bio.maxLength}
                         name="bio"
                         rows="4"
-                        set:text={DEMO_PROFILE.bio}
                     />
                 </label>
                 <p
@@ -229,7 +213,7 @@ const LINK_FIELDS = [
                     class="font-mono tabular-nums text-sm text-text-secondary"
                     aria-live="polite"
                 >
-                    <span data-bio-count>{DEMO_PROFILE.bio.length}</span> / {PROFILE_FIELDS.bio.maxLength}<span class="sr-only">&#32;characters</span>
+                    <span data-bio-count>0</span> / {PROFILE_FIELDS.bio.maxLength}<span class="sr-only">&#32;characters</span>
                 </p>
             </div>
             <fieldset class="flex flex-col gap-2">
@@ -241,7 +225,6 @@ const LINK_FIELDS = [
                         <label class="chip gap-2">
                             <input
                                 class="box"
-                                checked={DEMO_PROFILE.genres.includes(genre)}
                                 name="genres"
                                 type="checkbox"
                                 value={genre}
@@ -260,7 +243,7 @@ const LINK_FIELDS = [
                         <label class="chip gap-2">
                             <input
                                 class="box"
-                                checked={role.id === DEMO_PROFILE.role}
+                                checked={role.id === DEFAULT_ROLE}
                                 name="role"
                                 type="radio"
                                 value={role.id}
@@ -279,10 +262,10 @@ const LINK_FIELDS = [
                             class="input"
                             aria-invalid="false"
                             autocomplete={PROFILE_FIELDS.city.autocomplete}
+                            maxlength={PROFILE_FIELDS.city.maxLength}
                             name="city"
                             required={PROFILE_FIELDS.city.required}
                             type="text"
-                            value={DEMO_PROFILE.city}
                         />
                     </label>
                 </div>
@@ -300,7 +283,7 @@ const LINK_FIELDS = [
                             >
                                 {US_STATES.map(state => (
                                     <option
-                                        selected={state.code === DEMO_PROFILE.state}
+                                        selected={state.code === DEFAULT_STATE}
                                         value={state.code}
                                     >
                                         {state.name}
@@ -345,7 +328,6 @@ const LINK_FIELDS = [
                             placeholder={field.placeholder}
                             spellcheck="false"
                             type="url"
-                            value={field.value}
                         />
                     </label>
                 </div>
@@ -388,13 +370,12 @@ const LINK_FIELDS = [
                     <div
                         class="settings__staged slab slab--sunk basis-65 flex flex-wrap grow items-center justify-between gap-x-4 gap-y-1"
                         data-track-staged
+                        hidden
                     >
                         <p
                             class="min-w-0 font-bold wrap-anywhere"
                             data-track-name
-                        >
-                            {DEMO_PROFILE.track.name}
-                        </p>
+                        />
                         <button
                             class="action-text flex items-center min-h-(--control-size) px-1 text-text-secondary"
                             aria-label="Remove track"
@@ -409,7 +390,7 @@ const LINK_FIELDS = [
                     id="settings-track-help"
                     class="text-base text-text-secondary"
                 >
-                    A {UPLOAD_EXTENSIONS_OR_LIST} file up to {formatBytes(UPLOAD.maxFileBytes)}.
+                    A {uploadExtensionsOrList} file up to {formatBytes(UPLOAD.maxFileBytes)}.
                 </p>
             </div>
             <button
@@ -426,16 +407,18 @@ const LINK_FIELDS = [
             <h2 class="text-2xl">
                 Password
             </h2>
-            <div class="flex flex-col gap-2">
+            <div
+                class="flex flex-col gap-2"
+                data-password-current
+            >
                 <label class="flex flex-col gap-2">
                     <span class="label text-text-secondary">Current password</span>
                     <span class="block relative">
                         <input
                             id="settings-current"
-                            class="input pr-12"
+                            class="input input--trailing"
                             aria-invalid="false"
                             autocomplete="current-password"
-                            minlength={PASSWORD_MIN_LENGTH}
                             name="current"
                             required
                             type="password"
@@ -463,7 +446,7 @@ const LINK_FIELDS = [
                     <span class="block relative">
                         <input
                             id="settings-password"
-                            class="input pr-12"
+                            class="input input--trailing"
                             aria-describedby="settings-password-help"
                             aria-invalid="false"
                             autocomplete="new-password"
@@ -501,7 +484,7 @@ const LINK_FIELDS = [
                     <span class="block relative">
                         <input
                             id="settings-confirm"
-                            class="input pr-12"
+                            class="input input--trailing"
                             aria-invalid="false"
                             autocomplete="new-password"
                             name="confirm"
@@ -686,6 +669,14 @@ const LINK_FIELDS = [
 </section>
 
 <style>
+    .settings-stage {
+        display: var(--session-in-only, grid);
+    }
+
+    .settings-stage:not(.is-ready) {
+        opacity: 0;
+    }
+
     .settings__attendance,
     .settings__ledger {
         --scroll-slot-max: calc(2 * 2px + 2 * 12px + var(--text-sm) + 5 * (2 * 16px + var(--text-base--line-height) + 1px));
@@ -716,51 +707,131 @@ const LINK_FIELDS = [
 </style>
 
 <script>
-    import { LINK_MAX_LENGTH, MOCK_LATENCY_MILLISECONDS, PROFILE_FIELDS, UPLOAD } from '@lib/shared/constants';
-    import { clearFieldErrors, getConfirmRule, getPasswordRule, handleReveal, isValidationBypassed, reportFieldErrors, setRole, validateFields, watchFieldErrors } from '@lib/ui/forms';
-    import { delay, formatDateStamp, formatProds, formatRole, getInitials, pickTileColor, registerPageScript, setAvatarImage, setPending, setText } from '@lib/shared/utils';
-    import { getProdsAttendance, getProdsBalance, getProdsRows, onProdsChange } from '@lib/account/prods';
+    import { LINK_MAX_LENGTH, PORTRAIT_REMOVED_MESSAGE, PORTRAIT_STAGED_MESSAGE, PROFILE_FIELDS, UPLOAD } from '@lib/shared/constants';
+    import { clearAuthLink, getAuthLink, getSession, onSessionChange, saveSession, saveTrack, updatePassword, whenSessionReady } from '@lib/account/session';
+    import {
+        clearFieldErrors,
+        getConfirmRule,
+        getPasswordRule,
+        handleReveal,
+        reportFieldErrors,
+        serialize,
+        setRole,
+        validateFields,
+        watchFieldErrors,
+    } from '@lib/ui/forms';
+    import {
+        formatDateStamp,
+        formatProds,
+        formatRole,
+        getInitials,
+        pickTileColor,
+        registerPageScript,
+        setAvatarImage,
+        setHidden,
+        setPending,
+        setText,
+        toAustinIso,
+    } from '@lib/shared/utils';
+    import { getExtensionError, getSizeError, releaseAudioContext, uploadSubmission } from '@lib/audio/uploads';
+    import { guardRoute } from '@lib/account/guard';
+    import { loadAttendance, loadLedger } from '@lib/account/prods';
     import { observeRowWindow } from '@lib/account/ledger';
-    import { UPLOAD_EXTENSIONS_OR_LIST, getExtension, getSizeError, releaseAudioContext, uploadSubmission } from '@lib/audio/uploads';
-    import { getOnboardingHref } from '@lib/account/onboarding';
-    import { getSession, onSessionChange, saveSession } from '@lib/account/session';
     import { stageAvatar } from '@lib/account/images';
     import { toast } from '@lib/ui/toasts';
 
     const CURRENT_PASSWORD_MESSAGE = 'Enter your current password.';
+
+    const ERROR_FIELDS: Partial<Record<SessionErrorCode, string>> = {
+        'invalid-credentials': 'current',
+        'same-password': 'password',
+        'upload-failed': 'portrait',
+        'weak-password': 'password',
+    };
+
+    const HISTORY_MESSAGE = 'Your history could not be loaded. Check your connection and try again.';
     const LINK_LABELS: Record<string, string> = { instagram: 'Instagram', soundcloud: 'SoundCloud', spotify: 'Spotify', youtube: 'YouTube' };
     const LINK_PATTERN = /^https?:\/\/\S+\.\S+$/i;
 
     const PROFILE_RULES: Record<string, FieldRule> = {
         artistName: { max: PROFILE_FIELDS.artistName.maxLength, message: PROFILE_FIELDS.artistName.message },
-        city: { message: PROFILE_FIELDS.city.message, required: PROFILE_FIELDS.city.required },
+        city: { max: PROFILE_FIELDS.city.maxLength, message: PROFILE_FIELDS.city.message, required: PROFILE_FIELDS.city.required },
     };
 
-    const SIGNED_OUT_MESSAGE = 'Sign in to save changes.';
-    const STORAGE_MESSAGE = 'Nothing was saved because your browser storage is full. Clear some space and try again.';
+    const RECOVERY_MESSAGE = 'Choose a new password.';
     const TRACK_MISSING_MESSAGE = 'Stage an audio file before you save.';
 
     const LINK_RULES: Record<string, FieldRule> = Object.fromEntries(
-        Object.entries(LINK_LABELS).map(([name, label]) => [name, { max: LINK_MAX_LENGTH, message: `Enter a full https:// address for ${label}.`, pattern: LINK_PATTERN }]),
+        Object.entries(LINK_LABELS).map(([name, label]) => [
+            name,
+            { max: LINK_MAX_LENGTH, message: `Enter a full https:// address for ${label}.`, pattern: LINK_PATTERN },
+        ]),
     );
 
     const PASSWORD_RULES: Record<string, FieldRule> = {
         confirm: getConfirmRule(),
-        current: { ...getPasswordRule(), message: CURRENT_PASSWORD_MESSAGE },
+        current: { message: CURRENT_PASSWORD_MESSAGE, required: true },
         password: getPasswordRule(),
     };
 
-    let demoSummary = { email: '', name: '', role: '', since: '' };
+    const PASSWORDLESS_RULES: Record<string, FieldRule> = {
+        confirm: PASSWORD_RULES.confirm,
+        password: PASSWORD_RULES.password,
+    };
+
+    const savingForms = new Set<HTMLFormElement>();
+
+    let appliedAvatar = '';
+    let historyLoads = 0;
     let isReading = false;
     let isStaging = false;
+    let linksSnapshot = '';
+    let profileSnapshot = '';
+    let renderedProds: number | undefined;
     let stagedAvatar = '';
-    let unsubscribe: (() => void) | undefined;
-    let unsubscribeProds: (() => void) | undefined;
+    let stagedTrack: File | null = null;
+
+    function applyForms(session: Session) {
+        const links = document.querySelector<HTMLFormElement>('[data-links-form]');
+        const profile = document.querySelector<HTMLFormElement>('[data-settings-form]');
+
+        if (links && serialize(links) === linksSnapshot) fillLinks(links, session);
+        if (profile && serialize(profile, stagedAvatar) === profileSnapshot) fillProfile(profile, session);
+    }
+
+    function fillLinks(form: HTMLFormElement, session: Session) {
+        setValue(form, 'instagram', session.links.instagram);
+        setValue(form, 'soundcloud', session.links.soundcloud);
+        setValue(form, 'spotify', session.links.spotify);
+        setValue(form, 'youtube', session.links.youtube);
+        linksSnapshot = serialize(form);
+    }
+
+    function fillProfile(form: HTMLFormElement, session: Session) {
+        appliedAvatar = session.avatar;
+        stagedAvatar = session.avatar;
+
+        form.querySelectorAll<HTMLInputElement>('[name="genres"]').forEach((input) => {
+            input.checked = session.genres.includes(input.value);
+        });
+
+        renderPortrait(form);
+        setRole(form, session.role);
+        setText(form.querySelector('[data-bio-count]'), String(session.bio.length));
+        setValue(form, 'artistName', session.artistName);
+        setValue(form, 'bio', session.bio);
+        setValue(form, 'city', session.city);
+        setValue(form, 'state', session.state);
+        profileSnapshot = serialize(form, stagedAvatar);
+    }
 
     async function handleLinksSubmit(event: SubmitEvent, form: HTMLFormElement) {
         event.preventDefault();
 
+        if (savingForms.has(form)) return;
+
         const errors = validateFields(form, LINK_RULES);
+        const values = new FormData(form);
 
         clearFieldErrors(form);
 
@@ -771,19 +842,43 @@ const LINK_FIELDS = [
         }
 
         const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        const submitted = serialize(form);
 
+        savingForms.add(form);
         setPending(button, true);
 
-        await delay(MOCK_LATENCY_MILLISECONDS);
+        const result = await saveSession({
+            links: {
+                instagram: String(values.get('instagram') ?? '').trim(),
+                soundcloud: String(values.get('soundcloud') ?? '').trim(),
+                spotify: String(values.get('spotify') ?? '').trim(),
+                youtube: String(values.get('youtube') ?? '').trim(),
+            },
+        });
 
+        savingForms.delete(form);
         setPending(button, false);
+
+        if (!result.ok) {
+            reportFailure(form, result.code, result.message);
+
+            return;
+        }
+
+        if (result.session && serialize(form) === submitted) fillLinks(form, result.session);
+
         toast('Links saved.', 'success');
     }
 
     async function handlePasswordSubmit(event: SubmitEvent, form: HTMLFormElement) {
         event.preventDefault();
 
-        const errors = validateFields(form, PASSWORD_RULES);
+        if (savingForms.has(form)) return;
+
+        const rules = getSession()?.passwordless ? PASSWORDLESS_RULES : PASSWORD_RULES;
+        const values = new FormData(form);
+
+        const errors = validateFields(form, rules);
 
         clearFieldErrors(form);
 
@@ -795,19 +890,21 @@ const LINK_FIELDS = [
 
         const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
 
+        savingForms.add(form);
         setPending(button, true);
 
-        await delay(MOCK_LATENCY_MILLISECONDS);
+        const result = await updatePassword(String(values.get('password') ?? ''), String(values.get('current') ?? ''));
 
+        savingForms.delete(form);
         setPending(button, false);
 
-        if (!getSession()) {
-            toast(SIGNED_OUT_MESSAGE, 'info');
+        if (!result.ok) {
+            reportFailure(form, result.code, result.code === 'invalid-credentials' ? CURRENT_PASSWORD_MESSAGE : result.message);
 
             return;
         }
 
-        form.querySelectorAll<HTMLButtonElement>('[aria-pressed="true"][data-reveal]').forEach(button => handleReveal(button));
+        form.querySelectorAll<HTMLButtonElement>('[aria-pressed="true"][data-reveal]').forEach(reveal => handleReveal(reveal));
         form.reset();
         toast('Password updated.', 'success');
     }
@@ -834,7 +931,7 @@ const LINK_FIELDS = [
 
             stagedAvatar = staged.dataUrl;
             renderPortrait(form);
-            toast('Portrait staged.', 'success');
+            toast(PORTRAIT_STAGED_MESSAGE, 'success');
         } finally {
             isStaging = false;
         }
@@ -843,7 +940,7 @@ const LINK_FIELDS = [
     async function handleProfileSubmit(event: SubmitEvent, form: HTMLFormElement) {
         event.preventDefault();
 
-        if (isStaging) return;
+        if (isStaging || savingForms.has(form)) return;
 
         const errors = validateFields(form, PROFILE_RULES);
         const values = new FormData(form);
@@ -857,36 +954,50 @@ const LINK_FIELDS = [
         }
 
         const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        const submitted = serialize(form, stagedAvatar);
 
+        savingForms.add(form);
         setPending(button, true);
 
-        const saved = await saveSession({
+        const result = await saveSession({
+            ...(stagedAvatar === appliedAvatar ? {} : { avatar: stagedAvatar }),
             artistName: String(values.get('artistName') ?? '').trim(),
-            avatar: stagedAvatar,
+            bio: String(values.get('bio') ?? '').trim(),
+            city: String(values.get('city') ?? '').trim(),
+            genres: values.getAll('genres').map(String),
             role: String(values.get('role') ?? ''),
+            state: String(values.get('state') ?? ''),
         });
 
+        savingForms.delete(form);
         setPending(button, false);
 
-        if (!saved.session) {
-            toast(SIGNED_OUT_MESSAGE, 'info');
+        if (!result.ok) {
+            reportFailure(form, result.code, result.message);
 
             return;
         }
 
-        if (!saved.persisted) {
-            toast(STORAGE_MESSAGE, 'error');
-
-            return;
-        }
-
-        if (stagedAvatar && getSession()?.avatar !== stagedAvatar) {
-            toast('That portrait could not be stored. Try a smaller image.', 'error');
-
-            return;
-        }
+        if (result.session && serialize(form, stagedAvatar) === submitted) fillProfile(form, result.session);
 
         toast('Profile saved.', 'success');
+    }
+
+    async function handleSessionReady(password: HTMLFormElement, signal: AbortSignal) {
+        const session = await whenSessionReady();
+
+        if (signal.aborted || !session) return;
+
+        const link = getAuthLink();
+
+        clearAuthLink();
+        void loadHistory(session, signal);
+
+        if (link !== 'recovery') return;
+
+        password.scrollIntoView({ block: 'center' });
+        password.querySelector<HTMLInputElement>('[name="password"]')?.focus();
+        toast(RECOVERY_MESSAGE, 'info');
     }
 
     async function handleTrackChange(form: HTMLFormElement, input: HTMLInputElement, signal: AbortSignal) {
@@ -894,9 +1005,9 @@ const LINK_FIELDS = [
 
         input.value = '';
 
-        if (!file || isReading) return;
+        if (!file || isReading || savingForms.has(form)) return;
 
-        const error = validateTrack(file);
+        const error = getExtensionError(file.name) ?? getSizeError(file, UPLOAD.maxFileBytes);
 
         clearFieldErrors(form);
 
@@ -920,7 +1031,8 @@ const LINK_FIELDS = [
                 return;
             }
 
-            stageTrack(form, file.name);
+            stagedTrack = file;
+            renderTrack();
             toast('Track staged.', 'success');
         } finally {
             isReading = false;
@@ -928,13 +1040,41 @@ const LINK_FIELDS = [
         }
     }
 
-    async function handleTrackSubmit(event: SubmitEvent, form: HTMLFormElement) {
-        event.preventDefault();
+    async function handleTrackRemove(form: HTMLFormElement, button: HTMLButtonElement) {
+        if (isReading || savingForms.has(form)) return;
+
         clearFieldErrors(form);
 
-        const staged = form.querySelector<HTMLElement>('[data-track-staged]');
+        if (!stagedTrack) {
+            savingForms.add(form);
+            setPending(button, true);
 
-        if (!isValidationBypassed() && staged?.hasAttribute('hidden') !== false) {
+            const result = await saveTrack(null);
+
+            savingForms.delete(form);
+            setPending(button, false);
+
+            if (!result.ok) {
+                reportFailure(form, result.code, result.message);
+
+                return;
+            }
+        }
+
+        stagedTrack = null;
+        renderTrack();
+        form.querySelector<HTMLInputElement>('[data-track-input]')?.focus();
+        toast('Track removed.', 'info');
+    }
+
+    async function handleTrackSubmit(event: SubmitEvent, form: HTMLFormElement) {
+        event.preventDefault();
+
+        if (isReading || savingForms.has(form)) return;
+
+        clearFieldErrors(form);
+
+        if (!stagedTrack) {
             reportFieldErrors(form, { track: TRACK_MISSING_MESSAGE });
 
             return;
@@ -942,11 +1082,24 @@ const LINK_FIELDS = [
 
         const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
 
+        savingForms.add(form);
+        setBusy(form, true);
         setPending(button, true);
 
-        await delay(MOCK_LATENCY_MILLISECONDS);
+        const result = await saveTrack(stagedTrack);
 
+        savingForms.delete(form);
+        setBusy(form, false);
         setPending(button, false);
+
+        if (!result.ok) {
+            reportFailure(form, result.code, result.message);
+
+            return;
+        }
+
+        stagedTrack = null;
+        renderTrack();
         toast('Track saved.', 'success');
     }
 
@@ -961,23 +1114,25 @@ const LINK_FIELDS = [
         const bio = profile.querySelector<HTMLTextAreaElement>('[name="bio"]');
         const file = track.querySelector<HTMLInputElement>('[data-track-input]');
         const picture = profile.querySelector<HTMLInputElement>('[data-portrait-input]');
+        const remove = track.querySelector<HTMLButtonElement>('[data-track-remove]');
 
-        demoSummary = {
-            email: readText('[data-settings-email]'),
-            name: readText('[data-settings-name]'),
-            role: readText('[data-settings-role]'),
-            since: readText('[data-settings-since]'),
-        };
-
+        appliedAvatar = '';
+        isReading = false;
+        linksSnapshot = serialize(links);
+        renderedProds = undefined;
+        stagedAvatar = '';
+        stagedTrack = null;
+        profileSnapshot = serialize(profile, stagedAvatar);
         links.noValidate = true;
         password.noValidate = true;
         profile.noValidate = true;
         track.noValidate = true;
-        unsubscribe?.();
-        unsubscribe = onSessionChange(renderSession);
-        unsubscribeProds?.();
-        unsubscribeProds = onProdsChange(renderSession);
-        bio?.addEventListener('input', () => setText(document.querySelector('[data-bio-count]'), String(bio.value.length)), { signal });
+        renderSession(signal);
+        savingForms.clear();
+
+        const unsubscribe = onSessionChange(() => renderSession(signal));
+
+        bio?.addEventListener('input', () => setText(profile.querySelector('[data-bio-count]'), String(bio.value.length)), { signal });
         file?.addEventListener('change', () => void handleTrackChange(track, file, signal), { signal });
         links.addEventListener('submit', event => void handleLinksSubmit(event, links), { signal });
         password.addEventListener('submit', event => void handlePasswordSubmit(event, password), { signal });
@@ -989,11 +1144,10 @@ const LINK_FIELDS = [
         picture?.addEventListener('change', () => void handlePortraitChange(profile, picture), { signal });
         profile.addEventListener('submit', event => void handleProfileSubmit(event, profile), { signal });
         profile.querySelector<HTMLButtonElement>('[data-portrait-remove]')?.addEventListener('click', () => removePortrait(profile), { signal });
+        remove?.addEventListener('click', () => void handleTrackRemove(track, remove), { signal });
         signal.addEventListener('abort', releaseAudioContext, { once: true });
-        signal.addEventListener('abort', () => unsubscribe?.(), { once: true });
-        signal.addEventListener('abort', () => unsubscribeProds?.(), { once: true });
+        signal.addEventListener('abort', unsubscribe, { once: true });
         track.addEventListener('submit', event => void handleTrackSubmit(event, track), { signal });
-        track.querySelector<HTMLButtonElement>('[data-track-remove]')?.addEventListener('click', () => removeTrack(track), { signal });
         watchFieldErrors(links, signal);
         watchFieldErrors(password, signal);
         watchFieldErrors(profile, signal);
@@ -1003,26 +1157,28 @@ const LINK_FIELDS = [
             observeRowWindow(scroller, signal);
         });
 
-        isReading = false;
-        stagedAvatar = getSession()?.avatar ?? '';
-        prefillProfile(profile);
-        renderPortrait(profile);
-        renderSession();
+        void guardRoute('member', signal);
+        void handleSessionReady(password, signal);
     }
 
-    function prefillProfile(form: HTMLFormElement) {
-        const name = form.querySelector<HTMLInputElement>('[name="artistName"]');
-        const session = getSession();
+    async function loadHistory(session: Session, signal: AbortSignal) {
+        historyLoads++;
+        renderedProds = session.prods;
 
-        if (!session) return;
+        const load = historyLoads;
 
-        if (name) name.value = session.artistName;
+        const [attendance, ledger] = await Promise.all([loadAttendance(session.id), loadLedger(session.id)]);
 
-        setRole(form, session.role);
-    }
+        if (signal.aborted || load !== historyLoads) return;
 
-    function readText(selector: string) {
-        return document.querySelector<HTMLElement>(selector)?.textContent?.trim() ?? '';
+        if (!attendance || !ledger) {
+            toast(HISTORY_MESSAGE, 'error');
+
+            return;
+        }
+
+        renderAttendance(attendance);
+        renderLedger(ledger);
     }
 
     function removePortrait(form: HTMLFormElement) {
@@ -1030,20 +1186,10 @@ const LINK_FIELDS = [
         clearFieldErrors(form);
         renderPortrait(form);
         form.querySelector<HTMLInputElement>('[data-portrait-input]')?.focus();
-        toast('Portrait removed.', 'info');
+        toast(PORTRAIT_REMOVED_MESSAGE, 'info');
     }
 
-    function removeTrack(form: HTMLFormElement) {
-        const staged = form.querySelector<HTMLElement>('[data-track-staged]');
-
-        clearFieldErrors(form);
-        setText(form.querySelector('[data-track-name]'), '');
-        staged?.setAttribute('hidden', '');
-        form.querySelector<HTMLInputElement>('[data-track-input]')?.focus();
-        toast('Track removed.', 'info');
-    }
-
-    function renderAttendance(email: string, joined?: number) {
+    function renderAttendance(entries: ProdsAttendance[]) {
         const body = document.querySelector<HTMLElement>('[data-settings-attendance]');
         const empty = document.querySelector<HTMLElement>('[data-settings-attendance-empty]');
         const scroller = document.querySelector<HTMLElement>('.settings__attendance');
@@ -1051,11 +1197,9 @@ const LINK_FIELDS = [
 
         if (!body || !empty || !scroller || !template) return;
 
-        const entries = getProdsAttendance(email, joined);
-
         body.replaceChildren();
 
-        entries.toReversed().forEach((entry) => {
+        entries.forEach((entry) => {
             const fragment = template.content.cloneNode(true) as DocumentFragment;
 
             fragment.querySelectorAll<HTMLTimeElement>('[data-cell="date"]').forEach((date) => {
@@ -1072,7 +1216,23 @@ const LINK_FIELDS = [
         scroller.toggleAttribute('hidden', entries.length === 0);
     }
 
-    function renderLedger(email: string, joined?: number) {
+    function renderGenres(genres: string[]) {
+        const list = document.querySelector<HTMLElement>('[data-settings-genres]');
+        const template = document.querySelector<HTMLTemplateElement>('[data-settings-chip]');
+
+        if (!list || !template) return;
+
+        list.replaceChildren();
+
+        genres.forEach((genre) => {
+            const fragment = template.content.cloneNode(true) as DocumentFragment;
+
+            setText(fragment.querySelector('li'), genre);
+            list.append(fragment);
+        });
+    }
+
+    function renderLedger(rows: ProdsRow[]) {
         const body = document.querySelector<HTMLElement>('[data-settings-ledger]');
         const template = document.querySelector<HTMLTemplateElement>('[data-settings-ledger-row]');
 
@@ -1080,7 +1240,7 @@ const LINK_FIELDS = [
 
         body.replaceChildren();
 
-        getProdsRows(email, joined).toReversed().forEach((row) => {
+        rows.forEach((row) => {
             const fragment = template.content.cloneNode(true) as DocumentFragment;
 
             fragment.querySelectorAll<HTMLElement>('[data-cell="change"]').forEach((change) => {
@@ -1093,8 +1253,8 @@ const LINK_FIELDS = [
                 setText(date, formatDateStamp(new Date(row.date)));
             });
 
-            setText(fragment.querySelector<HTMLElement>('[data-cell="reason"]'), row.reason);
             setText(fragment.querySelector<HTMLElement>('[data-cell="balance"]'), String(row.total));
+            setText(fragment.querySelector<HTMLElement>('[data-cell="reason"]'), row.reason);
             body.append(fragment);
         });
     }
@@ -1106,13 +1266,13 @@ const LINK_FIELDS = [
         staged?.toggleAttribute('hidden', stagedAvatar.length === 0);
     }
 
-    function renderSession() {
-        const link = document.querySelector<HTMLAnchorElement>('[data-settings-onboarding]');
+    function renderSession(signal: AbortSignal) {
         const session = getSession();
         const tile = document.querySelector<HTMLElement>('.settings__tile');
 
-        const name = session ? session.artistName || session.email : demoSummary.name;
-        const role = session ? session.role : demoSummary.role;
+        if (!session) return;
+
+        const name = session.artistName || session.email;
 
         const tileColor = pickTileColor(name);
 
@@ -1121,32 +1281,39 @@ const LINK_FIELDS = [
             tile.style.color = tileColor.text;
         }
 
-        document.querySelectorAll<HTMLElement>('[data-settings-role]').forEach(element => setText(element, formatRole(role)));
-        setAvatarImage(document.querySelector<HTMLImageElement>('[data-settings-avatar]'), session?.avatar ?? '');
+        applyForms(session);
+        document.querySelector('.settings-stage')?.classList.add('is-ready');
+        renderGenres(session.genres);
+        renderTrack();
+        setAvatarImage(document.querySelector<HTMLImageElement>('[data-settings-avatar]'), session.avatar);
+        setHidden(document.querySelector<HTMLElement>('[data-password-current]'), session.passwordless);
+        setHidden(document.querySelector<HTMLElement>('[data-settings-onboarding]'), session.onboarded);
         setText(document.querySelector('.settings__initials'), getInitials(name));
-        setText(document.querySelector('[data-settings-email]'), session?.email ?? demoSummary.email);
+        setText(document.querySelector('[data-settings-email]'), session.email);
+        setText(document.querySelector('[data-settings-location]'), session.city ? [session.city, session.state].filter(Boolean).join(', ') : '');
         setText(document.querySelector('[data-settings-name]'), name);
+        setText(document.querySelector('[data-settings-prods]'), formatProds(session.prods));
+        setText(document.querySelector('[data-settings-role]'), formatRole(session.role));
+        setText(document.querySelector('[data-settings-since]'), session.createdAt ? formatDateStamp(new Date(session.createdAt)) : '');
 
-        setText(
-            document.querySelector('[data-settings-prods]'),
-            formatProds(getProdsBalance(session?.email ?? demoSummary.email, session?.createdAt)),
-        );
+        if (session.createdAt) document.querySelector('[data-settings-since]')?.setAttribute('datetime', toAustinIso(new Date(session.createdAt)));
+        else document.querySelector('[data-settings-since]')?.removeAttribute('datetime');
 
-        renderAttendance(session?.email ?? demoSummary.email, session?.createdAt);
-        renderLedger(session?.email ?? demoSummary.email, session?.createdAt);
+        if (renderedProds !== session.prods && renderedProds !== undefined) void loadHistory(session, signal);
+    }
 
-        setText(
-            document.querySelector('[data-settings-since]'),
-            session?.createdAt ? formatDateStamp(new Date(session.createdAt)) : demoSummary.since,
-        );
+    function renderTrack() {
+        const name = stagedTrack?.name ?? getSession()?.track ?? '';
 
-        if (!link) return;
+        setHidden(document.querySelector<HTMLElement>('[data-track-staged]'), name.length === 0);
+        setText(document.querySelector('[data-track-name]'), name);
+    }
 
-        link.toggleAttribute('hidden', !session || session.onboarded);
+    function reportFailure(form: HTMLFormElement, code: SessionErrorCode, message: string) {
+        const field = ERROR_FIELDS[code];
 
-        if (!session) return;
-
-        link.href = getOnboardingHref(session.email);
+        if (field) reportFieldErrors(form, { [field]: message });
+        else toast(message, code === 'signed-out' ? 'info' : 'error');
     }
 
     function setBusy(form: HTMLFormElement, isBusy: boolean) {
@@ -1156,21 +1323,13 @@ const LINK_FIELDS = [
         else zone?.removeAttribute('aria-busy');
     }
 
-    function stageTrack(form: HTMLFormElement, name: string) {
-        const staged = form.querySelector<HTMLElement>('[data-track-staged]');
+    function setValue(form: HTMLFormElement, name: string, value: string) {
+        const control = form.querySelector<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(`[name="${name}"]`);
 
-        setText(form.querySelector('[data-track-name]'), name);
-        staged?.removeAttribute('hidden');
-    }
+        if (!control) return;
+        if (control instanceof HTMLSelectElement && !Array.from(control.options).some(option => option.value === value)) return;
 
-    function validateTrack(file: File) {
-        const extension = getExtension(file.name);
-
-        if (!UPLOAD.extensions.some(allowed => allowed === extension)) {
-            return `That is a .${extension || 'file'}. We take ${UPLOAD_EXTENSIONS_OR_LIST}.`;
-        }
-
-        return getSizeError(file, UPLOAD.maxFileBytes);
+        control.value = value;
     }
 
     registerPageScript(initSettings);

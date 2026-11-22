@@ -1,5 +1,6 @@
 ---
 import SectionHead from '@components/shared/SectionHead.astro';
+import { EMAIL_MAX_LENGTH } from '@lib/shared/constants';
 ---
 
 <section
@@ -12,7 +13,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
     >
         <div>
             <SectionHead
-                class="text-[clamp(32px,calc(20px_+_3.75vw),68px)]"
+                class="text-2xl-5xl"
                 headingId="newsletter-title"
             >
                 Get the dispatch
@@ -33,6 +34,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
                         class="input font-mono"
                         aria-invalid="false"
                         autocomplete="email"
+                        maxlength={EMAIL_MAX_LENGTH}
                         name="email"
                         placeholder="you@studio.fm"
                         required
@@ -51,115 +53,185 @@ import SectionHead from '@components/shared/SectionHead.astro';
                 data-output
             />
         </form>
+        <div
+            class="flex flex-col gap-3"
+            data-newsletter-leave
+            hidden
+        >
+            <p class="p-3 bg-signal text-text-on-signal">
+                Leaving the dispatch? Press the button and the emails stop.
+            </p>
+            <button
+                class="btn btn--accent self-start max-lg:self-stretch"
+                type="button"
+            >
+                Unsubscribe
+            </button>
+        </div>
     </div>
 </section>
 
 <script>
-    import { EMAIL_PATTERN, STORAGE } from '@lib/shared/constants';
-    import { clearFieldErrors, isValidationBypassed, reportFieldErrors, validateFields, watchFieldErrors } from '@lib/ui/forms';
-    import { createStore } from '@lib/shared/state';
-    import { getSession } from '@lib/account/session';
-    import { applyInstantly, registerPageScript } from '@lib/shared/utils';
+    import { EMAIL_MAX_LENGTH, EMAIL_MESSAGE, EMAIL_PATTERN, UNSUBSCRIBE_PARAMETER } from '@lib/shared/constants';
+    import { applyInstantly, registerPageScript, setHidden, setPending } from '@lib/shared/utils';
+    import { clearFieldErrors, reportFieldErrors, validateFields, watchFieldErrors } from '@lib/ui/forms';
+    import { getAccessToken, supabase } from '@lib/shared/supabase';
+    import { getSession, onSessionChange } from '@lib/account/session';
+    import { sendRequest } from '@lib/shared/request';
     import { toast } from '@lib/ui/toasts';
 
     interface NewsletterElements {
         button: HTMLButtonElement;
         form: HTMLFormElement;
         input: HTMLInputElement;
+        leave: HTMLElement;
+        leaveButton: HTMLButtonElement;
         output: HTMLElement;
     }
 
-    const RULES: Record<string, FieldRule> = {
-        email: { message: 'Enter a valid email address.', pattern: EMAIL_PATTERN, required: true },
-    };
-
-    const STORAGE_MESSAGE = 'You are not on the list because your browser storage is full. Clear some space and try again.';
-    const SUBSCRIBED_MESSAGE = 'Your account is already on the list.';
-
-    const subscription = createStore<null | string>({
-        fallback: null,
-        key: STORAGE.newsletter.key,
-        normalize: normalizeEmail,
-        scope: STORAGE.newsletter.scope,
-        topic: STORAGE.newsletter.topic,
-    });
-
-    function getSubscribedEmail() {
-        const email = subscription.get();
-        const session = getSession();
-
-        return session !== null && email === session.email ? email : null;
+    interface SubscriberRow {
+        status: string;
     }
 
-    function handleNewsletterSubmit(event: SubmitEvent, elements: NewsletterElements) {
+    const CONFIRMED_MESSAGE = 'You are on the list. The next dispatch lands in your inbox.';
+
+    const RULES: Record<string, FieldRule> = {
+        email: { max: EMAIL_MAX_LENGTH, message: EMAIL_MESSAGE, pattern: EMAIL_PATTERN, required: true },
+    };
+
+    const SUBSCRIBED_MESSAGE = 'Your account is already on the list.';
+
+    const submitting = new WeakSet<HTMLFormElement>();
+
+    let stopSessionWatch: (() => void) | undefined;
+
+    async function handleLeaveConfirm(elements: NewsletterElements, token: string, signal: AbortSignal) {
+        const { form, leave, leaveButton } = elements;
+
+        setPending(leaveButton, true);
+
+        const result = await sendRequest(`/api/unsubscribe?token=${encodeURIComponent(token)}`, { method: 'POST' });
+
+        setPending(leaveButton, false);
+        toast(result.ok ? 'You are off the list.' : result.message, result.ok ? 'success' : 'error');
+
+        if (signal.aborted || (!result.ok && result.code !== 'rejected')) return;
+
+        setHidden(form, false);
+        setHidden(leave, true);
+        history.replaceState(history.state, '', window.location.pathname);
+    }
+
+    async function handleNewsletterSubmit(event: SubmitEvent, elements: NewsletterElements) {
         event.preventDefault();
 
-        const subscribed = getSubscribedEmail();
+        if (submitting.has(elements.form)) return;
 
-        if (subscribed !== null) {
-            showConfirmation(elements, subscribed, true);
-            toast(SUBSCRIBED_MESSAGE, 'info');
+        const { button, form, input } = elements;
 
-            return;
-        }
+        const errors = validateFields(form, RULES);
 
-        const errors = validateFields(elements.form, RULES);
-
-        clearFieldErrors(elements.form);
+        clearFieldErrors(form);
 
         if (Object.keys(errors).length > 0) {
-            reportFieldErrors(elements.form, errors);
+            reportFieldErrors(form, errors);
 
             return;
         }
 
-        const email = readEmailInput(elements.input);
+        const email = input.value.trim().toLowerCase();
 
-        if (email === null) return;
+        submitting.add(form);
+        setPending(button, true);
 
-        subscription.set(email);
+        const result = await sendRequest('/api/newsletter', { body: { email }, method: 'POST', token: await getAccessToken() });
 
-        if (!subscription.persisted()) {
-            toast(STORAGE_MESSAGE, 'error');
+        submitting.delete(form);
+        setPending(button, false);
+
+        if (!result.ok) {
+            if (result.code === 'rejected') reportFieldErrors(form, { email: result.message });
+            else toast(result.message, 'error');
 
             return;
         }
 
         showConfirmation(elements, email, false);
-        toast('You are on the list. The next dispatch lands in your inbox.', 'success');
+        toast(CONFIRMED_MESSAGE, 'success');
     }
 
     function initNewsletter(signal: AbortSignal) {
         const form = document.querySelector<HTMLFormElement>('.newsletter-form');
+        const leave = document.querySelector<HTMLElement>('[data-newsletter-leave]');
 
         const button = form?.querySelector<HTMLButtonElement>('button');
         const input = form?.querySelector<HTMLInputElement>('input');
+        const leaveButton = leave?.querySelector<HTMLButtonElement>('button');
         const output = form?.querySelector<HTMLElement>('[data-output]');
 
-        if (!button || !form || !input || !output) return;
+        if (!button || !form || !input || !leave || !leaveButton || !output) return;
 
-        const elements = { button, form, input, output };
-        const subscribed = getSubscribedEmail();
+        const elements = { button, form, input, leave, leaveButton, output };
+        const token = new URLSearchParams(window.location.search).get(UNSUBSCRIBE_PARAMETER);
 
         form.noValidate = true;
-        form.addEventListener('submit', event => handleNewsletterSubmit(event, elements), { signal });
+        form.addEventListener('submit', event => void handleNewsletterSubmit(event, elements), { signal });
         watchFieldErrors(form, signal);
 
-        if (subscribed !== null) showConfirmation(elements, subscribed, true);
+        if (token) {
+            setHidden(form, true);
+            setHidden(leave, false);
+            leaveButton.addEventListener('click', () => void handleLeaveConfirm(elements, token, signal), { signal });
+            leaveButton.focus();
+
+            return;
+        }
+
+        void restoreSubscription(elements, signal);
+        stopSessionWatch?.();
+        stopSessionWatch = onSessionChange(() => void restoreSubscription(elements, signal));
+        signal.addEventListener('abort', () => stopSessionWatch?.(), { once: true });
     }
 
-    function normalizeEmail(value: null | string) {
-        const email = typeof value === 'string' ? value.trim().toLowerCase() : '';
+    function releaseConfirmation(elements: NewsletterElements) {
+        const { button, input, output } = elements;
 
-        return EMAIL_PATTERN.test(email) ? email : null;
+        applyInstantly(button, () => {
+            button.disabled = false;
+        });
+
+        input.disabled = false;
+        input.value = '';
+        output.textContent = '';
+        output.classList.add('hidden');
+        delete output.dataset.newsletterState;
     }
 
-    function readEmailInput(input: HTMLInputElement) {
-        const email = normalizeEmail(input.value);
+    async function restoreSubscription(elements: NewsletterElements, signal: AbortSignal) {
+        const { button, form, output } = elements;
+        const session = getSession();
 
-        if (!isValidationBypassed() || email !== null) return email;
+        if (!session) {
+            if (output.dataset.newsletterState === 'account') releaseConfirmation(elements);
 
-        return input.value.trim().toLowerCase() || input.placeholder;
+            return;
+        }
+
+        const { data, error } = await supabase.from('newsletter_subscribers').select('status').eq('email', session.email).maybeSingle();
+
+        const isAccountLock = output.dataset.newsletterState === 'account';
+
+        const row: SubscriberRow | null = data;
+
+        if (signal.aborted || error || getSession()?.email !== session.email || submitting.has(form)) return;
+
+        if (row?.status === 'subscribed') {
+            if (!button.disabled || isAccountLock) showConfirmation(elements, session.email, true);
+
+            return;
+        }
+
+        if (isAccountLock) releaseConfirmation(elements);
     }
 
     function showConfirmation(elements: NewsletterElements, email: string, isReturning: boolean) {
@@ -171,7 +243,8 @@ import SectionHead from '@components/shared/SectionHead.astro';
 
         input.disabled = true;
         input.value = email;
-        output.textContent = isReturning ? SUBSCRIBED_MESSAGE : 'You are on the list. The next dispatch lands in your inbox.';
+        output.dataset.newsletterState = isReturning ? 'account' : 'sent';
+        output.textContent = isReturning ? SUBSCRIBED_MESSAGE : CONFIRMED_MESSAGE;
         output.classList.remove('hidden');
 
         if (isReturning) return;

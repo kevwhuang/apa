@@ -1,38 +1,35 @@
 ---
-import { getCollection } from 'astro:content';
-
 import PageHead from '@components/shared/PageHead.astro';
 import ProducerLinks from '@components/producer/Links.astro';
 import ProducerPortrait from '@components/producer/Portrait.astro';
 import ProducerTrack from '@components/producer/Track.astro';
 import SearchField from '@components/shared/SearchField.astro';
-import { PALETTE } from '@lib/shared/constants';
-import { describeMatches, formatCalendarMonth, formatRole, toAustinIso, toRoster } from '@lib/shared/utils';
+import { MEMBER_ROLES, PALETTE } from '@lib/shared/constants';
+import { describeMatches, formatCalendarMonth, formatRole } from '@lib/shared/utils';
+import { loadRoster } from '@lib/server/roster';
 
-import type { CollectionEntry } from 'astro:content';
-
-const ROLE_COLORS: Record<CollectionEntry<'producers'>['data']['roles'][number], string> = {
+const ROLE_COLORS: Record<(typeof MEMBER_ROLES)[number], string> = {
     artist: 'var(--color-chart-2)',
     engineer: 'var(--color-marker-cobalt)',
     fan: 'var(--color-text-secondary)',
     producer: 'var(--color-signal)',
 };
 
-const producers = toRoster(await getCollection('producers'));
+const members = await loadRoster() ?? [];
 
-const allGenres = Array.from(new Set(producers.flatMap(producer => producer.data.genres))).sort((a, b) => a.localeCompare(b));
-const allRoles = Array.from(new Set(producers.flatMap(producer => producer.data.roles))).sort((a, b) => a.localeCompare(b));
+const allGenres = Array.from(new Set(members.flatMap(member => member.genres))).sort((a, b) => a.localeCompare(b));
+const allRoles = Array.from(new Set(members.flatMap(member => member.roles))).sort((a, b) => a.localeCompare(b));
 
-const roster = [...producers]
-    .sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || a.data.name.localeCompare(b.data.name))
-    .map(producer => ({
-        ...producer,
+const roster = [...members]
+    .sort((a, b) => Number(b.featured) - Number(a.featured) || a.name.localeCompare(b.name))
+    .map(member => ({
+        ...member,
         search: [
-            producer.data.name,
-            ...producer.data.genres,
-            ...producer.data.roles,
-            producer.data.location,
-            producer.data.bio,
+            member.name,
+            ...member.genres,
+            ...member.roles,
+            member.location,
+            member.bio,
         ].join(' ').toLowerCase(),
     }));
 ---
@@ -146,14 +143,14 @@ const roster = [...producers]
             class="roster__grid grid grid-cols-3 gap-x-(--space-lg) list-none max-lg:grid-cols-2 max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))]"
             data-motion-stagger="flip"
         >
-            {roster.map((producer, index) => (
+            {roster.map((member, index) => (
                 <li
-                    id={producer.data.producerId}
+                    id={member.id}
                     class="producer-card min-w-0 mb-(--space-2xl)"
-                    data-genres={producer.data.genres.join(',')}
-                    data-role={producer.data.roles[0]}
-                    data-search={producer.search}
-                    style={`--role-color: ${ROLE_COLORS[producer.data.roles[0]]}`}
+                    data-genres={member.genres.join(',')}
+                    data-role={member.roles[0]}
+                    data-search={member.search}
+                    style={`--role-color: ${ROLE_COLORS[member.roles[0]]}`}
                 >
                     <article class="producer-card__frame slab slab--bare slab--card">
                         <ProducerPortrait
@@ -161,10 +158,10 @@ const roster = [...producers]
                             color={PALETTE[(index + 1) % PALETTE.length].background}
                             labelClass="text-6xl"
                             labelColor={PALETTE[(index + 1) % PALETTE.length].text}
-                            name={producer.data.name}
-                            producerId={producer.data.producerId}
+                            name={member.name}
+                            portrait={member.portrait}
                         >
-                            {producer.data.featured && (
+                            {member.featured && (
                                 <p class="label absolute left-0 top-0 p-3 border-b-2 border-border-strong border-r-2 bg-bg-page text-text">Spotlight</p>
                             )}
                         </ProducerPortrait>
@@ -173,7 +170,7 @@ const roster = [...producers]
                                 class="mb-3 text-2xl text-balance"
                                 data-placeholder
                             >
-                                {producer.data.name}
+                                {member.name}
                             </h2>
                             <div class="flex flex-wrap items-center justify-between self-start gap-3 mb-6">
                                 <p class="label inline-flex items-center gap-1 px-2 py-1 border-(--role-color) border-2 text-text">
@@ -181,33 +178,34 @@ const roster = [...producers]
                                         class="flex-none size-2 bg-(--role-color)"
                                         aria-hidden="true"
                                     />
-                                    {formatRole(producer.data.roles[0])}
+                                    {formatRole(member.roles[0])}
                                 </p>
                                 <p
                                     class="font-mono text-base wrap-anywhere text-text-secondary"
                                     data-placeholder
                                 >
-                                    {producer.data.location}
+                                    {member.location}
                                 </p>
                             </div>
                             <p
                                 class="producer-card__bio scroll-slot empty:mb-0 self-start mb-6 text-base text-text-secondary"
                                 data-placeholder
                             >
-                                {producer.data.bio}
+                                {member.bio}
                             </p>
                             <ul class="empty:mb-0 flex flex-wrap self-end gap-2 mb-6 list-none">
-                                {producer.data.genres.map(genre => (
+                                {member.genres.map(genre => (
                                     <li class="label inline-flex items-center h-6 px-2 border-2 border-border-strong">{genre}</li>
                                 ))}
                             </ul>
-                            {producer.data.tracks[0]
+                            {member.tracks[0]
                                 ? (
                                         <ProducerTrack
                                             class="mb-3"
+                                            artist={member.name}
                                             hasWave={false}
-                                            producerId={producer.data.producerId}
-                                            track={producer.data.tracks[0]}
+                                            producerId={member.id}
+                                            track={member.tracks[0]}
                                         />
                                     )
                                 : (
@@ -221,11 +219,12 @@ const roster = [...producers]
                                     class="grow font-mono leading-(--control-size) text-base whitespace-nowrap text-text-secondary"
                                     data-placeholder
                                 >
-                                    <span class="sr-only">Member since </span><time datetime={toAustinIso(producer.data.joined)}>{formatCalendarMonth(producer.data.joined)}</time>
+                                    <span class="sr-only">Member since </span>
+                                    <time datetime={member.joined}>{formatCalendarMonth(new Date(member.joined))}</time>
                                 </p>
                                 <ProducerLinks
                                     linkClass="hover:text-link"
-                                    links={producer.data.links}
+                                    links={member.links}
                                 />
                             </div>
                         </div>

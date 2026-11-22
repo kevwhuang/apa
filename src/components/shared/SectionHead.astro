@@ -1,13 +1,10 @@
 ---
 interface Props {
     class?: string;
-    eyebrow?: string;
-    eyebrowClass?: string;
     headingId: string;
-    tone?: 'dark' | 'light';
 }
 
-const { class: headingClass, eyebrow, eyebrowClass = 'mb-3', headingId, tone = 'light' } = Astro.props;
+const { class: headingClass, headingId } = Astro.props;
 ---
 
 <div
@@ -18,11 +15,6 @@ const { class: headingClass, eyebrow, eyebrowClass = 'mb-3', headingId, tone = '
     data-motion="rise"
 >
     <div>
-        {eyebrow && (
-            <p class:list={['label', eyebrowClass, tone === 'dark' ? 'text-link-on-inverse' : 'text-link']}>
-                {eyebrow}
-            </p>
-        )}
         <h2
             id={headingId}
             class:list={['font-display', headingClass]}

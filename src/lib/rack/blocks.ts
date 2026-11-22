@@ -21,6 +21,7 @@ const DELAY_TIME_DEFAULT = 0.35;
 const DELAY_WET_LEVEL = 0.7;
 const DISTORTION_DRIVE_DEFAULT = 8;
 const DISTORTION_TONE_DEFAULT = 6_000;
+const EMPTY_READOUT = '\u2014';
 const EQ_HIGH_GAIN_DEFAULT = 3;
 const EQ_HIGH_HERTZ = 4_000;
 const EQ_LOW_GAIN_DEFAULT = 4;
@@ -44,7 +45,7 @@ const LIMITER_RELEASE = 0.1;
 const LIMITER_THRESHOLD_DEFAULT = -12;
 const MIDI_OCTAVE_OFFSET = 1;
 const MIN_RMS = 0.008;
-const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
 const PAN_POSITION_DEFAULT = 0;
 const PITCH_MAX_HERTZ = 1_000;
 const PITCH_MIN_CORRELATION = 0.5;
@@ -108,7 +109,7 @@ function buildChorus(context: AudioContext) {
     lfo.start();
 
     return {
-        dispose(): void {
+        dispose() {
             lfo.stop();
             [delayA, delayB, depthA, depthB, dry, input, lfo, output, wetA, wetB].forEach(node => node.disconnect());
         },
@@ -181,13 +182,6 @@ function buildDistortion(context: AudioContext) {
     let pending = DISTORTION_DRIVE_DEFAULT;
     let reshape = 0;
 
-    makeup.gain.value = getDistortionMakeup(built);
-    shaper.curve = createDistortionCurve(built);
-    shaper.oversample = '4x';
-    tone.type = 'lowpass';
-    tone.frequency.value = DISTORTION_TONE_DEFAULT;
-    shaper.connect(tone).connect(makeup);
-
     function rebuildCurve() {
         reshape = 0;
 
@@ -197,8 +191,15 @@ function buildDistortion(context: AudioContext) {
         shaper.curve = createDistortionCurve(built);
     }
 
+    makeup.gain.value = getDistortionMakeup(built);
+    shaper.curve = createDistortionCurve(built);
+    shaper.oversample = '4x';
+    tone.type = 'lowpass';
+    tone.frequency.value = DISTORTION_TONE_DEFAULT;
+    shaper.connect(tone).connect(makeup);
+
     return {
-        dispose(): void {
+        dispose() {
             cancelAnimationFrame(reshape);
             [makeup, shaper, tone].forEach(node => node.disconnect());
         },
@@ -288,7 +289,7 @@ function buildGate(context: AudioContext) {
             if (name === 'threshold') threshold = value;
         },
         state: () => (isOpen ? 'Gate open' : 'Gate closed'),
-        tick(): void {
+        tick() {
             analyser.getFloatTimeDomainData(data);
 
             const decibels = DECIBEL_SCALE * Math.log10(Math.max(getRootMeanSquare(data), GATE_FLOOR));
@@ -381,12 +382,6 @@ function buildReverb(context: AudioContext) {
     let pending = REVERB_DECAY_DEFAULT;
     let rebuild = 0;
 
-    convolver.buffer = createImpulse(context, built);
-    dry.gain.value = 1 - REVERB_WET_DEFAULT;
-    wet.gain.value = REVERB_WET_DEFAULT;
-    input.connect(dry).connect(output);
-    input.connect(convolver).connect(wet).connect(output);
-
     function rebuildImpulse() {
         rebuild = 0;
 
@@ -396,8 +391,14 @@ function buildReverb(context: AudioContext) {
         convolver.buffer = createImpulse(context, built);
     }
 
+    convolver.buffer = createImpulse(context, built);
+    dry.gain.value = 1 - REVERB_WET_DEFAULT;
+    wet.gain.value = REVERB_WET_DEFAULT;
+    input.connect(dry).connect(output);
+    input.connect(convolver).connect(wet).connect(output);
+
     return {
-        dispose(): void {
+        dispose() {
             cancelAnimationFrame(rebuild);
             [convolver, dry, input, output, wet].forEach(node => node.disconnect());
         },
@@ -427,11 +428,6 @@ function buildSaturator(context: AudioContext) {
     let pending = SATURATOR_DRIVE_DEFAULT;
     let reshape = 0;
 
-    makeup.gain.value = getSaturationMakeup(built);
-    shaper.curve = createSaturationCurve(built);
-    shaper.oversample = '4x';
-    input.connect(shaper).connect(makeup);
-
     function rebuildCurve() {
         reshape = 0;
 
@@ -441,8 +437,13 @@ function buildSaturator(context: AudioContext) {
         shaper.curve = createSaturationCurve(built);
     }
 
+    makeup.gain.value = getSaturationMakeup(built);
+    shaper.curve = createSaturationCurve(built);
+    shaper.oversample = '4x';
+    input.connect(shaper).connect(makeup);
+
     return {
-        dispose(): void {
+        dispose() {
             cancelAnimationFrame(reshape);
             [input, makeup, shaper].forEach(node => node.disconnect());
         },
@@ -472,7 +473,7 @@ function buildTremolo(context: AudioContext) {
     lfo.start();
 
     return {
-        dispose(): void {
+        dispose() {
             lfo.stop();
             [depth, input, lfo].forEach(node => node.disconnect());
         },
@@ -492,14 +493,14 @@ function buildTremolo(context: AudioContext) {
 function buildTrim(context: AudioContext) {
     const node = context.createGain();
 
-    node.gain.value = decibelsToGain(TRIM_GAIN_DEFAULT);
+    node.gain.value = toGain(TRIM_GAIN_DEFAULT);
 
     return {
         dispose: () => node.disconnect(),
         input: node,
         output: node,
         setParameter(name: string, value: number) {
-            if (name === 'gain') smooth(context, node.gain, decibelsToGain(value));
+            if (name === 'gain') smooth(context, node.gain, toGain(value));
         },
     };
 }
@@ -511,7 +512,7 @@ function buildTuner(context: AudioContext) {
 
     const data = new Float32Array(analyser.fftSize);
 
-    let display = '\u2014';
+    let display = EMPTY_READOUT;
     let phase = 0;
 
     return {
@@ -521,7 +522,7 @@ function buildTuner(context: AudioContext) {
         output: analyser,
         setParameter: () => undefined,
         state: () => display,
-        tick(): void {
+        tick() {
             phase = (phase + 1) % TICK_INTERVAL;
 
             if (phase !== 0) return;
@@ -530,7 +531,7 @@ function buildTuner(context: AudioContext) {
 
             const hertz = detectPitch(data, context.sampleRate);
 
-            display = hertz > 0 ? formatPitch(hertz) : '\u2014';
+            display = hertz > 0 ? formatPitch(hertz) : EMPTY_READOUT;
         },
     };
 }
@@ -538,7 +539,7 @@ function buildTuner(context: AudioContext) {
 function createDistortionCurve(drive: number) {
     const samples = new Float32Array(CURVE_LENGTH);
 
-    for (let index = 0; index < CURVE_LENGTH; index += 1) {
+    for (let index = 0; index < CURVE_LENGTH; index++) {
         const x = (index / (CURVE_LENGTH - 1)) * 2 - 1;
 
         samples[index] = Math.max(-1, Math.min(1, drive * x));
@@ -552,10 +553,10 @@ function createImpulse(context: AudioContext, seconds: number) {
 
     const buffer = context.createBuffer(IMPULSE_CHANNELS, length, context.sampleRate);
 
-    for (let channel = 0; channel < buffer.numberOfChannels; channel += 1) {
+    for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
         const samples = buffer.getChannelData(channel);
 
-        for (let index = 0; index < length; index += 1) {
+        for (let index = 0; index < length; index++) {
             samples[index] = (Math.random() * 2 - 1) * Math.exp(-IMPULSE_SHAPE * index / length);
         }
     }
@@ -567,7 +568,7 @@ function createSaturationCurve(drive: number) {
     const samples = new Float32Array(CURVE_LENGTH);
     const scale = Math.tanh(drive);
 
-    for (let index = 0; index < CURVE_LENGTH; index += 1) {
+    for (let index = 0; index < CURVE_LENGTH; index++) {
         const x = (index / (CURVE_LENGTH - 1)) * 2 - 1;
 
         samples[index] = Math.tanh(drive * x) / scale;
@@ -576,14 +577,12 @@ function createSaturationCurve(drive: number) {
     return samples;
 }
 
-function decibelsToGain(decibels: number) {
-    return 10 ** (decibels / DECIBEL_SCALE);
-}
-
 function detectPitch(data: Float32Array, sampleRate: number) {
     let power = 0;
 
-    for (let index = 0; index < data.length; index += 1) power += data[index] * data[index];
+    for (let index = 0; index < data.length; index++) {
+        power += data[index] * data[index];
+    }
 
     if (Math.sqrt(power / data.length) < MIN_RMS) return 0;
 
@@ -593,10 +592,12 @@ function detectPitch(data: Float32Array, sampleRate: number) {
     let bestCorrelation = 0;
     let bestLag = 0;
 
-    for (let lag = minLag; lag <= maxLag; lag += 1) {
+    for (let lag = minLag; lag <= maxLag; lag++) {
         let correlation = 0;
 
-        for (let index = 0; index < data.length - lag; index += 1) correlation += data[index] * data[index + lag];
+        for (let index = 0; index < data.length - lag; index++) {
+            correlation += data[index] * data[index + lag];
+        }
 
         correlation /= power;
 
@@ -627,7 +628,9 @@ function getDistortionMakeup(drive: number) {
 function getRootMeanSquare(data: Float32Array) {
     let power = 0;
 
-    for (let index = 0; index < data.length; index += 1) power += data[index] * data[index];
+    for (let index = 0; index < data.length; index++) {
+        power += data[index] * data[index];
+    }
 
     return Math.sqrt(power / data.length);
 }
@@ -636,8 +639,12 @@ function getSaturationMakeup(drive: number) {
     return Math.tanh(drive) / drive;
 }
 
-function smooth(context: AudioContext, param: AudioParam, value: number) {
-    param.setTargetAtTime(value, context.currentTime, SMOOTHING);
+function smooth(context: AudioContext, parameter: AudioParam, value: number) {
+    parameter.setTargetAtTime(value, context.currentTime, SMOOTHING);
+}
+
+function toGain(decibels: number) {
+    return 10 ** (decibels / DECIBEL_SCALE);
 }
 
 export {
@@ -649,6 +656,7 @@ export {
     DELAY_FEEDBACK_DEFAULT,
     DELAY_TIME_DEFAULT,
     DISTORTION_DRIVE_DEFAULT,
+    EMPTY_READOUT,
     EQ_HIGH_GAIN_DEFAULT,
     EQ_LOW_GAIN_DEFAULT,
     EQ_MID_GAIN_DEFAULT,

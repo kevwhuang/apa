@@ -1,9 +1,7 @@
-import { LINKS, ONBOARDING_ROUTE, ONBOARDING_TOKEN_PARAMETER } from '@lib/shared/constants';
-import { formatProds } from '@lib/shared/utils';
+import { BRAND } from '@lib/shared/brand';
+import { LINKS, ONBOARDING_ROUTE } from '@lib/shared/constants';
 
-const SENDER_NAME = 'Austin Producer Alliance';
-
-function composeContactEmail(input: ContactEmailInput): MockEmail {
+function composeContactEmail(input: ContactEmailInput): ComposedEmail {
     const { email, message, name, topic } = input;
 
     const subject = `${topic} \u00b7 ${name}`;
@@ -20,27 +18,21 @@ function composeContactEmail(input: ContactEmailInput): MockEmail {
     };
 }
 
-function composeOnboardingEmail(input: OnboardingEmailInput): MockEmail {
-    const { email, eventName, prods, token } = input;
-
-    const greeting = eventName
-        ? `Thanks for checking in at ${eventName}. You're part of the Alliance now.`
-        : 'Thanks for checking in. You\'re part of the Alliance now.';
-
+function composeOnboardingEmail(input: OnboardingEmailInput): ComposedEmail {
     return {
-        actionHref: `${ONBOARDING_ROUTE}?${ONBOARDING_TOKEN_PARAMETER}=${token}`,
+        actionHref: ONBOARDING_ROUTE,
         actionLabel: 'Finish profile',
         body: [
-            greeting,
-            `Your account is open with ${formatProds(prods)} on it. Prods are our credit for taking part. They add up as you show up, and each one takes $1.00 off in the store.`,
+            'Thanks for checking in. You\'re part of the Alliance now.',
+            'Your account is open with your first Prods on it. Prods are our credit for taking part. They add up as you show up, and each one takes $1.00 off in the store.',
             'The link below signs you in and drops you into the last few basics, so the rest of the roster knows who you are and what you make.',
-            'The link works for the next 24 hours. If it expires, checking in again sends a fresh one.',
+            'The link works for the next hour.',
         ],
-        from: `${SENDER_NAME} <${LINKS.email}>`,
-        preheader: `Finish your profile and claim ${formatProds(prods)}.`,
+        from: `${BRAND.name} <${LINKS.email}>`,
+        preheader: 'Finish your profile and claim your first Prods.',
         replyTo: LINKS.email,
-        subject: `Welcome to ${SENDER_NAME}`,
-        to: email,
+        subject: `Welcome to ${BRAND.name}`,
+        to: input.email,
     };
 }
 

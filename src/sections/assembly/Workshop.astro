@@ -7,9 +7,9 @@ import IconDownload from '@components/icons/Download.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import Schedule from '@components/program/Schedule.astro';
 import { PALETTE } from '@lib/shared/constants';
-import { getInitials, isUpcoming, toAustinIso } from '@lib/shared/utils';
+import { getInitials, isUpcoming, toAssetSlug, toAustinIso } from '@lib/shared/utils';
+import { getRecord, loadEvents } from '@lib/programs/calendar';
 import { isDownload, toAvailability } from '@lib/resources/unlocks';
-import { loadEvents } from '@lib/programs/calendar';
 
 import type { ImageMetadata } from 'astro';
 
@@ -24,10 +24,10 @@ const SESSION_EXTRAS = {
 const downloads = await getCollection('downloads');
 const events = await loadEvents();
 
-const files = SESSION_EXTRAS.files.map((id) => {
-    const entry = downloads.find(download => download.id === id);
+const portraits = import.meta.glob<{ default: ImageMetadata }>('/src/images/speakers/*.webp', { eager: true });
 
-    if (!entry) throw new Error(`Download ${id} has no file.`);
+const files = SESSION_EXTRAS.files.map((id) => {
+    const entry = getRecord(downloads, id, 'Download');
 
     return {
         availability: toAvailability(entry.data),
@@ -38,8 +38,6 @@ const files = SESSION_EXTRAS.files.map((id) => {
     };
 });
 
-const portraits = import.meta.glob<{ default: ImageMetadata }>('/src/images/speakers/*.webp', { eager: true });
-
 const sessions = events.flatMap(event => (event.program === 'Assembly' && event.speaker ? [{ ...event, speaker: event.speaker }] : []));
 
 const ended = sessions.filter(session => !isUpcoming(session.ends_at));
@@ -49,10 +47,10 @@ const cards = [...ended.slice(-1), ...upcoming].map((session, index) => ({
     bio: session.speaker.bio,
     body: session.body,
     endsAt: toAustinIso(session.ends_at),
-    extras: session.id === SESSION_EXTRAS.event_id && files.length > 0 ? { files } : undefined,
+    extras: session.id === SESSION_EXTRAS.event_id ? { files } : undefined,
     headingId: index === 0 ? 'workshop-title' : `workshop-${index + 1}-title`,
     isUpcoming: isUpcoming(session.ends_at),
-    portrait: portraits[`/src/images/speakers/${session.speaker.name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}.webp`]?.default,
+    portrait: portraits[`/src/images/speakers/${toAssetSlug(session.speaker.name)}.webp`]?.default,
     speaker: session.speaker.name,
     title: session.title,
 }));
@@ -97,7 +95,7 @@ const shown = cards.find(card => card.isUpcoming) ?? cards.at(-1);
                 </p>
                 <h2
                     id={card.headingId}
-                    class="mb-(--space-lg) font-display text-xl-5xl text-balance"
+                    class="mb-(--space-lg) font-display text-balance text-xl-5xl"
                 >
                     {card.title}
                 </h2>
@@ -154,13 +152,14 @@ const shown = cards.find(card => card.isUpcoming) ?? cards.at(-1);
                             {card.extras.files.map(file => (
                                 <li class="workshop__row first:border-t-0 first:pt-0 last:pb-0 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 py-4 border-t border-t-border-subtle">
                                     <div class="[grid-area:body] flex flex-col gap-1">
-                                        <p class="overflow-hidden font-bold tracking-tight text-ellipsis wrap-normal">{file.title}</p>
+                                        <p class="overflow-hidden font-bold text-ellipsis tracking-tight wrap-normal">{file.title}</p>
                                         <p class="overflow-hidden text-base text-ellipsis wrap-normal text-text-secondary">{file.description}</p>
                                     </div>
                                     {file.availability === 'open' && (
                                         <a
                                             class:list={['hit active:translate-y-px focus-visible:text-link hover:text-link [grid-area:link] inline-flex size-8 transition-[color,translate]', file.isDownload ? '-me-0.75' : 'items-center justify-end text-2xl']}
                                             aria-label={`${file.isDownload ? 'Download' : 'View'} ${file.title}`}
+                                            data-astro-prefetch={file.isDownload ? 'false' : undefined}
                                             download={file.isDownload ? '' : undefined}
                                             href={file.href}
                                         >

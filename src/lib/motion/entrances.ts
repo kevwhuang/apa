@@ -2,12 +2,11 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { ENTRANCE_PRESETS, FOLDED_PROPERTIES, GUARDED_PRESET, PRESET_NAMES, REST_PROPERTIES, VISIBLE_PRESETS, buildStagger, resolvePreset } from '@lib/motion/presets';
+import { MOTION_SELECTOR, TRIGGER_START } from '@lib/shared/constants';
 import { getMotionTokens } from '@lib/motion/tokens';
 
 const INTERACTIVE_SELECTOR = 'a[href], button, input, select, summary, textarea, [tabindex]:not([tabindex="-1"])';
-const MOTION_SELECTOR = '[data-motion], [data-motion-stagger] > *';
 const STAGGER_SELECTOR = '[data-motion-stagger]';
-const TRIGGER_START = 'top 85%';
 const WILL_CHANGE = 'transform';
 
 const effective = new WeakMap<Element, MotionPresetName>();
@@ -28,7 +27,9 @@ function buildEntrances(): void {
         const targets = Array.from(container.children);
 
         if (nested || !preset || !targets.length) {
-            for (const target of targets) stranded.add(target);
+            for (const target of targets) {
+                stranded.add(target);
+            }
 
             continue;
         }
@@ -88,12 +89,16 @@ function clearRest(targets: Element[], properties: string) {
     for (const target of targets) {
         if (!(target instanceof HTMLElement)) continue;
 
-        for (const property of FOLDED_PROPERTIES) target.style.removeProperty(property);
+        for (const property of FOLDED_PROPERTIES) {
+            target.style.removeProperty(property);
+        }
     }
 }
 
 function markStarted(this: gsap.core.Tween) {
-    for (const target of this.targets<Element>()) waiting.delete(target);
+    for (const target of this.targets<Element>()) {
+        waiting.delete(target);
+    }
 }
 
 function playEntrance(entering: Element[]) {
@@ -111,7 +116,9 @@ function playEntrance(entering: Element[]) {
         groups.set(name, group);
     }
 
-    for (const group of groups.values()) playPreset(group);
+    for (const group of groups.values()) {
+        playPreset(group);
+    }
 }
 
 function playPreset({ name, targets }: MotionGroup) {
@@ -124,7 +131,9 @@ function playPreset({ name, targets }: MotionGroup) {
         if (waiting.has(target)) gsap.killTweensOf(target);
     }
 
-    for (const target of targets) waiting.add(target);
+    for (const target of targets) {
+        waiting.add(target);
+    }
 
     const offset = gsap.utils.distribute(buildStagger(targets.length, preset.stagger));
 
@@ -186,4 +195,4 @@ function revealTarget(target: Element): void {
     }
 }
 
-export { MOTION_SELECTOR, buildEntrances, revealAll, revealTarget };
+export { buildEntrances, revealAll, revealTarget };

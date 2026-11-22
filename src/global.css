@@ -132,8 +132,6 @@
     --radius-*: initial;
     --shadow-*: initial;
     --spacing: 4px;
-    --text-10xl: clamp(186px, calc(178px + 2.5vw), 210px);
-    --text-10xl--line-height: 1;
     --text-2xl: clamp(32px, calc(30.666px + 0.4168vw), 36px);
     --text-2xl--line-height: var(--text-3xl);
     --text-2xl-3xl: clamp(32px, calc(28px + 1.25vw), 44px);
@@ -198,6 +196,7 @@
 }
 
 :root {
+    --admin-only: none;
     --control-size: 48px;
     --dark-only: none;
     --drift-unit: round(clamp(12px, calc(1.333px + 3.3333vw), 44px), 4px);
@@ -210,7 +209,6 @@
     --halftone-pitch: 6px;
     --header-height: 80px;
     --lift: clamp(2px, 1vw, calc(var(--shell-max) / 100));
-    --lift-shadow: var(--lift) var(--lift) 0 0 var(--color-border-strong);
     --light-only: initial;
     --measure-form: calc(var(--shell-max) * 3 / 4 - 2 * var(--shell-pad));
     --measure-search: calc(var(--shell-max) * 3 / 8);
@@ -231,10 +229,8 @@
     --stagger-base: 0.07s;
     --stagger-max-total: 0.45s;
     --stagger-tight: 0.035s;
-    --z-card: 2;
     --z-drawer: 100;
     --z-ground: 0;
-    --z-lift: 3;
     --z-page: 1;
 }
 
@@ -251,15 +247,12 @@ summary {
     user-select: none;
 }
 
-@layer base {
-    dd,
-    p {
-        text-wrap: pretty;
-    }
+dd:not(.sr-only, .text-balance, .text-wrap, .truncate, .whitespace-nowrap),
+p:not(.sr-only, .text-balance, .text-wrap, .truncate, .whitespace-nowrap) {
+    text-wrap: pretty;
 }
 
-dialog::backdrop,
-.scrim {
+dialog::backdrop {
     background-color: var(--color-ink);
     cursor: zoom-out;
     opacity: 0.65;
@@ -274,6 +267,12 @@ h3.font-display {
     line-height: 1;
 }
 
+h1:not(.sr-only),
+h2:not(.sr-only),
+h3:not(.sr-only) {
+    text-wrap: balance;
+}
+
 h2:not(.font-display, .label),
 h3 {
     --text-base--line-height: var(--text-lg);
@@ -285,6 +284,7 @@ h3 {
 
 html {
     color-scheme: light;
+    scroll-padding-block: var(--header-height);
     scrollbar-gutter: stable;
     touch-action: manipulation;
 }
@@ -404,6 +404,10 @@ thead th {
     cursor: not-allowed;
 }
 
+[data-admin='true'] {
+    --admin-only: initial;
+}
+
 [data-session='in'] {
     --session-in-only: initial;
     --session-out-only: none;
@@ -482,7 +486,7 @@ thead th {
 }
 
 [id] {
-    scroll-margin-top: calc(var(--header-height) + var(--space-2xl));
+    scroll-margin-top: var(--space-2xl);
 }
 
 [tabindex='-1']:not(a, button, input, select, summary, textarea, [role]):focus-visible {

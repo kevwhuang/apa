@@ -1,11 +1,12 @@
 import { RACK_MASTER_LEVEL, closeRackChain, openRackChain, setRackMuted, setRackVolume } from '@lib/rack/context';
-import { STORAGE, TRACK_STATE_TOPIC } from '@lib/shared/constants';
+import { SECONDS_PER_MINUTE, STEPS_PER_BEAT, STORAGE, TRACK_LOAD_MESSAGE, TRACK_STATE_TOPIC } from '@lib/shared/constants';
 import { createStore } from '@lib/shared/state';
+import { toast } from '@lib/ui/toasts';
 
 const ATTACK_DIVISOR = 8;
 const BASS_LEVEL = 0.5;
 const BASS_RELEASE = 0.9;
-const BASS_STEPS = [0, 10];
+const BASS_STEPS = [0, 10] as const;
 const BEATS_PER_BAR = 4;
 const HASH_MULTIPLIER = 31;
 const HAT_CUTOFF_HERTZ = 7_000;
@@ -19,24 +20,20 @@ const MIDI_A4 = 69;
 const MINIMUM_GAIN = 0.0001;
 const NOISE_SECONDS = 1;
 const OCTAVE_THRESHOLD = 0.85;
-const PENTATONIC = [0, 3, 5, 7, 10];
+const PENTATONIC = [0, 3, 5, 7, 10] as const;
 const RANDOM_ADDEND = 12_345;
 const RANDOM_MODULUS = 2_147_483_648;
 const RANDOM_MULTIPLIER = 1_103_515_245;
 const ROOT_MIDI = 36;
 const SCALE_SALT = 7;
 const SCHEDULE_AHEAD = 0.15;
-const SECONDS_PER_MINUTE = 60;
 const SEMITONES_PER_OCTAVE = 12;
 const START_PADDING = 0.06;
-const STEPS_PER_BEAT = 4;
 const TEMPO_BASE = 84;
 const TEMPO_SPREAD = 5;
 const TEMPO_STEP = 8;
 const TUNING_HERTZ = 440;
 const VOICE_LEVEL = 0.55;
-
-const VOICE_MIX = VOICE_LEVEL / RACK_MASTER_LEVEL;
 
 const store = createStore<PlayerState>({
     fallback: { open: false, playing: false, position: 0 },
@@ -44,6 +41,8 @@ const store = createStore<PlayerState>({
     scope: STORAGE.player.scope,
     topic: STORAGE.player.topic,
 });
+
+const voiceMix = VOICE_LEVEL / RACK_MASTER_LEVEL;
 
 let context: AudioContext | undefined;
 let current: PlayerTrack | undefined;
@@ -93,12 +92,14 @@ function ensureAudio() {
 
         const samples = noise.getChannelData(0);
 
-        for (let index = 0; index < samples.length; index += 1) samples[index] = Math.random() * 2 - 1;
+        for (let index = 0; index < samples.length; index++) {
+            samples[index] = Math.random() * 2 - 1;
+        }
     }
 
     if (!mix) {
         mix = audio.context.createGain();
-        mix.gain.value = VOICE_MIX;
+        mix.gain.value = voiceMix;
     }
 
     mix.connect(audio.input);
@@ -111,10 +112,13 @@ function ensureElement() {
     if (typeof Audio === 'undefined') return undefined;
 
     element = new Audio();
+    element.crossOrigin = 'anonymous';
     element.muted = muted;
     element.preload = 'auto';
     element.volume = volume;
     element.addEventListener('ended', stopPlayback);
+    element.addEventListener('error', handleMediaError);
+    element.addEventListener('loadedmetadata', handleMetadata);
 
     return element;
 }
@@ -151,6 +155,25 @@ function getVolume(): number {
     return volume;
 }
 
+function handleMediaError() {
+    element?.removeAttribute('src');
+
+    if (!current?.file) return;
+
+    pausePlayback();
+    toast(TRACK_LOAD_MESSAGE, 'error');
+}
+
+function handleMetadata() {
+    const media = element;
+    const track = current;
+
+    if (!media || !Number.isFinite(media.duration) || !track?.file || track.durationSeconds > 0) return;
+
+    current = { ...track, durationSeconds: media.duration };
+    store.set({ ...store.get() });
+}
+
 function handlePlayRejection(error: unknown) {
     if (error instanceof DOMException && error.name === 'AbortError') return;
 
@@ -160,7 +183,7 @@ function handlePlayRejection(error: unknown) {
 function hash(value: string) {
     let total = 0;
 
-    for (let index = 0; index < value.length; index += 1) {
+    for (let index = 0; index < value.length; index++) {
         total = (total * HASH_MULTIPLIER + value.charCodeAt(index)) % RANDOM_MODULUS;
     }
 
@@ -227,6 +250,7 @@ function resumeFile(file: string, from: number, state: PlayerState) {
 
     if (media.src !== source) media.src = source;
 
+    handleMetadata();
     media.currentTime = from;
     store.set({ ...state, open: true, playing: true, position: from });
     announceTrackState();
@@ -287,7 +311,7 @@ function scheduleStep(track: PlayerTrack, step: number, at: number) {
     const roll = getRandom(seed + step);
     const root = ROOT_MIDI + (seed % SEMITONES_PER_OCTAVE);
 
-    if (BASS_STEPS.includes(beat)) pluck(track, at, root, BASS_LEVEL, BASS_RELEASE, 'triangle');
+    if (BASS_STEPS.some(bassStep => bassStep === beat)) pluck(track, at, root, BASS_LEVEL, BASS_RELEASE, 'triangle');
     if (step % 2 === 1) whisper(at);
 
     if (roll < LEAD_THRESHOLD) return;
@@ -366,7 +390,7 @@ function tick() {
 
     while (stepTime < context.currentTime + SCHEDULE_AHEAD) {
         scheduleStep(track, stepCursor, stepTime);
-        stepCursor += 1;
+        stepCursor++;
         stepTime += getStepSeconds(track);
     }
 }

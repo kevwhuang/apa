@@ -13,6 +13,7 @@ import {
     DELAY_FEEDBACK_DEFAULT,
     DELAY_TIME_DEFAULT,
     DISTORTION_DRIVE_DEFAULT,
+    EMPTY_READOUT,
     EQ_HIGH_GAIN_DEFAULT,
     EQ_LOW_GAIN_DEFAULT,
     EQ_MID_GAIN_DEFAULT,
@@ -28,10 +29,10 @@ import {
     TREMOLO_RATE_DEFAULT,
     TRIM_GAIN_DEFAULT,
 } from '@lib/rack/blocks';
-import { MODULE_NAMES } from '@lib/rack/rack';
-import { RACK_EXTENSION_LIST, RACK_MAX_BYTES } from '@lib/rack/loader';
-import { UPLOAD } from '@lib/shared/constants';
+import { MODULE_NAMES, UPLOAD } from '@lib/shared/constants';
 import { formatBytes, formatEntry } from '@lib/shared/utils';
+import { rackMaxBytes } from '@lib/rack/loader';
+import { uploadExtensionsOrList } from '@lib/audio/uploads';
 
 interface Module {
     blurb: string;
@@ -54,6 +55,7 @@ interface ModuleSlider {
 }
 
 const CLASS_DROP = 'dropzone halftone rack__drop flex flex-col items-center justify-center relative gap-3 p-4 border-2 border-border-inverse-strong border-dashed text-center bg-bg-inverse-raised';
+const CLASS_READOUT = 'flex items-center justify-center min-h-(--control-size) px-3 py-2 border-(--module-line) border-2 font-mono text-center text-lg bg-(--module-fill) select-none';
 const DISTORTION_TONE_POSITION = 0.7819;
 const FILTER_CUTOFF_POSITION = 0.5498;
 const HIGHPASS_CUTOFF_POSITION = 0.389;
@@ -200,7 +202,7 @@ const MODULES: Module[] = [
     {
         blurb: 'Autocorrelation on the signal at this point in the chain: hertz, nearest note, cents off. Feed it something monophonic. Chords read as nonsense.',
         kind: 'tuner',
-        readout: '\u2014',
+        readout: EMPTY_READOUT,
         role: 'Tuner',
         sliders: [],
         visualization: 'readout',
@@ -250,11 +252,11 @@ const MODULES: Module[] = [
         </div>
         <div class="content-start grid px-4 py-3 bg-bg-page">
             <dt class="label mb-1 text-text-secondary">Formats</dt>
-            <dd class="font-mono text-base">{RACK_EXTENSION_LIST}</dd>
+            <dd class="font-mono text-base">{uploadExtensionsOrList}</dd>
         </div>
         <div class="content-start grid px-4 py-3 bg-bg-page">
             <dt class="label mb-1 text-text-secondary">Ceiling</dt>
-            <dd class="font-mono text-base">{formatBytes(RACK_MAX_BYTES)} per file</dd>
+            <dd class="font-mono text-base">{formatBytes(rackMaxBytes)} per file</dd>
         </div>
         <div class="content-start grid px-4 py-3 bg-bg-page">
             <dt class="label mb-1 text-text-secondary">Output</dt>
@@ -275,7 +277,6 @@ const MODULES: Module[] = [
         <SectionHead
             class="text-2xl text-balance"
             headingId="rack-title"
-            tone="dark"
         >
             Load a file and build the chain
         </SectionHead>
@@ -291,7 +292,7 @@ const MODULES: Module[] = [
                     id="rack-help"
                     class="font-mono text-balance text-sm text-text-inverse-secondary"
                 >
-                    A {RACK_EXTENSION_LIST} file up to {formatBytes(RACK_MAX_BYTES)}.
+                    A {uploadExtensionsOrList} file up to {formatBytes(rackMaxBytes)}.
                 </span>
                 <input
                     id="rack-file"
@@ -458,7 +459,7 @@ const MODULES: Module[] = [
                         {module.visualization === 'readout' && (
                             <div class="row-5">
                                 <p
-                                    class="flex items-center justify-center min-h-(--control-size) px-3 py-2 border-(--module-line) border-2 font-mono text-center text-lg bg-(--module-fill) select-none"
+                                    class={CLASS_READOUT}
                                     data-module-readout
                                 >
                                     {module.readout}
@@ -516,6 +517,10 @@ const MODULES: Module[] = [
         background-color: var(--color-btn-primary-bg-hover);
         border-color: var(--color-btn-primary-bg);
         color: var(--color-btn-primary-text);
+    }
+
+    .rack .spinner {
+        --spinner-track: var(--color-border-inverse-subtle);
     }
 
     .rack.is-decoding .rack__meta {
@@ -641,8 +646,8 @@ const MODULES: Module[] = [
 
 <script>
     import { ANALYSER_FFT } from '@lib/rack/blocks';
+    import { MODULE_NAMES, STORAGE } from '@lib/shared/constants';
     import {
-        MODULE_NAMES,
         RACK_ORDER,
         getRackAnalyser,
         getRackReadout,
@@ -653,7 +658,6 @@ const MODULES: Module[] = [
         setRackParameter,
         toggleRack,
     } from '@lib/rack/rack';
-    import { STORAGE } from '@lib/shared/constants';
     import { applyInstantly, formatDuration, preventNavigation, registerPageScript, setHidden, setText } from '@lib/shared/utils';
     import { initRig } from '@lib/motion/rig';
     import { readColorToken } from '@lib/motion/tokens';
@@ -755,12 +759,11 @@ const MODULES: Module[] = [
 
     function buildView(card: HTMLElement, signal: AbortSignal) {
         const canvas = card.querySelector<HTMLCanvasElement>('[data-module-canvas]');
+        const kind = RACK_ORDER.find(entry => entry === card.dataset.module);
         const readout = card.querySelector<HTMLElement>('[data-module-readout]');
         const toggle = card.querySelector<HTMLButtonElement>('[data-module-active]');
 
-        if (!toggle) return null;
-
-        const kind = card.dataset.module as RackKind;
+        if (!kind || !toggle) return null;
 
         const view: ModuleView = {
             canvas,
@@ -825,7 +828,7 @@ const MODULES: Module[] = [
 
         let peak = 0;
 
-        for (let index = 0; index < meterData.length; index += 1) {
+        for (let index = 0; index < meterData.length; index++) {
             const value = Math.abs(meterData[index]);
 
             if (value > peak) peak = value;
@@ -836,7 +839,7 @@ const MODULES: Module[] = [
 
         const lit = Math.round(level * METER_SEGMENTS);
 
-        for (let index = 0; index < METER_SEGMENTS; index += 1) {
+        for (let index = 0; index < METER_SEGMENTS; index++) {
             const isAccented = index >= METER_SEGMENTS - ACCENT_SEGMENTS;
 
             const litColor = isAccented ? view.accent : view.ink;
@@ -924,15 +927,17 @@ const MODULES: Module[] = [
     }
 
     async function intake(file: File, signal: AbortSignal) {
+        requests++;
+
+        const error = validateRackFile(file);
         const input = document.querySelector<HTMLInputElement>('[data-rack-input]');
-        const invalid = validateRackFile(file);
-        const token = (requests += 1);
+        const token = requests;
 
         input?.setAttribute('aria-invalid', 'false');
 
-        if (invalid) {
+        if (error) {
             setDecoding(false);
-            showRackError(input, invalid);
+            showRackError(input, error);
 
             return;
         }
@@ -1023,7 +1028,10 @@ const MODULES: Module[] = [
         const isActive = state.activeKinds.includes(view.kind);
 
         view.card.classList.toggle('module--engaged', isActive);
-        if (view.toggle.getAttribute('aria-pressed') !== String(isActive)) applyInstantly(view.toggle, () => view.toggle.setAttribute('aria-pressed', String(isActive)));
+
+        if (view.toggle.getAttribute('aria-pressed') !== String(isActive)) {
+            applyInstantly(view.toggle, () => view.toggle.setAttribute('aria-pressed', String(isActive)));
+        }
 
         if (isActive && state.playing) return;
 

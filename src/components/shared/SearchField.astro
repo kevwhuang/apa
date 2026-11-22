@@ -9,6 +9,8 @@ interface Props {
     'placeholder': string;
 }
 
+const CLASS_CLEAR = 'active:translate-y-px hover:text-link absolute inline-flex items-center justify-center right-0 top-0 h-(--control-size) w-(--control-size) text-text-secondary transition-[color,translate]';
+
 const { class: fieldClass, 'data-motion': motion, label, placeholder } = Astro.props;
 ---
 
@@ -25,7 +27,7 @@ const { class: fieldClass, 'data-motion': motion, label, placeholder } = Astro.p
             <IconSearch />
         </span>
         <input
-            class="input search-field__input pl-11 pr-(--control-size) font-mono"
+            class="input input--trailing search-field__input font-mono"
             autocomplete="off"
             data-search-input
             placeholder={placeholder}
@@ -33,7 +35,7 @@ const { class: fieldClass, 'data-motion': motion, label, placeholder } = Astro.p
             type="search"
         />
         <button
-            class="active:translate-y-px hover:text-link absolute inline-flex items-center justify-center right-0 top-0 h-(--control-size) w-(--control-size) text-text-secondary transition-[color,translate]"
+            class={CLASS_CLEAR}
             aria-label="Clear search"
             data-search-clear
             hidden
@@ -47,10 +49,15 @@ const { class: fieldClass, 'data-motion': motion, label, placeholder } = Astro.p
 <style>
     .search-field__input {
         background-color: var(--color-bg-sunken);
+        padding-left: 44px;
     }
 
     .search-field__input:focus-visible,
     .search-field__input:hover {
         background-color: var(--color-bg-page);
+    }
+
+    .search-field__input::-webkit-search-cancel-button {
+        appearance: none;
     }
 </style>

@@ -8,23 +8,23 @@ import IconArrow from '@components/icons/Arrow.astro';
     data-tour
 >
     <div
-        class="scrim tour__pane tour__pane--top fixed pointer-events-auto"
+        class="tour__pane tour__pane--top fixed pointer-events-auto"
         aria-hidden="true"
     />
     <div
-        class="scrim tour__pane tour__pane--bottom fixed pointer-events-auto"
+        class="tour__pane tour__pane--bottom fixed pointer-events-auto"
         aria-hidden="true"
     />
     <div
-        class="scrim tour__pane tour__pane--left fixed pointer-events-auto"
+        class="tour__pane tour__pane--left fixed pointer-events-auto"
         aria-hidden="true"
     />
     <div
-        class="scrim tour__pane tour__pane--right fixed pointer-events-auto"
+        class="tour__pane tour__pane--right fixed pointer-events-auto"
         aria-hidden="true"
     />
     <div
-        class="tour__ring fixed left-(--tour-left) top-(--tour-top) h-(--tour-height) w-(--tour-width) outline-2 outline-border-selected pointer-events-auto"
+        class="tour__ring fixed left-(--tour-left) top-(--tour-top) h-(--tour-height) w-(--tour-width) -outline-offset-2 outline-2 outline-border-selected pointer-events-auto"
         aria-hidden="true"
     />
     <div
@@ -74,8 +74,8 @@ import IconArrow from '@components/icons/Arrow.astro';
 
 <style>
     .tour {
-        --tour-card-x: 0px;
-        --tour-card-y: 0px;
+        --tour-card-x: 0;
+        --tour-card-y: 0;
         --tour-height: 0px;
         --tour-left: 0px;
         --tour-top: 0px;
@@ -99,7 +99,9 @@ import IconArrow from '@components/icons/Arrow.astro';
     }
 
     .tour__pane {
+        background-color: var(--color-ink);
         cursor: default;
+        opacity: 0.65;
     }
 
     .tour__pane--bottom {
@@ -209,7 +211,7 @@ import IconArrow from '@components/icons/Arrow.astro';
 
         if (!buttons.length) return;
 
-        const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+        const index = buttons.findIndex(button => button === document.activeElement);
         const offset = event.shiftKey ? -1 : 1;
         const outside = event.shiftKey ? buttons.length : -1;
 
@@ -239,7 +241,9 @@ import IconArrow from '@components/icons/Arrow.astro';
     }
 
     function listControls() {
-        return Array.from(document.querySelectorAll<HTMLButtonElement>('[data-tour-back], [data-tour-next], [data-tour-skip]'))
+        const root = document.querySelector<HTMLElement>('[data-tour]');
+
+        return Array.from(root?.querySelectorAll<HTMLButtonElement>('[data-tour-back], [data-tour-next], [data-tour-skip]') ?? [])
             .filter(button => !button.hidden);
     }
 
@@ -294,9 +298,10 @@ import IconArrow from '@components/icons/Arrow.astro';
     }
 
     function render() {
-        const card = document.querySelector<HTMLElement>('[data-tour-card]');
         const root = document.querySelector<HTMLElement>('[data-tour]');
         const stop = stops[step];
+
+        const card = root?.querySelector<HTMLElement>('[data-tour-card]');
 
         if (!card || !root || !stop) return;
 
@@ -345,7 +350,9 @@ import IconArrow from '@components/icons/Arrow.astro';
     }
 
     function showStep(next: number) {
-        if (!isRunning) return;
+        const root = document.querySelector<HTMLElement>('[data-tour]');
+
+        if (!isRunning || !root) return;
 
         const last = stops.length - 1;
 
@@ -353,15 +360,15 @@ import IconArrow from '@components/icons/Arrow.astro';
 
         const stop = stops[step];
 
-        setHidden(document.querySelector<HTMLElement>('[data-tour-back]'), step === 0);
-        setHidden(document.querySelector<HTMLElement>('[data-tour-skip]'), step === last);
-        setText(document.querySelector('[data-tour-announce]'), `Step ${step + 1} of ${stops.length}. ${stop.body}`);
-        setText(document.querySelector('[data-tour-body]'), stop.body);
-        setText(document.querySelector('[data-tour-eyebrow]'), `Tour stop ${step + 1} of ${stops.length}`);
-        setText(document.querySelector('[data-tour-next-label]'), step === last ? 'Done' : 'Next');
+        setHidden(root.querySelector<HTMLElement>('[data-tour-back]'), step === 0);
+        setHidden(root.querySelector<HTMLElement>('[data-tour-skip]'), step === last);
+        setText(root.querySelector('[data-tour-announce]'), `Step ${step + 1} of ${stops.length}. ${stop.body}`);
+        setText(root.querySelector('[data-tour-body]'), stop.body);
+        setText(root.querySelector('[data-tour-eyebrow]'), `Tour stop ${step + 1} of ${stops.length}`);
+        setText(root.querySelector('[data-tour-next-label]'), step === last ? 'Done' : 'Next');
         scrollToTargets(stop.targets);
         render();
-        document.querySelector<HTMLElement>('[data-tour-next]')?.focus({ preventScroll: true });
+        root.querySelector<HTMLElement>('[data-tour-next]')?.focus({ preventScroll: true });
     }
 
     function startTour(root: HTMLDialogElement, signal: AbortSignal) {
@@ -371,9 +378,9 @@ import IconArrow from '@components/icons/Arrow.astro';
         showStep(0);
         document.addEventListener('keydown', handleKeydown, { signal });
         document.addEventListener('transitionend', schedule, { signal });
-        document.querySelector<HTMLElement>('[data-tour-back]')?.addEventListener('click', () => showStep(step - 1), { signal });
-        document.querySelector<HTMLElement>('[data-tour-next]')?.addEventListener('click', handleNext, { signal });
-        document.querySelector<HTMLElement>('[data-tour-skip]')?.addEventListener('click', () => void closeTour(), { signal });
+        root.querySelector<HTMLElement>('[data-tour-back]')?.addEventListener('click', () => showStep(step - 1), { signal });
+        root.querySelector<HTMLElement>('[data-tour-next]')?.addEventListener('click', handleNext, { signal });
+        root.querySelector<HTMLElement>('[data-tour-skip]')?.addEventListener('click', () => void closeTour(), { signal });
         root.addEventListener('cancel', handleCancel, { signal });
         window.addEventListener('resize', schedule, { signal });
         window.addEventListener('scroll', schedule, { capture: true, passive: true, signal });

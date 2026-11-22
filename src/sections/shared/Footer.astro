@@ -6,7 +6,7 @@ import IconMeetup from '@components/icons/Meetup.astro';
 import IconSoundCloud from '@components/icons/SoundCloud.astro';
 import IconSpotify from '@components/icons/Spotify.astro';
 import { BRAND } from '@lib/shared/brand';
-import { LINKS, LOCALE, NAV_GROUPS, ONBOARDING_ROUTE, SITE_UPDATED, TIME_ZONE } from '@lib/shared/constants';
+import { LINKS, LOCALE, NAV_GROUPS, ONBOARDING_ROUTE, SETTINGS_ROUTE, SITE_UPDATED, TIME_ZONE } from '@lib/shared/constants';
 import { formatDateStamp } from '@lib/shared/utils';
 
 const ACCOUNT_LINKS = [
@@ -14,7 +14,7 @@ const ACCOUNT_LINKS = [
     { href: '/here', label: 'Here' },
     { href: '/store/cart', label: 'Cart' },
     { href: '/store/orders', label: 'Orders' },
-    { href: '/settings', label: 'Settings' },
+    { href: SETTINGS_ROUTE, label: 'Settings' },
     { href: '/admin', label: 'Admin' },
 ] as const;
 
@@ -67,7 +67,6 @@ const year = new Date().toLocaleDateString(LOCALE, { timeZone: TIME_ZONE, year: 
                             <li>
                                 <a
                                     class="footer__link active:translate-y-px hover:text-link-on-inverse flex items-center min-h-(--control-size) text-base transition-[color,translate]"
-                                    data-footer-onboarding={item.href === ONBOARDING_ROUTE ? '' : undefined}
                                     href={item.href}
                                 >
                                     {item.label}
@@ -136,7 +135,7 @@ const year = new Date().toLocaleDateString(LOCALE, { timeZone: TIME_ZONE, year: 
 
 <style>
     .footer__bar {
-        --stage-pad: 0px;
+        --stage-pad: 0;
     }
 
     .footer__credit-link,
@@ -203,30 +202,3 @@ const year = new Date().toLocaleDateString(LOCALE, { timeZone: TIME_ZONE, year: 
         }
     }
 </style>
-
-<script>
-    import { ONBOARDING_ROUTE } from '@lib/shared/constants';
-    import { getOnboardingHref } from '@lib/account/onboarding';
-    import { getSession, onSessionChange } from '@lib/account/session';
-    import { registerPageScript } from '@lib/shared/utils';
-
-    let unsubscribe: (() => void) | undefined;
-
-    function initFooter(signal: AbortSignal) {
-        renderOnboarding();
-        unsubscribe?.();
-        unsubscribe = onSessionChange(renderOnboarding);
-        signal.addEventListener('abort', () => unsubscribe?.(), { once: true });
-    }
-
-    function renderOnboarding() {
-        const link = document.querySelector<HTMLAnchorElement>('[data-footer-onboarding]');
-        const session = getSession();
-
-        if (!link) return;
-
-        link.href = session ? getOnboardingHref(session.email) : ONBOARDING_ROUTE;
-    }
-
-    registerPageScript(initFooter);
-</script>

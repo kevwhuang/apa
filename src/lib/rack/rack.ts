@@ -7,25 +7,6 @@ import { getPlayerState, onPlayerChange, togglePlayback } from '@lib/audio/playe
 
 const CROSSFADE_SECONDS = 0.015;
 
-const MODULE_NAMES: Record<RackKind, string> = {
-    chorus: 'Weave',
-    compressor: 'Clamp',
-    delay: 'Relay',
-    distortion: 'Scorch',
-    eq: 'Ledger',
-    filter: 'Sieve',
-    gate: 'Latch',
-    highpass: 'Sill',
-    limiter: 'Ceiling',
-    meter: 'Needle',
-    pan: 'Bearing',
-    reverb: 'Chamber',
-    saturator: 'Grit',
-    tremolo: 'Pulse',
-    trim: 'Tare',
-    tuner: 'Pitchfork',
-};
-
 const RACK_ORDER: RackKind[] = [
     'trim',
     'filter',
@@ -62,6 +43,7 @@ let buffer: AudioBuffer | undefined;
 let bus: GainNode | undefined;
 let frame = 0;
 let input: GainNode | undefined;
+let loads = 0;
 let pausedPosition = 0;
 let rebuild: Timer | undefined;
 let settle: Timer | undefined;
@@ -162,9 +144,13 @@ function hasFeed() {
 }
 
 async function loadRackFile(file: File): Promise<RackLoadResult> {
+    loads++;
+
+    const token = loads;
+
     const result = await decodeRackFile(file);
 
-    if (!result.ok) return result;
+    if (!result.ok || token !== loads) return result;
 
     buffer = result.buffer;
     pausedPosition = 0;
@@ -180,7 +166,7 @@ function onRackChange(callback: (state: RackState) => void): () => void {
     return store.onChange(callback);
 }
 
-function pauseRack(): void {
+function pauseRack() {
     const state = store.get();
 
     if (!state.playing) return;
@@ -194,7 +180,7 @@ function pauseRack(): void {
     settle = setTimeout(suspendRackAudio, SETTLE_DELAY_MILLISECONDS);
 }
 
-function playRack(): void {
+function playRack() {
     const state = store.get();
 
     if (!buffer || state.playing) return;
@@ -315,7 +301,9 @@ function stopSource(seconds: number) {
 function tick() {
     frame = 0;
 
-    for (const kind of store.get().activeKinds) blocks.get(kind)?.tick?.();
+    for (const kind of store.get().activeKinds) {
+        blocks.get(kind)?.tick?.();
+    }
 
     startTicking();
 }
@@ -337,7 +325,6 @@ onPlayerChange((state) => {
 setRackChainBuilder(attachChain);
 
 export {
-    MODULE_NAMES,
     RACK_ORDER,
     getRackAnalyser,
     getRackPosition,

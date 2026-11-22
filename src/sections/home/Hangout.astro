@@ -55,7 +55,7 @@ const upcoming = events.filter(event => event.program === 'Hangout' && isUpcomin
                             datetime={toAustinIso(event.starts_at)}
                         >
                             <span class="hangout-flyer__day">{formatCalendarDay(event.starts_at)}</span>
-                            <span class="block font-mono text-lg max-md:self-center max-md:justify-self-end max-md:text-end">{formatCalendarMonth(event.starts_at)}</span>
+                            <span class="block font-mono text-lg max-md:justify-self-end max-md:self-center max-md:text-end">{formatCalendarMonth(event.starts_at)}</span>
                         </time>
                     </p>
                     <div class="content-start p-(--space-lg)">

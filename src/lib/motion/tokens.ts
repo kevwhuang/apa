@@ -23,7 +23,7 @@ const FALLBACK_DATA_KEY = 'motionTokenFallback';
 const SCALAR_FALLBACKS = {
     '--motion-travel': 24,
     '--stagger-max-total': 0.45,
-};
+} as const;
 
 const STAGGER_FALLBACKS: Record<MotionStaggerToken, number> = {
     base: 0.07,
@@ -49,7 +49,7 @@ function createCubicBezier(x1: number, y1: number, x2: number, y2: number) {
 
         let t = progress;
 
-        for (let index = 0; index < BEZIER_ITERATIONS; index += 1) {
+        for (let index = 0; index < BEZIER_ITERATIONS; index++) {
             const error = ((ax * t + bx) * t + cx) * t - progress;
 
             if (Math.abs(error) < BEZIER_EPSILON) break;
@@ -109,7 +109,7 @@ function readEase(styles: CSSStyleDeclaration, name: string, fallback: MotionBez
 
     const points = match ? match[1].split(',').map(Number) : [];
 
-    const isValid = points.length === fallback.length && points.every(Number.isFinite);
+    const isValid = points.every(Number.isFinite) && points.length === fallback.length;
 
     if (!isValid) fallbacks.push(name);
 

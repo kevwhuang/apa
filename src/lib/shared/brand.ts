@@ -3,6 +3,7 @@ import horizontalInk from '@images/brand/apa_horizontal_ink.svg';
 import symbol from '@images/brand/apa_symbol_default.svg';
 import symbolCream from '@images/brand/apa_symbol_cream.svg';
 import symbolInk from '@images/brand/apa_symbol_ink.svg';
+import { TITLE_SEPARATOR } from '@lib/shared/constants';
 
 const BRAND_ICONS = {
     appleTouch: '/apple-touch-icon.png',
@@ -43,7 +44,7 @@ const BRAND = {
 } as const;
 
 function brandTitle(...trail: string[]): string {
-    return [...trail, BRAND.shortName].join(' | ');
+    return [...trail, BRAND.shortName].join(TITLE_SEPARATOR);
 }
 
 export { BRAND, BRAND_ICONS, BRAND_LOGOS, BRAND_OG, BRAND_SIZES, BRAND_THEME_COLORS, brandTitle };

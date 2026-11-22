@@ -117,8 +117,18 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
                 >
                     Your message
                 </h2>
-                <p class="text-text-secondary">
+                <p
+                    class="text-text-secondary"
+                    data-contact-note="draft"
+                >
                     The button below opens this message in your email app.
+                </p>
+                <p
+                    class="text-text-secondary"
+                    data-contact-note="sent"
+                    hidden
+                >
+                    Sent. We reply to the address in the From line.
                 </p>
             </hgroup>
             <dl class="flex flex-col">
@@ -295,18 +305,21 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
 </style>
 
 <script>
-    import { CONTACT_LIMITS, EMAIL_PATTERN } from '@lib/shared/constants';
+    import { CONTACT_LIMITS, CONTACT_MESSAGES, EMAIL_PATTERN, PARAGRAPH_SEPARATOR } from '@lib/shared/constants';
     import { clearFieldErrors, reportFieldErrors, validateFields, watchFieldErrors } from '@lib/ui/forms';
     import { composeContactEmail } from '@lib/shared/email';
-    import { registerPageScript, setText } from '@lib/shared/utils';
+    import { registerPageScript, setHidden, setPending, setText } from '@lib/shared/utils';
+    import { sendRequest } from '@lib/shared/request';
     import { toast } from '@lib/ui/toasts';
 
     const RULES: Record<string, FieldRule> = {
-        email: { max: CONTACT_LIMITS.email, message: 'Enter a valid email address.', pattern: EMAIL_PATTERN, required: true },
-        message: { max: CONTACT_LIMITS.message, message: 'Write at least a sentence.', min: CONTACT_LIMITS.messageMin, required: true },
-        name: { max: CONTACT_LIMITS.name, message: 'Enter your name.', required: true },
-        topic: { message: 'Choose a topic.', required: true },
+        email: { max: CONTACT_LIMITS.email, message: CONTACT_MESSAGES.email, pattern: EMAIL_PATTERN, required: true },
+        message: { max: CONTACT_LIMITS.message, message: CONTACT_MESSAGES.message, min: CONTACT_LIMITS.messageMin, required: true },
+        name: { max: CONTACT_LIMITS.name, message: CONTACT_MESSAGES.name, required: true },
+        topic: { message: CONTACT_MESSAGES.topic, required: true },
     };
+
+    const submitting = new WeakSet<HTMLFormElement>();
 
     function applyTopicFromQuery(form: HTMLFormElement) {
         const requested = new URLSearchParams(window.location.search).get('topic')?.trim();
@@ -325,14 +338,18 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
     function handleContactAgain(form: HTMLFormElement, done: HTMLElement) {
         done.setAttribute('hidden', '');
         form.removeAttribute('hidden');
-        form.reset();
+
+        if (done.dataset.contactState === 'sent') form.reset();
+
         form.querySelector<HTMLInputElement>('[name="name"]')?.focus();
     }
 
-    function handleContactSubmit(event: SubmitEvent, form: HTMLFormElement, done: HTMLElement) {
+    async function handleContactSubmit(event: SubmitEvent, form: HTMLFormElement, done: HTMLElement) {
         event.preventDefault();
 
-        const errors = validateFields(form, RULES, true);
+        if (submitting.has(form)) return;
+
+        const errors = validateFields(form, RULES);
 
         clearFieldErrors(form);
 
@@ -342,7 +359,18 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
             return;
         }
 
-        renderReceipt(form, done);
+        const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        const values = readContactValues(form);
+
+        submitting.add(form);
+        setPending(button, true);
+
+        const result = await sendRequest('/api/contact', { body: { ...values }, method: 'POST' });
+
+        submitting.delete(form);
+        setPending(button, false);
+        renderReceipt(form, done, values, result.ok);
+        toast(result.ok ? 'Message sent. We will reply by email.' : result.message, result.ok ? 'success' : 'error');
     }
 
     function initContactForm(signal: AbortSignal) {
@@ -354,33 +382,40 @@ import { CONTACT_LIMITS, CONTACT_TOPICS, LINKS, PLATFORMS } from '@lib/shared/co
 
         form.noValidate = true;
         again?.addEventListener('click', () => handleContactAgain(form, done), { signal });
-        form.addEventListener('submit', event => handleContactSubmit(event, form, done), { signal });
+        form.addEventListener('submit', event => void handleContactSubmit(event, form, done), { signal });
         watchFieldErrors(form, signal);
         applyTopicFromQuery(form);
     }
 
-    function renderReceipt(form: HTMLFormElement, done: HTMLElement) {
-        const send = document.querySelector<HTMLAnchorElement>('[data-contact-send]');
+    function readContactValues(form: HTMLFormElement) {
         const values = new FormData(form);
 
-        const composed = composeContactEmail({
+        return {
             email: String(values.get('email') ?? '').trim(),
             message: String(values.get('message') ?? '').trim(),
             name: String(values.get('name') ?? '').trim(),
             topic: String(values.get('topic') ?? '').trim(),
-        });
+        };
+    }
 
+    function renderReceipt(form: HTMLFormElement, done: HTMLElement, values: ContactEmailInput, isSent: boolean) {
+        const composed = composeContactEmail(values);
+        const send = done.querySelector<HTMLAnchorElement>('[data-contact-send]');
+
+        done.dataset.contactState = isSent ? 'sent' : 'draft';
         done.removeAttribute('hidden');
         form.setAttribute('hidden', '');
 
         if (send) send.href = composed.actionHref;
 
-        setText(document.querySelector('[data-contact-from]'), composed.from);
-        setText(document.querySelector('[data-contact-message]'), composed.body.join('\n\n'));
-        setText(document.querySelector('[data-contact-subject]'), composed.subject);
-        setText(document.querySelector('[data-contact-to]'), composed.to);
-        document.querySelector<HTMLElement>('[data-contact-heading]')?.focus();
-        toast('Message ready. Send it from your inbox.', 'info');
+        setHidden(send, isSent);
+        setHidden(done.querySelector<HTMLElement>('[data-contact-note="draft"]'), isSent);
+        setHidden(done.querySelector<HTMLElement>('[data-contact-note="sent"]'), !isSent);
+        setText(done.querySelector('[data-contact-from]'), composed.from);
+        setText(done.querySelector('[data-contact-message]'), composed.body.join(PARAGRAPH_SEPARATOR));
+        setText(done.querySelector('[data-contact-subject]'), composed.subject);
+        setText(done.querySelector('[data-contact-to]'), composed.to);
+        done.querySelector<HTMLElement>('[data-contact-heading]')?.focus();
     }
 
     registerPageScript(initContactForm);

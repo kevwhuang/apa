@@ -12,7 +12,7 @@ interface Props {
     hasHero?: boolean;
 }
 
-const HERO_ROUTES = new Set<string>(['/api', '/assemblies', '/bashes', '/directory', '/gallery', '/hangouts', '/partners', '/rack', '/store']);
+const HERO_ROUTES = new Set(['/api', '/assemblies', '/bashes', '/directory', '/gallery', '/hangouts', '/partners', '/rack', '/store']);
 
 const { hasHero = false } = Astro.props;
 
@@ -375,6 +375,9 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
             border-bottom: 2px solid var(--color-border-strong);
             display: none;
             inset: 100% 0 auto;
+            max-height: calc(100dvh - var(--header-height));
+            overflow-y: auto;
+            overscroll-behavior: contain;
             position: absolute;
         }
 
@@ -402,7 +405,6 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
             background: none;
             border: 0;
             gap: 0;
-            inset: auto;
             min-width: 0;
             padding: 0 0 0 var(--nav-pad);
             position: static;
@@ -426,16 +428,16 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
 </style>
 
 <script>
-    import { count, onCartChange, seedCart } from '@lib/commerce/cart';
+    import { HOVER_QUERY } from '@lib/shared/constants';
+    import { count, onCartChange } from '@lib/commerce/cart';
     import { registerPageScript } from '@lib/shared/utils';
 
     const CART_BADGE_MAX = 99;
     const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled])';
     const HEADER_INSTANT_CLASS = 'is-instant';
     const HEADER_STATE_CLASSES = ['is-hidden'] as const;
-    const HOVER_CLICK_GRACE = 500;
-    const HOVER_CLOSE_DELAY = 200;
-    const HOVER_QUERY = '(hover: hover)';
+    const HOVER_CLICK_GRACE_MILLISECONDS = 500;
+    const HOVER_CLOSE_DELAY_MILLISECONDS = 200;
     const MOBILE_QUERY = '(max-width: 1024px)';
     const SCROLL_DELTA = 6;
     const SCROLL_TOP_THRESHOLD = 80;
@@ -597,7 +599,7 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
     }
 
     function handleMenuKeydown(event: KeyboardEvent, menu: HTMLElement) {
-        const index = listItems(menu).indexOf(document.activeElement as HTMLElement);
+        const index = listItems(menu).findIndex(item => item === document.activeElement);
 
         if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
             event.preventDefault();
@@ -662,7 +664,7 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
         closeAll(trigger);
         delete trigger.dataset.hoverOpened;
 
-        if (isExpanded && hoverOpenedAt && Date.now() - hoverOpenedAt < HOVER_CLICK_GRACE) return;
+        if (isExpanded && hoverOpenedAt && Date.now() - hoverOpenedAt < HOVER_CLICK_GRACE_MILLISECONDS) return;
 
         setExpanded(trigger, !isExpanded);
     }
@@ -695,7 +697,6 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
         isJumpNavigation = Boolean(window.location.hash);
         isScrollTicking = false;
         lastScrollY = window.scrollY;
-        seedCart();
         updateActiveLink();
         updateCart();
         updateHeader();
@@ -747,7 +748,7 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
             if (menu?.contains(document.activeElement)) return;
 
             setExpanded(trigger, false);
-        }, HOVER_CLOSE_DELAY);
+        }, HOVER_CLOSE_DELAY_MILLISECONDS);
     }
 
     function setExpanded(trigger: HTMLElement, isExpanded: boolean) {
@@ -789,11 +790,8 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
     function trackScroll() {
         const currentScrollY = window.scrollY;
 
-        if (currentScrollY < lastScrollY - SCROLL_DELTA || isJumpNavigation) {
-            isHeaderRequested = true;
-        } else if (currentScrollY > lastScrollY + SCROLL_DELTA) {
-            isHeaderRequested = false;
-        }
+        if (currentScrollY < lastScrollY - SCROLL_DELTA || isJumpNavigation) isHeaderRequested = true;
+        else if (currentScrollY > lastScrollY + SCROLL_DELTA) isHeaderRequested = false;
 
         isJumpNavigation = false;
         isScrollTicking = false;
@@ -813,13 +811,9 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
             const hash = target.slice(path.length);
             const href = path.replace(/\/$/, '') || '/';
 
-            if ((hash === '' || hash === currentHash) && href === currentPath) {
-                link.setAttribute('aria-current', 'page');
-            } else if (currentPath.startsWith(`${href}/`) && href !== '/') {
-                link.setAttribute('aria-current', 'true');
-            } else {
-                link.removeAttribute('aria-current');
-            }
+            if ((hash === '' || hash === currentHash) && href === currentPath) link.setAttribute('aria-current', 'page');
+            else if (currentPath.startsWith(`${href}/`) && href !== '/') link.setAttribute('aria-current', 'true');
+            else link.removeAttribute('aria-current');
         });
     }
 

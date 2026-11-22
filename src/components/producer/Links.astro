@@ -4,11 +4,9 @@ import IconSoundCloud from '@components/icons/SoundCloud.astro';
 import IconSpotify from '@components/icons/Spotify.astro';
 import IconYouTube from '@components/icons/YouTube.astro';
 
-import type { CollectionEntry } from 'astro:content';
-
 interface Props {
     linkClass: string;
-    links: CollectionEntry<'producers'>['data']['links'];
+    links: { href: string; label: string }[];
 }
 
 const LINK_ICONS: Record<string, typeof IconInstagram | undefined> = {
@@ -42,7 +40,10 @@ const { linkClass, links } = Astro.props;
                         target="_blank"
                     >
                         {LinkIcon ? <LinkIcon /> : link.label}
-                        <span class="sr-only">{LinkIcon && link.label}&nbsp;(opens in a new tab)</span>
+                        <span class="sr-only">
+                            {LinkIcon && link.label}
+                            &nbsp;(opens in a new tab)
+                        </span>
                     </a>
                 </li>
             );

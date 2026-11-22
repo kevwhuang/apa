@@ -86,6 +86,7 @@ const files = (await getCollection('downloads', asset => asset.data.kind === 'ba
                                         <a
                                             class="action-text inline-flex items-center min-h-(--control-size)"
                                             aria-label={`Download ${file.data.title}`}
+                                            data-astro-prefetch="false"
                                             download
                                             href={file.data.href}
                                         >

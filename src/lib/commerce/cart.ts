@@ -1,14 +1,8 @@
 import { BASIS_POINTS_DIVISOR, CENTS_PER_DOLLAR, COMMERCE, PRODUCT_SIZES, STORAGE } from '@lib/shared/constants';
 import { createStore } from '@lib/shared/state';
+import { isRecord } from '@lib/shared/utils';
 
-const SEED_ITEMS: CartItem[] = [
-    { image: '01001_symbol', priceCents: 100, productSlug: 'alliance_sticker', quantity: 2, sku: '01001', title: 'Alliance Sticker', variation: 'Symbol' },
-    { image: '00010_bone', priceCents: 3_000, productSlug: 'alliance_tee', quantity: 1, size: 'M', sku: '00010', title: 'Alliance Tee', variation: 'Bone' },
-];
-
-const SEED_MARKER_KEY = 'apa.cart-seeded';
-
-const SEED_ROWS = SEED_ITEMS.length;
+const CATALOG_PATH = '/api/store';
 
 const store = createStore<CartItem[]>({
     fallback: [],
@@ -58,8 +52,40 @@ function count(): number {
     return getItems().reduce((total, item) => total + item.quantity, 0);
 }
 
+async function fetchCatalog(snapshot: CatalogEntry[]): Promise<CatalogEntry[]> {
+    let records: unknown;
+
+    try {
+        const response = await fetch(CATALOG_PATH);
+
+        if (!response.ok) return snapshot;
+
+        records = await response.json();
+    } catch {
+        return snapshot;
+    }
+
+    if (!Array.isArray(records)) return snapshot;
+
+    const live = records.filter(isRecord);
+
+    return snapshot.flatMap((entry) => {
+        const record = live.find(candidate => candidate.id === entry.slug);
+
+        return record ? [toLiveEntry(entry, record)] : [];
+    });
+}
+
 function getItems(): CartItem[] {
     return store.get();
+}
+
+function getProdsCharge(balance: number, dueCents: number): number {
+    const prods = Math.min(Math.max(0, Math.trunc(Number(balance)) || 0), toProds(dueCents));
+
+    const remainder = dueCents - prods * CENTS_PER_DOLLAR;
+
+    return prods > 0 && remainder > 0 && remainder < COMMERCE.minChargeCents ? prods - 1 : prods;
 }
 
 function getSizeRank(size = '') {
@@ -102,17 +128,40 @@ function isPromoCode(code: string): boolean {
 function normalizeItems(items: CartItem[]) {
     if (!Array.isArray(items)) return [];
 
-    return items.filter(isCartItem).map(item => ({
-        ...item,
-        priceCents: Number(item.priceCents) || 0,
-        quantity: clampQuantity(Number(item.quantity), COMMERCE.maxQuantityPerItem),
-        sku: String(item.sku ?? ''),
-        title: String(item.title ?? ''),
-    })).sort(compareItems);
+    return items
+        .filter(isCartItem)
+        .map(item => ({
+            image: String(item.image ?? ''),
+            priceCents: Number(item.priceCents) || 0,
+            productSlug: item.productSlug,
+            quantity: clampQuantity(Number(item.quantity), COMMERCE.maxQuantityPerItem),
+            size: typeof item.size === 'string' ? item.size : undefined,
+            sku: String(item.sku ?? ''),
+            title: String(item.title ?? ''),
+            variation: typeof item.variation === 'string' ? item.variation : undefined,
+        }))
+        .sort(compareItems);
 }
 
 function onCartChange(callback: (items: CartItem[]) => void): () => void {
-    return store.onChange(callback);
+    const unsubscribe = store.onChange(callback);
+
+    if (typeof window === 'undefined') return unsubscribe;
+
+    const controller = new AbortController();
+
+    window.addEventListener('storage', (event) => {
+        if (event.key === STORAGE.cart.key || event.key === null) callback(getItems());
+    }, { signal: controller.signal });
+
+    return () => {
+        controller.abort();
+        unsubscribe();
+    };
+}
+
+function readCount(value: unknown, fallback: number) {
+    return typeof value === 'number' && Number.isInteger(value) && value >= 0 ? value : fallback;
 }
 
 function reconcile(catalog: CatalogEntry[]): CartIssue[] {
@@ -120,24 +169,29 @@ function reconcile(catalog: CatalogEntry[]): CartIssue[] {
     const issues: CartIssue[] = [];
     const items = getItems();
     const next: CartItem[] = [];
+    const remaining = new Map(catalog.map(entry => [entry.slug, entry.stock]));
 
     items.forEach((item) => {
         const entry = entries.get(item.productSlug);
 
-        if (!entry) {
+        const isSizeOffered = entry?.sizes.length ? entry.sizes.includes(item.size ?? '') : !item.size;
+        const variation = entry?.variations.find(candidate => candidate.name === item.variation);
+
+        if (!entry || !isSizeOffered || !variation) {
             issues.push({ kind: 'removed', title: item.title });
 
             return;
         }
 
-        if (entry.stock === 0) {
+        const stock = remaining.get(entry.slug) ?? 0;
+
+        if (stock <= 0) {
             issues.push({ kind: 'out-of-stock', title: entry.title });
 
             return;
         }
 
-        const ceiling = Math.min(entry.stock, COMMERCE.maxQuantityPerItem);
-        const priceCents = entry.variations.find(variation => variation.name === item.variation)?.priceCents ?? entry.priceCents;
+        const ceiling = Math.min(stock, COMMERCE.maxQuantityPerItem);
         const reconciled = toCatalogItem(catalog, item);
 
         if (item.quantity > ceiling) {
@@ -145,11 +199,12 @@ function reconcile(catalog: CatalogEntry[]): CartIssue[] {
             reconciled.quantity = ceiling;
         }
 
-        if (item.priceCents !== priceCents) {
-            issues.push({ from: item.priceCents, kind: 'price-changed', title: entry.title, to: priceCents });
-            reconciled.priceCents = priceCents;
+        if (item.priceCents !== variation.priceCents) {
+            issues.push({ from: item.priceCents, kind: 'price-changed', title: entry.title, to: variation.priceCents });
+            reconciled.priceCents = variation.priceCents;
         }
 
+        remaining.set(entry.slug, stock - reconciled.quantity);
         next.push(reconciled);
     });
 
@@ -170,22 +225,6 @@ function remove(index: number): boolean {
     });
 
     return store.persisted();
-}
-
-function seedCart(): void {
-    if (typeof localStorage === 'undefined') return;
-
-    try {
-        if (localStorage.getItem(SEED_MARKER_KEY) !== null) return;
-
-        localStorage.setItem(SEED_MARKER_KEY, String(Date.now()));
-    } catch {
-        return;
-    }
-
-    if (getItems().length > 0) return;
-
-    store.set(SEED_ITEMS.map(item => ({ ...item })));
 }
 
 function setQuantity(index: number, quantity: number, maxQuantity: number): boolean {
@@ -209,24 +248,39 @@ function toCatalogItem(catalog: CatalogEntry[], item: CartItem): CartItem {
     return variation ? { ...item, image: variation.image, sku: variation.sku } : { ...item };
 }
 
+function toLiveEntry(entry: CatalogEntry, record: Record<string, unknown>) {
+    const variations = Array.isArray(record.variations) ? record.variations.filter(isRecord) : [];
+
+    return {
+        ...entry,
+        priceCents: readCount(record.priceCents, entry.priceCents),
+        stock: readCount(record.stock, entry.stock),
+        variations: entry.variations.flatMap((variation) => {
+            const match = variations.find(candidate => candidate.name === variation.name);
+
+            return match ? [{ ...variation, priceCents: readCount(match.priceCents, variation.priceCents) }] : [];
+        }),
+    };
+}
+
 function toProds(cents: number): number {
     return Math.ceil(Math.max(0, Math.trunc(Number(cents)) || 0) / CENTS_PER_DOLLAR);
 }
 
 export {
-    SEED_ROWS,
     add,
     clampQuantity,
     clear,
     compareItems,
     count,
+    fetchCatalog,
     getItems,
+    getProdsCharge,
     getTotals,
     isPromoCode,
     onCartChange,
     reconcile,
     remove,
-    seedCart,
     setQuantity,
     toCatalogItem,
     toProds,

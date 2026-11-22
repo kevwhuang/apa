@@ -71,7 +71,7 @@ const priceCents = getVariationPrice(product, baseVariation);
                 {gallery.map(({ image, variation }) => (
                     <li>
                         <button
-                            class="product-gallery__thumb block relative aspect-square w-full border-2 border-border"
+                            class="hit product-gallery__thumb block aspect-square w-full border-2 border-border"
                             aria-label={`Show ${variation} view`}
                             aria-pressed={variation === product.base ? 'true' : 'false'}
                             data-gallery-thumb={variation}
@@ -229,7 +229,7 @@ const priceCents = getVariationPrice(product, baseVariation);
             >
                 <p class="label text-text-secondary">Details</p>
                 {product.details.length > 0 && (
-                    <ul class="space-y-2 list-none text-text-secondary">
+                    <ul class="space-y-2 list-none text-pretty text-text-secondary">
                         {product.details.map(detail => (
                             <li class="flex gap-3">
                                 <span
@@ -313,15 +313,9 @@ const priceCents = getVariationPrice(product, baseVariation);
         border-color: var(--color-link);
     }
 
-    .product-gallery__thumb::after {
-        content: '';
-        inset: min(0px, calc(50% - var(--control-size) / 2));
-        position: absolute;
-    }
-
     .product-gallery__thumb[aria-pressed='true'] {
         border-color: var(--color-border-strong);
-        box-shadow: var(--lift-shadow);
+        box-shadow: var(--lift) var(--lift) 0 0 var(--color-border-strong);
     }
 
     .product-gallery__thumb-image {

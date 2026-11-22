@@ -3,7 +3,6 @@ import { getCollection } from 'astro:content';
 
 import BackLink from '@components/shared/BackLink.astro';
 import IconTrash from '@components/icons/Trash.astro';
-import { SEED_ROWS } from '@lib/commerce/cart';
 import { toCatalog, toImageSources } from '@lib/commerce/products';
 
 const REMOVE_ICON_SIZE = 24;
@@ -34,7 +33,7 @@ const images = await toImageSources();
         <div class="cart__grid grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] gap-12 max-md:grid-cols-1">
             <div class="cart__main flex flex-col gap-6">
                 <div
-                    class="cart__empty slab slab--card slab--empty max-w-(--measure-form) w-full"
+                    class="cart__empty slab slab--card slab--empty max-w-(--measure-form) w-full mx-auto"
                     data-cart-empty
                     data-motion="rise"
                     tabindex="-1"
@@ -50,7 +49,6 @@ const images = await toImageSources();
                 <ul
                     class="cart__list empty:hidden flex flex-col gap-(--space-2xl) list-none"
                     data-cart-list
-                    style={`--cart-seed-rows: ${SEED_ROWS}`}
                 />
                 <p
                     class="sr-only"
@@ -198,7 +196,7 @@ const images = await toImageSources();
 
     html[data-cart='filled'] .cart__list:empty {
         display: flex;
-        min-height: calc(var(--row-count) * var(--row-height) + (var(--row-count) - 1) * var(--space-2xl));
+        min-height: calc(var(--row-count) * (2 * var(--row-pad) + var(--text-lg) + var(--text-base) + 4 * var(--spacing) + 16px + var(--row-controls) + 4px) + (var(--row-count) - 1) * var(--space-2xl));
     }
 
     .cart-items__body {
@@ -224,8 +222,7 @@ const images = await toImageSources();
 
     .cart__list {
         --row-controls: calc(var(--control-size) + 4px);
-        --row-count: var(--cart-rows, var(--cart-seed-rows));
-        --row-height: calc(2 * var(--row-pad) + var(--text-lg) + var(--text-base) + 4 * var(--spacing) + 16px + var(--row-controls) + 4px);
+        --row-count: var(--cart-rows);
         --row-pad: round(clamp(16px, calc(9.333px + 2.0833vw), 36px), 4px);
     }
 
@@ -235,14 +232,16 @@ const images = await toImageSources();
         top: calc(var(--header-height) + var(--space-md));
     }
 
+    @media (max-width: 1024px) {
+        .cart-items__row {
+            grid-template-columns: var(--row-tile) minmax(0, 1fr);
+        }
+    }
+
     @media (max-width: 768px) {
         .cart-items__heading {
             align-items: flex-end;
             flex-wrap: wrap-reverse;
-        }
-
-        .cart-items__row {
-            grid-template-columns: var(--row-tile) minmax(0, 1fr);
         }
 
         .cart__list {
@@ -253,9 +252,20 @@ const images = await toImageSources();
 
 <script>
     import { CARD_COLORS, COMMERCE, MOBILE_WIDTH } from '@lib/shared/constants';
-    import { applyInstantly, describeCartChange, formatPrice, formatSku, formatVariant, parseCatalog, parseImageSources, registerPageScript, setProductImage, setText, setTitleLink } from '@lib/shared/utils';
-    import { getItems, getTotals, onCartChange, reconcile, remove, setQuantity } from '@lib/commerce/cart';
-    import { isValidationBypassed } from '@lib/ui/forms';
+    import {
+        applyInstantly,
+        describeCartChange,
+        formatPrice,
+        formatSku,
+        formatVariant,
+        parseCatalog,
+        parseImageSources,
+        registerPageScript,
+        setProductImage,
+        setText,
+        setTitleLink,
+    } from '@lib/shared/utils';
+    import { fetchCatalog, getItems, getTotals, onCartChange, reconcile, remove, setQuantity } from '@lib/commerce/cart';
     import { toast } from '@lib/ui/toasts';
 
     interface FocusMark {
@@ -264,6 +274,7 @@ const images = await toImageSources();
         index: number;
     }
 
+    const REMOVE_WINDOW_MILLISECONDS = 400;
     const ROW_CONTROLS = ['[data-row-decrease]', '[data-row-increase]', '[data-row-remove]'];
     const SQUARE_PASSES = 6;
     const SQUARE_RATIO = 0.6;
@@ -272,6 +283,7 @@ const images = await toImageSources();
 
     let catalog: CatalogEntry[] = [];
     let images: ImageSources = {};
+    let removedAt = Number.NEGATIVE_INFINITY;
     let squareFrame = 0;
 
     function announce(message: string) {
@@ -298,8 +310,6 @@ const images = await toImageSources();
     }
 
     function handleCheckoutClick(event: Event, checkout: HTMLElement) {
-        if (isValidationBypassed()) return;
-
         if (checkout.getAttribute('aria-disabled') === 'true') event.preventDefault();
     }
 
@@ -314,6 +324,10 @@ const images = await toImageSources();
     }
 
     function handleRemoveClick(index: number, item: CartItem) {
+        if (performance.now() - removedAt < REMOVE_WINDOW_MILLISECONDS) return;
+
+        removedAt = performance.now();
+
         if (!remove(index)) {
             toast(STORAGE_MESSAGE, 'error');
 
@@ -321,6 +335,10 @@ const images = await toImageSources();
         }
 
         toast(`Removed ${item.title} from your cart.`, 'info');
+    }
+
+    function handleRemoveKeydown(event: KeyboardEvent) {
+        if (event.key === 'Enter' && event.repeat) event.preventDefault();
     }
 
     function initCartView(signal: AbortSignal) {
@@ -332,6 +350,7 @@ const images = await toImageSources();
 
         catalog = parseCatalog(source?.dataset.catalog);
         images = parseImageSources(source?.dataset.images);
+        removedAt = Number.NEGATIVE_INFINITY;
 
         const issues = reconcile(catalog);
 
@@ -342,10 +361,11 @@ const images = await toImageSources();
         const observer = new ResizeObserver(() => scheduleSquares(list));
         const unsubscribe = onCartChange(() => renderCart(checkout, list, signal));
 
-        observer.observe(list);
         checkout.addEventListener('click', event => handleCheckoutClick(event, checkout), { signal });
-        signal.addEventListener('abort', unsubscribe, { once: true });
+        observer.observe(list);
         signal.addEventListener('abort', () => stopSquares(observer), { once: true });
+        signal.addEventListener('abort', unsubscribe, { once: true });
+        void refreshCart(checkout, list, signal);
     }
 
     function measureBodyHeight(row: HTMLElement) {
@@ -359,12 +379,12 @@ const images = await toImageSources();
 
         if (window.innerWidth <= MOBILE_WIDTH) return;
 
-        for (let pass = 0; pass < SQUARE_PASSES; pass += 1) {
-            const sides = rows.map(row => Math.min(measureBodyHeight(row), row.getBoundingClientRect().width * SQUARE_RATIO));
+        for (let pass = 0; pass < SQUARE_PASSES; pass++) {
+            const side = Math.max(...rows.map(row => Math.min(measureBodyHeight(row), row.getBoundingClientRect().width * SQUARE_RATIO)));
 
-            if (sides.every((side, index) => Math.abs(side - readSquare(rows[index])) < SQUARE_TOLERANCE)) break;
+            if (rows.every(row => Math.abs(side - readSquare(row)) < SQUARE_TOLERANCE)) break;
 
-            rows.forEach((row, index) => row.style.setProperty('--row-square', `${sides[index]}px`));
+            rows.forEach(row => row.style.setProperty('--row-square', `${side}px`));
         }
 
         if (!rows.every(row => measureBodyHeight(row) <= readSquare(row) + SQUARE_TOLERANCE)) resetSquares(rows);
@@ -372,6 +392,19 @@ const images = await toImageSources();
 
     function readSquare(row: HTMLElement) {
         return Number.parseFloat(row.style.getPropertyValue('--row-square')) || 0;
+    }
+
+    async function refreshCart(checkout: HTMLElement, list: HTMLElement, signal: AbortSignal) {
+        const live = await fetchCatalog(catalog);
+
+        if (signal.aborted) return;
+
+        catalog = live;
+
+        const issues = reconcile(catalog);
+
+        if (issues.length > 0) toast(describeCartChange(issues), 'info');
+        else renderCart(checkout, list, signal);
     }
 
     function renderCart(checkout: HTMLElement, list: HTMLElement, signal: AbortSignal) {
@@ -407,8 +440,8 @@ const images = await toImageSources();
         setText(fragment.querySelector('[data-row-price]'), formatPrice(item.priceCents * item.quantity));
         setText(fragment.querySelector('[data-row-quantity]'), String(item.quantity));
         setText(fragment.querySelector('[data-row-sku]'), item.sku ? formatSku(item.sku) : '');
-        setTitleLink(fragment.querySelector('[data-row-title]'), catalog, item, item.title);
         setText(fragment.querySelector('[data-row-variant]'), formatVariant(item));
+        setTitleLink(fragment.querySelector('[data-row-title]'), catalog, item, item.title);
 
         if (tile) {
             const color = CARD_COLORS[index % CARD_COLORS.length];
@@ -432,6 +465,7 @@ const images = await toImageSources();
         if (removeButton) {
             removeButton.setAttribute('aria-label', `Remove ${item.title} from cart`);
             removeButton.addEventListener('click', () => handleRemoveClick(index, item), { signal });
+            removeButton.addEventListener('keydown', handleRemoveKeydown, { signal });
         }
 
         return fragment;

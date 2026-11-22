@@ -6,10 +6,9 @@ interface Props {
     'label'?: string;
     'labelClass'?: string;
     'labelColor'?: string;
-    'numeric'?: boolean;
 }
 
-const { class: tileClass, color, 'data-motion': motion, label, labelClass, labelColor, numeric } = Astro.props;
+const { class: tileClass, color, 'data-motion': motion, label, labelClass, labelColor } = Astro.props;
 
 const style = labelColor ? `background: ${color}; color: ${labelColor};` : `background: ${color};`;
 ---
@@ -25,7 +24,7 @@ const style = labelColor ? `background: ${color}; color: ${labelColor};` : `back
     />
     {label && (
         <span
-            class:list={['relative font-bold select-none', numeric ? 'font-display tracking-[-0.02em]' : 'tracking-tight', labelClass]}
+            class:list={['relative font-bold tracking-tight select-none', labelClass]}
             aria-hidden="true"
         >
             {label}

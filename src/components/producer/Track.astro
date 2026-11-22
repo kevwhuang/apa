@@ -1,34 +1,27 @@
 ---
-import { getCollection } from 'astro:content';
-
 import IconPause from '@components/icons/Pause.astro';
 import IconPlay from '@components/icons/Play.astro';
-import { formatDuration, toRoster } from '@lib/shared/utils';
-
-import type { CollectionEntry } from 'astro:content';
+import { formatDuration } from '@lib/shared/utils';
 
 interface Props {
+    artist: string;
     class?: string;
     hasWave?: boolean;
     producerId: string;
-    track: CollectionEntry<'producers'>['data']['tracks'][number];
+    track: { durationSeconds: number; path: string; title: string };
 }
 
-const WAVE_BAR_COUNT = 14;
+const CLASS_TRACK = 'producer-track group active:translate-y-px aria-pressed:bg-btn-primary-bg aria-pressed:text-btn-primary-text hover:bg-bg-raised-hover flex items-center min-h-(--control-size) w-full gap-3 p-3 border-2 border-border-strong text-left transition-[translate]';
+const WAVE_BARS = 14;
 const WAVE_HASH_MODULUS = 997;
 const WAVE_HASH_MULTIPLIER = 31;
 const WAVE_MAX_SPAN = 72;
 const WAVE_MIN_HEIGHT = 24;
 const WAVE_PHASE_STEP = 1.7;
 
-const { class: rowClass, hasWave = true, producerId, track } = Astro.props;
+const { artist, class: rowClass, hasWave = true, producerId, track } = Astro.props;
 
-const producers = toRoster(await getCollection('producers'));
-
-const producer = producers.find(entry => entry.data.producerId === producerId);
-
-const artist = producer?.data.name ?? '';
-const seedKey = producer?.id ?? '';
+const seedKey = artist.toLowerCase().replaceAll(' ', '_');
 
 const seed = [...`${seedKey}:${track.title}`].reduce(
     (total, character) => (total * WAVE_HASH_MULTIPLIER + character.charCodeAt(0)) % WAVE_HASH_MODULUS,
@@ -36,21 +29,18 @@ const seed = [...`${seedKey}:${track.title}`].reduce(
 );
 
 const waveHeights = Array.from(
-    { length: WAVE_BAR_COUNT },
+    { length: WAVE_BARS },
     (_, index) => Math.round(WAVE_MIN_HEIGHT + Math.abs(Math.sin(seed + index * WAVE_PHASE_STEP)) * WAVE_MAX_SPAN),
 );
 ---
 
 <button
-    class:list={[
-        'producer-track active:translate-y-px aria-pressed:bg-btn-primary-bg aria-pressed:text-btn-primary-text group hover:bg-bg-raised-hover flex items-center min-h-(--control-size) w-full gap-3 p-3 border-2 border-border-strong text-left transition-[translate]',
-        rowClass,
-    ]}
+    class:list={[CLASS_TRACK, rowClass]}
     aria-pressed="false"
     data-track-artist={artist}
     data-track-duration={track.durationSeconds}
-    data-track-file={track.file}
     data-track-id={producerId}
+    data-track-path={track.path || undefined}
     data-track-seed={seedKey}
     data-track-title={track.title}
     type="button"
@@ -80,16 +70,18 @@ const waveHeights = Array.from(
         >
             {waveHeights.map(height => (
                 <span
-                    class="group-aria-pressed:bg-current min-h-0.5 w-(--producer-track-bar-width,2px) bg-text-secondary"
+                    class="group-aria-pressed:bg-current min-h-0.5 w-1.5 bg-text-secondary"
                     style={`height: ${height}%;`}
                 />
             ))}
         </span>
     )}
-    <span
-        class="group-aria-pressed:text-btn-primary-text group-hover:text-text shrink-0 font-mono tabular-nums text-sm text-text-secondary"
-        data-placeholder
-    >
-        {formatDuration(track.durationSeconds)}
-    </span>
+    {track.durationSeconds > 0 && (
+        <span
+            class="group-aria-pressed:text-btn-primary-text group-hover:text-text shrink-0 font-mono tabular-nums text-sm text-text-secondary"
+            data-placeholder
+        >
+            {formatDuration(track.durationSeconds)}
+        </span>
+    )}
 </button>

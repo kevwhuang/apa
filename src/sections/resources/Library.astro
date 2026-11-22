@@ -90,7 +90,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
             {describeMatches(assets.length, assets.length, false, '')}
         </p>
         <ul
-            class="resources__grid grid grid-cols-3 gap-x-(--space-lg) gap-y-(--space-2xl) max-lg:grid-cols-2 max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))]"
+            class="grid-tail resources__grid grid grid-cols-3 gap-x-(--space-lg) gap-y-(--space-2xl) max-lg:grid-cols-2 max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))]"
             data-motion-stagger="flip"
         >
             {assets.map(asset => (
@@ -145,6 +145,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                             <a
                                 class="btn btn--primary"
                                 aria-label={asset.isDownload ? `Download ${asset.title}` : undefined}
+                                data-astro-prefetch={asset.isDownload ? 'false' : undefined}
                                 download={asset.isDownload ? '' : undefined}
                                 href={asset.data.href}
                             >
@@ -166,6 +167,7 @@ const kinds = Array.from(new Set(assets.map(asset => asset.data.kind)))
                                     <a
                                         class="btn btn--primary"
                                         aria-label={asset.isDownload ? `Download ${asset.title}` : undefined}
+                                        data-astro-prefetch={asset.isDownload ? 'false' : undefined}
                                         data-unlock-ready
                                         download={asset.isDownload ? '' : undefined}
                                         hidden

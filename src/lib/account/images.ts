@@ -1,8 +1,35 @@
-import { AVATAR } from '@lib/shared/constants';
+import { AVATAR, STATUS_SERVER_ERROR, STORAGE_BUCKETS } from '@lib/shared/constants';
 import { formatExtensions, getExtension, getSizeError } from '@lib/audio/uploads';
+import { supabase } from '@lib/shared/supabase';
+
+type AvatarUpload = { isRefused: boolean; ok: false } | { ok: true; path: string };
 
 const AVATAR_EXTENSIONS = [...AVATAR.extensions, ...AVATAR.aliasExtensions];
-const AVATAR_EXTENSIONS_OR_LIST = formatExtensions(AVATAR.extensions);
+const DATA_URL_PATTERN = /^data:(image\/[a-z]+);base64,(.+)$/;
+const FOLDER_LIST_LIMIT = 10;
+const STATUS_CLIENT_ERROR = 400;
+
+const UPLOAD_EXTENSIONS: Partial<Record<string, string>> = {
+    'image/jpeg': 'jpg',
+    'image/webp': 'webp',
+};
+
+const avatarExtensionsOrList = formatExtensions(AVATAR.extensions);
+const avatarPrefix = supabase.storage.from(STORAGE_BUCKETS.avatars).getPublicUrl('').data.publicUrl;
+
+function decodeDataUrl(dataUrl: string) {
+    const match = DATA_URL_PATTERN.exec(dataUrl);
+
+    if (!match) return null;
+
+    try {
+        const bytes = Uint8Array.from(atob(match[2]), character => character.charCodeAt(0));
+
+        return new Blob([bytes], { type: match[1] });
+    } catch {
+        return null;
+    }
+}
 
 async function decodeImage(file: File) {
     if (typeof createImageBitmap === 'undefined') return null;
@@ -14,12 +41,14 @@ async function decodeImage(file: File) {
     }
 }
 
+function getAvatarUrl(path: string): string {
+    return path ? supabase.storage.from(STORAGE_BUCKETS.avatars).getPublicUrl(path).data.publicUrl : '';
+}
+
 function getRejectionReason(file: File) {
     const extension = getExtension(file.name);
 
-    if (!AVATAR_EXTENSIONS.some(allowed => allowed === extension)) {
-        return `That is a .${extension || 'file'}. We take ${AVATAR_EXTENSIONS_OR_LIST}.`;
-    }
+    if (!AVATAR_EXTENSIONS.some(allowed => allowed === extension)) return `That is a .${extension || 'file'}. We take ${avatarExtensionsOrList}.`;
 
     if (!AVATAR.acceptAttribute.includes(file.type) && !file.type.startsWith('image/') && file.type.length > 0) {
         return 'That does not look like an image file.';
@@ -29,7 +58,15 @@ function getRejectionReason(file: File) {
 }
 
 function normalizeAvatar(value: string): string {
+    if (value.length > avatarPrefix.length && value.startsWith(avatarPrefix)) return value;
+
     return value.length <= AVATAR.maxDataUrlLength && value.startsWith('data:image/') ? value : '';
+}
+
+async function removeAvatar(path: string): Promise<void> {
+    if (!path) return;
+
+    await supabase.storage.from(STORAGE_BUCKETS.avatars).remove([path]);
 }
 
 function renderAvatar(image: ImageBitmap) {
@@ -77,4 +114,35 @@ async function stageAvatar(file: File): Promise<AvatarResult> {
     return { dataUrl, ok: true };
 }
 
-export { AVATAR_EXTENSIONS_OR_LIST, normalizeAvatar, stageAvatar };
+function toAvatarPath(url: string): string {
+    return url.startsWith(avatarPrefix) ? url.slice(avatarPrefix.length) : '';
+}
+
+async function uploadAvatar(userId: string, dataUrl: string, currentPath: string): Promise<AvatarUpload> {
+    const blob = decodeDataUrl(dataUrl);
+    const bucket = supabase.storage.from(STORAGE_BUCKETS.avatars);
+
+    const extension = UPLOAD_EXTENSIONS[blob?.type ?? ''];
+
+    if (!blob || !extension) return { isRefused: true, ok: false };
+
+    const path = `${userId}/${crypto.randomUUID()}.${extension}`;
+
+    const { data: objects } = await bucket.list(userId, { limit: FOLDER_LIST_LIMIT });
+
+    const strays = (objects ?? [])
+        .map(object => `${userId}/${object.name}`)
+        .filter(stray => stray !== currentPath);
+
+    if (strays.length > 0) await bucket.remove(strays);
+
+    const { error } = await bucket.upload(path, blob);
+
+    if (!error) return { ok: true, path };
+
+    const status = error.status ?? 0;
+
+    return { isRefused: status >= STATUS_CLIENT_ERROR && status < STATUS_SERVER_ERROR, ok: false };
+}
+
+export { avatarExtensionsOrList, getAvatarUrl, normalizeAvatar, removeAvatar, stageAvatar, toAvatarPath, uploadAvatar };

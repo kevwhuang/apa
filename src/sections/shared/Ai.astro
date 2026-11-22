@@ -2,6 +2,7 @@
 import IconArrow from '@components/icons/Arrow.astro';
 import IconClose from '@components/icons/Close.astro';
 import IconSpark from '@components/icons/Spark.astro';
+import { AI_QUESTION_MAX_LENGTH } from '@lib/shared/constants';
 ---
 
 <aside
@@ -54,16 +55,18 @@ import IconSpark from '@components/icons/Spark.astro';
             class="ai__form flex flex-wrap justify-end shrink-0 gap-2 p-4 border-border-subtle border-t"
             data-ai-form
         >
-            <input
-                id="ai-question"
-                class="input flex-1 min-w-42"
-                aria-label="Question"
-                autocomplete="off"
-                data-ai-field
-                name="question"
-                placeholder="Ask a question"
-                type="text"
-            />
+            <label class="flex flex-1 min-w-42">
+                <span class="sr-only">Question</span>
+                <input
+                    class="input"
+                    autocomplete="off"
+                    data-ai-field
+                    maxlength={AI_QUESTION_MAX_LENGTH}
+                    name="question"
+                    placeholder="Ask a question"
+                    type="text"
+                />
+            </label>
             <button
                 class="ai__send btn btn--accent relative h-(--control-size)"
                 data-ai-send
@@ -111,6 +114,7 @@ import IconSpark from '@components/icons/Spark.astro';
 
 <style>
     .ai {
+        --ai-bottom: max(var(--space-md), min(var(--ai-offset), calc(100dvh - var(--header-height) - var(--space-md) - 320px)));
         --ai-offset: calc(var(--space-md) + 2 * (var(--control-size) + 8px));
         display: none;
     }
@@ -207,8 +211,8 @@ import IconSpark from '@components/icons/Spark.astro';
         background: var(--color-bg-raised);
         border: 2px solid var(--color-border-strong);
         color: var(--color-text);
-        height: min(600px, calc(100dvh - var(--header-height) - var(--space-md) - var(--ai-offset)));
-        inset: auto calc(var(--control-size) + var(--lift)) var(--ai-offset) auto;
+        height: min(600px, calc(100dvh - var(--header-height) - var(--space-md) - var(--ai-bottom)));
+        inset: auto calc(var(--control-size) + var(--lift)) var(--ai-bottom) auto;
         max-width: calc(100vw - var(--control-size) - var(--lift) - var(--shell-pad));
         position: fixed;
         width: var(--ai-width, min(340px, calc(100vw - var(--control-size) - 2 * var(--space-md))));
@@ -221,8 +225,10 @@ import IconSpark from '@components/icons/Spark.astro';
 </style>
 
 <script>
-    import { LAUNCHER_SIZE, MOCK_LATENCY_MILLISECONDS, POINTER_COARSE_QUERY, WINDOW_MARGINS } from '@lib/shared/constants';
-    import { claimFloatWindow, delay, initPanelResize, onFloatWindowClaim, registerPageScript, setPending, setText } from '@lib/shared/utils';
+    import { LAUNCHER_SIZE, POINTER_COARSE_QUERY, WINDOW_MARGINS } from '@lib/shared/constants';
+    import { claimFloatWindow, initPanelResize, onFloatWindowClaim, registerPageScript, setPending, setText } from '@lib/shared/utils';
+    import { sendRequest } from '@lib/shared/request';
+    import { toast } from '@lib/ui/toasts';
 
     interface AiAnswer {
         body: string;
@@ -275,6 +281,8 @@ import IconSpark from '@components/icons/Spark.astro';
         },
     ];
 
+    const FAILURE_MESSAGE = 'The assistant could not look that up. Try again in a moment.';
+
     const FALLBACK_ANSWER: AiAnswer = {
         body: 'I know the site basics best. Try asking about Assembly, the Bash, Prods, or the store.',
         href: '/contact',
@@ -283,8 +291,9 @@ import IconSpark from '@components/icons/Spark.astro';
     };
 
     const GENERIC_KEYWORDS = new Set(['calendar', 'date', 'event', 'meeting', 'next', 'schedule', 'when']);
+    const REQUEST_TIMEOUT_MILLISECONDS = 30_000;
     const RESIZE_LABEL = 'Resize AI assistant';
-    const THINKING_FACTOR = 2;
+    const SITE_PATH_PATTERN = /^\/(?![\t\n\r]*[/\\])/;
     const TOPIC_WEIGHT = 10;
 
     const WELCOME_ANSWER: AiAnswer = {
@@ -294,6 +303,7 @@ import IconSpark from '@components/icons/Spark.astro';
         label: 'See what\'s next',
     };
 
+    let isAvailable = true;
     let isPending = false;
     let messages: AiMessage[] = [];
 
@@ -306,9 +316,7 @@ import IconSpark from '@components/icons/Spark.astro';
         messages = [...messages, { answer: null, text }];
         render();
 
-        await delay(MOCK_LATENCY_MILLISECONDS * THINKING_FACTOR);
-
-        const answer = matchAnswer(text);
+        const answer = (await requestAnswer(text)) ?? matchAnswer(text);
 
         isPending = false;
         messages = [...messages, { answer, text: answer.body }];
@@ -401,6 +409,8 @@ import IconSpark from '@components/icons/Spark.astro';
     }
 
     async function handleSubmit(event: SubmitEvent) {
+        if (!(event.target instanceof HTMLFormElement) || !event.target.matches('[data-ai-form]')) return;
+
         event.preventDefault();
 
         const field = document.querySelector<HTMLInputElement>('[data-ai-field]');
@@ -417,11 +427,10 @@ import IconSpark from '@components/icons/Spark.astro';
     function initAi(signal: AbortSignal) {
         const aside = document.querySelector<HTMLElement>('.ai');
         const dialog = document.querySelector<HTMLDialogElement>('[data-ai-window]');
-        const form = document.querySelector<HTMLFormElement>('[data-ai-form]');
         const grip = document.querySelector<HTMLElement>('[data-ai-grip]');
         const launcher = document.querySelector<HTMLElement>('[data-ai-launcher]');
 
-        if (!aside || !dialog || !form || !grip || !launcher) return;
+        if (!aside || !dialog || !grip || !launcher) return;
 
         if ('closedBy' in dialog) dialog.setAttribute('closedby', 'closerequest');
 
@@ -441,7 +450,6 @@ import IconSpark from '@components/icons/Spark.astro';
         aside.addEventListener('keydown', handleKeydown, { signal });
         dialog.addEventListener('close', () => handleClose(dialog), { signal });
         document.querySelector<HTMLElement>('[data-ai-close]')?.addEventListener('click', closeWindow, { signal });
-        form.addEventListener('submit', event => void handleSubmit(event), { signal });
         launcher.addEventListener('click', handleLaunch, { signal });
         onFloatWindowClaim(dialog, closeWindow, signal);
 
@@ -471,10 +479,14 @@ import IconSpark from '@components/icons/Spark.astro';
     function openWindow() {
         const dialog = document.querySelector<HTMLDialogElement>('[data-ai-window]');
         const field = document.querySelector<HTMLInputElement>('[data-ai-field]');
+        const log = document.querySelector<HTMLElement>('[data-ai-log]');
 
         if (!dialog || dialog.open) return;
 
         dialog.show();
+
+        if (log) log.scrollTop = log.scrollHeight;
+
         document.querySelector<HTMLElement>('[data-ai-launcher]')?.setAttribute('aria-expanded', 'true');
         claimFloatWindow(dialog);
 
@@ -506,9 +518,50 @@ import IconSpark from '@components/icons/Spark.astro';
         log.scrollTop = log.scrollHeight;
     }
 
+    async function requestAnswer(question: string) {
+        if (!isAvailable) return null;
+
+        const result = await sendRequest('/api/ask', {
+            body: { question },
+            method: 'POST',
+            signal: AbortSignal.timeout(REQUEST_TIMEOUT_MILLISECONDS),
+        });
+
+        if (result.ok) {
+            const answer = toAnswer(result.data);
+
+            if (!answer) toast(FAILURE_MESSAGE, 'error');
+
+            return answer;
+        }
+
+        if (result.code === 'not-configured') {
+            isAvailable = false;
+
+            return null;
+        }
+
+        toast(result.code === 'rate-limited' ? result.message : FAILURE_MESSAGE, 'error');
+
+        return null;
+    }
+
+    function toAnswer(data: Record<string, unknown>) {
+        const { answered, body, href, label } = data;
+
+        if (answered === false) return FALLBACK_ANSWER;
+
+        if (answered !== true || typeof body !== 'string' || !body.trim()) return null;
+
+        if (typeof href !== 'string' || typeof label !== 'string' || !SITE_PATH_PATTERN.test(href)) return { body, keywords: [] };
+
+        return { body, href, keywords: [], label };
+    }
+
     function weighKeyword(keyword: string) {
         return GENERIC_KEYWORDS.has(keyword) ? 1 : TOPIC_WEIGHT;
     }
 
+    document.addEventListener('submit', event => void handleSubmit(event), { capture: true });
     registerPageScript(initAi);
 </script>

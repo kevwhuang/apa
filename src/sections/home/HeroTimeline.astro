@@ -1,14 +1,14 @@
 ---
 import WaveformBars from '@components/shared/WaveformBars.astro';
-import { STEP_COUNT, stepEnergy } from '@lib/motion/pattern';
+import { getStepEnergy, steps } from '@lib/motion/pattern';
 
 const BAR_CONTRAST = 1.6;
 const BAR_MAX = 92;
 const BAR_MIN = 8;
 
-const barPeak = Math.max(...Array.from({ length: STEP_COUNT }, (_, step) => stepEnergy(step)));
+const barPeak = Math.max(...Array.from({ length: steps }, (_, step) => getStepEnergy(step)));
 
-const bars = Array.from({ length: STEP_COUNT }, (_, step) => BAR_MIN + (BAR_MAX - BAR_MIN) * (stepEnergy(step) / barPeak) ** BAR_CONTRAST);
+const bars = Array.from({ length: steps }, (_, step) => BAR_MIN + (BAR_MAX - BAR_MIN) * (getStepEnergy(step) / barPeak) ** BAR_CONTRAST);
 ---
 
 <section

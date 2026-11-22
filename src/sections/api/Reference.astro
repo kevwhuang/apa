@@ -3,12 +3,7 @@ import IconArrow from '@components/icons/Arrow.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
 
-interface Endpoint {
-    blurb: string;
-    path: string;
-}
-
-const ENDPOINTS: Endpoint[] = [
+const ENDPOINTS = [
     { blurb: 'Every event in one chronological list with its title, body, and venue; room, speaker, sponsor, and RSVP link appear when set.', path: '/api/events' },
     { blurb: 'The full roster, ordered by six-digit string ID, with genres, role, links, location, and spotlight tracks.', path: '/api/producers' },
     { blurb: 'The asset library with formats, sizes, publication state, and unlock times.', path: '/api/resources' },

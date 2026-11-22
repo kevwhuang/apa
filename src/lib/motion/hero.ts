@@ -1,9 +1,9 @@
 import gsap from 'gsap';
 
-import { MOBILE_WIDTH } from '@lib/shared/constants';
-import { STEP_COUNT, stepDuration } from '@lib/motion/pattern';
+import { HERO_FIELD_SELECTOR, MAX_PIXEL_RATIO, MILLISECONDS_PER_SECOND, MOBILE_WIDTH } from '@lib/shared/constants';
+import { createFrameBudget, isSlowDevice } from '@lib/shared/utils';
 import { getMotionTokens, readColorToken } from '@lib/motion/tokens';
-import { isSlowDevice } from '@lib/shared/utils';
+import { getStepDuration, steps } from '@lib/motion/pattern';
 
 interface FieldOptions {
     accentColor: string;
@@ -17,20 +17,14 @@ interface FieldOptions {
 const ACCENT_OFFSET = 1.5;
 const ACCENT_THRESHOLD = 0.55;
 const BED_LEVEL = 0.12;
-const BUDGET_BREACH_LIMIT = 12;
-const BUDGET_MILLISECONDS = 6;
-const BUDGET_WINDOW = 30;
 const CANVAS_SELECTOR = '.hero__canvas';
 const DOT_RATIO = 0.42;
 const DRIFT_PERIOD = 21;
-const FIELD_SELECTOR = '.hero__field';
 const GLOW_FLOOR = 0.55;
 const GLOW_WIDTH = 0.02;
 const HASH_COLUMN = 12.9898;
 const HASH_ROW = 78.233;
 const HASH_SCALE = 43_758.5453;
-const MAX_PIXEL_RATIO = 2;
-const MILLISECONDS_PER_SECOND = 1_000;
 const MOBILE_PITCH_SCALE = 1.5;
 const PLAYHEAD_END = 100;
 const PLAYHEAD_SELECTOR = '.hero__playhead';
@@ -40,7 +34,7 @@ const QUALITY_STEPS = [
     { fps: 24, pitch: 18 },
     { fps: 15, pitch: 27 },
     { fps: 12, pitch: 36 },
-];
+] as const;
 
 const RIPPLE_CYCLES = 0.7;
 const RIPPLE_PERIOD = 17;
@@ -51,8 +45,9 @@ const SWELL_FLOOR = 0.3;
 const SWELL_PERIOD = 26;
 const SWELL_RANGE = 0.48;
 const SWELL_WEIGHT = 0.6;
-const TAU = Math.PI * 2;
 const VERTICAL_FLOOR = 0.2;
+
+const tau = Math.PI * 2;
 
 function buildSprites(color: string, pitch: number, ratio: number) {
     const cell = Math.ceil(pitch * ratio);
@@ -67,11 +62,11 @@ function buildSprites(color: string, pitch: number, ratio: number) {
 
     context.fillStyle = color;
 
-    for (let level = 1; level < SPRITE_LEVELS; level += 1) {
+    for (let level = 1; level < SPRITE_LEVELS; level++) {
         const radius = (level / (SPRITE_LEVELS - 1)) * pitch * DOT_RATIO * ratio;
 
         context.beginPath();
-        context.arc(cell * level + cell / 2, cell / 2, radius, 0, TAU);
+        context.arc(cell * level + cell / 2, cell / 2, radius, 0, tau);
         context.fill();
     }
 
@@ -81,7 +76,7 @@ function buildSprites(color: string, pitch: number, ratio: number) {
 function initHeroField(signal: AbortSignal, still: boolean): void {
     initPlayhead(signal, still);
 
-    const holder = document.querySelector<HTMLElement>(FIELD_SELECTOR);
+    const holder = document.querySelector<HTMLElement>(HERO_FIELD_SELECTOR);
     const styles = getComputedStyle(document.documentElement);
 
     const accentColor = readColorToken(styles, '--color-unlit-accent');
@@ -101,16 +96,24 @@ function initPlayhead(signal: AbortSignal, still: boolean) {
     const tokens = getMotionTokens();
 
     const sweep = gsap.fromTo(playhead, { xPercent: PLAYHEAD_START }, {
-        duration: STEP_COUNT * stepDuration(SWEEP_BEATS_PER_MINUTE),
+        duration: steps * getStepDuration(SWEEP_BEATS_PER_MINUTE),
         ease: tokens.ease.linear,
         repeat: -1,
         xPercent: PLAYHEAD_END,
     });
 
-    const observer = new IntersectionObserver(entries => (entries[0]?.isIntersecting ? sweep.play() : sweep.pause()));
+    const observer = new IntersectionObserver((entries) => {
+        if (entries[0]?.isIntersecting) sweep.play();
+        else sweep.pause();
+    });
 
     observer.observe(playhead);
-    document.addEventListener('visibilitychange', () => (document.hidden ? sweep.pause() : sweep.play()), { signal });
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) sweep.pause();
+        else sweep.play();
+    }, { signal });
+
     signal.addEventListener('abort', () => observer.disconnect());
 }
 
@@ -124,10 +127,7 @@ function mountField({ accentColor, canvas, holder, inkColor, signal, still }: Fi
 
     let accentSheet: HTMLCanvasElement | undefined;
     let bed = new Float32Array(0);
-    let breaches = 0;
     let columns = 0;
-    let cost = 0;
-    let frames = 0;
     let handle = 0;
     let inkSheet: HTMLCanvasElement | undefined;
     let isRunning = false;
@@ -135,10 +135,21 @@ function mountField({ accentColor, canvas, holder, inkColor, signal, still }: Fi
     let quality = isMobile || isSlowDevice() ? 1 : 0;
     let rows = 0;
 
+    function degrade() {
+        if (quality >= QUALITY_STEPS.length - 1) {
+            stop();
+
+            return;
+        }
+
+        quality++;
+        resize();
+    }
+
     function draw(elapsed: number) {
         if (!context || !inkSheet) return;
 
-        const drift = 0.5 + 0.5 * Math.sin(TAU * (elapsed / DRIFT_PERIOD));
+        const drift = 0.5 + 0.5 * Math.sin(tau * (elapsed / DRIFT_PERIOD));
         const pitch = QUALITY_STEPS[quality].pitch * (isMobile ? MOBILE_PITCH_SCALE : 1);
         const ripplePhase = elapsed / RIPPLE_PERIOD;
         const swellPhase = elapsed / SWELL_PERIOD;
@@ -147,17 +158,17 @@ function mountField({ accentColor, canvas, holder, inkColor, signal, still }: Fi
 
         context.clearRect(0, 0, canvas.width, canvas.height);
 
-        for (let row = 0; row < rows; row += 1) {
+        for (let row = 0; row < rows; row++) {
             const depth = (row + 0.5) / rows;
 
-            const ripple = Math.sin(TAU * (ripplePhase + depth * RIPPLE_CYCLES));
+            const ripple = Math.sin(tau * (ripplePhase + depth * RIPPLE_CYCLES));
             const vertical = VERTICAL_FLOOR + (1 - VERTICAL_FLOOR) * (1 - Math.abs(depth * 2 - 1));
 
-            for (let column = 0; column < columns; column += 1) {
+            for (let column = 0; column < columns; column++) {
                 const fraction = (column + 0.5) / columns;
 
                 const glow = GLOW_FLOOR + (1 - GLOW_FLOOR) * Math.exp(-((fraction - drift) ** 2) / GLOW_WIDTH);
-                const swell = Math.sin(TAU * (swellPhase - fraction * SWELL_CYCLES));
+                const swell = Math.sin(tau * (swellPhase - fraction * SWELL_CYCLES));
 
                 const wave = SWELL_FLOOR + SWELL_RANGE * (0.5 + 0.5 * (SWELL_WEIGHT * swell + (1 - SWELL_WEIGHT) * ripple));
 
@@ -213,8 +224,8 @@ function mountField({ accentColor, canvas, holder, inkColor, signal, still }: Fi
         rows = Math.ceil(height / pitch);
         bed = new Float32Array(columns * rows);
 
-        for (let row = 0; row < rows; row += 1) {
-            for (let column = 0; column < columns; column += 1) {
+        for (let row = 0; row < rows; row++) {
+            for (let column = 0; column < columns; column++) {
                 const noise = Math.sin(column * HASH_COLUMN + row * HASH_ROW) * HASH_SCALE;
 
                 bed[row * columns + column] = (noise - Math.floor(noise)) * BED_LEVEL;
@@ -244,48 +255,42 @@ function mountField({ accentColor, canvas, holder, inkColor, signal, still }: Fi
         canvas.hidden = true;
     }
 
-    function watch(duration: number) {
-        cost += duration;
-        frames += 1;
-
-        if (frames < BUDGET_WINDOW) return;
-
-        breaches = cost / frames > BUDGET_MILLISECONDS ? breaches + 1 : 0;
-        cost = 0;
-        frames = 0;
-
-        if (breaches < BUDGET_BREACH_LIMIT) return;
-
-        breaches = 0;
-
-        if (quality >= QUALITY_STEPS.length - 1) {
-            stop();
-
-            return;
-        }
-
-        quality += 1;
-        resize();
-    }
+    const watch = createFrameBudget(degrade);
 
     canvas.style.opacity = '0';
     void canvas.offsetHeight;
     canvas.hidden = false;
-    requestAnimationFrame(() => (canvas.style.opacity = '1'));
+
+    requestAnimationFrame(() => {
+        canvas.style.opacity = '1';
+    });
+
     resize();
 
     if (still) {
         draw(0);
-        signal.addEventListener('abort', () => (canvas.hidden = true));
+
+        signal.addEventListener('abort', () => {
+            canvas.hidden = true;
+        });
+
         window.addEventListener('resize', redraw, { signal });
 
         return;
     }
 
-    const observer = new IntersectionObserver(entries => (entries[0]?.isIntersecting ? start() : stop()));
+    const observer = new IntersectionObserver((entries) => {
+        if (entries[0]?.isIntersecting) start();
+        else stop();
+    });
 
     observer.observe(holder);
-    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()), { signal });
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stop();
+        else start();
+    }, { signal });
+
     signal.addEventListener('abort', teardown);
     window.addEventListener('resize', resize, { signal });
 }

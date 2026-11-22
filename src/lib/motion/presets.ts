@@ -3,7 +3,7 @@ import { getMotionTokens } from '@lib/motion/tokens';
 const CLIP_OPEN = 'inset(0% 0% 0% 0%)';
 const FLIP_PERSPECTIVE = 900;
 const FLIP_ROTATION = -55;
-const FOLDED_PROPERTIES = ['rotate', 'scale', 'transform', 'translate'];
+const FOLDED_PROPERTIES = ['rotate', 'scale', 'transform', 'translate'] as const;
 const GUARDED_PRESET: MotionPresetName = 'rise';
 const ORIGIN_TOP = '50% 0%';
 const REST_PROPERTIES = 'clipPath,rotate,scale,transform,transformOrigin,translate,willChange';

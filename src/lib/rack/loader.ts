@@ -1,20 +1,18 @@
-import { UPLOAD } from '@lib/shared/constants';
-import { UPLOAD_EXTENSIONS_OR_LIST, getExtension, getFormatError, getSizeError } from '@lib/audio/uploads';
+import { BYTES_PER_MEGABYTE, DECODE_FAILED_MESSAGE } from '@lib/shared/constants';
 import { ensureRackAudio } from '@lib/rack/context';
+import { getExtensionError, getFormatError, getSizeError } from '@lib/audio/uploads';
 
-const ABORTED_MESSAGE = 'The rack closed before that file finished.';
-const RACK_EXTENSION_LIST = UPLOAD_EXTENSIONS_OR_LIST;
-const RACK_MAX_BYTES = UPLOAD.maxFileBytes;
+const RACK_MAX_MEGABYTES = 100;
 
-async function decodeRackFile(file: File, signal?: AbortSignal): Promise<RackLoadResult> {
-    const invalid = validateRackFile(file);
+const rackMaxBytes = RACK_MAX_MEGABYTES * BYTES_PER_MEGABYTE;
 
-    if (invalid) return { message: invalid, ok: false };
+async function decodeRackFile(file: File): Promise<RackLoadResult> {
+    const error = validateRackFile(file);
+
+    if (error) return { message: error, ok: false };
 
     try {
         const bytes = await file.arrayBuffer();
-
-        if (signal?.aborted) return { message: ABORTED_MESSAGE, ok: false };
 
         const formatError = getFormatError(file, bytes);
 
@@ -24,22 +22,14 @@ async function decodeRackFile(file: File, signal?: AbortSignal): Promise<RackLoa
 
         const buffer = await context.decodeAudioData(bytes);
 
-        if (signal?.aborted) return { message: ABORTED_MESSAGE, ok: false };
-
         return { buffer, ok: true };
     } catch {
-        return { message: 'That file could not be decoded.', ok: false };
+        return { message: DECODE_FAILED_MESSAGE, ok: false };
     }
 }
 
 function validateRackFile(file: File): string | undefined {
-    const extension = getExtension(file.name);
-
-    if (!UPLOAD.extensions.some(allowed => allowed === extension)) {
-        return `That is a .${extension || 'file'}. We take ${RACK_EXTENSION_LIST}.`;
-    }
-
-    return getSizeError(file, RACK_MAX_BYTES);
+    return getExtensionError(file.name) ?? getSizeError(file, rackMaxBytes);
 }
 
-export { RACK_EXTENSION_LIST, RACK_MAX_BYTES, decodeRackFile, validateRackFile };
+export { decodeRackFile, rackMaxBytes, validateRackFile };

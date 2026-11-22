@@ -3,8 +3,18 @@ import IconArrow from '@components/icons/Arrow.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import PlaceholderTile from '@components/shared/PlaceholderTile.astro';
 import Schedule from '@components/program/Schedule.astro';
-import { AVATAR, GENRES, ONBOARDING_STEPS, PROFILE_FIELDS, PROFILE_ROLES, TOUR_STOPS, US_STATES } from '@lib/shared/constants';
-import { AVATAR_EXTENSIONS_OR_LIST } from '@lib/account/images';
+import {
+    AVATAR,
+    DEFAULT_ROLE,
+    DEFAULT_STATE,
+    GENRES,
+    ONBOARDING_STEPS,
+    PROFILE_FIELDS,
+    PROFILE_ROLES,
+    TOUR_STOPS,
+    US_STATES,
+} from '@lib/shared/constants';
+import { avatarExtensionsOrList } from '@lib/account/images';
 import { formatBytes, formatDateStamp, formatRole, isUpcoming, toAustinIso } from '@lib/shared/utils';
 import { loadEvents } from '@lib/programs/calendar';
 
@@ -19,9 +29,8 @@ const ACCOUNT_BENEFITS = [
     { blurb: 'One email a season with what is on the calendar and where to find us next, sent to your account address if you opt in at check-in.', label: 'The dispatch' },
 ];
 
+const CLASS_DROP = 'dropzone halftone basis-55 flex grow items-center relative min-h-(--control-size) px-4 py-2 border-2 border-border-strong border-dashed bg-bg-page';
 const DEFAULT_CITY = 'Austin';
-const DEFAULT_ROLE = 'fan';
-const DEFAULT_STATE = 'TX';
 
 const WELCOME_LINKS = [
     { blurb: 'Apparel, accessories, audio, tickets, and what your Prods buy.', href: '/store', label: 'Store' },
@@ -67,17 +76,17 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
             This link no longer works
         </h2>
         <p class="max-w-2xl text-lg text-text-secondary">
-            Welcome links last 24 hours. Checking in again sends a fresh one.
+            Welcome links last 1 hour. Sign in, or use Forgot password there, for a fresh one.
         </p>
         <a
             class="btn btn--primary"
-            href="/here"
+            href="/signin?next=/onboarding"
         >
-            Check in again <IconArrow />
+            Sign in <IconArrow />
         </a>
     </div>
     <div
-        class="grid grid-cols-[160px_minmax(0,1fr)] items-start gap-x-12 gap-y-(--space-lg) max-md:grid-cols-1"
+        class="grid grid-cols-[184px_minmax(0,1fr)] items-start gap-x-12 gap-y-(--space-lg) max-md:grid-cols-1"
         data-onboarding-surface="flow"
     >
         <div class="onboarding__aside">
@@ -180,7 +189,7 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
                 <div class="flex flex-col gap-2">
                     <p class="label text-text-secondary">{PROFILE_FIELDS.portrait.label}</p>
                     <div class="flex flex-wrap items-center gap-(--space-md)">
-                        <label class="dropzone halftone basis-55 flex grow items-center relative min-h-(--control-size) px-4 py-2 border-2 border-border-strong border-dashed bg-bg-page">
+                        <label class={CLASS_DROP}>
                             <span class="label">{PROFILE_FIELDS.portrait.picker}</span>
                             <input
                                 id="onboarding-portrait"
@@ -207,7 +216,7 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
                         id="onboarding-portrait-help"
                         class="text-base text-text-secondary"
                     >
-                        {AVATAR_EXTENSIONS_OR_LIST}. Up to {formatBytes(AVATAR.maxFileBytes)}, at least {AVATAR.minEdgePixels}px on each side.
+                        {avatarExtensionsOrList}. Up to {formatBytes(AVATAR.maxFileBytes)}, at least {AVATAR.minEdgePixels}px on each side.
                     </p>
                 </div>
                 <div class="flex flex-col gap-2">
@@ -270,6 +279,7 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
                                 class="input"
                                 aria-invalid="false"
                                 autocomplete={PROFILE_FIELDS.city.autocomplete}
+                                maxlength={PROFILE_FIELDS.city.maxLength}
                                 name="city"
                                 required={PROFILE_FIELDS.city.required}
                                 type="text"
@@ -446,6 +456,18 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
 <Schedule />
 
 <style>
+    html[data-onboarding-resume] [data-onboarding-surface='flow'] {
+        opacity: 0;
+    }
+
+    html[data-session='out'] [data-onboarding-surface='flow'] {
+        display: none;
+    }
+
+    html[data-theme='dark'] .onboarding-tour {
+        --color-bg-inverse: var(--color-bg-page);
+    }
+
     .onboarding-benefits__cell:not(:nth-child(-n + 2)) {
         border-top: 2px solid var(--color-border-strong);
     }
@@ -606,38 +628,36 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
 <script>
     import { navigate } from 'astro:transitions/client';
 
-    import { MOTION_SELECTOR, revealTarget } from '@lib/motion/entrances';
-    import { ONBOARDING_STEPS, ONBOARDING_TOKEN_PARAMETER, PROFILE_FIELDS, REDUCED_MOTION_QUERY } from '@lib/shared/constants';
+    import { MOTION_SELECTOR, ONBOARDING_STEPS, PORTRAIT_REMOVED_MESSAGE, PORTRAIT_STAGED_MESSAGE, PROFILE_FIELDS, REDUCED_MOTION_QUERY } from '@lib/shared/constants';
     import { armTour } from '@lib/tour/tour';
-    import { clearFieldErrors, reportFieldErrors, setRole, validateFields, watchFieldErrors } from '@lib/ui/forms';
-    import { clearOnboardingDraft, getOnboardingDraft, saveOnboardingDraft, verifyOnboardingToken } from '@lib/account/onboarding';
+    import { clearAuthLink, getAuthLink, getSession, onSessionChange, saveSession, whenSessionReady } from '@lib/account/session';
+    import { clearFieldErrors, reportFieldErrors, serialize, setRole, validateFields, watchFieldErrors } from '@lib/ui/forms';
+    import { clearOnboardingStep, getOnboardingStep, saveOnboardingStep } from '@lib/account/onboarding';
     import { formatRole, getInitials, pickTileColor, registerPageScript, setAvatarImage, setHidden, setPending, setText } from '@lib/shared/utils';
-    import { getSession, startSession, updateSession } from '@lib/account/session';
+    import { revealTarget } from '@lib/motion/entrances';
     import { stageAvatar } from '@lib/account/images';
     import { toast } from '@lib/ui/toasts';
 
     const BASICS_RULES: Record<string, FieldRule> = {
         artistName: { max: PROFILE_FIELDS.artistName.maxLength, message: PROFILE_FIELDS.artistName.message },
-        city: { message: PROFILE_FIELDS.city.message, required: PROFILE_FIELDS.city.required },
+        city: { max: PROFILE_FIELDS.city.maxLength, message: PROFILE_FIELDS.city.message, required: PROFILE_FIELDS.city.required },
     };
 
-    const COMPLETION_ENABLED = false;
     const DEFAULT_LOCATION = 'Austin, TX';
-    const DEMO_EMAIL = 'you@austinproduceralliance.com';
     const LAST_STEP = 2;
-    const STORAGE_MESSAGE = 'Your progress was not saved because your browser storage is full. Clear some space and try again.';
 
     const STEP_RULES: Record<string, FieldRule>[] = [BASICS_RULES, {}, {}];
 
-    let accountEmail = '';
+    let appliedAvatar = '';
     let avatar = '';
+    let isExpired = false;
+    let isOpen = false;
     let isStaging = false;
-    let signedIn: Promise<SessionResult> | undefined;
+    let isSubmitting = false;
+    let snapshot = '';
     let step = 0;
 
-    function armReveal(form: HTMLFormElement) {
-        const block = form.querySelector<HTMLElement>(`[data-onboarding-pane="${step}"] [data-onboarding-reveal]`);
-
+    function armReveal(block: HTMLElement | null) {
         if (!block || window.matchMedia(REDUCED_MOTION_QUERY).matches) return;
 
         block.dataset.onboardingReveal = 'off';
@@ -645,53 +665,23 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
         block.dataset.onboardingReveal = 'on';
     }
 
+    function changeStep(form: HTMLFormElement, userId: string, next: number) {
+        step = next;
+        saveOnboardingStep(userId, step);
+        showStep(form, true);
+    }
+
     function collect(form: HTMLFormElement) {
         const values = new FormData(form);
 
         return {
+            ...(avatar === appliedAvatar ? {} : { avatar }),
             artistName: String(values.get('artistName') ?? '').trim(),
-            avatar,
-            email: accountEmail,
+            city: String(values.get('city') ?? '').trim(),
             genres: values.getAll('genres').map(String),
-            location: getLocation(values),
-            roles: [getRole(values)],
+            role: getRole(values),
+            state: String(values.get('state') ?? ''),
         };
-    }
-
-    async function complete(form: HTMLFormElement) {
-        const back = form.querySelector<HTMLButtonElement>('[data-onboarding-back]');
-        const button = form.querySelector<HTMLButtonElement>('[data-onboarding-next]');
-        const draft = collect(form);
-
-        setPending(button, true);
-
-        await signedIn;
-
-        const session = await updateSession({ artistName: draft.artistName, avatar: draft.avatar, onboarded: true, role: draft.roles[0] });
-
-        if (!session) {
-            setPending(button, false);
-            toast('That sign-in has lapsed. Check in again for a fresh link.', 'error');
-            button?.focus();
-
-            return;
-        }
-
-        if (!getSession()?.onboarded) {
-            setPending(button, false);
-            toast('That could not be saved because your browser storage is full. Try a smaller portrait.', 'error');
-            button?.focus();
-
-            return;
-        }
-
-        clearOnboardingDraft();
-        setHidden(back, true);
-        setHidden(button, true);
-        setPending(button, false);
-        toast('You are all set. Your card is on the roster.', 'success');
-
-        await navigate('/');
     }
 
     function getLocation(values: FormData) {
@@ -705,11 +695,11 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
     }
 
     function handleBack(form: HTMLFormElement) {
-        if (step === 0) return;
+        const session = getSession();
 
-        step -= 1;
-        persistDraft(form);
-        showStep(form, true);
+        if (isSubmitting || !session || step === 0) return;
+
+        changeStep(form, session.id, step - 1);
     }
 
     async function handlePortraitChange(form: HTMLFormElement, input: HTMLInputElement) {
@@ -734,8 +724,7 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
 
             avatar = staged.dataUrl;
             renderPreview(form);
-            persistDraft(form);
-            toast('Portrait staged.', 'success');
+            toast(PORTRAIT_STAGED_MESSAGE, 'success');
         } finally {
             isStaging = false;
         }
@@ -745,15 +734,16 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
         avatar = '';
         clearFieldErrors(form);
         renderPreview(form);
-        persistDraft(form);
         form.querySelector<HTMLInputElement>('[data-portrait-input]')?.focus();
-        toast('Portrait removed.', 'info');
+        toast(PORTRAIT_REMOVED_MESSAGE, 'info');
     }
 
-    async function handleSubmit(event: SubmitEvent, form: HTMLFormElement) {
+    async function handleSubmit(event: SubmitEvent, form: HTMLFormElement, signal: AbortSignal) {
         event.preventDefault();
 
-        if (isStaging) return;
+        const session = getSession();
+
+        if (isStaging || isSubmitting || !session) return;
 
         const errors = validateFields(form, STEP_RULES[step]);
 
@@ -765,28 +755,48 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
             return;
         }
 
-        if (step === LAST_STEP) {
-            if (!COMPLETION_ENABLED) {
-                toast('Completion is switched off while the flow is under review.', 'info');
-
-                return;
-            }
-
-            await complete(form);
+        if (step > 0 && step < LAST_STEP) {
+            changeStep(form, session.id, step + 1);
 
             return;
         }
 
-        const draft = collect(form);
+        const button = form.querySelector<HTMLButtonElement>('[data-onboarding-next]');
+        const isFinishing = step === LAST_STEP;
+        const submitted = serialize(form, avatar);
 
-        step += 1;
+        isSubmitting = true;
+        setPending(button, true);
 
-        if (!persistDraft(form).persisted) toast(STORAGE_MESSAGE, 'error');
+        const result = await saveSession(isFinishing ? { ...collect(form), onboarded: true } : collect(form));
 
-        showStep(form, true);
+        if (signal.aborted) return;
 
-        await signedIn;
-        await updateSession({ artistName: draft.artistName });
+        setPending(button, false);
+
+        if (isFinishing && result.ok) {
+            clearOnboardingStep();
+            setHidden(button, true);
+            setHidden(form.querySelector<HTMLButtonElement>('[data-onboarding-back]'), true);
+            toast('You are all set. Your card is on the roster.', 'success');
+
+            await navigate('/');
+
+            return;
+        }
+
+        isSubmitting = false;
+
+        if (result.ok) {
+            snapshot = submitted;
+            changeStep(form, session.id, step + 1);
+        } else if (result.code === 'upload-failed') {
+            reportFieldErrors(form, { portrait: result.message });
+        } else {
+            toast(result.message, result.code === 'signed-out' ? 'info' : 'error');
+        }
+
+        syncFlow(form);
     }
 
     async function handleTour() {
@@ -797,53 +807,61 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
 
     function initOnboardingFlow(signal: AbortSignal) {
         const form = document.querySelector<HTMLFormElement>('[data-onboarding-form]');
-        const gate = verifyOnboardingToken(new URLSearchParams(window.location.search).get(ONBOARDING_TOKEN_PARAMETER));
         const picture = document.querySelector<HTMLInputElement>('[data-portrait-input]');
-        const session = getSession();
 
         if (!form) return;
 
-        if (COMPLETION_ENABLED && session?.onboarded === true) {
-            void navigate('/settings', { history: 'replace' });
-
-            return;
-        }
-
-        if (gate.state === 'rejected' && gate.reason !== 'missing') {
-            showSurface('expired');
-
-            return;
-        }
-
-        accountEmail = gate.state === 'granted' ? gate.email : (session?.email ?? DEMO_EMAIL);
+        appliedAvatar = '';
+        avatar = '';
+        isExpired = getAuthLink() === 'expired';
+        isOpen = false;
+        isSubmitting = false;
+        snapshot = serialize(form, avatar);
         step = 0;
         form.noValidate = true;
-        prefill(form, session);
-        restore(form);
-        renderPreview(form);
-        setText(document.querySelector<HTMLElement>('[data-onboarding-email]'), accountEmail);
-        showStep(form, false);
-        showSurface('flow');
-        void signIn();
+
+        if (isExpired) clearAuthLink();
+
         form.addEventListener('input', () => renderPreview(form), { signal });
-        form.addEventListener('submit', event => void handleSubmit(event, form), { signal });
+        form.addEventListener('submit', event => void handleSubmit(event, form, signal), { signal });
         form.querySelector<HTMLButtonElement>('[data-onboarding-back]')?.addEventListener('click', () => handleBack(form), { signal });
         form.querySelector<HTMLButtonElement>('[data-onboarding-tour]')?.addEventListener('click', () => void handleTour(), { signal });
         form.querySelector<HTMLButtonElement>('[data-portrait-remove]')?.addEventListener('click', () => handlePortraitRemove(form), { signal });
         picture?.addEventListener('change', () => void handlePortraitChange(form, picture), { signal });
         watchFieldErrors(form, signal);
+        void openFlow(form, signal);
     }
 
-    function persistDraft(form: HTMLFormElement) {
-        return saveOnboardingDraft({ ...collect(form), step: step + 1 });
+    async function openFlow(form: HTMLFormElement, signal: AbortSignal) {
+        const cached = getSession();
+
+        if (cached && !cached.onboarded) showFlow(form, cached);
+
+        await whenSessionReady();
+
+        if (signal.aborted) return;
+
+        const unsubscribe = onSessionChange(() => syncFlow(form));
+
+        signal.addEventListener('abort', unsubscribe, { once: true });
+        syncFlow(form);
     }
 
-    function prefill(form: HTMLFormElement, session: Session | null) {
-        if (!session || session.email !== accountEmail) return;
-
+    function prefill(form: HTMLFormElement, session: Session) {
+        appliedAvatar = session.avatar;
         avatar = session.avatar;
+
+        form.querySelectorAll<HTMLInputElement>('[name="genres"]').forEach((input) => {
+            input.checked = session.genres.includes(input.value);
+        });
+
         setRole(form, session.role);
+        setText(document.querySelector<HTMLElement>('[data-onboarding-email]'), session.email);
         setValue(form, 'artistName', session.artistName);
+        setValue(form, 'city', session.city);
+        setValue(form, 'state', session.state);
+        renderPreview(form);
+        snapshot = serialize(form, avatar);
     }
 
     function renderPreview(form: HTMLFormElement) {
@@ -866,11 +884,11 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
         }
 
         setAvatarImage(document.querySelector<HTMLImageElement>('[data-preview-avatar]'), avatar);
+        setHidden(badge, role.length === 0);
         setHidden(document.querySelector<HTMLElement>('[data-portrait-remove]'), avatar.length === 0);
         setPreviewText(document.querySelector<HTMLElement>('[data-preview-name]'), artistName, 'Your artist name');
-        setText(document.querySelector<HTMLElement>('.onboarding-preview__initials'), getInitials(artistName) || '??');
-        setHidden(badge, role.length === 0);
         setText(badge, formatRole(role));
+        setText(document.querySelector<HTMLElement>('.onboarding-preview__initials'), getInitials(artistName) || '??');
         setText(document.querySelector<HTMLElement>('[data-preview-location]'), location);
 
         if (!list || !template) return;
@@ -883,26 +901,6 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
             setText(fragment.querySelector('[data-preview-genre]'), genre);
             list.append(fragment);
         });
-    }
-
-    function restore(form: HTMLFormElement) {
-        const draft = getOnboardingDraft();
-
-        if (draft.email !== accountEmail) return;
-
-        const [draftCity = '', draftState = ''] = draft.location.split(/,\s*/);
-
-        avatar = draft.avatar || avatar;
-        step = Math.min(LAST_STEP, Math.max(0, draft.step - 1));
-
-        form.querySelectorAll<HTMLInputElement>('[name="genres"]').forEach((input) => {
-            input.checked = draft.genres.includes(input.value);
-        });
-
-        setRole(form, draft.roles[0] ?? '');
-        setValue(form, 'artistName', draft.artistName);
-        setValue(form, 'city', draftCity);
-        setValue(form, 'state', draftState.toUpperCase());
     }
 
     function setPreviewText(element: HTMLElement | null, value: string, fallback: string) {
@@ -919,6 +917,15 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
         if (control instanceof HTMLSelectElement && !Array.from(control.options).some(option => option.value === value)) return;
 
         control.value = value;
+    }
+
+    function showFlow(form: HTMLFormElement, session: Session) {
+        isOpen = true;
+        prefill(form, session);
+        step = Math.min(LAST_STEP, getOnboardingStep(session.id));
+        showStep(form, false);
+        showSurface('flow');
+        delete document.documentElement.dataset.onboardingResume;
     }
 
     function showStep(form: HTMLFormElement, isStepChange: boolean) {
@@ -944,10 +951,9 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
 
         if (!isStepChange) return;
 
-        armReveal(form);
-
         const pane = form.querySelector<HTMLElement>(`[data-onboarding-pane="${step}"]`);
 
+        armReveal(pane?.querySelector<HTMLElement>('[data-onboarding-reveal]') ?? null);
         pane?.querySelectorAll(MOTION_SELECTOR).forEach(target => revealTarget(target));
         (pane?.querySelector<HTMLElement>('input') ?? pane?.querySelector<HTMLElement>('legend'))?.focus();
     }
@@ -958,16 +964,36 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
         });
     }
 
-    async function signIn() {
-        if (getSession()?.email === accountEmail) return;
+    function syncFlow(form: HTMLFormElement) {
+        const session = getSession();
+        const surface = document.querySelector<HTMLElement>('[data-onboarding-surface="flow"]');
 
-        signedIn = startSession({ email: accountEmail });
+        if (isSubmitting) return;
 
-        const result = await signedIn;
+        if (session?.onboarded) {
+            void navigate('/settings', { history: 'replace' });
 
-        if (result.ok) return;
+            return;
+        }
 
-        toast(result.message, 'error');
+        if (!session) {
+            if (isExpired) showSurface('expired');
+            else void navigate('/signin?next=/onboarding', { history: 'replace' });
+
+            return;
+        }
+
+        isExpired = false;
+
+        if (isOpen) {
+            if (serialize(form, avatar) === snapshot) prefill(form, session);
+
+            return;
+        }
+
+        showFlow(form, session);
+        surface?.querySelectorAll(MOTION_SELECTOR).forEach(target => revealTarget(target));
+        armReveal(surface);
     }
 
     registerPageScript(initOnboardingFlow);

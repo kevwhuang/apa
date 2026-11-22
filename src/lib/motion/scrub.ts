@@ -1,11 +1,10 @@
 import gsap from 'gsap';
 
-import { MOBILE_WIDTH, REDUCED_MOTION_QUERY } from '@lib/shared/constants';
+import { HERO_FIELD_SELECTOR, MOBILE_WIDTH, REDUCED_MOTION_QUERY } from '@lib/shared/constants';
 import { getMotionTokens } from '@lib/motion/tokens';
 
 const DRIFT_SCRUB = 0.6;
 const DRIFT_SHIFT = 6;
-const HERO_SELECTOR = '.hero__field';
 const SCRUB_END = 'bottom top';
 const SCRUB_SELECTOR = '[data-scrub]';
 const SCRUB_START = 'top bottom';
@@ -39,7 +38,7 @@ function initScrub(): void {
     for (const element of document.querySelectorAll<HTMLElement>(SCRUB_SELECTOR)) {
         const variant = SCRUB_VARIANTS.find(name => name === element.dataset.scrub);
 
-        if (element.closest(HERO_SELECTOR) || !variant) continue;
+        if (element.closest(HERO_FIELD_SELECTOR) || !variant) continue;
 
         const preset = SCRUB_PRESETS[variant];
 

@@ -126,7 +126,7 @@ const categories = PRODUCT_CATEGORIES.filter(category => products.some(product =
                         )}
                     </span>
                     <span class="block pb-2 pt-(--space-md) px-(--space-md)">
-                        <span class="flex flex-wrap items-center justify-between gap-x-4 mb-2">
+                        <span class="flex flex-wrap items-center justify-between min-h-4 gap-x-4 mb-2">
                             <span class="label text-text-secondary">
                                 {product.data.category}
                             </span>
@@ -211,11 +211,9 @@ const categories = PRODUCT_CATEGORIES.filter(category => products.some(product =
 </style>
 
 <script>
-    import { REDUCED_MOTION_QUERY } from '@lib/shared/constants';
+    import { HOVER_QUERY, REDUCED_MOTION_QUERY } from '@lib/shared/constants';
     import { describeMatches, initFilterGroup, registerPageScript } from '@lib/shared/utils';
-    import { isValidationBypassed } from '@lib/ui/forms';
 
-    const HOVER_QUERY = '(hover: hover)';
     const SLIDESHOW_INTERVAL_MILLISECONDS = 1_000;
 
     let slideshowTimer: Timer | undefined;
@@ -227,12 +225,6 @@ const categories = PRODUCT_CATEGORIES.filter(category => products.some(product =
 
         photos[current]?.classList.remove('is-current');
         photos[(current + 1) % photos.length]?.classList.add('is-current');
-    }
-
-    function handleDisabledClick(event: Event) {
-        if (isValidationBypassed()) return;
-
-        event.preventDefault();
     }
 
     function handleLinkEnter(frame: HTMLElement) {
@@ -277,7 +269,7 @@ const categories = PRODUCT_CATEGORIES.filter(category => products.some(product =
         document.querySelectorAll<HTMLAnchorElement>('[data-product-link]').forEach((link) => {
             const frame = link.querySelector<HTMLElement>('[data-product-frame="loop"]');
 
-            if (link.getAttribute('aria-disabled') === 'true') link.addEventListener('click', handleDisabledClick, { signal });
+            if (link.getAttribute('aria-disabled') === 'true') link.addEventListener('click', event => event.preventDefault(), { signal });
 
             if (!frame) return;
 

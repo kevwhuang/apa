@@ -1,7 +1,7 @@
 ---
 import PageHead from '@components/shared/PageHead.astro';
 
-const CLASS_DETAIL_ROW = 'col-span-full content-start grid grid-cols-subgrid items-baseline gap-x-(--space-md) gap-y-3 px-(--space-lg) py-4 bg-event-hangout max-lg:col-auto max-lg:grid-cols-1 max-lg:py-(--space-lg)';
+const CLASS_DETAIL_ROW = 'col-span-full content-start grid grid-cols-subgrid items-baseline gap-x-(--space-md) gap-y-3 px-(--space-lg) py-4 bg-event-hangout max-lg:col-auto max-lg:grid-cols-1 max-lg:last:odd:col-span-full max-lg:py-(--space-lg)';
 
 const DETAILS: { detail: string; term: string }[] = [
     { detail: 'Open to everyone', term: 'Who' },

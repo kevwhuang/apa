@@ -186,7 +186,7 @@ import IconUser from '@components/icons/User.astro';
     import { navigate } from 'astro:transitions/client';
 
     import { STORAGE } from '@lib/shared/constants';
-    import { endSession, getSession, onSessionChange } from '@lib/account/session';
+    import { endSession, getSession, onSessionChange, syncSessionAttribute } from '@lib/account/session';
     import { getTheme, toggleTheme } from '@lib/ui/theme';
     import { registerPageScript, setPending } from '@lib/shared/utils';
     import { toast } from '@lib/ui/toasts';
@@ -225,7 +225,7 @@ import IconUser from '@components/icons/User.astro';
         const name = document.querySelector<HTMLElement>('[data-account-name]');
         const session = getSession();
 
-        document.documentElement.dataset.session = session ? 'in' : 'out';
+        syncSessionAttribute();
 
         if (!name) return;
 

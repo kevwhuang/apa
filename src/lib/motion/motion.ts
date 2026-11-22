@@ -1,8 +1,8 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-import { MOTION_SELECTOR, buildEntrances, revealAll, revealTarget } from '@lib/motion/entrances';
-import { REDUCED_MOTION_QUERY, STORAGE } from '@lib/shared/constants';
+import { MOTION_SELECTOR, REDUCED_MOTION_QUERY, STORAGE } from '@lib/shared/constants';
+import { buildEntrances, revealAll, revealTarget } from '@lib/motion/entrances';
 import { clearScrub, initScrub } from '@lib/motion/scrub';
 import { initCounters } from '@lib/motion/counter';
 import { initHeroField } from '@lib/motion/hero';

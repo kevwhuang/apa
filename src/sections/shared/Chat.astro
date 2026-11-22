@@ -1,6 +1,7 @@
 ---
 import IconChat from '@components/icons/Chat.astro';
 import IconClose from '@components/icons/Close.astro';
+import { CHAT_MESSAGE_MAX_LENGTH } from '@lib/shared/constants';
 ---
 
 <aside
@@ -58,16 +59,18 @@ import IconClose from '@components/icons/Close.astro';
             class="chat__form flex flex-wrap justify-end shrink-0 gap-2 p-4 border-border-subtle border-t"
             data-chat-form
         >
-            <input
-                id="chat-message"
-                class="input flex-1 min-w-42"
-                aria-label="Message"
-                autocomplete="off"
-                data-chat-field
-                name="message"
-                placeholder="Write a message"
-                type="text"
-            />
+            <label class="flex flex-1 min-w-42">
+                <span class="sr-only">Message</span>
+                <input
+                    class="input"
+                    autocomplete="off"
+                    data-chat-field
+                    maxlength={CHAT_MESSAGE_MAX_LENGTH}
+                    name="message"
+                    placeholder="Write a message"
+                    type="text"
+                />
+            </label>
             <button
                 class="btn btn--accent chat__send h-(--control-size)"
                 type="submit"
@@ -87,7 +90,7 @@ import IconClose from '@components/icons/Close.astro';
                         class="chat__author min-w-0 font-bold leading-(--text-lg) text-base wrap-anywhere"
                         data-chat-author
                     />
-                    <span
+                    <time
                         class="chat__time font-mono text-sm text-text-secondary"
                         data-chat-time
                     />
@@ -114,6 +117,7 @@ import IconClose from '@components/icons/Close.astro';
 
 <style>
     .chat {
+        --chat-bottom: max(var(--space-md), min(var(--chat-offset), calc(100dvh - var(--header-height) - var(--space-md) - 320px)));
         --chat-offset: calc(var(--space-md) + var(--control-size) + 8px);
         display: none;
     }
@@ -224,8 +228,8 @@ import IconClose from '@components/icons/Close.astro';
         background: var(--color-bg-raised);
         border: 2px solid var(--color-border-strong);
         color: var(--color-text);
-        height: min(600px, calc(100dvh - var(--header-height) - var(--space-md) - var(--chat-offset)));
-        inset: auto calc(var(--control-size) + var(--lift)) var(--chat-offset) auto;
+        height: min(600px, calc(100dvh - var(--header-height) - var(--space-md) - var(--chat-bottom)));
+        inset: auto calc(var(--control-size) + var(--lift)) var(--chat-bottom) auto;
         max-width: calc(100vw - var(--control-size) - var(--lift) - var(--shell-pad));
         position: fixed;
         width: var(--chat-width, min(340px, calc(100vw - var(--control-size) - 2 * var(--space-md))));
@@ -239,21 +243,45 @@ import IconClose from '@components/icons/Close.astro';
 
 <script>
     import { LAUNCHER_SIZE, PALETTE, POINTER_COARSE_QUERY, WINDOW_MARGINS } from '@lib/shared/constants';
-    import { ROOM_MEMBERS, closeChat, getChatState, getMessages, getOnlineCount, onChatChange, openChat, seedRoom, sendChatMessage } from '@lib/chat/chat';
-    import { claimFloatWindow, formatTime, getInitials, initPanelResize, onFloatWindowClaim, registerPageScript, setText } from '@lib/shared/utils';
+    import {
+        claimFloatWindow,
+        formatTime,
+        getInitials,
+        initPanelResize,
+        onFloatWindowClaim,
+        pickTileColor,
+        registerPageScript,
+        setText,
+        toAustinIso,
+    } from '@lib/shared/utils';
+    import {
+        closeChat,
+        connectChat,
+        getChatState,
+        getMessages,
+        hasEarlierMessages,
+        loadEarlierMessages,
+        onChatChange,
+        openChat,
+        sendChatMessage,
+    } from '@lib/chat/chat';
+    import { getSession, onSessionChange } from '@lib/account/session';
+    import { toast } from '@lib/ui/toasts';
 
     const CHAT_MIN_WIDTH = 340;
     const GROUP_WINDOW_MILLISECONDS = 300_000;
-    const LIVE_RESET_DELAY = 200;
-    const MEMBER_COLORS = new Map<string, TileColor>(ROOM_MEMBERS.map((member, index) => [member.name, PALETTE[(index + 1) % PALETTE.length]]));
+    const LIVE_RESET_MILLISECONDS = 200;
+    const PIN_THRESHOLD_PIXELS = 48;
     const RECEIVE_HAPTICS_MILLISECONDS = [60, 90, 110];
     const RESIZE_LABEL = 'Resize member chat';
-    const SELF_COLOR = PALETTE[PALETTE.length - 1];
-    const TALLY_INTERVAL_MILLISECONDS = 60_000;
 
-    let liveTimer: number | undefined;
-    let tallyTimer: number | undefined;
+    const selfColor = PALETTE[PALETTE.length - 1];
+
+    let fieldUserId = '';
+    let liveTimer: Timer | undefined;
+    let swapDistance = 0;
     let unsubscribeChat: (() => void) | undefined;
+    let unsubscribeSession: (() => void) | undefined;
 
     function buildMessage(message: ChatMessage, previous: ChatMessage | undefined) {
         const template = document.querySelector<HTMLTemplateElement>('[data-chat-message]');
@@ -267,16 +295,21 @@ import IconClose from '@components/icons/Close.astro';
 
         if (!avatar || !item) return null;
 
-        const isGrouped = previous !== undefined && previous.name === message.name && message.sentAt - previous.sentAt < GROUP_WINDOW_MILLISECONDS;
-        const tone = message.self ? SELF_COLOR : (MEMBER_COLORS.get(message.name) ?? SELF_COLOR);
+        const isGrouped = previous !== undefined
+            && previous.userId === message.userId
+            && message.sentAt - previous.sentAt < GROUP_WINDOW_MILLISECONDS;
+
+        const tileColor = message.self ? selfColor : pickTileColor(message.userId);
 
         item.classList.toggle('chat__message--grouped', isGrouped);
+        item.dataset.chatId = message.id;
         setText(avatar, getInitials(message.name));
         setText(fragment.querySelector('[data-chat-author]'), message.name);
         setText(fragment.querySelector('[data-chat-text]'), message.body);
         setText(fragment.querySelector('[data-chat-time]'), formatTime(new Date(message.sentAt)));
-        avatar.style.background = tone.background;
-        avatar.style.color = tone.text;
+        fragment.querySelector('[data-chat-time]')?.setAttribute('datetime', toAustinIso(new Date(message.sentAt)));
+        avatar.style.background = tileColor.background;
+        avatar.style.color = tileColor.text;
 
         return item;
     }
@@ -291,6 +324,18 @@ import IconClose from '@components/icons/Close.astro';
         }
 
         handleClose(dialog);
+    }
+
+    function handleAfterSwap() {
+        const log = document.querySelector<HTMLElement>('[data-chat-log]');
+
+        if (log) log.scrollTop = log.scrollHeight - log.clientHeight - swapDistance;
+    }
+
+    function handleBeforeSwap() {
+        const log = document.querySelector<HTMLElement>('[data-chat-log]');
+
+        if (log) swapDistance = log.scrollHeight - log.scrollTop - log.clientHeight;
     }
 
     function handleClose(dialog: HTMLDialogElement | null) {
@@ -319,7 +364,7 @@ import IconClose from '@components/icons/Close.astro';
     function handleLaunch() {
         if (!getChatState().open) {
             openChat();
-            openWindow(true);
+            openWindow();
 
             return;
         }
@@ -328,33 +373,46 @@ import IconClose from '@components/icons/Close.astro';
     }
 
     async function handleSubmit(event: SubmitEvent) {
+        if (!(event.target instanceof HTMLFormElement) || !event.target.matches('[data-chat-form]')) return;
+
         event.preventDefault();
 
         const field = document.querySelector<HTMLInputElement>('[data-chat-field]');
 
         if (!field) return;
 
-        const body = field.value;
+        const body = field.value.trim();
 
         field.value = '';
 
-        await sendChatMessage(body);
+        if (!body) return;
+
+        const result = await sendChatMessage(body);
+
+        if (result.ok) return;
+
+        if (!field.value) field.value = body;
+
+        toast(result.message, 'error');
     }
 
     function initChat(signal: AbortSignal) {
         const aside = document.querySelector<HTMLElement>('.chat');
         const dialog = document.querySelector<HTMLDialogElement>('[data-chat-window]');
-        const form = document.querySelector<HTMLFormElement>('[data-chat-form]');
         const grip = document.querySelector<HTMLElement>('[data-chat-grip]');
         const launcher = document.querySelector<HTMLElement>('[data-chat-launcher]');
+        const log = document.querySelector<HTMLElement>('[data-chat-log]');
 
-        if (!aside || !dialog || !form || !grip || !launcher) return;
+        if (!aside || !dialog || !grip || !launcher || !log) return;
 
         if ('closedBy' in dialog) dialog.setAttribute('closedby', 'closerequest');
 
         aside.classList.add('is-ready');
+        launcher.setAttribute('aria-expanded', String(dialog.open));
         unsubscribeChat?.();
+        unsubscribeSession?.();
         unsubscribeChat = onChatChange(render);
+        unsubscribeSession = onSessionChange(syncChat);
         signal.addEventListener('abort', teardown, { once: true });
 
         initPanelResize({
@@ -370,42 +428,40 @@ import IconClose from '@components/icons/Close.astro';
         aside.addEventListener('keydown', handleKeydown, { signal });
         dialog.addEventListener('close', () => handleClose(dialog), { signal });
         document.querySelector<HTMLElement>('[data-chat-close]')?.addEventListener('click', closeWindow, { signal });
-        form.addEventListener('submit', event => void handleSubmit(event), { signal });
         launcher.addEventListener('click', handleLaunch, { signal });
+
+        log.addEventListener('scroll', () => {
+            if (log.scrollTop <= 0 && hasEarlierMessages()) void loadEarlierMessages();
+        }, { passive: true, signal });
+
         onFloatWindowClaim(dialog, closeWindow, signal);
-        seedRoom();
-        window.clearInterval(tallyTimer);
-        tallyTimer = window.setInterval(renderTally, TALLY_INTERVAL_MILLISECONDS);
-
-        if (!dialog.open && getChatState().open) closeChat();
-
+        syncChat();
         render();
     }
 
-    function openWindow(shouldMoveFocus: boolean) {
+    function isRendered(item: HTMLElement, message: ChatMessage) {
+        return item.dataset.chatId === message.id
+            && item.querySelector('[data-chat-author]')?.textContent === message.name
+            && item.querySelector('[data-chat-time]')?.textContent === formatTime(new Date(message.sentAt));
+    }
+
+    function openWindow() {
         const dialog = document.querySelector<HTMLDialogElement>('[data-chat-window]');
         const field = document.querySelector<HTMLInputElement>('[data-chat-field]');
-        const previous = document.activeElement;
+        const log = document.querySelector<HTMLElement>('[data-chat-log]');
 
         if (!dialog || dialog.open) return;
 
         dialog.show();
+
+        if (log) log.scrollTop = log.scrollHeight;
+
         document.querySelector<HTMLElement>('[data-chat-launcher]')?.setAttribute('aria-expanded', 'true');
         claimFloatWindow(dialog);
 
-        if (shouldMoveFocus) {
-            const close = dialog.querySelector<HTMLElement>('[data-chat-close]');
+        const close = dialog.querySelector<HTMLElement>('[data-chat-close]');
 
-            (window.matchMedia(POINTER_COARSE_QUERY).matches ? close : (field ?? close))?.focus();
-
-            return;
-        }
-
-        if (previous !== document.body && previous instanceof HTMLElement) {
-            previous.focus();
-        } else if (document.activeElement instanceof HTMLElement) {
-            document.activeElement.blur();
-        }
+        (window.matchMedia(POINTER_COARSE_QUERY).matches ? close : (field ?? close))?.focus();
     }
 
     function pulseReceive() {
@@ -429,24 +485,37 @@ import IconClose from '@components/icons/Close.astro';
     function render() {
         const log = document.querySelector<HTMLElement>('[data-chat-log]');
 
-        renderTally();
+        setText(document.querySelector('[data-chat-online]'), `${getChatState().online} online`);
 
         if (log) renderLog(log, getMessages());
     }
 
     function renderLog(log: HTMLElement, messages: ChatMessage[]) {
-        const isStale = !log.children.length || log.children.length > messages.length;
+        const dialog = document.querySelector<HTMLDialogElement>('[data-chat-window]');
+        const distance = log.scrollHeight - log.scrollTop - log.clientHeight;
+        const rendered = Array.from(log.querySelectorAll<HTMLElement>('[data-chat-id]'));
 
-        if (isStale) {
-            log.setAttribute('aria-live', 'off');
-            log.replaceChildren();
-            window.clearTimeout(liveTimer);
-            liveTimer = window.setTimeout(() => log.setAttribute('aria-live', 'polite'), LIVE_RESET_DELAY);
-        }
+        const head = Math.max(rendered.findIndex(item => item.dataset.chatId === messages.at(0)?.id), 0);
 
-        const start = log.children.length;
+        const kept = rendered.slice(head);
+
+        const anchor = kept.at(-1);
+        const isAppend = kept.length > 0 && kept.length <= messages.length && kept.every((item, index) => isRendered(item, messages[index]));
+
+        const anchorTop = (anchor?.offsetTop ?? 0) - log.scrollTop;
+        const start = isAppend ? kept.length : 0;
 
         const fresh = messages.slice(start);
+
+        if (isAppend) {
+            rendered.slice(0, head).forEach(item => item.remove());
+            kept[0].classList.remove('chat__message--grouped');
+        } else {
+            log.setAttribute('aria-live', 'off');
+            log.replaceChildren();
+            clearTimeout(liveTimer);
+            liveTimer = setTimeout(() => log.setAttribute('aria-live', 'polite'), LIVE_RESET_MILLISECONDS);
+        }
 
         fresh.forEach((message, offset) => {
             const item = buildMessage(message, messages[start + offset - 1]);
@@ -454,23 +523,35 @@ import IconClose from '@components/icons/Close.astro';
             if (item) log.append(item);
         });
 
-        if (!isStale && fresh.some(message => !message.self) && start > 0) pulseReceive();
+        if (isAppend && dialog?.open && fresh.some(message => !message.self)) pulseReceive();
 
-        log.scrollTop = log.scrollHeight;
+        if (distance < PIN_THRESHOLD_PIXELS || (isAppend && fresh.some(message => message.self))) log.scrollTop = log.scrollHeight;
+        else if (!isAppend) log.scrollTop = log.scrollHeight - log.clientHeight - distance;
+        else if (anchor) log.scrollTop = anchor.offsetTop - anchorTop;
     }
 
-    function renderTally() {
-        setText(document.querySelector('[data-chat-online]'), `${getOnlineCount(Date.now())} online`);
+    function syncChat() {
+        const field = document.querySelector<HTMLInputElement>('[data-chat-field]');
+        const userId = getSession()?.id ?? '';
+
+        if (field && fieldUserId && userId !== fieldUserId) field.value = '';
+
+        fieldUserId = userId;
+        connectChat();
     }
 
     function teardown() {
-        window.clearInterval(tallyTimer);
-        window.clearTimeout(liveTimer);
+        clearTimeout(liveTimer);
+        document.querySelector('[data-chat-log]')?.setAttribute('aria-live', 'polite');
         unsubscribeChat?.();
+        unsubscribeSession?.();
         liveTimer = undefined;
-        tallyTimer = undefined;
         unsubscribeChat = undefined;
+        unsubscribeSession = undefined;
     }
 
+    document.addEventListener('astro:after-swap', handleAfterSwap);
+    document.addEventListener('astro:before-swap', handleBeforeSwap);
+    document.addEventListener('submit', event => void handleSubmit(event), { capture: true });
     registerPageScript(initChat);
 </script>

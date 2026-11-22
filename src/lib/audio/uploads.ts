@@ -1,7 +1,6 @@
-import { UPLOAD } from '@lib/shared/constants';
+import { CANCELED_MESSAGE, DECODE_FAILED_MESSAGE, DUPLICATE_FILE_MESSAGE, UPLOAD } from '@lib/shared/constants';
 import { formatBytes } from '@lib/shared/utils';
 
-const DECODE_FAILED_MESSAGE = 'That file could not be decoded.';
 const ID3_FLAGS_OFFSET = 5;
 const ID3_FOOTER_FLAG = 0x10;
 const ID3_HEADER_BYTES = 10;
@@ -21,32 +20,32 @@ const MPEG_SYNC_MASK = 0xe0;
 const MPEG_TWO_BITRATES = [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160] as const;
 const MPEG_TWO_FRAME_FACTOR = 72_000;
 const MPEG_VERSION_SHIFT = 3;
-const PEAK_COUNT = 200;
+const PEAKS = 200;
+const READ_FAILED_MESSAGE = 'That file could not be read.';
 const SNIFF_WINDOW_BYTES = 4_096;
 const SYNCSAFE_BITS = 7;
 const SYNCSAFE_MASK = 0x7f;
-const UPLOAD_EXTENSIONS_OR_LIST = formatExtensions(UPLOAD.extensions);
 const WAVE_FORMAT_OFFSET = 8;
+
+const uploadExtensionsOrList = formatExtensions(UPLOAD.extensions);
 
 let audioContext: AudioContext | undefined;
 
-function acceptFiles(files: FileList | File[], queued: UploadEntry[]): UploadEntry[] {
+function acceptFiles(files: FileList | File[], queued: UploadEntry[], stored: BoardEntry[]): UploadEntry[] {
     const accepted = [...queued];
     const created: UploadEntry[] = [];
 
     Array.from(files).forEach((file) => {
-        const error = getRejectionReason(file, accepted);
+        const error = getRejectionReason(file, accepted, stored);
 
         const entry: UploadEntry = {
             file,
-            id: crypto.randomUUID(),
-            loadedBytes: 0,
             status: error ? 'rejected' : 'queued',
             totalBytes: file.size,
         };
 
         if (error) entry.error = error;
-        if (!error) accepted.push(entry);
+        else accepted.push(entry);
 
         created.push(entry);
     });
@@ -68,16 +67,16 @@ async function decodePeaks(buffer: ArrayBuffer) {
 
 function extractPeaks(buffer: AudioBuffer) {
     const channel = buffer.getChannelData(0);
-    const peaks = new Float32Array(PEAK_COUNT);
+    const peaks = new Float32Array(PEAKS);
 
-    const blockSize = Math.max(1, Math.floor(channel.length / PEAK_COUNT));
+    const blockSize = Math.max(1, Math.floor(channel.length / PEAKS));
 
-    for (let index = 0; index < PEAK_COUNT; index += 1) {
+    for (let index = 0; index < PEAKS; index++) {
         const start = index * blockSize;
 
         let peak = 0;
 
-        for (let offset = 0; offset < blockSize; offset += 1) {
+        for (let offset = 0; offset < blockSize; offset++) {
             const value = Math.abs(channel[start + offset] ?? 0);
 
             if (value > peak) peak = value;
@@ -87,20 +86,6 @@ function extractPeaks(buffer: AudioBuffer) {
     }
 
     return peaks;
-}
-
-function findMpegFrame(bytes: Uint8Array, start: number) {
-    const end = Math.min(bytes.length, start + SNIFF_WINDOW_BYTES);
-
-    for (let index = start; index < end; index += 1) {
-        const length = readMpegFrameLength(bytes, index);
-
-        const next = index + length;
-
-        if (length > 0 && (next === bytes.length || readMpegFrameLength(bytes, next) > 0)) return true;
-    }
-
-    return false;
 }
 
 function formatExtensions(extensions: readonly string[]) {
@@ -119,31 +104,39 @@ function getExtension(name: string): string {
     return index < 0 ? '' : name.slice(index + 1).toLowerCase();
 }
 
+function getExtensionError(name: string): string | undefined {
+    const extension = getExtension(name);
+
+    if (UPLOAD.extensions.some(allowed => allowed === extension)) return undefined;
+
+    return `That is a .${extension || 'file'}. We take ${uploadExtensionsOrList}.`;
+}
+
 function getFormatError(file: File, buffer: ArrayBuffer): string | undefined {
     const extension = getExtension(file.name);
 
     return sniffAudioFormat(buffer) === extension ? undefined : `That file does not contain ${extension.toUpperCase()} audio.`;
 }
 
-function getRejectionReason(file: File, queued: UploadEntry[]) {
-    const extension = getExtension(file.name);
+function getRejectionReason(file: File, queued: UploadEntry[], stored: BoardEntry[]) {
+    const extensionError = getExtensionError(file.name);
     const sizeError = getSizeError(file, UPLOAD.maxFileBytes);
 
-    if (!UPLOAD.extensions.some(allowed => allowed === extension)) {
-        return `That is a .${extension || 'file'}. We take ${UPLOAD_EXTENSIONS_OR_LIST}.`;
-    }
+    if (extensionError) return extensionError;
 
-    if (file.type.length > 0 && !file.type.startsWith('audio/') && !UPLOAD.acceptAttribute.includes(file.type)) {
+    if (!UPLOAD.acceptAttribute.includes(file.type) && !file.type.startsWith('audio/') && file.type.length > 0) {
         return 'That does not look like an audio file.';
     }
 
     if (sizeError) return sizeError;
 
-    const isDuplicate = queued.some(entry => entry.file.lastModified === file.lastModified
+    const isQueued = queued.some(entry => entry.file.lastModified === file.lastModified
         && entry.file.name === file.name
         && entry.file.size === file.size);
 
-    return isDuplicate ? 'That file is already in the queue.' : '';
+    const isStored = stored.some(entry => entry.bytes === file.size && entry.source === file.name);
+
+    return isQueued || isStored ? DUPLICATE_FILE_MESSAGE : '';
 }
 
 function getSizeError(file: File, limit: number): string | undefined {
@@ -154,15 +147,30 @@ function getSizeError(file: File, limit: number): string | undefined {
     return undefined;
 }
 
+function hasMpegFrame(bytes: Uint8Array, start: number) {
+    const end = Math.min(bytes.length, start + SNIFF_WINDOW_BYTES);
+
+    for (let index = start; index < end; index++) {
+        const length = readMpegFrameLength(bytes, index);
+
+        const next = index + length;
+
+        if (length > 0 && (next === bytes.length || readMpegFrameLength(bytes, next) > 0)) return true;
+    }
+
+    return false;
+}
+
 function readArrayBuffer(file: File, options: UploadOptions) {
     return new Promise<ArrayBuffer>((resolve, reject) => {
         const reader = new FileReader();
+        const settled = new AbortController();
 
-        options.signal.addEventListener('abort', () => reader.abort(), { once: true });
-        reader.addEventListener('abort', () => reject(new Error('Canceled.')));
-        reader.addEventListener('error', () => reject(new Error('That file could not be read.')));
+        options.signal.addEventListener('abort', () => reader.abort(), { once: true, signal: settled.signal });
+        reader.addEventListener('abort', () => reject(new Error(CANCELED_MESSAGE)));
+        reader.addEventListener('error', () => reject(new Error(READ_FAILED_MESSAGE)));
         reader.addEventListener('load', () => resolve(reader.result instanceof ArrayBuffer ? reader.result : new ArrayBuffer(0)));
-        reader.addEventListener('progress', event => options.onProgress?.(event.loaded, event.total || file.size));
+        reader.addEventListener('loadend', () => settled.abort(), { once: true });
         reader.readAsArrayBuffer(file);
     });
 }
@@ -214,14 +222,12 @@ function sniffAudioFormat(buffer: ArrayBuffer) {
 
     if (readAscii(bytes, 0, 4) === 'RIFF' && readAscii(bytes, WAVE_FORMAT_OFFSET, 4) === 'WAVE') return 'wav';
 
-    return findMpegFrame(bytes, readId3Length(bytes)) ? 'mp3' : '';
+    return hasMpegFrame(bytes, readId3Length(bytes)) ? 'mp3' : '';
 }
 
 async function uploadSubmission(file: File, options: UploadOptions): Promise<UploadResult> {
     const entry: UploadEntry = {
         file,
-        id: crypto.randomUUID(),
-        loadedBytes: 0,
         status: 'reading',
         totalBytes: file.size,
     };
@@ -231,20 +237,14 @@ async function uploadSubmission(file: File, options: UploadOptions): Promise<Upl
     try {
         buffer = await readArrayBuffer(file, options);
     } catch (error) {
-        return { message: error instanceof Error ? error.message : 'That file could not be read.', ok: false };
+        return { message: error instanceof Error ? error.message : READ_FAILED_MESSAGE, ok: false };
     }
 
     const formatError = getFormatError(file, buffer);
 
     if (formatError) return { message: formatError, ok: false };
 
-    if (file.name.toLowerCase().includes(UPLOAD.failureTrigger)) {
-        return { message: 'Transfer failed. Remove the file and try again.', ok: false };
-    }
-
-    entry.loadedBytes = file.size;
     entry.status = 'ready';
-    options.onProgress?.(file.size, file.size);
 
     if (file.size > UPLOAD.maxDecodeBytes || typeof AudioContext === 'undefined') return { entry, ok: true };
 
@@ -259,12 +259,13 @@ async function uploadSubmission(file: File, options: UploadOptions): Promise<Upl
 }
 
 export {
-    UPLOAD_EXTENSIONS_OR_LIST,
     acceptFiles,
     formatExtensions,
     getExtension,
+    getExtensionError,
     getFormatError,
     getSizeError,
     releaseAudioContext,
+    uploadExtensionsOrList,
     uploadSubmission,
 };
