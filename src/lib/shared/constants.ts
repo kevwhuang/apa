@@ -14,6 +14,7 @@ const ASSET_KIND_LABELS: Record<AssetKind, string> = {
 };
 
 const BASIS_POINTS_DIVISOR = 10_000;
+const BROWSER_CACHE_CONTROL = 'public, max-age=0, must-revalidate';
 const BYTES_PER_KILOBYTE = 1_024;
 const BYTES_PER_MEGABYTE = 1_048_576;
 const CANCELED_MESSAGE = 'Canceled.';
@@ -30,8 +31,6 @@ const CHECKOUT_STEPS = ['1 Review', '2 Shipping', '3 Payment'] as const;
 const CHECK_VIOLATION = '23514';
 
 const COMMERCE = {
-    discountBasisPoints: 1_000,
-    discountCode: 'ALLIANCE10',
     maxQuantityPerItem: 5,
     minChargeCents: 50,
     taxBasisPoints: 825,
@@ -198,7 +197,7 @@ const PARTNERS = [
 const PARTNER_INQUIRY_TOPIC = 'Partnerships';
 const PARTNER_LOGO_WIDTH = 640;
 const PASSWORD_MAX_BYTES = 72;
-const PASSWORD_MIN_LENGTH = 12;
+const PASSWORD_MIN_LENGTH = 8;
 const PAYMENTS_NOT_CONFIGURED_MESSAGE = 'Payments are not configured.';
 const PAYMENT_FAILED_MESSAGE = 'Your payment did not go through. Check your card details and try again.';
 const PERMISSION_DENIED = '42501';
@@ -208,7 +207,7 @@ const PORTRAIT_STAGED_MESSAGE = 'Portrait staged.';
 const PRODS_NEGATIVE_MESSAGE = 'This would take the balance below zero.';
 const PRODUCT_CATEGORIES = ['apparel', 'accessories', 'audio', 'tickets'] as const;
 const PRODUCT_SIZES = ['S', 'M', 'L', 'XL'] as const;
-const PROMO_CODE_MESSAGE = 'That code is not valid.';
+const PROMO_CODE_MESSAGE = 'That promo code is not valid.';
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
 const ROLES = [
@@ -223,7 +222,7 @@ const ROLES = [
 const SECONDS_PER_MINUTE = 60;
 
 const SECURITY_HEADERS = {
-    'content-security-policy': 'base-uri \'none\'; connect-src \'self\' https://*.supabase.co https://api.stripe.com wss://*.supabase.co; default-src \'self\'; form-action \'self\'; frame-ancestors \'self\'; frame-src https://*.js.stripe.com https://hooks.stripe.com https://js.stripe.com; img-src \'self\' data: https://*.supabase.co; media-src \'self\' https://*.supabase.co; script-src \'self\' \'unsafe-inline\' https://*.js.stripe.com https://js.stripe.com; style-src \'self\' \'unsafe-inline\'',
+    'content-security-policy': 'base-uri \'none\'; connect-src \'self\' https://api.stripe.com https://dmtnkjdwxchvtdkvacaf.supabase.co wss://dmtnkjdwxchvtdkvacaf.supabase.co; default-src \'self\'; form-action \'self\'; frame-ancestors \'self\'; frame-src https://*.js.stripe.com https://hooks.stripe.com https://js.stripe.com; img-src \'self\' data: https://dmtnkjdwxchvtdkvacaf.supabase.co; media-src \'self\' https://dmtnkjdwxchvtdkvacaf.supabase.co; script-src \'self\' \'unsafe-inline\' data: https://*.js.stripe.com https://js.stripe.com; style-src \'self\' \'unsafe-inline\'',
     'permissions-policy': 'camera=(), microphone=(), geolocation=()',
     'referrer-policy': 'strict-origin-when-cross-origin',
     'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
@@ -231,10 +230,12 @@ const SECURITY_HEADERS = {
     'x-frame-options': 'sameorigin',
 } as const;
 
+const SERVER_ERROR_MESSAGE = 'Something went wrong on our side. Try again in a moment.';
 const SETTINGS_ROUTE = '/settings';
+const SHARED_CACHE_CONTROL = 'public, durable, s-maxage=60, stale-while-revalidate=120';
 const SIGNED_URL_SECONDS = 3_600;
 const SIGN_IN_FIRST_MESSAGE = 'Sign in first.';
-const SITE_UPDATED = '2026-11-22T00:00:00-06:00';
+const SITE_UPDATED = '2026-11-27T00:00:00-06:00';
 const STATUS_SERVER_ERROR = 500;
 const STEPS_PER_BEAT = 4;
 
@@ -472,6 +473,7 @@ export {
     ASSET_KIND_LABELS,
     AVATAR,
     BASIS_POINTS_DIVISOR,
+    BROWSER_CACHE_CONTROL,
     BYTES_PER_KILOBYTE,
     BYTES_PER_MEGABYTE,
     CANCELED_MESSAGE,
@@ -544,7 +546,9 @@ export {
     ROUTES,
     SECONDS_PER_MINUTE,
     SECURITY_HEADERS,
+    SERVER_ERROR_MESSAGE,
     SETTINGS_ROUTE,
+    SHARED_CACHE_CONTROL,
     SIGNED_URL_SECONDS,
     SIGN_IN_FIRST_MESSAGE,
     SITE_UPDATED,

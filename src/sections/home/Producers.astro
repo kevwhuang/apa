@@ -4,22 +4,28 @@ import ProducerLinks from '@components/producer/Links.astro';
 import ProducerPortrait from '@components/producer/Portrait.astro';
 import ProducerTrack from '@components/producer/Track.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { PALETTE } from '@lib/shared/constants';
+import { BROWSER_CACHE_CONTROL, PALETTE, SHARED_CACHE_CONTROL, STATUS_SERVER_ERROR } from '@lib/shared/constants';
 import { formatCalendarMonth, formatRole } from '@lib/shared/utils';
 import { loadRoster } from '@lib/server/roster';
 
 const GENRE_LIMIT = 2;
 const STRIP_LIMIT = 4;
 
-const members = await loadRoster() ?? [];
+const loaded = await loadRoster();
+
+const members = loaded ?? [];
 
 const featured = members.find(member => member.featured);
-
-const roster = members
-    .filter(member => member.id !== featured?.id)
-    .sort((a, b) => a.name.localeCompare(b.name));
+const roster = members.toSorted((a, b) => a.name.localeCompare(b.name));
 
 const track = featured?.tracks[0];
+
+if (!Astro.isPrerendered && loaded) {
+    Astro.response.headers.set('Cache-Control', BROWSER_CACHE_CONTROL);
+    Astro.response.headers.set('Netlify-CDN-Cache-Control', SHARED_CACHE_CONTROL);
+}
+
+if (!Astro.isPrerendered && !loaded) Astro.response.status = STATUS_SERVER_ERROR;
 ---
 
 {featured && (
@@ -120,7 +126,7 @@ const track = featured?.tracks[0];
             </a>
         </SectionHead>
         <ul
-            class="producer-strip grid grid-cols-4 gap-x-(--space-lg) gap-y-(--space-2xl) list-none max-lg:grid-cols-2 max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))] max-md:mb-10"
+            class="producer-strip grid grid-cols-4 [overflow-anchor:none] gap-x-(--space-lg) gap-y-(--space-2xl) list-none max-lg:grid-cols-2 max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))] max-md:mb-10"
             data-motion-stagger="flip"
             data-producer-strip
         >
@@ -192,23 +198,47 @@ const track = featured?.tracks[0];
     import { getMotionTokens } from '@lib/motion/tokens';
     import { initTracks } from '@lib/audio/tracks';
     import { registerPageScript } from '@lib/shared/utils';
+    import { revealTarget } from '@lib/motion/entrances';
 
-    const HIDDEN_CLASS = 'hidden';
+    const RECENT_ROTATIONS = 5;
     const ROTATE_INTERVAL_MILLISECONDS = 10_000;
     const ROTATE_TRAVEL_FACTOR = 3;
     const STRIP_LIMIT = 4;
 
+    let carriedRotations: string[][] = [];
     let isRotating = false;
     let isVisible = true;
     let rotateTimer: Timer | undefined;
+    let shownRotations: string[][] = [];
 
-    function enterCards(leaving: HTMLElement[], entering: HTMLElement[], tokens: MotionTokens) {
-        swapCards(leaving, entering);
+    function drawRotation(cards: HTMLElement[], rotations: string[][]) {
+        const pool = cards.map(readHref);
 
-        gsap.fromTo(entering, { opacity: 0, x: tokens.travel * ROTATE_TRAVEL_FACTOR, y: 0 }, {
+        for (let index = pool.length - 1; index > 0; index--) {
+            const swap = Math.floor(Math.random() * (index + 1));
+
+            [pool[index], pool[swap]] = [pool[swap], pool[index]];
+        }
+
+        const drawn = pool
+            .map(href => ({ href, lastShown: rotations.findLastIndex(rotation => rotation.includes(href)) }))
+            .toSorted((a, b) => a.lastShown - b.lastShown)
+            .slice(0, STRIP_LIMIT)
+            .map(({ href }) => href);
+
+        return pool.filter(href => drawn.includes(href));
+    }
+
+    function enterCards(cards: HTMLElement[], entering: string[], tokens: MotionTokens) {
+        const slots = cards.slice(0, STRIP_LIMIT);
+
+        slots.forEach(slot => revealTarget(slot));
+        swapCards(cards, entering);
+
+        gsap.fromTo(slots, { opacity: 0, x: tokens.travel * ROTATE_TRAVEL_FACTOR, y: 0 }, {
             duration: tokens.duration.slower,
             ease: tokens.ease.entrance,
-            onComplete: () => finishRotation(entering),
+            onComplete: () => finishRotation(slots),
             opacity: 1,
             overwrite: 'auto',
             stagger: tokens.stagger.base,
@@ -216,13 +246,16 @@ const track = featured?.tracks[0];
         });
     }
 
-    function finishRotation(entering: HTMLElement[]) {
+    function finishRotation(slots: HTMLElement[]) {
         isRotating = false;
-        gsap.set(entering, { clearProps: 'transform' });
+        gsap.set(slots, { clearProps: 'transform' });
     }
 
     function initRosterRotation(signal: AbortSignal) {
+        const carried = carriedRotations;
         const strip = document.querySelector<HTMLElement>('[data-producer-strip]');
+
+        carriedRotations = [];
 
         if (!strip) return;
 
@@ -230,8 +263,16 @@ const track = featured?.tracks[0];
 
         if (cards.length <= STRIP_LIMIT) return;
 
+        const { bottom, top } = strip.getBoundingClientRect();
+
+        const isUnseen = bottom <= 0 || cards.every(card => getComputedStyle(card).opacity === '0') || top >= window.innerHeight;
+
+        if (carried.length > 0) placeCards(cards, carried[carried.length - 1]);
+        else if (isUnseen) placeCards(cards, drawRotation(cards, []));
+
         isRotating = false;
         isVisible = true;
+        shownRotations = [...carried.slice(0, -1), cards.slice(0, STRIP_LIMIT).map(readHref)];
 
         const observer = new IntersectionObserver((entries) => {
             isVisible = entries[0]?.isIntersecting ?? false;
@@ -243,27 +284,48 @@ const track = featured?.tracks[0];
         signal.addEventListener('abort', () => stopRotation(cards, observer), { once: true });
     }
 
+    function placeCards(cards: HTMLElement[], hrefs: string[]) {
+        hrefs.forEach((href, index) => {
+            const slot = cards[index];
+            const source = cards.find(card => readHref(card) === href);
+
+            if (!source || source === slot) return;
+
+            const held = Array.from(slot.children);
+
+            slot.replaceChildren(...source.children);
+            source.replaceChildren(...held);
+        });
+    }
+
+    function readHref(card: HTMLElement) {
+        return card.querySelector('a')?.getAttribute('href') ?? '';
+    }
+
     function rotateStrip(strip: HTMLElement, cards: HTMLElement[]) {
         if (!isVisible || document.hidden || isRotating) return;
         if (strip.contains(document.activeElement) || strip.matches(':hover')) return;
 
-        const entering = sampleCards(cards);
-        const leaving = cards.filter(card => !card.classList.contains(HIDDEN_CLASS));
+        const entering = drawRotation(cards, shownRotations);
 
         if (window.matchMedia(REDUCED_MOTION_QUERY).matches) {
-            swapCards(leaving, entering);
+            swapCards(cards, entering);
 
             return;
         }
 
+        const slots = cards.slice(0, STRIP_LIMIT);
         const tokens = getMotionTokens();
 
         isRotating = true;
 
-        gsap.to(leaving, {
+        gsap.to(slots, {
             duration: tokens.duration.slower,
             ease: tokens.ease.mechanical,
-            onComplete: () => enterCards(leaving, entering, tokens),
+            onComplete: () => enterCards(cards, entering, tokens),
+            onInterrupt: () => {
+                isRotating = false;
+            },
             opacity: 0,
             overwrite: 'auto',
             stagger: tokens.stagger.base,
@@ -271,40 +333,20 @@ const track = featured?.tracks[0];
         });
     }
 
-    function sampleCards(cards: HTMLElement[]) {
-        const pool = [...cards];
-
-        for (let index = pool.length - 1; index > 0; index--) {
-            const swap = Math.floor(Math.random() * (index + 1));
-
-            [pool[index], pool[swap]] = [pool[swap], pool[index]];
-        }
-
-        const draw = pool.slice(0, STRIP_LIMIT);
-
-        if (draw.every(card => !card.classList.contains(HIDDEN_CLASS))) {
-            const fresh = pool.slice(STRIP_LIMIT).find(card => card.classList.contains(HIDDEN_CLASS));
-
-            if (fresh) draw[draw.length - 1] = fresh;
-        }
-
-        return draw.toSorted((a, b) => cards.indexOf(a) - cards.indexOf(b));
-    }
-
     function stopRotation(cards: HTMLElement[], observer: IntersectionObserver) {
+        if (!cards[0].isConnected) carriedRotations = shownRotations;
+
         clearInterval(rotateTimer);
-        gsap.killTweensOf(cards);
+        gsap.getTweensOf(cards).forEach(tween => tween.kill());
         observer.disconnect();
         rotateTimer = undefined;
     }
 
-    function swapCards(leaving: HTMLElement[], entering: HTMLElement[]) {
-        leaving.forEach(card => card.classList.add(HIDDEN_CLASS));
-        gsap.set(leaving, { clearProps: 'transform' });
-        entering.forEach(card => card.classList.remove(HIDDEN_CLASS));
-        gsap.set(entering, { opacity: 1 });
+    function swapCards(cards: HTMLElement[], entering: string[]) {
+        shownRotations = [...shownRotations, entering].slice(-RECENT_ROTATIONS);
+        placeCards(cards, entering);
     }
 
     initTracks();
-    registerPageScript(initRosterRotation);
+    registerPageScript(initRosterRotation, true);
 </script>

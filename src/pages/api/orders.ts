@@ -13,12 +13,13 @@ import {
     US_STATES,
     ZIP_PATTERN,
 } from '@lib/shared/constants';
-import { compareItems, getTotals, isPromoCode, toProds } from '@lib/commerce/cart';
+import { compareItems, getTotals, toProds } from '@lib/commerce/cart';
 import { createAdminClient, getRequestToken, getRequestUser } from '@lib/server/supabase';
 import { getStripe } from '@lib/server/stripe';
 import { getVariationPrice, toImageKey } from '@lib/commerce/products';
 import { isRecord, readText } from '@lib/shared/utils';
 import { limitRequest } from '@lib/server/limiter';
+import { loadPromo } from '@lib/server/promo';
 
 import type Stripe from 'stripe';
 import type { APIRoute } from 'astro';
@@ -177,7 +178,6 @@ export const POST: APIRoute = async ({ clientAddress, request }) => {
     if (requestId && !UUID_PATTERN.test(requestId)) return Response.json({ error: INVALID_BODY_MESSAGE }, { status: 400 });
     if (!EMAIL_PATTERN.test(email) || email.length > FIELD_LIMITS.email) return Response.json({ error: EMAIL_MESSAGE }, { status: 400 });
     if (!shipping) return Response.json({ error: ADDRESS_MESSAGE }, { status: 400 });
-    if (promoCode && !isPromoCode(promoCode)) return Response.json({ error: PROMO_CODE_MESSAGE }, { status: 400 });
 
     const limited = await limitRequest('orders', clientAddress);
 
@@ -194,18 +194,28 @@ export const POST: APIRoute = async ({ clientAddress, request }) => {
 
     if (!items) return Response.json({ error: CART_CHANGED_MESSAGE }, { status: 409 });
 
-    const dueCents = getTotals(items, 0, promoCode).totalCents;
-    const totals = getTotals(items, prodsApplied, promoCode);
+    const admin = createAdminClient();
+
+    if (!admin) return Response.json({ error: PAYMENTS_NOT_CONFIGURED_MESSAGE }, { status: 503 });
+
+    const lookup = await loadPromo(admin, promoCode);
+
+    if (!lookup.ok) return Response.json({ error: NOT_PLACED_MESSAGE }, { status: 500 });
+    if (promoCode && !lookup.promo) return Response.json({ error: PROMO_CODE_MESSAGE }, { status: 400 });
+
+    const { promo } = lookup;
+
+    const dueCents = getTotals(items, 0, promo?.discountBasisPoints).totalCents;
+    const totals = getTotals(items, prodsApplied, promo?.discountBasisPoints);
 
     const isChargeable = totals.totalCents === 0 || totals.totalCents >= COMMERCE.minChargeCents;
     const isRedeemable = prodsApplied >= 0 && prodsApplied <= toProds(dueCents);
 
     if (!isChargeable || !isRedeemable || totals.totalCents !== totalCents) return Response.json({ error: CART_CHANGED_MESSAGE }, { status: 409 });
 
-    const admin = createAdminClient();
     const stripe = getStripe();
 
-    if (!admin || (!stripe && totals.totalCents > 0)) return Response.json({ error: PAYMENTS_NOT_CONFIGURED_MESSAGE }, { status: 503 });
+    if (!stripe && totals.totalCents > 0) return Response.json({ error: PAYMENTS_NOT_CONFIGURED_MESSAGE }, { status: 503 });
 
     const slugs = new Set(items.map(item => item.productSlug));
 
@@ -219,7 +229,7 @@ export const POST: APIRoute = async ({ clientAddress, request }) => {
         p_prods: prodsApplied,
         p_prods_cents: totals.discountCents - totals.promoCents,
         p_promo_cents: totals.promoCents,
-        p_promo_code: promoCode ? COMMERCE.discountCode : '',
+        p_promo_code: promo?.code ?? '',
         p_request_id: requestId && totals.totalCents === 0 ? requestId : null,
         p_shipping: {
             city: shipping.city,

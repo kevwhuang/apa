@@ -7,10 +7,8 @@ interface SwitchRow {
     is_open: boolean;
 }
 
-const OPEN_SWITCHES: SwitchState = { assembly_intake: true, bash_intake: true, check_in: true, signups: true };
-
-const store = createStore<SwitchState>({
-    fallback: OPEN_SWITCHES,
+const store = createStore<Partial<SwitchState>>({
+    fallback: {},
     key: STORAGE.switches.key,
     scope: STORAGE.switches.scope,
     topic: STORAGE.switches.topic,
@@ -28,11 +26,15 @@ function applySwitch(id: SiteSwitch, isOpen: boolean): void {
 }
 
 function isSiteSwitch(value: string): value is SiteSwitch {
-    return Object.hasOwn(OPEN_SWITCHES, value);
+    return Object.hasOwn(writtenAt, value);
+}
+
+function isSwitchClosed(id: SiteSwitch): boolean {
+    return store.get()[id] === false;
 }
 
 function isSwitchOpen(id: SiteSwitch): boolean {
-    return store.get()[id];
+    return store.get()[id] === true;
 }
 
 async function loadSwitches(): Promise<boolean> {
@@ -80,4 +82,4 @@ async function setSwitchOpen(id: SiteSwitch, isOpen: boolean): Promise<ActionRes
     return { ok: true };
 }
 
-export { applySwitch, isSiteSwitch, isSwitchOpen, loadSwitches, onSwitchChange, setSwitchOpen };
+export { applySwitch, isSiteSwitch, isSwitchClosed, isSwitchOpen, loadSwitches, onSwitchChange, setSwitchOpen };

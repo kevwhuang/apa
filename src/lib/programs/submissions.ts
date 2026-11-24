@@ -12,7 +12,7 @@ import {
     TRACK_CONTENT_TYPES,
     UNIQUE_VIOLATION,
 } from '@lib/shared/constants';
-import { applySwitch, isSwitchOpen, loadSwitches } from '@lib/programs/switches';
+import { applySwitch, isSwitchClosed, loadSwitches } from '@lib/programs/switches';
 import { createLiveList } from '@lib/shared/live';
 import { createStore } from '@lib/shared/state';
 import { getExtension } from '@lib/audio/uploads';
@@ -161,7 +161,7 @@ function findRefusal(board: IntakeBoard) {
 
     const held = entries.filter(entry => entry.self).length + pendingSends[board].size;
 
-    if (!isSwitchOpen(`${board}_intake`)) return 'closed';
+    if (isSwitchClosed(`${board}_intake`)) return 'closed';
     if (!eventId) return status === 'ready' ? 'closed' : 'unavailable';
     if (held >= SUBMISSION_LIMIT) return 'limit';
 
@@ -177,7 +177,7 @@ async function getFailureCode(board: IntakeBoard, fallback: SubmissionErrorCode)
 
     await loadSwitches();
 
-    return isSwitchOpen(`${board}_intake`) ? fallback : 'closed';
+    return isSwitchClosed(`${board}_intake`) ? 'closed' : fallback;
 }
 
 function handleCreated(board: IntakeBoard, payload: unknown) {
@@ -266,7 +266,7 @@ async function queryBoard(board: IntakeBoard, userId: string) {
 }
 
 function refreshBoard(board: IntakeBoard) {
-    if (feeds[board].userId && isSwitchOpen(`${board}_intake`)) void feeds[board].list.revalidate();
+    if (feeds[board].userId && !isSwitchClosed(`${board}_intake`)) void feeds[board].list.revalidate();
 }
 
 function reject(code: SubmissionErrorCode): SubmissionResult {

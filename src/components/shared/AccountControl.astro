@@ -56,6 +56,14 @@ import IconUser from '@components/icons/User.astro';
                     Settings
                 </a>
             </li>
+            <li class="account__admin">
+                <a
+                    class="account__item label"
+                    href="/admin"
+                >
+                    Admin
+                </a>
+            </li>
             <li>
                 <button
                     class="account__item label"
@@ -89,6 +97,10 @@ import IconUser from '@components/icons/User.astro';
 <style>
     .account {
         position: relative;
+    }
+
+    .account__admin {
+        display: var(--admin-only, list-item);
     }
 
     .account__in {

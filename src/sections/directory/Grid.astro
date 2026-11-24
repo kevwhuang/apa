@@ -140,7 +140,7 @@ const roster = [...members]
             {describeMatches(roster.length, roster.length, false, '')}
         </p>
         <ul
-            class="roster__grid grid grid-cols-3 gap-x-(--space-lg) list-none max-lg:grid-cols-2 max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))]"
+            class="grid-tail grid-tail--3 roster__grid grid grid-cols-3 gap-x-(--space-lg) list-none max-lg:grid-cols-2 max-md:grid-cols-[repeat(auto-fill,minmax(min(100%,240px),1fr))]"
             data-motion-stagger="flip"
         >
             {roster.map((member, index) => (

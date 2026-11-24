@@ -18,10 +18,11 @@ function getEventLabel(event: EventRecord) {
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, site, url }) => {
     const guard = await requireAdmin(request);
 
     if (!guard.ok) return guard.response;
+    if (url.origin !== site?.origin) return Response.json({ synced: 0 });
 
     const events = await loadEvents();
 

@@ -92,10 +92,10 @@ function getSizeRank(size = '') {
     return PRODUCT_SIZES.findIndex(entry => entry === size);
 }
 
-function getTotals(items: CartItem[], prodsApplied = 0, promoCode = ''): CartTotals {
+function getTotals(items: CartItem[], prodsApplied = 0, discountBasisPoints = 0): CartTotals {
     const subtotal = items.reduce((total, item) => total + item.priceCents * item.quantity, 0);
 
-    const promoCents = isPromoCode(promoCode) ? Math.round(subtotal * COMMERCE.discountBasisPoints / BASIS_POINTS_DIVISOR) : 0;
+    const promoCents = Math.round(subtotal * discountBasisPoints / BASIS_POINTS_DIVISOR);
 
     const taxCents = Math.round((subtotal - promoCents) * COMMERCE.taxBasisPoints / BASIS_POINTS_DIVISOR);
 
@@ -119,10 +119,6 @@ function getVariantKey(item: CartItem) {
 
 function isCartItem(item: unknown): item is CartItem {
     return typeof item === 'object' && item !== null && 'productSlug' in item && typeof item.productSlug === 'string';
-}
-
-function isPromoCode(code: string): boolean {
-    return code.trim().toUpperCase() === COMMERCE.discountCode;
 }
 
 function normalizeItems(items: CartItem[]) {
@@ -277,7 +273,6 @@ export {
     getItems,
     getProdsCharge,
     getTotals,
-    isPromoCode,
     onCartChange,
     reconcile,
     remove,

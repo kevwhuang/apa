@@ -92,7 +92,7 @@ end;
 $$;
 
 revoke execute on function private.subscribe_newsletter(text) from public;
-grant execute on function private.subscribe_newsletter(text) to anon, authenticated;
+grant execute on function private.subscribe_newsletter(text) to authenticated;
 
 create function private.unsubscribe_newsletter(p_token uuid)
 returns boolean
@@ -121,8 +121,8 @@ as $$
     select private.subscribe_newsletter(p_email);
 $$;
 
-revoke execute on function public.subscribe_newsletter(text) from public;
-grant execute on function public.subscribe_newsletter(text) to anon, authenticated;
+revoke execute on function public.subscribe_newsletter(text) from public, anon;
+grant execute on function public.subscribe_newsletter(text) to authenticated;
 
 create function public.add_subscriber(p_email text, p_is_owner boolean)
 returns uuid

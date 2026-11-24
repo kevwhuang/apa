@@ -57,8 +57,8 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
             class="max-w-2xl text-lg text-text-secondary"
             data-motion="blur"
         >
-            That link signed you in. Three short steps follow: the basics, what the account is
-            for, and a look around. Then your card is on the roster.
+            Three short steps put your card on the roster: the basics, what the account is for,
+            and a look around.
         </p>
     </div>
 </section>
@@ -630,7 +630,7 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
 
     import { MOTION_SELECTOR, ONBOARDING_STEPS, PORTRAIT_REMOVED_MESSAGE, PORTRAIT_STAGED_MESSAGE, PROFILE_FIELDS, REDUCED_MOTION_QUERY } from '@lib/shared/constants';
     import { armTour } from '@lib/tour/tour';
-    import { clearAuthLink, getAuthLink, getSession, onSessionChange, saveSession, whenSessionReady } from '@lib/account/session';
+    import { clearAuthLink, getAuthLink, getSession, isSessionEnding, onSessionChange, saveSession, whenSessionReady } from '@lib/account/session';
     import { clearFieldErrors, reportFieldErrors, serialize, setRole, validateFields, watchFieldErrors } from '@lib/ui/forms';
     import { clearOnboardingStep, getOnboardingStep, saveOnboardingStep } from '@lib/account/onboarding';
     import { formatRole, getInitials, pickTileColor, registerPageScript, setAvatarImage, setHidden, setPending, setText } from '@lib/shared/utils';
@@ -835,7 +835,7 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
     async function openFlow(form: HTMLFormElement, signal: AbortSignal) {
         const cached = getSession();
 
-        if (cached && !cached.onboarded) showFlow(form, cached);
+        if (cached) showFlow(form, cached);
 
         await whenSessionReady();
 
@@ -922,7 +922,7 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
     function showFlow(form: HTMLFormElement, session: Session) {
         isOpen = true;
         prefill(form, session);
-        step = Math.min(LAST_STEP, getOnboardingStep(session.id));
+        step = session.onboarded ? 0 : Math.min(LAST_STEP, getOnboardingStep(session.id));
         showStep(form, false);
         showSurface('flow');
         delete document.documentElement.dataset.onboardingResume;
@@ -970,15 +970,9 @@ const assemblies = events.filter(event => event.program === 'Assembly' && isUpco
 
         if (isSubmitting) return;
 
-        if (session?.onboarded) {
-            void navigate('/settings', { history: 'replace' });
-
-            return;
-        }
-
         if (!session) {
             if (isExpired) showSurface('expired');
-            else void navigate('/signin?next=/onboarding', { history: 'replace' });
+            else if (!isSessionEnding()) void navigate('/signin?next=/onboarding', { history: 'replace' });
 
             return;
         }

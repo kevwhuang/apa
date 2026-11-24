@@ -29,6 +29,7 @@ type PaymentErrorCode = 'cart-changed' | 'empty-cart' | 'not-configured' | 'paym
 type ProdsErrorCode = 'member-unknown' | 'negative' | 'not-admin' | 'unavailable';
 type ProdsResult = { code: ProdsErrorCode; message: string; ok: false } | { ok: true; prods: number };
 type ProfilePatch = Partial<Pick<Session, 'artistName' | 'avatar' | 'bio' | 'city' | 'genres' | 'links' | 'onboarded' | 'role' | 'state'>>;
+type PromoResult = { code: RequestErrorCode; message: string; ok: false } | { ok: true; promo: Promo };
 type RackKind = 'chorus' | 'compressor' | 'delay' | 'distortion' | 'eq' | 'filter' | 'gate' | 'highpass' | 'limiter' | 'meter' | 'pan' | 'reverb' | 'saturator' | 'tremolo' | 'trim' | 'tuner';
 type RackLoadResult = { buffer: AudioBuffer; ok: true } | { message: string; ok: false };
 type RequestErrorCode = 'conflict' | 'network' | 'not-configured' | 'rate-limited' | 'rejected' | 'unauthorized' | 'unavailable';
@@ -232,7 +233,7 @@ interface OrderInput {
     items: CartItem[];
     payment: PaymentField | null;
     prodsApplied: number;
-    promoCode: string;
+    promo: Promo | null;
     shipping: ShippingAddress;
 }
 
@@ -278,6 +279,11 @@ interface ProdsRow {
     date: string;
     reason: string;
     total: number;
+}
+
+interface Promo {
+    code: string;
+    discountBasisPoints: number;
 }
 
 interface RackAudio {

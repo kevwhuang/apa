@@ -55,6 +55,35 @@ create policy product_sales_select_all on public.product_sales
 for select to anon, authenticated
 using (true);
 
+create table public.promo_codes (
+    code text primary key check (code ~ '^[0-9A-Z]{1,20}$'),
+    discount_basis_points integer not null check (discount_basis_points between 1 and 10000),
+    is_active boolean not null default true,
+    created_at timestamptz not null default now()
+);
+
+comment on table public.promo_codes is 'Store discount codes in upper case with the share of the subtotal each takes off, in basis points. Rows are added by hand in SQL so that no code sits in the repository. No API role can read the table; the order routes ask get_promo_code as service_role.';
+
+alter table public.promo_codes enable row level security;
+
+revoke all on table public.promo_codes from anon, authenticated, service_role;
+
+create view public.promo_code_usage
+with (security_invoker = true)
+as
+select
+    o.promo_code as code,
+    count(*) filter (where o.status = 'paid') as paid_orders,
+    count(*) filter (where o.status = 'refunded') as refunded_orders,
+    coalesce(sum(o.promo_cents) filter (where o.status = 'paid'), 0) as paid_discount_cents
+from public.orders o
+where o.promo_code is not null and o.status in ('paid', 'refunded')
+group by o.promo_code;
+
+comment on view public.promo_code_usage is 'Uses per discount code, counted from orders. A use is a paid order; a refunded order leaves that count and is listed beside it; pending and canceled orders never count. No API role can read it, so it is seen in the dashboard only.';
+
+revoke all on table public.promo_code_usage from anon, authenticated, service_role;
+
 create function private.settle_order(p_order_id bigint, p_payment_intent text)
 returns text
 language plpgsql
@@ -157,7 +186,8 @@ declare
 begin
     perform 1
     from public.orders o
-    where o.user_id = p_user_id and o.status = 'pending'
+    where o.status = 'pending'
+        and (o.user_id = p_user_id or (p_user_id is null and o.user_id is null and lower(o.email) = lower(p_email)))
     order by o.id
     for update;
 
@@ -180,7 +210,8 @@ begin
     with canceled as (
         update public.orders o
         set status = 'canceled'
-        where o.user_id = p_user_id and o.status = 'pending'
+        where o.status = 'pending'
+            and (o.user_id = p_user_id or (p_user_id is null and o.user_id is null and lower(o.email) = lower(p_email)))
         returning o.stripe_payment_intent_id
     )
     select coalesce(array_agg(c.stripe_payment_intent_id) filter (where c.stripe_payment_intent_id is not null), '{}')
@@ -204,7 +235,6 @@ begin
         cross join jsonb_array_elements(o.items) as i
         where o.status = 'pending'
             and o.placed_at > now() - interval '10 minutes'
-            and o.email <> p_email
             and i ->> 'product_slug' = v_line.product_slug;
 
         if v_sold + v_reserved + v_line.quantity > coalesce((p_stock ->> v_line.product_slug)::integer, 0) then
@@ -274,6 +304,21 @@ $$;
 revoke execute on function private.refund_order(text) from public;
 grant execute on function private.refund_order(text) to service_role;
 
+create function private.get_promo_code(p_code text)
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+    select jsonb_build_object('code', c.code, 'discount_basis_points', c.discount_basis_points)
+    from public.promo_codes c
+    where c.code = upper(btrim(coalesce(p_code, ''))) and c.is_active;
+$$;
+
+revoke execute on function private.get_promo_code(text) from public;
+grant execute on function private.get_promo_code(text) to service_role;
+
 create function public.place_order(
     p_email text,
     p_items jsonb,
@@ -323,3 +368,16 @@ $$;
 
 revoke execute on function public.refund_order(text) from public, anon, authenticated;
 grant execute on function public.refund_order(text) to service_role;
+
+create function public.get_promo_code(p_code text)
+returns jsonb
+language sql
+stable
+security invoker
+set search_path = ''
+as $$
+    select private.get_promo_code(p_code);
+$$;
+
+revoke execute on function public.get_promo_code(text) from public, anon, authenticated;
+grant execute on function public.get_promo_code(text) to service_role;

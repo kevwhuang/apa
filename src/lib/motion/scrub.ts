@@ -30,12 +30,12 @@ function clearScrub(): void {
     tweens.length = 0;
 }
 
-function initScrub(): void {
+function initScrub(scopes: ParentNode[] = [document]): void {
     if (window.innerWidth <= MOBILE_WIDTH || window.matchMedia(REDUCED_MOTION_QUERY).matches) return;
 
     const tokens = getMotionTokens();
 
-    for (const element of document.querySelectorAll<HTMLElement>(SCRUB_SELECTOR)) {
+    for (const element of scopes.flatMap(scope => Array.from(scope.querySelectorAll<HTMLElement>(SCRUB_SELECTOR)))) {
         const variant = SCRUB_VARIANTS.find(name => name === element.dataset.scrub);
 
         if (element.closest(HERO_FIELD_SELECTOR) || !variant) continue;

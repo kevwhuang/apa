@@ -85,6 +85,11 @@ async function createSupport(support: Support, stripe: Stripe) {
 export const prerender = false;
 
 export const POST: APIRoute = async ({ clientAddress, request }) => {
+    const product = process.env.STRIPE_SUPPORT_PRODUCT_ID;
+    const stripe = getStripe();
+
+    if (!product || !stripe) return Response.json({ error: PAYMENTS_NOT_CONFIGURED_MESSAGE }, { status: 503 });
+
     let body: Record<string, unknown>;
 
     try {
@@ -114,19 +119,13 @@ export const POST: APIRoute = async ({ clientAddress, request }) => {
 
     if (limited) return limited;
 
-    const product = process.env.STRIPE_SUPPORT_PRODUCT_ID;
-    const stripe = getStripe();
-
     const user = await getRequestUser(request);
 
     if (tier) {
         if (!user?.email) return Response.json({ error: SIGN_IN_MESSAGE }, { status: 401 });
-        if (!product || !stripe) return Response.json({ error: PAYMENTS_NOT_CONFIGURED_MESSAGE }, { status: 503 });
 
         return createSupport({ account: user.email, amountCents, email, product, tier: tier.id, userId: user.id }, stripe);
     }
-
-    if (!stripe) return Response.json({ error: PAYMENTS_NOT_CONFIGURED_MESSAGE }, { status: 503 });
 
     return createGift(amountCents, email, user?.id ?? '', stripe);
 };

@@ -15,7 +15,9 @@ import Layout from '@/Layout.astro';
     title="Austin Producer Alliance"
 >
     <HeroTimeline />
-    <LandingProducers />
+    <LandingProducers server:defer>
+        <LandingProducers slot="fallback" />
+    </LandingProducers>
     <LandingAssembly />
     <LandingHangout />
     <LandingBash />

@@ -8,7 +8,7 @@ import { loadEvents } from '@lib/programs/calendar';
 import type { ImageMetadata } from 'astro';
 
 const CLASS_VIEWER = 'wall__viewer group fixed grid inset-0 overflow-visible place-items-center z-301 h-auto max-h-none max-w-none w-auto cursor-zoom-out';
-const CLASS_VIEWER_PHOTO = 'block box-content object-contain aspect-(--wall-ratio) h-auto min-h-0 w-[calc(100%-4px)] border-2 border-current cursor-default pointer-events-auto select-none';
+const CLASS_VIEWER_PHOTO = 'block box-content object-contain aspect-(--wall-ratio) h-auto min-h-0 w-[calc(100%-4px)] border-2 border-current bg-ink cursor-default pointer-events-auto select-none';
 
 const FIGURES = [
     { alt: 'Nine people gather around a round black metal table on a covered dock, two seated and seven standing, with a lake and a bright cloud-filled sky behind them', image_path: '/src/images/gallery/2026_10_camp_river_oaks.webp', label: 'October 2026 CAMP' },
@@ -39,6 +39,8 @@ const FIGURES = [
 ] as const;
 
 const IMAGE_DENSITY = 2;
+const IMAGE_PHONE_WIDTH = 1_200;
+const IMAGE_SIZES = 'auto, (max-width: 768px) calc(100vw - 44px), 452px';
 
 const events = await loadEvents();
 
@@ -107,7 +109,7 @@ function formatCaption(event: (typeof events)[number]) {
         class="wall__list flex flex-wrap gap-(--space-md) list-none"
         data-motion-stagger="rise"
     >
-        {figures.map(figure => (
+        {figures.map((figure, index) => (
             <li
                 class="wall__item grow-(--figure-ratio) min-w-0"
                 style={`--figure-ratio: ${figure.ratio}`}
@@ -126,11 +128,13 @@ function formatCaption(event: (typeof events)[number]) {
                         <Image
                             class="block h-auto w-full select-none"
                             alt={figure.alt}
-                            densities={[1, IMAGE_DENSITY]}
                             draggable="false"
+                            fetchpriority={index === 0 ? 'high' : undefined}
                             loading="lazy"
+                            sizes={IMAGE_SIZES}
                             src={figure.image}
                             width={figure.columnWidth}
+                            widths={[figure.columnWidth, IMAGE_PHONE_WIDTH, figure.image.width]}
                         />
                     </button>
                     <figcaption class="label text-text-secondary">{figure.label}</figcaption>
@@ -162,16 +166,15 @@ function formatCaption(event: (typeof events)[number]) {
             <div class="flex items-baseline justify-between shrink-0 h-(--text-sm) gap-(--wall-gap)">
                 <p
                     class="label"
+                    aria-live="polite"
                     data-wall-caption
                 />
                 <button
-                    class="label active:translate-y-px focus-visible:not-sr-only group-open:visible sr-only transition-[translate]"
+                    class="group-open:visible sr-only transition-[translate]"
                     aria-label="Close viewer"
                     data-wall-close
                     type="button"
-                >
-                    Close
-                </button>
+                />
             </div>
             <span
                 class="spinner"
@@ -202,7 +205,7 @@ function formatCaption(event: (typeof events)[number]) {
 
     .wall__stack .spinner {
         display: none;
-        font-size: var(--text-2xl);
+        font-size: round(var(--text-4xl), 2px);
         inset: 50% auto auto 50%;
         position: absolute;
         translate: -50% -50%;
@@ -232,6 +235,14 @@ function formatCaption(event: (typeof events)[number]) {
         display: inline-block;
     }
 
+    .wall__viewer[data-pending] .wall__stack::before {
+        background-color: var(--color-ink);
+        border: 2px solid currentColor;
+        content: '';
+        inset: var(--wall-meta) 0;
+        position: absolute;
+    }
+
     .wall__viewer[open] {
         opacity: 1;
         transition: opacity var(--duration-fast) var(--motion-ease-ui);
@@ -248,7 +259,11 @@ function formatCaption(event: (typeof events)[number]) {
 <script>
     import { isOutsideBox, registerPageScript } from '@lib/shared/utils';
 
+    const SPINNER_DELAY_MILLISECONDS = 300;
+
+    let frames: HTMLButtonElement[] = [];
     let isBackdropPress = false;
+    let spinnerTimer: Timer | undefined;
     let trigger: HTMLButtonElement | null = null;
     let viewer: HTMLDialogElement | null = null;
     let viewerCaption: HTMLElement | null = null;
@@ -256,10 +271,16 @@ function formatCaption(event: (typeof events)[number]) {
     let viewerPhoto: HTMLImageElement | null = null;
     let viewerTitle: HTMLElement | null = null;
 
+    function clearSpinnerTimer() {
+        clearTimeout(spinnerTimer);
+        spinnerTimer = undefined;
+    }
+
     function closeViewer() {
         if (!viewer?.open) return;
 
         document.documentElement.style.overflow = '';
+        clearSpinnerTimer();
         viewer.close();
         trigger?.focus();
     }
@@ -276,15 +297,26 @@ function formatCaption(event: (typeof events)[number]) {
     }
 
     function handleViewerKeydown(event: KeyboardEvent) {
-        if (!viewer?.open || event.key !== 'Tab') return;
+        if (!viewer?.open) return;
 
-        event.preventDefault();
-        viewerClose?.focus();
+        const hasModifier = event.altKey || event.ctrlKey || event.metaKey || event.shiftKey;
+
+        if (event.key === 'Tab') {
+            event.preventDefault();
+            viewerClose?.focus();
+        } else if (!hasModifier && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+            const offset = event.key === 'ArrowRight' ? 1 : -1;
+
+            const frame = trigger ? frames[frames.indexOf(trigger) + offset] : undefined;
+
+            event.preventDefault();
+
+            if (frame) showViewerFrame(frame);
+        }
     }
 
     function initWall(signal: AbortSignal) {
-        const frames = Array.from(document.querySelectorAll<HTMLButtonElement>('.wall__frame'));
-
+        frames = Array.from(document.querySelectorAll<HTMLButtonElement>('.wall__frame'));
         isBackdropPress = false;
         trigger = null;
         viewer = document.querySelector<HTMLDialogElement>('.wall__viewer');
@@ -322,34 +354,49 @@ function formatCaption(event: (typeof events)[number]) {
     }
 
     function openViewer(frame: HTMLButtonElement) {
-        if (!viewer || !viewerCaption || !viewerClose || !viewerPhoto || !viewerTitle) return;
-
-        const { wallAlt = '', wallLabel = '', wallRatio = '1', wallSource = '', wallWidth = '100%' } = frame.dataset;
-
-        if (viewerPhoto.getAttribute('src') !== wallSource) {
-            viewer.setAttribute('data-loading', '');
-            viewerPhoto.style.visibility = 'hidden';
-        }
+        if (!viewer || !viewerClose) return;
 
         document.documentElement.style.overflow = 'hidden';
-        trigger = frame;
-        viewer.style.setProperty('--wall-ratio', wallRatio);
-        viewer.style.setProperty('--wall-width', wallWidth);
+        showViewerFrame(frame);
+        viewer.removeAttribute('data-loading');
         viewer.showModal();
-        viewerCaption.textContent = wallLabel;
-        viewerPhoto.alt = wallAlt;
-        viewerPhoto.src = wallSource;
-        viewerTitle.textContent = wallLabel;
         viewerClose.focus();
     }
 
+    function showViewerFrame(frame: HTMLButtonElement) {
+        if (!viewer || !viewerCaption || !viewerPhoto || !viewerTitle) return;
+
+        const isBroken = viewerPhoto.complete && !viewerPhoto.naturalWidth;
+        const { wallAlt = '', wallLabel = '', wallRatio = '1', wallSource = '', wallWidth = '100%' } = frame.dataset;
+
+        if (isBroken || viewerPhoto.getAttribute('src') !== wallSource) viewerPhoto.src = wallSource;
+
+        trigger = frame;
+        viewer.style.setProperty('--wall-ratio', wallRatio);
+        viewer.style.setProperty('--wall-width', wallWidth);
+        viewerCaption.textContent = wallLabel;
+        viewerPhoto.alt = wallAlt;
+        viewerTitle.textContent = wallLabel;
+
+        if (viewerPhoto.complete) {
+            showViewerPhoto();
+        } else {
+            spinnerTimer ??= setTimeout(() => viewer?.setAttribute('data-loading', ''), SPINNER_DELAY_MILLISECONDS);
+            viewer.setAttribute('data-pending', '');
+        }
+    }
+
     function showViewerPhoto() {
+        if (!viewerPhoto?.complete) return;
+
+        clearSpinnerTimer();
         viewer?.removeAttribute('data-loading');
-        viewerPhoto?.style.removeProperty('visibility');
+        viewer?.removeAttribute('data-pending');
     }
 
     function teardown() {
         document.documentElement.style.overflow = '';
+        clearSpinnerTimer();
         viewer?.close();
     }
 

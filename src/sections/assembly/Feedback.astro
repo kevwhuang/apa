@@ -44,8 +44,10 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                         class="chip feedback__mode is-active hover:bg-bg-hover"
                         aria-controls="feedback-panel-link"
                         aria-pressed="true"
+                        autocomplete="off"
                         data-intake-control
                         data-mode="link"
+                        disabled
                         type="button"
                     >
                         Paste a link
@@ -54,8 +56,10 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                         class="chip feedback__mode hover:bg-bg-hover"
                         aria-controls="feedback-panel-file"
                         aria-pressed="false"
+                        autocomplete="off"
                         data-intake-control
                         data-mode="file"
+                        disabled
                         type="button"
                     >
                         Drop a file
@@ -77,6 +81,7 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                             autocomplete="off"
                             data-feedback-link
                             data-intake-control
+                            disabled
                             name="link"
                             spellcheck="false"
                             type="url"
@@ -90,7 +95,9 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                     </p>
                     <button
                         class="btn btn--primary self-start"
+                        autocomplete="off"
                         data-intake-control
+                        disabled
                         type="submit"
                     >
                         Add to queue
@@ -119,8 +126,10 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                             accept={UPLOAD.acceptAttribute}
                             aria-describedby="feedback-file-help"
                             aria-invalid="false"
+                            autocomplete="off"
                             data-dropzone-input
                             data-intake-control
+                            disabled
                             multiple
                             name="feedback"
                             type="file"
@@ -159,7 +168,10 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                     hidden
                 >
                     <span class="spinner" aria-hidden="true" />
-                    <span data-board-refresh-text />
+                    <span
+                        class="self-baseline leading-(--text-lg)"
+                        data-board-refresh-text
+                    />
                 </p>
             </div>
             <div

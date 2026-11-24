@@ -15,7 +15,7 @@ const ACCOUNT_LINKS = [
     { href: '/store/cart', label: 'Cart' },
     { href: '/store/orders', label: 'Orders' },
     { href: SETTINGS_ROUTE, label: 'Settings' },
-    { href: '/admin', label: 'Admin' },
+    { href: '/admin', isAdminOnly: true, label: 'Admin' },
 ] as const;
 
 const SOCIALS = [
@@ -64,7 +64,7 @@ const year = new Date().toLocaleDateString(LOCALE, { timeZone: TIME_ZONE, year: 
                     <h2 class="footer__head label mb-4 text-text-inverse-secondary">{column.head}</h2>
                     <ul class="flex flex-col list-none">
                         {column.items.map(item => (
-                            <li>
+                            <li class:list={['isAdminOnly' in item && 'footer__admin', item.href === ONBOARDING_ROUTE && 'footer__onboarding']}>
                                 <a
                                     class="footer__link active:translate-y-px hover:text-link-on-inverse flex items-center min-h-(--control-size) text-base transition-[color,translate]"
                                     href={item.href}
@@ -134,6 +134,14 @@ const year = new Date().toLocaleDateString(LOCALE, { timeZone: TIME_ZONE, year: 
 </footer>
 
 <style>
+    html[data-onboarded='true'] .footer__onboarding {
+        display: none;
+    }
+
+    .footer__admin {
+        display: var(--admin-only, list-item);
+    }
+
     .footer__bar {
         --stage-pad: 0;
     }

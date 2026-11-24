@@ -10,6 +10,7 @@ import {
     TIME_ZONE,
     TRACK_CONTENT_TYPES,
 } from '@lib/shared/constants';
+import { onIslandLoad } from '@lib/shared/islands';
 import { revealTarget } from '@lib/motion/entrances';
 
 import type { CollectionEntry } from 'astro:content';
@@ -64,6 +65,8 @@ const PANEL_WIDE_VIEWPORT = 1_024;
 const SLOW_CORE_COUNT = 4;
 
 const panelWidths = new Map<string, number>();
+
+let documentSettled: Promise<void> | undefined;
 
 function applyInstantly(root: HTMLElement, change: () => void): void {
     root.classList.add(INSTANT_CLASS);
@@ -550,19 +553,36 @@ function readText(record: Record<string, unknown>, key: string): string {
     return typeof value === 'string' ? value.trim() : '';
 }
 
-function registerPageScript(init: (signal: AbortSignal) => void): void {
+function registerPageScript(init: (signal: AbortSignal) => void, hasIslands = false): void {
     let controller: AbortController | undefined;
 
+    async function handleDocumentReady() {
+        documentSettled ??= settleDocument();
+
+        await documentSettled;
+
+        handlePageLoad();
+    }
+
     function handlePageLoad() {
+        if (controller?.signal.aborted === false) return;
+
+        initPage();
+    }
+
+    function initPage() {
         teardown();
         controller = new AbortController();
         init(controller.signal);
+
+        if (hasIslands) onIslandLoad(initPage, controller.signal);
     }
 
     function teardown() {
         controller?.abort();
     }
 
+    document.addEventListener('DOMContentLoaded', handleDocumentReady, { once: true });
     document.addEventListener('astro:before-swap', teardown);
     document.addEventListener('astro:page-load', handlePageLoad);
 }
@@ -621,6 +641,16 @@ function setTitleLink(element: Element | null, catalog: CatalogEntry[], item: Ca
 
     element.href = href;
     setText(element, text);
+}
+
+async function settleDocument() {
+    void document.documentElement.offsetHeight;
+
+    const faces = Array.from(document.fonts).filter(face => face.status === 'loading');
+    const pageLoad = new Promise(resolve => window.addEventListener('load', resolve, { once: true }));
+
+    await Promise.race([Promise.allSettled(faces.map(face => face.loaded)), pageLoad]);
+    await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve)));
 }
 
 function toAssetSlug(name: string): string {

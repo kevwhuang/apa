@@ -9,7 +9,7 @@ port = 8888
 [[headers]]
 for = '/*'
 [headers.values]
-content-security-policy = "base-uri 'none'; connect-src 'self' https://*.supabase.co https://api.stripe.com wss://*.supabase.co; default-src 'self'; form-action 'self'; frame-ancestors 'self'; frame-src https://*.js.stripe.com https://hooks.stripe.com https://js.stripe.com; img-src 'self' data: https://*.supabase.co; media-src 'self' https://*.supabase.co; script-src 'self' 'unsafe-inline' https://*.js.stripe.com https://js.stripe.com; style-src 'self' 'unsafe-inline'"
+content-security-policy = "base-uri 'none'; connect-src 'self' https://api.stripe.com https://dmtnkjdwxchvtdkvacaf.supabase.co wss://dmtnkjdwxchvtdkvacaf.supabase.co; default-src 'self'; form-action 'self'; frame-ancestors 'self'; frame-src https://*.js.stripe.com https://hooks.stripe.com https://js.stripe.com; img-src 'self' data: https://dmtnkjdwxchvtdkvacaf.supabase.co; media-src 'self' https://dmtnkjdwxchvtdkvacaf.supabase.co; script-src 'self' 'unsafe-inline' data: https://*.js.stripe.com https://js.stripe.com; style-src 'self' 'unsafe-inline'"
 permissions-policy = 'camera=(), microphone=(), geolocation=()'
 referrer-policy = 'strict-origin-when-cross-origin'
 strict-transport-security = 'max-age=31536000; includeSubDomains; preload'

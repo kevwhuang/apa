@@ -49,7 +49,7 @@ function initTracks(): void {
     if (isRegistered) return;
 
     isRegistered = true;
-    registerPageScript(start);
+    registerPageScript(start, true);
 }
 
 async function playStored(button: HTMLButtonElement, path: string) {

@@ -4,7 +4,6 @@ import { getCollection } from 'astro:content';
 import BackLink from '@components/shared/BackLink.astro';
 import PageHead from '@components/shared/PageHead.astro';
 import SectionHead from '@components/shared/SectionHead.astro';
-import { COMMERCE } from '@lib/shared/constants';
 import { toCatalog, toImageSources } from '@lib/commerce/products';
 
 const catalog = toCatalog(await getCollection('products'));
@@ -69,7 +68,7 @@ const images = await toImageSources();
                 data-order-promo-row
                 hidden
             >
-                <dt>Discount ({COMMERCE.discountCode})</dt>
+                <dt>Discount</dt>
                 <dd
                     class="whitespace-nowrap"
                     data-order-promo

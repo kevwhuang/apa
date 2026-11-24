@@ -1,10 +1,8 @@
 ---
 import DirectoryGrid from '@sections/directory/Grid.astro';
 import Layout from '@/Layout.astro';
+import { BROWSER_CACHE_CONTROL, SHARED_CACHE_CONTROL } from '@lib/shared/constants';
 import { brandTitle } from '@lib/shared/brand';
-
-const BROWSER_CACHE_CONTROL = 'public, max-age=0, must-revalidate';
-const SHARED_CACHE_CONTROL = 'public, durable, s-maxage=60, stale-while-revalidate=120';
 
 Astro.response.headers.set('Cache-Control', BROWSER_CACHE_CONTROL);
 Astro.response.headers.set('Netlify-CDN-Cache-Control', SHARED_CACHE_CONTROL);

@@ -2,10 +2,11 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { MOTION_SELECTOR, REDUCED_MOTION_QUERY, STORAGE } from '@lib/shared/constants';
-import { buildEntrances, revealAll, revealTarget } from '@lib/motion/entrances';
+import { adoptEntrances, buildEntrances, revealAll, revealTarget } from '@lib/motion/entrances';
 import { clearScrub, initScrub } from '@lib/motion/scrub';
 import { initCounters } from '@lib/motion/counter';
 import { initHeroField } from '@lib/motion/hero';
+import { onIslandLoad } from '@lib/shared/islands';
 import { refreshMotionTokens } from '@lib/motion/tokens';
 import { registerPageScript } from '@lib/shared/utils';
 
@@ -101,6 +102,20 @@ function handleFocusIn(event: FocusEvent) {
     if (target) revealTarget(target);
 }
 
+function handleIslandLoad(added: Element[], removed: Element[]) {
+    if (!context) return;
+
+    for (const trigger of ScrollTrigger.getAll()) {
+        if (trigger.trigger?.isConnected === false) trigger.kill();
+    }
+
+    context.add(() => {
+        if (window.__apaMotion?.live() === true) adoptEntrances(added, removed);
+
+        initScrub(added);
+    });
+}
+
 function handlePreferenceChange() {
     if (reducedMotionQuery.matches) {
         teardown();
@@ -167,6 +182,7 @@ async function refreshTriggers() {
 }
 
 function start(signal: AbortSignal) {
+    onIslandLoad(handleIslandLoad, signal);
     signal.addEventListener('abort', teardown, { once: true });
     reboot();
 }

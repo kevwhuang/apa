@@ -10,6 +10,10 @@ const MISSING_MESSAGE = 'No billing profile on file.';
 export const prerender = false;
 
 export const POST: APIRoute = async ({ clientAddress, request, url }) => {
+    const stripe = getStripe();
+
+    if (!process.env.STRIPE_SUPPORT_PRODUCT_ID || !stripe) return Response.json({ error: PAYMENTS_NOT_CONFIGURED_MESSAGE }, { status: 503 });
+
     const limited = await limitRequest('portal', clientAddress);
 
     if (limited) return limited;
@@ -17,10 +21,6 @@ export const POST: APIRoute = async ({ clientAddress, request, url }) => {
     const user = await getRequestUser(request);
 
     if (!user?.email) return Response.json({ error: SIGN_IN_FIRST_MESSAGE }, { status: 401 });
-
-    const stripe = getStripe();
-
-    if (!stripe) return Response.json({ error: PAYMENTS_NOT_CONFIGURED_MESSAGE }, { status: 503 });
 
     const customer = await findCustomer(user.email, user.id, stripe);
 

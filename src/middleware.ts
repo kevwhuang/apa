@@ -18,15 +18,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
     try {
         const response = await next();
 
-        if (isApi && response.body === null && response.status === 404) return Response.json({ error: NOT_FOUND_MESSAGE }, { status: 404 });
+        if (isApi && response.body === null && response.status === 404) {
+            return applySecurityHeaders(Response.json({ error: NOT_FOUND_MESSAGE }, { status: 404 }));
+        }
 
-        if (isApi) return response;
-
-        if (response.status >= 500) return applySecurityHeaders(await context.rewrite('/500'));
+        if (!isApi && response.status >= 500) return applySecurityHeaders(await context.rewrite('/500'));
 
         return applySecurityHeaders(response);
     } catch {
-        if (isApi) return Response.json({ error: 'Internal server error.' }, { status: 500 });
+        if (isApi) return applySecurityHeaders(Response.json({ error: 'Internal server error.' }, { status: 500 }));
 
         return applySecurityHeaders(await context.rewrite('/500'));
     }

@@ -144,17 +144,30 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
     color: var(--btn-text);
 }
 
+.btn[aria-busy='true'],
+.btn[aria-busy='true']:hover {
+    background: var(--color-btn-disabled-bg);
+    border-color: var(--color-btn-disabled-border);
+    color: transparent;
+    position: relative;
+}
+
 .btn[aria-busy='true']::after {
-    --spinner-track: transparent;
+    --spinner-track: var(--color-btn-disabled-border);
+    color: var(--color-btn-disabled-text);
     content: '';
+    inset: 50% auto auto 50%;
+    position: absolute;
+    translate: -50% -50%;
 }
 
 .btn[aria-busy='true']::after,
 .spinner {
     animation: var(--duration-slowest) var(--motion-ease-linear) infinite spinner__turn;
-    border: 2px solid var(--spinner-track);
+    border: round(down, 0.1em, 2px) solid var(--spinner-track);
     border-radius: 9999px;
     border-top-color: currentColor;
+    font-size: round(var(--text-lg), 2px);
     height: 1em;
     width: 1em;
 }
@@ -264,10 +277,26 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
     width: 100%;
 }
 
-.grid-tail--wide > :nth-last-child(1 of :not([hidden], .hidden)):nth-child(odd of :not([hidden], .hidden)) {
-    grid-column: 1 / -1;
-    justify-self: center;
-    width: calc((100% - var(--space-lg)) / 2);
+.grid-tail {
+    --grid-tail-half: calc(50% + var(--space-lg) / 2);
+    --grid-tail-pair: var(--grid-tail-half);
+    --grid-tail-solo: calc(100% + var(--space-lg));
+}
+
+.grid-tail--2 > :nth-last-child(1 of :not([hidden], .hidden)):nth-child(odd of :not([hidden], .hidden)) {
+    left: var(--grid-tail-half);
+    position: relative;
+}
+
+.grid-tail--3 > :nth-last-child(1 of :not([hidden], .hidden)):nth-child(3n + 1 of :not([hidden], .hidden)) {
+    left: var(--grid-tail-solo);
+    position: relative;
+}
+
+.grid-tail--3 > :nth-last-child(1 of :not([hidden], .hidden)):nth-child(3n + 2 of :not([hidden], .hidden)),
+.grid-tail--3 > :nth-last-child(2 of :not([hidden], .hidden)):nth-child(3n + 1 of :not([hidden], .hidden)) {
+    left: var(--grid-tail-pair);
+    position: relative;
 }
 
 .grip {
@@ -771,18 +800,28 @@ label:hover:not(:has(a:hover)) > .box:not(:disabled, [aria-invalid='true']),
 }
 
 @media (max-width: 1024px) {
+    .grid-tail {
+        --grid-tail-pair: auto;
+        --grid-tail-solo: auto;
+    }
+
     .grid-tail > :nth-last-child(1 of :not([hidden], .hidden)):nth-child(odd of :not([hidden], .hidden)) {
-        grid-column: 1 / -1;
-        justify-self: center;
-        width: calc((100% - var(--space-lg)) / 2);
+        left: var(--grid-tail-half);
+        position: relative;
     }
 }
 
 @media (max-width: 768px) {
+    .grid-tail {
+        --grid-tail-half: auto;
+    }
+
+    .grid-tail > * {
+        margin-inline: min(round(down, 100%, calc(2 * 240px + var(--space-lg))), calc((100% + var(--space-lg)) / 4));
+    }
+
     .grid-tail > :nth-last-child(1 of :not([hidden], .hidden)):nth-child(odd of :not([hidden], .hidden)) {
-        grid-column: auto;
-        justify-self: auto;
-        width: auto;
+        grid-column: 1 / -1;
     }
 
     .rank--2 {

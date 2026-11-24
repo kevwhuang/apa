@@ -1,4 +1,4 @@
-import { NETWORK_MESSAGE, SECONDS_PER_MINUTE, STATUS_SERVER_ERROR } from '@lib/shared/constants';
+import { NETWORK_MESSAGE, SECONDS_PER_MINUTE, SERVER_ERROR_MESSAGE, STATUS_SERVER_ERROR } from '@lib/shared/constants';
 import { isRecord } from '@lib/shared/utils';
 
 interface RequestOptions {
@@ -8,7 +8,6 @@ interface RequestOptions {
     token?: string;
 }
 
-const FALLBACK_MESSAGE = 'Something went wrong on our side. Try again in a moment.';
 const HOURS_THRESHOLD_SECONDS = 7_200;
 const SECONDS_PER_HOUR = 3_600;
 
@@ -63,7 +62,7 @@ async function sendRequest(path: string, options: RequestOptions = {}): Promise<
     if (!response.ok) {
         const { error } = await readBody(response);
 
-        const message = typeof error === 'string' ? error : FALLBACK_MESSAGE;
+        const message = typeof error === 'string' ? error : SERVER_ERROR_MESSAGE;
 
         return { code: STATUS_CODES[response.status] ?? (response.status >= STATUS_SERVER_ERROR ? 'unavailable' : 'rejected'), message, ok: false };
     }

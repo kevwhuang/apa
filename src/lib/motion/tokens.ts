@@ -1,3 +1,5 @@
+import { MILLISECONDS_PER_SECOND } from '@lib/shared/constants';
+
 const BEZIER_EPSILON = 0.000_001;
 const BEZIER_ITERATIONS = 8;
 const CUBIC_BEZIER_PATTERN = /cubic-bezier\(([^)]+)\)/;
@@ -119,7 +121,9 @@ function readEase(styles: CSSStyleDeclaration, name: string, fallback: MotionBez
 }
 
 function readNumber(styles: CSSStyleDeclaration, name: string, fallback: number) {
-    const parsed = Number.parseFloat(styles.getPropertyValue(name));
+    const raw = styles.getPropertyValue(name);
+
+    const parsed = Number.parseFloat(raw);
 
     if (!Number.isFinite(parsed)) {
         fallbacks.push(name);
@@ -127,7 +131,7 @@ function readNumber(styles: CSSStyleDeclaration, name: string, fallback: number)
         return fallback;
     }
 
-    return parsed;
+    return raw.endsWith('ms') ? parsed / MILLISECONDS_PER_SECOND : parsed;
 }
 
 function refreshMotionTokens(): void {

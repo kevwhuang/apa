@@ -15,7 +15,7 @@ create table public.site_chunks (
     constraint site_chunks_content_check check (char_length(content) between 1 and 8000)
 );
 
-comment on table public.site_chunks is 'The assistant index: one row per chunk of a public page with its gte-small embedding. Written by the admin through POST /api/ingest; visitors reach it only through match_site_chunks.';
+comment on table public.site_chunks is 'The assistant index: one row per chunk of a public page with its gte-small embedding. Written through POST /api/ingest, by the admin on demand and by the server after each production deploy; visitors reach it only through match_site_chunks.';
 
 create index site_chunks_embedding_idx on public.site_chunks using hnsw (embedding extensions.vector_ip_ops);
 
@@ -23,6 +23,7 @@ alter table public.site_chunks enable row level security;
 
 revoke all on table public.site_chunks from anon, authenticated, service_role;
 grant select, insert, delete on table public.site_chunks to authenticated;
+grant select, insert, delete on table public.site_chunks to service_role;
 
 create policy site_chunks_select_admin on public.site_chunks
 for select to authenticated

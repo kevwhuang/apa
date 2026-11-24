@@ -5,15 +5,68 @@ import { ENTRANCE_PRESETS, FOLDED_PROPERTIES, GUARDED_PRESET, PRESET_NAMES, REST
 import { MOTION_SELECTOR, TRIGGER_START } from '@lib/shared/constants';
 import { getMotionTokens } from '@lib/motion/tokens';
 
+interface MotionEntrance {
+    end: number;
+    position: number;
+    timeline: gsap.core.Timeline;
+}
+
 const INTERACTIVE_SELECTOR = 'a[href], button, input, select, summary, textarea, [tabindex]:not([tabindex="-1"])';
 const STAGGER_SELECTOR = '[data-motion-stagger]';
 const WILL_CHANGE = 'transform';
 
 const effective = new WeakMap<Element, MotionPresetName>();
+const entrances = new WeakMap<Element, MotionEntrance>();
 const revealed = new WeakSet<Element>();
 const waiting = new Set<Element>();
 
-function buildEntrances(): void {
+function adoptEntrances(added: Element[], removed: Element[]): void {
+    const pairs = new Map<Element, Element>();
+    const positions = new Map<Element, number>();
+    const resumed = new Map<gsap.core.Timeline, MotionGroup>();
+
+    for (const node of added) {
+        const match = removed.find(other => other.cloneNode().isEqualNode(node.cloneNode()));
+
+        if (!match) continue;
+
+        for (const selector of MOTION_SELECTOR.split(', ')) {
+            const sources = Array.from(match.querySelectorAll(selector));
+
+            node.querySelectorAll(selector).forEach((target, index) => {
+                if (sources[index]) pairs.set(target, sources[index]);
+            });
+        }
+    }
+
+    buildEntrances(added);
+
+    for (const [target, source] of pairs) {
+        const entrance = entrances.get(source);
+        const name = effective.get(source);
+
+        if (!entrance && name && !revealed.has(source)) continue;
+
+        if (!entrance || entrance.end <= entrance.timeline.time() || !name || revealed.has(source)) {
+            revealElement(target);
+
+            continue;
+        }
+
+        const group = resumed.get(entrance.timeline) ?? { name, targets: [] };
+
+        effective.delete(target);
+        group.targets.push(target);
+        positions.set(target, entrance.position);
+        resumed.set(entrance.timeline, group);
+    }
+
+    for (const [timeline, group] of resumed) {
+        playPreset(group, positions).time(timeline.time());
+    }
+}
+
+function buildEntrances(scopes: ParentNode[] = [document]): void {
     const batches = new Map<MotionPresetName, Element[]>();
     const roots: MotionRoot[] = [];
     const stranded = new Set<Element>();
@@ -21,7 +74,7 @@ function buildEntrances(): void {
 
     waiting.clear();
 
-    for (const container of document.querySelectorAll<HTMLElement>(STAGGER_SELECTOR)) {
+    for (const container of scopes.flatMap(scope => Array.from(scope.querySelectorAll<HTMLElement>(STAGGER_SELECTOR)))) {
         const nested = container.parentElement?.closest(STAGGER_SELECTOR);
         const preset = resolvePreset(container.dataset.motionStagger);
         const targets = Array.from(container.children);
@@ -37,7 +90,7 @@ function buildEntrances(): void {
         roots.push({ preset, targets });
     }
 
-    for (const element of document.querySelectorAll<HTMLElement>('[data-motion]')) {
+    for (const element of scopes.flatMap(scope => Array.from(scope.querySelectorAll<HTMLElement>('[data-motion]')))) {
         const preset = resolvePreset(element.dataset.motion);
 
         if (element.closest(STAGGER_SELECTOR) || !preset) {
@@ -53,7 +106,7 @@ function buildEntrances(): void {
         for (const target of root.targets) {
             const preset = resolveEffective(root.preset, target);
 
-            if (preset) stranded.delete(target);
+            if (!revealed.has(target) && preset) stranded.delete(target);
             else stranded.add(target);
 
             if (!preset || revealed.has(target)) continue;
@@ -108,7 +161,7 @@ function playEntrance(entering: Element[]) {
     for (const target of new Set([...waiting, ...entering])) {
         const name = effective.get(target);
 
-        if (!name || !names.has(name) || revealed.has(target)) continue;
+        if (!name || !names.has(name) || revealed.has(target) || !target.isConnected) continue;
 
         const group = groups.get(name) ?? { name, targets: [] };
 
@@ -121,7 +174,7 @@ function playEntrance(entering: Element[]) {
     }
 }
 
-function playPreset({ name, targets }: MotionGroup) {
+function playPreset({ name, targets }: MotionGroup, positions?: Map<Element, number>) {
     const preset = ENTRANCE_PRESETS[name];
     const tokens = getMotionTokens();
 
@@ -144,14 +197,20 @@ function playPreset({ name, targets }: MotionGroup) {
     });
 
     targets.forEach((target, index) => {
+        const position = positions?.get(target) ?? offset(index, target, targets);
+
+        entrances.set(target, { end: position + tokens.duration[preset.duration], position, timeline });
+
         timeline.fromTo(target, preset.from(tokens), {
             ...preset.to(),
             duration: tokens.duration[preset.duration],
             ease: tokens.ease[preset.ease],
             onStart: markStarted,
             overwrite: 'auto',
-        }, offset(index, target, targets));
+        }, position);
     });
+
+    return timeline;
 }
 
 function resolveEffective(preset: MotionPresetName, target: Element) {
@@ -195,4 +254,4 @@ function revealTarget(target: Element): void {
     }
 }
 
-export { buildEntrances, revealAll, revealTarget };
+export { adoptEntrances, buildEntrances, revealAll, revealTarget };

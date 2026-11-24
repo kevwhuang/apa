@@ -25,6 +25,8 @@ function hasOnboardingProgress() {
         const progress = rawProgress ? JSON.parse(rawProgress) : null;
         const session = rawSession ? JSON.parse(rawSession) : null;
 
+        if (session?.onboarded === true) return false;
+
         return typeof session?.id === 'string' && session.id.length > 0 && progress?.userId === session.id && Number(progress.step) > 0;
     } catch {
         return false;
@@ -126,6 +128,7 @@ function initScrollRestore() {
 
 function initSessionState() {
     let admin = 'false';
+    let onboarded = 'false';
     let state = 'out';
 
     try {
@@ -135,17 +138,20 @@ function initSessionState() {
 
         if (session && typeof session.id === 'string' && session.id.length > 0) state = 'in';
         if (state === 'in' && session.admin === true) admin = 'true';
+        if (state === 'in' && session.onboarded === true) onboarded = 'true';
     } catch {
         state = 'out';
     }
 
     root.dataset.admin = admin;
+    root.dataset.onboarded = onboarded;
     root.dataset.session = state;
 
     doc.addEventListener('astro:before-swap', (event) => {
         const next = event.newDocument.documentElement;
 
         next.dataset.admin = root.dataset.admin;
+        next.dataset.onboarded = root.dataset.onboarded;
         next.dataset.session = root.dataset.session;
     });
 }

@@ -1,6 +1,6 @@
 import { STRIPE_PUBLISHABLE_KEY } from 'astro:env/client';
 
-import { CART_CHANGED_MESSAGE, PAYMENTS_NOT_CONFIGURED_MESSAGE, PAYMENT_FAILED_MESSAGE, STORAGE } from '@lib/shared/constants';
+import { CART_CHANGED_MESSAGE, PAYMENTS_NOT_CONFIGURED_MESSAGE, PAYMENT_FAILED_MESSAGE, PROMO_CODE_MESSAGE, STORAGE } from '@lib/shared/constants';
 import { clampQuantity, clear, compareItems, getItems, getTotals, toCatalogItem } from '@lib/commerce/cart';
 import { createStore } from '@lib/shared/state';
 import { getAccessToken, supabase } from '@lib/shared/supabase';
@@ -47,6 +47,7 @@ const MAX_ORDER_CENTS = 100_000_000;
 const ORDERS_PATH = '/api/orders';
 const ORDER_COLUMNS = 'email, items, number, placed_at, prods_cents, promo_cents, shipping_cents, subtotal_cents, tax_cents, total_cents';
 const PAYMENT_UNAVAILABLE_MESSAGE = 'The payment form did not load. Reload the page and try again.';
+const PROMO_PATH = '/api/promo';
 const RETURN_PATH = '/store/orders';
 
 const MESSAGES: Record<LocalErrorCode, string> = {
@@ -67,6 +68,20 @@ const store = createStore<Order | null>({
 });
 
 let unanswered: OrderAttempt | undefined;
+
+async function checkPromo(code: string): Promise<PromoResult> {
+    const result = await sendRequest(PROMO_PATH, { body: { code }, method: 'POST' });
+
+    if (!result.ok) return result;
+
+    const { promo } = result.data;
+
+    if (!isRecord(promo) || typeof promo.code !== 'string' || typeof promo.discountBasisPoints !== 'number') {
+        return { code: 'rejected', message: PROMO_CODE_MESSAGE, ok: false };
+    }
+
+    return { ok: true, promo: { code: promo.code, discountBasisPoints: promo.discountBasisPoints } };
+}
 
 async function loadOrderStatus(number: string): Promise<null | string> {
     const { data, error } = await supabase.from('orders').select('status').eq('number', number).maybeSingle();
@@ -149,9 +164,11 @@ async function placeOrder(input: OrderInput): Promise<OrderResult> {
     if (input.items.length === 0) return reject('empty-cart');
     if (!matchesCart(input.items)) return reject('cart-changed');
 
-    const purchase = JSON.stringify({ email: input.email, items: input.items.map(toLine), promoCode: input.promoCode, shipping: input.shipping });
+    const promoCode = input.promo?.code ?? '';
     const session = getSession();
-    const totals = getTotals(input.items, input.prodsApplied, input.promoCode);
+    const totals = getTotals(input.items, input.prodsApplied, input.promo?.discountBasisPoints);
+
+    const purchase = JSON.stringify({ email: input.email, items: input.items.map(toLine), promoCode, shipping: input.shipping });
 
     if (session && unanswered?.isPrepaid && unanswered.purchase === purchase && unanswered.userId === session.id) {
         const { data, error } = await supabase.from('orders').select(ORDER_COLUMNS).eq('request_id', unanswered.id).maybeSingle();
@@ -183,7 +200,7 @@ async function placeOrder(input: OrderInput): Promise<OrderResult> {
         email: input.email,
         items: input.items.map(toLine),
         prodsApplied: input.prodsApplied,
-        promoCode: input.promoCode,
+        promoCode,
         shipping: input.shipping,
         totalCents: totals.totalCents,
     };
@@ -291,4 +308,4 @@ function toOrder(row: OrderRow) {
     };
 }
 
-export { PAYMENT_UNAVAILABLE_MESSAGE, loadOrderStatus, loadOrders, placeOrder, reconcileOrder };
+export { PAYMENT_UNAVAILABLE_MESSAGE, checkPromo, loadOrderStatus, loadOrders, placeOrder, reconcileOrder };

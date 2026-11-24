@@ -40,6 +40,7 @@ const RATE_BUDGETS = {
     newsletter: { limit: 30, windowSeconds: SECONDS_PER_HOUR },
     orders: { limit: 20, windowSeconds: SECONDS_PER_HOUR },
     portal: { limit: 20, windowSeconds: SECONDS_PER_HOUR },
+    promo: { limit: 20, windowSeconds: SECONDS_PER_HOUR },
     welcome: { limit: 10, windowSeconds: SECONDS_PER_HOUR },
 } as const;
 

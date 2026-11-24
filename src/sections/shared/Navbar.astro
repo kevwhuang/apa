@@ -736,7 +736,7 @@ const isOverHero = hasHero || HERO_ROUTES.has(Astro.routePattern);
     }
 
     function listItems(menu: HTMLElement) {
-        return Array.from(menu.querySelectorAll<HTMLElement>('li:not([hidden]) a, li:not([hidden]) button'));
+        return Array.from(menu.querySelectorAll<HTMLElement>('li:not([hidden]) a, li:not([hidden]) button')).filter(item => item.checkVisibility());
     }
 
     function scheduleHoverClose(trigger: HTMLElement) {

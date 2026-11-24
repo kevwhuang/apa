@@ -329,16 +329,17 @@ const MODULES: Module[] = [
                 </button>
                 <div class="min-w-0">
                     <p
-                        class="rack__meta flex items-center gap-2 text-base"
+                        class="rack__meta flex items-baseline gap-2 text-base"
                         aria-live="polite"
                         data-rack-meta
                     >
                         <span
-                            class="spinner"
                             aria-hidden="true"
                             data-rack-spinner
                             hidden
-                        />
+                        >
+                            <span class="spinner align-middle" />
+                        </span>
                         <span
                             class="truncate"
                             data-rack-meta-text

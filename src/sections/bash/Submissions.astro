@@ -48,8 +48,10 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                         accept={UPLOAD.acceptAttribute}
                         aria-describedby="submissions-help"
                         aria-invalid="false"
+                        autocomplete="off"
                         data-dropzone-input
                         data-intake-control
+                        disabled
                         multiple
                         name="submissions"
                         type="file"
@@ -87,7 +89,10 @@ const fillerRows = Array.from({ length: BOARD_PAGE_SIZE - 1 });
                     hidden
                 >
                     <span class="spinner" aria-hidden="true" />
-                    <span data-board-refresh-text />
+                    <span
+                        class="self-baseline leading-(--text-lg)"
+                        data-board-refresh-text
+                    />
                 </p>
             </div>
             <div

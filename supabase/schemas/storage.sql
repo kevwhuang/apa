@@ -18,6 +18,10 @@ declare
     v_folders text[] := storage.foldername(new.name);
     v_prefix text;
 begin
+    if (select auth.role()) = 'anon' then
+        return new;
+    end if;
+
     if v_folders[1] is null then
         return new;
     end if;

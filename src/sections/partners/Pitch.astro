@@ -19,6 +19,7 @@ interface Tier {
 }
 
 const DONATION_AMOUNTS = ['$10', '$25', '$50', '$100'];
+const DONATION_HREF = 'https://www.patreon.com/';
 
 const DONATION_USES = [
     'Venue deposits and room fees',
@@ -204,9 +205,13 @@ const contactHref = `/contact?topic=${encodeURIComponent(PARTNER_INQUIRY_TOPIC)}
                         </ul>
                         <a
                             class:list={['btn', tier.featured ? 'btn--accent' : 'btn--primary']}
-                            href={contactHref}
+                            data-placeholder
+                            href={DONATION_HREF}
+                            rel="noopener noreferrer"
+                            target="_blank"
                         >
                             Choose this level
+                            <span class="sr-only">&nbsp;(opens in a new tab)</span>
                         </a>
                     </article>
                 </li>
@@ -264,14 +269,14 @@ const contactHref = `/contact?topic=${encodeURIComponent(PARTNER_INQUIRY_TOPIC)}
                 <a
                     class="btn btn--accent w-full mb-4"
                     data-placeholder
-                    href={contactHref}
+                    href={DONATION_HREF}
+                    rel="noopener noreferrer"
+                    target="_blank"
                 >
                     Arrange a donation
+                    <span class="sr-only">&nbsp;(opens in a new tab)</span>
                 </a>
-                <p class="text-base text-text-secondary">
-                    Donations are arranged by message, so the contact form is the way to give.
-                    Tell us the amount you have in mind and we'll take it from there.
-                </p>
+                <p class="text-base text-text-secondary">Donations go through Patreon, which opens in a new tab.</p>
             </div>
         </div>
     </div>

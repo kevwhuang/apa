@@ -101,11 +101,9 @@ const LINK_FIELDS = [
                     <div class="flex flex-col justify-center p-(--space-md) bg-bg-raised">
                         <dt class="label mb-2 text-text-secondary">Attended</dt>
                         <dd
-                            class="font-bold text-xl"
+                            class="min-h-lh font-bold text-xl"
                             data-settings-attended
-                        >
-                            0
-                        </dd>
+                        />
                     </div>
                     <div class="col-span-full flex flex-col justify-center p-(--space-md) bg-bg-raised">
                         <dt class="label mb-2 text-text-secondary">Member since</dt>
@@ -407,6 +405,11 @@ const LINK_FIELDS = [
             <h2 class="text-2xl">
                 Password
             </h2>
+            <p
+                id="settings-password-email"
+                class="font-mono text-base wrap-anywhere"
+                data-password-email
+            />
             <div
                 class="flex flex-col gap-2"
                 data-password-current
@@ -447,7 +450,7 @@ const LINK_FIELDS = [
                         <input
                             id="settings-password"
                             class="input input--trailing"
-                            aria-describedby="settings-password-help"
+                            aria-describedby="settings-password-email settings-password-help"
                             aria-invalid="false"
                             autocomplete="new-password"
                             minlength={PASSWORD_MIN_LENGTH}
@@ -1289,6 +1292,7 @@ const LINK_FIELDS = [
         setHidden(document.querySelector<HTMLElement>('[data-password-current]'), session.passwordless);
         setHidden(document.querySelector<HTMLElement>('[data-settings-onboarding]'), session.onboarded);
         setText(document.querySelector('.settings__initials'), getInitials(name));
+        setText(document.querySelector('[data-password-email]'), session.email);
         setText(document.querySelector('[data-settings-email]'), session.email);
         setText(document.querySelector('[data-settings-location]'), session.city ? [session.city, session.state].filter(Boolean).join(', ') : '');
         setText(document.querySelector('[data-settings-name]'), name);

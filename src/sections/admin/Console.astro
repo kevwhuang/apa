@@ -3,7 +3,7 @@ import SectionHead from '@components/shared/SectionHead.astro';
 
 const ACTIONS = [
     {
-        blurb: 'Removes every demo queued for the next Assembly, along with the notes attached to each one.',
+        blurb: 'Deletes every demo on the Assembly board, from every event, along with any uploaded audio.',
         board: 'assembly',
         confirmLabel: 'clear Assembly demos',
         confirmMany: 'Clear all {count} demo entries? This cannot be undone.',
@@ -13,7 +13,7 @@ const ACTIONS = [
         name: 'Assembly demos',
     },
     {
-        blurb: 'Removes every track submitted for the current Bash prompt, along with its uploaded stems.',
+        blurb: 'Deletes every track on the Bash board, from every event, along with its uploaded audio.',
         board: 'bash',
         confirmLabel: 'clear Bash submissions',
         confirmMany: 'Clear all {count} submission entries and their uploads? This cannot be undone.',
@@ -96,10 +96,11 @@ const SWITCHES = [
                             id={control.id}
                             class="admin__switch"
                             aria-labelledby={`${control.id}-title`}
-                            checked
+                            autocomplete="off"
                             data-admin-off={`${control.name} closed.`}
                             data-admin-on={`${control.name} opened.`}
                             data-admin-switch={control.id}
+                            disabled
                             role="switch"
                             type="checkbox"
                         />
@@ -139,6 +140,7 @@ const SWITCHES = [
                         </p>
                         <button
                             class="btn"
+                            autocomplete="off"
                             data-admin-action={action.id}
                             data-admin-board={action.board}
                             disabled
@@ -187,7 +189,8 @@ const SWITCHES = [
         background-color: var(--color-bg-active);
     }
 
-    .admin__row:has(.admin__switch:checked) .admin__state-off {
+    .admin__row:has(.admin__switch:checked) .admin__state-off,
+    .admin__row:has(.admin__switch:disabled) .admin__state-off {
         display: none;
     }
 
@@ -227,6 +230,10 @@ const SWITCHES = [
         background-position: calc(100% - 4px) center;
     }
 
+    .admin__switch:disabled {
+        visibility: hidden;
+    }
+
     .admin__switch:hover {
         border-color: var(--color-border-strong);
     }
@@ -242,7 +249,7 @@ const SWITCHES = [
     import { clearSubmissions, countSubmissions, onBoardChange, removeOrphans, watchBoard } from '@lib/programs/submissions';
     import { getSession } from '@lib/account/session';
     import { guardRoute } from '@lib/account/guard';
-    import { isSiteSwitch, isSwitchOpen, loadSwitches, onSwitchChange, setSwitchOpen } from '@lib/programs/switches';
+    import { isSiteSwitch, isSwitchClosed, isSwitchOpen, loadSwitches, onSwitchChange, setSwitchOpen } from '@lib/programs/switches';
     import { syncEvents } from '@lib/account/checkin';
     import { toast } from '@lib/ui/toasts';
 
@@ -426,10 +433,12 @@ const SWITCHES = [
 
             const isOpen = isSwitchOpen(id);
 
-            if (input.checked === isOpen) return;
+            if (!isOpen && !isSwitchClosed(id)) return;
+            if (!input.disabled && input.checked === isOpen) return;
 
             applyInstantly(input, () => {
                 input.checked = isOpen;
+                input.disabled = false;
             });
         });
     }

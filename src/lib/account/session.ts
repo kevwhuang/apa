@@ -20,7 +20,7 @@ import { createStore } from '@lib/shared/state';
 import { getAvatarUrl, normalizeAvatar, removeAvatar, toAvatarPath, uploadAvatar } from '@lib/account/images';
 import { getExtension } from '@lib/audio/uploads';
 import { isRecord, isTrackExtension } from '@lib/shared/utils';
-import { isSwitchOpen, loadSwitches } from '@lib/programs/switches';
+import { isSwitchClosed, loadSwitches } from '@lib/programs/switches';
 import { sendRequest } from '@lib/shared/request';
 import { supabase } from '@lib/shared/supabase';
 
@@ -84,6 +84,7 @@ const welcomeUserIds = new Set<string>();
 let authLink: AuthLink | null = null;
 let channel: RealtimeChannel | null = null;
 let channelUserId = '';
+let isEnding = false;
 let isReady = false;
 let isRecovering = false;
 let loadedUserId = '';
@@ -153,11 +154,16 @@ async function createAccount(draft: SessionDraft): Promise<SessionResult> {
 }
 
 async function endSession(): Promise<void> {
+    isEnding = true;
     isReady = false;
 
-    await Promise.race([supabase.auth.signOut({ scope: 'local' }), whenSessionReady()]);
+    try {
+        await Promise.race([supabase.auth.signOut({ scope: 'local' }), whenSessionReady()]);
 
-    clearAccount();
+        clearAccount();
+    } finally {
+        isEnding = false;
+    }
 }
 
 async function fetchAccount() {
@@ -223,6 +229,10 @@ function handleStorageEvent(event: StorageEvent, callback: (session: Session | n
 
     snapshot = store.get();
     callback(snapshot);
+}
+
+function isSessionEnding(): boolean {
+    return isEnding;
 }
 
 async function loadAccount(user: User, token: string) {
@@ -480,6 +490,7 @@ function syncSessionAttribute(): void {
     const session = getSession();
 
     document.documentElement.dataset.admin = String(session?.admin === true);
+    document.documentElement.dataset.onboarded = String(session?.onboarded === true);
     document.documentElement.dataset.session = session ? 'in' : 'out';
 }
 
@@ -550,7 +561,7 @@ async function toSignupErrorCode(error: AuthError) {
 
     await loadSwitches();
 
-    return isSwitchOpen('signups') ? 'unavailable' : 'signups-closed';
+    return isSwitchClosed('signups') ? 'signups-closed' : 'unavailable';
 }
 
 async function updatePassword(password: string, current: string): Promise<SessionResult> {
@@ -613,6 +624,7 @@ export {
     endSession,
     getAuthLink,
     getSession,
+    isSessionEnding,
     onSessionChange,
     requestPasswordReset,
     saveSession,

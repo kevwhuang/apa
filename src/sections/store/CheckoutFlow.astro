@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 
 import BackLink from '@components/shared/BackLink.astro';
-import { CHECKOUT_STEPS, COMMERCE, FIELD_LIMITS, US_STATES } from '@lib/shared/constants';
+import { CHECKOUT_STEPS, FIELD_LIMITS, US_STATES } from '@lib/shared/constants';
 import { toCatalog, toImageSources } from '@lib/commerce/products';
 
 interface CheckoutField {
@@ -106,12 +106,9 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
                         data-review-list
                     />
                     <div class="flex flex-col gap-2 mb-(--space-lg)">
-                        <div
-                            class="checkout__code-entry flex flex-wrap items-end gap-4"
-                            data-code-entry
-                        >
+                        <div class="checkout__code-entry flex flex-wrap items-end gap-4">
                             <label class="flex flex-[1_1_160px] flex-col min-w-0 gap-2">
-                                <span class="label text-text-secondary">Discount code</span>
+                                <span class="label text-text-secondary">Promo code</span>
                                 <input
                                     id="checkout-code"
                                     class="input font-mono"
@@ -119,7 +116,6 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
                                     autocomplete="off"
                                     maxlength={FIELD_LIMITS.code}
                                     name="code"
-                                    placeholder="Enter a code"
                                     type="text"
                                 />
                             </label>
@@ -143,7 +139,7 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
                             />
                             <button
                                 class="action-text min-h-(--control-size) text-text-secondary"
-                                aria-label="Remove discount code"
+                                aria-label="Remove promo code"
                                 data-code-remove
                                 type="button"
                             >
@@ -161,7 +157,7 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
                             data-promo-row
                             hidden
                         >
-                            <dt>Discount ({COMMERCE.discountCode})</dt>
+                            <dt>Discount</dt>
                             <dd
                                 class="whitespace-nowrap"
                                 data-promo
@@ -352,7 +348,7 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
                         data-promo-row
                         hidden
                     >
-                        <dt>Discount ({COMMERCE.discountCode})</dt>
+                        <dt>Discount</dt>
                         <dd
                             class="whitespace-nowrap"
                             data-promo
@@ -546,7 +542,7 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
 <script>
     import { navigate } from 'astro:transitions/client';
 
-    import { CHECKOUT_STEPS, COMMERCE, EMAIL_MESSAGE, EMAIL_PATTERN, FIELD_LIMITS, PROMO_CODE_MESSAGE, ZIP_PATTERN } from '@lib/shared/constants';
+    import { CHECKOUT_STEPS, EMAIL_MESSAGE, EMAIL_PATTERN, FIELD_LIMITS, ZIP_PATTERN } from '@lib/shared/constants';
     import {
         applyInstantly,
         describeCartChange,
@@ -561,11 +557,11 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
         setText,
         setTitleLink,
     } from '@lib/shared/utils';
+    import { checkPromo, placeOrder } from '@lib/commerce/checkout';
     import { clearFieldErrors, reportFieldErrors, validateFields, watchFieldErrors } from '@lib/ui/forms';
     import { createPaymentField } from '@lib/commerce/payments';
-    import { fetchCatalog, getItems, getProdsCharge, getTotals, isPromoCode, onCartChange, reconcile, toCatalogItem } from '@lib/commerce/cart';
+    import { fetchCatalog, getItems, getProdsCharge, getTotals, onCartChange, reconcile, toCatalogItem } from '@lib/commerce/cart';
     import { getSession, onSessionChange } from '@lib/account/session';
-    import { placeOrder } from '@lib/commerce/checkout';
     import { toast } from '@lib/ui/toasts';
 
     interface CheckoutControls {
@@ -580,7 +576,7 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
 
     interface CheckoutDraft {
         fields: Record<string, string>;
-        promoCode: string;
+        promo: Promo | null;
         step: number;
         userId: string;
     }
@@ -588,6 +584,7 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
     const ACTIVATION_WINDOW_MILLISECONDS = 500;
     const BASIS_POINTS_PER_PERCENT = 100;
     const LAST_STEP = 2;
+    const PROMO_KEPT_MESSAGE = 'Your current promo code stays applied because it gives an equal or larger discount. Only one code applies per order.';
     const REVIEW_STEP = 0;
     const SHIPPING_STEP = 1;
 
@@ -613,11 +610,12 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
     let draft: CheckoutDraft | null = null;
     let images: ImageSources = {};
     let isBlocked = false;
+    let isCheckingCode = false;
     let isSubmitting = false;
     let orderItems: CartItem[] = [];
     let payment: PaymentField | null = null;
     let paymentReady = Promise.resolve();
-    let promoCode = '';
+    let promo: Promo | null = null;
     let step = REVIEW_STEP;
     let stepChangedAt = Number.NEGATIVE_INFINITY;
 
@@ -633,7 +631,10 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
     }
 
     function dropStaleDraft() {
-        if (draft?.userId !== (getSession()?.id ?? '') || getItems().length === 0) draft = null;
+        const isEmpty = getItems().length === 0;
+
+        if (draft?.userId !== (getSession()?.id ?? '') || isEmpty) draft = null;
+        if (isEmpty) promo = null;
     }
 
     function fillReviewRow(fragment: DocumentFragment, item: CartItem) {
@@ -672,7 +673,7 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
     }
 
     function getDiscountPercent() {
-        return COMMERCE.discountBasisPoints / BASIS_POINTS_PER_PERCENT;
+        return (promo?.discountBasisPoints ?? 0) / BASIS_POINTS_PER_PERCENT;
     }
 
     function getProdsApplied(form: HTMLFormElement) {
@@ -688,23 +689,58 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
         updateSteps(controls, true);
     }
 
-    function handleCodeApply(form: HTMLFormElement) {
+    function handleCartChange(form: HTMLFormElement) {
+        if (isSubmitting) return;
+
+        document.documentElement.dataset.cart = getItems().length > 0 ? 'filled' : 'empty';
+        renderOrder(form);
+    }
+
+    async function handleCodeApply(form: HTMLFormElement, signal: AbortSignal) {
+        const apply = form.querySelector<HTMLButtonElement>('[data-code-apply]');
         const input = form.querySelector<HTMLInputElement>('[name="code"]');
 
-        if (!input || input.value.trim().length === 0) return;
+        if (!input || input.value.trim().length === 0 || isCheckingCode) return;
 
-        if (!isPromoCode(input.value)) {
-            reportFieldErrors(form, { code: PROMO_CODE_MESSAGE });
+        isCheckingCode = true;
+        setPending(apply, true);
+
+        const result = await checkPromo(input.value.trim());
+
+        if (signal.aborted) return;
+
+        isCheckingCode = false;
+        setPending(apply, false);
+        handleCodeInput(form);
+
+        if (!result.ok && result.code === 'rejected') {
+            reportFieldErrors(form, { code: result.message });
+
+            return;
+        }
+
+        if (!result.ok) {
+            apply?.focus();
+            toast(result.message, 'error');
+
+            return;
+        }
+
+        input.value = '';
+        clearFieldErrors(form);
+
+        if (promo && result.promo.discountBasisPoints <= promo.discountBasisPoints) {
+            handleCodeInput(form);
+            input.focus();
+            toast(PROMO_KEPT_MESSAGE, 'info');
 
             return;
         }
 
         codeAppliedAt = performance.now();
-        promoCode = COMMERCE.discountCode;
-        input.value = '';
-        clearFieldErrors(form);
+        promo = result.promo;
         renderOrder(form);
-        toast(`${COMMERCE.discountCode} applied: ${getDiscountPercent()}% off your subtotal.`, 'success');
+        toast(`Promo code applied: ${getDiscountPercent()}% off your subtotal.`, 'success');
         form.querySelector<HTMLButtonElement>('[data-code-remove]')?.focus();
     }
 
@@ -719,20 +755,20 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
         });
     }
 
-    function handleCodeKeydown(event: KeyboardEvent, form: HTMLFormElement) {
+    function handleCodeKeydown(event: KeyboardEvent, form: HTMLFormElement, signal: AbortSignal) {
         if (event.key !== 'Enter') return;
 
         event.preventDefault();
-        handleCodeApply(form);
+        void handleCodeApply(form, signal);
     }
 
     function handleCodeRemove(form: HTMLFormElement) {
         if (performance.now() - codeAppliedAt < ACTIVATION_WINDOW_MILLISECONDS) return;
 
-        promoCode = '';
+        promo = null;
         clearFieldErrors(form);
         renderOrder(form);
-        toast('Discount code removed.', 'info');
+        toast('Promo code removed.', 'info');
         form.querySelector<HTMLInputElement>('[name="code"]')?.focus();
     }
 
@@ -804,10 +840,11 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
         codeAppliedAt = Number.NEGATIVE_INFINITY;
         images = parseImageSources(source?.dataset.images);
         isBlocked = false;
+        isCheckingCode = false;
         isSubmitting = false;
         payment = null;
         paymentReady = Promise.resolve();
-        promoCode = '';
+        promo = null;
         step = REVIEW_STEP;
         stepChangedAt = Number.NEGATIVE_INFINITY;
         form.noValidate = true;
@@ -823,6 +860,7 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
         if (!hasItems) return;
 
         const unsubscribe = onSessionChange(() => renderOrder(form));
+        const unsubscribeCart = onCartChange(() => handleCartChange(form));
         const userId = getSession()?.id ?? '';
 
         restoreDraft(form);
@@ -831,19 +869,20 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
         void refreshCheckout(controls, signal);
         backButton.addEventListener('click', () => handleBackClick(controls), { signal });
         codeInput?.addEventListener('input', () => handleCodeInput(form), { signal });
-        codeInput?.addEventListener('keydown', event => handleCodeKeydown(event, form), { signal });
+        codeInput?.addEventListener('keydown', event => handleCodeKeydown(event, form, signal), { signal });
         form.addEventListener('keydown', handleFormKeydown, { signal });
         form.addEventListener('submit', event => void handleFormSubmit(event, controls, signal), { signal });
-        form.querySelector<HTMLButtonElement>('[data-code-apply]')?.addEventListener('click', () => handleCodeApply(form), { signal });
+        form.querySelector<HTMLButtonElement>('[data-code-apply]')?.addEventListener('click', () => void handleCodeApply(form, signal), { signal });
         form.querySelector<HTMLButtonElement>('[data-code-remove]')?.addEventListener('click', () => handleCodeRemove(form), { signal });
         form.querySelector<HTMLInputElement>('[name="prods"]')?.addEventListener('change', () => handleProdsToggle(form), { signal });
         signal.addEventListener('abort', () => saveDraft(form, userId), { once: true });
         signal.addEventListener('abort', unsubscribe, { once: true });
+        signal.addEventListener('abort', unsubscribeCart, { once: true });
         watchFieldErrors(form, signal);
     }
 
     async function initPayment(controls: CheckoutControls, signal: AbortSignal) {
-        const field = await createPaymentField(getTotals(getItems(), 0, promoCode).totalCents);
+        const field = await createPaymentField(getTotals(getItems(), 0, promo?.discountBasisPoints).totalCents);
 
         if (!field) return;
 
@@ -867,7 +906,7 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
     function isFullyCovered() {
         const charge = readProdsCharge();
 
-        return charge > 0 && getTotals(getItems(), charge, promoCode).totalCents === 0;
+        return charge > 0 && getTotals(getItems(), charge, promo?.discountBasisPoints).totalCents === 0;
     }
 
     function isProdsEngaged(form: HTMLFormElement) {
@@ -887,7 +926,7 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
     }
 
     function readProdsCharge() {
-        return getProdsCharge(readProdsBalance(), getTotals(getItems(), 0, promoCode).totalCents);
+        return getProdsCharge(readProdsBalance(), getTotals(getItems(), 0, promo?.discountBasisPoints).totalCents);
     }
 
     function readShipping(form: HTMLFormElement) {
@@ -930,21 +969,17 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
 
     function renderCode(form: HTMLFormElement) {
         const apply = form.querySelector<HTMLButtonElement>('[data-code-apply]');
-        const entry = form.querySelector<HTMLElement>('[data-code-entry]');
         const input = form.querySelector<HTMLInputElement>('[name="code"]');
         const tag = form.querySelector<HTMLElement>('[data-code-tag]');
 
-        if (!apply || !entry || !input || !tag) return;
-
-        const isApplied = promoCode.length > 0;
+        if (!apply || !input || !tag) return;
 
         applyInstantly(apply, () => {
             apply.disabled = input.value.trim().length === 0;
         });
 
-        entry.toggleAttribute('hidden', isApplied);
-        tag.toggleAttribute('hidden', !isApplied);
-        setText(form.querySelector('[data-code-label]'), isApplied ? `${promoCode} \u00b7 ${getDiscountPercent()}% off` : '');
+        tag.toggleAttribute('hidden', promo === null);
+        setText(form.querySelector('[data-code-label]'), promo ? `${getDiscountPercent()}% off` : '');
     }
 
     function renderItems() {
@@ -998,7 +1033,7 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
     }
 
     function renderTotals(form: HTMLFormElement) {
-        const summary = getTotals(getItems(), getProdsApplied(form), promoCode);
+        const summary = getTotals(getItems(), getProdsApplied(form), promo?.discountBasisPoints);
 
         const prodsCents = summary.discountCents - summary.promoCents;
 
@@ -1030,14 +1065,14 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
             if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) field.value = value;
         });
 
-        promoCode = draft.promoCode;
+        promo = draft.promo;
         step = Math.min(draft.step, SHIPPING_STEP);
     }
 
     function saveDraft(form: HTMLFormElement, userId: string) {
         draft = {
             fields: Object.fromEntries(Object.keys(STEP_RULES[SHIPPING_STEP]).map(name => [name, readValue(form, name)])),
-            promoCode,
+            promo,
             step,
             userId,
         };
@@ -1063,7 +1098,7 @@ const steps = CHECKOUT_STEPS.map(step => step.split(' '));
             items,
             payment: isCardWaived(form) ? null : payment,
             prodsApplied: getProdsApplied(form),
-            promoCode,
+            promo,
             shipping: readShipping(form),
         });
 

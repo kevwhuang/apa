@@ -1,7 +1,7 @@
 import { navigate } from 'astro:transitions/client';
 
 import { SETTINGS_ROUTE } from '@lib/shared/constants';
-import { getSession, onSessionChange, whenSessionReady } from '@lib/account/session';
+import { getSession, isSessionEnding, onSessionChange, whenSessionReady } from '@lib/account/session';
 
 type RouteAccess = 'admin' | 'member';
 
@@ -11,7 +11,7 @@ function enforce(access: RouteAccess) {
     const session = getSession();
 
     if (!session) {
-        void navigate(`/signin?${NEXT_PARAMETER}=${encodeURIComponent(window.location.pathname)}`, { history: 'replace' });
+        if (!isSessionEnding()) void navigate(`/signin?${NEXT_PARAMETER}=${encodeURIComponent(window.location.pathname)}`, { history: 'replace' });
 
         return true;
     }

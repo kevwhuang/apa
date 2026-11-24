@@ -2215,3 +2215,218 @@ grant execute on function private.is_spotlight(text) to anon, authenticated;
 create policy objects_select_spotlight on storage.objects
 for select to anon, authenticated
 using (bucket_id = 'tracks' and private.is_spotlight(name));
+
+create or replace function private.enforce_object_caps()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+    v_cap integer;
+    v_folders text[] := storage.foldername(new.name);
+    v_prefix text;
+begin
+    if (select auth.role()) = 'anon' then
+        return new;
+    end if;
+
+    if v_folders[1] is null then
+        return new;
+    end if;
+
+    if new.bucket_id = 'avatars' then
+        v_cap := 2;
+        v_prefix := v_folders[1] || '/';
+    elsif v_folders[2] = 'spotlight' then
+        v_cap := 3;
+        v_prefix := v_folders[1] || '/spotlight/';
+    else
+        if not exists (
+            select 1
+            from unnest(array['assembly', 'bash']) as b (board)
+            where public.current_event_id(b.board) = v_folders[2]
+                and private.is_switch_open(b.board || '_intake')
+        ) then
+            raise exception 'intake_closed';
+        end if;
+
+        v_cap := 4;
+        v_prefix := v_folders[1] || '/' || v_folders[2] || '/';
+    end if;
+
+    perform pg_advisory_xact_lock(hashtextextended(new.bucket_id || '/' || v_prefix, 0));
+
+    if (
+        select count(*)
+        from storage.objects o
+        where o.bucket_id = new.bucket_id and starts_with(o.name, v_prefix) and o.name <> new.name
+    ) >= v_cap then
+        raise exception 'object_limit';
+    end if;
+
+    return new;
+end;
+$$;
+
+create table public.promo_codes (
+    code text primary key check (code ~ '^[0-9A-Z]{1,20}$'),
+    discount_basis_points integer not null check (discount_basis_points between 1 and 10000),
+    is_active boolean not null default true,
+    created_at timestamptz not null default now()
+);
+
+comment on table public.promo_codes is 'Store discount codes in upper case with the share of the subtotal each takes off, in basis points. Rows are added by hand in SQL so that no code sits in the repository. No API role can read the table; the order routes ask get_promo_code as service_role.';
+
+alter table public.promo_codes enable row level security;
+
+revoke all on table public.promo_codes from anon, authenticated, service_role;
+
+create view public.promo_code_usage
+with (security_invoker = true)
+as
+select
+    o.promo_code as code,
+    count(*) filter (where o.status = 'paid') as paid_orders,
+    count(*) filter (where o.status = 'refunded') as refunded_orders,
+    coalesce(sum(o.promo_cents) filter (where o.status = 'paid'), 0) as paid_discount_cents
+from public.orders o
+where o.promo_code is not null and o.status in ('paid', 'refunded')
+group by o.promo_code;
+
+comment on view public.promo_code_usage is 'Uses per discount code, counted from orders. A use is a paid order; a refunded order leaves that count and is listed beside it; pending and canceled orders never count. No API role can read it, so it is seen in the dashboard only.';
+
+revoke all on table public.promo_code_usage from anon, authenticated, service_role;
+
+create function private.get_promo_code(p_code text)
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+    select jsonb_build_object('code', c.code, 'discount_basis_points', c.discount_basis_points)
+    from public.promo_codes c
+    where c.code = upper(btrim(coalesce(p_code, ''))) and c.is_active;
+$$;
+
+revoke execute on function private.get_promo_code(text) from public;
+grant execute on function private.get_promo_code(text) to service_role;
+
+create function public.get_promo_code(p_code text)
+returns jsonb
+language sql
+stable
+security invoker
+set search_path = ''
+as $$
+    select private.get_promo_code(p_code);
+$$;
+
+revoke execute on function public.get_promo_code(text) from public, anon, authenticated;
+grant execute on function public.get_promo_code(text) to service_role;
+
+create or replace function private.place_order(
+    p_email text,
+    p_items jsonb,
+    p_prods integer,
+    p_prods_cents integer,
+    p_promo_cents integer,
+    p_promo_code text,
+    p_request_id uuid,
+    p_shipping jsonb,
+    p_stock jsonb,
+    p_subtotal_cents integer,
+    p_tax_cents integer,
+    p_total_cents integer,
+    p_user_id uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+    v_balance integer;
+    v_line record;
+    v_order public.orders;
+    v_reserved integer;
+    v_sold integer;
+    v_superseded text[];
+begin
+    perform 1
+    from public.orders o
+    where o.status = 'pending'
+        and (o.user_id = p_user_id or (p_user_id is null and o.user_id is null and lower(o.email) = lower(p_email)))
+    order by o.id
+    for update;
+
+    if p_prods > 0 then
+        select p.prods into v_balance from public.profiles p where p.id = p_user_id for update;
+    end if;
+
+    if p_request_id is not null then
+        select o.* into v_order from public.orders o where o.request_id = p_request_id and o.user_id = p_user_id;
+
+        if found then
+            return jsonb_build_object('id', v_order.id, 'number', v_order.number, 'placed_at', v_order.placed_at, 'superseded', '[]'::jsonb);
+        end if;
+    end if;
+
+    if p_prods > 0 and (v_balance is null or v_balance < p_prods) then
+        raise exception 'prods_negative';
+    end if;
+
+    with canceled as (
+        update public.orders o
+        set status = 'canceled'
+        where o.status = 'pending'
+            and (o.user_id = p_user_id or (p_user_id is null and o.user_id is null and lower(o.email) = lower(p_email)))
+        returning o.stripe_payment_intent_id
+    )
+    select coalesce(array_agg(c.stripe_payment_intent_id) filter (where c.stripe_payment_intent_id is not null), '{}')
+    into v_superseded
+    from canceled c;
+
+    for v_line in
+        select i.product_slug, sum(i.quantity)::integer as quantity
+        from jsonb_to_recordset(p_items) as i (product_slug text, quantity integer)
+        group by i.product_slug
+        order by i.product_slug
+    loop
+        insert into public.product_sales (product_slug)
+        values (v_line.product_slug)
+        on conflict (product_slug) do nothing;
+
+        select s.units_sold into v_sold from public.product_sales s where s.product_slug = v_line.product_slug for update;
+
+        select coalesce(sum((i ->> 'quantity')::integer), 0) into v_reserved
+        from public.orders o
+        cross join jsonb_array_elements(o.items) as i
+        where o.status = 'pending'
+            and o.placed_at > now() - interval '10 minutes'
+            and i ->> 'product_slug' = v_line.product_slug;
+
+        if v_sold + v_reserved + v_line.quantity > coalesce((p_stock ->> v_line.product_slug)::integer, 0) then
+            raise exception 'order_conflict';
+        end if;
+    end loop;
+
+    insert into public.orders (email, items, prods_applied, prods_cents, promo_cents, promo_code, request_id, shipping, subtotal_cents, tax_cents, total_cents, user_id)
+    values (p_email, p_items, p_prods, p_prods_cents, p_promo_cents, nullif(p_promo_code, ''), p_request_id, p_shipping, p_subtotal_cents, p_tax_cents, p_total_cents, p_user_id)
+    returning * into v_order;
+
+    if p_total_cents = 0 then
+        perform private.settle_order(v_order.id, null);
+    end if;
+
+    return jsonb_build_object('id', v_order.id, 'number', v_order.number, 'placed_at', v_order.placed_at, 'superseded', to_jsonb(v_superseded));
+end;
+$$;
+
+revoke execute on function public.subscribe_newsletter(text) from anon;
+revoke execute on function private.subscribe_newsletter(text) from anon;
+
+grant select, insert, delete on table public.site_chunks to service_role;
+
+comment on table public.site_chunks is 'The assistant index: one row per chunk of a public page with its gte-small embedding. Written through POST /api/ingest, by the admin on demand and by the server after each production deploy; visitors reach it only through match_site_chunks.';
